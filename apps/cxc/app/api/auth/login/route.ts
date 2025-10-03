@@ -17,6 +17,7 @@ export async function POST(request: NextRequest) {
       message: "Login successful",
       user: result.user,
       session: result.session,
+      error: result.error, // Pass through any error (like "email_not_verified")
     });
   } catch (error) {
     console.error("Login error:", error);

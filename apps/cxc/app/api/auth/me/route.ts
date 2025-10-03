@@ -17,6 +17,7 @@ export async function GET() {
       user: {
         id: user.id,
         email: user.email,
+        email_confirmed_at: user.email_confirmed_at,
         created_at: user.created_at,
         last_sign_in_at: user.last_sign_in_at,
         metadata: user.user_metadata,

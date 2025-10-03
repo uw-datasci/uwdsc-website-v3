@@ -65,6 +65,18 @@ export class AuthService {
         });
 
       if (error) {
+        
+        // Special case: if email is not confirmed, we want to allow the login
+        // but indicate that email verification is needed
+        if (error.message === "Email not confirmed") {
+          return {
+            success: true,
+            user: null, // No user data since they're not fully authenticated
+            session: null, // No session until email is verified
+            error: "email_not_verified", // Custom error code for client handling
+          };
+        }
+        
         return {
           success: false,
           user: null,
@@ -79,7 +91,8 @@ export class AuthService {
         session: authData.session,
         error: null,
       };
-    } catch {
+    } catch (error) {
+      console.error("Login service error:", error); // Debug log
       return {
         success: false,
         user: null,

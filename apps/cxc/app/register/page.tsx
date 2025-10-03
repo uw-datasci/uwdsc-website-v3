@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function RegisterTestPage() {
     const [formData, setFormData] = useState({
@@ -9,6 +10,7 @@ export default function RegisterTestPage() {
     });
     const [response, setResponse] = useState<string>('');
     const [loading, setLoading] = useState(false);
+    const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -25,7 +27,22 @@ export default function RegisterTestPage() {
             });
 
             const data = await res.json();
-            setResponse(`Status: ${res.status}\nResponse: ${JSON.stringify(data, null, 2)}`);
+            if (res.ok) {
+                // Check if user has a session (email confirmed) or not
+                if (data.session) {
+                    // User has session, check if email is confirmed
+                    if (data.user.email_confirmed_at) {
+                        router.push('/me');
+                    } else {
+                        router.push('/verify-email');
+                    }
+                } else {
+                    // No session means email confirmation required
+                    router.push('/verify-email');
+                }
+            } else {
+                setResponse(`Status: ${res.status}\nResponse: ${JSON.stringify(data, null, 2)}`);
+            }
         } catch (error) {
             setResponse(`Error: ${error}`);
         } finally {

@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [response, setResponse] = useState('');
+    const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -21,6 +23,22 @@ export default function LoginPage() {
             const data = await response.json();
             if (response.ok) {
                 setResponse(JSON.stringify(data, null, 2));
+                // Check if this is a successful login with unverified email
+                if (data.error === "email_not_verified") {
+                    // User exists but email not verified, redirect to verify email
+                    router.push('/verify-email');
+                } else if (data.session && data.user) {
+                    if (data.user.email_confirmed_at) {
+                        // Email verified, redirect to dashboard
+                        router.push('/me');
+                    } else {
+                        // Email not verified, redirect to verify email page
+                        router.push('/verify-email');
+                    }
+                } else {
+                    // Fallback: refresh and let middleware handle
+                    router.refresh();
+                }
             } else {
                 setResponse(JSON.stringify(data, null, 2));
             }

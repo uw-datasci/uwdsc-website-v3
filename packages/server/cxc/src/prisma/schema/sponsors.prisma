@@ -1,0 +1,11 @@
+// prisma/schema/sponsors.prisma
+model Sponsor {
+    id          BigInt            @id @default(autoincrement())
+    name        String            @unique
+    logo_url    String
+    website_url String
+    tier        sponsor_tier_enum @default(bronze)
+    created_at  DateTime          @default(now())
+
+    @@map("sponsors")
+}

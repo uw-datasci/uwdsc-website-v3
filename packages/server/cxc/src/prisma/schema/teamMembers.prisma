@@ -1,0 +1,15 @@
+// prisma/schema/teamMembers.prisma
+model TeamMember {
+    id         BigInt         @id @default(autoincrement())
+    team_id    BigInt
+    profile_id String         @db.Uuid
+    role       team_role_enum @default(member)
+    created_at DateTime       @default(now())
+    joined_at  DateTime       @default(now())
+
+    team    Team    @relation(fields: [team_id], references: [id])
+    profile Profile @relation(fields: [profile_id], references: [id])
+
+    @@unique([team_id, profile_id])
+    @@map("team_members")
+}

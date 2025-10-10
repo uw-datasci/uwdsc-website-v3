@@ -1,0 +1,15 @@
+// prisma/schema/applicationAnswers.prisma
+model ApplicationAnswer {
+    id             BigInt   @id @default(autoincrement())
+    application_id BigInt
+    question_id    BigInt
+    answer         String?
+    created_at     DateTime @default(now())
+    updated_at     DateTime @default(now())
+
+    application Application @relation(fields: [application_id], references: [id])
+    question    Question    @relation(fields: [question_id], references: [id])
+
+    @@unique([application_id, question_id])
+    @@map("application_answers")
+}

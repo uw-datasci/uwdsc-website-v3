@@ -1,0 +1,15 @@
+// prisma/schema/eventAttendance.prisma
+model EventAttendance {
+    id         BigInt   @id @default(autoincrement())
+    event_id   BigInt
+    profile_id String   @db.Uuid
+    checked_in Boolean  @default(false)
+    created_at DateTime @default(now())
+
+    // Relationships
+    event   Event   @relation(fields: [event_id], references: [id])
+    profile Profile @relation(fields: [profile_id], references: [id])
+
+    @@unique([event_id, profile_id])
+    @@map("event_attendance")
+}

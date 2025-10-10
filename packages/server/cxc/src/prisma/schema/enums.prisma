@@ -1,0 +1,29 @@
+enum role_enum {
+    hacker
+    sponsor
+    mentor
+    volunteer
+    admin
+    default
+}
+
+enum application_status_enum {
+    draft
+    submitted
+    offered
+    accepted
+    rejected
+    waitlisted
+}
+
+enum team_role_enum {
+    leader
+    member
+}
+
+enum sponsor_tier_enum {
+    bronze
+    silver
+    gold
+    platinum
+}

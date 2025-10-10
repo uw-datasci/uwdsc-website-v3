@@ -1,0 +1,12 @@
+// prisma/schema/resumes.prisma
+model Resume {
+    id         BigInt   @id @default(autoincrement())
+    profile_id String   @db.Uuid
+    file_path  String   @unique
+    created_at DateTime @default(now())
+
+    profile      Profile       @relation(fields: [profile_id], references: [id], onDelete: Cascade)
+    applications Application[]
+
+    @@map("resumes")
+}

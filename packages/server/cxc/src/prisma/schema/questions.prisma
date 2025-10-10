@@ -1,0 +1,18 @@
+// prisma/schema/questions.prisma
+model Question {
+    id          BigInt    @id @default(autoincrement())
+    question_id String
+    question    String
+    is_required Boolean   @default(false)
+    order_num   Int
+    max_length  Int
+    placeholder String?
+    help_text   String?
+    role        role_enum
+    term        String
+
+    answers ApplicationAnswer[]
+
+    @@unique([term, question_id])
+    @@map("questions")
+}

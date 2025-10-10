@@ -1,0 +1,21 @@
+// prisma/schema/events.prisma
+model Event {
+    id                    BigInt   @id @default(autoincrement())
+    name                  String
+    registration_required Boolean
+    description           String?
+    location              String?
+    start_time            DateTime
+    buffered_start_time   DateTime
+    end_time              DateTime
+    buffered_end_time     DateTime
+    payment_required      Boolean  @default(true)
+    image_id              BigInt?
+    created_at            DateTime @default(now())
+    updated_at            DateTime @default(now())
+
+    // Relationships
+    attendance EventAttendance[]
+
+    @@map("events")
+}

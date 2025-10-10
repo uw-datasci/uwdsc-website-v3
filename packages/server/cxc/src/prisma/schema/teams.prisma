@@ -1,0 +1,12 @@
+// prisma/schema/teams.prisma
+model Team {
+    id            BigInt   @id @default(autoincrement())
+    team_name     String   @unique
+    team_size     Int      @default(1)
+    is_recruiting Boolean  @default(true)
+    created_at    DateTime @default(now())
+
+    members TeamMember[]
+
+    @@map("teams")
+}

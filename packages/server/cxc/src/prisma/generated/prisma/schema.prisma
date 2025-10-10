@@ -1,0 +1,218 @@
+// prisma/schema/applicationAnswers.prisma
+model ApplicationAnswer {
+  id             BigInt   @id @default(autoincrement())
+  application_id BigInt
+  question_id    BigInt
+  answer         String?
+  created_at     DateTime @default(now())
+  updated_at     DateTime @default(now())
+
+  application Application @relation(fields: [application_id], references: [id])
+  question    Question    @relation(fields: [question_id], references: [id])
+
+  @@unique([application_id, question_id])
+  @@map("application_answers")
+}
+
+// prisma/schema/applications.prisma
+model Application {
+  id           BigInt                  @id @default(autoincrement())
+  profile_id   String                  @db.Uuid
+  resume_id    BigInt?
+  status       application_status_enum @default(draft)
+  role         role_enum
+  term         String
+  comments     String?
+  created_at   DateTime                @default(now())
+  updated_at   DateTime                @default(now())
+  submitted_at DateTime?
+
+  profile Profile             @relation(fields: [profile_id], references: [id])
+  resume  Resume?             @relation(fields: [resume_id], references: [id], onDelete: SetNull)
+  answers ApplicationAnswer[]
+
+  @@unique([profile_id, role, term])
+  @@map("applications")
+}
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+generator kysely {
+  provider = "prisma-kysely"
+  output   = "../generated"
+  fileName = "types.ts"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum role_enum {
+  hacker
+  sponsor
+  mentor
+  volunteer
+  admin
+  default
+}
+
+enum application_status_enum {
+  draft
+  submitted
+  offered
+  accepted
+  rejected
+  waitlisted
+}
+
+enum team_role_enum {
+  leader
+  member
+}
+
+enum sponsor_tier_enum {
+  bronze
+  silver
+  gold
+  platinum
+}
+
+// prisma/schema/eventAttendance.prisma
+model EventAttendance {
+  id         BigInt   @id @default(autoincrement())
+  event_id   BigInt
+  profile_id String   @db.Uuid
+  checked_in Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  // Relationships
+  event   Event   @relation(fields: [event_id], references: [id])
+  profile Profile @relation(fields: [profile_id], references: [id])
+
+  @@unique([event_id, profile_id])
+  @@map("event_attendance")
+}
+
+// prisma/schema/events.prisma
+model Event {
+  id                    BigInt   @id @default(autoincrement())
+  name                  String
+  registration_required Boolean
+  description           String?
+  location              String?
+  start_time            DateTime
+  buffered_start_time   DateTime
+  end_time              DateTime
+  buffered_end_time     DateTime
+  payment_required      Boolean  @default(true)
+  image_id              BigInt?
+  created_at            DateTime @default(now())
+  updated_at            DateTime @default(now())
+
+  // Relationships
+  attendance EventAttendance[]
+
+  @@map("events")
+}
+
+// prisma/schema/profile.prisma
+model Profile {
+  id         String    @id @default(uuid()) @db.Uuid
+  first_name String
+  last_name  String
+  role       role_enum @default(default)
+  nfc_id     BigInt?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now())
+
+  // Relationships
+  resumes         Resume[]
+  applications    Application[]
+  eventAttendance EventAttendance[]
+  teamMembers     TeamMember[]
+
+  @@map("profiles")
+}
+
+// prisma/schema/questions.prisma
+model Question {
+  id          BigInt    @id @default(autoincrement())
+  question_id String
+  question    String
+  is_required Boolean   @default(false)
+  order_num   Int
+  max_length  Int
+  placeholder String?
+  help_text   String?
+  role        role_enum
+  term        String
+
+  answers ApplicationAnswer[]
+
+  @@unique([term, question_id])
+  @@map("questions")
+}
+
+// prisma/schema/resumes.prisma
+model Resume {
+  id         BigInt   @id @default(autoincrement())
+  profile_id String   @db.Uuid
+  file_path  String   @unique
+  created_at DateTime @default(now())
+
+  profile      Profile       @relation(fields: [profile_id], references: [id], onDelete: Cascade)
+  applications Application[]
+
+  @@map("resumes")
+}
+
+// prisma/schema/sponsors.prisma
+model Sponsor {
+  id          BigInt            @id @default(autoincrement())
+  name        String            @unique
+  logo_url    String
+  website_url String
+  tier        sponsor_tier_enum @default(bronze)
+  created_at  DateTime          @default(now())
+
+  @@map("sponsors")
+}
+
+// prisma/schema/teamMembers.prisma
+model TeamMember {
+  id         BigInt         @id @default(autoincrement())
+  team_id    BigInt
+  profile_id String         @db.Uuid
+  role       team_role_enum @default(member)
+  created_at DateTime       @default(now())
+  joined_at  DateTime       @default(now())
+
+  team    Team    @relation(fields: [team_id], references: [id])
+  profile Profile @relation(fields: [profile_id], references: [id])
+
+  @@unique([team_id, profile_id])
+  @@map("team_members")
+}
+
+// prisma/schema/teams.prisma
+model Team {
+  id            BigInt   @id @default(autoincrement())
+  team_name     String   @unique
+  team_size     Int      @default(1)
+  is_recruiting Boolean  @default(true)
+  created_at    DateTime @default(now())
+
+  members TeamMember[]
+
+  @@map("teams")
+}

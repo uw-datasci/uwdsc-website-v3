@@ -11,6 +11,7 @@ interface AdminLink {
   href: string;
   title: string;
   description: string;
+  adminOnly?: boolean;
 }
 
 const adminLinks: AdminLink[] = [
@@ -23,14 +24,25 @@ const adminLinks: AdminLink[] = [
     href: "/admin/applications",
     title: "Manage Exec Apps 📝",
     description: "Review applications for the next term's exec team",
+    adminOnly: true,
   },
 ];
 
-export function AdminDropdown() {
+interface AdminDropdownProps {
+  readonly userStatus: "admin" | "exec";
+}
+
+export function AdminDropdown({ userStatus }: AdminDropdownProps) {
+  const isAdmin = userStatus === "admin";
+  const label = userStatus === "admin" ? "Admin" : "Exec";
+
+  // Filter links based on user status
+  const visibleLinks = adminLinks.filter((link) => !link.adminOnly || isAdmin);
+
   return (
     <NavigationMenuItem>
       <NavigationMenuTrigger className="text-sm sm:text-base !bg-transparent hover:!bg-transparent hover:text-primary data-[state=open]:!bg-transparent data-[state=open]:text-primary focus:!bg-transparent focus-visible:!bg-transparent">
-        Admin
+        {label}
       </NavigationMenuTrigger>
       <NavigationMenuContent className="!bg-transparent !border-0 !shadow-none">
         <GlassSurface
@@ -55,17 +67,28 @@ export function AdminDropdown() {
                 </Link>
               </NavigationMenuLink>
             </li>
-            {adminLinks.map((link) => (
-              <li key={link.href}>
+            {visibleLinks.map((link) => (
+              <li
+                key={link.href}
+                className={visibleLinks.length === 1 ? "row-span-3" : ""}
+              >
                 <NavigationMenuLink asChild>
                   <Link
                     href={link.href}
-                    className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-muted/30 focus:bg-muted/30"
+                    className={`select-none rounded-md leading-none no-underline outline-none transition-colors hover:bg-muted/30 focus:bg-muted/30 ${
+                      visibleLinks.length === 1
+                        ? "flex h-full flex-col justify-center p-6 space-y-2"
+                        : "block space-y-1 p-3"
+                    }`}
                   >
-                    <div className="text-sm font-medium leading-none">
+                    <div
+                      className={`font-medium leading-none ${visibleLinks.length === 1 ? "text-base" : "text-sm"}`}
+                    >
                       {link.title}
                     </div>
-                    <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                    <p
+                      className={`leading-snug text-muted-foreground ${visibleLinks.length === 1 ? "text-sm leading-tight" : "text-sm line-clamp-2"}`}
+                    >
                       {link.description}
                     </p>
                   </Link>

@@ -24,6 +24,7 @@ import { Button, Card, CardContent, CardHeader, CardTitle } from "@uwdsc/ui";
 import { Loader2, MoveLeft, MoveRight, User } from "lucide-react";
 import { AvailablePositions } from "@/components/application/banners/AvailablePositions";
 import { DueDateTag } from "@/components/application/DueDateTag";
+import { motion, AnimatePresence } from "framer-motion";
 
 const STEP_NAMES = [
   "DSC Application",
@@ -33,9 +34,26 @@ const STEP_NAMES = [
   "Resume",
 ];
 
+// Animation variants for sliding transitions
+const slideVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 1000 : -1000,
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction > 0 ? -1000 : 1000,
+    opacity: 0,
+  }),
+};
+
 export default function ApplyPage() {
   const [currentTerm, setCurrentTerm] = useState<Term | null>(null);
   const [currentStep, setCurrentStep] = useState<number>(0);
+  const [direction, setDirection] = useState<number>(1); // 1 for forward, -1 for backward
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setProgressValue } = useApplicationProgress();
 
@@ -63,6 +81,7 @@ export default function ApplyPage() {
 
   const handleStartApplication = () => {
     // TODO: API call to create application
+    setDirection(1);
     setCurrentStep(currentStep + 1);
   };
 
@@ -86,6 +105,7 @@ export default function ApplyPage() {
   };
 
   const goToStep = (step: number) => {
+    setDirection(step > currentStep ? 1 : -1);
     setCurrentStep(step);
   };
 
@@ -186,8 +206,23 @@ export default function ApplyPage() {
         </CardHeader>
 
         <CardContent>
-          <div className="space-y-6">
-            {renderStep()}
+          <div className="space-y-6 overflow-hidden">
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={currentStep}
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{
+                  x: { type: "spring", stiffness: 300, damping: 30 },
+                  opacity: { duration: 0.2 },
+                }}
+              >
+                {renderStep()}
+              </motion.div>
+            </AnimatePresence>
 
             {currentStep !== 0 && currentStep !== 5 && (
               <div className="flex justify-between pt-4">

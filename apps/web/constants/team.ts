@@ -40,7 +40,7 @@ import lunaNguyen from "@/public/teams/Luna-Nguyen.jpg";
 import dishitaChawla from "@/public/teams/Dishita-Chawla.jpg";
 
 // CXC
-import michaelZhang from "@/public/teams/Michael-Zhang.jpeg";
+import michaelZhang from "@/public/teams/Michael-Zhang.jpg";
 import davidHe from "@/public/teams/David-He.png";
 import adhyaSharma from "@/public/teams/Adhya-Sharma.jpg";
 import parithySenthamilarasan from "@/public/teams/Parithy-Senthamilarasan.jpeg";

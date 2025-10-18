@@ -12,10 +12,10 @@ import { UseFormReturn } from "react-hook-form";
 import { AppFormValues } from "@/lib/schemas/application";
 import { GraduationCap, User } from "lucide-react";
 import {
-  renderTextField,
-  renderSelectField,
-  renderRadioField,
-} from "@/components/ExecAppFormHelpers";
+  renderTextFieldWithLabel as renderTextField,
+  renderSelectFieldWithLabel as renderSelectField,
+  renderRadioFieldWithLabel as renderRadioField,
+} from "@/components/FormHelpers";
 
 interface PersonalProps {
   readonly form: UseFormReturn<AppFormValues>;

@@ -1,29 +1,42 @@
-import { AuthService } from "@uwdsc/server/core/services/authService";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { createAuthService } from "@/lib/services";
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const body = await request.json();
     const { email, password } = body;
 
-    const authService = new AuthService();
-    const result = await authService.login({
-      email,
-      password,
-    });
-
-    if (!result.success) {
-      return Response.json({ error: result.error }, { status: 401 });
+    if (!email || !password) {
+      return NextResponse.json(
+        { error: "Email and password are required" },
+        { status: 400 }
+      );
     }
 
-    return Response.json({
-      message: "Login successful",
+    const authService = await createAuthService();
+    const result = await authService.login({ email, password });
+
+    if (!result.success) {
+      return NextResponse.json(
+        {
+          error: result.error,
+          needsVerification: result.needsVerification,
+          email: result.email,
+        },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
       user: result.user,
       session: result.session,
-      error: result.error, // Pass through any error (like "email_not_verified")
     });
   } catch (error) {
     console.error("Login error:", error);
-    return Response.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "An unexpected error occurred" },
+      { status: 500 }
+    );
   }
 }

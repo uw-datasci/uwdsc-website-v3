@@ -1,31 +1,35 @@
-import { AuthService } from "@uwdsc/server/core/services/authService";
+import { ProfileService } from "@uwdsc/server/web/services/profileService";
+import { createAuthService } from "@/lib/services";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+// Handle GET requests - get current user and profile
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    const authService = new AuthService();
-    const { user, error } = await authService.getCurrentUser();
+    const authService = await createAuthService();
+    const profileService = new ProfileService();
 
-    if (error) {
-      return Response.json({ error: error }, { status: 401 });
+    // Get the authenticated user
+    const userResult = await authService.getCurrentUser();
+
+    if (!userResult.success || !userResult.user) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    if (!user) {
-      return Response.json({ error: "Not authenticated" }, { status: 401 });
-    }
+    // Get the user's profile
+    const profile = await profileService.getProfileByUserId(userResult.user.id);
 
-    return Response.json({
+    return NextResponse.json({
       user: {
-        id: user.id,
-        email: user.email,
-        email_confirmed_at: user.email_confirmed_at,
-        created_at: user.created_at,
-        last_sign_in_at: user.last_sign_in_at,
-        metadata: user.user_metadata,
+        id: userResult.user.id,
+        email: userResult.user.email,
       },
-      timestamp: new Date().toISOString(),
+      profile: profile || null,
     });
   } catch (error) {
-    console.error("Me endpoint error:", error);
-    return Response.json({ error: "Internal server error" }, { status: 500 });
+    console.error("Error fetching user data:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch user data" },
+      { status: 500 }
+    );
   }
 }

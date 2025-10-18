@@ -3,6 +3,7 @@ model Profile {
     id         String    @id @default(uuid()) @db.Uuid
     first_name String
     last_name  String
+    dob        DateTime
     role       role_enum @default(default)
     nfc_id     BigInt?
     created_at DateTime  @default(now())

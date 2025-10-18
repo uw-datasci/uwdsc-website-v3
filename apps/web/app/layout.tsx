@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "@uwdsc/ui";
 import { Navbar } from "@/components/Navbar";
 import { baseMetadata } from "@/lib/metadata";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,8 +50,10 @@ export default function RootLayout({
       >
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
           <ThemeProvider>
-            <Navbar />
-            {children}
+            <AuthProvider>
+              <Navbar />
+              {children}
+            </AuthProvider>
           </ThemeProvider>
         </div>
       </body>

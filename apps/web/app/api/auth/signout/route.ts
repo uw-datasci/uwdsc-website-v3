@@ -1,19 +1,24 @@
-import { AuthService } from "@uwdsc/server/core/services/authService";
+import { NextRequest, NextResponse } from "next/server";
+import { createAuthService } from "@/lib/services";
 
-export async function POST() {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const authService = new AuthService();
+    const authService = await createAuthService();
     const result = await authService.signOut();
 
     if (!result.success) {
-      return Response.json({ error: result.error }, { status: 400 });
+      return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
-    return Response.json({
-      message: "Successfully signed out",
+    return NextResponse.json({
+      success: true,
+      message: result.message,
     });
   } catch (error) {
     console.error("Signout error:", error);
-    return Response.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "An unexpected error occurred" },
+      { status: 500 }
+    );
   }
 }

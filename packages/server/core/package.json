@@ -7,9 +7,10 @@
     "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.39.7",
-    "pg": "^8.11.0",
-    "kysely": "^0.27.0"
+    "kysely": "^0.27.0",
+    "pg": "^8.11.0"
   },
   "devDependencies": {
     "@types/node": "^20.19.9",

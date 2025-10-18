@@ -11,7 +11,7 @@ import {
 import { UseFormReturn } from "react-hook-form";
 import { AppFormValues } from "@/lib/schemas/application";
 import { MessageSquare } from "lucide-react";
-import { renderTextAreaField } from "@/components/ExecAppFormHelpers";
+import { renderTextAreaFieldWithLabel as renderTextAreaField } from "@/components/FormHelpers";
 import { GeneralTip } from "../banners/GeneralTip";
 
 interface GeneralProps {

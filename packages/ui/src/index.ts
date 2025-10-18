@@ -64,6 +64,18 @@ export {
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
 } from "./components/dropdown-menu";
+export {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+  DialogTrigger,
+} from "./components/dialog";
 
 export { GlassSurface } from "./components/GlassSurface";
 

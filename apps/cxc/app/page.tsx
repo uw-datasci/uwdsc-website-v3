@@ -1,4 +1,4 @@
-import { AboutCxC } from "@/components/home/AboutCxC";
+import  AboutCxC  from "@/components/home/AboutCxC";
 import {
   WormholeTop,
   WormholeMiddle,

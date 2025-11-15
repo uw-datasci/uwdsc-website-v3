@@ -1,0 +1,637 @@
+# Database Setup
+
+Learn how to work with Prisma and Supabase in this project.
+
+## Overview
+
+Our project uses:
+
+- **Prisma** - Type-safe ORM for database operations
+- **Supabase** - PostgreSQL database and authentication
+- **PostgreSQL** - Relational database
+
+## Architecture
+
+```
+┌─────────────────────────────────────────┐
+│     Application Layer                   │
+│  (Next.js API Routes & Services)        │
+└───────────┬─────────────────────────────┘
+            │
+┌───────────▼─────────────────────────────┐
+│        Prisma Client                     │
+│   (Type-safe ORM)                        │
+└───────────┬─────────────────────────────┘
+            │
+┌───────────▼─────────────────────────────┐
+│     Supabase PostgreSQL                  │
+│   (Database & Auth)                      │
+└──────────────────────────────────────────┘
+```
+
+## Setup
+
+### 1. Environment Variables
+
+Create `.env.local` files in your apps:
+
+```bash
+# apps/web/.env.local
+DATABASE_URL="postgresql://user:password@host:5432/database"
+DIRECT_URL="postgresql://user:password@host:5432/database"
+SUPABASE_URL="https://your-project.supabase.co"
+SUPABASE_ANON_KEY="your-anon-key"
+SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
+```
+
+### 2. Prisma Schema
+
+Schemas are located in:
+
+- `packages/server/web/src/prisma/schema/`
+- `packages/server/cxc/src/prisma/schema/`
+
+**Example schema:**
+
+```prisma
+// packages/server/web/src/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  bio       String?
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  applications Application[]
+  profile      Profile?
+
+  @@map("users")
+}
+
+model Profile {
+  id     String @id @default(uuid())
+  userId String @unique
+  bio    String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("profiles")
+}
+
+model Application {
+  id        String   @id @default(uuid())
+  userId    String
+  status    String
+  data      Json
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("applications")
+}
+```
+
+## Prisma Workflow
+
+### Generate Client
+
+After changing the schema:
+
+```bash
+cd packages/server/web
+pnpm prisma generate
+```
+
+This creates the Prisma Client in `src/generated/`.
+
+### Create Migration
+
+Create a new migration:
+
+```bash
+cd packages/server/web
+pnpm prisma migrate dev --name add_user_bio
+```
+
+This:
+
+1. Creates SQL migration file
+2. Applies migration to database
+3. Regenerates Prisma Client
+
+### Apply Migrations
+
+Apply migrations to production:
+
+```bash
+pnpm prisma migrate deploy
+```
+
+### Reset Database
+
+**Warning**: This deletes all data!
+
+```bash
+pnpm prisma migrate reset
+```
+
+### Prisma Studio
+
+Open visual database editor:
+
+```bash
+cd packages/server/web
+pnpm prisma studio
+```
+
+This opens a web UI at http://localhost:5555
+
+## Using Prisma
+
+### Basic Queries
+
+```typescript
+// packages/server/web/src/repository/userRepository.ts
+import { PrismaClient } from "../generated";
+
+export class UserRepository {
+  private prisma: PrismaClient;
+
+  constructor() {
+    this.prisma = new PrismaClient();
+  }
+
+  // Find one
+  async findById(id: string) {
+    return this.prisma.user.findUnique({
+      where: { id },
+    });
+  }
+
+  // Find many
+  async findAll() {
+    return this.prisma.user.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  // Create
+  async create(data: { email: string; name: string }) {
+    return this.prisma.user.create({
+      data,
+    });
+  }
+
+  // Update
+  async update(id: string, data: { name?: string; bio?: string }) {
+    return this.prisma.user.update({
+      where: { id },
+      data,
+    });
+  }
+
+  // Delete
+  async delete(id: string) {
+    return this.prisma.user.delete({
+      where: { id },
+    });
+  }
+}
+```
+
+### Relations
+
+```typescript
+// Include related data
+async findUserWithProfile(userId: string) {
+  return this.prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      profile: true,
+      applications: true,
+    },
+  });
+}
+
+// Nested writes
+async createUserWithProfile(data: {
+  email: string;
+  name: string;
+  bio: string;
+}) {
+  return this.prisma.user.create({
+    data: {
+      email: data.email,
+      name: data.name,
+      profile: {
+        create: {
+          bio: data.bio,
+        },
+      },
+    },
+  });
+}
+```
+
+### Filtering
+
+```typescript
+// Where clause
+async findActiveUsers() {
+  return this.prisma.user.findMany({
+    where: {
+      status: "active",
+      createdAt: {
+        gte: new Date("2024-01-01"),
+      },
+    },
+  });
+}
+
+// OR conditions
+async search(query: string) {
+  return this.prisma.user.findMany({
+    where: {
+      OR: [
+        { name: { contains: query, mode: "insensitive" } },
+        { email: { contains: query, mode: "insensitive" } },
+      ],
+    },
+  });
+}
+```
+
+### Pagination
+
+```typescript
+async findWithPagination(page: number, limit: number) {
+  const skip = (page - 1) * limit;
+
+  const [users, total] = await Promise.all([
+    this.prisma.user.findMany({
+      skip,
+      take: limit,
+      orderBy: { createdAt: "desc" },
+    }),
+    this.prisma.user.count(),
+  ]);
+
+  return {
+    users,
+    total,
+    page,
+    pages: Math.ceil(total / limit),
+  };
+}
+```
+
+### Transactions
+
+```typescript
+async transferCredits(fromId: string, toId: string, amount: number) {
+  return this.prisma.$transaction(async (tx) => {
+    // Deduct from sender
+    await tx.user.update({
+      where: { id: fromId },
+      data: { credits: { decrement: amount } },
+    });
+
+    // Add to receiver
+    await tx.user.update({
+      where: { id: toId },
+      data: { credits: { increment: amount } },
+    });
+
+    // Create transaction record
+    await tx.transaction.create({
+      data: {
+        fromId,
+        toId,
+        amount,
+      },
+    });
+  });
+}
+```
+
+### Aggregations
+
+```typescript
+async getStats() {
+  return this.prisma.user.aggregate({
+    _count: true,
+    _avg: { age: true },
+    _min: { createdAt: true },
+    _max: { createdAt: true },
+  });
+}
+
+async groupByStatus() {
+  return this.prisma.user.groupBy({
+    by: ["status"],
+    _count: true,
+  });
+}
+```
+
+## Supabase Integration
+
+### Authentication
+
+```typescript
+// packages/server/core/src/services/authService.ts
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+export class AuthService {
+  async signUp(email: string, password: string) {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (error) throw error;
+    return data;
+  }
+
+  async signIn(email: string, password: string) {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) throw error;
+    return data;
+  }
+
+  async getUser(token: string) {
+    const { data, error } = await supabase.auth.getUser(token);
+    if (error) throw error;
+    return data.user;
+  }
+}
+```
+
+### File Storage
+
+```typescript
+// packages/server/core/src/services/fileService.ts
+export class FileService {
+  async uploadFile(bucket: string, path: string, file: File) {
+    const { data, error } = await supabase.storage
+      .from(bucket)
+      .upload(path, file);
+
+    if (error) throw error;
+    return data;
+  }
+
+  getPublicUrl(bucket: string, path: string) {
+    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+
+    return data.publicUrl;
+  }
+
+  async deleteFile(bucket: string, path: string) {
+    const { error } = await supabase.storage.from(bucket).remove([path]);
+
+    if (error) throw error;
+  }
+}
+```
+
+## Data Seeding
+
+### Create Seed File
+
+```typescript
+// packages/server/web/src/prisma/seed.ts
+import { PrismaClient } from "./generated";
+
+const prisma = new PrismaClient();
+
+async function main() {
+  // Clear existing data
+  await prisma.application.deleteMany();
+  await prisma.profile.deleteMany();
+  await prisma.user.deleteMany();
+
+  // Create test users
+  const user1 = await prisma.user.create({
+    data: {
+      email: "john@example.com",
+      name: "John Doe",
+      profile: {
+        create: {
+          bio: "Software developer",
+        },
+      },
+    },
+  });
+
+  const user2 = await prisma.user.create({
+    data: {
+      email: "jane@example.com",
+      name: "Jane Smith",
+      profile: {
+        create: {
+          bio: "Product designer",
+        },
+      },
+    },
+  });
+
+  // Create applications
+  await prisma.application.createMany({
+    data: [
+      {
+        userId: user1.id,
+        status: "pending",
+        data: {},
+      },
+      {
+        userId: user2.id,
+        status: "approved",
+        data: {},
+      },
+    ],
+  });
+
+  console.log("Database seeded successfully");
+}
+
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
+```
+
+### Run Seed
+
+```bash
+cd packages/server/web
+pnpm prisma db seed
+```
+
+## Best Practices
+
+### ✅ Do
+
+- Use transactions for multi-step operations
+- Handle errors appropriately
+- Use TypeScript types from Prisma
+- Index frequently queried columns
+- Use select to limit returned fields
+- Close Prisma connections properly
+
+### ❌ Don't
+
+- N+1 queries (use `include` or `select`)
+- Store large files in database
+- Skip migrations in production
+- Expose database errors to clients
+- Use raw SQL unless necessary
+
+## Common Patterns
+
+### Repository Pattern
+
+```typescript
+import { BaseRepository } from "@uwdsc/server/core/repository/baseRepository";
+
+export class UserRepository extends BaseRepository {
+  async findByEmail(email: string) {
+    return this.prisma.user.findUnique({
+      where: { email },
+    });
+  }
+
+  async existsByEmail(email: string): Promise<boolean> {
+    const count = await this.prisma.user.count({
+      where: { email },
+    });
+    return count > 0;
+  }
+}
+```
+
+### Soft Deletes
+
+```prisma
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  deletedAt DateTime?
+
+  @@map("users")
+}
+```
+
+```typescript
+async softDelete(id: string) {
+  return this.prisma.user.update({
+    where: { id },
+    data: { deletedAt: new Date() },
+  });
+}
+
+async findActive() {
+  return this.prisma.user.findMany({
+    where: { deletedAt: null },
+  });
+}
+```
+
+### Optimistic Locking
+
+```prisma
+model User {
+  id      String @id @default(uuid())
+  version Int    @default(0)
+
+  @@map("users")
+}
+```
+
+```typescript
+async updateWithVersion(id: string, currentVersion: number, data: any) {
+  return this.prisma.user.updateMany({
+    where: {
+      id,
+      version: currentVersion,
+    },
+    data: {
+      ...data,
+      version: { increment: 1 },
+    },
+  });
+}
+```
+
+## Troubleshooting
+
+### Schema Sync Issues
+
+```bash
+# Push schema without creating migration
+pnpm prisma db push
+
+# View current database schema
+pnpm prisma db pull
+```
+
+### Migration Conflicts
+
+```bash
+# Mark migration as applied without running it
+pnpm prisma migrate resolve --applied <migration_name>
+
+# Mark as rolled back
+pnpm prisma migrate resolve --rolled-back <migration_name>
+```
+
+### Connection Issues
+
+Check environment variables and database connectivity:
+
+```typescript
+async function testConnection() {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    console.log("Database connected");
+  } catch (error) {
+    console.error("Database connection failed:", error);
+  }
+}
+```
+
+## Resources
+
+- [Prisma Documentation](https://www.prisma.io/docs)
+- [Supabase Documentation](https://supabase.com/docs)
+- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
+
+## Next Steps
+
+- [Creating API Endpoints](/guides/creating-api) - Build backend features
+- [Development Tips](/guides/development) - Improve workflow

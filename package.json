@@ -7,6 +7,8 @@
     "dev": "turbo dev",
     "dev:web": "turbo dev --filter=web...",
     "dev:cxc": "turbo dev --filter=cxc...",
+    "dev:docs": "turbo dev --filter=docs...",
+    "build:docs": "turbo build --filter=docs",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "ui:add": "node scripts/ui-add.js"
@@ -15,10 +17,10 @@
     "@uwdsc/eslint-config": "workspace:*",
     "@uwdsc/typescript-config": "workspace:*",
     "prettier": "^3.6.2",
-    "turbo": "^2.5.8",
+    "turbo": "^2.6.1",
     "typescript": "5.7.3"
   },
-  "packageManager": "pnpm@10.20.0",
+  "packageManager": "pnpm@10.22.0",
   "engines": {
     "node": ">=20"
   }

@@ -1,0 +1,438 @@
+# API Architecture
+
+Learn about our backend architecture and API patterns.
+
+## Architecture Pattern
+
+We follow a **layered architecture** with clear separation of concerns:
+
+```
+┌─────────────────────┐
+│  React Component    │  UI Layer
+└──────────┬──────────┘
+           │
+┌──────────▼──────────┐
+│   Client API Func   │  API Client Layer
+└──────────┬──────────┘
+           │
+┌──────────▼──────────┐
+│   Next.js Route     │  HTTP Layer
+└──────────┬──────────┘
+           │
+┌──────────▼──────────┐
+│      Service        │  Business Logic Layer
+└──────────┬──────────┘
+           │
+┌──────────▼──────────┐
+│    Repository       │  Data Access Layer
+└──────────┬──────────┘
+           │
+┌──────────▼──────────┐
+│     Database        │  Persistence Layer
+└─────────────────────┘
+```
+
+## Layer Breakdown
+
+### 1. React Components (UI Layer)
+
+**Location**: `apps/{web,cxc}/components/`, `apps/{web,cxc}/app/`
+
+**Purpose**: Display UI and handle user interactions
+
+**Example**:
+
+```tsx
+"use client";
+
+import { useState, useEffect } from "react";
+import { getSystemHealth } from "@/lib/api";
+import { Card, CardContent } from "@uwdsc/ui";
+
+export function HealthStatus() {
+  const [health, setHealth] = useState(null);
+
+  useEffect(() => {
+    getSystemHealth().then(setHealth);
+  }, []);
+
+  return (
+    <Card>
+      <CardContent>
+        Status: {health?.status}
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+### 2. Client API Functions (API Client Layer)
+
+**Location**: `apps/{web,cxc}/lib/api/`
+
+**Purpose**: Type-safe API wrappers for frontend
+
+**Example** (`apps/web/lib/api/health.ts`):
+
+```tsx
+import type { HealthResponse } from "@/types/api";
+
+export async function getSystemHealth(): Promise<HealthResponse> {
+  const response = await fetch("/api/health");
+  
+  if (!response.ok) {
+    throw new Error("Failed to fetch health status");
+  }
+  
+  return response.json();
+}
+
+export async function login(email: string, password: string) {
+  const response = await fetch("/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message);
+  }
+  
+  return response.json();
+}
+```
+
+### 3. Next.js API Routes (HTTP Layer)
+
+**Location**: `apps/{web,cxc}/app/api/`
+
+**Purpose**: Handle HTTP requests and responses
+
+**Example** (`apps/web/app/api/health/route.ts`):
+
+```tsx
+import { NextResponse } from "next/server";
+import { HealthService } from "@uwdsc/server/web/services/healthService";
+
+export async function GET() {
+  try {
+    const healthService = new HealthService();
+    const health = await healthService.getSystemHealth();
+    
+    return NextResponse.json(health);
+  } catch (error) {
+    console.error("Health check failed:", error);
+    return NextResponse.json(
+      { error: "Health check failed" },
+      { status: 500 }
+    );
+  }
+}
+```
+
+### 4. Services (Business Logic Layer)
+
+**Location**: `packages/server/{core,web,cxc}/src/services/`
+
+**Purpose**: Business logic and orchestration
+
+**Example** (`packages/server/web/src/services/healthService.ts`):
+
+```tsx
+import { HealthRepository } from "../repository/healthRepository";
+
+export class HealthService {
+  private repository: HealthRepository;
+
+  constructor() {
+    this.repository = new HealthRepository();
+  }
+
+  async getSystemHealth() {
+    const dbHealth = await this.repository.checkDatabaseConnection();
+    const timestamp = new Date().toISOString();
+
+    return {
+      status: dbHealth ? "healthy" : "unhealthy",
+      timestamp,
+      database: dbHealth ? "connected" : "disconnected",
+    };
+  }
+
+  async performHealthCheck() {
+    // More complex health check logic
+    const checks = await Promise.all([
+      this.repository.checkDatabaseConnection(),
+      this.checkExternalServices(),
+      this.checkMemoryUsage(),
+    ]);
+
+    return {
+      status: checks.every(Boolean) ? "healthy" : "degraded",
+      checks,
+    };
+  }
+
+  private async checkExternalServices() {
+    // Check external service health
+    return true;
+  }
+
+  private async checkMemoryUsage() {
+    // Check memory usage
+    return true;
+  }
+}
+```
+
+### 5. Repositories (Data Access Layer)
+
+**Location**: `packages/server/{core,web,cxc}/src/repository/`
+
+**Purpose**: Database queries and data access
+
+**Example** (`packages/server/web/src/repository/healthRepository.ts`):
+
+```tsx
+import { BaseRepository } from "@uwdsc/server/core/repository/baseRepository";
+
+export class HealthRepository extends BaseRepository {
+  async checkDatabaseConnection(): Promise<boolean> {
+    try {
+      await this.prisma.$queryRaw`SELECT 1`;
+      return true;
+    } catch (error) {
+      console.error("Database connection check failed:", error);
+      return false;
+    }
+  }
+
+  async getSystemMetrics() {
+    return {
+      userCount: await this.prisma.user.count(),
+      applicationCount: await this.prisma.application.count(),
+      eventCount: await this.prisma.event.count(),
+    };
+  }
+}
+```
+
+### 6. Database (Persistence Layer)
+
+**Technologies**:
+- **Prisma**: Type-safe ORM
+- **Supabase**: PostgreSQL database and auth
+- **PostgreSQL**: Relational database
+
+## Complete Flow Example
+
+### Health Check Flow
+
+```typescript
+// 1. React Component (apps/web/components/HealthDashboard.tsx)
+"use client";
+import { useEffect, useState } from "react";
+import { getSystemHealth } from "@/lib/api";
+
+export function HealthDashboard() {
+  const [health, setHealth] = useState(null);
+  
+  useEffect(() => {
+    getSystemHealth().then(setHealth);
+  }, []);
+  
+  return <div>Status: {health?.status}</div>;
+}
+
+// 2. Client API (apps/web/lib/api/health.ts)
+export async function getSystemHealth() {
+  const response = await fetch("/api/health");
+  return response.json();
+}
+
+// 3. API Route (apps/web/app/api/health/route.ts)
+import { NextResponse } from "next/server";
+import { HealthService } from "@uwdsc/server/web/services/healthService";
+
+export async function GET() {
+  const healthService = new HealthService();
+  const health = await healthService.getSystemHealth();
+  return NextResponse.json(health);
+}
+
+// 4. Service (packages/server/web/src/services/healthService.ts)
+export class HealthService {
+  private repository: HealthRepository;
+  
+  async getSystemHealth() {
+    return await this.repository.checkDatabaseConnection();
+  }
+}
+
+// 5. Repository (packages/server/web/src/repository/healthRepository.ts)
+export class HealthRepository extends BaseRepository {
+  async checkDatabaseConnection() {
+    await this.prisma.$queryRaw`SELECT 1`;
+    return { status: "healthy" };
+  }
+}
+```
+
+## Authentication Flow
+
+### User Login
+
+```typescript
+// 1. Component calls API
+const result = await login(email, password);
+
+// 2. Client API makes request
+async function login(email: string, password: string) {
+  return fetch("/api/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+// 3. API Route validates and calls service
+export async function POST(request: Request) {
+  const { email, password } = await request.json();
+  const authService = new AuthService();
+  return authService.login(email, password);
+}
+
+// 4. Service handles business logic
+async login(email: string, password: string) {
+  // Validate credentials
+  const user = await this.repository.findUserByEmail(email);
+  
+  // Check password
+  const isValid = await this.verifyPassword(password, user.hash);
+  
+  // Create session
+  return this.createSession(user);
+}
+
+// 5. Repository accesses database
+async findUserByEmail(email: string) {
+  return this.prisma.user.findUnique({
+    where: { email },
+  });
+}
+```
+
+## Error Handling
+
+### Centralized Error Handler
+
+```typescript
+// utils/errors.ts
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public statusCode: number = 500,
+    public code?: string
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
+export function handleApiError(error: unknown) {
+  if (error instanceof ApiError) {
+    return {
+      message: error.message,
+      code: error.code,
+      statusCode: error.statusCode,
+    };
+  }
+  
+  return {
+    message: "Internal server error",
+    statusCode: 500,
+  };
+}
+```
+
+### Usage in API Routes
+
+```typescript
+import { NextResponse } from "next/server";
+import { ApiError, handleApiError } from "@/lib/errors";
+
+export async function POST(request: Request) {
+  try {
+    const data = await request.json();
+    const result = await service.process(data);
+    return NextResponse.json(result);
+  } catch (error) {
+    const { message, statusCode } = handleApiError(error);
+    return NextResponse.json(
+      { error: message },
+      { status: statusCode }
+    );
+  }
+}
+```
+
+## Validation
+
+### Using Zod Schemas
+
+```typescript
+// lib/schemas/user.ts
+import { z } from "zod";
+
+export const loginSchema = z.object({
+  email: z.string().email("Invalid email"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+export type LoginInput = z.infer<typeof loginSchema>;
+
+// app/api/auth/login/route.ts
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const validated = loginSchema.parse(body);
+    
+    // Process validated data
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { errors: error.errors },
+        { status: 400 }
+      );
+    }
+    throw error;
+  }
+}
+```
+
+## Best Practices
+
+### ✅ Do
+
+- Keep layers separated and focused
+- Use services for business logic
+- Use repositories for data access
+- Validate inputs with Zod
+- Handle errors appropriately
+- Use TypeScript for type safety
+- Write unit tests for services and repositories
+
+### ❌ Don't
+
+- Put business logic in API routes
+- Access database directly from API routes
+- Skip input validation
+- Expose internal errors to clients
+- Mix concerns across layers
+
+## Next Steps
+
+- [Data Flow](/architecture/data-flow) - Understanding data patterns
+- [Creating API Endpoints](/guides/creating-api) - Practical guide
+

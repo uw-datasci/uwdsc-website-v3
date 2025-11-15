@@ -1,0 +1,452 @@
+# UI Package
+
+The shared design system built with shadcn/ui components.
+
+## Overview
+
+The `@uwdsc/ui` package contains all shared UI components (atoms) used across the monorepo.
+
+**Location**: `packages/ui/`
+
+**Import**: `@uwdsc/ui`
+
+## Available Components
+
+### Layout Components
+
+- **Card** - Container with border and padding
+- **Separator** - Visual divider
+- **Aspect Ratio** - Maintain aspect ratios
+
+### Navigation
+
+- **Navigation Menu** - Accessible navigation
+- **Breadcrumb** - Hierarchical navigation
+- **Tabs** - Tabbed interfaces
+
+### Form Components
+
+- **Button** - Interactive buttons with variants
+- **Input** - Text input fields
+- **Checkbox** - Boolean input
+- **Select** - Dropdown selection
+- **Form** - Form wrapper with validation
+
+### Feedback
+
+- **Alert** - Important messages
+- **Toast** - Temporary notifications
+- **Badge** - Status indicators
+- **Progress** - Progress indicators
+
+### Overlays
+
+- **Dialog** - Modal dialogs
+- **Dropdown Menu** - Contextual menus
+- **Popover** - Floating content
+- **Sheet** - Side panels
+
+### Data Display
+
+- **Avatar** - User avatars
+- **Table** - Data tables
+- **Accordion** - Collapsible content
+
+## Installation
+
+### Adding New Components
+
+Use the custom script from the root:
+
+```bash
+pnpm ui:add <component-name>
+```
+
+**Examples:**
+
+```bash
+# Add a dialog component
+pnpm ui:add dialog
+
+# Add multiple components
+pnpm ui:add dropdown-menu popover sheet
+```
+
+This script:
+1. Changes to `packages/ui` directory
+2. Runs `shadcn@canary add <component-name>`
+3. Downloads component to `src/components/`
+4. Installs dependencies
+5. Makes it available via `@uwdsc/ui`
+
+### Manual Installation
+
+If you need to install manually:
+
+```bash
+cd packages/ui
+pnpm dlx shadcn@canary add <component-name>
+```
+
+## Usage
+
+### Basic Import
+
+```tsx
+import { Button, Card, CardHeader, CardContent } from "@uwdsc/ui";
+
+export function MyComponent() {
+  return (
+    <Card>
+      <CardHeader>Title</CardHeader>
+      <CardContent>
+        <Button>Click me</Button>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+### With Variants
+
+```tsx
+import { Button } from "@uwdsc/ui";
+
+export function ButtonExample() {
+  return (
+    <div className="flex gap-2">
+      <Button variant="default">Default</Button>
+      <Button variant="outline">Outline</Button>
+      <Button variant="ghost">Ghost</Button>
+      <Button variant="destructive">Destructive</Button>
+    </div>
+  );
+}
+```
+
+### With Sizes
+
+```tsx
+import { Button } from "@uwdsc/ui";
+
+export function SizeExample() {
+  return (
+    <div className="flex gap-2 items-center">
+      <Button size="sm">Small</Button>
+      <Button size="default">Default</Button>
+      <Button size="lg">Large</Button>
+    </div>
+  );
+}
+```
+
+## Styling
+
+### Tailwind Classes
+
+All components accept `className` prop:
+
+```tsx
+<Button className="mt-4 w-full">
+  Full Width Button
+</Button>
+```
+
+### CSS Variables
+
+Components use CSS variables for theming:
+
+```css
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --primary: 222.2 47.4% 11.2%;
+  --primary-foreground: 210 40% 98%;
+  /* ... more variables */
+}
+```
+
+### Dark Mode
+
+Automatically supports dark mode:
+
+```tsx
+import { ThemeProvider } from "next-themes";
+
+function App({ children }) {
+  return (
+    <ThemeProvider attribute="class" defaultTheme="system">
+      {children}
+    </ThemeProvider>
+  );
+}
+```
+
+## Component Examples
+
+### Card Component
+
+```tsx
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@uwdsc/ui";
+
+export function CardExample() {
+  return (
+    <Card className="w-96">
+      <CardHeader>
+        <CardTitle>Card Title</CardTitle>
+        <CardDescription>Card description goes here</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p>Card content</p>
+      </CardContent>
+      <CardFooter>
+        <Button>Action</Button>
+      </CardFooter>
+    </Card>
+  );
+}
+```
+
+### Dialog Component
+
+```tsx
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@uwdsc/ui";
+import { Button } from "@uwdsc/ui";
+
+export function DialogExample() {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button>Open Dialog</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Dialog Title</DialogTitle>
+          <DialogDescription>
+            This is a dialog description
+          </DialogDescription>
+        </DialogHeader>
+        <div>Dialog content goes here</div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+```
+
+### Form Component
+
+```tsx
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+  Input,
+  Button,
+} from "@uwdsc/ui";
+
+const formSchema = z.object({
+  email: z.string().email(),
+});
+
+export function FormExample() {
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+  });
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input placeholder="email@example.com" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit">Submit</Button>
+      </form>
+    </Form>
+  );
+}
+```
+
+## Package Structure
+
+```
+packages/ui/
+├── src/
+│   ├── components/        # UI components
+│   │   ├── button.tsx
+│   │   ├── card.tsx
+│   │   ├── input.tsx
+│   │   └── ...
+│   ├── hooks/            # React hooks
+│   │   ├── use-toast.ts
+│   │   └── use-mobile.ts
+│   ├── lib/              # Utilities
+│   │   └── utils.ts
+│   ├── styles/           # Global styles
+│   │   └── globals.css
+│   └── index.ts          # Main export
+├── components.json       # shadcn config
+├── package.json
+└── tsconfig.json
+```
+
+## Configuration
+
+### components.json
+
+```json
+{
+  "style": "new-york",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "tailwind.config.ts",
+    "css": "src/styles/globals.css",
+    "baseColor": "slate",
+    "cssVariables": true
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils"
+  }
+}
+```
+
+## Dependencies
+
+### Core Dependencies
+
+- `react` & `react-dom` - React framework
+- `@radix-ui/*` - Headless UI primitives
+- `class-variance-authority` - Variant styling
+- `clsx` - Class name utilities
+- `tailwind-merge` - Tailwind class merging
+
+### Optional Dependencies
+
+- `framer-motion` - Animations
+- `lucide-react` - Icons
+- `next-themes` - Theme support
+
+## Utilities
+
+### cn() Function
+
+Merge Tailwind classes:
+
+```tsx
+import { cn } from "@uwdsc/ui/lib/utils";
+
+<div className={cn(
+  "base-classes",
+  isActive && "active-classes",
+  className
+)} />
+```
+
+### Custom Hooks
+
+```tsx
+import { useToast } from "@uwdsc/ui";
+
+export function Component() {
+  const { toast } = useToast();
+
+  const showToast = () => {
+    toast({
+      title: "Success",
+      description: "Action completed successfully",
+    });
+  };
+
+  return <Button onClick={showToast}>Show Toast</Button>;
+}
+```
+
+## Best Practices
+
+### ✅ Do
+
+- Import components from `@uwdsc/ui`
+- Use provided variants and sizes
+- Extend with Tailwind classes
+- Follow accessibility guidelines
+- Use semantic HTML
+
+### ❌ Don't
+
+- Modify component files directly
+- Create duplicate components in apps
+- Override core styles excessively
+- Ignore accessibility features
+
+## Customization
+
+### Extending Components
+
+Create custom variants:
+
+```tsx
+import { Button } from "@uwdsc/ui";
+import { cn } from "@uwdsc/ui/lib/utils";
+
+export function CustomButton({ className, ...props }) {
+  return (
+    <Button
+      className={cn("custom-gradient shadow-lg", className)}
+      {...props}
+    />
+  );
+}
+```
+
+### Theme Customization
+
+Modify CSS variables in `globals.css`:
+
+```css
+:root {
+  --primary: 200 100% 50%;  /* Custom primary color */
+}
+```
+
+## Resources
+
+- [shadcn/ui Documentation](https://ui.shadcn.com/)
+- [Radix UI Documentation](https://www.radix-ui.com/)
+- [Tailwind CSS Documentation](https://tailwindcss.com/)
+
+## Next Steps
+
+- [Design System](/architecture/design-system) - Architecture overview
+- [Adding Components](/guides/adding-components) - Step-by-step guide
+

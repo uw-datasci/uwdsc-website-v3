@@ -1,0 +1,244 @@
+# Design System
+
+Our design system follows **Atomic Design** principles, with shadcn/ui as the foundation.
+
+## Atomic Design Hierarchy
+
+```
+Atoms → Molecules → Organisms → Templates → Pages
+  ↓         ↓           ↓           ↓        ↓
+packages/ui  apps/*/components/  page layouts
+```
+
+## Atoms: UI Package (`packages/ui`)
+
+The `packages/ui` directory contains **shared, reusable UI primitives** built with shadcn/ui components.
+
+### Configuration
+
+- **Style**: shadcn/ui "new-york" style
+- **Exports**: Via `packages/ui/src/index.ts`
+- **Global Styles**: `packages/ui/src/styles/globals.css`
+- **Components**: `packages/ui/src/components/`
+- **Config**: `packages/ui/components.json`
+
+### Available Components
+
+Our UI package includes these shadcn components:
+
+- **Layout**: Card, Separator, Aspect Ratio
+- **Navigation**: Navigation Menu, Breadcrumb, Tabs
+- **Forms**: Button, Input, Checkbox, Select, Form
+- **Feedback**: Alert, Toast, Badge, Progress
+- **Overlays**: Dialog, Dropdown Menu, Popover, Sheet
+- **Data Display**: Avatar, Table, Accordion
+- **Typography**: Text components with consistent styling
+
+### Using Atoms
+
+Import atoms in your app components:
+
+```tsx
+import { Button, Card, CardHeader, CardContent } from "@uwdsc/ui";
+
+export function MyComponent() {
+  return (
+    <Card>
+      <CardHeader>Title</CardHeader>
+      <CardContent>
+        <Button>Click me</Button>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+## Molecules: App Components
+
+**Molecules** are composed components that combine atoms with app-specific logic.
+
+### Location
+
+- `apps/web/components/`
+- `apps/cxc/components/`
+
+### Examples
+
+#### TeamCard (Web App)
+
+Combines Card atoms with team member data:
+
+```tsx
+import { Card, CardHeader, CardContent } from "@uwdsc/ui";
+import { Avatar } from "@uwdsc/ui";
+
+export function TeamCard({ member }) {
+  return (
+    <Card>
+      <CardHeader>
+        <Avatar src={member.image} />
+        <h3>{member.name}</h3>
+      </CardHeader>
+      <CardContent>
+        <p>{member.role}</p>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+#### MotionCard (CxC App)
+
+Combines Card with Framer Motion:
+
+```tsx
+import { Card, Button } from "@uwdsc/ui";
+import { motion } from "framer-motion";
+
+export function MotionCard({ children }) {
+  return (
+    <motion.div
+      whileHover={{ scale: 1.05 }}
+      transition={{ duration: 0.2 }}
+    >
+      <Card>{children}</Card>
+    </motion.div>
+  );
+}
+```
+
+## Adding New Shadcn Components
+
+To add a new shadcn component to the shared UI package:
+
+```bash
+pnpm ui:add <component-name>
+```
+
+**Examples:**
+
+```bash
+pnpm ui:add dialog
+pnpm ui:add dropdown-menu
+pnpm ui:add input
+```
+
+This script:
+1. Runs `shadcn@canary add` in `packages/ui`
+2. Downloads the component to `packages/ui/src/components/`
+3. Makes it available to all apps via `@uwdsc/ui`
+
+## Styling Guidelines
+
+### Tailwind CSS
+
+All components use Tailwind CSS for styling:
+
+```tsx
+<div className="flex items-center gap-4 p-4 rounded-lg bg-background">
+  <Button variant="default" size="lg">
+    Primary Action
+  </Button>
+</div>
+```
+
+### Design Tokens
+
+Global design tokens are defined in `packages/ui/src/styles/globals.css`:
+
+```css
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  /* ... more tokens */
+}
+```
+
+### Theme Support
+
+The design system supports light and dark themes via `next-themes`:
+
+```tsx
+import { ThemeProvider } from "next-themes";
+
+function App() {
+  return (
+    <ThemeProvider attribute="class" defaultTheme="system">
+      {children}
+    </ThemeProvider>
+  );
+}
+```
+
+## Usage Guidelines
+
+### ✅ Do
+
+1. **Import atoms from `@uwdsc/ui`** in your app components
+2. **Create molecules in app-specific `components/`** when:
+   - Combining multiple atoms
+   - Adding app-specific business logic
+   - Creating feature-specific compositions
+3. **Add new primitives to the UI package** when:
+   - The component will be reused across multiple apps
+   - It's a pure UI component with minimal business logic
+   - It follows shadcn/ui patterns
+
+### ❌ Don't
+
+1. **Don't duplicate shadcn components** in app folders - add them to the UI package
+2. **Don't add business logic** to UI package atoms - keep them pure
+3. **Don't manually install shadcn components** - always use `pnpm ui:add`
+
+## Package Exports
+
+The UI package exports:
+
+- `@uwdsc/ui` - All component exports
+- `@uwdsc/ui/globals.css` - Global styles
+- `@uwdsc/ui/postcss.config` - PostCSS configuration
+
+## Dependencies
+
+The UI package includes:
+
+- **Radix UI** primitives (headless components)
+- **Tailwind CSS** for styling
+- **Framer Motion** for animations
+- **Lucide React** for icons
+- **next-themes** for theme support
+- **class-variance-authority** for variant styling
+- **clsx** and **tailwind-merge** for className utilities
+
+## Component Variants
+
+Use `cva` (Class Variance Authority) for component variants:
+
+```tsx
+import { cva } from "class-variance-authority";
+
+const buttonVariants = cva(
+  "inline-flex items-center justify-center rounded-md",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground",
+        outline: "border border-input bg-background",
+      },
+      size: {
+        default: "h-10 px-4 py-2",
+        sm: "h-9 px-3",
+        lg: "h-11 px-8",
+      },
+    },
+  }
+);
+```
+
+## Next Steps
+
+- [API Architecture](/architecture/api-flow) - Learn about backend patterns
+- [Guides: Adding Components](/guides/adding-components) - Step-by-step tutorial
+

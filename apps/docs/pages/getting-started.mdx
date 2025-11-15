@@ -1,0 +1,156 @@
+# Getting Started
+
+Get your development environment up and running in minutes.
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+- **Node.js** >= 20
+- **pnpm** >= 10.4.1
+
+### Installing pnpm
+
+If you don't have pnpm installed, you can install it with:
+
+```bash
+npm install -g pnpm@10.20.0
+```
+
+Or follow the [official pnpm installation guide](https://pnpm.io/installation).
+
+## Installation
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/uwdsc/uwdsc-website-v3.git
+cd uwdsc-website-v3
+```
+
+### 2. Install Dependencies
+
+```bash
+pnpm install
+```
+
+This will install all dependencies for all packages and apps in the monorepo. Thanks to pnpm workspaces, shared dependencies are efficiently linked.
+
+### 3. Set Up Environment Variables
+
+Each app may require environment variables. Check for `.env.example` files in:
+
+- `apps/web/.env.example`
+- `apps/cxc/.env.example`
+
+Copy the example files and fill in your values:
+
+```bash
+cp apps/web/.env.example apps/web/.env.local
+cp apps/cxc/.env.example apps/cxc/.env.local
+```
+
+## Running the Apps
+
+### Start All Apps
+
+```bash
+pnpm dev
+```
+
+This will start all applications in development mode:
+
+- **Web app**: http://localhost:3000
+- **CxC app**: http://localhost:3001
+- **Docs**: http://localhost:3002
+
+### Start Specific Apps
+
+If you only want to work on a specific app:
+
+```bash
+# Main website only
+pnpm dev:web
+
+# CxC app only
+pnpm dev:cxc
+
+# Documentation only
+pnpm dev:docs
+```
+
+## Building for Production
+
+### Build All Packages
+
+```bash
+pnpm build
+```
+
+### Build Specific App
+
+```bash
+pnpm build --filter=web
+pnpm build --filter=cxc
+pnpm build --filter=docs
+```
+
+## Common Commands
+
+```bash
+# Development
+pnpm dev                    # Start all apps
+pnpm dev:web               # Start main website only
+pnpm dev:cxc               # Start CxC app only
+pnpm dev:docs              # Start documentation only
+
+# Building
+pnpm build                 # Build all packages
+
+# Code Quality
+pnpm lint                  # Lint all packages
+pnpm format                # Format code with Prettier
+
+# UI Components
+pnpm ui:add button         # Add shadcn button component
+pnpm ui:add form           # Add shadcn form components
+```
+
+## Next Steps
+
+- Learn about the [Architecture](/architecture) of the monorepo
+- Follow our [Guides](/guides) for common development tasks
+- Explore the [Packages](/packages) documentation
+
+## Troubleshooting
+
+### Port Already in Use
+
+If you get an error that a port is already in use, you can either:
+
+1. Kill the process using that port
+2. Change the port in the app's `package.json` dev script
+
+### pnpm Installation Issues
+
+If you encounter issues with pnpm, try:
+
+```bash
+# Clear pnpm cache
+pnpm store prune
+
+# Reinstall dependencies
+rm -rf node_modules
+rm pnpm-lock.yaml
+pnpm install
+```
+
+### TypeScript Errors
+
+If you see TypeScript errors, try:
+
+```bash
+# Clean and rebuild
+pnpm clean
+pnpm build
+```

@@ -1,4 +1,3 @@
-import baseConfig from "@uwdsc/eslint-config/base.js";
+import { config } from "@uwdsc/eslint-config/base";
 
-export default [...baseConfig];
-
+export default [...config];

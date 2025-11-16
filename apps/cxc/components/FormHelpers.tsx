@@ -13,10 +13,13 @@ import {
   RadioGroup,
   RadioGroupItem,
   Combobox,
+  cn,
   Checkbox,
+  FileTextIcon,
+  UploadSimpleIcon,
 } from "@uwdsc/ui";
 import type { ComboboxOption } from "@uwdsc/ui";
-import { ComponentProps } from "react";
+import { ComponentProps, useEffect, useState } from "react";
 import { ControllerRenderProps } from "react-hook-form";
 
 /**
@@ -65,10 +68,12 @@ interface ComboboxFieldOptions {
 }
 
 interface FileUploadFieldOptions {
+  label?: string;
   required?: boolean;
 }
 
 interface CheckboxGroupFieldOptions {
+  label?: string;
   required?: boolean;
 }
 
@@ -80,14 +85,14 @@ const inputStyles: Record<FormFieldVariant, string> = {
   default: "",
   auth: "!h-auto !text-base border-gray-100/80 !bg-black px-4.5 py-3.5 placeholder:text-gray-100/80 rounded-lg xl:px-6 xl:py-4.5",
   application:
-    "!border-0 !border-b !rounded-none !px-3 !shadow-none !bg-white/5 hover:!bg-white/10 focus:!bg-white/10 transition-colors",
+    "!h-auto !border-0 !px-4.5 !py-4 !text-base !border-b-[2px] !bg-cxc-input-bg !rounded-none !shadow-none transition-colors",
 };
 
 const selectTriggerStyles: Record<FormFieldVariant, string> = {
   default: "w-full",
   auth: "w-full !bg-black !h-auto !px-4.5 !py-3.5 !rounded-lg xl:px-6 xl:py-4.5 border border-gray-100/75 text-base",
   application:
-    "w-full !border-0 !border-b !rounded-none !px-3 !shadow-none !bg-white/5 hover:!bg-white/10",
+    "w-full !h-auto !px-4.5 !py-4 !text-base !border-0 !border-b !bg-cxc-input-bg !rounded-none !shadow-none",
 };
 
 const selectContentStyles: Record<FormFieldVariant, string> = {
@@ -101,21 +106,21 @@ const selectItemStyles: Record<FormFieldVariant, string> = {
     "text-slate-200 focus:bg-slate-600 focus:text-white hover:bg-slate-600 hover:text-white transition-colors",
   auth: "text-slate-200 focus:text-white hover:!bg-slate-600/50 hover:text-white rounded-sm px-3 py-3.5 hover:bg-grey4 xl:px-4 xl:py-4 text-base",
   application:
-    "!text-gray-200 focus:!bg-zinc-700 focus:!text-white hover:!bg-zinc-700 hover:!text-white transition-colors",
+    "!text-gray-200 focus:!bg-zinc-700 focus:!text-white hover:!bg-zinc-700 hover:!text-white transition-colors p-2",
 };
 
 const textareaStyles: Record<FormFieldVariant, string> = {
   default: "",
   auth: "min-h-[6rem] max-h-[10rem] border-gray-100/80 bg-black px-4.5 py-3.5 placeholder:text-gray-100/80 rounded-lg xl:px-6 xl:py-4.5 !text-base",
   application:
-    "!border-0 !border-b !rounded-none !px-3 !shadow-none !bg-white/5 hover:!bg-white/10 focus:!bg-white/10 transition-colors",
+    "!h-auto min-h-[8rem] !border-0 !border-b !rounded-none !px-3 !shadow-none !bg-white/5 hover:!bg-white/10 focus:!bg-white/10 transition-colors !text-base",
 };
 
 const comboboxStyles: Record<FormFieldVariant, string> = {
   default: "",
   auth: "!h-auto !text-base border-gray-100/80 !bg-black px-4.5 py-3.5 rounded-lg xl:px-6 xl:py-4.5",
   application:
-    "!border-0 !border-b !rounded-none !px-3 !shadow-none !bg-white/5 hover:!bg-white/10",
+    "!h-auto !border-0 !border-b !rounded-none !px-4.5 !py-4 !shadow-none !bg-cxc-input-bg text-base font-normal",
 };
 
 const comboboxContentStyles: Record<FormFieldVariant, string> = {
@@ -144,11 +149,17 @@ export const renderTextField = <T extends Record<string, any>>(
 ) => {
   const { label, required = false, variant = "default", inputProps } = options;
 
-  return ({ field }: { field: ControllerRenderProps<T, any> }) => (
+  return ({
+    field,
+    fieldState,
+  }: {
+    field: ControllerRenderProps<T, any>;
+    fieldState: { error?: { message?: string } };
+  }) => (
     <FormItem>
       {label && (
-        <FormLabel className={variant === "application" ? "mb-2" : "mb-1"}>
-          {label} {required && <span className="text-red-500">*</span>}
+        <FormLabel className={`font-normal mb-1`}>
+          {label} {required && <span className="text-destructive">*</span>}
         </FormLabel>
       )}
       <FormControl>
@@ -156,7 +167,13 @@ export const renderTextField = <T extends Record<string, any>>(
           {...field}
           {...inputProps}
           placeholder={placeholder}
-          className={inputStyles[variant]}
+          value={field.value ?? ""}
+          className={cn(
+            inputStyles[variant],
+            variant === "application" &&
+              !fieldState.error &&
+              "focus-visible:ring-white/30 focus-visible:border-white"
+          )}
         />
       </FormControl>
       <FormMessage />
@@ -184,8 +201,8 @@ export const renderSelectField = <T extends Record<string, any>>(
   return ({ field }: { field: ControllerRenderProps<T, any> }) => (
     <FormItem>
       {label && (
-        <FormLabel className={variant === "application" ? "mb-2" : "mb-1"}>
-          {label} {required && <span className="text-red-500">*</span>}
+        <FormLabel className={`font-normal mb-1`}>
+          {label} {required && <span className="text-destructive">*</span>}
         </FormLabel>
       )}
       <Select onValueChange={field.onChange} value={field.value}>
@@ -236,14 +253,8 @@ export const renderTextAreaField = <T extends Record<string, any>>(
   return ({ field }: { field: ControllerRenderProps<T, any> }) => (
     <FormItem>
       {label && (
-        <FormLabel
-          className={
-            variant === "application"
-              ? "mb-2 leading-relaxed"
-              : "mb-1 leading-relaxed"
-          }
-        >
-          {label} {required && <span className="text-red-500">*</span>}
+        <FormLabel className={`font-normal mb-1 leading-relaxed`}>
+          {label} {required && <span className="text-destructive">*</span>}
         </FormLabel>
       )}
       <FormControl>
@@ -273,8 +284,8 @@ export const renderRadioField = <T extends Record<string, any>>(
 
   return ({ field }: { field: ControllerRenderProps<T, any> }) => (
     <FormItem className="space-y-3">
-      <FormLabel>
-        {label} {required && <span className="text-red-500">*</span>}
+      <FormLabel className="font-normal">
+        {label} {required && <span className="text-destructive">*</span>}
       </FormLabel>
       <FormControl>
         <RadioGroup
@@ -327,8 +338,8 @@ export const renderComboboxField = <T extends Record<string, any>>(
   return ({ field }: { field: ControllerRenderProps<T, any> }) => (
     <FormItem>
       {label && (
-        <FormLabel className={variant === "application" ? "mb-2" : "mb-1"}>
-          {label} {required && <span className="text-red-500">*</span>}
+        <FormLabel className={`font-normal mb-1`}>
+          {label} {required && <span className="text-destructive">*</span>}
         </FormLabel>
       )}
       <FormControl>
@@ -355,34 +366,80 @@ export const renderComboboxField = <T extends Record<string, any>>(
  * renderFileUploadField("Upload your resume")
  */
 export const renderFileUploadField = <T extends Record<string, any>>(
-  label: string,
   accept: string,
   fieldOptions: FileUploadFieldOptions = {}
 ) => {
-  const { required = false } = fieldOptions;
-  return ({ field: { value, onChange, ...fieldProps } }: { field: ControllerRenderProps<T, any> }) => (
-    <FormItem>
-      <FormLabel> {label} {required && <span className="text-red-500">*</span>} </FormLabel>
-      <FormControl>
-        <Input
-          type="file"
-          className="h-auto py-2 file:cursor-pointer"
-          accept={accept}
-          onChange={(e) => {
-            const file = e.target.files?.[0] ?? null;
-            if (file) {
-              onChange(file);
-            } else {
-              e.target.value = "";
-              onChange(undefined);
-            }
-          }}
-          {...fieldProps}
-        />
-      </FormControl>
-      <FormMessage />
-    </FormItem>
-  );
+  const { label, required = false } = fieldOptions;
+
+  return ({
+    field: { value, onChange, ...fieldProps },
+  }: {
+    field: ControllerRenderProps<T, any>;
+  }) => {
+    const [fileName, setFileName] = useState<string>(() => {
+      if (value) return value.name;
+      if (typeof value === "string") return value;
+      return "";
+    });
+
+    useEffect(() => {
+      if (value) setFileName(value.name);
+      else if (typeof value === "string") setFileName(value);
+      else setFileName("");
+    }, [value]);
+
+    return (
+      <FormItem>
+        {label && (
+          <FormLabel className="font-normal">
+            {" "}
+            {label}{" "}
+            {required && <span className="text-destructive">*</span>}{" "}
+          </FormLabel>
+        )}
+
+        <FormControl>
+          <div className="relative w-fit">
+            <Input
+              type="file"
+              id={`file-upload-${fieldProps.name}`}
+              className="hidden"
+              accept={accept}
+              onChange={(e) => {
+                const file = e.target.files?.[0] ?? null;
+                if (file) {
+                  onChange(file);
+                  setFileName(file.name);
+                } else {
+                  e.target.value = "";
+                  onChange(undefined);
+                  setFileName("");
+                }
+              }}
+              {...fieldProps}
+            />
+            <label
+              htmlFor={`file-upload-${fieldProps.name}`}
+              className="flex items-center gap-4 px-4 py-3 rounded-md cursor-pointer w-fit hover:outline hover:outline-white/50 duration-50"
+            >
+              {fileName ? (
+                <>
+                  <FileTextIcon size={24} />
+                  <span className="text-white">{fileName}</span>
+                </>
+              ) : (
+                <div className="flex flex-row gap-3">
+                  <UploadSimpleIcon size={24} />
+                  Resume
+                </div>
+              )}
+            </label>
+          </div>
+        </FormControl>
+        <FormMessage />
+      </FormItem>
+    );
+  };
 };
 
 /**
@@ -394,23 +451,29 @@ export const renderFileUploadField = <T extends Record<string, any>>(
  * ])
  */
 export const renderCheckboxGroupField = <T extends Record<string, any>>(
-  label: string,
   options: string[],
   fieldOptions: CheckboxGroupFieldOptions = {}
 ) => {
-  const { required = false } = fieldOptions;
+  const { label, required = false } = fieldOptions;
   return ({ field }: { field: ControllerRenderProps<T, any> }) => (
     <FormItem>
-      <FormLabel>{label} {required && <span className="text-red-500">*</span>}</FormLabel>
-      <fieldset className="space-y-4">
+      {label && (
+        <FormLabel className="font-normal">
+          {label} {required && <span className="text-destructive">*</span>}
+        </FormLabel>
+      )}
+
+      <fieldset className="flex flex-col gap-3">
         {options.map((option) => (
-          <FormItem key={option} className="flex items-center space-x-3">
+          <FormItem key={option} className="flex items-center space-x-3 mb-0">
             <FormControl>
               <Checkbox
                 checked={field.value?.includes(option)}
                 onCheckedChange={(checked) => {
                   const isChecked = checked === true;
-                  const newValue = Array.isArray(field.value) ? [...field.value] : [];
+                  const newValue = Array.isArray(field.value)
+                    ? [...field.value]
+                    : [];
                   if (isChecked) {
                     newValue.push(option);
                   } else {
@@ -421,9 +484,12 @@ export const renderCheckboxGroupField = <T extends Record<string, any>>(
                   }
                   field.onChange(newValue);
                 }}
+                className="!bg-transparent rounded-xs border-white data-[state=checked]:border-white w-4 h-4 hover:cursor-pointer"
               />
             </FormControl>
-            <FormLabel className="font-normal">{option}</FormLabel>
+            <FormLabel className="font-normal text-base hover:cursor-pointer">
+              {option}
+            </FormLabel>
             <FormMessage />
           </FormItem>
         ))}

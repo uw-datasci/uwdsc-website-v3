@@ -173,3 +173,29 @@ export {
 } from "react-icons/ri";
 
 export { ArrowLeft, ArrowRight, Clock, MapPin, Link } from "lucide-react";
+
+export {
+  ArrowRightIcon,
+  ArrowLeftIcon,
+  UploadSimpleIcon,
+  FileTextIcon,
+  IdentificationCardIcon,
+  EnvelopeSimpleIcon,
+  PhoneIcon,
+  DiscordLogoIcon,
+  TShirtIcon,
+  HamburgerIcon,
+  GenderIntersexIcon,
+  GlobeIcon,
+  GraduationCapIcon,
+  BookIcon,
+  CalendarIcon,
+  TrophyIcon,
+  UsersIcon,
+  GithubLogoIcon,
+  LinkedinLogoIcon,
+  XLogoIcon,
+  LinkIcon,
+  LightbulbIcon,
+  SmileyIcon
+} from "@phosphor-icons/react";

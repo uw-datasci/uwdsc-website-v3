@@ -11,55 +11,41 @@ export const isStepValid = (
   form: UseFormReturn<AppFormValues>,
   currentStep: number
 ): boolean => {
-  const values = form.getValues();
   const { errors } = form.formState;
 
   switch (currentStep) {
-    // TODO: Implement validation for each steps
-    case 1: // Personal Details
-      return true;
-    case 3:
+    case 0: // Personal Details
       const dietary_restrictions = form.watch("dietary_restrictions");
       const dietary_restrictions_other = form.watch(
         "dietary_restrictions_other"
       );
       const tshirt_size = form.watch("tshirt_size");
-      return (
+
+      const validAboutYou =
         !errors.dietary_restrictions &&
         dietary_restrictions !== undefined &&
         !errors.tshirt_size &&
         tshirt_size !== undefined &&
         !errors.dietary_restrictions_other &&
         (dietary_restrictions !== "Other" ||
-          (dietary_restrictions_other?.trim().length ?? 0) > 0)
-      );
-    case 4:
-      const prior_hackathon_experience = form.watch(
-        "prior_hackathon_experience"
-      );
-      const hackathons_attended = form.watch("hackathons_attended");
-      return (
-        !errors.prior_hackathon_experience &&
-        !errors.resume &&
-        !errors.github &&
-        !errors.linkedin &&
-        !errors.other_link &&
-        !errors.hackathons_attended &&
-        prior_hackathon_experience.length > 0 &&
-        hackathons_attended !== undefined
-      );
-    case 5: // CxC App
-      return (
-        values.cxc_gain?.trim().length > 0 &&
-        values.silly_q?.trim().length > 0 &&
-        !errors.cxc_gain &&
-        !errors.silly_q
-      );
-    case 2: // Education
+          (dietary_restrictions_other?.trim().length ?? 0) > 0) &&
+        !errors.gender &&
+        !errors.ethnicity;
+
+      const validContactInfo =
+        !errors.email && !errors.phone && !errors.discord;
+
+      return validAboutYou && validContactInfo;
+    case 1: // Experience
       const universityName = form.watch("university_name");
       const program = form.watch("program");
       const universityNameOther = form.watch("university_name_other");
       const programOther = form.watch("program_other");
+
+      const prior_hackathon_experience = form.watch(
+        "prior_hackathon_experience"
+      );
+      const hackathons_attended = form.watch("hackathons_attended");
 
       const isUniversityValid =
         !errors.university_name &&
@@ -72,7 +58,20 @@ export const isStepValid = (
       const isYearValid =
         !errors.year_of_study && !!form.watch("year_of_study");
 
-      return isUniversityValid && isProgramValid && isYearValid;
+      const validHackExp =
+        !errors.prior_hackathon_experience &&
+        !errors.resume &&
+        !errors.github &&
+        !errors.linkedin &&
+        !errors.other_link &&
+        !errors.hackathons_attended &&
+        prior_hackathon_experience.length > 0 &&
+        hackathons_attended !== undefined;
+      // TODO: ^ change to number input instead of dropdown later
+
+      return isUniversityValid && isProgramValid && isYearValid && validHackExp;
+    case 2: // CxC App
+      return !errors.cxc_gain && !errors.silly_q;
     default:
       return true;
   }

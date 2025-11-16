@@ -9,6 +9,7 @@ export interface RegisterCredentials {
   email: string;
   password: string;
   emailRedirectTo?: string;
+  metadata?: object;
 }
 
 export class AuthRepository {
@@ -37,7 +38,10 @@ export class AuthRepository {
     const { data, error } = await this.client.auth.signUp({
       email: credentials.email,
       password: credentials.password,
-      options: { emailRedirectTo: credentials.emailRedirectTo },
+      options: {
+        emailRedirectTo: credentials?.emailRedirectTo,
+        data: credentials?.metadata,
+      },
     });
 
     return { data, error };

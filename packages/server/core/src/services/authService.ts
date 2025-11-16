@@ -59,12 +59,17 @@ export class AuthService {
   /**
    * Register new user
    */
-  async register(credentials: RegisterData, emailRedirectTo: string) {
+  async register(
+    credentials: RegisterData,
+    emailRedirectTo: string,
+    metadata?: object
+  ) {
     try {
       const { data, error } = await this.repository.signUp({
         email: credentials.email,
         password: credentials.password,
         emailRedirectTo,
+        metadata,
       });
 
       if (error) {

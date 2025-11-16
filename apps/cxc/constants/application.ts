@@ -1,11 +1,9 @@
 import { type ComboboxOption } from "@uwdsc/ui";
 export const STEP_NAMES = [
-  "Intro",
-  "Personal Details",
-  "Education",
-  "Preferences",
-  "Portfolio",
-  "CxC Application",
+  "Your Info",
+  "Your Experience",
+  "Application questions",
+  "Submit!",
 ];
 
 export const PERSONAL_FIELDS = ["first_name", "last_name", "email", "dob"];
@@ -26,7 +24,7 @@ export const EDUCATION_FIELDS = [
   "program_other",
 ];
 
-export const graduationYears = [
+export const GRADUATION_YEARS = [
   "1st Year",
   "2nd Year",
   "3rd Year",
@@ -34,7 +32,7 @@ export const graduationYears = [
   "5th Year+",
 ];
 
-export const programOptions: ComboboxOption[] = [
+export const PROGRAM_OPTIONS: ComboboxOption[] = [
   { value: "Computer Science", label: "Computer Science" },
   { value: "Data Science", label: "Data Science" },
   { value: "Mathematics", label: "Mathematics" },
@@ -51,7 +49,7 @@ export const programOptions: ComboboxOption[] = [
   { value: "Other", label: "Other" },
 ];
 
-export const universityOptions: ComboboxOption[] = [
+export const UNIVERSITY_OPTIONS: ComboboxOption[] = [
   { value: "University of Waterloo", label: "University of Waterloo" },
   {
     value: "University of Toronto St. George",
@@ -104,6 +102,94 @@ export const BLANK_APPLICATION = {
   status: "draft",
 };
 
+export const APPLICATION_RELEASE_DATE = new Date(); // Set actual release date here
+export const APPLICATION_DEADLINE = new Date(); // Set actual deadline here
+
+// field names
+export const CONTACT_INFO_FIELDS = {
+  email: "email",
+  phone: "phone",
+  discord: "discord",
+} as const;
+
+export const OPTIONAL_ABOUT_YOU_FIELDS = {
+  tshirt_size: "tshirt_size",
+  dietary_restrictions: "dietary_restrictions",
+  dietary_restrictions_other: "dietary_restrictions_other",
+  gender: "gender",
+  ethnicity: "ethnicity",
+} as const;
+
+export const UNIVERSITY_INFO_FIELDS = {
+  university_name: "university_name",
+  university_name_other: "university_name_other",
+  program: "program",
+  program_other: "program_other",
+  year_of_study: "year_of_study",
+} as const;
+
+export const PRIOR_HACK_EXP_FIELDS = {
+  prior_hackathon_experience: "prior_hackathon_experience",
+  hackathons_attended: "hackathons_attended",
+} as const;
+
+export const LINKS_FIELDS = {
+  github: "github",
+  linkedin: "linkedin",
+  x: "x",
+  other_link: "other_link",
+  resume: "resume",
+} as const;
+
+export const APP_Q_FIELDS = {
+  cxc_gain: "cxc_gain",
+  silly_q: "silly_q",
+} as const;
+
+// personal
+export const TSHIRT_OPTIONS = ["XS", "S", "M", "L", "XL", "XXL"];
+
+export const DIETARY_OPTIONS = [
+  "None",
+  "Vegetarian",
+  "Vegan",
+  "Gluten-Free",
+  "Halal",
+  "Kosher",
+  "Other",
+];
+
+export const GENDERS = [
+  "Male",
+  "Female",
+  "Non-binary",
+  "Other",
+  "Prefer not to say",
+];
+
+export const ETHNICITIES = [
+  "Asian",
+  "Black or African",
+  "Hispanic or Latino",
+  "White",
+  "Indigenous",
+  "Middle Eastern",
+  "Pacific Islander",
+  "Other",
+];
+
+// experience
+export const HACKER_EXPERIENCE_OPTIONS = [
+  "None",
+  "Hacker",
+  "Judge",
+  "Mentor",
+  "Organizer",
+];
+
+export const NUMBER_HACKATHONS = ["0", "1", "2", "3", "4+"];
+
+// cxc app questions
 export const questions = [
   {
     name: "cxc_gain" as const,
@@ -116,17 +202,3 @@ export const questions = [
     placeholder: "Long Answer (200 char limit)",
   },
 ];
-
-export const APPLICATION_RELEASE_DATE = new Date(); // Set actual release date here
-export const APPLICATION_DEADLINE = new Date(); // Set actual deadline here
-
-//personal
-export const PERSONAL_INFO_FIELDS = {
-  firstName: "first_name",
-  lastName: "last_name",
-  email: "email",
-  phone: "phone",
-  discord: "discord",
-  gender: "gender",
-  ethnicity: "ethnicity",
-} as const;

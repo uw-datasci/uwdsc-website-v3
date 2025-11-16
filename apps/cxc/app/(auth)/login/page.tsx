@@ -1,21 +1,21 @@
+"use client";
+
+import DSCLogo from "@/components/DSCLogo";
 import { LoginForm } from "@/components/login/LoginForm";
-import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const router = useRouter();
   return (
     <div className="bg-black w-full min-h-screen flex flex-col items-center justify-center px-12 py-8">
       <div className="flex-1 flex flex-col items-center justify-center w-full">
         <div className="flex flex-col md:flex-row gap-8 lg:gap-12 w-full h-full max-w-6xl mx-auto">
           <div className="flex flex-col flex-1 gap-8 justify-center">
-            <div className="hidden md:block relative w-40 h-40">
-              <Image
-                src="/logos/dsc.svg"
-                alt="uwdsc logo"
-                fill
-                className="object-contain"
-                priority
-              />
-            </div>
+            <DSCLogo
+              size={40}
+              className="hidden md:block"
+              onClick={() => router.push("/")}
+            />
             <div className="">
               <h2 className="text-7xl font-bold text-center md:text-start my-10">
                 Sign in

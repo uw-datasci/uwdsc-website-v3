@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import AppStepButton from "../application/AppStepButton";
 
 export default function Navbar() {
   const router = useRouter();
@@ -32,12 +33,13 @@ export default function Navbar() {
       </div>
 
       {/* Sign up button */}
-      <button
-        className="bg-white text-black text-sm sm:text-base px-4 py-2 font-medium hover:cursor-pointer hover:scale-105 duration-200"
+      <AppStepButton
+        text="Sign up"
         onClick={() => router.push("/register")}
-      >
-        Sign up<span className="ml-4">→</span>
-      </button>
+        className="!px-3 !py-2 text-base"
+        marginLeft="ml-8"
+        iconSize={16}
+      />
     </div>
   );
 }

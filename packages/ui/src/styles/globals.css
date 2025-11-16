@@ -42,6 +42,8 @@
   --sidebar-ring: oklch(0.606 0.25 292.717);
 
   /* cxc */
+  --cxc-input-bg: oklch(0.2478 0 0);
+  --cxc-app-bg: oklch(0.2308 0 0);
 
   /* web */
   --nav-hover-blue: oklch(61.53% 0.16853 255.741);
@@ -85,6 +87,8 @@
   --sidebar-ring: oklch(0.541 0.281 293.009);
 
   /* cxc */
+  --cxc-input-bg: oklch(0.2478 0 0);
+  --cxc-app-bg: oklch(0.2308 0 0);
 
   /* web */
   --nav-hover-blue: oklch(61.53% 0.16853 255.741);
@@ -137,6 +141,8 @@ html {
   --color-sidebar-ring: var(--sidebar-ring);
 
   /* cxc */
+  --color-cxc-input-bg: var(--cxc-input-bg);
+  --color-cxc-app-bg: var(--cxc-app-bg);
 
   /* web */
   --color-nav-hover-blue: var(--nav-hover-blue);
@@ -146,6 +152,10 @@ html {
   --color-grey4: var(--grey4);
   --font-family-satoshi: "Satoshi-Variable", sans-serif;
   --font-family-clash: "ClashDisplay-Variable", sans-serif;
+}
+
+.cxc-app-font {
+  font-family: var(--font-host-grotesk);
 }
 
 @font-face {

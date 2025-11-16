@@ -7,6 +7,7 @@
 export interface RegisterRequest {
   email: string;
   password: string;
+  metadata?: object;
 }
 
 export interface RegisterResponse {

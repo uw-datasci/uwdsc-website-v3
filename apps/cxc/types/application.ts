@@ -22,15 +22,3 @@ export interface AppInfo {
   appDeadline: Date;
   questions: Question[];
 }
-
-//personal
-export interface PersonalInfo {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  discord: string;
-  gender: string;
-  ethnicity: string;
-}
-

@@ -1,5 +1,5 @@
 import "@uwdsc/ui/globals.css";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Host_Grotesk } from "next/font/google";
 import { ThemeProvider } from "@uwdsc/ui";
 import type { Metadata, Viewport } from "next";
 import { baseMetadata, baseViewport } from "@/lib/metadata";
@@ -12,6 +12,11 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const hostGrotesk = Host_Grotesk({
+  variable: "--font-host-grotesk",
   subsets: ["latin"],
 });
 
@@ -51,7 +56,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${hostGrotesk.variable} antialiased`}
       >
         <ThemeProvider>
           <AuthProvider>{children}</AuthProvider>

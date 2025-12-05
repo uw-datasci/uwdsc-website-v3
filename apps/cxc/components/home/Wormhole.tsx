@@ -4,13 +4,44 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useRef, useMemo } from "react";
 import * as THREE from "three";
+import { useGLTF } from "@react-three/drei";
 
 interface WormholeWithRingsProps {
   readonly partType: "top" | "middle" | "bottom";
 }
 
+interface CubeData {
+  angle: number;
+  speed: number;
+  rotationSpeed: { x: number; y: number; z: number };
+}
+
+// Component to render your custom cube model
+function CustomCube({
+  position,
+  rotation,
+  scale,
+}: {
+  position: [number, number, number];
+  rotation: [number, number, number];
+  scale: number;
+}) {
+  const { scene } = useGLTF("/models/Watercube.glb");
+  const clonedScene = useMemo(() => scene.clone(true), [scene]);
+
+  return (
+    <primitive
+      object={clonedScene}
+      position={position}
+      rotation={rotation}
+      scale={scale}
+    />
+  );
+}
+
 function WormholeWithRings({ partType }: WormholeWithRingsProps) {
   const groupRef = useRef<THREE.Group>(null);
+  const cubeGroupRefs = useRef<(THREE.Group | null)[]>([]);
 
   // Define wormhole geometry based on part type
   const wormholeGeometry = useMemo(() => {
@@ -136,7 +167,6 @@ function WormholeWithRings({ partType }: WormholeWithRingsProps) {
     const numRings = 8;
 
     for (let i = 0; i < numRings; i++) {
-      // Create ring as a perfect circle - let the group rotation handle the perspective
       const points: THREE.Vector3[] = [];
       const segments = 64;
       for (let j = 0; j <= segments; j++) {
@@ -162,43 +192,24 @@ function WormholeWithRings({ partType }: WormholeWithRingsProps) {
     return ringArray;
   }, []);
 
-  const cubes = useMemo(() => {
-    const cubeArray: THREE.Mesh[] = [];
-    const numCubes = 8;
-    const cubeSize = 2.5;
-
-    for (let i = 0; i < numCubes; i++) {
-      const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
-      const material = new THREE.MeshBasicMaterial({
-        color: 0xffffff,
-        transparent: true,
-        opacity: 0.8,
-        wireframe: true,
-      });
-
-      const cube = new THREE.Mesh(geometry, material);
-
-      cube.userData = {
-        angle: Math.random() * Math.PI * 2,
-        speed: 0.02 + Math.random() * 0.03,
-        rotationSpeed: {
-          x: (Math.random() - 0.5) * 0.05,
-          y: (Math.random() - 0.5) * 0.05,
-          z: (Math.random() - 0.5) * 0.05,
-        },
-      };
-
-      cubeArray.push(cube);
-    }
-
-    return cubeArray;
-  }, []);
+  // Create cube data for animation - use ref to persist across frames
+  const cubeData = useRef<CubeData[]>(
+    Array.from({ length: 8 }, () => ({
+      angle: Math.random() * Math.PI * 2,
+      speed: 0.02 + Math.random() * 0.02,
+      rotationSpeed: {
+        x: (Math.random() - 0.5) * 0.05,
+        y: (Math.random() - 0.5) * 0.05,
+        z: (Math.random() - 0.5) * 0.05,
+      },
+    }))
+  );
 
   // Helper function to calculate animated Y position
   const calculateAnimatedY = (
     elapsedTime: number,
     speed: number,
-    offset: number,
+    offset: number
   ): number => {
     const progress =
       (elapsedTime * speed * wormholeGeometry.height + offset) %
@@ -214,7 +225,7 @@ function WormholeWithRings({ partType }: WormholeWithRingsProps) {
   const updateRing = (
     ring: THREE.Line,
     animatedY: number,
-    halfHeight: number,
+    halfHeight: number
   ): void => {
     if (Math.abs(animatedY) > halfHeight) {
       ring.visible = false;
@@ -238,69 +249,84 @@ function WormholeWithRings({ partType }: WormholeWithRingsProps) {
     (ring.material as THREE.LineBasicMaterial).opacity = Math.max(opacity, 0);
   };
 
-  // Helper function to update cube animation
-  const updateCube = (
-    cube: THREE.Mesh,
-    animatedY: number,
-    halfHeight: number,
-  ): void => {
-    if (Math.abs(animatedY) > halfHeight) {
-      cube.visible = false;
-      return;
-    }
-
-    cube.visible = true;
-    const radius = getRadiusAtY(animatedY);
-
-    cube.userData.angle += cube.userData.speed * 0.5;
-
-    const spiralRadius = radius * (0.4 + Math.sin(animatedY * 0.1) * 0.3);
-    const x = Math.cos(cube.userData.angle) * spiralRadius;
-    const z = Math.sin(cube.userData.angle) * spiralRadius;
-
-    cube.position.set(x, animatedY, z);
-
-    cube.rotation.x += cube.userData.rotationSpeed.x;
-    cube.rotation.y += cube.userData.rotationSpeed.y;
-    cube.rotation.z += cube.userData.rotationSpeed.z;
-
-    const edgeDistance = Math.abs(animatedY) / halfHeight;
-    const fadeZone = 0.15;
-    let opacity = 0.8;
-
-    if (edgeDistance > 1.0 - fadeZone) {
-      const fadeProgress = (edgeDistance - (1.0 - fadeZone)) / fadeZone;
-      opacity = 0.8 * (1.0 - fadeProgress);
-    }
-
-    (cube.material as THREE.MeshBasicMaterial).opacity = Math.max(opacity, 0);
-  };
-
-  // Animate the rings to follow wormhole shape
+  // Animate the rings and cubes
   useFrame((state) => {
     const halfHeight = wormholeGeometry.height * 0.5;
 
+    // Animate rings
     for (const [index, ring] of rings.entries()) {
       const speed = 0.05;
       const offset = (index / rings.length) * wormholeGeometry.height;
       const animatedY = calculateAnimatedY(
         state.clock.elapsedTime,
         speed,
-        offset,
+        offset
       );
       updateRing(ring, animatedY, halfHeight);
     }
 
-    for (const [index, cube] of cubes.entries()) {
-      const speed = cube.userData.speed;
-      const offset = (index / cubes.length) * wormholeGeometry.height;
+    // Animate cubes using refs
+    cubeData.current.forEach((data, index) => {
+      const cubeGroup = cubeGroupRefs.current[index];
+      if (!cubeGroup) return;
+
+      const offset =
+        (index / cubeData.current.length) * wormholeGeometry.height;
       const animatedY = calculateAnimatedY(
         state.clock.elapsedTime,
-        speed,
-        offset,
+        data.speed,
+        offset
       );
-      updateCube(cube, animatedY, halfHeight);
-    }
+
+      // Check if cube should be visible
+      if (Math.abs(animatedY) > halfHeight) {
+        cubeGroup.visible = false;
+        return;
+      }
+
+      cubeGroup.visible = true;
+      const radius = getRadiusAtY(animatedY);
+
+      // Update angle for spiral motion
+      data.angle += data.speed * 0.5;
+
+      const spiralRadius = radius * (0.3 + Math.sin(animatedY * 0.1) * 0.2);
+      const x = Math.cos(data.angle) * spiralRadius;
+      const z = Math.sin(data.angle) * spiralRadius;
+
+      // Update position
+      cubeGroup.position.set(x, animatedY, z);
+
+      // Update rotation
+      cubeGroup.rotation.x += data.rotationSpeed.x;
+      cubeGroup.rotation.y += data.rotationSpeed.y;
+      cubeGroup.rotation.z += data.rotationSpeed.z;
+
+      // Calculate opacity based on distance from edges
+      const edgeDistance = Math.abs(animatedY) / halfHeight;
+      const fadeZone = 0.15;
+      let opacity = 0.8;
+
+      if (edgeDistance > 1.0 - fadeZone) {
+        const fadeProgress = (edgeDistance - (1.0 - fadeZone)) / fadeZone;
+        opacity = 0.8 * (1.0 - fadeProgress);
+      }
+
+      // Apply opacity to all materials in the cube
+      cubeGroup.traverse((child) => {
+        if (child instanceof THREE.Mesh && child.material) {
+          if (Array.isArray(child.material)) {
+            child.material.forEach((mat) => {
+              mat.transparent = true;
+              mat.opacity = Math.max(opacity, 0);
+            });
+          } else {
+            child.material.transparent = true;
+            child.material.opacity = Math.max(opacity, 0);
+          }
+        }
+      });
+    });
   });
 
   let rotation: [number, number, number];
@@ -327,9 +353,16 @@ function WormholeWithRings({ partType }: WormholeWithRingsProps) {
         <primitive key={`ring-${index}`} object={ring} />
       ))}
 
-      {/* Flowing cubes */}
-      {cubes.map((cube, index) => (
-        <primitive key={`cube-${index}`} object={cube} />
+      {/* Custom WaterCubes */}
+      {cubeData.current.map((_, index) => (
+        <group
+          key={`cube-${index}`}
+          ref={(el) => {
+            cubeGroupRefs.current[index] = el;
+          }}
+        >
+          <CustomCube position={[0, 0, 0]} rotation={[0, 0, 0]} scale={0.5} />
+        </group>
       ))}
     </group>
   );
@@ -343,6 +376,8 @@ export function WormholeTop() {
           camera={{ position: [0, -0.8, 40], fov: 75 }}
           onCreated={({ camera }) => camera.lookAt(0, 0, 0)}
         >
+          <ambientLight intensity={0.5} />
+          <directionalLight position={[10, 10, 5]} intensity={1} />
           <WormholeWithRings partType="top" />
         </Canvas>
       </div>
@@ -355,6 +390,8 @@ export function WormholeMiddle() {
     <div className="block h-[25vh] sm:h-[45vh] lg:h-[55vh] overflow-hidden -z-10">
       <div className="transform -translate-y-[20%] h-[40vh] sm:h-[75vh] lg:h-[100vh]">
         <Canvas camera={{ position: [0, 0, 30], fov: 75 }}>
+          <ambientLight intensity={0.5} />
+          <directionalLight position={[10, 10, 5]} intensity={1} />
           <WormholeWithRings partType="middle" />
         </Canvas>
       </div>
@@ -370,6 +407,8 @@ export function WormholeBottom() {
           camera={{ position: [0, -2, -30], fov: 75 }}
           onCreated={({ camera }) => camera.lookAt(0, 0, -20)}
         >
+          <ambientLight intensity={0.5} />
+          <directionalLight position={[10, 10, 5]} intensity={1} />
           <WormholeWithRings partType="bottom" />
         </Canvas>
       </div>

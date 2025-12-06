@@ -22,7 +22,7 @@ export function PriorHackExp({ form }: PriorHackExpProps) {
   return (
     <Form {...form}>
       <AppSection label="Prior hackathon experience">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
           <FormField
             control={form.control}
             name={PRIOR_HACK_EXP_FIELDS.prior_hackathon_experience}

@@ -18,14 +18,14 @@ export function ContactInfo({ form }: ContactInfoProps) {
         label="Contact info"
         description="We'll verify you for our server with your Discord username."
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 items-start">
           <FormField
             control={form.control}
             name={CONTACT_INFO_FIELDS.email}
             render={renderTextField("Email", {
               label: "Email",
               required: true,
-              inputProps: { type: "email" },
+              inputProps: { type: "email", readOnly: true },
               variant: "application",
             })}
           />

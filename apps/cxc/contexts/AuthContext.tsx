@@ -2,10 +2,11 @@
 
 import { createContext, useContext, ReactNode, useMemo } from "react";
 import useSWR from "swr";
-import { getUserProfile, type UserProfile } from "@/lib/api";
+import { getUserProfile } from "@/lib/api";
+import type { UserProfile } from "@/types/api";
 
 interface AuthContextType {
-  profile: UserProfile | null;
+  user: UserProfile | null;
   isLoading: boolean;
   isError: boolean;
   mutate: () => Promise<UserProfile | null | undefined>; // For manual revalidation
@@ -36,18 +37,18 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
       shouldRetryOnError: false,
       // Show cached data while revalidating
       revalidateIfStale: true,
-    },
+    }
   );
 
   const value: AuthContextType = useMemo(
     () => ({
-      profile: data ?? null,
+      user: data ?? null,
       isLoading,
       isError: !!error,
       mutate,
       isAuthenticated: !!data && data !== null,
     }),
-    [data, isLoading, error, mutate],
+    [data, isLoading, error, mutate]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -70,12 +70,15 @@ export const isDesktopStepValid = (
         !errors.hackathons_attended &&
         prior_hackathon_experience.length > 0 &&
         hackathons_attended !== undefined;
-      // TODO: ^ change to number input instead of dropdown later
 
       return isUniversityValid && isProgramValid && isYearValid && validHackExp;
     }
-    case 2: // CxC App
-      return !errors.cxc_gain && !errors.silly_q;
+    case 2: {
+      // CxC App
+      const CxCGain = form.watch("cxc_gain");
+      const SillyQ = form.watch("silly_q");
+      return !errors.cxc_gain && !!CxCGain && !errors.silly_q && !!SillyQ;
+    }
     default:
       return true;
   }

@@ -5,6 +5,7 @@ import { z } from "zod";
  */
 export const applicationSchema = z.object({
   // personal info
+  name: z.string().min(1, "Name is required"),
   email: z.string().email("Valid email is required"),
   phone: z.string().min(1, "Phone number is required"),
   discord: z.string().min(1, "Discord handle is required"),
@@ -82,8 +83,8 @@ export type AppFormValues = z.infer<typeof applicationSchema>;
  */
 export const applicationDefaultValues: Partial<AppFormValues> = {
   // TODO: Add more fields to match schema
+  name: "",
   email: "",
-
   dietary_restrictions: undefined,
   dietary_restrictions_other: "",
   tshirt_size: undefined,

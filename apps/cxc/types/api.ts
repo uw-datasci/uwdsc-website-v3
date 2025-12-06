@@ -56,12 +56,5 @@ export interface UserProfile {
   dob: string | null;
   role: string;
   nfc_id: string | null;
-  created_at: string;
-  updated_at: string;
 }
 
-export interface GetProfileResponse {
-  profile: UserProfile | null;
-  error?: string;
-  message?: string;
-}

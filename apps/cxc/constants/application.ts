@@ -107,6 +107,7 @@ export const APPLICATION_DEADLINE = new Date(); // Set actual deadline here
 
 // field names
 export const CONTACT_INFO_FIELDS = {
+  name: "name",
   email: "email",
   phone: "phone",
   discord: "discord",

@@ -43,7 +43,7 @@ export function Education({ form }: EducationProps) {
         label="Education"
         description="You must be in post-secondary education to attend CxC!"
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 items-start">
           {/* University Name Column */}
           <div className="space-y-4">
             <FormField

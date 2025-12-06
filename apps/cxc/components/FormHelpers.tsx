@@ -18,6 +18,7 @@ import {
   Checkbox,
   FileTextIcon,
   UploadSimpleIcon,
+  FormDescription,
 } from "@uwdsc/ui";
 import type { ComboboxOption } from "@uwdsc/ui";
 import { ComponentProps, useEffect, useState } from "react";
@@ -267,24 +268,34 @@ export const renderTextAreaField = <T extends Record<string, any>>(
     field,
   }: {
     field: ControllerRenderProps<T, any>;
-  }) => (
-    <FormItem>
-      {label && (
-        <FormLabel className={`font-normal mb-1 leading-relaxed text-base`}>
-          {label} {required && <span className="text-destructive">*</span>}
-        </FormLabel>
-      )}
-      <FormControl>
-        <Textarea
-          placeholder={placeholder}
-          {...textareaProps}
-          {...field}
-          className={textareaStyles[variant]}
-        />
-      </FormControl>
-      <FormMessage />
-    </FormItem>
-  );
+  }) => {
+    const maxLength = textareaProps?.maxLength;
+    return (
+      <>
+        <FormItem>
+          {label && (
+            <FormLabel className={`font-normal mb-1 leading-relaxed text-base`}>
+              {label} {required && <span className="text-destructive">*</span>}
+            </FormLabel>
+          )}
+          <FormControl>
+            <Textarea
+              placeholder={placeholder}
+              {...textareaProps}
+              {...field}
+              className={textareaStyles[variant]}
+            />
+          </FormControl>
+          {maxLength && (
+            <FormDescription className="text-sm text-muted-foreground text-right">
+              {field.value?.length ?? 0} / {maxLength}
+            </FormDescription>
+          )}
+          <FormMessage />
+        </FormItem>
+      </>
+    );
+  };
 
   TextAreaFieldComponent.displayName = `TextAreaField(${placeholder})`;
 

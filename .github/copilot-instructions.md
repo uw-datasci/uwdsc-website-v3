@@ -105,6 +105,7 @@ The `packages/server/` directory contains backend services organized into three 
 **Location**: `packages/server/core/src/`
 
 **Structure**:
+
 - `database/` - Supabase client and connection utilities
 - `services/` - Shared services (AuthService, FileService, ResumeService)
 - `repository/` - Base repository and shared data access (BaseRepository, AuthRepository, FileRepository)
@@ -112,6 +113,7 @@ The `packages/server/` directory contains backend services organized into three 
 - `utils/` - Error handling and utilities
 
 **Exports**:
+
 ```typescript
 import { AuthService } from "@uwdsc/server/core/services/authService";
 import { FileService } from "@uwdsc/server/core/services/fileService";
@@ -127,6 +129,7 @@ import { BaseRepository } from "@uwdsc/server/core/repository/baseRepository";
 **Location**: `packages/server/web/src/`
 
 **Structure**:
+
 - `prisma/schema/` - Prisma schema files (application, event, profile, etc.)
 - `services/` - Web-specific business logic (ProfileService, ApplicationService, EventService)
 - `repository/` - Web-specific data access layer
@@ -135,6 +138,7 @@ import { BaseRepository } from "@uwdsc/server/core/repository/baseRepository";
 - `policies/` - (Placeholder for authorization policies)
 
 **Exports**:
+
 ```typescript
 import { ProfileService } from "@uwdsc/server/web/services/profileService";
 import { ApplicationService } from "@uwdsc/server/web/services/applicationService";
@@ -153,6 +157,7 @@ import { ApplicationService } from "@uwdsc/server/web/services/applicationServic
 **Structure**: Same as web backend with CxC-specific schemas and services
 
 **Exports**:
+
 ```typescript
 import { ProfileService } from "@uwdsc/server/cxc/services/profileService";
 import { ApplicationService } from "@uwdsc/server/cxc/services/applicationService";
@@ -246,17 +251,20 @@ return profile;
 ### ✅ Do
 
 1. **Import services from server packages in API routes**:
+
    ```typescript
    // apps/web/app/api/profile/route.ts
    import { ProfileService } from "@uwdsc/server/web/services/profileService";
    ```
 
 2. **Use core services for shared functionality**:
+
    ```typescript
    import { AuthService } from "@uwdsc/server/core/services/authService";
    ```
 
 3. **Extend BaseRepository** when creating new repositories:
+
    ```typescript
    import { BaseRepository } from "@uwdsc/server/core/repository/baseRepository";
    ```

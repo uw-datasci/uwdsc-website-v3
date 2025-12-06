@@ -25,13 +25,12 @@ export async function GET() {
     }
 
     return NextResponse.json({
-      profile,
-      user: {
-        id: user.id,
-        email: user.email,
-        first_name: user.user_metadata.first_name,
-        last_name: user.user_metadata.last_name,
-      },
+      id: user.id,
+      email: user.email,
+      first_name: user.user_metadata.first_name,
+      last_name: user.user_metadata.last_name,
+      role: profile.role,
+      nfc_id: profile.nfc_id?.toString() ?? null,
     });
   } catch (error) {
     console.error("Error fetching profile:", error);

@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 import DSCLogo from "../DSCLogo";
 
 interface NavbarProps {
-  showAuthButtons?: boolean;
+  readonly showAuthButtons?: boolean;
 }
 
 export default function Navbar({ showAuthButtons = true }: NavbarProps) {

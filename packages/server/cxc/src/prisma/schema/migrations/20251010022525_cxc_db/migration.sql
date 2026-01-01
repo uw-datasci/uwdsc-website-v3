@@ -194,3 +194,22 @@ to public
 using (
   (auth.uid() = reviewer_id)
 );
+
+-- Function & Trigger
+CREATE OR REPLACE FUNCTION public.create_new_profile()
+RETURNS TRIGGER 
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  INSERT INTO public.profiles (id)
+  VALUES (NEW.id);
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER on_auth_user_created
+AFTER INSERT ON auth.users
+FOR EACH ROW
+EXECUTE FUNCTION public.create_new_profile();

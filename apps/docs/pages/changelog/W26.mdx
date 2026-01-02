@@ -6,9 +6,177 @@ This semester continues to build upon the foundation established in Fall 2025, w
 
 ## 🏆 CxC App (apps/cxc)
 
+### Application Flow Enhancements
+
+**Complete Application & Reviewer Flow (PR #100)**
+
+#### Application Form Improvements
+
+**Team Selection Feature**
+- Added team member search and selection functionality
+- Users can add up to 3 team members by searching for registered users
+- Team members displayed with names and emails in review section
+- Real-time search with name/email filtering
+- New `/api/users/emails` endpoint provides user list for team selection
+
+**Form State Persistence**
+- Application progress now persists across page refreshes using localStorage
+- Desktop step and mobile page positions saved automatically
+- Individual form fields auto-save to localStorage as users type
+- Form data restored when users return to the application
+- Prevents data loss during browser crashes or accidental navigation
+
+**Resume Upload & Management**
+- Resume uploads now replace existing resumes automatically
+- Added GET endpoint to retrieve user's current resume with signed URLs
+- Resume files stored in private bucket with secure access
+- Resume preview available in application review section
+- File validation (max 10 MB, PDF/DOC/DOCX formats)
+- Immediate upload on file selection with validation feedback
+
+**Application Submission Protection**
+- Users cannot edit applications after submission
+- Submitted applications redirect to "Submitted" page automatically
+- LocalStorage cleared upon successful submission
+
+#### Admin Review System
+
+**Review Assignment Logic**
+- New `/api/applications/random` endpoint returns applications with least reviews
+- Prevents reviewers from seeing applications they've already reviewed
+- Ties broken lexicographically by application ID for fairness
+- Admin-only access with role verification middleware
+
+**Review Interface (`/review` page)**
+- Dedicated review page for admin users with score submission
+- Displays complete application data including:
+  - Contact information and personal details
+  - Education and hackathon experience
+  - Social links (GitHub, LinkedIn, website)
+  - Application questions (technical project, haiku)
+  - Team members with names
+  - Resume viewer with signed URL access
+- Score applications on 3 categories (1-10 scale):
+  - Basic information
+  - Question 1 (technical project)
+  - Question 2 (haiku)
+- Validation ensures all scores provided before submission
+- Success confirmation with option to review another application
+
+**Review Tracking**
+- New `reviews` table tracks all review submissions
+- Prevents duplicate reviews from same reviewer
+- Tracks total review count per reviewer
+- Stores individual scores for each review category
+
+#### Application Form Structure
+
+**Reorganized Form Steps**
+- Split "Teams & MLH" into separate steps:
+  - Step 3: Team Members (optional)
+  - Step 4: MLH Checkboxes (required)
+  - Step 5: Review & Submit
+- Updated step validation logic for new structure
+- Desktop and mobile views synchronized
+
+### Backend Architecture Updates
+
+**New Services**
+- `AdminReviewService`: Manages review assignment and submission
+  - `getNextApplicationForReview()`: Returns least-reviewed application
+  - `submitReview()`: Validates and saves review scores
+- `ApplicationService.getAllUserEmails()`: Fetches user list for team selection
+
+**New Repositories**
+- `AdminReviewRepository`: Database operations for reviews
+  - `getApplicationWithLeastReviews()`: Query for review assignment
+  - `getUserEmail()`: Fetch user email by profile ID
+  - `getTeamMembersByEmails()`: Get team member details
+  - `hasReviewerReviewedApplication()`: Check duplicate reviews
+  - `createReview()`: Insert review record
+  - `getReviewCountByReviewer()`: Track reviewer progress
+
+**Enhanced File Services**
+- `FileRepository.createSignedUrl()`: Generate secure signed URLs for private files
+- `FileService.createSignedUrl()`: Service wrapper for signed URL generation
+- `ResumeService` enhancements:
+  - `uploadResume()`: Now automatically replaces existing resumes
+  - `getUserResume()`: Retrieve user's current resume
+  - `getSignedResumeUrl()`: Get secure, time-limited resume access with ownership verification
+
+### API Enhancements
+
+**New Endpoints**
+- `GET /api/applications/random` - Get next application for review (admin only)
+- `GET /api/applications/resumes` - Retrieve user's resume with signed URL
+- `POST /api/review/submit` - Submit review scores for an application
+- `GET /api/users/emails` - Get all user emails for team member selection
+
+**Enhanced Endpoints**
+- `POST /api/applications/resumes` - Now replaces existing resumes
+- `PATCH /api/applications/route` - Improved error messages with detailed error context
+
+### Middleware & Security
+
+**Admin Route Protection**
+- `/review` route now requires admin role
+- `withProtected` middleware enhanced with role-based access control
+- Non-admin users redirected to home page
+- Profile service integration for role verification
+
+**Auth Route Protection**
+- Added `/start` to protected authentication routes
+- Authenticated users redirected away from auth pages
+
+### Client-Side API Functions
+
+**New API Functions**
+- `getRandomApplication()`: Fetch random application for review
+- `submitReview()`: Submit review scores with validation
+- `getUserEmails()`: Get user list for team selection
+- `getResume()`: Retrieve current user's resume
+
+**Enhanced Functions**
+- `uploadResume()`: Improved error handling and response types
+
 ## 🎨 Design System (packages/ui)
 
+### Component Enhancements
+
+**GlassSurface Component**
+- Fixed React hook dependency warnings with proper useCallback memoization
+- Improved performance with optimized re-renders
+
+**Form Components**
+- Enhanced FileUploadField with callbacks for file selection and name changes
+- Added `existingFileName` prop to display previously uploaded files
+- Support for `onFileChange` and `onFileSelect` callbacks
+- Fixed SelectField to handle undefined values correctly
+
 ## 🔧 Infrastructure
+
+### Database Schema Updates
+
+**New Tables**
+- `reviews` table for storing application reviews:
+  - `id` (UUID primary key)
+  - `application_id` (foreign key to applications)
+  - `reviewer_id` (foreign key to profiles)
+  - `basic_info_score` (integer 1-10)
+  - `q1_score` (integer 1-10)
+  - `q2_score` (integer 1-10)
+  - `reviewed_at` (timestamp)
+
+**Application Updates**
+- `team_members` field stores comma-separated team member emails
+- Enhanced application queries to include team member details with display names
+
+### Storage Updates
+
+**Resume Storage**
+- Private bucket configuration for secure resume storage
+- Signed URL generation with configurable expiration (default 1 hour)
+- Automatic cleanup of old resumes when new ones uploaded
 
 ## 🚀 DevOps & CI/CD
 

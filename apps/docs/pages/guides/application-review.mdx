@@ -1,0 +1,589 @@
+# Application & Review System
+
+Complete guide to the CxC application submission and admin review system.
+
+## Overview
+
+The CxC application system includes:
+- Multi-step application form with validation
+- Team member selection
+- Resume upload with secure storage
+- Form state persistence across sessions
+- Admin review interface with scoring system
+
+## Application Flow
+
+### Form Structure
+
+The application is divided into **6 main steps** (desktop view) and **11 pages** (mobile view):
+
+#### Step 1: Your Info
+- **Contact Info** - Phone number and Discord username
+- **About You** - T-shirt size, dietary restrictions, age, country
+- **Optional Demographics** - Gender and ethnicity (optional)
+
+#### Step 2: Your Experience
+- **Education** - University, program, year of study
+- **Hackathon Experience** - Prior experience level, number of hackathons attended
+- **Links & Documents** - GitHub, LinkedIn, website, resume upload
+
+#### Step 3: Application Questions
+- **Question 1** - Technical project description (challenges, learnings)
+- **Question 2** - Creative haiku submission
+
+#### Step 4: Team Members (Optional)
+- Search and select up to 3 team members
+- Only users with existing accounts appear in search
+
+#### Step 5: MLH Requirements
+- MLH Code of Conduct agreement (required)
+- Information sharing authorization (required)
+- Marketing email opt-in (optional)
+
+#### Step 6: Review & Submit
+- Review all submitted information
+- View selected team members with names
+- Preview uploaded resume
+- Submit final application
+
+### Form State Persistence
+
+**Automatic Progress Saving**
+- Current step/page saved to localStorage
+- Returns to last position on page reload
+- Prevents losing progress from browser crashes
+
+**Field-Level Autosave**
+- All form fields automatically save to localStorage as you type
+- Data persists across page refreshes
+- Restored when returning to the application
+- Cleared upon successful submission
+
+**Supported Fields**
+- Text inputs (name, email, phone, Discord)
+- Select dropdowns (university, program, year, etc.)
+- Text areas (application questions)
+- Checkboxes (MLH agreements)
+- File uploads (resume filename tracked)
+- Team member selections
+
+### Team Member Selection
+
+**How It Works**
+1. Click the search input in the "Team Members" step
+2. Search by name or email address
+3. Select users from the dropdown (max 3)
+4. Team members displayed as removable tags
+5. Names shown in review section if available
+
+**API Integration**
+```typescript
+// Fetch all registered users
+const { emails } = await getUserEmails();
+
+// emails structure:
+// [
+//   { id: "uuid", email: "user@example.com", display_name: "John Doe" },
+//   ...
+// ]
+```
+
+**Team Member Display**
+- Shows both name and email if name is available
+- Falls back to email only if name not set
+- Team members shown in application review
+- Visible to reviewers during admin review
+
+### Resume Upload
+
+**Upload Process**
+1. Select PDF, DOC, or DOCX file (max 10 MB)
+2. File uploaded immediately upon selection
+3. Validation runs before upload:
+   - File size check (max 10 MB)
+   - File type validation (PDF, DOC, DOCX)
+4. Previous resume automatically replaced
+5. Filename displayed in form after upload
+
+**Storage & Security**
+- Resumes stored in private Supabase bucket
+- Access requires signed URLs (1-hour expiration)
+- Ownership verified before generating URLs
+- Files organized by user ID: `{userId}/{filename}`
+
+**API Usage**
+```typescript
+// Upload resume
+await uploadResume(file);
+
+// Get current resume
+const { resume, url, key } = await getResume();
+// resume: { name: "resume.pdf", ... }
+// url: "https://...signed-url..."
+// key: "userId/resume.pdf"
+```
+
+### Application Submission
+
+**Submission Process**
+1. Complete all required fields in steps 1-5
+2. Review information in step 6
+3. Click "Submit Application" button
+4. Backend validates all data
+5. Application status changed to "submitted"
+6. LocalStorage cleared automatically
+7. Redirected to "Submitted" confirmation page
+
+**Submission Protection**
+- Cannot edit application after submission
+- Attempting to access `/apply` redirects to "Submitted" page
+- Application data locked in database
+
+## Admin Review System
+
+### Review Assignment
+
+**Fair Assignment Algorithm**
+- Returns application with **least number of reviews**
+- Excludes applications already reviewed by requesting admin
+- Ties broken **lexicographically by application ID**
+- Ensures even distribution of reviews across applications
+
+**API Endpoint**
+```typescript
+GET /api/applications/random
+
+// Returns:
+{
+  application: {
+    id: "app-uuid",
+    profile_id: "user-uuid",
+    email: "applicant@example.com",
+    resume_url: "https://...signed-url...",
+    team_members_with_names: [
+      { email: "teammate@example.com", display_name: "Jane Smith" }
+    ],
+    // ... all application fields ...
+  }
+}
+```
+
+### Review Interface
+
+**Accessing the Review Page**
+- Navigate to `/review` (admin users only)
+- Non-admin users automatically redirected to home
+- Role verification happens in middleware
+
+**Review Components**
+
+1. **Basic Information Card**
+   - Contact details (email, phone, Discord)
+   - Personal info (t-shirt size, dietary restrictions, gender, ethnicity)
+   - Education (university, program, year)
+   - Hackathon experience
+   - Social links (GitHub, LinkedIn, website)
+   - Resume link (opens in new tab with signed URL)
+   - Team members with names and emails
+   - **Score: 1-10** for overall basic information quality
+
+2. **Question 1 Card**
+   - Displays technical project response
+   - Full text with preserved formatting
+   - **Score: 1-10** for technical depth and clarity
+
+3. **Question 2 Card**
+   - Displays haiku submission
+   - Full text with preserved formatting
+   - **Score: 1-10** for creativity and following haiku format
+
+**Scoring Guidelines**
+- All scores required (1-10 scale)
+- Cannot submit until all categories scored
+- Validation prevents duplicate reviews
+- Real-time error feedback
+
+### Review Submission
+
+**Submit Review Process**
+```typescript
+// Client-side submission
+await submitReview({
+  application_id: "app-uuid",
+  basic_info_score: 8,
+  q1_score: 7,
+  q2_score: 9
+});
+
+// Response:
+{
+  success: true,
+  message: "Review saved successfully",
+  review: { id: "review-uuid", ... },
+  total_reviews: 42  // Total reviews by this reviewer
+}
+```
+
+**Server-Side Validation**
+- Scores must be numbers between 1-10
+- All three scores required
+- Duplicate review check (same reviewer + application)
+- Admin role verification
+- Database transaction ensures consistency
+
+**After Submission**
+- Success message displayed
+- Option to review another application
+- "Get New Application" button fetches next review
+
+### Review Storage
+
+**Database Schema**
+```sql
+CREATE TABLE reviews (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  application_id UUID NOT NULL REFERENCES applications(id),
+  reviewer_id UUID NOT NULL REFERENCES profiles(id),
+  basic_info_score INTEGER NOT NULL CHECK (basic_info_score >= 1 AND basic_info_score <= 10),
+  q1_score INTEGER NOT NULL CHECK (q1_score >= 1 AND q1_score <= 10),
+  q2_score INTEGER NOT NULL CHECK (q2_score >= 1 AND q2_score <= 10),
+  reviewed_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  UNIQUE(application_id, reviewer_id)  -- Prevent duplicate reviews
+);
+```
+
+**Tracking**
+- Each review linked to specific application and reviewer
+- Timestamp records when review submitted
+- Unique constraint prevents duplicate reviews
+- Can query total reviews by application or reviewer
+
+## API Reference
+
+### Application Endpoints
+
+#### Create Application
+```typescript
+POST /api/applications
+Body: { profile_id: string }
+Response: { id: string, profile_id: string, status: "draft", ... }
+```
+
+#### Get User's Application
+```typescript
+GET /api/applications
+Response: { id: string, profile_id: string, status: string, ... } | null
+```
+
+#### Update Application
+```typescript
+PATCH /api/applications
+Body: Partial<ApplicationData>
+Response: { success: boolean }
+```
+
+### Resume Endpoints
+
+#### Upload Resume
+```typescript
+POST /api/applications/resumes
+Body: FormData with file
+Response: { 
+  message: "Resume uploaded successfully",
+  key: "userId/filename.pdf"
+}
+```
+
+#### Get Resume
+```typescript
+GET /api/applications/resumes
+Response: {
+  resume: { name: string } | null,
+  url: string | null,  // Signed URL, 1-hour expiration
+  key: string | null
+}
+```
+
+### Review Endpoints (Admin Only)
+
+#### Get Random Application
+```typescript
+GET /api/applications/random
+Response: {
+  application: {
+    id: string,
+    email: string,
+    resume_url: string,
+    team_members_with_names: Array<{email: string, display_name: string}>,
+    ...allApplicationFields
+  }
+}
+```
+
+#### Submit Review
+```typescript
+POST /api/review/submit
+Body: {
+  application_id: string,
+  basic_info_score: number,  // 1-10
+  q1_score: number,           // 1-10
+  q2_score: number            // 1-10
+}
+Response: {
+  success: true,
+  message: string,
+  review: { id: string, ... },
+  total_reviews: number
+}
+```
+
+### User Endpoints
+
+#### Get All User Emails
+```typescript
+GET /api/users/emails
+Response: {
+  emails: Array<{
+    id: string,
+    email: string,
+    display_name: string | null
+  }>
+}
+```
+
+## Client API Functions
+
+### Application Functions
+
+```typescript
+import { 
+  fetchApplication, 
+  createApplication, 
+  updateApplication 
+} from "@/lib/api";
+
+// Get user's application
+const app = await fetchApplication(userId);
+
+// Create new application
+const newApp = await createApplication(userId);
+
+// Update application
+await updateApplication(data);
+```
+
+### Resume Functions
+
+```typescript
+import { uploadResume, getResume } from "@/lib/api";
+
+// Upload resume
+await uploadResume(fileObject);
+
+// Get current resume
+const { resume, url, key } = await getResume();
+```
+
+### Review Functions
+
+```typescript
+import { getRandomApplication, submitReview } from "@/lib/api";
+
+// Get next application to review
+const { application } = await getRandomApplication();
+
+// Submit review scores
+await submitReview({
+  application_id: app.id,
+  basic_info_score: 8,
+  q1_score: 7,
+  q2_score: 9
+});
+```
+
+### User Functions
+
+```typescript
+import { getUserEmails } from "@/lib/api";
+
+// Get all registered users for team selection
+const { emails } = await getUserEmails();
+```
+
+## Backend Services
+
+### ApplicationService
+
+```typescript
+import { ApplicationService } from "@uwdsc/server/cxc/services/applicationService";
+
+const service = new ApplicationService();
+
+// Get application by user ID
+const app = await service.getApplicationByProfileId(userId);
+
+// Create new application
+const newApp = await service.createApplication(userId);
+
+// Update application
+await service.updateApplication(userId, data);
+
+// Get all user emails (for team selection)
+const users = await service.getAllUserEmails();
+```
+
+### AdminReviewService
+
+```typescript
+import { AdminReviewService } from "@uwdsc/server/cxc/services/adminReviewService";
+
+const service = new AdminReviewService();
+
+// Get next application for review
+const app = await service.getNextApplicationForReview(
+  reviewerId,
+  getResumeUrlFunction
+);
+
+// Submit review
+const result = await service.submitReview(
+  {
+    application_id: "app-id",
+    basic_info_score: 8,
+    q1_score: 7,
+    q2_score: 9
+  },
+  reviewerId
+);
+```
+
+### ResumeService
+
+```typescript
+import { ResumeService } from "@uwdsc/server/core/services/resumeService";
+
+const service = new ResumeService();
+
+// Upload resume (replaces existing)
+await service.uploadResume({ file, userId });
+
+// Get user's resume
+const result = await service.getUserResume(userId);
+
+// Get signed URL (1-hour expiration)
+const { url } = await service.getSignedResumeUrl(userId, 3600);
+
+// Delete resume
+await service.deleteResume(`${userId}/filename.pdf`);
+```
+
+## Form Persistence Hook
+
+### useFormFieldPersistence
+
+Custom hook for automatic form field persistence to localStorage.
+
+```typescript
+import { useFormFieldPersistence } from "@/hooks/useFormFieldPersistence";
+
+// In your form component:
+function MyFormSection({ form }: { form: UseFormReturn<AppFormValues> }) {
+  // Persist individual fields
+  useFormFieldPersistence(form, "phone");
+  useFormFieldPersistence(form, "discord");
+  useFormFieldPersistence(form, "university_name");
+  
+  // Custom storage key (optional)
+  useFormFieldPersistence(form, "cxc_q1", "q1_save");
+  
+  // ... render form
+}
+```
+
+**Features**
+- Automatically saves on field change
+- Restores from localStorage on mount
+- Handles form.reset() correctly
+- Works with text inputs, selects, checkboxes, arrays
+- Special handling for undefined/empty values
+- Cleared on application submission
+
+## Best Practices
+
+### Application Form
+
+**Do:**
+- Validate all inputs before allowing step progression
+- Save progress frequently to localStorage
+- Provide clear error messages
+- Allow users to go back and edit previous steps
+- Show progress indicator (step numbers)
+
+**Don't:**
+- Submit incomplete applications
+- Allow editing after submission
+- Store sensitive data in localStorage indefinitely
+- Skip validation on form submission
+
+### Resume Handling
+
+**Do:**
+- Validate file size and type client-side
+- Show upload progress/feedback
+- Handle network errors gracefully
+- Use signed URLs for private access
+- Set appropriate URL expiration times
+
+**Don't:**
+- Store resumes in public buckets
+- Allow arbitrary file types
+- Keep expired signed URLs
+- Skip virus scanning (in production)
+
+### Review System
+
+**Do:**
+- Verify admin role before showing review UI
+- Prevent duplicate reviews at database level
+- Track review counts for analytics
+- Provide clear scoring criteria
+- Show all relevant application information
+
+**Don't:**
+- Allow non-admins to access review endpoints
+- Skip validation of review scores
+- Allow reviews of already-reviewed applications
+- Expose applicant personally identifiable information unnecessarily
+
+## Troubleshooting
+
+### Form State Not Persisting
+1. Check browser localStorage is enabled
+2. Verify `useFormFieldPersistence` hook is called
+3. Check for JavaScript errors in console
+4. Clear localStorage and try again: `localStorage.clear()`
+
+### Resume Upload Fails
+1. Check file size (max 10 MB)
+2. Verify file type (PDF, DOC, DOCX)
+3. Check network connection
+4. Verify Supabase storage configuration
+5. Check bucket permissions
+
+### Review Page Access Denied
+1. Verify user has admin role in database
+2. Check profile table: `SELECT role FROM profiles WHERE id = 'user-id'`
+3. Verify middleware is running correctly
+4. Check authentication status
+
+### Team Member Not Appearing in Search
+1. Verify the user has created an account
+2. Check the user's email is confirmed
+3. Verify the user exists in auth.users table
+4. Check for typos in search query
+
+## Next Steps
+
+- [Creating API Endpoints](/guides/creating-api) - Learn to build new endpoints
+- [Database Setup](/guides/database) - Configure and manage the database
+- [Development Tips](/guides/development) - Improve your workflow

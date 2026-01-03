@@ -12,7 +12,8 @@ jobs:
       github.event.pull_request.merged == true &&
       github.event.pull_request.user.login != 'github-actions[bot]' &&
       !startsWith(github.event.pull_request.title, '📚 Auto-Docs Update') &&
-      !startsWith(github.event.pull_request.head.ref, 'auto-docs/merge-')
+      !startsWith(github.event.pull_request.head.ref, 'auto-docs/merge-') &&
+      !contains(github.event.pull_request.labels.*.name, 'no documentation')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -20,7 +21,7 @@ jobs:
 
     steps:
       - name: Checkout Main
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -52,7 +53,7 @@ jobs:
           .github/scripts/auto-docs/update-docs.sh
 
       - name: Create PR with Doc Updates
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "Update docs based on merge #${{ github.event.pull_request.number }}"

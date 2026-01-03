@@ -13,6 +13,11 @@ interface WormholeWithRingsProps {
   readonly bottomRadius?: number;
 }
 
+interface WormholeMiddleProps {
+  topRadius?: number;
+  bottomRadius?: number;
+}
+
 function WormholeWithRings({
   partType,
   topRadius,
@@ -207,7 +212,7 @@ function WormholeWithRings({
   const calculateAnimatedY = (
     elapsedTime: number,
     speed: number,
-    offset: number,
+    offset: number
   ): number => {
     const progress =
       (elapsedTime * speed * wormholeGeometry.height + offset) %
@@ -223,7 +228,7 @@ function WormholeWithRings({
   const updateRing = (
     ring: THREE.Line,
     animatedY: number,
-    halfHeight: number,
+    halfHeight: number
   ): void => {
     if (Math.abs(animatedY) > halfHeight) {
       ring.visible = false;
@@ -251,7 +256,7 @@ function WormholeWithRings({
   const updateCube = (
     cube: THREE.Mesh,
     animatedY: number,
-    halfHeight: number,
+    halfHeight: number
   ): void => {
     if (Math.abs(animatedY) > halfHeight) {
       cube.visible = false;
@@ -295,7 +300,7 @@ function WormholeWithRings({
       const animatedY = calculateAnimatedY(
         state.clock.elapsedTime,
         speed,
-        offset,
+        offset
       );
       updateRing(ring, animatedY, halfHeight);
     }
@@ -306,7 +311,7 @@ function WormholeWithRings({
       const animatedY = calculateAnimatedY(
         state.clock.elapsedTime,
         speed,
-        offset,
+        offset
       );
       updateCube(cube, animatedY, halfHeight);
     }
@@ -362,10 +367,7 @@ export function WormholeTop() {
 export function WormholeMiddle({
   topRadius,
   bottomRadius,
-}: {
-  topRadius?: number;
-  bottomRadius?: number;
-}) {
+}: Readonly<WormholeMiddleProps>) {
   return (
     <div className="block h-[25vh] sm:h-[45vh] lg:h-[55vh] overflow-hidden -z-10">
       <div className="transform -translate-y-[20%] h-[40vh] sm:h-[75vh] lg:h-[100vh]">

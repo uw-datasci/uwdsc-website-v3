@@ -9,7 +9,7 @@ uwdsc-website-v3/
 ├── .github/                # GitHub Actions
 ├── apps/                   # Frontend applications
 │   ├── web/                # Main website
-│   ├── cxc/                # CxC AI hackathon app
+│   ├── cxc/                # CXC AI hackathon app
 │   └── docs/               # Documentation site
 ├── packages/               # Shared packages
 │   ├── ui/                 # Design system
@@ -64,9 +64,9 @@ apps/web/
 └── types/              # TypeScript types
 ```
 
-### `apps/cxc` - CxC App
+### `apps/cxc` - CXC App
 
-Dedicated application for CxC.
+Dedicated application for CXC.
 
 **Purpose**: AI hackathon-specific features and application flow
 
@@ -160,18 +160,18 @@ Backend services specific to the main website.
 - pg (node-postgres) for database access
 - Supabase
 
-### `packages/server/cxc` - CxC Backend
+### `packages/server/cxc` - CXC Backend
 
-Backend services specific to CxC app.
+Backend services specific to CXC app.
 
 **Exports**: `@uwdsc/server/cxc/*`
 
 **Contents**:
 
-- Database migrations (db-mate SQL files) for CxC
-- CxC-specific services
+- Database migrations (db-mate SQL files) for CXC
+- CXC-specific services
 - Application logic
-- CxC-specific repositories
+- CXC-specific repositories
 
 ### `packages/eslint-config`
 
@@ -281,7 +281,7 @@ import { Button, Card } from "@uwdsc/ui";
 // Backend services (web app)
 import { HealthService } from "@uwdsc/server/web/services/healthService";
 
-// Backend services (cxc app)
+// Backend services (CXC app)
 import { ApplicationService } from "@uwdsc/server/cxc/services/applicationService";
 
 // Shared backend

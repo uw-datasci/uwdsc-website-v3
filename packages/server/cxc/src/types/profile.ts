@@ -5,7 +5,7 @@ export type Role = "hacker" | "volunteer" | "admin" | "default";
 export interface Profile {
   id: string;
   role: Role;
-  nfc_id: bigint | null;
+  nfc_id: string | null;
   created_at: Date;
   updated_at: Date;
 }

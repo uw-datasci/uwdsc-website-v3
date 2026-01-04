@@ -13,8 +13,8 @@ export async function withProtected(request: NextRequest, user: any) {
   // If route is protected and user is not authenticated, redirect to login
   if (!user) return NextResponse.redirect(new URL("/login", request.url));
 
-  // Check admin role for /review route
-  if (request.nextUrl.pathname === "/review") {
+  // Check admin role for /review and /admin routes
+  if (request.nextUrl.pathname === "/review" || request.nextUrl.pathname.startsWith("/admin")) {
     try {
       const profileService = new ProfileService();
       const profile = await profileService.getProfileByUserId(user.id);

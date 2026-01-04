@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent, Button } from "@uwdsc/ui";
-import { Plus, Loader2, QrCode, CheckCircle2 } from "lucide-react";
+import { Plus, Loader2, QrCode } from "lucide-react";
+import { QrScanner } from "@/components/admin/QrScanner";
 
 interface Event {
   id: string;
@@ -21,8 +22,7 @@ export default function AdminEventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-  const [nfcId, setNfcId] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
 
   useEffect(() => {
     async function loadEvents() {
@@ -52,38 +52,18 @@ export default function AdminEventsPage() {
     loadEvents();
   }, []);
 
-  // Load NFC ID for current user
-  useEffect(() => {
-    async function loadNfcId() {
-      try {
-        const response = await fetch("/api/admin/nfc");
-        if (response.ok) {
-          const data = await response.json();
-          setNfcId(data.nfc_id);
-        }
-      } catch (error) {
-        console.error("Error loading NFC ID:", error);
-      }
+  const handleQrScan = (result: string) => {
+    // Extract NFC ID from URL if it's a check-in URL
+    // Format: /admin/checkin/{nfc_id}
+    const match = result.match(/\/admin\/checkin\/([^/\s]+)/);
+    if (match && match[1]) {
+      const nfcId = match[1];
+      router.push(`/admin/checkin/${nfcId}`);
+    } else {
+      // If it's just an NFC ID, use it directly
+      router.push(`/admin/checkin/${result}`);
     }
-
-    loadNfcId();
-  }, []);
-
-  const handleCopyNfcId = async () => {
-    if (!nfcId) return;
-
-    const baseUrl = window.location.origin;
-    const checkInUrl = `${baseUrl}/admin/checkin/${nfcId}`;
-
-    try {
-      await navigator.clipboard.writeText(checkInUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
-      console.error("Failed to copy to clipboard:", error);
-      // Fallback: show alert
-      alert(`Check-in URL: ${checkInUrl}`);
-    }
+    setShowScanner(false);
   };
 
   if (loading) {
@@ -151,50 +131,25 @@ export default function AdminEventsPage() {
         </CardContent>
       </Card>
 
-      {/* NFC ID Display */}
-      {nfcId && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Your NFC Check-In URL</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block">NFC ID</label>
-              <div className="p-3 bg-muted rounded-md font-mono text-sm break-all">
-                {nfcId}
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">
-                Check-In URL
-              </label>
-              <div className="flex gap-2">
-                <div className="flex-1 p-3 bg-muted rounded-md font-mono text-sm break-all">
-                  {typeof window !== "undefined" &&
-                    `${window.location.origin}/admin/checkin/${nfcId}`}
-                </div>
-                <Button
-                  onClick={handleCopyNfcId}
-                  variant="outline"
-                  size="icon"
-                  title={copied ? "Copied!" : "Copy URL"}
-                >
-                  {copied ? (
-                    <CheckCircle2 className="h-4 w-4" />
-                  ) : (
-                    <QrCode className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Copy this URL and write it to NFC tags or QR codes. When scanned,
-              it will redirect to the check-in page with the selected event
-              cached.
-            </p>
-          </CardContent>
-        </Card>
-      )}
+      {/* QR Code Scanner */}
+      <Card>
+        <CardHeader>
+          <CardTitle>QR Code Scanner</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {showScanner ? (
+            <QrScanner
+              onScan={handleQrScan}
+              onClose={() => setShowScanner(false)}
+            />
+          ) : (
+            <Button onClick={() => setShowScanner(true)} className="w-full">
+              <QrCode className="mr-2 h-4 w-4" />
+              Open QR Scanner
+            </Button>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Events List */}
       {events.length > 0 && (
@@ -249,3 +204,4 @@ export default function AdminEventsPage() {
     </div>
   );
 }
+

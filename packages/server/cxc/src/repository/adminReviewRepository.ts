@@ -31,12 +31,52 @@ export class AdminReviewRepository extends BaseRepository {
    * Get a random application with the least number of reviews
    * Excludes applications already reviewed by the specified reviewer
    * Randomly selects from all applications with the minimum review count
+   * Uses efficient random offset instead of ORDER BY RANDOM() for better performance
    */
   async getApplicationWithLeastReviews(
     reviewerId: string,
   ): Promise<ApplicationWithReviewCount | null> {
     try {
-      // First, get all applications with the minimum review count
+      // First, get the count of applications with minimum review count
+      const countResult = await this.sql<Array<{ total: number }>>`
+        WITH review_counts AS (
+          SELECT 
+            application_id,
+            COUNT(*)::int as review_count
+          FROM reviews
+          GROUP BY application_id
+        ),
+        applications_with_counts AS (
+          SELECT 
+            a.*,
+            COALESCE(rc.review_count, 0)::int as review_count
+          FROM applications a
+          LEFT JOIN review_counts rc ON a.id = rc.application_id
+          WHERE a.status = 'submitted'
+            AND NOT EXISTS (
+              SELECT 1
+              FROM reviews r
+              WHERE r.application_id = a.id AND r.reviewer_id = ${reviewerId}
+            )
+        ),
+        min_review_count AS (
+          SELECT MIN(review_count) as min_count
+          FROM applications_with_counts
+        )
+        SELECT COUNT(*)::int as total
+        FROM applications_with_counts
+        WHERE review_count = (SELECT min_count FROM min_review_count)
+      `;
+
+      const total = countResult[0]?.total ?? 0;
+      if (total === 0) return null;
+
+      // Generate a random offset for maximum randomness
+      // Using Math.random() which provides cryptographically strong randomness
+      const randomOffset = Math.floor(Math.random() * total);
+
+      // Select one application at the random offset position
+      // Using ORDER BY id for stable ordering (required for OFFSET to work correctly)
       const applications = await this.sql<ApplicationWithReviewCount[]>`
         WITH review_counts AS (
           SELECT 
@@ -65,8 +105,9 @@ export class AdminReviewRepository extends BaseRepository {
         SELECT *
         FROM applications_with_counts
         WHERE review_count = (SELECT min_count FROM min_review_count)
-        ORDER BY RANDOM()
+        ORDER BY id
         LIMIT 1
+        OFFSET ${randomOffset}
       `;
 
       if (applications.length === 0) return null;

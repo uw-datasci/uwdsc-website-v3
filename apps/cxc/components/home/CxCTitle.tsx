@@ -5,7 +5,12 @@ import CxCButton from "../CxCButton";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Badge, Meteors, WarpBackground } from "@uwdsc/ui/index";
+import {
+  Badge,
+  Meteors,
+  TypingAnimation,
+  WarpBackground,
+} from "@uwdsc/ui/index";
 import Image from "next/image";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { APPLICATION_RELEASE_DATE } from "@/constants/application";
@@ -15,9 +20,9 @@ export default function CxCTitle() {
   const [mounted, setMounted] = useState(false);
   const [countdownOver, setCountdownOver] = useState(false);
   const isMobile = useIsMobile(640);
-  // const isTablet = useIsMobile(1024);
-  // const [cursorDone, setCursorDone] = useState(false);
-  // const [logoVisible, setLogoVisible] = useState(false);
+  const isTablet = useIsMobile(1024);
+  const [cursorDone, setCursorDone] = useState(false);
+  const [logoVisible, setLogoVisible] = useState(false);
 
   useEffect(() => {
     const checkCountdown = () => {
@@ -66,8 +71,7 @@ export default function CxCTitle() {
                     priority
                   />
                 </div>
-                {/* TODO: -bottom-12 md:-bottom-10 when adding back tangerine*/}
-                <div className="flex flex-col items-center gap-6 md:gap-8 justify-center absolute -bottom-2">
+                <div className="flex flex-col items-center gap-6 md:gap-8 justify-center absolute -bottom-12 md:-bottom-10">
                   <div className="flex flex-col items-center">
                     <Badge
                       className="mb-2 md:mb-3 font-normal text-sm md:text-base border-white/50 bg-background"
@@ -75,7 +79,7 @@ export default function CxCTitle() {
                     >
                       FEB 6-8 · An AI Hackathon
                     </Badge>
-                    {/* <div className="flex flex-row items-center">
+                    <div className="flex flex-row items-center">
                       <TypingAnimation
                         className="font-light text-xl sm:text-2xl lg:text-3xl text-white/80"
                         showCursor={true}
@@ -129,7 +133,7 @@ export default function CxCTitle() {
                         }}
                         className="w-36 h-8 sm:w-42 sm:h-9 lg:w-48 lg:h-10 object-contain -ml-5"
                       />
-                    </div> */}
+                    </div>
                   </div>
                   <CxCButton
                     asChild
@@ -173,7 +177,7 @@ export default function CxCTitle() {
                   >
                     FEB 6-8 · An AI Hackathon
                   </Badge>
-                  {/* <div className="flex flex-row items-center">
+                  <div className="flex flex-row items-center">
                     <TypingAnimation
                       className="font-light text-xl sm:text-2xl lg:text-3xl text-white/80"
                       showCursor={true}
@@ -227,7 +231,7 @@ export default function CxCTitle() {
                       }}
                       className="w-36 h-8 sm:w-42 sm:h-9 lg:w-48 lg:h-10 object-contain -ml-5"
                     />
-                  </div> */}
+                  </div>
                 </div>
 
                 <CountdownClock

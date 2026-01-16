@@ -15,6 +15,75 @@ This semester continues to build upon the foundation established in Fall 2025, w
 
 ## 🏆 CXC App (apps/cxc)
 
+### NFC Check-In System (PR #117)
+
+**NFC Badge Integration**
+- Users can view their unique NFC ID on the dashboard for event check-ins
+- NFC ID displayed in a scannable QR code format on dashboard card
+- Copy check-in URL to clipboard for easy badge programming
+- Automatic NFC ID generation when users access the dashboard
+
+**NFC Read & Write Pages**
+- Dedicated `/nfc-read` page for reading NFC tags using Web NFC API
+- Dedicated `/nfc-write` page for writing check-in URLs to NFC tags
+- Browser-based NFC tag reading and writing (no additional hardware required)
+- Real-time feedback when NFC tags are detected and read/written
+
+**Admin Event Check-In**
+- Admins can check in attendees by scanning NFC badges or QR codes
+- Quick check-in workflow from events page with NFC/QR scanner
+- Check-in confirmation with success/error messages
+- Automatic event caching - remembers last selected event for faster check-ins
+- Support for both NFC tap and QR code scan methods
+
+**Event Check-In Page (`/admin/checkin/[nfc_id]`)**
+- Dedicated check-in page accessible via NFC badge URL
+- Select event and check in user with single tap
+- Profile lookup by NFC ID with email display
+- Loading states with email polling for newly created profiles
+- Cached event selection for streamlined multi-attendee check-ins
+
+### Event Management System (PR #117)
+
+**Events Dashboard (`/admin/events`)**
+- Admins can view all events in a comprehensive list
+- Event cards display name, location, date/time, and registration requirements
+- Quick access to edit events or check in attendees
+- NFC and QR code scanner integration for on-site check-ins
+- Create new events directly from the dashboard
+
+**Event Creation (`/admin/events/add`)**
+- Admins can create new events with complete details
+- Form fields include:
+  - Event name and description
+  - Location and date/time selection
+  - Start and end times with buffer periods
+  - Registration and payment requirement toggles
+- Input validation ensures all required fields are provided
+- Success confirmation redirects to events list
+
+**Event Editing (`/admin/events/edit`)**
+- Admins can update existing event details
+- Pre-populated form with current event data
+- Same comprehensive editing options as event creation
+- Update confirmation with navigation back to events list
+
+### Superadmin Role Management (PR #117)
+
+**Role Assignment Interface (`/admin/assign`)**
+- Superadmins can search for users by email
+- Assign admin roles to registered users
+- View current user roles before assignment
+- Confirmation prompt before role changes
+- Real-time role updates in the interface
+- Cannot reassign superadmin or admin roles (shows current role badge)
+
+**Superadmin Navigation Access**
+- New "Superadmin" dropdown in navbar (visible only to superadmins)
+- Quick access to role assignment page
+- Separate from regular admin navigation menu
+- Role-based visibility ensures proper access control
+
 ### Account Security (PR #126)
 
 **Password Reset Flow**
@@ -137,6 +206,22 @@ This semester continues to build upon the foundation established in Fall 2025, w
 
 ### Backend Architecture Updates
 
+**Event Management Services (PR #117)**
+- `EventService`: Manages event lifecycle and attendance
+  - `getAllEvents()`: Retrieve all events sorted by date
+  - `getEventById()`: Fetch specific event details
+  - `createEvent()`: Create new events with validation
+  - `updateEvent()`: Update existing event information
+  - `deleteEvent()`: Remove events from the system
+  - `checkInUser()`: Record event attendance for users
+  - `getEventAttendance()`: Retrieve check-in records for events
+
+**Profile Management Services (PR #117)**
+- `ProfileService` enhancements:
+  - `getProfileByNfcId()`: Lookup profiles using NFC ID
+  - `updateNfcId()`: Assign or update NFC ID for users
+  - Role validation for admin and superadmin access
+
 **New Services**
 - `AdminApplicationService`: Manages admin application access
   - `getAllApplicationSummaries()`: Returns all submitted applications with summary data
@@ -169,6 +254,21 @@ This semester continues to build upon the foundation established in Fall 2025, w
 
 ### API Enhancements
 
+**Event Management Endpoints (PR #117)**
+- `GET /api/admin/events` - List all events (admin only)
+- `POST /api/admin/events` - Create new event (admin only)
+- `GET /api/admin/events/[id]` - Get specific event details (admin only)
+- `PUT /api/admin/events/[id]` - Update event information (admin only)
+- `DELETE /api/admin/events/[id]` - Delete event (admin only)
+
+**Check-In & NFC Endpoints (PR #117)**
+- `POST /api/admin/checkin` - Check in user for event using NFC ID (admin only)
+- `GET /api/admin/nfc?nfc_id=[id]` - Get profile by NFC ID (admin only)
+
+**User Management Endpoints (PR #117)**
+- `GET /api/admin/users/search?email=[email]` - Search users by email (superadmin only)
+- `POST /api/admin/users/assign` - Assign admin role to user (superadmin only)
+
 **New Endpoints**
 - `GET /api/admin/applications` - Get all submitted applications (admin only)
 - `GET /api/admin/applications/[id]` - Get full application details by ID (admin only)
@@ -189,6 +289,12 @@ This semester continues to build upon the foundation established in Fall 2025, w
 - Non-admin users redirected to home page
 - Profile service integration for role verification
 
+**Superadmin Route Protection (PR #117)**
+- `/admin/assign` route requires superadmin role specifically
+- Three-tier access control: user, admin, and superadmin
+- Middleware checks profile role before granting access
+- Automatic redirects for insufficient permissions
+
 **Auth Route Protection**
 - Added `/start` to protected authentication routes
 - Authenticated users redirected away from auth pages
@@ -207,6 +313,15 @@ This semester continues to build upon the foundation established in Fall 2025, w
 - `uploadResume()`: Improved error handling and response types
 
 ## 🎨 Design System (packages/ui)
+
+### New Components (PR #117)
+
+**QR Code Scanner Component**
+- Browser-based QR code scanner for admin check-ins
+- Real-time camera feed with scanning overlay
+- Automatic detection and parsing of check-in URLs
+- Fallback support for browsers without camera access
+- Used in event check-in workflows
 
 ### New Components
 
@@ -254,6 +369,27 @@ This semester continues to build upon the foundation established in Fall 2025, w
 - Shared across repositories for ethnicity and experience fields
 
 ### Database Schema Updates
+
+**Event Tables (PR #117)**
+- `events` table for storing hackathon events:
+  - `id` (primary key)
+  - `name`, `description`, `location`
+  - `start_time`, `buffered_start_time`, `end_time`, `buffered_end_time`
+  - `registration_required`, `payment_required`
+  - `image_id` (optional event image)
+  - Timestamps for created/updated tracking
+
+- `event_attendance` table for tracking check-ins:
+  - `id` (primary key)
+  - `event_id` (foreign key to events)
+  - `profile_id` (foreign key to profiles)
+  - `checked_in` (boolean status)
+  - `created_at` (check-in timestamp)
+
+**Profile Updates (PR #117)**
+- `nfc_id` field added to profiles table for NFC badge integration
+- Unique constraint on `nfc_id` to prevent duplicates
+- Used for quick profile lookup during event check-ins
 
 **New Tables**
 - `reviews` table for storing application reviews:

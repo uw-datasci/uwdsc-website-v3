@@ -15,6 +15,73 @@ This semester continues to build upon the foundation established in Fall 2025, w
 
 ## 🏆 CXC App (apps/cxc)
 
+### Review Leaderboard & Analytics (PR #132)
+
+**Admin Leaderboard Dashboard (`/admin/leaderboard`)**
+- Comprehensive leaderboard system for tracking reviewer performance
+- Superadmin-only access for monitoring review progress
+- Real-time statistics dashboard with key metrics:
+  - Total applications, reviews, and reviewers
+  - Average reviews per application
+  - Average scores across all review categories
+- Visual top 3 podium display with animated rankings
+- Full leaderboard table showing all reviewers ranked by review count
+- Click-to-view detailed statistics for individual reviewers
+
+**Reviewer Performance Tracking**
+- Individual reviewer statistics modal with average scores per category
+- Track average resume, links, Q1, and Q2 scores
+- Monitor total reviews completed by each reviewer
+- Compare individual performance against overall averages
+- Identify scoring patterns and consistency
+
+**Enhanced Scoring System**
+- Updated review scoring categories for more granular evaluation:
+  - **Resume Score**: 0-3 (quality and relevance)
+  - **Links Score**: 0-2 (portfolio and online presence)
+  - **Q1 Score**: 0-7 (technical depth and problem-solving)
+  - **Q2 Score**: 0-3 (creativity and format adherence)
+- More precise evaluation criteria vs. previous 1-10 scale
+- Score validation at database and application levels
+
+**Backend Services**
+- `AdminReviewService` enhancements:
+  - `getLeaderboard()`: Fetch all reviewers with review counts
+  - `getStatistics()`: Calculate aggregate review statistics
+  - `getReviewerAverageScores()`: Get individual reviewer performance metrics
+- `AdminReviewRepository` new methods:
+  - Optimized queries for leaderboard data
+  - Efficient aggregation for statistics calculation
+  - Reviewer-specific score averaging
+
+**API Enhancements**
+- `GET /api/admin/leaderboard`: Returns leaderboard and statistics
+- `GET /api/admin/leaderboard?reviewerId={id}`: Returns reviewer-specific scores
+- Superadmin-only access with role verification
+- Graceful error handling with fallback values
+- 30-second request timeout protection
+
+**Database Improvements**
+- Fixed reviews table unique indexes (migration `20260116182144_fix_reviews_unique_indexes`)
+- Removed incorrect unique constraints that prevented multiple reviewers per application
+- Updated schema to allow proper multi-reviewer system
+- Disabled RLS policies on reviews table for application-level access control
+- Proper compound unique constraint: `(application_id, reviewer_id)`
+
+**UI/UX Features**
+- Animated transitions with Framer Motion
+- Responsive design for mobile and desktop
+- Loading states and error handling
+- Color-coded podium display (gold, silver, bronze)
+- Interactive cards with hover effects
+- Real-time data fetching and updates
+
+**Gamification Benefits**
+- Encourages healthy competition among reviewers
+- Provides recognition for top contributors
+- Motivates consistent review participation
+- Transparent progress tracking for all reviewers
+
 ### Account Security (PR #126)
 
 **Password Reset Flow**

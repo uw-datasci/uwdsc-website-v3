@@ -177,29 +177,45 @@ GET /api/applications/random
 
 **Review Components**
 
-1. **Basic Information Card**
-   - Contact details (email, phone, Discord)
-   - Personal info (t-shirt size, dietary restrictions, gender, ethnicity)
-   - Education (university, program, year)
-   - Hackathon experience
-   - Social links (GitHub, LinkedIn, website)
-   - Resume link (opens in new tab with signed URL)
-   - Team members with names and emails
-   - **Score: 1-10** for overall basic information quality
+The review interface displays complete application information across organized cards:
 
-2. **Question 1 Card**
-   - Displays technical project response
-   - Full text with preserved formatting
-   - **Score: 1-10** for technical depth and clarity
+1. **Resume Review Card**
+   - Links to uploaded resume with signed URL
+   - Resume preview and download
+   - File information display
+   - **Score: 0-3** for resume quality and relevance
 
-3. **Question 2 Card**
-   - Displays haiku submission
-   - Full text with preserved formatting
-   - **Score: 1-10** for creativity and following haiku format
+2. **Links & Portfolio Card**
+   - GitHub profile link
+   - LinkedIn profile link
+   - Personal website/portfolio
+   - **Score: 0-2** for link quality and professional presence
+
+3. **Question 1 Card (Technical Project)**
+   - Full technical project description
+   - Challenges faced and solutions
+   - Learning outcomes
+   - **Score: 0-7** for technical depth, problem-solving, and learning
+
+4. **Question 2 Card (Creative Haiku)**
+   - Haiku submission display
+   - Creative expression evaluation
+   - **Score: 0-3** for creativity and following format
+
+**Additional Information Displayed**
+- Contact details (email, phone, Discord)
+- Personal info (t-shirt size, dietary restrictions, age, country)
+- Demographics (gender, ethnicity - if provided)
+- Education (university, program, year of study)
+- Hackathon experience level
+- Team members with names and emails (if applicable)
 
 **Scoring Guidelines**
-- All scores required (1-10 scale)
-- Cannot submit until all categories scored
+- **Resume Score**: 0-3 scale - Quality, relevance, and professionalism
+- **Links Score**: 0-2 scale - Portfolio quality and online presence
+- **Q1 Score**: 0-7 scale - Technical depth, problem-solving, and learning
+- **Q2 Score**: 0-3 scale - Creativity and format adherence
+- All scores required before submission
 - Validation prevents duplicate reviews
 - Real-time error feedback
 
@@ -210,9 +226,10 @@ GET /api/applications/random
 // Client-side submission
 await submitReview({
   application_id: "app-uuid",
-  basic_info_score: 8,
-  q1_score: 7,
-  q2_score: 9
+  resume_score: 2,    // 0-3
+  links_score: 1,     // 0-2
+  q1_score: 5,        // 0-7
+  q2_score: 2         // 0-3
 });
 
 // Response:
@@ -225,8 +242,11 @@ await submitReview({
 ```
 
 **Server-Side Validation**
-- Scores must be numbers between 1-10
-- All three scores required
+- **Resume Score**: Must be 0-3
+- **Links Score**: Must be 0-2
+- **Q1 Score**: Must be 0-7
+- **Q2 Score**: Must be 0-3
+- All four scores required
 - Duplicate review check (same reviewer + application)
 - Admin role verification
 - Database transaction ensures consistency
@@ -244,19 +264,171 @@ CREATE TABLE reviews (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   application_id UUID NOT NULL REFERENCES applications(id),
   reviewer_id UUID NOT NULL REFERENCES profiles(id),
-  basic_info_score INTEGER NOT NULL CHECK (basic_info_score >= 1 AND basic_info_score <= 10),
-  q1_score INTEGER NOT NULL CHECK (q1_score >= 1 AND q1_score <= 10),
-  q2_score INTEGER NOT NULL CHECK (q2_score >= 1 AND q2_score <= 10),
+  resume_score INTEGER NOT NULL CHECK (resume_score >= 0 AND resume_score <= 3),
+  links_score INTEGER NOT NULL CHECK (links_score >= 0 AND links_score <= 2),
+  q1_score INTEGER NOT NULL CHECK (q1_score >= 0 AND q1_score <= 7),
+  q2_score INTEGER NOT NULL CHECK (q2_score >= 0 AND q2_score <= 3),
   reviewed_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  UNIQUE(application_id, reviewer_id)  -- Prevent duplicate reviews
+  CONSTRAINT reviews_application_id_reviewer_id_key UNIQUE(application_id, reviewer_id)
 );
 ```
 
-**Tracking**
+**Key Features**
 - Each review linked to specific application and reviewer
 - Timestamp records when review submitted
-- Unique constraint prevents duplicate reviews
-- Can query total reviews by application or reviewer
+- Unique compound constraint on (application_id, reviewer_id) prevents duplicate reviews per reviewer
+- Allows multiple reviewers per application and multiple applications per reviewer
+- Score validation at database level with appropriate CHECK constraints
+
+## Admin Leaderboard
+
+The leaderboard system provides comprehensive analytics and gamification for the review process, helping superadmins track reviewer performance and overall application review progress.
+
+### Accessing the Leaderboard
+
+**Navigation**
+- Navigate to `/admin/leaderboard` (superadmin users only)
+- Non-superadmin users receive 403 Forbidden error
+- Accessible from Admin dropdown in navbar
+
+### Dashboard Overview
+
+The leaderboard page displays comprehensive review statistics and rankings:
+
+#### Statistics Cards (Top Row)
+
+**General Statistics**
+- **Total Applications**: Count of all submitted applications
+- **Total Reviews**: Aggregate number of reviews completed
+- **Total Reviewers**: Number of unique reviewers who have submitted at least one review
+- **Avg Reviews/App**: Average number of reviews per application
+
+**Average Score Metrics**
+- **Avg Resume Score**: Mean resume score across all reviews (out of 3)
+- **Avg Links Score**: Mean links score across all reviews (out of 2)
+- **Avg Q1 Score**: Mean Question 1 score across all reviews (out of 7)
+- **Avg Q2 Score**: Mean Question 2 score across all reviews (out of 3)
+
+#### Top 3 Podium Display
+
+**Visual Ranking**
+- Animated podium showing top 3 reviewers
+- Medal icons: 🏆 Gold (1st), 🥈 Silver (2nd), 🥉 Bronze (3rd)
+- Different podium heights for visual hierarchy
+- Color-coded borders: Yellow (1st), Silver (2nd), Bronze (3rd)
+- Displays reviewer name, email, and total review count
+- Click to view detailed reviewer statistics
+
+#### Full Leaderboard Table
+
+**Features**
+- Complete ranked list of all reviewers
+- Shows rank position, reviewer name, email, and review count
+- Animated entry transitions
+- Click any entry to view detailed statistics
+- Responsive design for mobile and desktop
+
+### Reviewer Detail Modal
+
+**Detailed Statistics per Reviewer**
+
+When clicking on a reviewer, a modal displays their individual performance metrics:
+
+- **Reviewer Information**: Name and email
+- **Average Scores**:
+  - Resume Score (out of 3)
+  - Links Score (out of 2)
+  - Q1 Score (out of 7)
+  - Q2 Score (out of 3)
+- **Total Reviews**: Number of reviews completed by this reviewer
+
+**Modal Features**
+- Loading state with spinner during data fetch
+- Organized grid layout with score cards
+- Score context indicators ("Out of X")
+- Review count summary at bottom
+
+### Leaderboard API
+
+**Get Leaderboard Data and Statistics**
+```typescript
+GET /api/admin/leaderboard
+
+// Response:
+{
+  leaderboard: [
+    {
+      reviewer_id: "uuid",
+      review_count: 42,
+      name: "John Doe",
+      email: "john@example.com"
+    },
+    ...
+  ],
+  statistics: {
+    total_applications: 150,
+    total_reviews: 300,
+    total_reviewers: 15,
+    avg_reviews_per_application: 2.0,
+    avg_resume_score: 2.1,
+    avg_links_score: 1.5,
+    avg_q1_score: 5.2,
+    avg_q2_score: 2.3
+  }
+}
+```
+
+**Get Reviewer-Specific Scores**
+```typescript
+GET /api/admin/leaderboard?reviewerId={uuid}
+
+// Response:
+{
+  reviewerScores: {
+    avg_resume_score: 2.3,
+    avg_links_score: 1.8,
+    avg_q1_score: 5.5,
+    avg_q2_score: 2.5,
+    total_reviews: 42
+  }
+}
+```
+
+### Implementation Details
+
+**Backend Services**
+
+AdminReviewService methods:
+- `getLeaderboard()`: Returns all reviewers with review counts, sorted by count descending
+- `getStatistics()`: Calculates aggregate statistics across all applications and reviews
+- `getReviewerAverageScores(reviewerId)`: Computes average scores for a specific reviewer
+
+**Security**
+- Superadmin-only access via ProfileService role check
+- Graceful error handling with fallback values
+- Request timeout protection (30 seconds)
+- Promise.allSettled for partial failure handling
+
+**Performance Optimizations**
+- Parallel data fetching for leaderboard and statistics
+- Optimized SQL queries with proper aggregations
+- Client-side caching with state management
+- Animated transitions with Framer Motion
+
+### Use Cases
+
+**For Superadmins**
+1. **Monitor Review Progress**: Track how many applications have been reviewed
+2. **Identify Top Contributors**: Recognize most active reviewers
+3. **Quality Assurance**: Analyze average scores to identify scoring patterns
+4. **Load Balancing**: See which reviewers are most active to distribute future review assignments
+5. **Performance Analytics**: Compare individual reviewer scoring patterns against overall averages
+
+**Gamification Benefits**
+- Encourages healthy competition among reviewers
+- Provides recognition for top contributors
+- Motivates consistent review participation
+- Transparent progress tracking
 
 ## API Reference
 
@@ -325,15 +497,53 @@ Response: {
 POST /api/review/submit
 Body: {
   application_id: string,
-  basic_info_score: number,  // 1-10
-  q1_score: number,           // 1-10
-  q2_score: number            // 1-10
+  resume_score: number,  // 0-3
+  links_score: number,   // 0-2
+  q1_score: number,      // 0-7
+  q2_score: number       // 0-3
 }
 Response: {
   success: true,
   message: string,
   review: { id: string, ... },
   total_reviews: number
+}
+```
+
+#### Get Leaderboard (Superadmin Only)
+```typescript
+GET /api/admin/leaderboard
+Response: {
+  leaderboard: Array<{
+    reviewer_id: string,
+    review_count: number,
+    name: string | null,
+    email: string
+  }>,
+  statistics: {
+    total_applications: number,
+    total_reviews: number,
+    total_reviewers: number,
+    avg_reviews_per_application: number,
+    avg_resume_score: number,
+    avg_links_score: number,
+    avg_q1_score: number,
+    avg_q2_score: number
+  }
+}
+```
+
+#### Get Reviewer Statistics (Superadmin Only)
+```typescript
+GET /api/admin/leaderboard?reviewerId={uuid}
+Response: {
+  reviewerScores: {
+    avg_resume_score: number,
+    avg_links_score: number,
+    avg_q1_score: number,
+    avg_q2_score: number,
+    total_reviews: number
+  }
 }
 ```
 
@@ -395,9 +605,11 @@ const { application } = await getRandomApplication();
 // Submit review scores
 await submitReview({
   application_id: app.id,
-  basic_info_score: 8,
-  q1_score: 7,
-  q2_score: 9
+  resume_score: 2,    // 0-3
+  links_score: 1,     // 0-2
+  q1_score: 5,        // 0-7
+  q2_score: 2         // 0-3
+});
 });
 ```
 
@@ -449,12 +661,25 @@ const app = await service.getNextApplicationForReview(
 const result = await service.submitReview(
   {
     application_id: "app-id",
-    basic_info_score: 8,
-    q1_score: 7,
-    q2_score: 9
+    resume_score: 2,    // 0-3
+    links_score: 1,     // 0-2
+    q1_score: 5,        // 0-7
+    q2_score: 2         // 0-3
   },
   reviewerId
 );
+
+// Get leaderboard (superadmin only)
+const leaderboard = await service.getLeaderboard();
+// Returns: Array<{ reviewer_id, review_count, name, email }>
+
+// Get overall statistics (superadmin only)
+const statistics = await service.getStatistics();
+// Returns: { total_applications, total_reviews, total_reviewers, avg_reviews_per_application, avg_resume_score, avg_links_score, avg_q1_score, avg_q2_score }
+
+// Get reviewer-specific average scores (superadmin only)
+const reviewerScores = await service.getReviewerAverageScores(reviewerId);
+// Returns: { avg_resume_score, avg_links_score, avg_q1_score, avg_q2_score, total_reviews }
 ```
 
 ### ResumeService

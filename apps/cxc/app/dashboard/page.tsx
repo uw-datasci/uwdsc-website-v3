@@ -89,8 +89,8 @@ export default function DashboardPage() {
         {/* Team Section */}
         <TeamSection team={team} />
 
-        {/* NFC Check-In Card */}
-        {user?.id && <NfcCard />}
+        {/* NFC Check-In Card - Only show for non-default roles */}
+        {user?.id && user?.role && user.role !== "default" && <NfcCard />}
 
         {/* Quick Links */}
         <motion.div

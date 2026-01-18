@@ -1,10 +1,12 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, cn } from "@uwdsc/ui";
 import Link from "next/link";
 import CxCButton from "../CxCButton";
 import type { AppStatus } from "@/types/application";
+import { APPLICATION_DEADLINE } from "@/constants/application";
 
 interface StatusCardProps {
   status: AppStatus | null;
@@ -57,6 +59,18 @@ const statusConfig: Record<
 
 export function StatusCard({ status, submittedAt }: Readonly<StatusCardProps>) {
   const config = status ? statusConfig[status] : null;
+  const [isPastDeadline, setIsPastDeadline] = useState(false);
+
+  useEffect(() => {
+    const checkDeadline = () => {
+      setIsPastDeadline(new Date() > APPLICATION_DEADLINE);
+    };
+
+    checkDeadline();
+    const interval = setInterval(checkDeadline, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <motion.div
@@ -86,15 +100,29 @@ export function StatusCard({ status, submittedAt }: Readonly<StatusCardProps>) {
         <CardContent className="pt-6">
           {status === null ? (
             <div className="space-y-6">
-              <p className="text-white/60">
-                You haven&apos;t started your application yet. Apply now to join
-                CxC!
-              </p>
-              <Link href="/apply">
-                <CxCButton className="w-full sm:w-auto">
-                  Start Application →
-                </CxCButton>
-              </Link>
+              {isPastDeadline ? (
+                <div className="border border-red-400/40 bg-red-400/10 p-4">
+                  <p className="text-red-400 font-medium mb-1 font-mono">
+                    Application deadline passed.
+                  </p>
+                  <p className="text-red-400/70 text-sm">
+                    The application deadline has passed. We are no longer accepting
+                    new applications.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <p className="text-white/60">
+                    You haven&apos;t started your application yet. Apply now to join
+                    CxC!
+                  </p>
+                  <Link href="/apply">
+                    <CxCButton className="w-full sm:w-auto">
+                      Start Application →
+                    </CxCButton>
+                  </Link>
+                </>
+              )}
             </div>
           ) : (
             <div className="space-y-4">
@@ -114,11 +142,26 @@ export function StatusCard({ status, submittedAt }: Readonly<StatusCardProps>) {
               )}
 
               {status === "draft" && (
-                <Link href="/apply">
-                  <CxCButton className="w-full sm:w-auto">
-                    Continue Application →
-                  </CxCButton>
-                </Link>
+                <>
+                  {isPastDeadline ? (
+                    <div className="border border-red-400/40 bg-red-400/10 p-4">
+                      <p className="text-red-400 font-medium mb-1 font-mono">
+                        Application deadline passed.
+                      </p>
+                      <p className="text-red-400/70 text-sm">
+                        The application deadline has passed. We are no longer
+                        accepting applications or allowing edits to draft
+                        applications.
+                      </p>
+                    </div>
+                  ) : (
+                    <Link href="/apply">
+                      <CxCButton className="w-full sm:w-auto">
+                        Continue Application →
+                      </CxCButton>
+                    </Link>
+                  )}
+                </>
               )}
 
               {status === "offered" && (

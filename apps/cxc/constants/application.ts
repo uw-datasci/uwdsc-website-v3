@@ -108,7 +108,7 @@ export const BLANK_APPLICATION = {
 };
 
 export const APPLICATION_RELEASE_DATE = new Date("2026-01-02T08:00:00");
-export const APPLICATION_DEADLINE = new Date("2027-12-31T23:59:59");
+export const APPLICATION_DEADLINE = new Date("2026-01-16T00:00:00");
 
 // field names
 export const CONTACT_INFO_FIELDS = {

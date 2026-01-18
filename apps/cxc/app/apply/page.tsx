@@ -80,9 +80,13 @@ export default function ApplyPage() {
   // ========================================================================
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { user } = useAuth();
+  const isAdminOrSuperadmin = user?.role === "admin" || user?.role === "superadmin";
   const [isApplicationOpen, setIsApplicationOpen] = useState<boolean>(() => {
     const now = new Date();
-    return now >= APPLICATION_RELEASE_DATE && now <= APPLICATION_DEADLINE;
+    const isWithinDeadline = now >= APPLICATION_RELEASE_DATE && now <= APPLICATION_DEADLINE;
+    // Admins and superadmins can always access
+    return isWithinDeadline || isAdminOrSuperadmin;
   });
   const [currentDesktopStep, setCurrentDesktopStep] = useState<number>(() => {
     if (typeof window !== "undefined") {
@@ -101,7 +105,6 @@ export default function ApplyPage() {
   const [applicationStatus, setApplicationStatus] = useState<string | null>(
     null,
   );
-  const { user } = useAuth();
   const hasInitialized = useRef<boolean>(false);
 
   // ========================================================================
@@ -121,19 +124,22 @@ export default function ApplyPage() {
   /**
    * Continuously check if applications are open
    * Checks every second to dynamically update when the date window changes
+   * Admins and superadmins can always access
    */
   useEffect(() => {
     const checkApplicationStatus = () => {
       const now = new Date();
-      const isOpen =
+      const isWithinDeadline =
         now >= APPLICATION_RELEASE_DATE && now <= APPLICATION_DEADLINE;
+      // Admins and superadmins can always access
+      const isOpen = isWithinDeadline || isAdminOrSuperadmin;
       setIsApplicationOpen(isOpen);
     };
 
     const timer = setInterval(checkApplicationStatus, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [isAdminOrSuperadmin]);
 
   /**
    * Initialize application on component mount
@@ -147,7 +153,7 @@ export default function ApplyPage() {
     const initializeApplication = async () => {
       if (!user?.id || hasInitialized.current) return;
 
-      // Don't initialize application if outside the date range
+      // Don't initialize application if outside the date range (unless admin/superadmin)
       if (!isApplicationOpen) {
         setApplicationStatus("closed");
         setIsLoading(false);
@@ -405,7 +411,8 @@ export default function ApplyPage() {
   // Render
   // ========================================================================
 
-  if (!isApplicationOpen) {
+  // Only show ApplicationClosed to non-admin users
+  if (!isApplicationOpen && !isAdminOrSuperadmin) {
     return <ApplicationClosed />;
   }
 

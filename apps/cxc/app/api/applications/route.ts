@@ -1,4 +1,7 @@
 import { ApplicationService } from "@uwdsc/server/cxc/services/applicationService";
+import { ProfileService } from "@uwdsc/server/cxc/services/profileService";
+import { createAuthService } from "@/lib/services";
+import { APPLICATION_DEADLINE } from "@/constants/application";
 import { NextResponse, NextRequest } from "next/server";
 
 // ============================================================================
@@ -43,6 +46,33 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    // Check if past deadline (unless admin/superadmin)
+    const now = new Date();
+    const isPastDeadline = now > APPLICATION_DEADLINE;
+
+    if (isPastDeadline) {
+      // Verify if user is admin or superadmin
+      const authService = await createAuthService();
+      const { user, error: userError } = await authService.getCurrentUser();
+
+      if (userError || !user) {
+        return NextResponse.json(
+          { error: "Application deadline has passed" },
+          { status: 403 },
+        );
+      }
+
+      const profileService = new ProfileService();
+      const profile = await profileService.getProfileByUserId(user.id);
+
+      if (profile?.role !== "admin" && profile?.role !== "superadmin") {
+        return NextResponse.json(
+          { error: "Application deadline has passed" },
+          { status: 403 },
+        );
+      }
+    }
+
     const body = await request.json();
     const applicationService = new ApplicationService();
 
@@ -64,6 +94,33 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
 export async function PATCH(request: NextRequest): Promise<NextResponse> {
   try {
+    // Check if past deadline (unless admin/superadmin)
+    const now = new Date();
+    const isPastDeadline = now > APPLICATION_DEADLINE;
+
+    if (isPastDeadline) {
+      // Verify if user is admin or superadmin
+      const authService = await createAuthService();
+      const { user, error: userError } = await authService.getCurrentUser();
+
+      if (userError || !user) {
+        return NextResponse.json(
+          { error: "Application deadline has passed" },
+          { status: 403 },
+        );
+      }
+
+      const profileService = new ProfileService();
+      const profile = await profileService.getProfileByUserId(user.id);
+
+      if (profile?.role !== "admin" && profile?.role !== "superadmin") {
+        return NextResponse.json(
+          { error: "Application deadline has passed" },
+          { status: 403 },
+        );
+      }
+    }
+
     const body = await request.json();
     const { profile_id, ...updateData } = body;
 

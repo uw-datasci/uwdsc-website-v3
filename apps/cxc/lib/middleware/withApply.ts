@@ -4,12 +4,10 @@ import type { NextRequest } from "next/server";
 
 /**
  * Middleware to protect the /apply route
- * Redirects unauthenticated users to /register
+ * Blocks ALL users (including admins) from accessing /apply
+ * Redirects everyone to home page
  */
 export function withApply(request: NextRequest, user: any) {
-  // If user is not authenticated, redirect to register
-  if (!user) return NextResponse.redirect(new URL("/start", request.url));
-
-  // User is authenticated, allow access
-  return NextResponse.next();
+  // Block everyone, regardless of authentication or role
+  return NextResponse.redirect(new URL("/", request.url));
 }

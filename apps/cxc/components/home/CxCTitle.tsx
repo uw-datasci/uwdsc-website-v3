@@ -8,12 +8,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Badge, Meteors, WarpBackground } from "@uwdsc/ui/index";
 import Image from "next/image";
 import { useIsMobile } from "@/hooks/useIsMobile";
-import { APPLICATION_RELEASE_DATE } from "@/constants/application";
+import {
+  APPLICATION_RELEASE_DATE,
+  APPLICATION_DEADLINE,
+} from "@/constants/application";
 
 export default function CxCTitle() {
   const eventDate = useMemo(() => APPLICATION_RELEASE_DATE, []);
   const [mounted, setMounted] = useState(false);
   const [countdownOver, setCountdownOver] = useState(false);
+  const [isPastDeadline, setIsPastDeadline] = useState(false);
   const isMobile = useIsMobile(640);
   // const isTablet = useIsMobile(1024);
   // const [cursorDone, setCursorDone] = useState(false);
@@ -34,6 +38,17 @@ export default function CxCTitle() {
 
     return () => clearInterval(interval);
   }, [eventDate]);
+
+  useEffect(() => {
+    const checkDeadline = () => {
+      setIsPastDeadline(new Date() > APPLICATION_DEADLINE);
+    };
+
+    checkDeadline();
+    const interval = setInterval(checkDeadline, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div
@@ -132,12 +147,14 @@ export default function CxCTitle() {
                     </div> */}
                   </div>
                   <div className="flex flex-col items-center gap-6">
-                    <CxCButton
-                      asChild
-                      className="text-base md:text-2xl py-2 md:py-3 px-10 md:px-14 hover:scale-105"
-                    >
-                      <Link href="/apply">Apply</Link>
-                    </CxCButton>
+                    {!isPastDeadline && (
+                      <CxCButton
+                        asChild
+                        className="text-base md:text-2xl py-2 md:py-3 px-10 md:px-14 hover:scale-105"
+                      >
+                        <Link href="/apply">Apply</Link>
+                      </CxCButton>
+                    )}
                     <div className="text-sm font-mono border border-orange-300 text-orange-300 px-3 py-1 shadow-[0_0_10px_rgba(251,146,60,0.3)]">
                       Applications due Jan 15, 11:59pm
                     </div>

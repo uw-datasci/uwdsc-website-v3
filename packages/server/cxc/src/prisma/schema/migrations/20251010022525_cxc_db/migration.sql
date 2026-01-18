@@ -1,8 +1,8 @@
 -- CreateEnum
-CREATE TYPE "public"."role_enum" AS ENUM ('hacker', 'volunteer', 'admin', 'default');
+CREATE TYPE "public"."role_enum" AS ENUM ('hacker', 'volunteer', 'admin', 'default', 'declined');
 
 -- CreateEnum
-CREATE TYPE "public"."application_status_enum" AS ENUM ('draft', 'submitted', 'offered', 'accepted', 'rejected', 'waitlisted');
+CREATE TYPE "public"."application_status_enum" AS ENUM ('draft', 'submitted', 'accepted', 'rejected', 'waitlisted');
 
 -- CreateEnum
 CREATE TYPE "public"."size_options" AS ENUM ('S', 'M', 'L', 'XL');

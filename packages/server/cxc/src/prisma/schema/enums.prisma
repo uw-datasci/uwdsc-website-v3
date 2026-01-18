@@ -3,12 +3,12 @@ enum role_enum {
     volunteer
     admin
     default
+    declined
 }
 
 enum application_status_enum {
     draft
     submitted
-    offered
     accepted
     rejected
     waitlisted

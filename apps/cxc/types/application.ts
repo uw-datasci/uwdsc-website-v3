@@ -4,7 +4,6 @@
 export type AppStatus =
   | "draft"
   | "submitted"
-  | "offered"
   | "accepted"
   | "rejected"
   | "waitlisted";

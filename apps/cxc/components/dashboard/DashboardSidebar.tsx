@@ -6,10 +6,10 @@ import { usePathname } from "next/navigation";
 import {
   cn,
   IdentificationCardIcon,
-  CalendarIcon,
   FileTextIcon,
   UsersIcon,
   ArrowLeftIcon,
+  CheckCircleIcon,
 } from "@uwdsc/ui";
 import Image from "next/image";
 
@@ -36,22 +36,32 @@ const navItems: NavItem[] = [
     icon: <UsersIcon className="w-5 h-5" />,
   },
   {
-    href: "/dashboard/schedule",
-    label: "Schedule",
-    icon: <CalendarIcon className="w-5 h-5" />,
+    href: "/dashboard/results",
+    label: "Results",
+    icon: <CheckCircleIcon className="w-5 h-5" />,
   },
 ];
 
 interface DashboardSidebarProps {
   className?: string;
   onNavClick?: () => void;
+  applicationStatus?: string;
 }
 
 export function DashboardSidebar({
   className,
   onNavClick,
+  applicationStatus,
 }: Readonly<DashboardSidebarProps>) {
   const pathname = usePathname();
+
+  // Filter out results tab if application is still in draft
+  const visibleNavItems = navItems.filter((item) => {
+    if (item.href === "/dashboard/results") {
+      return applicationStatus && applicationStatus !== "draft";
+    }
+    return true;
+  });
 
   return (
     <nav className={cn("flex flex-col gap-2 p-6", className)}>
@@ -73,7 +83,7 @@ export function DashboardSidebar({
       </div>
 
       <div className="flex flex-col gap-1">
-        {navItems.map((item) => {
+        {visibleNavItems.map((item) => {
           const isActive =
             pathname === item.href ||
             (item.href !== "/dashboard" && pathname.startsWith(item.href));

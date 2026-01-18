@@ -27,15 +27,8 @@ const statusConfig: Record<
     borderColor: "border-blue-400",
     description: "Your application is under review. We'll notify you soon!",
   },
-  offered: {
-    label: "ACCEPTED",
-    color: "text-green-400",
-    borderColor: "border-green-400",
-    description:
-      "Congratulations! You've been accepted. Please confirm your attendance.",
-  },
   accepted: {
-    label: "CONFIRMED",
+    label: "ACCEPTED",
     color: "text-emerald-400",
     borderColor: "border-emerald-400",
     description: "You're all set! We can't wait to see you at CxC.",
@@ -119,21 +112,6 @@ export function StatusCard({ status, submittedAt }: Readonly<StatusCardProps>) {
                     Continue Application →
                   </CxCButton>
                 </Link>
-              )}
-
-              {status === "offered" && (
-                <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                  <CxCButton className="flex-1">Confirm Attendance</CxCButton>
-                  <CxCButton
-                    className="flex-1 !bg-transparent !text-white border border-white/20 hover:!bg-white/10"
-                    disabled
-                  >
-                    Decline
-                  </CxCButton>
-                  <p className="text-xs text-white/40 sm:hidden">
-                    RSVP functionality coming soon
-                  </p>
-                </div>
               )}
             </div>
           )}

@@ -20,14 +20,7 @@ export const applicationSchema = z.object({
   // ========================================================================
 
   status: z
-    .enum([
-      "draft",
-      "submitted",
-      "offered",
-      "accepted",
-      "rejected",
-      "waitlisted",
-    ])
+    .enum(["draft", "submitted", "accepted", "rejected", "waitlisted"])
     .optional(),
   submitted_at: z.date().optional(),
 

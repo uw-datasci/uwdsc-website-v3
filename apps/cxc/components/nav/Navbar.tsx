@@ -24,6 +24,7 @@ import Image from "next/image";
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/dashboard", label: "Dashboard" },
+  { href: "/schedule", label: "Schedule" },
 ];
 
 const adminPages = [

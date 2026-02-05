@@ -7,13 +7,12 @@ import { Loader2 } from "lucide-react";
 import echo1 from "@/public/graphics/echo-1.png";
 import echo2 from "@/public/graphics/echo-2.png";
 import InputFeedback from "../home/InputFeedback";
-import { renderTextField } from "../FormHelpers";
+import { renderTextField, Form, FormField, Button } from "@uwdsc/ui";
 import {
   mailingListDefaultValues,
   MailingListFormValues,
   mailingListSchema,
 } from "@/lib/schemas/mailing-list";
-import { Form, FormField, Button } from "@uwdsc/ui";
 
 export default function MailingList() {
   const [loading, setLoading] = useState<boolean>(false);

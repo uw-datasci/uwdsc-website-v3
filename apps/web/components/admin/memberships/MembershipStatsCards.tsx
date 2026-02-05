@@ -5,8 +5,7 @@ import { Users, DollarSign, GraduationCap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { MembershipStats } from "@/types/api";
 import type { MembershipFilterType } from "@/app/admin/memberships/page";
-import { cn } from "@/lib/utils";
-import { Card, CardHeader, CardTitle, CardContent } from "@uwdsc/ui";
+import { cn, Card, CardHeader, CardTitle, CardContent } from "@uwdsc/ui";
 
 interface MembershipStatsCardsProps {
   readonly stats: MembershipStats;

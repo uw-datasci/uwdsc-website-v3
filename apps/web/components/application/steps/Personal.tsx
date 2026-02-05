@@ -7,15 +7,13 @@ import {
   CardTitle,
   Form,
   FormField,
+  renderTextField,
+  renderSelectField,
+  renderRadioField,
 } from "@uwdsc/ui";
 import { UseFormReturn } from "react-hook-form";
 import { AppFormValues } from "@/lib/schemas/application";
 import { GraduationCap, User } from "lucide-react";
-import {
-  renderTextField,
-  renderSelectField,
-  renderRadioField,
-} from "@/components/FormHelpers";
 
 interface PersonalProps {
   readonly form: UseFormReturn<AppFormValues>;

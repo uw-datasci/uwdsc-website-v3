@@ -55,6 +55,15 @@ importers:
       '@tanstack/react-query-devtools':
         specifier: ^5.90.2
         version: 5.91.3(@tanstack/react-query@5.90.20(react@19.2.4))(react@19.2.4)
+      '@uwdsc/admin':
+        specifier: workspace:*
+        version: link:../../packages/server/admin
+      '@uwdsc/core':
+        specifier: workspace:*
+        version: link:../../packages/server/core
+      '@uwdsc/db':
+        specifier: workspace:*
+        version: link:../../packages/server/db
       '@uwdsc/ui':
         specifier: workspace:*
         version: link:../../packages/ui

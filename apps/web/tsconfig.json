@@ -7,7 +7,7 @@
       "@/*": ["./*"],
       "@uwdsc/ui": ["../../packages/ui/src/index.ts"],
       "@uwdsc/core": ["../../packages/server/core/src/index.ts"],
-      "@uwdsc/db": ["../../packages/server/db/src/index.ts"]
+      "@uwdsc/db": ["../../packages/server/db/src/config/supabase.ts"]
     },
     "plugins": [{ "name": "next" }]
   },

@@ -7,10 +7,9 @@ import { z } from "zod";
 import { Typing } from "@/components/login/Typing";
 import Link from "next/link";
 import { Loader2, Mail, ArrowRight } from "lucide-react";
-import { renderTextField } from "@/components/FormHelpers";
+import { renderTextField, Button, Form, FormField } from "@uwdsc/ui";
 import { motion, AnimatePresence } from "framer-motion";
 import { register, resendVerificationEmail } from "@/lib/api";
-import { Button, Form, FormField } from "@uwdsc/ui";
 
 // Simple schema for email and password only
 const registerSchema = z

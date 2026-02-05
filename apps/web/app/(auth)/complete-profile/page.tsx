@@ -13,13 +13,15 @@ import {
   renderTextField,
   renderSelectField,
   renderTextAreaField,
-} from "@/components/FormHelpers";
+  Button,
+  Form,
+  FormField,
+} from "@uwdsc/ui";
 import { Typing } from "@/components/login/Typing";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getProfile, updateUserProfile } from "@/lib/api";
-import { Button, Form, FormField } from "@uwdsc/ui";
 
 // Map the displayed faculty options to enum values
 const facultyMap: Record<string, string> = {

@@ -23,6 +23,7 @@
     "typescript": "^5.9.2"
   },
   "exports": {
-    ".": "./src/index.ts"
+    "./connection": "./src/config/connection.ts",
+    "./supabase": "./src/config/supabase.ts"
   }
 }

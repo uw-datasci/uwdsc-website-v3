@@ -9,9 +9,12 @@
     "start": "next start",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
-    "typecheck": "tsc --noEmit"
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@uwdsc/db": "workspace:*",
+    "@uwdsc/core": "workspace:*",
+    "@uwdsc/admin": "workspace:*",
     "@uwdsc/ui": "workspace:*",
     "@hookform/resolvers": "^5.2.2",
     "@reduxjs/toolkit": "^2.10.1",

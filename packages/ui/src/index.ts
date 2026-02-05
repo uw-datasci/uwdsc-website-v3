@@ -1,3 +1,4 @@
+export * from "./lib";
 export * from "./components/accordion";
 export * from "./components/avatar";
 export * from "./components/badge";
@@ -22,3 +23,6 @@ export * from "./components/sonner";
 export * from "./components/table";
 export * from "./components/textarea";
 export * from "./components/tooltip";
+
+export * from "./components/sidebar";
+export * from "./components/skeleton";

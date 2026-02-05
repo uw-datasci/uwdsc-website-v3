@@ -7,14 +7,12 @@ import {
   CardTitle,
   Form,
   FormField,
+  renderSelectField,
+  renderTextAreaField,
 } from "@uwdsc/ui";
 import { UseFormReturn } from "react-hook-form";
 import { AppFormValues } from "@/lib/schemas/application";
 import { Briefcase, Users } from "lucide-react";
-import {
-  renderSelectField,
-  renderTextAreaField,
-} from "@/components/FormHelpers";
 import { AVAILABLE_POSITIONS } from "@/constants/positions";
 import { useEffect } from "react";
 import { DuplicateBanner } from "../banners/DuplicateBanner";

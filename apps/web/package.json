@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit",
+    "check-types": "tsc --noEmit",
     "ui:add": "node scripts/ui-add.mjs",
     "pull-secrets": "node scripts/pull-secrets.js",
     "migrate": "node scripts/migrate.js up",

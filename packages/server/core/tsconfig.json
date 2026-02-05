@@ -5,13 +5,7 @@
     "jsx": "react-jsx",
     "noImplicitAny": false,
     "paths": {
-      "@uwdsc/core/services/email": ["./src/services/email.service.tsx"],
-      "@uwdsc/core/services/pdf": ["./src/services/pdf.service.tsx"],
-      "@uwdsc/core/services/*": ["./src/services/*.service.ts"],
-      "@uwdsc/core/types/*": ["./src/types/*.ts"],
-      "@uwdsc/core/repository/*": ["./src/repository/postgres/*.repository.ts"],
-      "@uwdsc/core/cache/*": ["./src/repository/redis/*.cache.ts"],
-      "@uwdsc/core/utils/*": ["./src/utils/*.ts"],
+      "@uwdsc/core/services/*": ["./src/services/*"],
       "@uwdsc/core/*": ["./src/*"]
     }
   },

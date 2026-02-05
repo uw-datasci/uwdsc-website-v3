@@ -21,9 +21,7 @@ function isProfileComplete(profile: any, error: any): boolean {
 
 export async function proxy(request: NextRequest) {
   const response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
+    request: { headers: request.headers },
   });
 
   // Create Supabase client

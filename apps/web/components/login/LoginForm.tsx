@@ -8,13 +8,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { renderTextField } from "../FormHelpers";
+import { renderTextField, Form, FormField, Button } from "@uwdsc/ui";
 import { Loader2 } from "lucide-react";
 import { VerifyEmailModal } from "./VerifyEmailModal";
 import { login } from "@/lib/api/auth";
 import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
-import { Form, FormField, Button } from "@uwdsc/ui";
 
 export function LoginForm() {
   const [authError, setAuthError] = useState<string>("");

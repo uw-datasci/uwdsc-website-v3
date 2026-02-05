@@ -1,31 +1,59 @@
-# shadcn/ui monorepo template
+# UWDSC Website v3 - Developer Onboarding Guide
 
-This template is for creating a monorepo with shadcn/ui.
+Welcome to the UW Data Science Club website repository! This guide will help you understand the codebase architecture, setup process, and development workflow.
 
-## Usage
+## 🚀 Quick Setup
+
+> 📖 For detailed setup instructions and environment configuration, visit **[docs.uwdatascience.ca/getting-started](https://docs.uwdatascience.ca/getting-started)**
+
+### Prerequisites
+
+- Node.js >= 20
+- pnpm >= 10.26.0
+
+### Quick Start
 
 ```bash
-pnpm dlx shadcn@latest init
+# 1. Clone the repository
+git clone https://github.com/uwdsc/uwdsc-website-v3.git
+cd uwdsc-website-v3
+
+# 2. Install dependencies
+pnpm install
+
+# 3. Set up environment variables
+pnpm pull-secrets
+
+# 4. Start development servers
+pnpm dev
 ```
 
-## Adding components
-
-To add components to your app, run the following command at the root of your `web` app:
+### Common Commands
 
 ```bash
-pnpm dlx shadcn@latest add button -c apps/web
+pnpm dev                       # Start all apps
+pnpm dev:web                   # Start main website only
+pnpm dev:admin                 # Start admin app only
+pnpm build                     # Build all packages
+pnpm lint                      # Lint all packages
+pnpm ui:add <component-name>   # Add shadcn components
 ```
 
-This will place the ui components in the `packages/ui/src/components` directory.
+## 📚 Documentation
 
-## Tailwind
+For comprehensive documentation including architecture, development workflows, and best practices, visit **[docs.uwdatascience.ca](https://docs.uwdatascience.ca)**.
 
-Your `tailwind.config.ts` and `globals.css` are already set up to use the components from the `ui` package.
+### Key Documentation Sections
 
-## Using components
+- **[Getting Started](https://docs.uwdatascience.ca/getting-started)** - Complete environment setup and installation guide
+- **[Architecture](https://docs.uwdatascience.ca/architecture)** - Monorepo structure, design system, and API architecture
+- **[Guides](https://docs.uwdatascience.ca/guides)** - Step-by-step development guides for common tasks
+- **[Packages](https://docs.uwdatascience.ca/packages)** - Detailed package documentation
 
-To use the components in your app, import them from the `ui` package.
+## 🆘 Getting Help
 
-```tsx
-import { Button } from "@uwdsc/ui";
-```
+- Check the [documentation](https://docs.uwdatascience.ca) for detailed guides and architecture information
+- Review the [Getting Started guide](https://docs.uwdatascience.ca/getting-started) for setup help
+- Reach out to your VPs for more questions/clarifications
+
+Happy coding! 🚀

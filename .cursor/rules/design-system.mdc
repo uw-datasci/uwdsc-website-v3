@@ -1,0 +1,93 @@
+---
+alwaysApply: true
+---
+
+# Design System Architecture
+
+This project follows an **Atomic Design System** pattern using shadcn/ui as the foundation.
+
+## Structure Overview
+
+### 🧬 Atoms: UI Package (`packages/ui`)
+
+The [packages/ui](mdc:packages/ui) directory contains **shared, reusable UI primitives** built with shadcn/ui components. These are the foundational building blocks of the design system.
+
+**Package Configuration:**
+
+- Uses shadcn/ui "new-york" style
+- Exports via [packages/ui/src/index.ts](mdc:packages/ui/src/index.ts)
+- Includes global styles at [packages/ui/src/styles/globals.css](mdc:packages/ui/src/styles/globals.css)
+- UI components at [packages/ui/src/components](mdc:packages/ui/src/components)
+- Configuration: [packages/ui/components.json](mdc:packages/ui/components.json)
+
+### 🧩 Molecules: App Components
+
+Each app (e.g., `apps/web/components`, `apps/cxc/components`) contains **composed components** that combine atoms from the UI package with app-specific logic.
+
+**Examples:**
+
+- [apps/web/components/TeamCard.tsx](mdc:apps/web/components/TeamCard.tsx) - Composes Card, CardHeader, CardContent from `@uwdsc/ui`
+- [apps/cxc/components/MotionCard.tsx](mdc:apps/cxc/components/MotionCard.tsx) - Combines Card and Button with Framer Motion animations
+
+## Adding New Shadcn Components
+
+To add a new shadcn component to the shared UI package:
+
+```bash
+pnpm ui:add <component-name>
+```
+
+**Example:**
+
+```bash
+pnpm ui:add dialog
+pnpm ui:add dropdown-menu
+pnpm ui:add input
+```
+
+This script (defined in [package.json](mdc:package.json) and implemented in [scripts/ui-add.js](mdc:scripts/ui-add.js)) runs `pnpm dlx shadcn@canary add <component-name>` in the `packages/ui` directory.
+
+## Usage Guidelines
+
+### ✅ Do
+
+1. **Import atoms from `@uwdsc/ui`** in your app components:
+
+   ```tsx
+   import { Card, Button, Avatar } from "@uwdsc/ui";
+   ```
+
+2. **Create molecules in app-specific `components/` folders** when:
+   - Combining multiple atoms
+   - Adding app-specific business logic
+   - Creating feature-specific compositions
+
+3. **Add new primitives to the UI package** when:
+   - The component will be reused across multiple apps
+   - It's a pure UI component with minimal business logic
+   - It follows shadcn/ui patterns
+
+### ❌ Don't
+
+1. **Don't duplicate shadcn components** in app folders - add them to the UI package instead
+2. **Don't add business logic** to UI package atoms - keep them pure and reusable
+3. **Don't manually install shadcn components** - always use `pnpm ui:add`
+
+## Package Exports
+
+The UI package exports:
+
+- `@uwdsc/ui` - All component exports
+- `@uwdsc/ui/globals.css` - Global styles
+- `@uwdsc/ui/postcss.config` - PostCSS configuration
+
+## Dependencies
+
+The UI package includes:
+
+- **Radix UI** primitives (headless components)
+- **Tailwind CSS** for styling
+- **Framer Motion** for animations
+- **Lucide React** for icons (via shadcn)
+- **next-themes** for theme support
+- **class-variance-authority** for variant styling

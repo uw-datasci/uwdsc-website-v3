@@ -1,0 +1,3 @@
+{
+  "extends": "@uwdsc/typescript-config/base.json"
+}

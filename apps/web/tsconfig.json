@@ -1,0 +1,22 @@
+{
+  "extends": "@uwdsc/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "noImplicitAny": false,
+    "paths": {
+      "@/*": ["./*"],
+      "@uwdsc/ui": ["../../packages/ui/src/index.ts"],
+      "@uwdsc/core": ["../../packages/server/core/src/index.ts"],
+      "@uwdsc/db": ["../../packages/server/db/src/index.ts"]
+    },
+    "plugins": [{ "name": "next" }]
+  },
+  "include": [
+    "next-env.d.ts",
+    "next.config.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["node_modules", ".next", ".turbo", ".vercel"]
+}

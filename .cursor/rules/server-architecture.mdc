@@ -1,0 +1,194 @@
+---
+alwaysApply: true
+---
+
+# Server Packages & API Architecture
+
+This project follows a **clean architecture pattern** with clear separation between frontend apps and backend services.
+
+## Server Package Structure
+
+The `packages/server/` directory contains backend services organized into three sub-packages:
+
+### 📦 `@uwdsc/server/core` - Shared Backend Utilities
+
+**Purpose**: Common backend services shared across all apps
+
+**Location**: `packages/server/core/src/`
+
+**Structure**:
+
+- `database/` - Supabase client and connection utilities
+- `services/` - Shared services (AuthService, FileService, ResumeService)
+- `repository/` - Base repository and shared data access (BaseRepository, AuthRepository, FileRepository)
+- `types/` - Common TypeScript types
+- `utils/` - Error handling and utilities
+
+**Exports**:
+
+```typescript
+import { AuthService } from "@uwdsc/server/core/services/authService";
+import { FileService } from "@uwdsc/server/core/services/fileService";
+import { BaseRepository } from "@uwdsc/server/core/repository/baseRepository";
+```
+
+**Tech Stack**: Supabase, PostgreSQL, TypeScript
+
+### 📦 `@uwdsc/server/web` - Web App Backend
+
+**Purpose**: Backend services specific to the main website
+
+**Location**: `packages/server/web/src/`
+
+**Structure**:
+
+- `prisma/schema/` - Prisma schema files (application, event, profile, etc.)
+- `services/` - Web-specific business logic (ProfileService, ApplicationService, EventService)
+- `repository/` - Web-specific data access layer
+- `types/` - Web-specific types
+- `middleware/` - (Placeholder for future middleware)
+- `policies/` - (Placeholder for authorization policies)
+
+**Exports**:
+
+```typescript
+import { ProfileService } from "@uwdsc/server/web/services/profileService";
+import { ApplicationService } from "@uwdsc/server/web/services/applicationService";
+```
+
+**Dependencies**: Extends `@uwdsc/server/core`, uses Prisma for app-specific database
+
+**Tech Stack**: Prisma, Supabase, PostgreSQL, TypeScript
+
+### 📦 `@uwdsc/server/cxc` - CxC App Backend
+
+**Purpose**: Backend services specific to CxC app
+
+**Location**: `packages/server/cxc/src/`
+
+**Structure**: Same as web backend with CxC-specific schemas and services
+
+**Exports**:
+
+```typescript
+import { ProfileService } from "@uwdsc/server/cxc/services/profileService";
+import { ApplicationService } from "@uwdsc/server/cxc/services/applicationService";
+```
+
+**Dependencies**: Extends `@uwdsc/server/core`, uses Prisma for app-specific database
+
+**Tech Stack**: Prisma, Supabase, PostgreSQL, TypeScript
+
+## API Architecture & Data Flow
+
+The application follows a layered architecture pattern:
+
+### Flow: React Component → Client API → API Route → Service → Repository → Database
+
+```
+┌─────────────────┐     ┌─────────────────┐    ┌─────────────────┐
+│   React Page    │───▶│ lib/api/ funcs  │───▶│   app/api/      │
+│   (Frontend)    │     │  (Client SDK)   │    │  (API Routes)   │
+└─────────────────┘     └─────────────────┘    └─────────────────┘
+
+┌─────────────────┐     ┌─────────────────┐    ┌─────────────────┐
+│    Database     │◀───│   Repository    │◀───│    Service      │
+│   (Supabase)    │     │  (Data Layer)   │    │ (Business Logic)│
+└─────────────────┘     └─────────────────┘    └─────────────────┘
+```
+
+### Layer Breakdown
+
+1. **React Components** (`apps/{web,cxc}/components/`)
+   - UI components that consume data
+   - These are your **molecular components** built from UI atoms
+   - Call client API functions from `lib/api/`
+
+2. **Client API Functions** (`apps/{web,cxc}/lib/api/`)
+   - Type-safe API wrapper functions for frontend consumption
+   - Handle request/response formatting and error handling
+   - Example: `register()`, `login()`, `getProfile()`
+   - Import types from `apps/{app}/types/api.ts`
+   - Make HTTP requests to Next.js API routes
+
+3. **API Routes** (`apps/{web,cxc}/app/api/`)
+   - Handle HTTP requests and responses
+   - Thin layer that calls service methods
+   - **Import services from respective server package**
+   - Example: `apps/web/app/api/profile/route.ts` imports from `@uwdsc/server/web`
+
+4. **Services** (`packages/server/{core,web,cxc}/src/services/`)
+   - Business logic and validation
+   - Orchestrate repository calls
+   - Shared services in `core`, app-specific in `web`/`cxc`
+   - Example: `ProfileService.getProfile()`, `AuthService.signIn()`
+
+5. **Repositories** (`packages/server/{core,web,cxc}/src/repository/`)
+   - Data access layer
+   - Direct database interactions via Prisma or Supabase client
+   - Extend `BaseRepository` for common functionality
+   - Core repositories in `core`, app-specific in `web`/`cxc`
+
+6. **Database**
+   - **Prisma**: App-specific database schemas for web and cxc
+   - **Supabase**: Authentication and shared services
+   - PostgreSQL as the underlying database
+
+### Example: Profile API Flow
+
+```typescript
+// 1. React component (apps/web/app/page.tsx) calls API function
+import { getProfile } from "@/lib/api";
+const profile = await getProfile();
+
+// 2. API function (apps/web/lib/api/user.ts) calls Next.js route
+const response = await fetch("/api/profile");
+return response.json();
+
+// 3. API route (apps/web/app/api/profile/route.ts) calls service
+import { ProfileService } from "@uwdsc/server/web/services/profileService";
+const profileService = new ProfileService();
+const profile = await profileService.getProfileByUserId(userId);
+
+// 4. Service (packages/server/web/src/services/profileService.ts) calls repository
+return await this.repository.getProfileByUserId(userId);
+
+// 5. Repository (packages/server/web/src/repository/profileRepository.ts) queries database
+const profile = await this.prisma.profile.findUnique({ where: { userId } });
+return profile;
+```
+
+## Usage Guidelines
+
+### ✅ Do
+
+1. **Import services from server packages in API routes**:
+
+   ```typescript
+   // apps/web/app/api/profile/route.ts
+   import { ProfileService } from "@uwdsc/server/web/services/profileService";
+   ```
+
+2. **Use core services for shared functionality**:
+
+   ```typescript
+   import { AuthService } from "@uwdsc/server/core/services/authService";
+   ```
+
+3. **Extend BaseRepository** when creating new repositories:
+
+   ```typescript
+   import { BaseRepository } from "@uwdsc/server/core/repository/baseRepository";
+   ```
+
+4. **Keep API routes thin** - they should only handle HTTP concerns and delegate to services
+
+5. **Put business logic in services**, not in API routes or repositories
+
+### ❌ Don't
+
+1. **Don't import server packages in React components** - use client API functions instead
+2. **Don't put business logic in API routes** - use services
+3. **Don't put business logic in repositories** - they should only handle data access
+4. **Don't duplicate services** - use `@uwdsc/server/core` for shared functionality
+5. **Don't access database directly from API routes** - always go through services and repositories

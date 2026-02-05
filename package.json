@@ -1,0 +1,39 @@
+{
+  "name": "uwdsc",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "dev:web": "turbo dev --filter=web...",
+    "dev:admin": "turbo dev --filter=admin...",
+    "dev:docs": "turbo dev --filter=docs...",
+    "build:docs": "turbo build --filter=docs",
+    "lint": "turbo lint",
+    "check-types": "turbo check-types",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "ui:add": "node scripts/ui-add.js",
+    "pull-secrets": "node scripts/pull-secrets.js"
+  },
+  "devDependencies": {
+    "@uwdsc/eslint-config": "workspace:*",
+    "@uwdsc/typescript-config": "workspace:*",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "turbo": "^2.6.3",
+    "typescript": "^5.7.3"
+  },
+  "packageManager": "pnpm@10.28.2",
+  "engines": {
+    "node": ">=24"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "^19.2.7",
+      "@types/react-dom": "^19.2.3"
+    }
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3"
+  }
+}

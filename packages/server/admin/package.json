@@ -1,0 +1,20 @@
+{
+  "name": "@uwdsc/admin",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "lint": "eslint . --max-warnings 0"
+  },
+  "devDependencies": {
+    "@uwdsc/eslint-config": "workspace:*",
+    "@uwdsc/typescript-config": "workspace:*",
+    "@types/node": "^20.19.9",
+    "eslint": "^9.32.0",
+    "typescript": "^5.9.2"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*"
+  }
+}

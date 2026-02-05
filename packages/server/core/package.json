@@ -1,0 +1,25 @@
+{
+  "name": "@uwdsc/core",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "lint": "eslint . --max-warnings 0",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@supabase/storage-js": "^2.94.0",
+    "@supabase/supabase-js": "^2.94.0",
+    "@uwdsc/db": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@uwdsc/eslint-config": "workspace:*",
+    "@uwdsc/typescript-config": "workspace:*",
+    "eslint": "^9",
+    "typescript": "^5"
+  },
+  "exports": {
+    ".": "./src/services/index.ts"
+  }
+}

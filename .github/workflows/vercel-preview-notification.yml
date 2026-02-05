@@ -1,0 +1,38 @@
+name: Vercel Preview Discord Notification
+
+on:
+  pull_request:
+    types: opened
+
+jobs:
+  construct-deployment-url:
+    runs-on: ubuntu-latest
+    outputs:
+      should-notify: ${{ steps.construct-url.outputs.should-notify }}
+      deployment-info: ${{ steps.construct-url.outputs.deployment-info }}
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v6
+
+      - name: Construct Deployment URL
+        id: construct-url
+        uses: uw-datasci/nexus-construct-url@v1
+        with:
+          project-name: uwdsc-website-v3-cxc
+          team-slug: uwdsc
+
+  send-discord-notification:
+    runs-on: ubuntu-latest
+    needs: construct-deployment-url
+    if: needs.construct-deployment-url.outputs.should-notify == 'true'
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v6
+
+      - name: Send Discord Notification
+        uses: uw-datasci/nexus-discord-notification@v1
+        with:
+          discord-webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          deployment-info: ${{ needs.construct-deployment-url.outputs.deployment-info }}

@@ -1,0 +1,69 @@
+name: Auto-Update Docs on Merge
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  update-docs-after-merge:
+    if: |
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.user.login != 'github-actions[bot]' &&
+      !startsWith(github.event.pull_request.title, '📚 Auto-Docs Update') &&
+      !startsWith(github.event.pull_request.head.ref, 'auto-docs/merge-') &&
+      !contains(github.event.pull_request.labels.*.name, 'no documentation')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout Main
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Extract Semester Tag
+        id: semester
+        run: |
+          # Extract semester tags from PR labels (F25, W26, S26, F26, W27, etc.)
+          SEMESTER_TAG=$(echo '${{ join(github.event.pull_request.labels.*.name, ' ') }}' | grep -oE '(F|W|S)[0-9]{2}' | head -1 || echo "")
+          echo "semester_tag=$SEMESTER_TAG" >> $GITHUB_OUTPUT
+          echo "Found semester tag: $SEMESTER_TAG"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Install Copilot CLI Agent
+        run: npm install -g @github/copilot
+
+      - name: Run Copilot to Update Docs
+        env:
+          GITHUB_TOKEN: ${{ secrets.COPILOT_TOKEN }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          SEMESTER_TAG: ${{ steps.semester.outputs.semester_tag }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          chmod +x .github/scripts/update-docs.sh
+          .github/scripts/update-docs.sh
+
+      - name: Create PR with Doc Updates
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Update docs based on merge #${{ github.event.pull_request.number }}"
+          title: "📚 Auto-Docs Update (Post-Merge)"
+          branch: "auto-docs/merge-${{ github.event.pull_request.number }}"
+          base: main
+          delete-branch: true
+          body: |
+            ### 🤖 Automated Documentation Update
+
+            Triggered by the merge of PR #${{ github.event.pull_request.number }}.
+
+            **Changes:** Updated `/docs` to match code changes.

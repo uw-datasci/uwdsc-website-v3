@@ -45,29 +45,32 @@ if (!process.env.DATABASE_URL) {
   process.exit(1);
 }
 
+// Migrations live in packages/server/db/src/migrations (db package)
+const migrationsDir = "src/migrations";
+
 // Get the command (up, down, reset, etc.)
 const command = process.argv[2] || "up";
 const args = process.argv.slice(3);
 
 console.log(`\n🔄 Running database migration: ${command}\n`);
 
-// For create command, automatically add --sql-file flag
-let dbMigrateArgs = [command, ...args];
-if (command === "create") {
-  // If --sql-file is not already in args, add it
-  if (!args.includes("--sql-file")) {
-    dbMigrateArgs = [command, ...args, "--sql-file"];
-  }
+// Always use migrations dir in the db package; for create, add --sql-file
+let dbMigrateArgs = ["-m", migrationsDir, command, ...args];
+if (command === "create" && !args.includes("--sql-file")) {
+  dbMigrateArgs.push("--sql-file");
 }
 
-// Run db-migrate
-// Use 'db-migrate' directly - npm will resolve it from node_modules/.bin
-const dbMigrate = spawn("db-migrate", dbMigrateArgs, {
-  stdio: "inherit",
-  env: process.env,
-  shell: true,
-  cwd: path.join(__dirname, ".."),
-});
+// Run db-migrate from the db package (finds database.json there)
+const dbMigrate = spawn(
+  "pnpm",
+  ["--filter", "@uwdsc/db", "exec", "db-migrate", ...dbMigrateArgs],
+  {
+    stdio: "inherit",
+    env: process.env,
+    shell: true,
+    cwd: path.join(__dirname, ".."),
+  }
+);
 
 dbMigrate.on("close", (code) => {
   if (code === 0) {

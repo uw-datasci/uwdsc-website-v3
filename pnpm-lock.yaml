@@ -408,6 +408,12 @@ importers:
       '@uwdsc/typescript-config':
         specifier: workspace:*
         version: link:../../typescript-config
+      db-migrate:
+        specifier: ^0.11.14
+        version: 0.11.14
+      db-migrate-pg:
+        specifier: ^1.5.2
+        version: 1.5.2
       eslint:
         specifier: ^9.32.0
         version: 9.39.2(jiti@2.6.1)

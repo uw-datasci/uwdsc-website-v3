@@ -1,0 +1,540 @@
+# API Architecture
+
+Learn about our backend architecture and API patterns.
+
+## Architecture Pattern
+
+We follow a **layered architecture** with clear separation of concerns:
+
+```
+┌─────────────────────┐
+│  React Component    │  UI Layer
+└──────────┬──────────┘
+           │
+┌──────────▼──────────┐
+│   Client API Func   │  API Client Layer
+└──────────┬──────────┘
+           │
+┌──────────▼──────────┐
+│   Next.js Route     │  HTTP Layer
+└──────────┬──────────┘
+           │
+┌──────────▼──────────┐
+│      Service        │  Business Logic Layer
+└──────────┬──────────┘
+           │
+┌──────────▼──────────┐
+│    Repository       │  Data Access Layer
+└──────────┬──────────┘
+           │
+┌──────────▼──────────┐
+│     Database        │  Persistence Layer
+└─────────────────────┘
+```
+
+## Layer Breakdown
+
+### 1. React Components (UI Layer)
+
+**Location**: `apps/{web,cxc}/components/`, `apps/{web,cxc}/app/`
+
+**Purpose**: Display UI and handle user interactions
+
+**Example**:
+
+```tsx
+"use client";
+
+import { useState, useEffect } from "react";
+import { getSystemHealth } from "@/lib/api";
+import { Card, CardContent } from "@uwdsc/ui";
+
+export function HealthStatus() {
+  const [health, setHealth] = useState(null);
+
+  useEffect(() => {
+    async function fetchHealth() {
+      const healthData = await getSystemHealth();
+      setHealth(healthData);
+    }
+    fetchHealth();
+  }, []);
+
+  return (
+    <Card>
+      <CardContent>Status: {health?.status}</CardContent>
+    </Card>
+  );
+}
+```
+
+### 2. Client API Functions (API Client Layer)
+
+**Location**: `apps/{web,cxc}/lib/api/`
+
+**Purpose**: Type-safe API wrappers for frontend
+
+**Example** (`apps/web/lib/api/health.ts`):
+
+```tsx
+import type { HealthResponse } from "@/types/api";
+
+export async function getSystemHealth(): Promise<HealthResponse> {
+  const response = await fetch("/api/health");
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch health status");
+  }
+
+  return response.json();
+}
+
+export async function login(credentials: LoginRequest): Promise<LoginResponse> {
+  const response = await fetch("/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(credentials),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw createApiError(data, response.status);
+  }
+
+  return data;
+}
+```
+
+### 3. Next.js API Routes (HTTP Layer)
+
+**Location**: `apps/{web,cxc}/app/api/`
+
+**Purpose**: Handle HTTP requests and responses
+
+**Example** (`apps/web/app/api/health/route.ts`):
+
+```tsx
+import { NextResponse } from "next/server";
+import { HealthService } from "@uwdsc/server/web/services/healthService";
+
+export async function GET() {
+  try {
+    const healthService = new HealthService();
+    const health = await healthService.getSystemHealth();
+
+    return NextResponse.json(health);
+  } catch (error) {
+    console.error("Health check failed:", error);
+    return NextResponse.json({ error: "Health check failed" }, { status: 500 });
+  }
+}
+```
+
+### 4. Services (Business Logic Layer)
+
+**Location**: `packages/server/{core,web,cxc}/src/services/`
+
+**Purpose**: Business logic and orchestration
+
+**Example** (`packages/server/web/src/services/healthService.ts`):
+
+```tsx
+import { HealthRepository } from "../repository/healthRepository";
+
+export class HealthService {
+  private repository: HealthRepository;
+
+  constructor() {
+    this.repository = new HealthRepository();
+  }
+
+  async getSystemHealth() {
+    const dbHealth = await this.repository.checkDatabaseConnection();
+    const timestamp = new Date().toISOString();
+
+    return {
+      status: dbHealth ? "healthy" : "unhealthy",
+      timestamp,
+      database: dbHealth ? "connected" : "disconnected",
+    };
+  }
+
+  async performHealthCheck() {
+    // More complex health check logic
+    const checks = await Promise.all([
+      this.repository.checkDatabaseConnection(),
+      this.checkExternalServices(),
+      this.checkMemoryUsage(),
+    ]);
+
+    return {
+      status: checks.every(Boolean) ? "healthy" : "degraded",
+      checks,
+    };
+  }
+
+  private async checkExternalServices() {
+    // Check external service health
+    return true;
+  }
+
+  private async checkMemoryUsage() {
+    // Check memory usage
+    return true;
+  }
+}
+```
+
+### 5. Repositories (Data Access Layer)
+
+**Location**: `packages/server/{core,web,cxc}/src/repository/`
+
+**Purpose**: Database queries and data access
+
+**Example** (`packages/server/web/src/repository/healthRepository.ts`):
+
+```tsx
+import { BaseRepository } from "@uwdsc/server/core/repository/baseRepository";
+
+export class HealthRepository extends BaseRepository {
+  async checkDatabaseConnection(): Promise<boolean> {
+    try {
+      const result = await this.pool.query("SELECT 1");
+      return result.rows.length > 0;
+    } catch (error) {
+      console.error("Database connection check failed:", error);
+      return false;
+    }
+  }
+
+  async getSystemMetrics() {
+    const [userResult, applicationResult, eventResult] = await Promise.all([
+      this.pool.query("SELECT COUNT(*) as count FROM users"),
+      this.pool.query("SELECT COUNT(*) as count FROM applications"),
+      this.pool.query("SELECT COUNT(*) as count FROM events"),
+    ]);
+
+    return {
+      userCount: parseInt(userResult.rows[0].count),
+      applicationCount: parseInt(applicationResult.rows[0].count),
+      eventCount: parseInt(eventResult.rows[0].count),
+    };
+  }
+}
+```
+
+### 6. Database (Persistence Layer)
+
+**Technologies**:
+
+- **pg**: PostgreSQL client for Node.js (raw SQL queries)
+- **db-mate**: Database migration tool (SQL files)
+- **Supabase**: PostgreSQL database and auth
+- **PostgreSQL**: Relational database
+
+## Complete Flow Example
+
+### Health Check Flow
+
+```typescript
+// 1. React Component (apps/web/components/HealthDashboard.tsx)
+"use client";
+import { useEffect, useState } from "react";
+import { getSystemHealth } from "@/lib/api";
+
+export function HealthDashboard() {
+  const [health, setHealth] = useState(null);
+
+  useEffect(() => {
+    async function fetchHealth() {
+      const healthData = await getSystemHealth();
+      setHealth(healthData);
+    }
+    fetchHealth();
+  }, []);
+
+  return <div>Status: {health?.status}</div>;
+}
+
+// 2. Client API (apps/web/lib/api/health.ts)
+export async function getSystemHealth() {
+  const response = await fetch("/api/health");
+  return response.json();
+}
+
+// 3. API Route (apps/web/app/api/health/route.ts)
+import { NextResponse } from "next/server";
+import { HealthService } from "@uwdsc/server/web/services/healthService";
+
+export async function GET() {
+  const healthService = new HealthService();
+  const health = await healthService.getSystemHealth();
+  return NextResponse.json(health);
+}
+
+// 4. Service (packages/server/web/src/services/healthService.ts)
+export class HealthService {
+  private repository: HealthRepository;
+
+  async getSystemHealth() {
+    return await this.repository.checkDatabaseConnection();
+  }
+}
+
+// 5. Repository (packages/server/web/src/repository/healthRepository.ts)
+export class HealthRepository extends BaseRepository {
+  async checkDatabaseConnection() {
+    await this.pool.query("SELECT 1");
+    return { status: "healthy" };
+  }
+}
+```
+
+## Authentication Flow
+
+**Note**: Authentication in this project uses **Supabase Auth**, not direct database queries. Supabase handles password hashing, session management, and email verification automatically.
+
+### User Login
+
+```typescript
+// 1. Component calls client API (apps/web/components/login/LoginForm.tsx)
+import { login } from "@/lib/api/auth";
+
+const handleLogin = async (email: string, password: string) => {
+  try {
+    const result = await login({ email, password });
+    // Handle success - result contains user and session
+    console.log("Logged in:", result.user);
+  } catch (error) {
+    // Handle error
+    console.error("Login failed:", error);
+  }
+};
+
+// 2. Client API (apps/web/lib/api/auth.ts)
+export async function login(credentials: LoginRequest): Promise<LoginResponse> {
+  const response = await fetch("/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(credentials),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw createApiError(data, response.status);
+  }
+
+  return data;
+}
+
+// 3. API Route (apps/web/app/api/auth/login/route.ts)
+import { NextRequest, NextResponse } from "next/server";
+import { createAuthService } from "@/lib/services";
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { email, password } = body;
+
+    if (!email || !password) {
+      return NextResponse.json(
+        { error: "Email and password are required" },
+        { status: 400 }
+      );
+    }
+
+    const authService = await createAuthService();
+    const result = await authService.login({ email, password });
+
+    if (!result.success) {
+      return NextResponse.json(
+        {
+          error: result.error,
+          needsVerification: result.needsVerification,
+          email: result.email,
+        },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      user: result.user,
+      session: result.session,
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    return NextResponse.json(
+      { error: "An unexpected error occurred" },
+      { status: 500 }
+    );
+  }
+}
+
+// 4. Service (packages/server/core/src/services/authService.ts)
+import { AuthRepository } from "../repository/authRepository";
+
+export class AuthService {
+  private readonly repository: AuthRepository;
+
+  constructor(supabaseClient: SupabaseClient) {
+    this.repository = new AuthRepository(supabaseClient);
+  }
+
+  async login(credentials: LoginData) {
+    const { data, error } = await this.repository.signInWithPassword({
+      email: credentials.email,
+      password: credentials.password,
+    });
+
+    if (error) {
+      if (error.message.includes("Email not confirmed")) {
+        return {
+          success: false,
+          needsVerification: true,
+          email: credentials.email,
+          error: "Email not verified",
+        };
+      }
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+
+    return {
+      success: true,
+      user: data.user,
+      session: data.session,
+    };
+  }
+}
+
+// 5. Repository (packages/server/core/src/repository/authRepository.ts)
+export class AuthRepository {
+  private readonly client: SupabaseClient;
+
+  constructor(client: SupabaseClient) {
+    this.client = client;
+  }
+
+  async signInWithPassword(credentials: LoginCredentials) {
+    const { data, error } = await this.client.auth.signInWithPassword({
+      email: credentials.email,
+      password: credentials.password,
+    });
+
+    return { data, error };
+  }
+}
+```
+
+## Error Handling
+
+### Centralized Error Handler
+
+```typescript
+// utils/errors.ts
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public statusCode: number = 500,
+    public code?: string
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
+export function handleApiError(error: unknown) {
+  if (error instanceof ApiError) {
+    return {
+      message: error.message,
+      code: error.code,
+      statusCode: error.statusCode,
+    };
+  }
+
+  return {
+    message: "Internal server error",
+    statusCode: 500,
+  };
+}
+```
+
+### Usage in API Routes
+
+```typescript
+import { NextResponse } from "next/server";
+import { ApiError, handleApiError } from "@/lib/errors";
+
+export async function POST(request: Request) {
+  try {
+    const data = await request.json();
+    const result = await service.process(data);
+    return NextResponse.json(result);
+  } catch (error) {
+    const { message, statusCode } = handleApiError(error);
+    return NextResponse.json({ error: message }, { status: statusCode });
+  }
+}
+```
+
+## Validation
+
+### Using Zod Schemas
+
+```typescript
+// lib/schemas/user.ts
+import { z } from "zod";
+
+export const loginSchema = z.object({
+  email: z.string().email("Invalid email"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+export type LoginInput = z.infer<typeof loginSchema>;
+
+// app/api/auth/login/route.ts
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const validated = loginSchema.parse(body);
+
+    // Process validated data
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ errors: error.errors }, { status: 400 });
+    }
+    throw error;
+  }
+}
+```
+
+## Best Practices
+
+### ✅ Do
+
+- Keep layers separated and focused
+- Use services for business logic
+- Use repositories for data access
+- Validate inputs with Zod
+- Handle errors appropriately
+- Use TypeScript for type safety
+- Write unit tests for services and repositories
+
+### ❌ Don't
+
+- Put business logic in API routes
+- Access database directly from API routes
+- Skip input validation
+- Expose internal errors to clients
+- Mix concerns across layers
+
+## Next Steps
+
+- [Data Flow](/architecture/data-flow) - Understanding data patterns
+- [Creating API Endpoints](/guides/creating-api) - Practical guide

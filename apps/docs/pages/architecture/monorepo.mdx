@@ -1,0 +1,360 @@
+# Monorepo Structure
+
+A detailed look at the monorepo organization and package relationships.
+
+## Repository Layout
+
+```
+uwdsc-website-v3/
+├── .github/                # GitHub Actions
+├── apps/                   # Frontend applications
+│   ├── web/                # Main website
+│   ├── cxc/                # CXC AI hackathon app
+│   └── docs/               # Documentation site
+├── packages/               # Shared packages
+│   ├── ui/                 # Design system
+│   ├── server/             # Backend services
+│   │   ├── core/           # Shared utilities
+│   │   ├── web/            # Web backend
+│   │   └── cxc/            # CxC backend
+│   ├── eslint-config/      # ESLint configuration
+│   └── typescript-config/  # TypeScript configuration
+├── scripts/                # Tool scripts
+├── package.json            # Root package configuration
+├── pnpm-workspace.yaml     # Workspace configuration
+└── turbo.json              # Turborepo configuration
+```
+
+## Apps
+
+### `apps/web` - Main Website
+
+The primary UW Data Science Club website.
+
+**Purpose**: Public-facing website with events, team info, and membership applications
+
+**Tech Stack**:
+
+- Next.js 15 (App Router)
+- React 19
+- TypeScript
+- Tailwind CSS
+
+**Key Features**:
+
+- Home page with events showcase
+- Team directory
+- Membership application system
+- Calendar integration
+- User authentication
+
+**Structure**:
+
+```
+apps/web/
+├── app/                 # Next.js pages and API routes
+│   ├── api/            # API endpoints
+│   ├── (auth)/         # Auth pages
+│   ├── admin/          # Admin dashboard
+│   └── ...             # Other pages
+├── components/          # React components
+├── lib/                # Utilities and API client
+├── constants/          # App constants
+├── contexts/           # React contexts
+└── types/              # TypeScript types
+```
+
+### `apps/cxc` - CXC App
+
+Dedicated application for CXC.
+
+**Purpose**: AI hackathon-specific features and application flow
+
+**Tech Stack**: Same as web app
+
+**Key Features**:
+
+- AI hackathon information
+- Team application system
+- Application tracking
+- Custom branding
+
+### `apps/docs` - Documentation
+
+This documentation site.
+
+**Purpose**: Developer documentation and guides
+
+**Tech Stack**:
+
+- Next.js 15
+- Nextra
+- MDX
+
+## Packages
+
+### `packages/ui` - Design System
+
+Shared UI components built with shadcn/ui.
+
+**Exports**: `@uwdsc/ui`
+
+**Contents**:
+
+- Button, Card, Input, Select
+- Navigation Menu, Tabs
+- Dialog, Dropdown, Popover
+- Avatar, Badge, Progress
+- And more shadcn components
+
+**Dependencies**:
+
+- Radix UI primitives
+- Tailwind CSS
+- Framer Motion
+- Lucide React icons
+
+### `packages/server/core` - Shared Backend
+
+Common backend services used by both apps.
+
+**Exports**: `@uwdsc/server/core/*`
+
+**Contents**:
+
+- Database connection utilities
+- Authentication services
+- File upload services
+- Resume processing
+- Base repository pattern
+- Error handling utilities
+
+**Structure**:
+
+```
+packages/server/core/src/
+├── database/          # Supabase client
+├── services/          # Shared services
+├── repository/        # Data access layer
+├── types/            # TypeScript types
+└── utils/            # Utilities
+```
+
+### `packages/server/web` - Web Backend
+
+Backend services specific to the main website.
+
+**Exports**: `@uwdsc/server/web/*`
+
+**Contents**:
+
+- Database migrations (db-mate SQL files) for web app
+- Application services
+- Event services
+- Profile services
+- Web-specific repositories
+
+**Dependencies**:
+
+- Extends `@uwdsc/server/core`
+- pg (node-postgres) for database access
+- Supabase
+
+### `packages/server/cxc` - CXC Backend
+
+Backend services specific to CXC app.
+
+**Exports**: `@uwdsc/server/cxc/*`
+
+**Contents**:
+
+- Database migrations (db-mate SQL files) for CXC
+- CXC-specific services
+- Application logic
+- CXC-specific repositories
+
+### `packages/eslint-config`
+
+Shared ESLint configuration.
+
+**Exports**:
+
+- `@uwdsc/eslint-config/base`
+- `@uwdsc/eslint-config/next`
+- `@uwdsc/eslint-config/react-internal`
+
+**Purpose**: Consistent code style across all packages
+
+### `packages/typescript-config`
+
+Shared TypeScript configuration.
+
+**Exports**:
+
+- `@uwdsc/typescript-config/base.json`
+- `@uwdsc/typescript-config/nextjs.json`
+- `@uwdsc/typescript-config/react-library.json`
+
+**Purpose**: Consistent TypeScript settings
+
+## Workspace Configuration
+
+### `pnpm-workspace.yaml`
+
+Defines which directories are part of the workspace:
+
+```yaml
+packages:
+  - "apps/*"
+  - "packages/*"
+  - "packages/server/*"
+```
+
+### `turbo.json`
+
+Configures Turborepo build pipeline:
+
+```json
+{
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}
+```
+
+## Dependency Management
+
+### Internal Dependencies
+
+Packages reference each other using workspace protocol:
+
+```json
+{
+  "dependencies": {
+    "@uwdsc/ui": "workspace:*",
+    "@uwdsc/server": "workspace:*"
+  }
+}
+```
+
+### Shared Dependencies
+
+Common dependencies are installed once at the root:
+
+- React, Next.js
+- TypeScript
+- Tailwind CSS
+- ESLint, Prettier
+
+### App-Specific Dependencies
+
+Apps can have their own unique dependencies:
+
+- `apps/web` might use specific charting libraries
+- `apps/cxc` might use different animation libraries
+
+## Build Order
+
+Turborepo automatically determines build order:
+
+1. **Config packages** (eslint-config, typescript-config)
+2. **UI package** (no dependencies on other workspace packages)
+3. **Server/core** (no dependencies on other workspace packages)
+4. **Server/web and server/cxc** (depend on core)
+5. **Apps** (depend on ui and server packages)
+
+## Import Paths
+
+### In Apps
+
+```tsx
+// UI components
+import { Button, Card } from "@uwdsc/ui";
+
+// Backend services (web app)
+import { HealthService } from "@uwdsc/server/web/services/healthService";
+
+// Backend services (CXC app)
+import { ApplicationService } from "@uwdsc/server/cxc/services/applicationService";
+
+// Shared backend
+import { AuthService } from "@uwdsc/server/core/services/authService";
+```
+
+### In Packages
+
+```tsx
+// Core services in web/cxc server packages
+import { AuthService } from "@uwdsc/server/core/services/authService";
+
+// UI components don't import from other packages (pure atoms)
+```
+
+## Adding New Packages
+
+### 1. Create Package Directory
+
+```bash
+mkdir -p packages/my-package/src
+cd packages/my-package
+```
+
+### 2. Initialize package.json
+
+```json
+{
+  "name": "@uwdsc/my-package",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts"
+}
+```
+
+### 3. Add to Dependencies
+
+In consuming package/app:
+
+```json
+{
+  "dependencies": {
+    "@uwdsc/my-package": "workspace:*"
+  }
+}
+```
+
+### 4. Install and Build
+
+```bash
+pnpm install
+pnpm build
+```
+
+## Best Practices
+
+### ✅ Do
+
+- Keep packages focused and single-purpose
+- Use workspace protocol for internal dependencies
+- Follow the dependency direction (apps → packages)
+- Share common code in appropriate packages
+- Use TypeScript for type safety
+
+### ❌ Don't
+
+- Create circular dependencies
+- Have packages depend on apps
+- Duplicate code across packages
+- Mix different concerns in one package
+
+## Next Steps
+
+- [Design System](/architecture/design-system) - UI component structure
+- [API Architecture](/architecture/api-flow) - Backend patterns

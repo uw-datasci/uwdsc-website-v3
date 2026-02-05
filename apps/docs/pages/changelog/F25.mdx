@@ -1,0 +1,150 @@
+# Fall 2025 Updates
+
+This semester marked the migration and modernization of the UWDSC website from [v2](https://github.com/uw-datasci/uwdsc-website-v2) to v3, establishing a new monorepo architecture and enhanced platform capabilities.
+
+## 🎯 Main Website (apps/web)
+
+### Migration from v2
+
+- **Platform Migration**: Migrated the main website from the previous Next.js v2 codebase to a modern monorepo architecture
+- **Architecture Modernization**: Rebuilt using Next.js 15 (App Router), React 19, and TypeScript with improved code organization
+- **Feature Parity**: Maintained and enhanced all existing features from v2 while improving user experience and maintainability
+
+### User Experience
+
+- **Home Page**: Comprehensive landing page featuring club statistics, past events showcase, sponsors, FAQ section, and mailing list signup
+- **Team Directory**: Dedicated team page showcasing current and past executive members with photos and roles
+- **Member Application System**: Multi-step application form with progress tracking, automatic save functionality, and role-based question routing
+- **Auto-Populated Application Fields**: Application form automatically pre-fills user name and email from profile data for a streamlined experience
+- **User Authentication**: Complete authentication system with email verification, login, and registration flows
+- **Profile Management**: User profile pages with ability to view and update personal information
+
+### Admin Features
+
+- **Admin Dashboard**: Centralized admin interface with navigation to different management sections
+- **Application Management**: Admin pages for reviewing and managing member applications (foundation laid)
+- **Event Management**: Admin interface for creating and managing club events (foundation laid)
+- **Membership Management**: Admin tools for tracking and managing club memberships (foundation laid)
+
+### Additional Pages
+
+- **Calendar**: Calendar view for club events
+- **Check-in**: Event check-in functionality for tracking attendance
+- **Passport**: Member passport/profile feature
+
+## 🏆 CxC App (apps/cxc)
+
+### Application Process
+
+- **AI Hackathon Landing Page**: Dedicated homepage with AI hackathon branding, information sections, and FAQ
+- **Application System**: Multi-step application flow with progress tracking and form validation
+- **Backend-Connected Application Form**: Application form now saves data to the backend automatically as users progress through steps
+- **Auto-Save Functionality**: Application data is automatically saved when users click "Continue" on each step, preventing data loss
+- **Pre-Filled Applications**: Returning users see their previously saved application data automatically loaded when they revisit the form
+- **Resume Upload**: File upload functionality for resume submissions
+- **Application Status Tracking**: Users can track their application progress through the system
+
+### User Interface
+
+- **Custom Branding**: Unique visual design with wormhole animations and custom styling
+- **Mobile-Responsive Design**: Fully responsive layout optimized for all device sizes
+- **Navigation**: Custom navbar with smooth scrolling to different sections
+
+## 🎨 Design System (packages/ui)
+
+### Core Components
+
+- **Form Components**: Input, Textarea, Select, Checkbox, Radio Group with validation support
+- **Layout Components**: Card, Separator, Sheet, Dialog, Popover for consistent layouts
+- **Navigation Components**: Navigation Menu, Dropdown Menu, Command for better user flow
+- **Interactive Components**: Button, Badge, Avatar, Accordion, Collapsible
+- **Specialized Components**: Carousel, Combobox, Counting Numbers, Glass Surface effect
+- **Theme Support**: Theme Provider with dark/light mode support
+
+### Design Principles
+
+- **Atomic Design**: Components follow atomic design principles (atoms → molecules → organisms)
+- **shadcn/ui Foundation**: Built on Radix UI primitives with Tailwind CSS styling
+- **Consistent Styling**: Shared design tokens and styling patterns across all apps
+
+## 🔧 Infrastructure
+
+### Monorepo Architecture
+
+- **Turborepo Setup**: Established new monorepo structure with Turborepo for efficient builds and caching, migrating from the single-repo v2 architecture
+- **pnpm Workspaces**: Package management with pnpm workspaces for dependency sharing across multiple apps
+- **Shared Packages**: Created reusable packages for UI components, server utilities, and configurations to support multiple applications
+
+### Backend Services
+
+- **Database Schema**: PostgreSQL database with Supabase integration
+  - User profiles and authentication
+  - Application management system
+  - Event management system
+  - Term-based application cycles
+- **API Architecture**: Next.js API routes with type-safe client wrappers
+- **Authentication**: Supabase Auth integration with email verification
+- **File Storage**: Supabase Storage for resume and file uploads
+
+### Development Tools
+
+- **TypeScript Configuration**: Shared TypeScript configs across packages
+- **ESLint Configuration**: Consistent linting rules across the monorepo
+- **Component Scripts**: Automated scripts for adding new shadcn/ui components
+
+### Package Structure
+
+- **packages/ui**: Shared design system components
+- **packages/server/core**: Shared backend utilities (auth, file services, database)
+- **packages/server/web**: Web app-specific backend services
+- **packages/server/cxc**: CxC app-specific backend services
+- **packages/eslint-config**: Shared ESLint configurations
+- **packages/typescript-config**: Shared TypeScript configurations
+
+## 🚀 DevOps & CI/CD
+
+### Continuous Integration
+
+- **Quality Gate Workflow**: Automated linting, type checking, and build verification on every push and pull request
+- **Automated Testing**: TypeScript type checking and ESLint validation across all packages
+- **Turborepo Caching**: Optimized build caching to speed up CI/CD pipelines
+- **Monorepo-Aware CI**: Workflows that understand package dependencies and only run necessary checks
+
+### Continuous Deployment
+
+- **Documentation Deployment**: Automated deployment of documentation site to GitHub Pages on changes
+- **Vercel Integration**: Preview deployments and notifications for pull requests
+- **Automated Documentation Updates**: GitHub Actions workflow that automatically updates documentation when PRs are merged
+
+### Development Workflow
+
+- **Shared Setup Actions**: Reusable GitHub Actions for consistent project setup across workflows
+- **Automated Changelog Updates**: AI-powered documentation updates based on merged PRs with semester tagging
+
+## 📱 Applications
+
+### Main Website (apps/web)
+
+- Migrated from Next.js v2 to Next.js 15 with App Router
+- Upgraded to React 19
+- Full authentication and authorization system
+- Member application workflow
+- Admin dashboard foundation
+
+### CxC App (apps/cxc)
+
+- Dedicated AI hackathon application platform
+- Custom branding and animations
+- Application tracking system
+- AI hackathon-specific features
+
+### Documentation (apps/docs)
+
+- Nextra-based documentation site
+- Comprehensive architecture documentation
+- Development guides and tutorials
+- Package documentation
+
+---
+
+_Features documented from merged PRs tagged with `F25`. This represents the migration from v2 to v3 and the foundation for future development._

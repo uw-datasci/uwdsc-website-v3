@@ -1,0 +1,251 @@
+# Server Package
+
+Backend services and data layer for the monorepo.
+
+## Overview
+
+The `packages/server/` directory contains backend services, repositories, and utilities shared across applications.
+
+**Location**: `packages/server/`
+
+**Sub-packages**:
+
+- `@uwdsc/server/core` - Shared backend utilities
+- `@uwdsc/server/web` - Web app backend
+- `@uwdsc/server/cxc` - CxC app backend
+
+## Structure
+
+```
+packages/server/
+├── core/              # Shared backend utilities
+│   ├── src/
+│   │   ├── database/     # Supabase client
+│   │   ├── services/     # Auth, file services
+│   │   ├── repository/   # Base repository
+│   │   ├── types/        # TypeScript types
+│   │   └── utils/        # Error handling
+│   └── package.json
+├── web/               # Web app backend
+│   ├── src/
+│   │   ├── db/          # Database migrations (db-mate)
+│   │   ├── services/     # Business logic
+│   │   ├── repository/   # Data access
+│   │   └── types/        # Types
+│   └── package.json
+└── cxc/               # CxC app backend
+    ├── src/
+    │   ├── db/          # Database migrations (db-mate)
+    │   ├── services/     # Business logic
+    │   ├── repository/   # Data access
+    │   └── types/        # Types
+    └── package.json
+```
+
+## Core Package (`@uwdsc/server/core`)
+
+Shared backend utilities used by both web and cxc backends.
+
+### Exports
+
+```typescript
+import { AuthService } from "@uwdsc/server/core/services/authService";
+import { FileService } from "@uwdsc/server/core/services/fileService";
+import { BaseRepository } from "@uwdsc/server/core/repository/baseRepository";
+```
+
+### Services
+
+**AuthService** - Authentication with Supabase
+
+- Sign up
+- Sign in
+- User management
+- Session handling
+
+**FileService** - File upload/storage with Supabase Storage
+
+- Upload files
+- Get public URLs
+- Delete files
+
+**ResumeService** - Resume processing
+
+- Parse resumes
+- Extract data
+
+### Repository
+
+**BaseRepository** - Base class for all repositories
+
+- pg connection pool access
+- Common database operations
+- Transaction support
+
+## Web Package (`@uwdsc/server/web`)
+
+Backend services specific to the main website.
+
+### Exports
+
+```typescript
+import { HealthService } from "@uwdsc/server/web/services/healthService";
+import { ProfileService } from "@uwdsc/server/web/services/profileService";
+import { ApplicationService } from "@uwdsc/server/web/services/applicationService";
+```
+
+### Services
+
+- **HealthService** - System health checks
+- **ProfileService** - User profile management
+- **ApplicationService** - Membership applications
+- **EventService** - Event management
+
+### Repositories
+
+- **HealthRepository** - Health check queries
+- **ProfileRepository** - Profile data access
+- **ApplicationRepository** - Application data access
+- **EventRepository** - Event data access
+
+## CxC Package (`@uwdsc/server/cxc`)
+
+Backend services specific to the CxC AI hackathon app.
+
+### Exports
+
+```typescript
+import { ApplicationService } from "@uwdsc/server/cxc/services/applicationService";
+import { TeamService } from "@uwdsc/server/cxc/services/teamService";
+import { DashboardService } from "@uwdsc/server/cxc/services/dashboardService";
+import { AdminApplicationService } from "@uwdsc/server/cxc/services/adminApplicationService";
+import { AdminReviewService } from "@uwdsc/server/cxc/services/adminReviewService";
+import { ProfileService } from "@uwdsc/server/cxc/services/profileService";
+```
+
+### Services
+
+- **ApplicationService** - AI hackathon applications
+- **TeamService** - Team management
+- **EventService** - AI hackathon events
+- **DashboardService** - Superadmin analytics and statistics
+- **AdminApplicationService** - Admin application management
+- **AdminReviewService** - Review assignment and tracking
+- **ProfileService** - User profile and role management
+
+## Usage
+
+### In API Routes
+
+```typescript
+// apps/web/app/api/profile/route.ts
+import { NextResponse } from "next/server";
+import { ProfileService } from "@uwdsc/server/web/services/profileService";
+
+export async function GET() {
+  const profileService = new ProfileService();
+  const profile = await profileService.getProfile(userId);
+  return NextResponse.json(profile);
+}
+```
+
+### Service Layer
+
+```typescript
+// packages/server/web/src/services/profileService.ts
+import { ProfileRepository } from "../repository/profileRepository";
+
+export class ProfileService {
+  private repository: ProfileRepository;
+
+  constructor() {
+    this.repository = new ProfileRepository();
+  }
+
+  async getProfile(userId: string) {
+    return await this.repository.findById(userId);
+  }
+}
+```
+
+### Repository Layer
+
+```typescript
+// packages/server/web/src/repository/profileRepository.ts
+import { BaseRepository } from "@uwdsc/server/core/repository/baseRepository";
+
+export class ProfileRepository extends BaseRepository {
+  async findById(userId: string) {
+    const result = await this.pool.query(
+      "SELECT * FROM users WHERE id = $1",
+      [userId]
+    );
+    return result.rows[0] || null;
+  }
+}
+```
+
+## Database
+
+### Migrations (db-mate)
+
+Each app-specific package has its own migration directory:
+
+```sql
+-- packages/server/web/src/db/migrations/001_create_users_table.up.sql
+
+CREATE TABLE IF NOT EXISTS users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email VARCHAR(255) UNIQUE NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_users_email ON users(email);
+```
+
+Migrations are managed with db-mate:
+
+```bash
+# Create new migration
+db-mate new add_user_bio
+
+# Apply migrations
+db-mate up
+
+# Rollback last migration
+db-mate down
+```
+
+### Supabase
+
+Core package uses Supabase for:
+
+- Authentication
+- File storage
+- Real-time subscriptions
+
+## Best Practices
+
+### ✅ Do
+
+- Use services for business logic
+- Use repositories for data access
+- Extend BaseRepository for common functionality
+- Handle errors appropriately
+- Use TypeScript types
+- Write unit tests
+
+### ❌ Don't
+
+- Put business logic in repositories
+- Access database directly from services
+- Skip error handling
+- Expose internal errors to clients
+- Mix concerns across layers
+
+## Next Steps
+
+- [API Architecture](/architecture/api-flow) - Learn about backend patterns
+- [Creating API Endpoints](/guides/creating-api) - Build APIs
+- [Database Setup](/guides/database) - Work with db-mate and pg

@@ -1,0 +1,230 @@
+# Contributing
+
+Thank you for your interest in contributing to the UWDSC monorepo! This guide will help you get started.
+
+## Development Setup
+
+### 1. Fork and Clone
+
+```bash
+# Fork the repository on GitHub
+# Then clone your fork
+git clone https://github.com/YOUR_USERNAME/uwdsc-website-v3.git
+cd uwdsc-website-v3
+```
+
+### 2. Install Dependencies
+
+```bash
+pnpm install
+```
+
+### 3. Create a Branch
+
+```bash
+git checkout -b feature/your-feature-name
+```
+
+## Development Workflow
+
+### Making Changes
+
+1. **Make your changes** in the appropriate package or app
+2. **Test locally** with `pnpm dev`
+3. **Lint your code** with `pnpm lint`
+4. **Format code** with `pnpm format`
+
+### Code Style
+
+We use ESLint and Prettier to enforce code style:
+
+```bash
+# Check for linting errors
+pnpm lint
+
+# Auto-fix linting issues
+pnpm lint --fix
+
+# Format code
+pnpm format
+```
+
+### Commit Messages
+
+Use clear, descriptive commit messages:
+
+```bash
+# Good
+git commit -m "feat: add user profile component"
+git commit -m "fix: resolve navigation menu bug"
+git commit -m "docs: update API documentation"
+
+# Bad
+git commit -m "update stuff"
+git commit -m "fix"
+```
+
+We follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+- `feat:` - New feature
+- `fix:` - Bug fix
+- `docs:` - Documentation changes
+- `style:` - Code style changes (formatting, etc.)
+- `refactor:` - Code refactoring
+- `test:` - Adding or updating tests
+- `chore:` - Maintenance tasks
+
+## Pull Request Process
+
+### 1. Push Your Changes
+
+```bash
+git push origin feature/your-feature-name
+```
+
+### 2. Create Pull Request
+
+1. Go to the repository on GitHub
+2. Click "New Pull Request"
+3. Select your branch
+4. Fill out the PR template
+
+### 3. PR Template
+
+```markdown
+## Description
+Brief description of the changes
+
+## Type of Change
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
+- [ ] Documentation update
+
+## Testing
+- [ ] I have tested these changes locally
+- [ ] I have added/updated tests
+- [ ] All tests pass
+
+## Screenshots (if applicable)
+Add screenshots here
+```
+
+### 4. Code Review
+
+- Address reviewer feedback
+- Make requested changes
+- Push updates to your branch
+
+## Areas to Contribute
+
+### 🎨 UI Components
+
+Add new shadcn components to the design system:
+
+```bash
+pnpm ui:add <component-name>
+```
+
+### 🔧 Features
+
+Implement new features in the web or CxC apps.
+
+### 📝 Documentation
+
+Improve or add documentation in:
+- `apps/docs/pages/` - Main documentation
+- `README.md` - Repository readme
+- Code comments
+
+### 🐛 Bug Fixes
+
+Find and fix bugs. Check the issue tracker for open bugs.
+
+### ✅ Testing
+
+Add tests for existing features.
+
+### 🌐 Accessibility
+
+Improve accessibility of components and pages.
+
+## Guidelines
+
+### Component Guidelines
+
+- Use TypeScript for all components
+- Follow atomic design principles
+- Add proper prop types
+- Include JSDoc comments for complex components
+- Test components thoroughly
+
+### API Guidelines
+
+- Follow the service → repository pattern
+- Add proper error handling
+- Validate inputs with Zod schemas
+- Document API endpoints
+
+### Database Guidelines
+
+- Use pg (node-postgres) with raw SQL queries for database operations
+- Use db-mate for database migrations (SQL files)
+- Add migrations for schema changes
+- Follow naming conventions
+- Document relationships
+- Always use parameterized queries to prevent SQL injection
+
+## Testing
+
+### Running Tests
+
+```bash
+# Run all tests
+pnpm test
+
+# Run tests for specific package
+pnpm test --filter=web
+```
+
+### Writing Tests
+
+```tsx
+import { render, screen } from "@testing-library/react";
+import { MyComponent } from "./MyComponent";
+
+describe("MyComponent", () => {
+  it("should render correctly", () => {
+    render(<MyComponent />);
+    expect(screen.getByText("Hello")).toBeInTheDocument();
+  });
+});
+```
+
+## Resources
+
+- [Architecture Documentation](/architecture)
+- [Component Guidelines](/guides/adding-components)
+- [API Development Guide](/guides/creating-api)
+
+## Getting Help
+
+- Open an issue for bugs or feature requests
+- Ask questions in discussions
+- Reach out to the team leads
+
+## Code of Conduct
+
+- Be respectful and inclusive
+- Welcome newcomers
+- Provide constructive feedback
+- Follow the code of conduct
+
+## License
+
+By contributing, you agree that your contributions will be licensed under the MIT License.
+
+---
+
+Thank you for contributing to UWDSC! 🎉
+

@@ -1,0 +1,576 @@
+# Creating API Endpoints
+
+Step-by-step guide to creating new API endpoints following our architecture.
+
+## Overview
+
+Creating a new API endpoint involves 5 steps:
+
+1. Define TypeScript types
+2. Create Zod validation schema
+3. Create repository method
+4. Create service method
+5. Create API route
+6. Create client API function
+
+Let's create a complete example: **User Profile API**
+
+## Step 1: Define Types
+
+Create types for your API in `apps/web/types/api.ts`:
+
+```typescript
+// apps/web/types/api.ts
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  name: string;
+  bio?: string;
+  avatar?: string;
+  createdAt: string;
+}
+
+export interface UpdateProfileRequest {
+  name?: string;
+  bio?: string;
+  avatar?: string;
+}
+
+export interface UpdateProfileResponse {
+  profile: UserProfile;
+  message: string;
+}
+```
+
+## Step 2: Create Validation Schema
+
+Create Zod schemas in `apps/web/lib/schemas/profile.ts`:
+
+```typescript
+// apps/web/lib/schemas/profile.ts
+import { z } from "zod";
+
+export const updateProfileSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters").optional(),
+  bio: z.string().max(500, "Bio must be less than 500 characters").optional(),
+  avatar: z.string().url("Invalid avatar URL").optional(),
+});
+
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+```
+
+## Step 3: Create Repository Method
+
+Add database queries in `packages/server/web/src/repository/profileRepository.ts`:
+
+```typescript
+// packages/server/web/src/repository/profileRepository.ts
+import { BaseRepository } from "@uwdsc/server/core/repository/baseRepository";
+
+export class ProfileRepository extends BaseRepository {
+  /**
+   * Find user profile by user ID
+   */
+  async findProfileByUserId(userId: string) {
+    const result = await this.pool.query(
+      `SELECT id, email, name, bio, avatar, created_at as "createdAt"
+       FROM users
+       WHERE id = $1`,
+      [userId]
+    );
+    return result.rows[0] || null;
+  }
+
+  /**
+   * Update user profile
+   */
+  async updateProfile(userId: string, data: {
+    name?: string;
+    bio?: string;
+    avatar?: string;
+  }) {
+    const updates: string[] = [];
+    const values: any[] = [];
+    let paramIndex = 1;
+
+    if (data.name !== undefined) {
+      updates.push(`name = $${paramIndex++}`);
+      values.push(data.name);
+    }
+    if (data.bio !== undefined) {
+      updates.push(`bio = $${paramIndex++}`);
+      values.push(data.bio);
+    }
+    if (data.avatar !== undefined) {
+      updates.push(`avatar = $${paramIndex++}`);
+      values.push(data.avatar);
+    }
+
+    if (updates.length === 0) {
+      return this.findProfileByUserId(userId);
+    }
+
+    updates.push(`updated_at = NOW()`);
+    values.push(userId);
+
+    const result = await this.pool.query(
+      `UPDATE users
+       SET ${updates.join(", ")}
+       WHERE id = $${paramIndex}
+       RETURNING id, email, name, bio, avatar, created_at as "createdAt"`,
+      values
+    );
+    return result.rows[0];
+  }
+
+  /**
+   * Check if profile exists
+   */
+  async profileExists(userId: string): Promise<boolean> {
+    const result = await this.pool.query(
+      "SELECT COUNT(*) as count FROM users WHERE id = $1",
+      [userId]
+    );
+    return parseInt(result.rows[0].count) > 0;
+  }
+}
+```
+
+## Step 4: Create Service Method
+
+Add business logic in `packages/server/web/src/services/profileService.ts`:
+
+```typescript
+// packages/server/web/src/services/profileService.ts
+import { ProfileRepository } from "../repository/profileRepository";
+import { ApiError } from "@uwdsc/server/core/utils/errors";
+
+export class ProfileService {
+  private repository: ProfileRepository;
+
+  constructor() {
+    this.repository = new ProfileRepository();
+  }
+
+  /**
+   * Get user profile
+   */
+  async getProfile(userId: string) {
+    const profile = await this.repository.findProfileByUserId(userId);
+
+    if (!profile) {
+      throw new ApiError("Profile not found", 404, "PROFILE_NOT_FOUND");
+    }
+
+    return profile;
+  }
+
+  /**
+   * Update user profile
+   */
+  async updateProfile(
+    userId: string,
+    data: {
+      name?: string;
+      bio?: string;
+      avatar?: string;
+    }
+  ) {
+    // Check if profile exists
+    const exists = await this.repository.profileExists(userId);
+    if (!exists) {
+      throw new ApiError("Profile not found", 404, "PROFILE_NOT_FOUND");
+    }
+
+    // Validate avatar URL if provided
+    if (data.avatar) {
+      await this.validateAvatarUrl(data.avatar);
+    }
+
+    // Update profile
+    const updated = await this.repository.updateProfile(userId, data);
+
+    return {
+      profile: updated,
+      message: "Profile updated successfully",
+    };
+  }
+
+  /**
+   * Validate avatar URL
+   */
+  private async validateAvatarUrl(url: string) {
+    // Check if URL is accessible
+    try {
+      const response = await fetch(url, { method: "HEAD" });
+      if (!response.ok) {
+        throw new Error("Invalid avatar URL");
+      }
+    } catch (error) {
+      throw new ApiError(
+        "Avatar URL is not accessible",
+        400,
+        "INVALID_AVATAR_URL"
+      );
+    }
+  }
+}
+```
+
+## Step 5: Create API Routes
+
+Create Next.js API routes in `apps/web/app/api/profile/`:
+
+### GET Profile Route
+
+```typescript
+// apps/web/app/api/profile/route.ts
+import { NextRequest, NextResponse } from "next/server";
+import { ProfileService } from "@uwdsc/server/web/services/profileService";
+import { getCurrentUser } from "@/lib/auth";
+
+export async function GET(request: NextRequest) {
+  try {
+    // Get current user from session
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    // Get profile
+    const profileService = new ProfileService();
+    const profile = await profileService.getProfile(user.id);
+
+    return NextResponse.json(profile);
+  } catch (error) {
+    console.error("Get profile error:", error);
+    return NextResponse.json(
+      { error: error.message || "Failed to fetch profile" },
+      { status: error.statusCode || 500 }
+    );
+  }
+}
+```
+
+### UPDATE Profile Route
+
+```typescript
+// apps/web/app/api/profile/route.ts (continued)
+import { updateProfileSchema } from "@/lib/schemas/profile";
+
+export async function PATCH(request: NextRequest) {
+  try {
+    // Get current user
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    // Parse and validate request body
+    const body = await request.json();
+    const validated = updateProfileSchema.parse(body);
+
+    // Update profile
+    const profileService = new ProfileService();
+    const result = await profileService.updateProfile(user.id, validated);
+
+    return NextResponse.json(result);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Validation failed", details: error.errors },
+        { status: 400 }
+      );
+    }
+
+    console.error("Update profile error:", error);
+    return NextResponse.json(
+      { error: error.message || "Failed to update profile" },
+      { status: error.statusCode || 500 }
+    );
+  }
+}
+```
+
+## Step 6: Create Client API Functions
+
+Create client-side API wrappers in `apps/web/lib/api/profile.ts`:
+
+```typescript
+// apps/web/lib/api/profile.ts
+import type { UserProfile, UpdateProfileRequest, UpdateProfileResponse } from "@/types/api";
+
+/**
+ * Get current user profile
+ */
+export async function getProfile(): Promise<UserProfile> {
+  const response = await fetch("/api/profile");
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to fetch profile");
+  }
+
+  return response.json();
+}
+
+/**
+ * Update user profile
+ */
+export async function updateProfile(
+  data: UpdateProfileRequest
+): Promise<UpdateProfileResponse> {
+  const response = await fetch("/api/profile", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to update profile");
+  }
+
+  return response.json();
+}
+```
+
+## Step 7: Use in Components
+
+Now use the API in your React components:
+
+```tsx
+// apps/web/app/profile/page.tsx
+"use client";
+
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { getProfile, updateProfile } from "@/lib/api/profile";
+import { updateProfileSchema } from "@/lib/schemas/profile";
+import { Button, Input, Textarea } from "@uwdsc/ui";
+
+export default function ProfilePage() {
+  const [profile, setProfile] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: zodResolver(updateProfileSchema),
+  });
+
+  // Load profile
+  useEffect(() => {
+    getProfile().then(setProfile);
+  }, []);
+
+  // Handle form submission
+  const onSubmit = async (data) => {
+    setIsLoading(true);
+    try {
+      const result = await updateProfile(data);
+      setProfile(result.profile);
+      alert(result.message);
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (!profile) return <div>Loading...</div>;
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div>
+        <label>Name</label>
+        <Input
+          {...register("name")}
+          defaultValue={profile.name}
+          placeholder="Your name"
+        />
+        {errors.name && <p>{errors.name.message}</p>}
+      </div>
+
+      <div>
+        <label>Bio</label>
+        <Textarea
+          {...register("bio")}
+          defaultValue={profile.bio}
+          placeholder="Tell us about yourself"
+        />
+        {errors.bio && <p>{errors.bio.message}</p>}
+      </div>
+
+      <Button type="submit" disabled={isLoading}>
+        {isLoading ? "Saving..." : "Save Profile"}
+      </Button>
+    </form>
+  );
+}
+```
+
+## Testing Your API
+
+### 1. Manual Testing
+
+```bash
+# Start dev server
+pnpm dev:web
+
+# Test GET endpoint
+curl http://localhost:3000/api/profile
+
+# Test PATCH endpoint
+curl -X PATCH http://localhost:3000/api/profile \
+  -H "Content-Type: application/json" \
+  -d '{"name":"John Doe","bio":"Software developer"}'
+```
+
+### 2. Unit Testing Service
+
+```typescript
+// packages/server/web/src/services/__tests__/profileService.test.ts
+import { ProfileService } from "../profileService";
+
+describe("ProfileService", () => {
+  let service: ProfileService;
+
+  beforeEach(() => {
+    service = new ProfileService();
+  });
+
+  it("should get user profile", async () => {
+    const profile = await service.getProfile("user-id");
+    expect(profile).toBeDefined();
+    expect(profile.id).toBe("user-id");
+  });
+
+  it("should update profile", async () => {
+    const result = await service.updateProfile("user-id", {
+      name: "New Name",
+    });
+    expect(result.profile.name).toBe("New Name");
+  });
+});
+```
+
+## Common Patterns
+
+### Pagination
+
+```typescript
+// Repository
+async findManyWithPagination(page: number, limit: number) {
+  const offset = (page - 1) * limit;
+  
+  const [itemsResult, countResult] = await Promise.all([
+    this.pool.query(
+      `SELECT * FROM items
+       LIMIT $1 OFFSET $2`,
+      [limit, offset]
+    ),
+    this.pool.query("SELECT COUNT(*) as total FROM items"),
+  ]);
+
+  return {
+    items: itemsResult.rows,
+    total: parseInt(countResult.rows[0].total),
+    page,
+    totalPages: Math.ceil(parseInt(countResult.rows[0].total) / limit),
+  };
+}
+```
+
+### Filtering
+
+```typescript
+// Repository
+async findFiltered(filters: {
+  search?: string;
+  category?: string;
+  status?: string;
+}) {
+  const conditions: string[] = [];
+  const values: any[] = [];
+  let paramIndex = 1;
+
+  if (filters.search) {
+    conditions.push(
+      `(name ILIKE $${paramIndex} OR description ILIKE $${paramIndex})`
+    );
+    values.push(`%${filters.search}%`);
+    paramIndex++;
+  }
+  if (filters.category) {
+    conditions.push(`category = $${paramIndex++}`);
+    values.push(filters.category);
+  }
+  if (filters.status) {
+    conditions.push(`status = $${paramIndex++}`);
+    values.push(filters.status);
+  }
+
+  const whereClause = conditions.length > 0
+    ? `WHERE ${conditions.join(" AND ")}`
+    : "";
+
+  const result = await this.pool.query(
+    `SELECT * FROM items ${whereClause}`,
+    values
+  );
+  return result.rows;
+}
+```
+
+### File Upload
+
+```typescript
+// Service
+async uploadAvatar(userId: string, file: File) {
+  // Upload to storage (Supabase)
+  const { data, error } = await supabase.storage
+    .from("avatars")
+    .upload(`${userId}/avatar.png`, file);
+
+  if (error) throw new ApiError("Upload failed", 500);
+
+  // Update profile with new avatar URL
+  const url = supabase.storage.from("avatars").getPublicUrl(data.path);
+  return this.repository.updateProfile(userId, { avatar: url.data.publicUrl });
+}
+```
+
+## Best Practices
+
+### ✅ Do
+
+- Validate all inputs with Zod
+- Use TypeScript for type safety
+- Handle errors appropriately
+- Check authentication/authorization
+- Use transactions for multi-step operations
+- Add JSDoc comments
+- Write unit tests
+
+### ❌ Don't
+
+- Skip input validation
+- Expose internal errors to clients
+- Put business logic in API routes
+- Access database directly from routes
+- Return sensitive data
+
+## Next Steps
+
+- [Database Setup](/guides/database) - Working with db-mate and pg
+- [Development Tips](/guides/development) - Improve workflow
+

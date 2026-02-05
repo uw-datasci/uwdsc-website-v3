@@ -1,0 +1,181 @@
+# Getting Started
+
+Get your development environment up and running in minutes.
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+- **Node.js** >= 20
+- **pnpm** >= 10.26.0
+
+### Installing pnpm
+
+If you don't have pnpm installed, you can install it using one of the following methods:
+
+**Windows (PowerShell):**
+
+```powershell
+Invoke-WebRequest https://get.pnpm.io/install.ps1 -UseBasicParsing | Invoke-Expression
+```
+
+**macOS/Linux (POSIX):**
+
+```bash
+curl -fsSL https://get.pnpm.io/install.sh | sh -
+```
+
+**Alternative (npm):**
+
+```bash
+npm install -g pnpm@10.26.0
+```
+
+Or follow the [official pnpm installation guide](https://pnpm.io/installation).
+
+## Installation
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/uwdsc/uwdsc-website-v3.git
+cd uwdsc-website-v3
+```
+
+### 2. Install Dependencies
+
+```bash
+pnpm install
+```
+
+This will install all dependencies for all packages and apps in the monorepo. Thanks to pnpm workspaces, shared dependencies are efficiently linked.
+
+### 3. Set Up Environment Variables
+
+First, create a `.env` file in the **root directory** of the repository:
+
+```bash
+INFISICAL_CLIENT_ID=<insert-id-here>
+INFISICAL_CLIENT_SECRET=<insert-secret-here>
+```
+
+> **Note**: Contact the Dev VPs on Discord to get your Infisical credentials, or check the DSC exec server for the values.
+
+Then, pull environment variables from Infisical:
+
+```bash
+pnpm pull-secrets
+```
+
+The `pull-secrets` script will:
+
+- Install the Infisical CLI globally if it's not already installed
+- Initialize Infisical configuration if needed
+- Authenticate with Infisical (using machine identity or user login)
+- Sync environment variables from Infisical for all apps (`web` and `cxc`)
+- Create `.env.local` files in each app directory with the synced secrets
+
+## Running the Apps
+
+### Start All Apps
+
+```bash
+pnpm dev
+```
+
+This will start all applications in development mode:
+
+- **Web app**: http://localhost:3000
+- **CXC app**: http://localhost:3001
+- **Docs**: http://localhost:3002
+
+### Start Specific Apps
+
+If you only want to work on a specific app:
+
+```bash
+# Main website only
+pnpm dev:web
+
+# CXC app only
+pnpm dev:cxc
+
+# Documentation only
+pnpm dev:docs
+```
+
+## Building for Production
+
+### Build All Packages
+
+```bash
+pnpm build
+```
+
+### Build Specific App
+
+```bash
+pnpm build --filter=web
+pnpm build --filter=cxc
+pnpm build --filter=docs
+```
+
+## Common Commands
+
+```bash
+# Development
+pnpm dev                    # Start all apps
+pnpm dev:web               # Start main website only
+pnpm dev:cxc               # Start CXC app only
+pnpm dev:docs              # Start documentation only
+
+# Building
+pnpm build                 # Build all packages
+
+# Code Quality
+pnpm lint                  # Lint all packages
+pnpm format                # Format code with Prettier
+
+# UI Components
+pnpm ui:add button         # Add shadcn button component
+pnpm ui:add form           # Add shadcn form components
+```
+
+## Next Steps
+
+- Learn about the [Architecture](/architecture) of the monorepo
+- Follow our [Guides](/guides) for common development tasks
+- Explore the [Packages](/packages) documentation
+
+## Troubleshooting
+
+### Port Already in Use
+
+If you get an error that a port is already in use, you can either:
+
+1. Kill the process using that port
+2. Change the port in the app's `package.json` dev script
+
+### pnpm Installation Issues
+
+If you encounter issues with pnpm, try:
+
+```bash
+# Clear pnpm cache
+pnpm store prune
+
+# Reinstall dependencies
+rm -rf node_modules
+rm pnpm-lock.yaml
+pnpm install
+```
+
+### TypeScript Errors
+
+If you see TypeScript errors, try:
+
+```bash
+# Clean and rebuild
+pnpm clean
+pnpm build
+```

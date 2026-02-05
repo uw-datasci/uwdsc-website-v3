@@ -1,0 +1,410 @@
+# Configuration Packages
+
+Shared configuration for ESLint and TypeScript across the monorepo.
+
+## Overview
+
+Configuration packages ensure consistent code style, linting rules, and TypeScript settings across all apps and packages.
+
+**Packages**:
+- `@uwdsc/eslint-config` - ESLint configurations
+- `@uwdsc/typescript-config` - TypeScript configurations
+
+## ESLint Config (`@uwdsc/eslint-config`)
+
+Shared ESLint configurations for different types of projects.
+
+**Location**: `packages/eslint-config/`
+
+### Available Configurations
+
+#### Base Configuration
+
+For general TypeScript projects:
+
+```javascript
+// packages/eslint-config/base.js
+module.exports = {
+  extends: [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+  ],
+  parser: "@typescript-eslint/parser",
+  plugins: ["@typescript-eslint"],
+  rules: {
+    // Custom rules
+  },
+};
+```
+
+**Usage:**
+
+```javascript
+// eslint.config.js
+import baseConfig from "@uwdsc/eslint-config/base.js";
+
+export default [...baseConfig];
+```
+
+#### Next.js Configuration
+
+For Next.js applications:
+
+```javascript
+// packages/eslint-config/next.js
+module.exports = {
+  extends: [
+    "./base.js",
+    "next/core-web-vitals",
+  ],
+  rules: {
+    // Next.js specific rules
+  },
+};
+```
+
+**Usage:**
+
+```javascript
+// apps/web/eslint.config.js
+import nextConfig from "@uwdsc/eslint-config/next.js";
+
+export default [...nextConfig];
+```
+
+#### React Internal Configuration
+
+For React component libraries:
+
+```javascript
+// packages/eslint-config/react-internal.js
+module.exports = {
+  extends: [
+    "./base.js",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+  ],
+  settings: {
+    react: {
+      version: "detect",
+    },
+  },
+};
+```
+
+**Usage:**
+
+```javascript
+// packages/ui/eslint.config.js
+import reactConfig from "@uwdsc/eslint-config/react-internal.js";
+
+export default [...reactConfig];
+```
+
+### Custom Rules
+
+Common rules across all configurations:
+
+```javascript
+{
+  "@typescript-eslint/no-unused-vars": [
+    "error",
+    { argsIgnorePattern: "^_" }
+  ],
+  "@typescript-eslint/no-explicit-any": "warn",
+  "@typescript-eslint/explicit-module-boundary-types": "off",
+}
+```
+
+## TypeScript Config (`@uwdsc/typescript-config`)
+
+Shared TypeScript compiler configurations.
+
+**Location**: `packages/typescript-config/`
+
+### Available Configurations
+
+#### Base Configuration
+
+General TypeScript settings:
+
+```json
+// packages/typescript-config/base.json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020"],
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+  }
+}
+```
+
+**Usage:**
+
+```json
+// tsconfig.json
+{
+  "extends": "@uwdsc/typescript-config/base.json",
+  "compilerOptions": {
+    // Additional options
+  }
+}
+```
+
+#### Next.js Configuration
+
+For Next.js applications:
+
+```json
+// packages/typescript-config/nextjs.json
+{
+  "extends": "./base.json",
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "jsx": "preserve",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "incremental": true,
+    "isolatedModules": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
+}
+```
+
+**Usage:**
+
+```json
+// apps/web/tsconfig.json
+{
+  "extends": "@uwdsc/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    }
+  }
+}
+```
+
+#### React Library Configuration
+
+For React component libraries:
+
+```json
+// packages/typescript-config/react-library.json
+{
+  "extends": "./base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "target": "ES2020",
+    "moduleResolution": "bundler"
+  }
+}
+```
+
+**Usage:**
+
+```json
+// packages/ui/tsconfig.json
+{
+  "extends": "@uwdsc/typescript-config/react-library.json"
+}
+```
+
+## Usage Examples
+
+### Setting Up a New App
+
+```json
+// apps/new-app/package.json
+{
+  "devDependencies": {
+    "@uwdsc/eslint-config": "workspace:*",
+    "@uwdsc/typescript-config": "workspace:*"
+  }
+}
+```
+
+```javascript
+// apps/new-app/eslint.config.js
+import nextConfig from "@uwdsc/eslint-config/next.js";
+
+export default [...nextConfig];
+```
+
+```json
+// apps/new-app/tsconfig.json
+{
+  "extends": "@uwdsc/typescript-config/nextjs.json",
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
+}
+```
+
+### Setting Up a New Package
+
+```json
+// packages/new-package/package.json
+{
+  "devDependencies": {
+    "@uwdsc/eslint-config": "workspace:*",
+    "@uwdsc/typescript-config": "workspace:*"
+  }
+}
+```
+
+```javascript
+// packages/new-package/eslint.config.js
+import baseConfig from "@uwdsc/eslint-config/base.js";
+
+export default [...baseConfig];
+```
+
+```json
+// packages/new-package/tsconfig.json
+{
+  "extends": "@uwdsc/typescript-config/base.json"
+}
+```
+
+## Customization
+
+### Adding Custom Rules
+
+You can extend the shared config with your own rules:
+
+```javascript
+// apps/web/eslint.config.js
+import nextConfig from "@uwdsc/eslint-config/next.js";
+
+export default [
+  ...nextConfig,
+  {
+    rules: {
+      // Your custom rules
+      "no-console": "warn",
+    },
+  },
+];
+```
+
+### Overriding TypeScript Options
+
+```json
+// apps/web/tsconfig.json
+{
+  "extends": "@uwdsc/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "strict": false,  // Override if needed
+    "paths": {
+      "@/*": ["./"]
+    }
+  }
+}
+```
+
+## Benefits
+
+### ✅ Consistency
+
+- Same rules across all packages
+- Predictable code style
+- Easier code reviews
+
+### ✅ Maintainability
+
+- Update rules in one place
+- Changes propagate automatically
+- Easier to onboard new developers
+
+### ✅ Best Practices
+
+- Enforces TypeScript best practices
+- Catches common errors
+- Improves code quality
+
+## Running Linters
+
+### Check All Packages
+
+```bash
+pnpm lint
+```
+
+### Fix Auto-Fixable Issues
+
+```bash
+pnpm lint --fix
+```
+
+### Type Check
+
+```bash
+pnpm tsc --noEmit
+```
+
+## Best Practices
+
+### ✅ Do
+
+- Use shared configs for consistency
+- Override rules sparingly
+- Keep custom rules to minimum
+- Document any overrides
+- Run linters before committing
+
+### ❌ Don't
+
+- Disable important rules
+- Skip type checking
+- Ignore linter warnings
+- Create conflicting rules
+- Bypass linters
+
+## Troubleshooting
+
+### ESLint Errors
+
+If you get unexpected ESLint errors:
+
+```bash
+# Clear ESLint cache
+rm -rf .eslintcache
+
+# Restart your editor
+```
+
+### TypeScript Errors
+
+If you get TypeScript errors:
+
+```bash
+# Rebuild all packages
+pnpm build
+
+# Restart TypeScript server in VS Code
+# Cmd/Ctrl + Shift + P -> "TypeScript: Restart TS Server"
+```
+
+## Next Steps
+
+- [Development Tips](/guides/development) - Improve workflow
+- [Contributing](/contributing) - Contribution guidelines
+

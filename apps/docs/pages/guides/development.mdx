@@ -1,0 +1,487 @@
+# Development Tips
+
+Improve your development workflow with these tips and best practices.
+
+## Development Environment
+
+### VS Code Setup
+
+**Recommended Extensions:**
+
+- ESLint
+- Prettier - Code formatter
+- Tailwind CSS IntelliSense
+- TypeScript Error Lens
+- PostgreSQL
+- GitLens
+
+**Workspace Settings** (`.vscode/settings.json`):
+
+```json
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true
+}
+```
+
+### Terminal Setup
+
+**Use multiple terminals:**
+
+```bash
+# Terminal 1: Web app
+pnpm dev:web
+
+# Terminal 2: CxC app
+pnpm dev:cxc
+
+# Terminal 3: Documentation
+pnpm dev:docs
+```
+
+**Or use tmux/screen for session management.**
+
+## Hot Reloading
+
+### Fast Refresh
+
+Next.js automatically reloads on changes:
+
+- **Component changes**: Instant update
+- **Page changes**: Page reloads
+- **Config changes**: Server restart required
+
+### Force Reload
+
+If changes don't reflect:
+
+```bash
+# Clear Next.js cache
+rm -rf apps/web/.next
+rm -rf apps/cxc/.next
+
+# Restart dev server
+pnpm dev
+```
+
+## Debugging
+
+### Console Logging
+
+**Server-side logs** (appear in terminal):
+
+```tsx
+// app/api/route.ts
+export async function GET() {
+  console.log("API called");  // Shows in terminal
+  return NextResponse.json({ data: "test" });
+}
+```
+
+**Client-side logs** (appear in browser):
+
+```tsx
+"use client";
+
+export function Component() {
+  console.log("Component rendered");  // Shows in browser
+  return <div>Content</div>;
+}
+```
+
+### VS Code Debugger
+
+**Launch configuration** (`.vscode/launch.json`):
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Next.js: debug server-side",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "pnpm dev:web"
+    },
+    {
+      "name": "Next.js: debug client-side",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000"
+    }
+  ]
+}
+```
+
+### React DevTools
+
+Install browser extension for React debugging:
+
+- Inspect component tree
+- View props and state
+- Track re-renders
+- Profile performance
+
+## Code Quality
+
+### Linting
+
+```bash
+# Check all packages
+pnpm lint
+
+# Fix auto-fixable issues
+pnpm lint --fix
+
+# Lint specific package
+cd apps/web
+pnpm lint
+```
+
+### Formatting
+
+```bash
+# Format all files
+pnpm format
+
+# Format specific files
+pnpm format "apps/web/**/*.tsx"
+```
+
+### Type Checking
+
+```bash
+# Check types
+pnpm tsc --noEmit
+
+# Watch mode
+pnpm tsc --noEmit --watch
+```
+
+## Performance Optimization
+
+### Next.js Bundle Analysis
+
+```bash
+# Install analyzer
+pnpm add -D @next/bundle-analyzer
+
+# Update next.config.mjs
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+})
+
+module.exports = withBundleAnalyzer(nextConfig)
+
+# Analyze
+ANALYZE=true pnpm build
+```
+
+### Component Optimization
+
+```tsx
+import { memo } from "react";
+
+// Memoize expensive components
+export const ExpensiveComponent = memo(function ExpensiveComponent({ data }) {
+  // Heavy computation
+  return <div>{data}</div>;
+});
+
+// Use useMemo for expensive calculations
+import { useMemo } from "react";
+
+export function Component({ items }) {
+  const sortedItems = useMemo(() => {
+    return items.sort((a, b) => a.name.localeCompare(b.name));
+  }, [items]);
+
+  return <div>{sortedItems.map(...)}</div>;
+}
+```
+
+## Database Development
+
+### db-mate Workflow
+
+```bash
+# Create new migration
+cd packages/server/web
+db-mate new add_user_bio
+
+# Edit migration files:
+# - 001_add_user_bio.up.sql (apply)
+# - 001_add_user_bio.down.sql (rollback)
+
+# Apply migrations
+db-mate up
+
+# Rollback last migration
+db-mate down
+
+# Check migration status
+db-mate status
+```
+
+### Database Seeding
+
+```typescript
+// packages/server/web/src/db/seed.ts
+import { pool } from "@uwdsc/server/core/database/connection";
+
+async function main() {
+  await pool.query(
+    `INSERT INTO users (email, name)
+     VALUES ($1, $2)`,
+    ["test@example.com", "Test User"]
+  );
+}
+
+main()
+  .catch(console.error)
+  .finally(async () => {
+    await pool.end();
+  });
+```
+
+```bash
+# Run seed
+cd packages/server/web
+tsx src/db/seed.ts
+```
+
+## Testing
+
+### Unit Tests
+
+```typescript
+// Component test
+import { render, screen } from "@testing-library/react";
+import { Button } from "@uwdsc/ui";
+
+describe("Button", () => {
+  it("renders children", () => {
+    render(<Button>Click me</Button>);
+    expect(screen.getByText("Click me")).toBeInTheDocument();
+  });
+
+  it("calls onClick handler", () => {
+    const handleClick = jest.fn();
+    render(<Button onClick={handleClick}>Click</Button>);
+    screen.getByText("Click").click();
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+});
+```
+
+### Integration Tests
+
+```typescript
+// API test
+import { GET } from "@/app/api/health/route";
+
+describe("Health API", () => {
+  it("returns health status", async () => {
+    const response = await GET();
+    const data = await response.json();
+    expect(data.status).toBe("healthy");
+  });
+});
+```
+
+## Git Workflow
+
+### Branch Strategy
+
+```bash
+# Create feature branch
+git checkout -b feature/add-user-profile
+
+# Make changes and commit
+git add .
+git commit -m "feat: add user profile component"
+
+# Push to remote
+git push origin feature/add-user-profile
+```
+
+### Commit Messages
+
+Follow Conventional Commits:
+
+- `feat:` - New feature
+- `fix:` - Bug fix
+- `docs:` - Documentation
+- `style:` - Code style
+- `refactor:` - Code refactoring
+- `test:` - Tests
+- `chore:` - Maintenance
+
+**Examples:**
+
+```bash
+git commit -m "feat: add user authentication"
+git commit -m "fix: resolve navigation menu bug"
+git commit -m "docs: update API documentation"
+git commit -m "refactor: simplify profile service"
+```
+
+## Productivity Tips
+
+### Command Aliases
+
+Add to `.bashrc` or `.zshrc`:
+
+```bash
+alias dev="pnpm dev"
+alias devw="pnpm dev:web"
+alias devc="pnpm dev:cxc"
+alias devd="pnpm dev:docs"
+alias build="pnpm build"
+alias lint="pnpm lint"
+```
+
+### Package Scripts
+
+Create convenience scripts in `package.json`:
+
+```json
+{
+  "scripts": {
+    "clean": "rm -rf .next node_modules",
+    "reset": "pnpm clean && pnpm install",
+    "type-check": "tsc --noEmit",
+    "test:watch": "jest --watch"
+  }
+}
+```
+
+### Code Snippets
+
+**VS Code snippets** (`.vscode/snippets.json`):
+
+```json
+{
+  "React Component": {
+    "prefix": "rfc",
+    "body": [
+      "export function ${1:Component}() {",
+      "  return <div>$0</div>;",
+      "}"
+    ]
+  },
+  "API Route": {
+    "prefix": "api",
+    "body": [
+      "import { NextResponse } from 'next/server';",
+      "",
+      "export async function GET() {",
+      "  return NextResponse.json({ data: $0 });",
+      "}"
+    ]
+  }
+}
+```
+
+## Common Issues
+
+### Port Already in Use
+
+```bash
+# Find process using port
+lsof -i :3000
+
+# Kill process
+kill -9 <PID>
+```
+
+### pnpm Lock File Conflicts
+
+```bash
+# Resolve conflicts
+pnpm install --no-frozen-lockfile
+```
+
+### Type Errors
+
+```bash
+# Regenerate types
+pnpm build
+
+# Restart TypeScript server in VS Code
+# Cmd/Ctrl + Shift + P -> "TypeScript: Restart TS Server"
+```
+
+### Module Not Found
+
+```bash
+# Clear cache and reinstall
+rm -rf node_modules
+rm pnpm-lock.yaml
+pnpm install
+```
+
+## Keyboard Shortcuts
+
+### VS Code
+
+- `Cmd/Ctrl + P` - Quick file open
+- `Cmd/Ctrl + Shift + P` - Command palette
+- `Cmd/Ctrl + B` - Toggle sidebar
+- `Cmd/Ctrl + `` - Toggle terminal
+- `F2` - Rename symbol
+- `Alt + Up/Down` - Move line up/down
+
+### Browser DevTools
+
+- `Cmd/Ctrl + Shift + C` - Inspect element
+- `Cmd/Ctrl + Shift + J` - Open console
+- `Cmd/Ctrl + Shift + M` - Toggle device mode
+- `Cmd/Ctrl + R` - Reload page
+- `Cmd/Ctrl + Shift + R` - Hard reload
+
+## Resources
+
+### Documentation
+
+- [Next.js Docs](https://nextjs.org/docs)
+- [React Docs](https://react.dev/)
+- [TypeScript Docs](https://www.typescriptlang.org/docs/)
+- [Tailwind CSS Docs](https://tailwindcss.com/docs)
+
+### Tools
+
+- [React DevTools](https://react.dev/learn/react-developer-tools)
+- [pgAdmin](https://www.pgadmin.org/) - PostgreSQL administration tool
+- [Postman](https://www.postman.com/) - API testing
+
+## Best Practices
+
+### ✅ Do
+
+- Use TypeScript strictly
+- Write clear commit messages
+- Test your changes locally
+- Keep components small and focused
+- Document complex logic
+- Use proper error handling
+
+### ❌ Don't
+
+- Commit broken code
+- Skip type checking
+- Ignore linter warnings
+- Push directly to main
+- Leave debug code in commits
+
+## Next Steps
+
+- [Adding Components](/guides/adding-components) - Build UI components
+- [Creating API](/guides/creating-api) - Build backend features
+- [Database Setup](/guides/database) - Work with db-mate and pg
+

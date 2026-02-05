@@ -1,0 +1,425 @@
+# Winter 2026 Updates
+
+This semester continues to build upon the foundation established in Fall 2025, with new features and improvements across the platform.
+
+## 🎯 Main Website (apps/web)
+
+### Account Security (PR #126)
+
+**Password Reset Flow**
+- Users can now reset forgotten passwords through a secure email-based flow
+- "Forgot Password" link added to login page for easy access
+- Password reset emails sent with time-limited secure links
+- Dedicated reset password page with new password confirmation
+- Email verification required before password can be reset
+
+## 🏆 CXC App (apps/cxc)
+
+### Superadmin Dashboard (PR #141)
+
+**Dashboard Overview (`/admin/dashboard`)**
+- Comprehensive analytics dashboard for tracking applications and RSVPs
+- Superadmin-only access for monitoring event metrics
+- Real-time statistics with key performance indicators:
+  - Total applications created and submitted
+  - Total offers extended (accepted applications)
+  - Total RSVPs confirmed (hackers)
+  - Total declined offers
+- Conversion rate tracking:
+  - Application → Offer rate
+  - Offer → RSVP rate
+  - Overall acceptance rate (Application → RSVP)
+- Status breakdown showing pending applications and awaiting RSVPs
+
+**RSVP Timeline Visualization**
+- Interactive line chart displaying RSVP trends over time
+- Toggle between daily and hourly views for granular insights
+- Responsive chart design with zoom and tooltip interactions
+- Built with Recharts library for smooth data visualization
+- Helps identify peak RSVP periods and track momentum
+
+**Backend Services**
+- `DashboardService` enhancements:
+  - `getDashboardStatistics()`: Aggregate application and profile metrics
+  - `getRSVPTimeline(intervalHours)`: Fetch RSVP data with hourly or daily intervals
+- `DashboardRepository` new methods:
+  - `getDashboardStatistics()`: Optimized queries for application and profile counts
+  - `getRSVPTimelineHourly()`: Time-series data for RSVP tracking
+  - Efficient aggregation using database-level grouping
+
+**API Enhancements**
+- `GET /api/admin/dashboard?interval={1|24}`: Returns statistics and timeline data
+  - `interval=1`: Hourly RSVP data points
+  - `interval=24`: Daily aggregated RSVP data (default)
+- Superadmin-only access with role verification
+- Graceful error handling with detailed error messages
+
+**UI/UX Features**
+- Statistics cards with icon indicators for each metric
+- Color-coded borders and hover effects
+- Responsive grid layout for mobile and desktop
+- Loading states with custom CXC loading screen
+- Time-based filtering for timeline granularity
+- Real-time data fetching and updates
+
+**Application Flow Updates (PR #145)**
+- Fixed issue where users without applications would encounter errors on results page
+- Added dedicated "No Application Found" page for users who never created an application
+  - Clear messaging explaining they didn't submit for CXC 2026
+  - Information about what this means for event participation
+  - Encouragement to watch for future opportunities
+- Users with draft applications continue to see explanation about missed deadline
+- Improved error handling and user experience with clear next steps messaging
+
+**Dashboard Sidebar Cleanup**
+- Removed application status prop dependency for cleaner component architecture
+- Results tab now visible to all users regardless of application status
+- Simplified navigation logic
+- Removed NFC ID display from profile page for cleaner UI
+
+### Review Leaderboard & Analytics (PR #132)
+
+**Admin Leaderboard Dashboard (`/admin/leaderboard`)**
+- Comprehensive leaderboard system for tracking reviewer performance
+- Superadmin-only access for monitoring review progress
+- Real-time statistics dashboard with key metrics:
+  - Total applications, reviews, and reviewers
+  - Average reviews per application
+  - Average scores across all review categories
+- Visual top 3 podium display with animated rankings
+- Full leaderboard table showing all reviewers ranked by review count
+- Click-to-view detailed statistics for individual reviewers
+
+**Reviewer Performance Tracking**
+- Individual reviewer statistics modal with average scores per category
+- Track average resume, links, Q1, and Q2 scores
+- Monitor total reviews completed by each reviewer
+- Compare individual performance against overall averages
+- Identify scoring patterns and consistency
+
+**Enhanced Scoring System**
+- Updated review scoring categories for more granular evaluation:
+  - **Resume Score**: 0-3 (quality and relevance)
+  - **Links Score**: 0-2 (portfolio and online presence)
+  - **Q1 Score**: 0-7 (technical depth and problem-solving)
+  - **Q2 Score**: 0-3 (creativity and format adherence)
+- More precise evaluation criteria vs. previous 1-10 scale
+- Score validation at database and application levels
+
+**Backend Services**
+- `AdminReviewService` enhancements:
+  - `getLeaderboard()`: Fetch all reviewers with review counts
+  - `getStatistics()`: Calculate aggregate review statistics
+  - `getReviewerAverageScores()`: Get individual reviewer performance metrics
+- `AdminReviewRepository` new methods:
+  - Optimized queries for leaderboard data
+  - Efficient aggregation for statistics calculation
+  - Reviewer-specific score averaging
+
+**API Enhancements**
+- `GET /api/admin/leaderboard`: Returns leaderboard and statistics
+- `GET /api/admin/leaderboard?reviewerId={id}`: Returns reviewer-specific scores
+- Superadmin-only access with role verification
+- Graceful error handling with fallback values
+- 30-second request timeout protection
+
+**Database Improvements**
+- Fixed reviews table unique indexes (migration `20260116182144_fix_reviews_unique_indexes`)
+- Removed incorrect unique constraints that prevented multiple reviewers per application
+- Updated schema to allow proper multi-reviewer system
+- Disabled RLS policies on reviews table for application-level access control
+- Proper compound unique constraint: `(application_id, reviewer_id)`
+
+**UI/UX Features**
+- Animated transitions with Framer Motion
+- Responsive design for mobile and desktop
+- Loading states and error handling
+- Color-coded podium display (gold, silver, bronze)
+- Interactive cards with hover effects
+- Real-time data fetching and updates
+
+**Gamification Benefits**
+- Encourages healthy competition among reviewers
+- Provides recognition for top contributors
+- Motivates consistent review participation
+- Transparent progress tracking for all reviewers
+
+### Account Security (PR #126)
+
+**Password Reset Flow**
+- Users can now reset forgotten passwords through a secure email-based flow
+- "Forgot Password" link added to login page for easy access
+- Password reset emails sent with time-limited secure links
+- Dedicated reset password page with new password confirmation
+- Email verification required before password can be reset
+
+### Admin Application Management (PR #118)
+
+**Applications Dashboard (`/admin/applications`)**
+- Admins can view all submitted applications in a sortable, filterable table
+- Table displays applicant name, email, university, gender, number of reviews, submission date, and review count
+- Filter applications by email with real-time search
+- Sortable columns for efficient application browsing
+- Pagination support with customizable rows per page (10, 20, 30, 40, 50)
+- Click any row to view complete application details in a modal
+- Real-time application count display
+
+**Application Details Modal**
+- View comprehensive application information in organized sections:
+  - Basic Information: name, email, phone, Discord, age, gender, ethnicity, country, t-shirt size, dietary restrictions
+  - Education & Experience: university, program, year of study, hackathon experience
+  - Social Links: GitHub, LinkedIn, website, portfolio
+  - Application Questions: technical project description and creative haiku
+  - Team Information: team members with names and emails
+  - Resume viewer with secure access
+  - MLH authorization checkboxes status
+- Loading skeleton during data fetch for improved UX
+- Responsive design with mobile-optimized layout
+
+**Enhanced Review System (`/admin/review`)**
+- Redesigned review interface with improved layout and components
+- Reusable review components for consistent scoring UI
+- Better error handling and loading states
+- "Get New Application" button to fetch next application without page reload
+
+**Admin Navigation**
+- New "Admin" dropdown menu in navbar (visible only to admin users)
+- Quick access to Applications Dashboard and Review pages
+- Mobile menu support with admin pages section
+- Description text for each admin page
+
+### Content & Branding Updates
+- **Brand Consistency (PR #114)**: Standardized "CXC" branding across all components, replacing inconsistent "CxC" usage for improved professional appearance
+
+### Application Flow Enhancements
+
+**Complete Application & Reviewer Flow (PR #100)**
+
+#### Application Form Improvements
+
+**Team Selection Feature**
+- Added team member search and selection functionality
+- Users can add up to 3 team members by searching for registered users
+- Team members displayed with names and emails in review section
+- Real-time search with name/email filtering
+- New `/api/users/emails` endpoint provides user list for team selection
+
+**Form State Persistence**
+- Application progress now persists across page refreshes using localStorage
+- Desktop step and mobile page positions saved automatically
+- Individual form fields auto-save to localStorage as users type
+- Form data restored when users return to the application
+- Prevents data loss during browser crashes or accidental navigation
+
+**Resume Upload & Management**
+- Resume uploads now replace existing resumes automatically
+- Added GET endpoint to retrieve user's current resume with signed URLs
+- Resume files stored in private bucket with secure access
+- Resume preview available in application review section
+- File validation (max 10 MB, PDF/DOC/DOCX formats)
+- Immediate upload on file selection with validation feedback
+
+**Application Submission Protection**
+- Users cannot edit applications after submission
+- Submitted applications redirect to "Submitted" page automatically
+- LocalStorage cleared upon successful submission
+
+#### Admin Review System
+
+**Review Assignment Logic**
+- New `/api/applications/random` endpoint returns applications with least reviews
+- Prevents reviewers from seeing applications they've already reviewed
+- Ties broken lexicographically by application ID for fairness
+- Admin-only access with role verification middleware
+
+**Review Interface (`/review` page)**
+- Dedicated review page for admin users with score submission
+- Displays complete application data including:
+  - Contact information and personal details
+  - Education and hackathon experience
+  - Social links (GitHub, LinkedIn, website)
+  - Application questions (technical project, haiku)
+  - Team members with names
+  - Resume viewer with signed URL access
+- Score applications on 3 categories (1-10 scale):
+  - Basic information
+  - Question 1 (technical project)
+  - Question 2 (haiku)
+- Validation ensures all scores provided before submission
+- Success confirmation with option to review another application
+
+**Review Tracking**
+- New `reviews` table tracks all review submissions
+- Prevents duplicate reviews from same reviewer
+- Tracks total review count per reviewer
+- Stores individual scores for each review category
+
+#### Application Form Structure
+
+**Reorganized Form Steps**
+- Split "Teams & MLH" into separate steps:
+  - Step 3: Team Members (optional)
+  - Step 4: MLH Checkboxes (required)
+  - Step 5: Review & Submit
+- Updated step validation logic for new structure
+- Desktop and mobile views synchronized
+
+### Backend Architecture Updates
+
+**New Services**
+- `AdminApplicationService`: Manages admin application access
+  - `getAllApplicationSummaries()`: Returns all submitted applications with summary data
+  - `getApplicationById()`: Retrieves full application details by ID
+- `AdminReviewService`: Manages review assignment and submission
+  - `getNextApplicationForReview()`: Returns least-reviewed application
+  - `submitReview()`: Validates and saves review scores
+- `ApplicationService.getAllUserEmails()`: Fetches user list for team selection
+
+**New Repositories**
+- `DashboardRepository`: Analytics and statistics queries
+  - `getDashboardStatistics()`: Aggregate application and profile counts
+  - `getRSVPTimelineHourly()`: Time-series RSVP data with hourly granularity
+- `AdminApplicationRepository`: Database operations for application management
+  - `getAllApplicationSummaries()`: Query for application table with review counts
+  - `getApplicationById()`: Fetch complete application details with team member info
+  - Includes user name extraction from auth metadata
+- `AdminReviewRepository`: Database operations for reviews
+  - `getApplicationWithLeastReviews()`: Query for review assignment
+  - `getUserEmail()`: Fetch user email by profile ID
+  - `getTeamMembersByEmails()`: Get team member details
+  - `hasReviewerReviewedApplication()`: Check duplicate reviews
+  - `createReview()`: Insert review record
+  - `getReviewCountByReviewer()`: Track reviewer progress
+
+**Enhanced File Services**
+- `FileRepository.createSignedUrl()`: Generate secure signed URLs for private files
+- `FileService.createSignedUrl()`: Service wrapper for signed URL generation
+- `ResumeService` enhancements:
+  - `uploadResume()`: Now automatically replaces existing resumes
+  - `getUserResume()`: Retrieve user's current resume
+  - `getSignedResumeUrl()`: Get secure, time-limited resume access with ownership verification
+
+### API Enhancements
+
+**New Endpoints**
+- `GET /api/admin/dashboard` - Get superadmin analytics (statistics and RSVP timeline)
+- `GET /api/admin/applications` - Get all submitted applications (admin only)
+- `GET /api/admin/applications/[id]` - Get full application details by ID (admin only)
+- `GET /api/applications/random` - Get next application for review (admin only)
+- `GET /api/applications/resumes` - Retrieve user's resume with signed URL
+- `POST /api/review/submit` - Submit review scores for an application
+- `GET /api/users/emails` - Get all user emails for team member selection
+
+**Enhanced Endpoints**
+- `POST /api/applications/resumes` - Now replaces existing resumes
+- `PATCH /api/applications/route` - Improved error messages with detailed error context
+
+### Middleware & Security
+
+**Admin Route Protection**
+- `/admin/**` routes now require admin role (updated from `/review`)
+- Superadmin-only routes: `/admin/assign`, `/admin/dashboard`, `/admin/leaderboard`
+- `withProtected` middleware enhanced with role-based access control
+- Non-admin users redirected to home page
+- Profile service integration for role verification
+
+**Auth Route Protection**
+- Added `/start` to protected authentication routes
+- Authenticated users redirected away from auth pages
+
+### Client-Side API Functions
+
+**New API Functions**
+- `getAllApplications()`: Fetch all submitted applications for admin table
+- `getApplicationDetails()`: Retrieve full application details by ID
+- `getRandomApplication()`: Fetch random application for review
+- `submitReview()`: Submit review scores with validation
+- `getUserEmails()`: Get user list for team selection
+- `getResume()`: Retrieve current user's resume
+
+**Enhanced Functions**
+- `uploadResume()`: Improved error handling and response types
+
+## 🎨 Design System (packages/ui)
+
+### New Components
+
+**Table Component (shadcn/ui)**
+- Added complete table component set for data display
+- Includes Table, TableHeader, TableBody, TableFooter, TableRow, TableHead, TableCell, TableCaption
+- Responsive overflow handling with horizontal scrolling
+- Hover states and selected row highlighting
+- Used for admin applications dashboard
+
+### Component Enhancements
+
+**Dialog Component**
+- Enhanced close button with cursor pointer for better UX
+- Code formatting cleanup (trailing commas)
+
+**GlassSurface Component**
+- Fixed React hook dependency warnings with proper useCallback memoization
+- Improved performance with optimized re-renders
+
+**Form Components**
+- Enhanced FileUploadField with callbacks for file selection and name changes
+- Added `existingFileName` prop to display previously uploaded files
+- Support for `onFileChange` and `onFileSelect` callbacks
+- Fixed SelectField to handle undefined values correctly
+
+## 🔧 Infrastructure
+
+### New Dependencies (PR #141)
+
+**Recharts** - Data visualization library
+- Added to CXC app for dashboard analytics
+- Provides responsive chart components (LineChart, BarChart, etc.)
+- Used in superadmin dashboard for RSVP timeline visualization
+- Supports interactive tooltips, legends, and customizable styling
+
+### Authentication Services (PR #126)
+
+**Password Reset Backend**
+- `AuthService.forgotPassword()`: Sends password reset email with secure redirect link
+- `AuthService.resetPassword()`: Validates and updates user password
+- `AuthRepository.resetPasswordForEmail()`: Supabase integration for password reset emails
+- `AuthRepository.updateUserPassword()`: Secure password update functionality
+- New API endpoints:
+  - `POST /api/auth/forgot-password` - Request password reset email
+  - `POST /api/auth/reset-password` - Complete password reset with new password
+- Client-side API functions for password reset flow integration
+
+### Shared Utilities
+
+**Data Transformers**
+- Added `splitCommaSeparatedString()` utility to core package for consistent string parsing
+- Shared across repositories for ethnicity and experience fields
+
+### Database Schema Updates
+
+**New Tables**
+- `reviews` table for storing application reviews:
+  - `id` (UUID primary key)
+  - `application_id` (foreign key to applications)
+  - `reviewer_id` (foreign key to profiles)
+  - `basic_info_score` (integer 1-10)
+  - `q1_score` (integer 1-10)
+  - `q2_score` (integer 1-10)
+  - `reviewed_at` (timestamp)
+
+**Application Updates**
+- `team_members` field stores comma-separated team member emails
+- Enhanced application queries to include team member details with display names
+
+### Storage Updates
+
+**Resume Storage**
+- Private bucket configuration for secure resume storage
+- Signed URL generation with configurable expiration (default 1 hour)
+- Automatic cleanup of old resumes when new ones uploaded
+
+## 🚀 DevOps & CI/CD
+
+---
+
+_Features documented from merged PRs tagged with `W26`. This page is automatically updated when PRs are merged._

@@ -1,0 +1,705 @@
+# Database Setup
+
+Learn how to work with db-mate, pg, and Supabase in this project.
+
+## Overview
+
+Our project uses:
+
+- **pg** (node-postgres) - PostgreSQL client for raw SQL queries
+- **db-mate** - Database migration tool with SQL files
+- **Supabase** - PostgreSQL database and authentication
+- **PostgreSQL** - Relational database
+
+## Architecture
+
+```
+┌─────────────────────────────────────────┐
+│     Application Layer                   │
+│  (Next.js API Routes & Services)        │
+└───────────┬─────────────────────────────┘
+            │
+┌───────────▼─────────────────────────────┐
+│        pg (node-postgres)                │
+│   (Raw SQL queries)                      │
+└───────────┬─────────────────────────────┘
+            │
+┌───────────▼─────────────────────────────┐
+│     Supabase PostgreSQL                  │
+│   (Database & Auth)                      │
+└──────────────────────────────────────────┘
+```
+
+## Setup
+
+### 1. Environment Variables
+
+Create `.env.local` files in your apps:
+
+```bash
+# apps/web/.env.local
+DATABASE_URL="postgresql://user:password@host:5432/database"
+SUPABASE_URL="https://your-project.supabase.co"
+SUPABASE_ANON_KEY="your-anon-key"
+SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
+```
+
+### 2. Database Migrations
+
+Migrations are located in:
+
+- `packages/server/web/src/db/migrations/`
+- `packages/server/cxc/src/db/migrations/`
+
+**Example migration file** (`001_create_users_table.up.sql`):
+
+```sql
+-- packages/server/web/src/db/migrations/001_create_users_table.up.sql
+
+CREATE TABLE IF NOT EXISTS users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email VARCHAR(255) UNIQUE NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  bio TEXT,
+  avatar VARCHAR(500),
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_users_email ON users(email);
+```
+
+**Down migration** (`001_create_users_table.down.sql`):
+
+```sql
+-- packages/server/web/src/db/migrations/001_create_users_table.down.sql
+
+DROP TABLE IF EXISTS users;
+```
+
+## db-mate Workflow
+
+### Install db-mate
+
+```bash
+# Install globally
+npm install -g db-mate
+
+# Or use npx
+npx db-mate
+```
+
+### Create Migration
+
+Create a new migration:
+
+```bash
+cd packages/server/web
+db-mate new add_user_bio
+```
+
+This creates two files:
+- `001_add_user_bio.up.sql` - Migration to apply
+- `001_add_user_bio.down.sql` - Migration to rollback
+
+### Apply Migrations
+
+Apply all pending migrations:
+
+```bash
+cd packages/server/web
+db-mate up
+```
+
+### Rollback Migration
+
+Rollback the last migration:
+
+```bash
+cd packages/server/web
+db-mate down
+```
+
+### Reset Database
+
+**Warning**: This deletes all data!
+
+```bash
+cd packages/server/web
+db-mate drop
+db-mate up
+```
+
+### Migration Status
+
+Check which migrations have been applied:
+
+```bash
+cd packages/server/web
+db-mate status
+```
+
+## Using pg (node-postgres)
+
+### Connection Pool
+
+```typescript
+// packages/server/core/src/database/connection.ts
+import { Pool } from "pg";
+
+export const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
+});
+```
+
+### Basic Queries
+
+```typescript
+// packages/server/web/src/repository/userRepository.ts
+import { pool } from "@uwdsc/server/core/database/connection";
+
+export class UserRepository {
+  // Find one
+  async findById(id: string) {
+    const result = await pool.query(
+      "SELECT * FROM users WHERE id = $1",
+      [id]
+    );
+    return result.rows[0] || null;
+  }
+
+  // Find many
+  async findAll() {
+    const result = await pool.query(
+      "SELECT * FROM users ORDER BY created_at DESC"
+    );
+    return result.rows;
+  }
+
+  // Create
+  async create(data: { email: string; name: string }) {
+    const result = await pool.query(
+      `INSERT INTO users (email, name)
+       VALUES ($1, $2)
+       RETURNING *`,
+      [data.email, data.name]
+    );
+    return result.rows[0];
+  }
+
+  // Update
+  async update(id: string, data: { name?: string; bio?: string }) {
+    const updates: string[] = [];
+    const values: any[] = [];
+    let paramIndex = 1;
+
+    if (data.name !== undefined) {
+      updates.push(`name = $${paramIndex++}`);
+      values.push(data.name);
+    }
+    if (data.bio !== undefined) {
+      updates.push(`bio = $${paramIndex++}`);
+      values.push(data.bio);
+    }
+
+    if (updates.length === 0) {
+      return this.findById(id);
+    }
+
+    updates.push(`updated_at = NOW()`);
+    values.push(id);
+
+    const result = await pool.query(
+      `UPDATE users
+       SET ${updates.join(", ")}
+       WHERE id = $${paramIndex}
+       RETURNING *`,
+      values
+    );
+    return result.rows[0];
+  }
+
+  // Delete
+  async delete(id: string) {
+    const result = await pool.query(
+      "DELETE FROM users WHERE id = $1 RETURNING *",
+      [id]
+    );
+    return result.rows[0];
+  }
+}
+```
+
+### Relations
+
+```typescript
+// Include related data
+async findUserWithProfile(userId: string) {
+  const result = await pool.query(
+    `SELECT 
+       u.*,
+       p.bio as profile_bio
+     FROM users u
+     LEFT JOIN profiles p ON p.user_id = u.id
+     WHERE u.id = $1`,
+    [userId]
+  );
+  return result.rows[0] || null;
+}
+
+// Nested writes (using transactions)
+async createUserWithProfile(data: {
+  email: string;
+  name: string;
+  bio: string;
+}) {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    // Create user
+    const userResult = await client.query(
+      `INSERT INTO users (email, name)
+       VALUES ($1, $2)
+       RETURNING *`,
+      [data.email, data.name]
+    );
+    const user = userResult.rows[0];
+
+    // Create profile
+    await client.query(
+      `INSERT INTO profiles (user_id, bio)
+       VALUES ($1, $2)`,
+      [user.id, data.bio]
+    );
+
+    await client.query("COMMIT");
+    return user;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+```
+
+### Filtering
+
+```typescript
+// Where clause
+async findActiveUsers() {
+  const result = await pool.query(
+    `SELECT * FROM users
+     WHERE status = $1
+       AND created_at >= $2`,
+    ["active", new Date("2024-01-01")]
+  );
+  return result.rows;
+}
+
+// OR conditions
+async search(query: string) {
+  const searchTerm = `%${query}%`;
+  const result = await pool.query(
+    `SELECT * FROM users
+     WHERE name ILIKE $1 OR email ILIKE $1`,
+    [searchTerm]
+  );
+  return result.rows;
+}
+```
+
+### Pagination
+
+```typescript
+async findWithPagination(page: number, limit: number) {
+  const offset = (page - 1) * limit;
+
+  const [usersResult, countResult] = await Promise.all([
+    pool.query(
+      `SELECT * FROM users
+       ORDER BY created_at DESC
+       LIMIT $1 OFFSET $2`,
+      [limit, offset]
+    ),
+    pool.query("SELECT COUNT(*) as total FROM users"),
+  ]);
+
+  return {
+    users: usersResult.rows,
+    total: parseInt(countResult.rows[0].total),
+    page,
+    pages: Math.ceil(parseInt(countResult.rows[0].total) / limit),
+  };
+}
+```
+
+### Transactions
+
+```typescript
+async transferCredits(fromId: string, toId: string, amount: number) {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    // Deduct from sender
+    await client.query(
+      `UPDATE users
+       SET credits = credits - $1
+       WHERE id = $2`,
+      [amount, fromId]
+    );
+
+    // Add to receiver
+    await client.query(
+      `UPDATE users
+       SET credits = credits + $1
+       WHERE id = $2`,
+      [amount, toId]
+    );
+
+    // Create transaction record
+    await client.query(
+      `INSERT INTO transactions (from_id, to_id, amount)
+       VALUES ($1, $2, $3)`,
+      [fromId, toId, amount]
+    );
+
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+```
+
+### Aggregations
+
+```typescript
+async getStats() {
+  const result = await pool.query(
+    `SELECT 
+       COUNT(*) as total_users,
+       AVG(age) as avg_age,
+       MIN(created_at) as first_user,
+       MAX(created_at) as latest_user
+     FROM users`
+  );
+  return result.rows[0];
+}
+
+async groupByStatus() {
+  const result = await pool.query(
+    `SELECT status, COUNT(*) as count
+     FROM users
+     GROUP BY status`
+  );
+  return result.rows;
+}
+```
+
+## Supabase Integration
+
+### Authentication
+
+```typescript
+// packages/server/core/src/services/authService.ts
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+export class AuthService {
+  async signUp(email: string, password: string) {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (error) throw error;
+    return data;
+  }
+
+  async signIn(email: string, password: string) {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) throw error;
+    return data;
+  }
+
+  async getUser(token: string) {
+    const { data, error } = await supabase.auth.getUser(token);
+    if (error) throw error;
+    return data.user;
+  }
+}
+```
+
+### File Storage
+
+```typescript
+// packages/server/core/src/services/fileService.ts
+export class FileService {
+  async uploadFile(bucket: string, path: string, file: File) {
+    const { data, error } = await supabase.storage
+      .from(bucket)
+      .upload(path, file);
+
+    if (error) throw error;
+    return data;
+  }
+
+  getPublicUrl(bucket: string, path: string) {
+    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+
+    return data.publicUrl;
+  }
+
+  async deleteFile(bucket: string, path: string) {
+    const { error } = await supabase.storage.from(bucket).remove([path]);
+
+    if (error) throw error;
+  }
+}
+```
+
+## Data Seeding
+
+### Create Seed File
+
+```typescript
+// packages/server/web/src/db/seed.ts
+import { pool } from "@uwdsc/server/core/database/connection";
+
+async function main() {
+  // Clear existing data
+  await pool.query("DELETE FROM applications");
+  await pool.query("DELETE FROM profiles");
+  await pool.query("DELETE FROM users");
+
+  // Create test users
+  const user1Result = await pool.query(
+    `INSERT INTO users (email, name)
+     VALUES ($1, $2)
+     RETURNING *`,
+    ["john@example.com", "John Doe"]
+  );
+  const user1 = user1Result.rows[0];
+
+  await pool.query(
+    `INSERT INTO profiles (user_id, bio)
+     VALUES ($1, $2)`,
+    [user1.id, "Software developer"]
+  );
+
+  const user2Result = await pool.query(
+    `INSERT INTO users (email, name)
+     VALUES ($1, $2)
+     RETURNING *`,
+    ["jane@example.com", "Jane Smith"]
+  );
+  const user2 = user2Result.rows[0];
+
+  await pool.query(
+    `INSERT INTO profiles (user_id, bio)
+     VALUES ($1, $2)`,
+    [user2.id, "Product designer"]
+  );
+
+  // Create applications
+  await pool.query(
+    `INSERT INTO applications (user_id, status, data)
+     VALUES ($1, $2, $3), ($4, $5, $6)`,
+    [
+      user1.id,
+      "pending",
+      JSON.stringify({}),
+      user2.id,
+      "approved",
+      JSON.stringify({}),
+    ]
+  );
+
+  console.log("Database seeded successfully");
+}
+
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await pool.end();
+  });
+```
+
+### Run Seed
+
+```bash
+cd packages/server/web
+tsx src/db/seed.ts
+```
+
+## Best Practices
+
+### ✅ Do
+
+- Use parameterized queries to prevent SQL injection
+- Use transactions for multi-step operations
+- Handle errors appropriately
+- Use TypeScript types for query results
+- Index frequently queried columns
+- Use SELECT to limit returned fields
+- Close database connections properly
+- Use connection pooling
+
+### ❌ Don't
+
+- Use string concatenation for SQL queries (SQL injection risk)
+- Store large files in database
+- Skip migrations in production
+- Expose database errors to clients
+- Create N+1 queries (use JOINs or batch queries)
+- Forget to release connection pool clients
+
+## Common Patterns
+
+### Repository Pattern
+
+```typescript
+import { pool } from "@uwdsc/server/core/database/connection";
+
+export class UserRepository {
+  async findByEmail(email: string) {
+    const result = await pool.query(
+      "SELECT * FROM users WHERE email = $1",
+      [email]
+    );
+    return result.rows[0] || null;
+  }
+
+  async existsByEmail(email: string): Promise<boolean> {
+    const result = await pool.query(
+      "SELECT COUNT(*) as count FROM users WHERE email = $1",
+      [email]
+    );
+    return parseInt(result.rows[0].count) > 0;
+  }
+}
+```
+
+### Soft Deletes
+
+```sql
+-- Migration
+ALTER TABLE users ADD COLUMN deleted_at TIMESTAMP;
+CREATE INDEX idx_users_deleted_at ON users(deleted_at);
+```
+
+```typescript
+async softDelete(id: string) {
+  const result = await pool.query(
+    `UPDATE users
+     SET deleted_at = NOW()
+     WHERE id = $1
+     RETURNING *`,
+    [id]
+  );
+  return result.rows[0];
+}
+
+async findActive() {
+  const result = await pool.query(
+    "SELECT * FROM users WHERE deleted_at IS NULL"
+  );
+  return result.rows;
+}
+```
+
+### Optimistic Locking
+
+```sql
+-- Migration
+ALTER TABLE users ADD COLUMN version INTEGER DEFAULT 0;
+```
+
+```typescript
+async updateWithVersion(
+  id: string,
+  currentVersion: number,
+  data: any
+) {
+  const result = await pool.query(
+    `UPDATE users
+     SET name = $1, version = version + 1
+     WHERE id = $2 AND version = $3
+     RETURNING *`,
+    [data.name, id, currentVersion]
+  );
+  return result.rows[0];
+}
+```
+
+## Troubleshooting
+
+### Connection Issues
+
+Check environment variables and database connectivity:
+
+```typescript
+import { pool } from "@uwdsc/server/core/database/connection";
+
+async function testConnection() {
+  try {
+    const result = await pool.query("SELECT 1");
+    console.log("Database connected");
+  } catch (error) {
+    console.error("Database connection failed:", error);
+  }
+}
+```
+
+### Migration Issues
+
+```bash
+# Check migration status
+db-mate status
+
+# Force rollback if needed
+db-mate down --force
+
+# Re-apply migrations
+db-mate up
+```
+
+### Query Performance
+
+Use EXPLAIN ANALYZE to debug slow queries:
+
+```sql
+EXPLAIN ANALYZE
+SELECT * FROM users WHERE email = 'test@example.com';
+```
+
+## Resources
+
+- [pg Documentation](https://node-postgres.com/)
+- [db-mate Documentation](https://github.com/amacneil/dbmate)
+- [Supabase Documentation](https://supabase.com/docs)
+- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
+
+## Next Steps
+
+- [Creating API Endpoints](/guides/creating-api) - Build backend features
+- [Development Tips](/guides/development) - Improve workflow

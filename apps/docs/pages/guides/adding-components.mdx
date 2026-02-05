@@ -1,0 +1,379 @@
+# Adding Components
+
+Learn how to add UI components to your apps following our design system principles.
+
+## Adding Shadcn Components (Atoms)
+
+When you need a new UI primitive that will be reused across apps:
+
+### Step 1: Add to UI Package
+
+```bash
+pnpm ui:add <component-name>
+```
+
+**Example:** Adding a Dialog component
+
+```bash
+pnpm ui:add dialog
+```
+
+This will:
+1. Download the component from shadcn/ui
+2. Place it in `packages/ui/src/components/dialog.tsx`
+3. Add necessary dependencies
+4. Configure imports
+
+### Step 2: Export from UI Package
+
+The component is automatically exported via `packages/ui/src/index.ts`. Verify it's there:
+
+```ts
+export * from "./components/dialog";
+```
+
+### Step 3: Use in Your App
+
+```tsx
+import { Dialog, DialogTrigger, DialogContent } from "@uwdsc/ui";
+
+export function MyComponent() {
+  return (
+    <Dialog>
+      <DialogTrigger>Open</DialogTrigger>
+      <DialogContent>
+        <h2>Dialog Content</h2>
+      </DialogContent>
+    </Dialog>
+  );
+}
+```
+
+## Creating App Components (Molecules)
+
+When you need a component with app-specific logic:
+
+### Step 1: Create Component File
+
+Create in your app's `components/` directory:
+
+```bash
+# For web app
+apps/web/components/MyFeature.tsx
+
+# For CxC app
+apps/cxc/components/MyFeature.tsx
+```
+
+### Step 2: Compose from Atoms
+
+```tsx
+import { Card, CardHeader, CardContent, Button } from "@uwdsc/ui";
+import { useState } from "react";
+
+export function FeatureCard({ title, description }) {
+  const [count, setCount] = useState(0);
+
+  return (
+    <Card>
+      <CardHeader>
+        <h3 className="text-xl font-bold">{title}</h3>
+      </CardHeader>
+      <CardContent>
+        <p className="text-muted-foreground">{description}</p>
+        <div className="mt-4 flex gap-2">
+          <Button onClick={() => setCount(count + 1)}>
+            Clicked {count} times
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+### Step 3: Use in Your Pages
+
+```tsx
+import { FeatureCard } from "@/components/FeatureCard";
+
+export default function Page() {
+  return (
+    <div className="container mx-auto py-8">
+      <FeatureCard
+        title="My Feature"
+        description="This is a feature card"
+      />
+    </div>
+  );
+}
+```
+
+## Component Organization
+
+### Directory Structure
+
+```
+apps/web/components/
+├── home/              # Home page components
+│   ├── Banner.tsx
+│   └── EventCard.tsx
+├── team/              # Team page components
+│   └── TeamCard.tsx
+├── navbar/            # Navigation components
+│   └── MobileMenu.tsx
+└── FormHelpers.tsx    # Shared utilities
+```
+
+### Naming Conventions
+
+- **PascalCase**: Component files and exports
+- **Descriptive**: Names should indicate purpose
+- **Grouped**: Related components in folders
+
+**Good:**
+```
+components/
+├── home/
+│   ├── HeroSection.tsx
+│   └── FeaturesGrid.tsx
+└── TeamCard.tsx
+```
+
+**Bad:**
+```
+components/
+├── comp1.tsx
+├── Component.tsx
+└── myComponent.tsx
+```
+
+## Component Patterns
+
+### 1. Server Components (Default)
+
+Use server components by default in Next.js 15:
+
+```tsx
+// apps/web/components/ServerComponent.tsx
+// No "use client" directive
+
+export function ServerComponent() {
+  // Can fetch data directly
+  return <div>Server Component</div>;
+}
+```
+
+### 2. Client Components
+
+Add `"use client"` when you need:
+- State management
+- Event handlers
+- Browser APIs
+- React hooks
+
+```tsx
+"use client";
+
+import { useState } from "react";
+import { Button } from "@uwdsc/ui";
+
+export function Counter() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <Button onClick={() => setCount(count + 1)}>
+      Count: {count}
+    </Button>
+  );
+}
+```
+
+### 3. Animated Components
+
+Use Framer Motion for animations:
+
+```tsx
+"use client";
+
+import { motion } from "framer-motion";
+import { Card } from "@uwdsc/ui";
+
+export function AnimatedCard({ children }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Card>{children}</Card>
+    </motion.div>
+  );
+}
+```
+
+### 4. Form Components
+
+Use React Hook Form with Zod validation:
+
+```tsx
+"use client";
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button, Input } from "@uwdsc/ui";
+
+const schema = z.object({
+  email: z.string().email(),
+  name: z.string().min(2),
+});
+
+export function ContactForm() {
+  const { register, handleSubmit } = useForm({
+    resolver: zodResolver(schema),
+  });
+
+  const onSubmit = (data) => {
+    console.log(data);
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <Input {...register("name")} placeholder="Name" />
+      <Input {...register("email")} placeholder="Email" />
+      <Button type="submit">Submit</Button>
+    </form>
+  );
+}
+```
+
+## Styling Components
+
+### Using Tailwind Classes
+
+```tsx
+import { Card } from "@uwdsc/ui";
+
+export function StyledCard() {
+  return (
+    <Card className="max-w-md mx-auto p-6 shadow-lg">
+      <h2 className="text-2xl font-bold text-foreground">Title</h2>
+      <p className="mt-2 text-muted-foreground">Description</p>
+    </Card>
+  );
+}
+```
+
+### Using CSS Variables
+
+```tsx
+export function ThemedComponent() {
+  return (
+    <div
+      className="p-4 rounded-lg"
+      style={{
+        backgroundColor: "hsl(var(--card))",
+        color: "hsl(var(--card-foreground))",
+      }}
+    >
+      Themed content
+    </div>
+  );
+}
+```
+
+### Conditional Styling
+
+Use `clsx` or `cn` utility:
+
+```tsx
+import { cn } from "@uwdsc/ui/lib/utils";
+
+export function ConditionalCard({ isActive }) {
+  return (
+    <div
+      className={cn(
+        "p-4 rounded-lg",
+        isActive && "bg-primary text-primary-foreground",
+        !isActive && "bg-muted text-muted-foreground"
+      )}
+    >
+      Content
+    </div>
+  );
+}
+```
+
+## Testing Components
+
+### Example Test
+
+```tsx
+import { render, screen } from "@testing-library/react";
+import { FeatureCard } from "./FeatureCard";
+
+describe("FeatureCard", () => {
+  it("renders title and description", () => {
+    render(
+      <FeatureCard title="Test" description="Description" />
+    );
+    
+    expect(screen.getByText("Test")).toBeInTheDocument();
+    expect(screen.getByText("Description")).toBeInTheDocument();
+  });
+});
+```
+
+## Best Practices
+
+### ✅ Do
+
+- Use atoms from `@uwdsc/ui` for basic UI elements
+- Create molecules for app-specific compositions
+- Follow TypeScript best practices
+- Use proper prop types
+- Keep components focused and single-purpose
+- Use semantic HTML
+
+### ❌ Don't
+
+- Duplicate shadcn components in app folders
+- Create overly complex components
+- Mix business logic with presentation
+- Ignore TypeScript errors
+- Use inline styles instead of Tailwind
+
+## Common Issues
+
+### Component Not Found
+
+If you get import errors:
+
+```bash
+# Rebuild the UI package
+cd packages/ui
+pnpm build
+```
+
+### TypeScript Errors
+
+Ensure proper types:
+
+```tsx
+interface Props {
+  title: string;
+  description: string;
+  onAction?: () => void;
+}
+
+export function MyComponent({ title, description, onAction }: Props) {
+  // ...
+}
+```
+
+## Next Steps
+
+- [Creating API Endpoints](/guides/creating-api) - Add backend functionality
+- [Development Tips](/guides/development) - Improve your workflow
+

@@ -1,0 +1,138 @@
+# Timeline
+
+Track the evolution of the UWDSC websites and applications. Features are organized by semester to align with the academic calendar.
+
+## How This Works
+
+Features are automatically documented from merged Pull Requests that are tagged with semester labels following this naming convention:
+
+### Semester Label Format
+
+Semester labels follow the pattern: `<Season><Year>`
+
+- **F** = Fall
+- **W** = Winter
+- **S** = Spring
+- **YY** = Two-digit year
+
+### Documentation Approach
+
+Each semester page focuses on **what** was built and **why** it matters to users, rather than technical implementation details. Features are automatically added to the appropriate semester page when PRs with matching labels are merged.
+
+## Browse by Semester
+
+<style>{`
+  .timeline-container {
+    position: relative;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    padding-left: 140px;
+  }
+  .timeline-line {
+    position: absolute;
+    left: 120px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(
+      to bottom,
+      rgb(59, 130, 246),
+      rgba(59, 130, 246, 0.3)
+    );
+  }
+  .timeline-label {
+    width: 110px;
+    text-align: right;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-left: -140px;
+  }
+  .timeline-card {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  .timeline-description {
+    opacity: 0.7;
+    font-size: 0.9rem;
+  }
+  .timeline-button {
+    padding: 0.5rem 1rem;
+    background: rgb(59, 130, 246);
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+  .dark .timeline-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  .dark .timeline-line {
+    background: linear-gradient(
+      to bottom,
+      rgb(59, 130, 246),
+      rgba(59, 130, 246, 0.2)
+    );
+  }
+`}</style>
+
+<div className="timeline-container">
+  <div className="timeline-line"></div>
+
+{/* Timeline items */}
+
+  <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "1.5rem",
+        position: "relative",
+      }}
+    >
+      <div className="timeline-label">
+        Fall 2025
+      </div>
+      <div className="timeline-card">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span className="timeline-description">
+            Initial platform migration and CxC Development
+          </span>
+          <a href="/changelog/F25" className="timeline-button">
+            View →
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "1.5rem",
+        position: "relative",
+      }}
+    >
+      <div className="timeline-label">
+        Winter 2026
+      </div>
+      <div className="timeline-card">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span className="timeline-description">
+            Ongoing development and improvements
+          </span>
+          <a href="/changelog/W26" className="timeline-button">
+            View →
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+Each semester page shows all features added during that term, organized by application and functional area.

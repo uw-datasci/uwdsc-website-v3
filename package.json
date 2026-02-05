@@ -13,7 +13,12 @@
     "check-types": "turbo check-types",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "ui:add": "node scripts/ui-add.js",
-    "pull-secrets": "node scripts/pull-secrets.js"
+    "pull-secrets": "node scripts/pull-secrets.js",
+    "migrate": "node scripts/migrate.js up",
+    "migrate:down": "node scripts/migrate.js down",
+    "migrate:reset": "node scripts/migrate.js reset",
+    "migrate:check": "node scripts/migrate.js check",
+    "migrate:create": "node scripts/migrate.js create"
   },
   "devDependencies": {
     "@uwdsc/eslint-config": "workspace:*",

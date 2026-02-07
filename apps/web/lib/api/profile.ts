@@ -31,9 +31,7 @@ export async function getProfile(): Promise<GetProfileResponse> {
 
   const data: GetProfileResponse = await response.json();
 
-  if (!response.ok) {
-    throw createApiError(data, response.status);
-  }
+  if (!response.ok) throw createApiError(data, response.status);
 
   return data;
 }

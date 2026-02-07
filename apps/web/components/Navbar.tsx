@@ -1,7 +1,6 @@
 "use client";
 
 import { NavLinks } from "./navbar/NavLinks";
-import { AdminDropdown } from "./navbar/AdminDropdown";
 import { UserAvatar } from "./navbar/UserAvatar";
 import { MobileMenu } from "./navbar/MobileMenu";
 import { usePathname } from "next/navigation";
@@ -12,7 +11,7 @@ import { GlassSurface, NavigationMenu, NavigationMenuList } from "@uwdsc/ui";
 
 export function Navbar() {
   const pathname = usePathname();
-  const { profile } = useAuth();
+  const { user } = useAuth();
 
   const hideNavbar = pathname === "/login" || pathname === "/register";
 
@@ -23,28 +22,6 @@ export function Navbar() {
     { href: "/apply", label: "Apply" },
     { href: "/calendar", label: "Calendar" },
   ];
-
-  // Check if user is admin or exec
-  const userRole = profile?.user_role || undefined;
-  const isAdminOrExec = userRole === "admin" || userRole === "exec";
-  const isAdmin = userRole === "admin";
-  const adminLabel = userRole === "admin" ? "Admin" : "Exec";
-
-  const visibleAdminLinks = [
-    {
-      href: "/admin/memberships",
-      title: "Memberships",
-    },
-    {
-      href: "/admin/events",
-      title: "Events",
-    },
-    {
-      href: "/admin/applications",
-      title: "Exec Apps",
-      adminOnly: true,
-    },
-  ].filter((link) => !link.adminOnly || isAdmin);
 
   if (hideNavbar) return null;
 
@@ -76,9 +53,6 @@ export function Navbar() {
             <NavigationMenu viewport={false}>
               <NavigationMenuList className="gap-4">
                 <NavLinks navLinks={navLinks} />
-                {isAdminOrExec && (
-                  <AdminDropdown userRole={userRole as "admin" | "exec"} />
-                )}
                 <UserAvatar />
               </NavigationMenuList>
             </NavigationMenu>
@@ -86,13 +60,7 @@ export function Navbar() {
         </div>
 
         {/* Mobile Menu */}
-        <MobileMenu
-          navLinks={navLinks}
-          profile={profile}
-          isAdminOrExec={isAdminOrExec}
-          adminLabel={adminLabel}
-          visibleAdminLinks={visibleAdminLinks}
-        />
+        <MobileMenu navLinks={navLinks} user={user} />
       </div>
     </div>
   );

@@ -1,12 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { FileObject } from "@supabase/storage-js";
-
-export interface FileUploadOptions {
-  file: File;
-  userId: string;
-  objectKey: string;
-  contentType: string;
-}
+import { FileUploadOptions } from "../types/file";
 
 export class FileRepository {
   protected readonly client: SupabaseClient;

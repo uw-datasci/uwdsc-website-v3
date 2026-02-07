@@ -60,23 +60,19 @@ export class ProfileRepository extends BaseRepository {
     try {
       const result = await this.sql<Profile[]>`
         SELECT 
-          p.id,
-          au.email,
-          p.first_name,
-          p.last_name,
-          p.wat_iam,
-          p.faculty,
-          p.term,
-          p.heard_from_where,
-          p.is_math_soc_member
+          id,
+          first_name,
+          last_name,
+          wat_iam,
+          faculty,
+          term,
+          heard_from_where,
+          is_math_soc_member
         FROM profiles p
-        JOIN auth.users au ON p.id = au.id
-        WHERE p.id = ${userId}
+        WHERE id = ${userId}
       `;
 
-      if (result.length === 0) {
-        return null;
-      }
+      if (result.length === 0) return null;
 
       return result[0] ?? null;
     } catch (error: unknown) {

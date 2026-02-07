@@ -43,13 +43,30 @@ export interface ResendVerificationEmailResponse {
   message: string;
 }
 
+export interface AuthUser {
+  id: string;
+  email: string;
+  role: string | null;
+  // Profile fields (all optional since profile might not exist yet)
+  first_name?: string | null;
+  last_name?: string | null;
+  wat_iam?: string | null;
+  faculty?: string | null;
+  term?: string | null;
+  heard_from_where?: string | null;
+  is_math_soc_member?: boolean;
+}
+
+export interface GetCurrentUserResponse {
+  user: AuthUser;
+}
+
 // ============================================================================
 // User Types
 // ============================================================================
 
 export interface UserProfile {
   id: string;
-  email: string;
   first_name: string | null;
   last_name: string | null;
   wat_iam: string | null;
@@ -60,6 +77,9 @@ export interface UserProfile {
   // Fields from joined tables (optional, only present when joined)
   user_role?: string | null;
   has_paid?: boolean;
+  payment_method?: string | null;
+  payment_location?: string | null;
+  verifier?: string | null;
   member_ideas?: string | null;
 }
 
@@ -99,7 +119,11 @@ export interface MemberProfile {
   faculty: string | null;
   term: string | null;
   wat_iam: string | null;
+  heard_from_where: string | null;
+  payment_method: string | null;
+  payment_location: string | null;
   verifier: string | null;
+  member_ideas: string | null;
 }
 
 export interface GetAllProfilesResponse {

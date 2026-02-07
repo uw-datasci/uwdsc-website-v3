@@ -14,7 +14,7 @@ CREATE TABLE application_roles (
 CREATE TABLE questions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   question_text text NOT NULL,
-  type input_type NOT NULL DEFAULT 'textarea',
+  type application_input_enum NOT NULL DEFAULT 'textarea',
   options jsonb, -- For dropdown choices
   created_at timestamptz DEFAULT now()
 );
@@ -47,7 +47,7 @@ CREATE TABLE application_role_selections (
   application_id uuid REFERENCES applications(id) ON DELETE CASCADE,
   role_id uuid REFERENCES application_roles(id) ON DELETE CASCADE,
   priority int CHECK (priority BETWEEN 1 AND 3),
-  status application_status DEFAULT 'Interviewing',
+  status application_review_status_enum DEFAULT 'In Review',
   UNIQUE(application_id, role_id)
 );
 

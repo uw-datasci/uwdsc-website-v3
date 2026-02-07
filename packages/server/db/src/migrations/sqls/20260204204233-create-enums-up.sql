@@ -27,6 +27,7 @@ CREATE TYPE application_status_enum AS ENUM (
 
 -- Create application_review_status_enum
 CREATE TYPE application_review_status_enum AS ENUM (
+  'In Review',
   'Interviewing', 
   'Wanted', 
   'Not Wanted', 

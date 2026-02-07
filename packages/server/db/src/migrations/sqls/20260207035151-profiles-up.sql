@@ -8,8 +8,7 @@ CREATE TABLE public.profiles (
   heard_from_where text null,
   is_math_soc_member BOOLEAN NOT NULL DEFAULT false,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  constraint profiles_pkey primary key (id)
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- Create trigger function to automatically create profile and user_role when a user signs up

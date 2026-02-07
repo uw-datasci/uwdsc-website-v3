@@ -97,13 +97,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         </SidebarFooter>
         <SidebarRail />
       </Sidebar>
-      <SidebarInset>
+      <SidebarInset className="overflow-x-hidden">
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <div className="container mx-auto">{children}</div>
-        </div>
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );

@@ -72,7 +72,7 @@ export async function updateUserProfile(
  * @throws Error if request fails or unauthorized
  */
 export async function getAllProfiles(): Promise<MemberProfile[]> {
-  const response = await fetch("/api/admin/memberships");
+  const response = await fetch("/api/members");
 
   const data: GetAllProfilesResponse = await response.json();
 
@@ -90,7 +90,7 @@ export async function getAllProfiles(): Promise<MemberProfile[]> {
  * @throws Error if request fails or unauthorized
  */
 export async function getMembershipStats(): Promise<MembershipStats> {
-  const response = await fetch("/api/admin/memberships?stats=true");
+  const response = await fetch("/api/members?stats=true");
 
   const data: GetMembershipStatsResponse = await response.json();
 
@@ -117,7 +117,7 @@ export async function markMemberAsPaid(
     verifier: string;
   },
 ): Promise<void> {
-  const response = await fetch(`/api/admin/memberships/${memberId}`, {
+  const response = await fetch(`/api/members/${memberId}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(paymentData),
@@ -149,7 +149,7 @@ export async function updateMember(
     is_math_soc_member: boolean;
   },
 ): Promise<void> {
-  const response = await fetch(`/api/admin/memberships/${memberId}`, {
+  const response = await fetch(`/api/members/${memberId}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(memberData),
@@ -170,7 +170,7 @@ export async function updateMember(
  * @throws Error if request fails or unauthorized
  */
 export async function deleteMember(memberId: string): Promise<void> {
-  const response = await fetch(`/api/admin/memberships/${memberId}`, {
+  const response = await fetch(`/api/members/${memberId}`, {
     method: "DELETE",
   });
 

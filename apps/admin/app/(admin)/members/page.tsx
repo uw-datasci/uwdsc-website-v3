@@ -9,7 +9,7 @@ import type { MemberProfile, MembershipStats } from "@/types/api";
 import { getAllProfiles, getMembershipStats } from "@/lib/api";
 import { MembershipFilterType } from "@/types/members";
 
-export default function AdminMembershipsPage() {
+export default function MembersPage() {
   const [profiles, setProfiles] = useState<MemberProfile[]>([]);
   const [stats, setStats] = useState<MembershipStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -45,7 +45,7 @@ export default function AdminMembershipsPage() {
 
   if (loading) {
     return (
-      <div className="space-y-4 mt-16">
+      <div className="space-y-4 mt-16 w-full">
         <h1 className="text-3xl font-bold">Membership</h1>
         <p className="text-muted-foreground">Loading membership data...</p>
       </div>
@@ -54,7 +54,7 @@ export default function AdminMembershipsPage() {
 
   if (error) {
     return (
-      <div className="space-y-4 mt-16">
+      <div className="space-y-4 mt-16 w-full">
         <h1 className="text-3xl font-bold">Membership</h1>
         <div className="rounded-lg border border-destructive bg-destructive/10 p-4">
           <p className="text-sm text-destructive">Error: {error}</p>
@@ -64,7 +64,7 @@ export default function AdminMembershipsPage() {
   }
 
   return (
-    <div className="space-y-6 mt-16">
+    <div className="space-y-6 mt-16 w-full">
       <div>
         <h1 className="text-3xl font-bold mb-2">Membership</h1>
         <p className="text-muted-foreground">

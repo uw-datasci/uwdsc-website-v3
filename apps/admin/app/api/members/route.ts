@@ -3,7 +3,7 @@ import { profileService } from "@uwdsc/core";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 
 /**
- * GET /api/admin/memberships
+ * GET /api/members
  * Get all user profiles with membership statistics
  * Admin only endpoint
  */

@@ -3,15 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "@uwdsc/ui/globals.css";
 import { Providers } from "@/providers/providers";
 
-const fontSans = Geist({
-  subsets: ["latin"],
-  variable: "--font-sans",
-});
-
-const fontMono = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-});
+const fontSans = Geist({ subsets: ["latin"], variable: "--font-sans" });
+const fontMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export default function RootLayout({
   children,

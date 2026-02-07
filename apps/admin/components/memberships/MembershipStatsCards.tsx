@@ -37,7 +37,7 @@ export function MembershipStatsCards({
   const activeCardStyles = "ring-2 ring-primary";
 
   return (
-    <div className="grid gap-4 md:grid-cols-3 mb-8">
+    <div className="grid gap-4 md:grid-cols-3 mb-8 w-full">
       {/* Total Users */}
       <Card
         className={cn(

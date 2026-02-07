@@ -4,6 +4,9 @@ DROP TYPE IF EXISTS application_status_enum;
 -- Drop payment_method_enum
 DROP TYPE IF EXISTS payment_method_enum;
 
+-- Drop payment_location_enum
+DROP TYPE IF EXISTS payment_location_enum;
+
 -- Drop faculty_enum
 DROP TYPE IF EXISTS faculty_enum;
 

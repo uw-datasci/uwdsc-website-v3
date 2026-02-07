@@ -1,0 +1,23 @@
+name: Run Production Database Migrations
+
+on:
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+    inputs:
+      confirm:
+        description: 'Type "migrate" to confirm running migrations'
+        required: true
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - migrations/**
+  #     - database.json
+  #     - scripts/migrate.js
+
+jobs:
+  migrate:
+    name: Run Database Migrations
+    # Only run if manually confirmed or if changes are in main branch
+    if: github.event_name == 'push' || github.event.inputs.confirm == 'migrate'
+    uses: uw-datasci/nexus-workflows/.github/workflows/migrate-db.yml@v4
+    

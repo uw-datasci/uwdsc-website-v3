@@ -21,6 +21,18 @@ export function Navbar() {
     { href: "/team", label: "Team" },
     { href: "/apply", label: "Apply" },
     { href: "/calendar", label: "Calendar" },
+    // Add Admin link if user is an admin
+    ...(user?.role === "admin"
+      ? [
+          {
+            href:
+              process.env.NEXT_PUBLIC_ADMIN_URL ||
+              "https://admin.uwdatascience.ca/",
+            label: "Admin",
+            target: "_blank",
+          },
+        ]
+      : []),
   ];
 
   if (hideNavbar) return null;

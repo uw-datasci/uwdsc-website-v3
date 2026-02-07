@@ -22,6 +22,7 @@ import {
 interface NavLink {
   href: string;
   label: string;
+  target?: string;
 }
 
 interface MobileMenuProps {
@@ -39,10 +40,7 @@ function HamburgerIcon() {
   );
 }
 
-export function MobileMenu({
-  navLinks,
-  user,
-}: Readonly<MobileMenuProps>) {
+export function MobileMenu({ navLinks, user }: Readonly<MobileMenuProps>) {
   const router = useRouter();
   const { mutate } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -105,17 +103,47 @@ export function MobileMenu({
             {/* Main Navigation Links */}
             <div className="px-6 py-2">
               <nav className="space-y-1">
-                {navLinks.map((link) => (
-                  <SheetClose key={link.href} asChild>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start text-lg py-3 px-4 h-auto font-semibold hover:bg-accent/50 transition-colors rounded-lg"
-                      asChild
+                {navLinks.map((link) => {
+                  const linkComponent = (
+                    <Link
+                      href={link.href}
+                      target={link.target}
+                      rel={
+                        link.target === "_blank"
+                          ? "noopener noreferrer"
+                          : undefined
+                      }
                     >
-                      <Link href={link.href}>{link.label}</Link>
-                    </Button>
-                  </SheetClose>
-                ))}
+                      {link.label}
+                    </Link>
+                  );
+
+                  // Don't close sheet for external links (target="_blank")
+                  if (link.target === "_blank") {
+                    return (
+                      <Button
+                        key={link.href}
+                        variant="ghost"
+                        className="w-full justify-start text-lg py-3 px-4 h-auto font-semibold hover:bg-accent/50 transition-colors rounded-lg"
+                        asChild
+                      >
+                        {linkComponent}
+                      </Button>
+                    );
+                  }
+
+                  return (
+                    <SheetClose key={link.href} asChild>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-lg py-3 px-4 h-auto font-semibold hover:bg-accent/50 transition-colors rounded-lg"
+                        asChild
+                      >
+                        {linkComponent}
+                      </Button>
+                    </SheetClose>
+                  );
+                })}
               </nav>
             </div>
 

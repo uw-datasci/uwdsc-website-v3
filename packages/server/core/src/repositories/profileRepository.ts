@@ -29,7 +29,6 @@ export class ProfileRepository extends BaseRepository {
           faculty = ${data.faculty}::faculty_enum,
           term = ${data.term},
           heard_from_where = ${data.heard_from_where},
-          member_ideas = ${data.member_ideas ?? null},
           updated_at = NOW(),
           is_math_soc_member = ${isMathSocMember}
         WHERE id = ${userId}
@@ -63,19 +62,13 @@ export class ProfileRepository extends BaseRepository {
         SELECT 
           p.id,
           au.email,
-          first_name,
-          last_name,
-          user_role,
-          has_paid,
-          wat_iam,
-          faculty,
-          term,
-          heard_from_where,
-          payment_method,
-          payment_location,
-          verifier,
-          member_ideas,
-          is_math_soc_member
+          p.first_name,
+          p.last_name,
+          p.wat_iam,
+          p.faculty,
+          p.term,
+          p.heard_from_where,
+          p.is_math_soc_member
         FROM profiles p
         JOIN auth.users au ON p.id = au.id
         WHERE p.id = ${userId}
@@ -104,15 +97,21 @@ export class ProfileRepository extends BaseRepository {
           au.email,
           p.first_name,
           p.last_name,
-          p.user_role,
-          p.has_paid,
+          ur.role as user_role,
+          CASE WHEN m.user_id IS NOT NULL THEN true ELSE false END as has_paid,
           p.is_math_soc_member,
           p.faculty,
           p.term,
           p.wat_iam,
-          p.verifier
+          m.verifier_id::text as verifier,
+          p.heard_from_where,
+          m.payment_method,
+          m.payment_location,
+          NULL as member_ideas
         FROM profiles p
         LEFT JOIN auth.users au ON p.id = au.id
+        LEFT JOIN user_roles ur ON p.id = ur.id
+        LEFT JOIN memberships m ON p.id = m.user_id
         ORDER BY au.created_at DESC
       `;
 
@@ -137,9 +136,10 @@ export class ProfileRepository extends BaseRepository {
       >`
         SELECT 
           COUNT(*) as total_users,
-          COUNT(*) FILTER (WHERE has_paid = true) as paid_users,
-          COUNT(*) FILTER (WHERE has_paid = true AND is_math_soc_member = true) as math_soc_members
-        FROM profiles
+          COUNT(*) FILTER (WHERE m.user_id IS NOT NULL) as paid_users,
+          COUNT(*) FILTER (WHERE m.user_id IS NOT NULL AND p.is_math_soc_member = true) as math_soc_members
+        FROM profiles p
+        LEFT JOIN memberships m ON p.id = m.user_id
       `;
 
       const row = result[0] ?? {
@@ -169,22 +169,36 @@ export class ProfileRepository extends BaseRepository {
     data: MarkAsPaidData,
   ): Promise<{ success: boolean; error?: string }> {
     try {
+      // First verify the profile exists
+      const profileCheck = await this.sql`
+        SELECT id FROM profiles WHERE id = ${profileId}
+      `;
+
+      if (profileCheck.length === 0) {
+        return {
+          success: false,
+          error: "Profile not found",
+        };
+      }
+
+      // Insert or update membership record
       const result = await this.sql`
-        UPDATE profiles
-        SET 
-          has_paid = true,
+        INSERT INTO memberships (user_id, payment_method, payment_location, verifier_id, verified_at, updated_at)
+        VALUES (${profileId}, ${data.payment_method}::payment_method_enum, ${data.payment_location}, ${data.verifier}::uuid, NOW(), NOW())
+        ON CONFLICT (user_id) 
+        DO UPDATE SET
           payment_method = ${data.payment_method}::payment_method_enum,
           payment_location = ${data.payment_location},
-          verifier = ${data.verifier},
+          verifier_id = ${data.verifier}::uuid,
+          verified_at = NOW(),
           updated_at = NOW()
-        WHERE id = ${profileId}
         RETURNING *
       `;
 
       if (result.length === 0) {
         return {
           success: false,
-          error: "Profile not found",
+          error: "Failed to create membership record",
         };
       }
 

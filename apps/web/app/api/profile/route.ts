@@ -71,7 +71,6 @@ export async function PATCH(request: NextRequest) {
       faculty: body.faculty,
       term: body.term,
       heard_from_where: body.heard_from_where,
-      member_ideas: body.member_ideas,
     });
 
     if (!result.success) {

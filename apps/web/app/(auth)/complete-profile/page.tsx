@@ -12,7 +12,6 @@ import {
 import {
   renderTextField,
   renderSelectField,
-  renderTextAreaField,
   Button,
   Form,
   FormField,
@@ -91,8 +90,6 @@ export default function CompleteProfilePage() {
     if (profile.term) form.setValue("term", profile.term);
     if (profile.heard_from_where)
       form.setValue("heard_from_where", profile.heard_from_where);
-    if (profile.member_ideas)
-      form.setValue("member_ideas", profile.member_ideas);
   };
 
   useEffect(() => {
@@ -129,7 +126,6 @@ export default function CompleteProfilePage() {
           faculty: facultyMap[formData.faculty] ?? "other_non_waterloo",
           term: formData.term,
           heard_from_where: formData.heard_from_where,
-          member_ideas: formData.member_ideas || "",
         };
 
         await updateUserProfile(profileData);
@@ -263,16 +259,6 @@ export default function CompleteProfilePage() {
                     placeholder: "Where did you hear about us?",
                     className:
                       "!h-auto !text-base border-gray-100/80 !bg-black px-4.5 py-3.5 placeholder:text-gray-100/80 rounded-lg xl:px-6 xl:py-4.5",
-                  })}
-                />
-                <FormField
-                  control={form.control}
-                  name="member_ideas"
-                  render={renderTextAreaField({
-                    placeholder:
-                      "[Optional] Share your ideas for new events or improvements!",
-                    className:
-                      "min-h-24 max-h-40 border-gray-100/80 bg-black px-4.5 py-3.5 placeholder:text-gray-100/80 rounded-lg xl:px-6 xl:py-4.5 !text-base",
                   })}
                 />
               </div>

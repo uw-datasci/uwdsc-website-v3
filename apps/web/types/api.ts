@@ -52,14 +52,15 @@ export interface UserProfile {
   email: string;
   first_name: string | null;
   last_name: string | null;
-  user_role: string | null;
-  has_paid: boolean;
-  is_math_soc_member: boolean;
+  wat_iam: string | null;
   faculty: string | null;
   term: string | null;
-  wat_iam: string | null;
   heard_from_where: string | null;
-  member_ideas: string | null;
+  is_math_soc_member: boolean;
+  // Fields from joined tables (optional, only present when joined)
+  user_role?: string | null;
+  has_paid?: boolean;
+  member_ideas?: string | null;
 }
 
 export interface UpdateProfileRequest {
@@ -69,7 +70,6 @@ export interface UpdateProfileRequest {
   faculty?: string;
   term?: string;
   heard_from_where?: string;
-  member_ideas?: string;
 }
 
 export interface UpdateProfileResponse {

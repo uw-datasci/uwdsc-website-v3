@@ -8,8 +8,8 @@ create or replace function public.handle_update_user_role()
 returns trigger as $$
 begin
   update auth.users
-  set raw_app_metadata = 
-    coalesce(raw_app_metadata, '{}'::jsonb) ||
+  set raw_app_meta_data = 
+    coalesce(raw_app_meta_data, '{}'::jsonb) ||
     jsonb_build_object('role', new.role)
   where id = new.id;
   return new;

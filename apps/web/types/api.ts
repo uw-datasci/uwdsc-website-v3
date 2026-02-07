@@ -104,10 +104,6 @@ export interface GetProfileResponse {
   message?: string;
 }
 
-// ============================================================================
-// Admin/Membership Types
-// ============================================================================
-
 export interface MemberProfile {
   id: string;
   email: string;
@@ -124,22 +120,4 @@ export interface MemberProfile {
   payment_location: string | null;
   verifier: string | null;
   member_ideas: string | null;
-}
-
-export interface GetAllProfilesResponse {
-  profiles: MemberProfile[];
-  error?: string;
-  message?: string;
-}
-
-export interface MembershipStats {
-  totalUsers: number;
-  paidUsers: number;
-  mathSocMembers: number;
-}
-
-export interface GetMembershipStatsResponse {
-  stats: MembershipStats;
-  error?: string;
-  message?: string;
 }

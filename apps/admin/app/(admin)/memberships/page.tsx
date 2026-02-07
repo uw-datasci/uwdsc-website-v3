@@ -4,11 +4,10 @@ import { useEffect, useState } from "react";
 import {
   MembershipStatsCards,
   MembershipsTable,
-} from "@/components/admin/memberships";
-import { getAllProfiles, getMembershipStats } from "@/lib/api";
+} from "@/components/memberships";
 import type { MemberProfile, MembershipStats } from "@/types/api";
-
-export type MembershipFilterType = "all" | "paid" | "paid-mathsoc";
+import { getAllProfiles, getMembershipStats } from "@/lib/api";
+import { MembershipFilterType } from "@/types/members";
 
 export default function AdminMembershipsPage() {
   const [profiles, setProfiles] = useState<MemberProfile[]>([]);
@@ -69,7 +68,8 @@ export default function AdminMembershipsPage() {
       <div>
         <h1 className="text-3xl font-bold mb-2">Membership</h1>
         <p className="text-muted-foreground">
-          Manage and view all member profiles and statistics. Click on the cards to quick filter
+          Manage and view all member profiles and statistics. Click on the cards
+          to quick filter
         </p>
       </div>
 

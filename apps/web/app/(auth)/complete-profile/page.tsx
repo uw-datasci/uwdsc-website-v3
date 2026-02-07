@@ -20,7 +20,7 @@ import { Typing } from "@/components/login/Typing";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { getProfile, updateUserProfile } from "@/lib/api";
+import { getProfile, updateUserProfile } from "@/lib/api/profile";
 
 // Map the displayed faculty options to enum values
 const facultyMap: Record<string, string> = {

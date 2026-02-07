@@ -1,7 +1,7 @@
 // Enums matching Prisma schema
-export type UserRole = "member" | "admin" | "exec";
+type UserRole = "member" | "admin" | "exec";
 
-export type Faculty =
+type Faculty =
   | "math"
   | "engineering"
   | "science"
@@ -9,8 +9,6 @@ export type Faculty =
   | "health"
   | "environment"
   | "other_non_waterloo";
-
-export type PaymentMethod = "cash" | "online" | "math_soc";
 
 // Profile type matching the database schema (includes email from auth.users)
 export interface Profile {

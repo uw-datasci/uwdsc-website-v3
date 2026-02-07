@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Users, DollarSign, GraduationCap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { MembershipStats } from "@/types/api";
-import type { MembershipFilterType } from "@/app/admin/memberships/page";
+import type { MembershipFilterType } from "@/types/members";
 import { cn, Card, CardHeader, CardTitle, CardContent } from "@uwdsc/ui";
 
 interface MembershipStatsCardsProps {

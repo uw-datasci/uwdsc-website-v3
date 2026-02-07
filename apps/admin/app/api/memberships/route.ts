@@ -10,8 +10,8 @@ import { tryGetCurrentUser } from "@/lib/api/utils";
 export async function GET(request: Request) {
   try {
     // Verify admin access
-    const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (isUnauthorized || !user) return isUnauthorized;
+    const { isUnauthorized } = await tryGetCurrentUser();
+    if (isUnauthorized) return isUnauthorized;
 
     // TODO: Add proper admin role check here
     // For now, any authenticated user can access

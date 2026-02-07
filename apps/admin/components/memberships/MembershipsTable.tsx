@@ -20,9 +20,7 @@ import {
   Download,
 } from "lucide-react";
 import type { MemberProfile } from "@/types/api";
-import type { MembershipFilterType } from "@/app/admin/memberships/page";
-import { exportToCsv } from "@/lib/utils/csv";
-import { globalMembershipFilter } from "@/lib/utils/table";
+import type { MembershipFilterType } from "@/types/members";
 import {
   membershipColumns,
   type MembershipActionType,
@@ -44,6 +42,8 @@ import {
   TableBody,
   TableCell,
 } from "@uwdsc/ui";
+import { exportToCsv } from "@/lib/utils/csv";
+import { globalMembershipFilter } from "@/lib/utils/table";
 
 interface MembershipsTableProps {
   readonly profiles: MemberProfile[];
@@ -138,7 +138,6 @@ export function MembershipsTable({
     });
   }, [activeFilter]);
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: profiles,
     columns: membershipColumns,

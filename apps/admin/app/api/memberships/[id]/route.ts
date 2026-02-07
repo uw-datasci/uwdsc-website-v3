@@ -15,8 +15,8 @@ interface Params {
 export async function PATCH(request: NextRequest, { params }: Params) {
   try {
     // Verify admin access
-    const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (isUnauthorized || !user) return isUnauthorized;
+    const { isUnauthorized } = await tryGetCurrentUser();
+    if (isUnauthorized) return isUnauthorized;
 
     // TODO: Add proper admin role check
 
@@ -111,7 +111,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
   try {
     // Verify admin access
     const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (isUnauthorized || !user) return isUnauthorized;
+    if (isUnauthorized) return isUnauthorized;
 
     // TODO: Add proper admin role check
 

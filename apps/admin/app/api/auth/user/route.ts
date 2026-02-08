@@ -10,8 +10,10 @@ export async function GET() {
   try {
     const { user, isUnauthorized } = await tryGetCurrentUser();
 
-    if (isUnauthorized || !user) {
-      return isUnauthorized;
+    if (isUnauthorized) return isUnauthorized;
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Extract role from app_metadata

@@ -14,7 +14,6 @@ export const completeProfileSchema = z.object({
     .string()
     .trim()
     .min(1, "Please enter where you heard about us"),
-  member_ideas: z.string().optional(),
 });
 
 export type CompleteProfileFormValues = z.infer<typeof completeProfileSchema>;
@@ -27,5 +26,4 @@ export const completeProfileDefaultValues: Partial<CompleteProfileFormValues> =
     faculty: "",
     term: "",
     heard_from_where: "",
-    member_ideas: "",
   };

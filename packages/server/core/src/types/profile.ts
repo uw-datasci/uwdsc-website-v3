@@ -22,17 +22,18 @@ export interface Profile {
   email: string;
   first_name: string | null;
   last_name: string | null;
-  user_role: UserRole;
-  has_paid: boolean;
   wat_iam: string | null;
   faculty: Faculty | null;
   term: string | null;
   heard_from_where: string | null;
-  payment_method: PaymentMethod | null;
-  payment_location: string | null;
-  verifier: string | null;
-  member_ideas: string | null;
   is_math_soc_member: boolean;
+  // Fields from joined tables (optional, only present when joined)
+  user_role?: UserRole;
+  has_paid?: boolean;
+  payment_method?: PaymentMethod | null;
+  payment_location?: string | null;
+  verifier?: string | null;
+  member_ideas?: string | null;
 }
 
 export interface ProfileUpdateData {
@@ -42,7 +43,6 @@ export interface ProfileUpdateData {
   faculty: string;
   term: string;
   heard_from_where: string;
-  member_ideas?: string;
 }
 
 export interface UpdateMemberData {

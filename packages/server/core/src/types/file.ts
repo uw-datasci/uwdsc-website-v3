@@ -9,3 +9,10 @@ export interface FileValidationConfig {
   mimeToExtension?: (mime: string) => string | null;
   customValidation?: (file: File) => { valid: boolean; error?: string } | null;
 }
+
+export interface FileUploadOptions {
+  file: File;
+  userId: string;
+  objectKey: string;
+  contentType: string;
+}

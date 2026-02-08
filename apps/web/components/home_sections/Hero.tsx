@@ -1,7 +1,7 @@
 "use client";
 
 import { signOut } from "@/lib/api";
-import { UserProfile } from "@/types/api";
+import { AuthUser } from "@/types/api";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -9,11 +9,11 @@ import { useState } from "react";
 import { CountingNumber, GlassSurface } from "@uwdsc/ui";
 
 interface HeroProps {
-  profile: UserProfile | null;
-  mutate: () => Promise<UserProfile | null | undefined>;
+  user: AuthUser | null;
+  mutate: () => Promise<void>;
 }
 
-export default function Hero({ profile, mutate }: Readonly<HeroProps>) {
+export default function Hero({ user, mutate }: Readonly<HeroProps>) {
   const [memberCount, setMemberCount] = useState(350); // TODO: update count from db
   const [eventCount, setEventCount] = useState(20); // TODO: update count from db
   const router = useRouter();
@@ -69,10 +69,10 @@ export default function Hero({ profile, mutate }: Readonly<HeroProps>) {
           industry.
         </p>
       </div>
-      {profile ? (
+      {user ? (
         <div className="flex flex-row gap-4 lg:hidden z-10 text-center text-grey1 py-6 text-sm md:text-base md:py-8">
           <p>
-            Logged in as <b>{profile?.first_name + " " + profile?.last_name}</b>
+            Logged in as <b>{user?.first_name + " " + user?.last_name}</b>
           </p>
           <button
             onClick={handleSignOut}
@@ -105,13 +105,13 @@ export default function Hero({ profile, mutate }: Readonly<HeroProps>) {
           width="100%"
           height="auto"
           borderRadius={9999}
-          className={`${profile ? "px-4 py-2" : "px-3 py-1"} md:px-6 md:py-3 overflow-visible! hover:cursor-pointer hover:scale-105 transition-transform duration-200`}
+          className={`${user ? "px-4 py-2" : "px-3 py-1"} md:px-6 md:py-3 overflow-visible! hover:cursor-pointer hover:scale-105 transition-transform duration-200`}
         >
           <Link
-            href={profile ? "/check-in" : "/register"}
+            href={user ? "/check-in" : "/register"}
             className="text-base md:text-xl font-medium flex items-center w-full justify-center hover:cursor-pointer"
           >
-            {profile ? "Check in for an event →" : "Sign up →"}
+            {user ? "Check in for an event →" : "Sign up →"}
           </Link>
         </GlassSurface>
       </div>

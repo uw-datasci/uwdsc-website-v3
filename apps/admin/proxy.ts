@@ -2,52 +2,42 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createSupabaseMiddlewareClient } from "@uwdsc/db";
 
+const ADMIN_ROLES = new Set(["admin", "exec"]);
+const LOGIN_ROUTE = "/login";
+const UNAUTHORIZED_ROUTE = "/unauthorized";
+
 /**
  * Proxy to protect all admin routes.
  * - Not signed in: only /login and /api are allowed; other paths redirect to /login.
  * - Signed in: all paths allowed except /login (redirect to /dashboard).
  */
 export async function proxy(request: NextRequest) {
-  try {
-    const pathname = request.nextUrl.pathname;
+  const response = NextResponse.next({ request: { headers: request.headers } });
+  const pathname = request.nextUrl.pathname;
 
-    // Always allow API routes (no auth check)
-    if (pathname.startsWith("/api")) {
-      return NextResponse.next({ request: { headers: request.headers } });
-    }
+  // Create Supabase client for authentication check
+  const supabase = createSupabaseMiddlewareClient(request, response);
 
-    const response = NextResponse.next({
-      request: { headers: request.headers },
-    });
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-    // Create Supabase client for authentication check
-    const supabase = createSupabaseMiddlewareClient(request, response);
+  const isAdmin = ADMIN_ROLES.has(user?.app_metadata.role);
+  const isLoginRoute = pathname == LOGIN_ROUTE;
+  const isUnauthorizedRoute = pathname == UNAUTHORIZED_ROUTE;
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    // Not signed in: allow only /login
-    if (!user || authError) {
-      if (pathname === "/login") return response;
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-
-    // Signed in: do not allow /login; redirect to dashboard
-    if (pathname === "/login") {
+  switch (true) {
+    case !user && !isLoginRoute:
+      return NextResponse.redirect(new URL("/login", request.url));
+    case user && isLoginRoute:
       return NextResponse.redirect(new URL("/dashboard", request.url));
-    }
-
-    return response;
-  } catch (error) {
-    console.error("Proxy error:", error);
-    return NextResponse.next({
-      request: { headers: request.headers },
-    });
+    case user && !isAdmin && !isUnauthorizedRoute:
+      return NextResponse.redirect(new URL("/unauthorized", request.url));
+    case user && isAdmin && isUnauthorizedRoute:
+      return NextResponse.redirect(new URL("/dashboard", request.url));
   }
+
+  return response;
 }
 
 export const config = {

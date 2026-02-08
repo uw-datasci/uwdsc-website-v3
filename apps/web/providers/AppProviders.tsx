@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { Toaster, TooltipProvider } from "@uwdsc/ui";
 
 interface AppProvidersProps {
   readonly children: ReactNode;
@@ -16,10 +15,7 @@ export function AppProviders({ children }: AppProvidersProps) {
       disableTransitionOnChange
       enableColorScheme
     >
-      <AuthProvider>
-        <TooltipProvider>{children}</TooltipProvider>
-        <Toaster />
-      </AuthProvider>
+      <AuthProvider>{children}</AuthProvider>
     </NextThemesProvider>
   );
 }

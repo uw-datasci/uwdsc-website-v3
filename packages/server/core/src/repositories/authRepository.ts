@@ -1,15 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-export interface RegisterCredentials {
-  email: string;
-  password: string;
-  emailRedirectTo?: string;
-}
+import { LoginData, RegisterCredentials } from "../types/auth";
 
 export class AuthRepository {
   private readonly client: SupabaseClient;
@@ -21,7 +11,7 @@ export class AuthRepository {
   /**
    * Sign in user with email and password
    */
-  async signInWithPassword(credentials: LoginCredentials) {
+  async signInWithPassword(credentials: LoginData) {
     const { data, error } = await this.client.auth.signInWithPassword({
       email: credentials.email,
       password: credentials.password,

@@ -17,8 +17,6 @@ export function globalMembershipFilter(
   const email = (row.original.email ?? "").toLowerCase();
   const watiam = (row.original.wat_iam ?? "").toLowerCase();
   return (
-    name.includes(search) ||
-    email.includes(search) ||
-    watiam.includes(search)
+    name.includes(search) || email.includes(search) || watiam.includes(search)
   );
 }

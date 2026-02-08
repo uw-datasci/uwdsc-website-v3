@@ -5,7 +5,11 @@
  * Components should use these functions instead of making direct fetch calls.
  */
 
-import { SignInRequest, SignInResponse } from "@/types/api";
+import {
+  GetCurrentUserResponse,
+  SignInRequest,
+  SignInResponse,
+} from "@/types/api";
 import { createApiError } from "./error";
 
 // ============================================================================
@@ -54,6 +58,25 @@ export async function signOut(): Promise<{ message: string }> {
   if (!response.ok) {
     throw createApiError(data, response.status);
   }
+
+  return data;
+}
+
+/**
+ * Get the currently authenticated user
+ *
+ * @returns Promise with user data
+ * @throws Error if fetching user fails
+ */
+export async function getCurrentUser(): Promise<GetCurrentUserResponse> {
+  const response = await fetch("/api/auth/user", {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) throw createApiError(data, response.status);
 
   return data;
 }

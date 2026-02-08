@@ -58,13 +58,13 @@ export function MarkAsPaidModal({
   onSuccess,
 }: Readonly<MarkAsPaidModalProps>) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { profile } = useAuth();
+  const { user } = useAuth();
 
   // Get the verifier name from the current user's profile
   const verifierName =
-    profile?.first_name && profile?.last_name
-      ? `${profile.first_name} ${profile.last_name}`
-      : profile?.email || "Unknown";
+    user?.first_name && user?.last_name
+      ? `${user.first_name} ${user.last_name}`
+      : user?.email || "Unknown";
 
   const form = useForm<MarkAsPaidFormValues>({
     resolver: zodResolver(markAsPaidSchema),

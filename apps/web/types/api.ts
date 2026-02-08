@@ -43,23 +43,44 @@ export interface ResendVerificationEmailResponse {
   message: string;
 }
 
+export interface AuthUser {
+  id: string;
+  email: string;
+  role: string | null;
+  // Profile fields (all optional since profile might not exist yet)
+  first_name?: string | null;
+  last_name?: string | null;
+  wat_iam?: string | null;
+  faculty?: string | null;
+  term?: string | null;
+  heard_from_where?: string | null;
+  is_math_soc_member?: boolean;
+}
+
+export interface GetCurrentUserResponse {
+  user: AuthUser;
+}
+
 // ============================================================================
 // User Types
 // ============================================================================
 
 export interface UserProfile {
   id: string;
-  email: string;
   first_name: string | null;
   last_name: string | null;
-  user_role: string | null;
-  has_paid: boolean;
-  is_math_soc_member: boolean;
+  wat_iam: string | null;
   faculty: string | null;
   term: string | null;
-  wat_iam: string | null;
   heard_from_where: string | null;
-  member_ideas: string | null;
+  is_math_soc_member: boolean;
+  // Fields from joined tables (optional, only present when joined)
+  user_role?: string | null;
+  has_paid?: boolean;
+  payment_method?: string | null;
+  payment_location?: string | null;
+  verifier?: string | null;
+  member_ideas?: string | null;
 }
 
 export interface UpdateProfileRequest {
@@ -69,7 +90,6 @@ export interface UpdateProfileRequest {
   faculty?: string;
   term?: string;
   heard_from_where?: string;
-  member_ideas?: string;
 }
 
 export interface UpdateProfileResponse {
@@ -84,10 +104,6 @@ export interface GetProfileResponse {
   message?: string;
 }
 
-// ============================================================================
-// Admin/Membership Types
-// ============================================================================
-
 export interface MemberProfile {
   id: string;
   email: string;
@@ -99,23 +115,9 @@ export interface MemberProfile {
   faculty: string | null;
   term: string | null;
   wat_iam: string | null;
+  heard_from_where: string | null;
+  payment_method: string | null;
+  payment_location: string | null;
   verifier: string | null;
-}
-
-export interface GetAllProfilesResponse {
-  profiles: MemberProfile[];
-  error?: string;
-  message?: string;
-}
-
-export interface MembershipStats {
-  totalUsers: number;
-  paidUsers: number;
-  mathSocMembers: number;
-}
-
-export interface GetMembershipStatsResponse {
-  stats: MembershipStats;
-  error?: string;
-  message?: string;
+  member_ideas: string | null;
 }

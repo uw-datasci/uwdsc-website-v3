@@ -18,7 +18,7 @@ import {
 } from "@uwdsc/ui";
 
 export function UserAvatar() {
-  const { profile, isLoading, isAuthenticated, mutate } = useAuth();
+  const { user, isLoading, isAuthenticated, mutate } = useAuth();
   const router = useRouter();
 
   const handleSignOut = async () => {
@@ -56,13 +56,13 @@ export function UserAvatar() {
   }
 
   const initials =
-    profile?.first_name && profile?.last_name
-      ? `${profile.first_name[0]}${profile.last_name[0]}`.toUpperCase()
+    user?.first_name && user?.last_name
+      ? `${user.first_name[0]}${user.last_name[0]}`.toUpperCase()
       : "??";
 
   const fullName =
-    profile?.first_name && profile?.last_name
-      ? `${profile.first_name} ${profile.last_name}`
+    user?.first_name && user?.last_name
+      ? `${user.first_name} ${user.last_name}`
       : "User";
 
   return (
@@ -89,7 +89,7 @@ export function UserAvatar() {
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium leading-none">{fullName}</p>
                 <p className="text-xs leading-none text-muted-foreground">
-                  {profile?.email}
+                  {user?.email}
                 </p>
               </div>
             </li>

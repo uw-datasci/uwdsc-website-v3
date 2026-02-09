@@ -10,10 +10,11 @@ on:
   #   branches:
   #     - main
   #   paths:
-  #     - migrations/**
-  #     - database.json
+  #     - packages/server/db/src/migrations/**
+  #     - packages/server/db/database.json
   #     - scripts/migrate.js
 
+# TODO: pull secrets into packages/server/db
 jobs:
   migrate:
     name: Run Database Migrations

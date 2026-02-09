@@ -6,9 +6,10 @@ CREATE TABLE terms (
   created_at timestamptz DEFAULT now()
 );
 
+-- Roles that are available to apply for
 CREATE TABLE application_roles (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  name text UNIQUE NOT NULL
+  role_id uuid REFERENCES public.exec_roles(id) ON DELETE CASCADE,
 );
 
 CREATE TABLE questions (

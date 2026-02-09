@@ -7,6 +7,27 @@ CREATE TABLE public.profiles (
   term VARCHAR(100), -- e.g., "Winter 2026"
   heard_from_where text null,
   is_math_soc_member BOOLEAN NOT NULL DEFAULT false,
+  instagram VARCHAR(255),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE public.exec_roles(
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text UNIQUE NOT NULL
+);
+
+CREATE TABLE public.subteams (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text UNIQUE NOT NULL
+);
+
+CREATE TABLE public.exec_team (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  profile_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  role_id UUID NOT NULL REFERENCES public.exec_roles(id) ON DELETE CASCADE,
+  subteam_id UUID NOT NULL REFERENCES public.subteams(id) ON DELETE CASCADE,
+  photo_url TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -38,3 +59,8 @@ CREATE TRIGGER on_auth_user_created
 -- Create indexes for common query patterns
 CREATE INDEX idx_profiles_faculty ON public.profiles (faculty);
 CREATE INDEX idx_profiles_is_math_soc_member ON public.profiles (is_math_soc_member);
+
+-- Create indexes for exec_team foreign keys
+CREATE INDEX idx_exec_team_profile_id ON public.exec_team (profile_id);
+CREATE INDEX idx_exec_team_role_id ON public.exec_team (role_id);
+CREATE INDEX idx_exec_team_subteam_id ON public.exec_team (subteam_id);

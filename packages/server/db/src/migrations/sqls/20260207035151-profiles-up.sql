@@ -2,12 +2,11 @@ CREATE TABLE public.profiles (
   id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
   first_name VARCHAR(255) NOT NULL,
   last_name VARCHAR(255) NOT NULL,
-  wat_iam VARCHAR(255) UNIQUE, -- Waterloo ID
+  wat_iam VARCHAR(8) UNIQUE,
   faculty public.faculty_enum,
-  term VARCHAR(100), -- e.g., "Winter 2026"
+  term VARCHAR(4) NOT NULL,
   heard_from_where text null,
   is_math_soc_member BOOLEAN NOT NULL DEFAULT false,
-  instagram VARCHAR(255),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -27,6 +26,7 @@ CREATE TABLE public.exec_team (
   profile_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   role_id UUID NOT NULL REFERENCES public.exec_roles(id) ON DELETE CASCADE,
   subteam_id UUID NOT NULL REFERENCES public.subteams(id) ON DELETE CASCADE,
+  instagram VARCHAR(30) UNIQUE,
   photo_url TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()

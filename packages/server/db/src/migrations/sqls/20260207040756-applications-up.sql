@@ -6,10 +6,10 @@ CREATE TABLE terms (
   created_at timestamptz DEFAULT now()
 );
 
--- Roles that are available to apply for
-CREATE TABLE application_roles (
+-- Positions that are available to apply for
+CREATE TABLE application_positions_available (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  role_id uuid REFERENCES public.exec_roles(id) ON DELETE CASCADE
+  position_id uuid REFERENCES public.exec_positions(id) ON DELETE CASCADE
 );
 
 CREATE TABLE questions (
@@ -21,13 +21,13 @@ CREATE TABLE questions (
 );
 
 -- 2. The Bridge (Logic)
-CREATE TABLE term_role_questions (
+CREATE TABLE term_position_questions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   term_id uuid REFERENCES terms(id) ON DELETE CASCADE,
-  role_id uuid REFERENCES application_roles(id) ON DELETE CASCADE, -- NULL = General
+  position_id uuid REFERENCES application_positions_available(id) ON DELETE CASCADE, -- NULL = General
   question_id uuid REFERENCES questions(id) ON DELETE CASCADE,
   sort_order int DEFAULT 0,
-  UNIQUE(term_id, role_id, question_id)
+  UNIQUE(term_id, position_id, question_id)
 );
 
 -- 3. The Submissions
@@ -43,13 +43,13 @@ CREATE TABLE applications (
   UNIQUE(profile_id, term_id)
 );
 
-CREATE TABLE application_role_selections (
+CREATE TABLE application_position_selections (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   application_id uuid REFERENCES applications(id) ON DELETE CASCADE,
-  role_id uuid REFERENCES application_roles(id) ON DELETE CASCADE,
+  position_id uuid REFERENCES application_positions_available(id) ON DELETE CASCADE,
   priority int CHECK (priority BETWEEN 1 AND 3),
   status application_review_status_enum DEFAULT 'In Review',
-  UNIQUE(application_id, role_id)
+  UNIQUE(application_id, position_id)
 );
 
 CREATE TABLE answers (
@@ -72,16 +72,16 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION check_role_limit() 
+CREATE OR REPLACE FUNCTION check_position_limit() 
 RETURNS TRIGGER AS $$
 BEGIN
-  IF (SELECT COUNT(*) FROM application_role_selections WHERE application_id = NEW.application_id) >= 3 THEN
-    RAISE EXCEPTION 'You cannot apply for more than 3 roles.';
+  IF (SELECT COUNT(*) FROM application_position_selections WHERE application_id = NEW.application_id) >= 3 THEN
+    RAISE EXCEPTION 'You cannot apply for more than 3 positions.';
   END IF;
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER enforce_role_limit
-BEFORE INSERT ON application_role_selections
-FOR EACH ROW EXECUTE FUNCTION check_role_limit();
+CREATE TRIGGER enforce_position_limit
+BEFORE INSERT ON application_position_selections
+FOR EACH ROW EXECUTE FUNCTION check_position_limit();

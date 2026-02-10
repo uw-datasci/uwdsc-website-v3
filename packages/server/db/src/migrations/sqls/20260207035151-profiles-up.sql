@@ -11,7 +11,7 @@ CREATE TABLE public.profiles (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE public.exec_roles(
+CREATE TABLE public.exec_positions(
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name text UNIQUE NOT NULL
 );
@@ -24,7 +24,7 @@ CREATE TABLE public.subteams (
 CREATE TABLE public.exec_team (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   profile_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-  role_id UUID NOT NULL REFERENCES public.exec_roles(id) ON DELETE CASCADE,
+  position_id UUID NOT NULL REFERENCES public.exec_positions(id) ON DELETE CASCADE,
   subteam_id UUID NOT NULL REFERENCES public.subteams(id) ON DELETE CASCADE,
   instagram VARCHAR(30) UNIQUE,
   photo_url TEXT,
@@ -62,5 +62,5 @@ CREATE INDEX idx_profiles_is_math_soc_member ON public.profiles (is_math_soc_mem
 
 -- Create indexes for exec_team foreign keys
 CREATE INDEX idx_exec_team_profile_id ON public.exec_team (profile_id);
-CREATE INDEX idx_exec_team_role_id ON public.exec_team (role_id);
+CREATE INDEX idx_exec_team_position_id ON public.exec_team (position_id);
 CREATE INDEX idx_exec_team_subteam_id ON public.exec_team (subteam_id);

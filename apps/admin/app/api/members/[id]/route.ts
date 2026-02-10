@@ -8,15 +8,15 @@ interface Params {
 }
 
 /**
- * PATCH /api/admin/memberships/[id]
+ * PATCH /api/members/[id]
  * Update member information or mark as paid
  * Admin only endpoint
  */
 export async function PATCH(request: NextRequest, { params }: Params) {
   try {
     // Verify admin access
-    const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (isUnauthorized || !user) return isUnauthorized;
+    const { isUnauthorized } = await tryGetCurrentUser();
+    if (isUnauthorized) return isUnauthorized;
 
     // TODO: Add proper admin role check
 
@@ -103,7 +103,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 }
 
 /**
- * DELETE /api/admin/memberships/[id]
+ * DELETE /api/members/[id]
  * Delete a member
  * Admin only endpoint
  */
@@ -111,7 +111,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
   try {
     // Verify admin access
     const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (isUnauthorized || !user) return isUnauthorized;
+    if (isUnauthorized) return isUnauthorized;
 
     // TODO: Add proper admin role check
 

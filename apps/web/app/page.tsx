@@ -11,7 +11,7 @@ import WhatWeDo from "@/components/home_sections/WhatWeDo";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Home() {
-  const { profile, isLoading, mutate } = useAuth();
+  const { user, isLoading, mutate } = useAuth();
 
   if (isLoading) {
     return (
@@ -23,7 +23,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
-      <Hero profile={profile} mutate={mutate} />
+      <Hero user={user} mutate={mutate} />
       <WhatWeDo />
       <ClubStats />
       <PastEvents />

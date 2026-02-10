@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Users, DollarSign, GraduationCap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { MembershipStats } from "@/types/api";
-import type { MembershipFilterType } from "@/app/admin/memberships/page";
+import type { MembershipFilterType } from "@/types/members";
 import { cn, Card, CardHeader, CardTitle, CardContent } from "@uwdsc/ui";
 
 interface MembershipStatsCardsProps {
@@ -37,7 +37,7 @@ export function MembershipStatsCards({
   const activeCardStyles = "ring-2 ring-primary";
 
   return (
-    <div className="grid gap-4 md:grid-cols-3 mb-8">
+    <div className="grid gap-4 md:grid-cols-3 mb-8 w-full">
       {/* Total Users */}
       <Card
         className={cn(

@@ -2,32 +2,32 @@
 
 import { createContext, useContext, ReactNode, useMemo } from "react";
 import useSWR from "swr";
-import { getProfile, type UserProfile } from "@/lib/api";
+import { getCurrentUser, type AuthUser } from "@/lib/api";
 
 interface AuthContextType {
-  profile: UserProfile | null;
+  user: AuthUser | null;
   isLoading: boolean;
   isError: boolean;
-  mutate: () => Promise<UserProfile | null | undefined>; // For manual revalidation
+  mutate: () => Promise<void>;
   isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Fetcher function for SWR using the API abstraction
+// Fetcher function for SWR
 const fetcher = async () => {
   try {
-    const data = await getProfile();
-    return data.profile;
+    const data = await getCurrentUser();
+    return data.user;
   } catch (error) {
-    console.error("Error fetching profile in AuthContext:", error);
+    console.error("Error fetching user in AuthContext:", error);
     return null;
   }
 };
 
 export function AuthProvider({ children }: { readonly children: ReactNode }) {
-  const { data, error, isLoading, mutate } = useSWR<UserProfile | null>(
-    "/api/profile",
+  const { data, error, isLoading, mutate } = useSWR<AuthUser | null>(
+    "/api/auth/user",
     fetcher,
     {
       // Revalidate on window focus
@@ -47,11 +47,13 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
 
   const value: AuthContextType = useMemo(
     () => ({
-      profile: data ?? null,
+      user: data ?? null,
       isLoading,
       isError: !!error,
-      mutate,
-      isAuthenticated: !!data && data !== null,
+      mutate: async () => {
+        await mutate();
+      },
+      isAuthenticated: !!data,
     }),
     [data, isLoading, error, mutate],
   );

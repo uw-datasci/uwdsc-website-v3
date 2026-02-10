@@ -23,14 +23,29 @@ const isCI = process.env.CI === "true";
 
 // Load appropriate .env file for development
 if (!isProduction && !isCI) {
-  const envPath = path.join(__dirname, "..", ".env.local");
+  // Try to load from packages/server/db/.env.local first (db-specific env)
+  const dbEnvPath = path.join(__dirname, "..", "packages", "server", "db", ".env.local");
+  const rootEnvPath = path.join(__dirname, "..", ".env.local");
+  
+  let envLoaded = false;
 
-  // Check if .env.local exists
-  if (fs.existsSync(envPath)) {
-    dotenv.config({ path: envPath });
+  // Check if db .env.local exists
+  if (fs.existsSync(dbEnvPath)) {
+    dotenv.config({ path: dbEnvPath });
+    console.log("✓ Loaded environment from packages/server/db/.env.local");
+    envLoaded = true;
+  }
+  
+  // Also load root .env.local if it exists (for additional env vars)
+  if (fs.existsSync(rootEnvPath)) {
+    dotenv.config({ path: rootEnvPath });
     console.log("✓ Loaded environment from .env.local");
-  } else {
+    envLoaded = true;
+  }
+
+  if (!envLoaded) {
     console.warn("⚠ Warning: .env.local not found");
+    console.warn("  Checked: packages/server/db/.env.local and .env.local");
     console.warn("  Make sure DATABASE_URL is set in your environment\n");
   }
 } else {

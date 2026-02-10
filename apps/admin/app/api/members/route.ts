@@ -3,15 +3,15 @@ import { profileService } from "@uwdsc/core";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 
 /**
- * GET /api/admin/memberships
+ * GET /api/members
  * Get all user profiles with membership statistics
  * Admin only endpoint
  */
 export async function GET(request: Request) {
   try {
     // Verify admin access
-    const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (isUnauthorized || !user) return isUnauthorized;
+    const { isUnauthorized } = await tryGetCurrentUser();
+    if (isUnauthorized) return isUnauthorized;
 
     // TODO: Add proper admin role check here
     // For now, any authenticated user can access

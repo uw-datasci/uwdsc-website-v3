@@ -1,3 +1,11 @@
+-- Disable RLS
+ALTER TABLE public.user_roles DISABLE ROW LEVEL SECURITY;
+
+-- Drop helper functions
+DROP FUNCTION IF EXISTS public.is_exec_or_admin(uuid);
+DROP FUNCTION IF EXISTS public.is_admin(uuid);
+DROP FUNCTION IF EXISTS public.get_user_role(uuid);
+
 -- Drop trigger
 DROP TRIGGER IF EXISTS on_role_upsert ON public.user_roles;
 

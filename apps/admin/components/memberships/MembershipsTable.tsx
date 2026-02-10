@@ -20,9 +20,7 @@ import {
   Download,
 } from "lucide-react";
 import type { MemberProfile } from "@/types/api";
-import type { MembershipFilterType } from "@/app/admin/memberships/page";
-import { exportToCsv } from "@/lib/utils/csv";
-import { globalMembershipFilter } from "@/lib/utils/table";
+import type { MembershipFilterType } from "@/types/members";
 import {
   membershipColumns,
   type MembershipActionType,
@@ -44,6 +42,8 @@ import {
   TableBody,
   TableCell,
 } from "@uwdsc/ui";
+import { exportToCsv } from "@/lib/utils/csv";
+import { globalMembershipFilter } from "@/lib/utils/table";
 
 interface MembershipsTableProps {
   readonly profiles: MemberProfile[];
@@ -53,13 +53,11 @@ interface MembershipsTableProps {
 
 const MEMBERSHIP_CSV_HEADERS = [
   "name",
-  "email",
   "wat_iam",
   "user_role",
   "has_paid",
   "is_math_soc_member",
   "faculty",
-  "term",
 ] as const;
 
 const ROLE_OPTIONS = [
@@ -138,7 +136,6 @@ export function MembershipsTable({
     });
   }, [activeFilter]);
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: profiles,
     columns: membershipColumns,
@@ -209,7 +206,7 @@ export function MembershipsTable({
     <>
       {renderActionModal()}
 
-      <Card className="p-6">
+      <Card className="p-6 w-full">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
           <div>
             <h2 className="text-xl font-semibold">All Members</h2>
@@ -348,9 +345,10 @@ export function MembershipsTable({
           </div>
         </div>
 
-        <div className="rounded-lg overflow-x-auto border">
-          <Table className="min-w-160">
-            <TableHeader>
+        <div className="w-full overflow-hidden">
+          <div className="rounded-lg overflow-x-auto border">
+            <Table className="min-w-160">
+              <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
@@ -393,6 +391,7 @@ export function MembershipsTable({
             </TableBody>
           </Table>
         </div>
+      </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4 px-1">
           <p className="text-xs text-muted-foreground">

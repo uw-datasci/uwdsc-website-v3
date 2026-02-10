@@ -78,24 +78,7 @@ export const membershipColumns: ColumnDef<MemberProfile>[] = [
       const first = row.original.first_name ?? "";
       const last = row.original.last_name ?? "";
       const name = [first, last].filter(Boolean).join(" ");
-      return <div className="min-w-35">{name || "—"}</div>;
-    },
-  },
-  {
-    accessorKey: "email",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="-ml-3 h-8"
-      >
-        Email
-        <SortIcon direction={column.getIsSorted()} />
-      </Button>
-    ),
-    cell: ({ row }) => {
-      const email = row.getValue("email") as string;
-      return <div className="min-w-50 lowercase">{email}</div>;
+      return <div className="min-w-32 px-1">{name || "—"}</div>;
     },
   },
   {
@@ -220,23 +203,6 @@ export const membershipColumns: ColumnDef<MemberProfile>[] = [
     ),
     cell: ({ row }) => {
       const v = row.getValue("faculty") as string | null;
-      return <span>{v ?? "—"}</span>;
-    },
-  },
-  {
-    accessorKey: "term",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="-ml-3 h-8"
-      >
-        Term
-        <SortIcon direction={column.getIsSorted()} />
-      </Button>
-    ),
-    cell: ({ row }) => {
-      const v = row.getValue("term") as string | null;
       return <span>{v ?? "—"}</span>;
     },
   },

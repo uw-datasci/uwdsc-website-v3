@@ -1,83 +1,28 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createSupabaseMiddlewareClient } from "@uwdsc/db";
+import { withAuth, withAnon } from "./lib/middleware";
 
-// Protected routes that require authentication
-const protectedRoutes = ["/me", "/admin"];
-const authRoutes = new Set(["/login", "/register"]);
-
-// Helper function to check if profile is complete
-function isProfileComplete(profile: any, error: any): boolean {
-  return !!(
-    profile &&
-    !error &&
-    profile.first_name &&
-    profile.last_name &&
-    profile.faculty &&
-    profile.term &&
-    profile.heard_from_where
-  );
-}
+const AUTH_ROUTES = new Set(["/login", "/register"]);
+const COMPLETE_PROFILE_ROUTE = "/complete-profile";
 
 export async function proxy(request: NextRequest) {
-  const response = NextResponse.next({
-    request: { headers: request.headers },
-  });
-
-  // Create Supabase client
-  const supabase = createSupabaseMiddlewareClient(request, response);
+  const response = NextResponse.next({ request: { headers: request.headers } });
 
   // Get user session
+  const supabase = createSupabaseMiddlewareClient(request, response);
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const { pathname } = request.nextUrl;
 
-  const pathname = request.nextUrl.pathname;
-
-  // Check if route is protected
-  const isProtectedRoute = protectedRoutes.some((route) =>
-    pathname.startsWith(route),
-  );
-  const isCompleteProfileRoute = pathname === "/complete-profile";
-
-  // Redirect to login if accessing protected route without auth
-  if (isProtectedRoute && !user) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-
-  // If user is authenticated
-  if (user) {
-    // Redirect authenticated users away from login/register pages
-    if (authRoutes.has(pathname)) {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
-
-    // Check if profile is complete using Supabase client (edge-compatible)
-    const { data: profile, error } = await supabase
-      .from("profiles")
-      .select("first_name, last_name, faculty, term, heard_from_where")
-      .eq("id", user.id)
-      .maybeSingle(); // Use maybeSingle() instead of single() - returns null if no rows
-
-    const profileComplete = isProfileComplete(profile, error);
-
-    // Redirect to home if profile is already complete and trying to access complete-profile
-    if (profileComplete && isCompleteProfileRoute) {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
-
-    // Redirect to complete-profile if profile is incomplete and not already there
-    if (!profileComplete && !isCompleteProfileRoute) {
-      return NextResponse.redirect(new URL("/complete-profile", request.url));
-    }
-
-    // Redirect away from verify-email if already authenticated with complete profile
-    if (pathname === "/verify-email" && profileComplete) {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
-  } else if (isCompleteProfileRoute) {
-    // Redirect away from complete-profile if not authenticated
-    return NextResponse.redirect(new URL("/login", request.url));
+  switch (true) {
+    // 1. User is not authenticated and trying to access auth routes
+    case AUTH_ROUTES.has(pathname):
+      return withAuth(request, response, user);
+    // 2. complete profile route
+    case pathname === COMPLETE_PROFILE_ROUTE:
+      return await withAnon(request, response, supabase, user?.id);
   }
 
   return response;

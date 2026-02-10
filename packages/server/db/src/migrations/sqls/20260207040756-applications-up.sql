@@ -9,7 +9,7 @@ CREATE TABLE terms (
 -- Roles that are available to apply for
 CREATE TABLE application_roles (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  role_id uuid REFERENCES public.exec_roles(id) ON DELETE CASCADE,
+  role_id uuid REFERENCES public.exec_roles(id) ON DELETE CASCADE
 );
 
 CREATE TABLE questions (

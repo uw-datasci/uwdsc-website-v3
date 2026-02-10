@@ -64,3 +64,95 @@ CREATE INDEX idx_profiles_is_math_soc_member ON public.profiles (is_math_soc_mem
 CREATE INDEX idx_exec_team_profile_id ON public.exec_team (profile_id);
 CREATE INDEX idx_exec_team_position_id ON public.exec_team (position_id);
 CREATE INDEX idx_exec_team_subteam_id ON public.exec_team (subteam_id);
+
+-- ============================================================================
+-- RLS Policies
+-- ============================================================================
+
+-- Enable RLS
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.exec_positions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.subteams ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.exec_team ENABLE ROW LEVEL SECURITY;
+
+-- profiles: SELECT - Own profile OR exec/admin can see all
+CREATE POLICY profiles_select_own_or_elevated ON public.profiles
+  FOR SELECT
+  USING (
+    id = auth.uid() OR 
+    public.is_exec_or_admin(auth.uid())
+  );
+
+-- profiles: UPDATE - Own profile OR exec/admin can update any
+CREATE POLICY profiles_update_own_or_elevated ON public.profiles
+  FOR UPDATE
+  USING (
+    id = auth.uid() OR 
+    public.is_exec_or_admin(auth.uid())
+  )
+  WITH CHECK (
+    id = auth.uid() OR 
+    public.is_exec_or_admin(auth.uid())
+  );
+
+-- profiles: DELETE - Admin only
+CREATE POLICY profiles_delete_admin_only ON public.profiles
+  FOR DELETE
+  USING (public.is_admin(auth.uid()));
+
+-- exec_positions: SELECT - Public (anyone can read)
+CREATE POLICY exec_positions_select_public ON public.exec_positions
+  FOR SELECT
+  USING (true);
+
+-- exec_positions: INSERT/UPDATE/DELETE - Admin only
+CREATE POLICY exec_positions_insert_admin_only ON public.exec_positions
+  FOR INSERT
+  WITH CHECK (public.is_admin(auth.uid()));
+
+CREATE POLICY exec_positions_update_admin_only ON public.exec_positions
+  FOR UPDATE
+  USING (public.is_admin(auth.uid()))
+  WITH CHECK (public.is_admin(auth.uid()));
+
+CREATE POLICY exec_positions_delete_admin_only ON public.exec_positions
+  FOR DELETE
+  USING (public.is_admin(auth.uid()));
+
+-- subteams: SELECT - Public (anyone can read)
+CREATE POLICY subteams_select_public ON public.subteams
+  FOR SELECT
+  USING (true);
+
+-- subteams: INSERT/UPDATE/DELETE - Admin only
+CREATE POLICY subteams_insert_admin_only ON public.subteams
+  FOR INSERT
+  WITH CHECK (public.is_admin(auth.uid()));
+
+CREATE POLICY subteams_update_admin_only ON public.subteams
+  FOR UPDATE
+  USING (public.is_admin(auth.uid()))
+  WITH CHECK (public.is_admin(auth.uid()));
+
+CREATE POLICY subteams_delete_admin_only ON public.subteams
+  FOR DELETE
+  USING (public.is_admin(auth.uid()));
+
+-- exec_team: SELECT - Public (anyone can read)
+CREATE POLICY exec_team_select_public ON public.exec_team
+  FOR SELECT
+  USING (true);
+
+-- exec_team: INSERT/UPDATE/DELETE - Admin only
+CREATE POLICY exec_team_insert_admin_only ON public.exec_team
+  FOR INSERT
+  WITH CHECK (public.is_admin(auth.uid()));
+
+CREATE POLICY exec_team_update_admin_only ON public.exec_team
+  FOR UPDATE
+  USING (public.is_admin(auth.uid()))
+  WITH CHECK (public.is_admin(auth.uid()));
+
+CREATE POLICY exec_team_delete_admin_only ON public.exec_team
+  FOR DELETE
+  USING (public.is_admin(auth.uid()));

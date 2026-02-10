@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createServerClient, createBrowserClient } from "@supabase/ssr";
 import type { CookieOptions } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 
 /**
  * Create a Supabase client for browser/client-side operations
@@ -93,4 +94,27 @@ export function createSupabaseMiddlewareClient<
       },
     },
   );
+}
+
+/**
+ * Create a Supabase client with service role key (bypasses RLS)
+ * WARNING: Only use this for admin operations that need to bypass RLS policies
+ * This client has full access to all data and should be used with extreme caution
+ */
+export function createSupabaseServiceRoleClient() {
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!serviceRoleKey) {
+    throw new Error(
+      "SUPABASE_SERVICE_ROLE_KEY environment variable is not set. " +
+        "This is required for admin operations that bypass RLS.",
+    );
+  }
+
+  return createClient(process.env.SUPABASE_URL!, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
 }

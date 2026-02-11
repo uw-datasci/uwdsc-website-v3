@@ -15,10 +15,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const authService = await createAuthService();
     const emailRedirectTo = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback?next=/complete-profile`;
-    const result = await authService.register(
-      { email, password },
+    const result = await authService.register({
+      email,
+      password,
       emailRedirectTo,
-    );
+    });
 
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });

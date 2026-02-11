@@ -1,9 +1,6 @@
-import { UserMetadata } from "@supabase/supabase-js";
-
 export interface RegisterData {
   email: string;
   password: string;
-  metadata?: Record<string, UserMetadata>;
 }
 
 export interface LoginData {

@@ -1,7 +1,6 @@
 import { AuthRepository } from "../repositories/authRepository";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { ApiError } from "../types/errors";
-import { LoginData, RegisterData } from "../types/auth";
+import { ApiError, LoginData, RegisterData } from "@uwdsc/types";
 
 export class AuthService {
   private readonly repository: AuthRepository;
@@ -50,12 +49,12 @@ export class AuthService {
   /**
    * Register new user
    */
-  async register(credentials: RegisterData, emailRedirectTo: string) {
+  async register(credentials: RegisterData) {
     try {
       const { data, error } = await this.repository.signUp({
         email: credentials.email,
         password: credentials.password,
-        emailRedirectTo,
+        emailRedirectTo: credentials.emailRedirectTo,
       });
 
       if (error) {

@@ -36,7 +36,9 @@ export type ProfileUpdateData = Omit<
 //  Used for in admin package
 // ==========================================
 
-export type UpdateMemberData = Omit<CompleteProfileData, "heard_from_where">;
+export type UpdateMemberData = Partial<
+  Omit<CompleteProfileData, "heard_from_where">
+>;
 
 export interface Member {
   first_name: string | null;
@@ -51,4 +53,10 @@ export interface Member {
   payment_method: PaymentMethod | null;
   payment_location: string | null;
   verifier: string | null;
+}
+
+export interface MembershipStats {
+  total_users: number;
+  paid_users: number;
+  math_soc_members: number;
 }

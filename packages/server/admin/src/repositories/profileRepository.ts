@@ -1,5 +1,5 @@
 import { BaseRepository } from "@uwdsc/db/baseRepository";
-import { MarkAsPaidData, Profile, UpdateMemberData } from "@uwdsc/types";
+import { MarkAsPaidData, MembershipStats, Profile } from "@uwdsc/types";
 
 export class ProfileRepository extends BaseRepository {
   /**
@@ -9,27 +9,25 @@ export class ProfileRepository extends BaseRepository {
   async getAllProfiles(): Promise<Profile[]> {
     try {
       const result = await this.sql<Profile[]>`
-        SELECT 
-          p.id,
-          au.email,
-          p.first_name,
-          p.last_name,
-          ur.role as user_role,
-          CASE WHEN m.user_id IS NOT NULL THEN true ELSE false END as has_paid,
-          p.is_math_soc_member,
-          p.faculty,
-          p.term,
-          p.wat_iam,
-          m.verifier_id::text as verifier,
-          p.heard_from_where,
-          m.payment_method,
-          m.payment_location,
-          NULL as member_ideas
-        FROM profiles p
-        LEFT JOIN auth.users au ON p.id = au.id
-        LEFT JOIN user_roles ur ON p.id = ur.id
-        LEFT JOIN memberships m ON p.id = m.user_id
-        ORDER BY au.created_at DESC
+      SELECT 
+        p.first_name,
+        p.last_name,
+        au.email,
+        p.wat_iam,
+        p.faculty,
+        p.term,
+        p.is_math_soc_member,
+        r.role,
+        payment_method,
+        payment_location,
+        pv.first_name,
+        pv.last_name
+      FROM profiles p
+      JOIN auth.users au ON p.id = au.id
+      JOIN user_roles r ON p.id = r.id
+      JOIN memberships m ON m.user_id = p.id
+      JOIN profiles pv ON pv.id = verifier_id
+      ORDER BY au.created_at DESC
       `;
 
       return result;
@@ -42,15 +40,9 @@ export class ProfileRepository extends BaseRepository {
   /**
    * Get membership statistics
    */
-  async getMembershipStats(): Promise<{
-    totalUsers: number;
-    paidUsers: number;
-    mathSocMembers: number;
-  }> {
+  async getMembershipStats(): Promise<MembershipStats> {
     try {
-      const result = await this.sql<
-        { total_users: number; paid_users: number; math_soc_members: number }[]
-      >`
+      const result = await this.sql<MembershipStats[]>`
         SELECT 
           COUNT(*) as total_users,
           COUNT(*) FILTER (WHERE m.user_id IS NOT NULL) as paid_users,
@@ -59,17 +51,13 @@ export class ProfileRepository extends BaseRepository {
         LEFT JOIN memberships m ON p.id = m.user_id
       `;
 
-      const row = result[0] ?? {
-        total_users: 0,
-        paid_users: 0,
-        math_soc_members: 0,
-      };
-
-      return {
-        totalUsers: row.total_users,
-        paidUsers: row.paid_users,
-        mathSocMembers: row.math_soc_members,
-      };
+      return (
+        result[0] ?? {
+          total_users: 0,
+          paid_users: 0,
+          math_soc_members: 0,
+        }
+      );
     } catch (error: unknown) {
       console.error("Error fetching membership stats:", error);
       throw error;
@@ -81,24 +69,8 @@ export class ProfileRepository extends BaseRepository {
    * @param profileId - The profile ID (UUID)
    * @param data - Payment data (method, location, verifier)
    */
-  async markAsPaid(
-    profileId: string,
-    data: MarkAsPaidData,
-  ): Promise<{ success: boolean; error?: string }> {
+  async markAsPaid(profileId: string, data: MarkAsPaidData): Promise<boolean> {
     try {
-      // First verify the profile exists
-      const profileCheck = await this.sql`
-        SELECT id FROM profiles WHERE id = ${profileId}
-      `;
-
-      if (profileCheck.length === 0) {
-        return {
-          success: false,
-          error: "Profile not found",
-        };
-      }
-
-      // Insert or update membership record
       const result = await this.sql`
         INSERT INTO memberships (user_id, payment_method, payment_location, verifier_id, verified_at, updated_at)
         VALUES (${profileId}, ${data.payment_method}::payment_method_enum, ${data.payment_location}, ${data.verifier}::uuid, NOW(), NOW())
@@ -112,66 +84,35 @@ export class ProfileRepository extends BaseRepository {
         RETURNING *
       `;
 
-      if (result.length === 0) {
-        return {
-          success: false,
-          error: "Failed to create membership record",
-        };
-      }
-
-      return { success: true };
+      return result.length > 0;
     } catch (error: unknown) {
       console.error("Error marking member as paid:", error);
-      return {
-        success: false,
-        error: (error as Error).message || "Failed to mark as paid",
-      };
+      throw error;
     }
   }
 
   /**
-   * Update member information by profile ID
+   * Update member information by profile ID (partial update for PATCH)
    * @param profileId - The profile ID (UUID)
-   * @param data - Member data to update
+   * @param data - Partial member data - only fields to change
    */
   async updateMemberById(
     profileId: string,
-    data: UpdateMemberData,
-  ): Promise<{ success: boolean; error?: string }> {
+    data: Record<string, string | boolean | null>,
+    columns: string[],
+  ): Promise<boolean> {
     try {
-      // Build the update query dynamically based on whether faculty is provided
-      const facultyValue = data.faculty
-        ? this.sql`${data.faculty}::faculty_enum`
-        : this.sql`NULL`;
-
       const result = await this.sql`
         UPDATE profiles
-        SET 
-          first_name = ${data.first_name},
-          last_name = ${data.last_name},
-          wat_iam = ${data.wat_iam ?? null},
-          faculty = ${facultyValue},
-          term = ${data.term ?? null},
-          is_math_soc_member = ${data.is_math_soc_member},
-          updated_at = NOW()
+        SET ${this.sql(data, ...columns)}, updated_at = NOW()
         WHERE id = ${profileId}
         RETURNING *
       `;
 
-      if (result.length === 0) {
-        return {
-          success: false,
-          error: "Profile not found",
-        };
-      }
-
-      return { success: true };
+      return result.length > 0;
     } catch (error: unknown) {
       console.error("Error updating member:", error);
-      return {
-        success: false,
-        error: (error as Error).message || "Failed to update member",
-      };
+      throw error;
     }
   }
 
@@ -179,9 +120,7 @@ export class ProfileRepository extends BaseRepository {
    * Delete a member by profile ID
    * @param profileId - The profile ID (UUID)
    */
-  async deleteMemberById(
-    profileId: string,
-  ): Promise<{ success: boolean; error?: string }> {
+  async deleteMemberById(profileId: string): Promise<boolean> {
     try {
       // First, delete the user from auth.users (this will cascade to profiles)
       const result = await this.sql`
@@ -190,20 +129,10 @@ export class ProfileRepository extends BaseRepository {
         RETURNING id
       `;
 
-      if (result.length === 0) {
-        return {
-          success: false,
-          error: "User not found",
-        };
-      }
-
-      return { success: true };
+      return result.length > 0;
     } catch (error: unknown) {
       console.error("Error deleting member:", error);
-      return {
-        success: false,
-        error: (error as Error).message || "Failed to delete member",
-      };
+      throw error;
     }
   }
 }

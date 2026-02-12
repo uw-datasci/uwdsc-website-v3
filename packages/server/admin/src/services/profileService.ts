@@ -1,10 +1,21 @@
 import {
   ApiError,
   MarkAsPaidData,
+  MembershipStats,
   Profile,
   UpdateMemberData,
 } from "@uwdsc/types";
 import { ProfileRepository } from "../repositories/profileRepository";
+import { filterPartialUpdate } from "../utils/filterPartialUpdate";
+
+const UPDATE_MEMBER_COLUMNS = [
+  "first_name",
+  "last_name",
+  "wat_iam",
+  "faculty",
+  "term",
+  "is_math_soc_member",
+] as const;
 
 class ProfileService {
   private readonly repository: ProfileRepository;
@@ -14,7 +25,7 @@ class ProfileService {
   }
 
   /**
-   * Get all user profiles (admin only)
+   * Get all user profiles
    */
   async getAllProfiles(): Promise<Profile[]> {
     try {
@@ -28,13 +39,9 @@ class ProfileService {
   }
 
   /**
-   * Get membership statistics (admin only)
+   * Get membership statistics
    */
-  async getMembershipStats(): Promise<{
-    totalUsers: number;
-    paidUsers: number;
-    mathSocMembers: number;
-  }> {
+  async getMembershipStats(): Promise<MembershipStats> {
     try {
       return await this.repository.getMembershipStats();
     } catch (error) {
@@ -46,14 +53,23 @@ class ProfileService {
   }
 
   /**
-   * Mark a member as paid (admin only)
+   * Mark a member as paid
    */
   async markMemberAsPaid(
     profileId: string,
     data: MarkAsPaidData,
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      return await this.repository.markAsPaid(profileId, data);
+      const result = await this.repository.markAsPaid(profileId, data);
+
+      if (!result) {
+        return {
+          success: false,
+          error: "Failed to create membership record",
+        };
+      }
+
+      return { success: true };
     } catch (error) {
       throw new ApiError(
         `Failed to mark member as paid: ${(error as Error).message}`,
@@ -63,14 +79,35 @@ class ProfileService {
   }
 
   /**
-   * Update member information (admin only)
+   * Update member information (partial update for PATCH)
+   * Only updates fields present in data; omitted fields are left unchanged
    */
   async updateMember(
     profileId: string,
     data: UpdateMemberData,
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      return await this.repository.updateMemberById(profileId, data);
+      const { filteredData, columns } = filterPartialUpdate(
+        data,
+        UPDATE_MEMBER_COLUMNS,
+      );
+
+      if (columns.length === 0) return { success: true };
+
+      const result = await this.repository.updateMemberById(
+        profileId,
+        filteredData,
+        columns,
+      );
+
+      if (!result) {
+        return {
+          success: false,
+          error: "Profile not found",
+        };
+      }
+
+      return { success: true };
     } catch (error) {
       throw new ApiError(
         `Failed to update member: ${(error as Error).message}`,
@@ -86,7 +123,16 @@ class ProfileService {
     profileId: string,
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      return await this.repository.deleteMemberById(profileId);
+      const result = await this.repository.deleteMemberById(profileId);
+
+      if (!result) {
+        return {
+          success: false,
+          error: "User not found",
+        };
+      }
+
+      return { success: true };
     } catch (error) {
       throw new ApiError(
         `Failed to delete member: ${(error as Error).message}`,

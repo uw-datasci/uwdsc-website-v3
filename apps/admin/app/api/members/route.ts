@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { profileService } from "@uwdsc/core";
+import { profileService } from "@uwdsc/admin";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 
 /**

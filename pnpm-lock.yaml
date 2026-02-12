@@ -314,6 +314,24 @@ importers:
         specifier: ^5
         version: 5.9.3
 
+  packages/common:
+    devDependencies:
+      '@types/node':
+        specifier: ^20
+        version: 20.19.31
+      '@uwdsc/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@uwdsc/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      eslint:
+        specifier: ^9
+        version: 9.39.2(jiti@2.6.1)
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+
   packages/eslint-config:
     devDependencies:
       '@eslint/js':
@@ -358,12 +376,15 @@ importers:
 
   packages/server/admin:
     dependencies:
+      '@uwdsc/common':
+        specifier: workspace:*
+        version: link:../../common
+      '@uwdsc/core':
+        specifier: workspace:*
+        version: link:../core
       '@uwdsc/db':
         specifier: workspace:*
         version: link:../db
-      '@uwdsc/types':
-        specifier: workspace:*
-        version: link:../../types
     devDependencies:
       '@types/node':
         specifier: ^20.19.9
@@ -389,12 +410,12 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.94.0
         version: 2.94.1
+      '@uwdsc/common':
+        specifier: workspace:*
+        version: link:../../common
       '@uwdsc/db':
         specifier: workspace:*
         version: link:../db
-      '@uwdsc/types':
-        specifier: workspace:*
-        version: link:../../types
     devDependencies:
       '@types/node':
         specifier: ^20
@@ -447,24 +468,6 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       typescript:
         specifier: ^5.9.2
-        version: 5.9.3
-
-  packages/types:
-    devDependencies:
-      '@types/node':
-        specifier: ^20
-        version: 20.19.31
-      '@uwdsc/eslint-config':
-        specifier: workspace:*
-        version: link:../eslint-config
-      '@uwdsc/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
-      eslint:
-        specifier: ^9
-        version: 9.39.2(jiti@2.6.1)
-      typescript:
-        specifier: ^5
         version: 5.9.3
 
   packages/typescript-config: {}

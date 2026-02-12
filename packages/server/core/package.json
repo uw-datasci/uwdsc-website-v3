@@ -11,7 +11,7 @@
     "@supabase/storage-js": "^2.94.0",
     "@supabase/supabase-js": "^2.94.0",
     "@uwdsc/db": "workspace:*",
-    "@uwdsc/types": "workspace:*"
+    "@uwdsc/common": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20",

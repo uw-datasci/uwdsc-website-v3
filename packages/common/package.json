@@ -1,5 +1,5 @@
 {
-  "name": "@uwdsc/types",
+  "name": "@uwdsc/common",
   "version": "0.0.0",
   "type": "module",
   "private": true,
@@ -16,6 +16,7 @@
     "typescript": "^5"
   },
   "exports": {
-    ".": "./src/index.ts"
+    "./types": "./src/types/index.ts",
+    "./utils": "./src/utils/index.ts"
   }
 }

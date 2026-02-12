@@ -3,7 +3,7 @@ import {
   CompleteProfileData,
   Profile,
   ProfileUpdateData,
-} from "@uwdsc/types";
+} from "@uwdsc/common/types";
 import { ProfileRepository } from "../repositories/profileRepository";
 
 class ProfileService {

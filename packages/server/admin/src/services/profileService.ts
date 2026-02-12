@@ -1,12 +1,12 @@
+import { ProfileRepository } from "../repositories/profileRepository";
 import {
   ApiError,
   MarkAsPaidData,
   MembershipStats,
   Profile,
   UpdateMemberData,
-} from "@uwdsc/types";
-import { ProfileRepository } from "../repositories/profileRepository";
-import { filterPartialUpdate } from "../utils/filterPartialUpdate";
+} from "@uwdsc/common/types";
+import { filterPartialUpdate } from "@uwdsc/common/utils";
 
 const UPDATE_MEMBER_COLUMNS = [
   "first_name",

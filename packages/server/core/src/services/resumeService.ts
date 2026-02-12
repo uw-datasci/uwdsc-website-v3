@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { FileObject } from "@supabase/storage-js";
 import { FileService } from "./fileService";
-import { FileUploadData, FileValidationConfig } from "@uwdsc/types";
+import { FileUploadData, FileValidationConfig } from "@uwdsc/common/types";
 
 // TODO: Cleanup
 

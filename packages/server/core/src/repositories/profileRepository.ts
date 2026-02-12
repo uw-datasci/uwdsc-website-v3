@@ -1,4 +1,8 @@
-import { CompleteProfileData, Profile, ProfileUpdateData } from "@uwdsc/types";
+import {
+  CompleteProfileData,
+  Profile,
+  ProfileUpdateData,
+} from "@uwdsc/common/types";
 import { BaseRepository } from "@uwdsc/db/baseRepository";
 
 export class ProfileRepository extends BaseRepository {

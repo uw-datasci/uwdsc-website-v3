@@ -1,6 +1,6 @@
 import { AuthRepository } from "../repositories/authRepository";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { ApiError, LoginData, RegisterData } from "@uwdsc/types";
+import { ApiError, LoginData, RegisterData } from "@uwdsc/common/types";
 
 export class AuthService {
   private readonly repository: AuthRepository;

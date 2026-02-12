@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@uwdsc/db": "workspace:*",
-    "@uwdsc/types": "workspace:*",
+    "@uwdsc/common": "workspace:*",
     "@uwdsc/core": "workspace:*"
   },
   "devDependencies": {

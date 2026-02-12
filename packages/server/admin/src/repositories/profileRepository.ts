@@ -1,5 +1,5 @@
 import { BaseRepository } from "@uwdsc/db/baseRepository";
-import { MarkAsPaidData, MembershipStats, Profile } from "@uwdsc/types";
+import { MarkAsPaidData, MembershipStats, Profile } from "@uwdsc/common/types";
 
 export class ProfileRepository extends BaseRepository {
   /**

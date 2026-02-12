@@ -1,7 +1,11 @@
 import { FileRepository } from "../repositories/fileRepository";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { FileObject } from "@supabase/storage-js";
-import { ApiError, FileValidationConfig, FileUploadData } from "@uwdsc/types";
+import {
+  ApiError,
+  FileValidationConfig,
+  FileUploadData,
+} from "@uwdsc/common/types";
 
 // TODO: Cleanup
 

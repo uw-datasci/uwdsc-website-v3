@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { LoginData, RegisterData } from "@uwdsc/types";
+import type { LoginData, RegisterData } from "@uwdsc/common/types";
 
 export class AuthRepository {
   private readonly supabase: SupabaseClient;

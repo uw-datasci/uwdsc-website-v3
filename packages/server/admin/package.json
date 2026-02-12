@@ -6,11 +6,14 @@
   "scripts": {
     "lint": "eslint . --max-warnings 0"
   },
+  "dependencies": {
+    "@uwdsc/db": "workspace:*",
+    "@uwdsc/types": "workspace:*",
+    "@uwdsc/core": "workspace:*"
+  },
   "devDependencies": {
     "@uwdsc/eslint-config": "workspace:*",
     "@uwdsc/typescript-config": "workspace:*",
-    "@uwdsc/db": "workspace:*",
-    "@uwdsc/types": "workspace:*",
     "@types/node": "^20.19.9",
     "eslint": "^9.32.0",
     "typescript": "^5.9.2"

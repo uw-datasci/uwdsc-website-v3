@@ -2,13 +2,11 @@
   "extends": "@uwdsc/typescript-config/base.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "jsx": "react-jsx",
     "noImplicitAny": false,
     "paths": {
-      "@uwdsc/core/*": ["./src/*"],
       "@uwdsc/types": ["../../types/src/index.ts"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "../db/src/config/baseRepository.ts"],
   "exclude": ["node_modules", "dist"]
 }

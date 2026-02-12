@@ -357,19 +357,20 @@ importers:
         version: 8.54.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
 
   packages/server/admin:
+    dependencies:
+      '@uwdsc/db':
+        specifier: workspace:*
+        version: link:../db
+      '@uwdsc/types':
+        specifier: workspace:*
+        version: link:../../types
     devDependencies:
       '@types/node':
         specifier: ^20.19.9
         version: 20.19.31
-      '@uwdsc/db':
-        specifier: workspace:*
-        version: link:../db
       '@uwdsc/eslint-config':
         specifier: workspace:*
         version: link:../../eslint-config
-      '@uwdsc/types':
-        specifier: workspace:*
-        version: link:../../types
       '@uwdsc/typescript-config':
         specifier: workspace:*
         version: link:../../typescript-config

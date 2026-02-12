@@ -5,7 +5,6 @@
     "jsx": "react-jsx",
     "noImplicitAny": false,
     "paths": {
-      "@uwdsc/core/services/*": ["./src/services/*"],
       "@uwdsc/core/*": ["./src/*"],
       "@uwdsc/types": ["../../types/src/index.ts"]
     }

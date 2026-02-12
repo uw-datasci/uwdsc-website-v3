@@ -64,13 +64,14 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Update the profile
-    const result = await profileService.updateProfile(user.id, {
+    const result = await profileService.completeProfile(user.id, {
       first_name: body.first_name,
       last_name: body.last_name,
       wat_iam: body.wat_iam,
       faculty: body.faculty,
       term: body.term,
       heard_from_where: body.heard_from_where,
+      is_math_soc_member: body.faculty === "math",
     });
 
     if (!result.success) {

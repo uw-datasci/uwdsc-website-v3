@@ -1,127 +1,7 @@
-import {
-  CompleteProfileData,
-  MarkAsPaidData,
-  Profile,
-  ProfileUpdateData,
-  UpdateMemberData,
-} from "@uwdsc/types";
 import { BaseRepository } from "@uwdsc/db/baseRepository";
+import { MarkAsPaidData, Profile, UpdateMemberData } from "@uwdsc/types";
 
 export class ProfileRepository extends BaseRepository {
-  /**
-   * Update user profile by user ID
-   * Uses postgres.js for direct database access
-   * @param userId - The auth.users.id (UUID)
-   * @param data - Profile data to update
-   */
-  async completeProfile(
-    userId: string,
-    data: CompleteProfileData,
-  ): Promise<{ success: boolean; error?: string }> {
-    try {
-      const result = await this.sql`
-        UPDATE profiles
-        SET 
-          first_name = ${data.first_name},
-          last_name = ${data.last_name},
-          wat_iam = ${data.wat_iam},
-          faculty = ${data.faculty}::faculty_enum,
-          term = ${data.term},
-          heard_from_where = ${data.heard_from_where},
-          updated_at = NOW(),
-          is_math_soc_member = ${data.is_math_soc_member}
-        WHERE id = ${userId}
-      `;
-
-      if (result.length === 0) {
-        return {
-          success: false,
-          error: "Profile not found",
-        };
-      }
-
-      return { success: true };
-    } catch (error: unknown) {
-      console.error("Error updating profile:", error);
-      return {
-        success: false,
-        error: (error as Error).message || "Failed to update profile",
-      };
-    }
-  }
-
-  /**
-   * Update user profile by user ID (excludes is_math_soc_member and heard_from_where)
-   * @param userId - The auth.users.id (UUID)
-   * @param data - Profile data to update (first_name, last_name, wat_iam, faculty, term only)
-   */
-  async updateProfileByUser(
-    userId: string,
-    data: ProfileUpdateData,
-  ): Promise<{ success: boolean; error?: string }> {
-    try {
-      const result = await this.sql`
-        UPDATE profiles
-        SET 
-          first_name = ${data.first_name},
-          last_name = ${data.last_name},
-          wat_iam = ${data.wat_iam},
-          faculty = ${data.faculty}::faculty_enum,
-          term = ${data.term},
-          updated_at = NOW()
-        WHERE id = ${userId}
-      `;
-
-      if (result.length === 0) {
-        return {
-          success: false,
-          error: "Profile not found",
-        };
-      }
-
-      return { success: true };
-    } catch (error: unknown) {
-      console.error("Error updating profile:", error);
-      return {
-        success: false,
-        error: (error as Error).message || "Failed to update profile",
-      };
-    }
-  }
-
-  /**
-   * Get user profile by user ID
-   * @param userId - The auth.users.id (UUID)
-   */
-  async getProfileByUserId(userId: string): Promise<Profile | null> {
-    try {
-      const result = await this.sql<Profile[]>`
-        SELECT 
-          first_name,
-          last_name,
-          email,
-          wat_iam,
-          faculty,
-          term,
-          is_math_soc_member,
-          ur.role as user_role
-        FROM profiles p
-        JOIN auth.users au ON p.id = au.id
-        JOIN user_roles ur ON p.id = ur.id
-        WHERE p.id = ${userId}
-        LIMIT 1
-      `;
-
-      if (result.length === 0) return null;
-
-      return result[0] ?? null;
-    } catch (error: unknown) {
-      console.error("Error fetching profile:", error);
-      return null;
-    }
-  }
-
-  // TODO: move to admin package
   /**
    * Get all user profiles with email from auth.users
    * Used for admin membership management
@@ -159,7 +39,6 @@ export class ProfileRepository extends BaseRepository {
     }
   }
 
-  // TODO: move to admin package
   /**
    * Get membership statistics
    */
@@ -197,7 +76,6 @@ export class ProfileRepository extends BaseRepository {
     }
   }
 
-  // TODO: move to admin package
   /**
    * Mark a member as paid by profile ID
    * @param profileId - The profile ID (UUID)
@@ -251,7 +129,6 @@ export class ProfileRepository extends BaseRepository {
     }
   }
 
-  // TODO: move to admin package
   /**
    * Update member information by profile ID
    * @param profileId - The profile ID (UUID)
@@ -298,7 +175,6 @@ export class ProfileRepository extends BaseRepository {
     }
   }
 
-  // TODO: move to admin package
   /**
    * Delete a member by profile ID
    * @param profileId - The profile ID (UUID)

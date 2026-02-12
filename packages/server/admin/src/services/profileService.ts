@@ -1,9 +1,7 @@
 import {
   ApiError,
-  CompleteProfileData,
   MarkAsPaidData,
   Profile,
-  ProfileUpdateData,
   UpdateMemberData,
 } from "@uwdsc/types";
 import { ProfileRepository } from "../repositories/profileRepository";
@@ -15,78 +13,6 @@ class ProfileService {
     this.repository = new ProfileRepository();
   }
 
-  /**
-   * Get profile by user ID
-   */
-  async getProfileByUserId(userId: string): Promise<Profile | null> {
-    try {
-      return await this.repository.getProfileByUserId(userId);
-    } catch (error) {
-      throw new ApiError(
-        `Failed to get profile: ${(error as Error).message}`,
-        500,
-      );
-    }
-  }
-
-  /**
-   * Update user profile
-   */
-  async completeProfile(
-    userId: string,
-    data: CompleteProfileData,
-  ): Promise<{ success: boolean; error?: string }> {
-    try {
-      data.is_math_soc_member = data.faculty === "math";
-      return await this.repository.completeProfile(userId, data);
-    } catch (error) {
-      throw new ApiError(
-        `Failed to update profile: ${(error as Error).message}`,
-        500,
-      );
-    }
-  }
-
-  /**
-   * Update user profile (excludes is_math_soc_member and heard_from_where)
-   */
-  async updateProfile(
-    userId: string,
-    data: ProfileUpdateData,
-  ): Promise<{ success: boolean; error?: string }> {
-    try {
-      return await this.repository.updateProfileByUser(userId, data);
-    } catch (error) {
-      throw new ApiError(
-        `Failed to update profile: ${(error as Error).message}`,
-        500,
-      );
-    }
-  }
-
-  /**
-   * Check if a user's profile is complete
-   */
-  async isProfileComplete(userId: string): Promise<boolean> {
-    try {
-      const profile = await this.repository.getProfileByUserId(userId);
-
-      if (!profile) return false;
-
-      // Profile is complete if required fields are filled
-      return !!(
-        profile.first_name &&
-        profile.last_name &&
-        profile.faculty &&
-        profile.term
-      );
-    } catch (error) {
-      console.error("Error checking profile completion:", error);
-      return false;
-    }
-  }
-
-  // TODO: move to admin package
   /**
    * Get all user profiles (admin only)
    */
@@ -101,7 +27,6 @@ class ProfileService {
     }
   }
 
-  // TODO: move to admin package
   /**
    * Get membership statistics (admin only)
    */
@@ -120,7 +45,6 @@ class ProfileService {
     }
   }
 
-  // TODO: move to admin package
   /**
    * Mark a member as paid (admin only)
    */
@@ -138,7 +62,6 @@ class ProfileService {
     }
   }
 
-  // TODO: move to admin package
   /**
    * Update member information (admin only)
    */
@@ -156,7 +79,6 @@ class ProfileService {
     }
   }
 
-  // TODO: move to admin package
   /**
    * Delete a member (admin only)
    */

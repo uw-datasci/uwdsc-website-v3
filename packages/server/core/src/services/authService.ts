@@ -14,10 +14,7 @@ export class AuthService {
    */
   async login(credentials: LoginData) {
     try {
-      const { data, error } = await this.repository.signInWithPassword({
-        email: credentials.email,
-        password: credentials.password,
-      });
+      const { data, error } = await this.repository.signInWithPassword(credentials);
 
       if (error) {
         // Check for specific error cases
@@ -51,11 +48,7 @@ export class AuthService {
    */
   async register(credentials: RegisterData) {
     try {
-      const { data, error } = await this.repository.signUp({
-        email: credentials.email,
-        password: credentials.password,
-        emailRedirectTo: credentials.emailRedirectTo,
-      });
+      const { data, error } = await this.repository.signUp(credentials);
 
       if (error) {
         return {

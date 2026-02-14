@@ -27,9 +27,7 @@ export class AuthRepository {
     const { data, error } = await this.supabase.auth.signUp({
       email: credentials.email,
       password: credentials.password,
-      options: {
-        emailRedirectTo: credentials?.emailRedirectTo,
-      },
+      options: { emailRedirectTo: credentials.emailRedirectTo },
     });
 
     return { data, error };
@@ -58,9 +56,7 @@ export class AuthRepository {
     const { data, error } = await this.supabase.auth.resend({
       type: "signup",
       email,
-      options: {
-        emailRedirectTo,
-      },
+      options: { emailRedirectTo },
     });
 
     return { data, error };
@@ -80,9 +76,7 @@ export class AuthRepository {
   async resetPasswordForEmail(email: string, emailRedirectTo?: string) {
     const { data, error } = await this.supabase.auth.resetPasswordForEmail(
       email,
-      {
-        redirectTo: emailRedirectTo,
-      },
+      { redirectTo: emailRedirectTo },
     );
 
     return { data, error };

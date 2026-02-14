@@ -146,10 +146,10 @@ export function Positions({ form }: PositionsProps) {
                   <FormField
                     key={q.id}
                     control={form.control}
-                    name={`position_1_answers.${q.id}` as any}
+                    name={`position_1_answers.${q.id}`}
                     render={renderTextAreaField({
-                      placeholder: q.placeholder,
-                      label: q.question,
+                      placeholder: q.placeholder ?? "",
+                      label: q.question_text,
                       required: true,
                     })}
                   />
@@ -209,10 +209,10 @@ export function Positions({ form }: PositionsProps) {
                   <FormField
                     key={q.id}
                     control={form.control}
-                    name={`position_2_answers.${q.id}` as any}
+                    name={`position_2_answers.${q.id}`}
                     render={renderTextAreaField({
-                      placeholder: q.placeholder,
-                      label: q.question,
+                      placeholder: q.placeholder ?? "",
+                      label: q.question_text,
                       required: true,
                     })}
                   />
@@ -272,10 +272,10 @@ export function Positions({ form }: PositionsProps) {
                   <FormField
                     key={q.id}
                     control={form.control}
-                    name={`position_3_answers.${q.id}` as any}
+                    name={`position_3_answers.${q.id}`}
                     render={renderTextAreaField({
-                      placeholder: q.placeholder,
-                      label: q.question,
+                      placeholder: q.placeholder ?? "",
+                      label: q.question_text,
                       required: true,
                     })}
                   />

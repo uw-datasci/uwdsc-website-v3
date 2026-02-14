@@ -13,3 +13,5 @@ export type Faculty =
   | "other_non_waterloo";
 
 export type PaymentMethod = "cash" | "online" | "math_soc";
+
+export type ApplicationInputType = "text" | "textarea";

@@ -25,13 +25,13 @@ CREATE TABLE questions (
 );
 
 -- 2. The Bridge (Logic)
-CREATE TABLE term_position_questions (
+-- Questions per position; same set applies every term
+CREATE TABLE position_questions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  term_id uuid REFERENCES terms(id) ON DELETE CASCADE,
   position_id uuid REFERENCES application_positions_available(id) ON DELETE CASCADE, -- NULL = General
   question_id uuid REFERENCES questions(id) ON DELETE CASCADE,
   sort_order int DEFAULT 0,
-  UNIQUE(term_id, position_id, question_id)
+  UNIQUE(position_id, question_id)
 );
 
 -- 3. The Submissions
@@ -109,7 +109,7 @@ $$ LANGUAGE sql SECURITY DEFINER STABLE;
 ALTER TABLE public.terms ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.application_positions_available ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.questions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.term_position_questions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.position_questions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.applications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.application_position_selections ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.answers ENABLE ROW LEVEL SECURITY;
@@ -171,22 +171,22 @@ CREATE POLICY questions_delete_admin_only ON public.questions
   FOR DELETE
   USING (public.is_admin(auth.uid()));
 
--- term_position_questions: SELECT - Authenticated users
-CREATE POLICY term_position_questions_select_authenticated ON public.term_position_questions
+-- position_questions: SELECT - Authenticated users
+CREATE POLICY position_questions_select_authenticated ON public.position_questions
   FOR SELECT
   USING (auth.uid() IS NOT NULL);
 
--- term_position_questions: INSERT/UPDATE/DELETE - Admin only
-CREATE POLICY term_position_questions_insert_admin_only ON public.term_position_questions
+-- position_questions: INSERT/UPDATE/DELETE - Admin only
+CREATE POLICY position_questions_insert_admin_only ON public.position_questions
   FOR INSERT
   WITH CHECK (public.is_admin(auth.uid()));
 
-CREATE POLICY term_position_questions_update_admin_only ON public.term_position_questions
+CREATE POLICY position_questions_update_admin_only ON public.position_questions
   FOR UPDATE
   USING (public.is_admin(auth.uid()))
   WITH CHECK (public.is_admin(auth.uid()));
 
-CREATE POLICY term_position_questions_delete_admin_only ON public.term_position_questions
+CREATE POLICY position_questions_delete_admin_only ON public.position_questions
   FOR DELETE
   USING (public.is_admin(auth.uid()));
 

@@ -22,10 +22,22 @@ import {
   Submitted,
 } from "@/components/application/steps";
 import { STEP_NAMES } from "@/constants/application";
-import { Term } from "@/types/application";
+import type { Term } from "@uwdsc/common/types";
 import { AnimatePresence, motion } from "framer-motion";
 import { Loader2, MoveLeft, MoveRight, User } from "lucide-react";
 import { Button, Card, CardHeader, CardTitle, CardContent } from "@uwdsc/ui";
+
+/** Format term code (e.g. W25) to display name (e.g. Winter 2025) */
+function formatTermCode(code: string): string {
+  const season = code.charAt(0).toUpperCase();
+  const year = "20" + code.slice(1);
+  const seasons: Record<string, string> = {
+    W: "Winter",
+    S: "Spring",
+    F: "Fall",
+  };
+  return `${seasons[season] ?? code} ${year}`;
+}
 
 // Animation variants for sliding transitions
 const slideVariants = {
@@ -53,10 +65,11 @@ export default function ApplyPage() {
   useEffect(() => {
     setCurrentTerm({
       id: "1",
-      termName: "Winter 2025",
-      appReleaseDate: new Date(),
-      appDeadline: new Date(),
-      questions: [],
+      code: "W25",
+      is_active: true,
+      application_release_date: new Date().toISOString(),
+      application_deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      created_at: new Date().toISOString(),
     });
   }, []);
 
@@ -158,14 +171,14 @@ export default function ApplyPage() {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <DueDateTag deadline={currentTerm.appReleaseDate} />
+      <DueDateTag deadline={new Date(currentTerm.application_deadline)} />
 
       <div className="mx-auto max-w-4xl text-center mb-6">
         <h1 className="mb-2 text-3xl font-bold text-white">
           DSC Exec Application Form
         </h1>
         <p className="text-3xl font-semibold text-blue-400">
-          {currentTerm.termName}
+          {formatTermCode(currentTerm.code)}
         </p>
       </div>
 

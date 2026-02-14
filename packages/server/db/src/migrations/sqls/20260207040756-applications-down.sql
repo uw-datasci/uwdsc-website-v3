@@ -14,10 +14,10 @@ DROP POLICY IF EXISTS applications_update_own_draft_or_admin ON public.applicati
 DROP POLICY IF EXISTS applications_insert_members_only ON public.applications;
 DROP POLICY IF EXISTS applications_select_own_or_admin ON public.applications;
 
-DROP POLICY IF EXISTS term_position_questions_delete_admin_only ON public.term_position_questions;
-DROP POLICY IF EXISTS term_position_questions_update_admin_only ON public.term_position_questions;
-DROP POLICY IF EXISTS term_position_questions_insert_admin_only ON public.term_position_questions;
-DROP POLICY IF EXISTS term_position_questions_select_authenticated ON public.term_position_questions;
+DROP POLICY IF EXISTS position_questions_delete_admin_only ON public.position_questions;
+DROP POLICY IF EXISTS position_questions_update_admin_only ON public.position_questions;
+DROP POLICY IF EXISTS position_questions_insert_admin_only ON public.position_questions;
+DROP POLICY IF EXISTS position_questions_select_authenticated ON public.position_questions;
 
 DROP POLICY IF EXISTS questions_delete_admin_only ON public.questions;
 DROP POLICY IF EXISTS questions_update_admin_only ON public.questions;

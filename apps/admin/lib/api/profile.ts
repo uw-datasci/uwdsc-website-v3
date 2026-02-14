@@ -14,6 +14,7 @@ import type {
   GetMembershipStatsResponse,
   MembershipStats,
 } from "@/types/api";
+import type { EditMemberFormValues } from "@/lib/schemas/membership";
 import { createApiError } from "./error";
 
 // ============================================================================
@@ -140,14 +141,7 @@ export async function markMemberAsPaid(
  */
 export async function updateMember(
   memberId: string,
-  memberData: {
-    first_name: string;
-    last_name: string;
-    wat_iam?: string | null;
-    faculty?: string | null;
-    term?: string | null;
-    is_math_soc_member: boolean;
-  },
+  memberData: EditMemberFormValues,
 ): Promise<void> {
   const response = await fetch(`/api/members/${memberId}`, {
     method: "PATCH",

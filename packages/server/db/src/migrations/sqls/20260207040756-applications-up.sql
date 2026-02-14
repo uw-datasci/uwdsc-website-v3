@@ -3,6 +3,8 @@ CREATE TABLE terms (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   code varchar(5) UNIQUE NOT NULL, -- e.g., 'W26'
   is_active boolean DEFAULT false,
+  application_release_date timestamptz NOT NULL,
+  application_deadline timestamptz NOT NULL,
   created_at timestamptz DEFAULT now()
 );
 
@@ -16,7 +18,9 @@ CREATE TABLE questions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   question_text text NOT NULL,
   type application_input_enum NOT NULL DEFAULT 'textarea',
-  options jsonb, -- For dropdown choices
+  max_length int,
+  placeholder text,
+  help_text text,
   created_at timestamptz DEFAULT now()
 );
 

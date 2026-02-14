@@ -3,7 +3,7 @@
   "compilerOptions": {
     "baseUrl": "../..",
     "paths": {
-      "@/*": ["admin/*"],
+      "@/*": ["apps/admin/*"],
       "@uwdsc/ui": ["packages/ui/src/index.ts"],
       "@uwdsc/core": ["packages/server/core/src/index.ts"],
       "@uwdsc/admin": ["packages/server/admin/src/index.ts"],

@@ -38,4 +38,4 @@ CREATE TYPE application_review_status_enum AS ENUM (
 );
 
 -- Create application_input_enum
-CREATE TYPE application_input_enum AS ENUM ('text', 'textarea', 'dropdown');
+CREATE TYPE application_input_enum AS ENUM ('text', 'textarea');

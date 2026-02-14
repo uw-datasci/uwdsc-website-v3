@@ -38,7 +38,7 @@ DROP POLICY IF EXISTS terms_select_authenticated ON public.terms;
 ALTER TABLE public.answers DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.application_position_selections DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.applications DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.term_position_questions DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.position_questions DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.questions DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.application_positions_available DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.terms DISABLE ROW LEVEL SECURITY;
@@ -58,7 +58,7 @@ DROP FUNCTION IF EXISTS delete_old_terms();
 DROP TABLE IF EXISTS answers CASCADE;
 DROP TABLE IF EXISTS application_position_selections CASCADE;
 DROP TABLE IF EXISTS applications CASCADE;
-DROP TABLE IF EXISTS term_position_questions CASCADE;
+DROP TABLE IF EXISTS position_questions CASCADE;
 
 -- Drop independent tables
 DROP TABLE IF EXISTS application_positions_available CASCADE;

@@ -1,6 +1,7 @@
 "use client";
 
-import { type AuthUser, getCurrentUser } from "@/lib/api";
+import { getCurrentUser } from "@/lib/api";
+import type { AuthUser } from "@/types/api";
 import { createContext, useContext, ReactNode, useMemo } from "react";
 import useSWR from "swr";
 

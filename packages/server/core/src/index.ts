@@ -1,3 +1,4 @@
+export * from "./services/applicationService";
 export * from "./services/authService";
 export * from "./services/fileService";
 export * from "./services/profileService";

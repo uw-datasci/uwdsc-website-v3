@@ -83,8 +83,8 @@ export default function RegisterPage() {
       console.error(error);
       setAuthError(
         error?.error ||
-          error?.message ||
-          "An unexpected error occurred. Please try again",
+        error?.message ||
+        "An unexpected error occurred. Please try again",
       );
     } finally {
       setIsLoading(false);
@@ -109,8 +109,8 @@ export default function RegisterPage() {
     } catch (error: any) {
       setResendStatus(
         error?.error ||
-          error?.message ||
-          "Failed to resend verification email.",
+        error?.message ||
+        "Failed to resend verification email.",
       );
     } finally {
       setIsResending(false);
@@ -147,7 +147,7 @@ export default function RegisterPage() {
               </div>
 
               {/* Title */}
-              <h1 className="gradient-text bg-gradient-to-b from-white to-[#ffffff20] text-7xl md:text-8xl font-medium pb-2">
+              <h1 className="gradient-text bg-linear-to-b from-white to-[#ffffff20] text-7xl md:text-8xl font-medium pb-2">
                 Verify Email
               </h1>
 
@@ -187,11 +187,10 @@ export default function RegisterPage() {
                 {/* Resend status message */}
                 {resendStatus && (
                   <p
-                    className={`mt-2 text-sm ${
-                      resendStatus.includes("successfully")
+                    className={`mt-2 text-sm ${resendStatus.includes("successfully")
                         ? "text-green-400"
                         : "text-red-400"
-                    }`}
+                      }`}
                   >
                     {resendStatus}
                   </p>
@@ -273,7 +272,7 @@ export default function RegisterPage() {
                           size="lg"
                           disabled={!isFormValid() || isLoading}
                           type="submit"
-                          className="w-full rounded-md xl:rounded-lg bg-gradient-purple text-lg font-bold !h-auto py-2.5"
+                          className="w-full rounded-md xl:rounded-lg bg-gradient-purple text-lg font-bold h-auto! py-2.5"
                         >
                           {isLoading ? (
                             <>

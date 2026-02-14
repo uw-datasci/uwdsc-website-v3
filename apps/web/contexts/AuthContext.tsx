@@ -2,7 +2,8 @@
 
 import { createContext, useContext, ReactNode, useMemo } from "react";
 import useSWR from "swr";
-import { getCurrentUser, type AuthUser } from "@/lib/api";
+import { getCurrentUser } from "@/lib/api";
+import type { AuthUser } from "@/types/api";
 
 interface AuthContextType {
   user: AuthUser | null;

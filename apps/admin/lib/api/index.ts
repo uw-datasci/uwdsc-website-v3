@@ -6,6 +6,3 @@
 
 export * from "./auth";
 export * from "./profile";
-
-// Export all types
-export type * from "@/types/api";

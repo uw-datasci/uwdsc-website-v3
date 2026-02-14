@@ -15,3 +15,21 @@ export type Faculty =
 export type PaymentMethod = "cash" | "online" | "math_soc";
 
 export type ApplicationInputType = "text" | "textarea";
+
+export type ApplicationStatus =
+  | "draft"
+  | "submitted"
+  | "under_review"
+  | "accepted"
+  | "rejected"
+  | "waitlisted";
+
+export type ApplicationReviewStatus =
+  | "In Review"
+  | "Interviewing"
+  | "Wanted"
+  | "Not Wanted"
+  | "Offer Sent"
+  | "Accepted Offer"
+  | "Declined Offer"
+  | "Rejection Sent";

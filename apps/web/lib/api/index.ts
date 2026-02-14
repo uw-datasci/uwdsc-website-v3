@@ -7,5 +7,8 @@
 // Export all authentication functions
 export * from "./auth";
 
-// Export all types
-export type * from "@/types/api";
+// Export all application functions
+export * from "./application";
+
+// Export resume upload
+export * from "./resume";

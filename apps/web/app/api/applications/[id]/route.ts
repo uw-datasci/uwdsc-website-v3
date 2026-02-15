@@ -1,3 +1,4 @@
+import { ApiError } from "@uwdsc/common/types";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 import { applicationService } from "@uwdsc/core";
 import { NextRequest, NextResponse } from "next/server";
@@ -35,9 +36,11 @@ export async function PATCH(
     return NextResponse.json(application);
   } catch (error) {
     console.error("Error updating application:", error);
-    return NextResponse.json(
-      { error: "Failed to update application" },
-      { status: 500 },
-    );
+    const message =
+      error instanceof ApiError
+        ? error.message
+        : "Failed to update application";
+    const status = error instanceof ApiError ? error.statusCode : 500;
+    return NextResponse.json({ error: message }, { status });
   }
 }

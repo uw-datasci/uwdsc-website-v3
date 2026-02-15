@@ -4,18 +4,19 @@ CREATE TABLE terms (
   code varchar(5) UNIQUE NOT NULL, -- e.g., 'W26'
   is_active boolean DEFAULT false,
   application_release_date timestamptz NOT NULL,
-  application_deadline timestamptz NOT NULL,
+  application_soft_deadline timestamptz NOT NULL,
+  application_hard_deadline timestamptz NOT NULL DEFAULT '1970-01-01 00:00:00+00'::timestamptz, -- overwritten by trigger
   created_at timestamptz DEFAULT now()
 );
 
 -- Positions that are available to apply for
 CREATE TABLE application_positions_available (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  position_id uuid REFERENCES public.exec_positions(id) ON DELETE CASCADE
+  id SERIAL PRIMARY KEY,
+  position_id INT REFERENCES public.exec_positions(id) ON DELETE CASCADE
 );
 
 CREATE TABLE questions (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  id SERIAL PRIMARY KEY,
   question_text text NOT NULL,
   type application_input_enum NOT NULL DEFAULT 'textarea',
   max_length int,
@@ -27,9 +28,9 @@ CREATE TABLE questions (
 -- 2. The Bridge (Logic)
 -- Questions per position; same set applies every term
 CREATE TABLE position_questions (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  position_id uuid REFERENCES application_positions_available(id) ON DELETE CASCADE, -- NULL = General
-  question_id uuid REFERENCES questions(id) ON DELETE CASCADE,
+  id SERIAL PRIMARY KEY,
+  position_id INT REFERENCES application_positions_available(id) ON DELETE CASCADE, -- NULL = General
+  question_id INT REFERENCES questions(id) ON DELETE CASCADE,
   sort_order int DEFAULT 0,
   UNIQUE(position_id, question_id)
 );
@@ -54,7 +55,7 @@ CREATE TABLE applications (
 CREATE TABLE application_position_selections (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   application_id uuid REFERENCES applications(id) ON DELETE CASCADE,
-  position_id uuid REFERENCES application_positions_available(id) ON DELETE CASCADE,
+  position_id INT REFERENCES application_positions_available(id) ON DELETE CASCADE,
   priority int CHECK (priority BETWEEN 1 AND 3),
   status application_review_status_enum DEFAULT 'In Review',
   UNIQUE(application_id, position_id)
@@ -63,7 +64,7 @@ CREATE TABLE application_position_selections (
 CREATE TABLE answers (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   application_id uuid REFERENCES applications(id) ON DELETE CASCADE,
-  question_id uuid REFERENCES questions(id) ON DELETE CASCADE,
+  question_id INT REFERENCES questions(id) ON DELETE CASCADE,
   answer_text text NOT NULL
 );
 
@@ -93,6 +94,19 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER enforce_position_limit
 BEFORE INSERT ON application_position_selections
 FOR EACH ROW EXECUTE FUNCTION check_position_limit();
+
+-- Auto-compute application_hard_deadline as 15 mins after application_soft_deadline
+CREATE OR REPLACE FUNCTION sync_terms_hard_deadline()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.application_hard_deadline := NEW.application_soft_deadline + interval '15 minutes';
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER terms_sync_hard_deadline
+BEFORE INSERT OR UPDATE OF application_soft_deadline ON terms
+FOR EACH ROW EXECUTE FUNCTION sync_terms_hard_deadline();
 
 -- ============================================================================
 -- RLS Helper Function for Applications

@@ -12,20 +12,20 @@ CREATE TABLE public.profiles (
 );
 
 CREATE TABLE public.exec_positions(
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id SERIAL PRIMARY KEY,
   name text UNIQUE NOT NULL
 );
 
 CREATE TABLE public.subteams (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id SERIAL PRIMARY KEY,
   name text UNIQUE NOT NULL
 );
 
 CREATE TABLE public.exec_team (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id SERIAL PRIMARY KEY,
   profile_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-  position_id UUID NOT NULL REFERENCES public.exec_positions(id) ON DELETE CASCADE,
-  subteam_id UUID NOT NULL REFERENCES public.subteams(id) ON DELETE CASCADE,
+  position_id INT NOT NULL REFERENCES public.exec_positions(id) ON DELETE CASCADE,
+  subteam_id INT NOT NULL REFERENCES public.subteams(id) ON DELETE CASCADE,
   instagram VARCHAR(30) UNIQUE,
   photo_url TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),

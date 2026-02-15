@@ -1,3 +1,4 @@
+import { ApiError } from "@uwdsc/common/types";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 import { applicationService } from "@uwdsc/core";
 import { NextRequest, NextResponse } from "next/server";
@@ -55,6 +56,8 @@ export async function POST(request: NextRequest) {
       error && typeof error === "object" && "message" in error
         ? (error as Error).message
         : "Failed to create application";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const status =
+      error instanceof ApiError ? error.statusCode : 500;
+    return NextResponse.json({ error: message }, { status });
   }
 }

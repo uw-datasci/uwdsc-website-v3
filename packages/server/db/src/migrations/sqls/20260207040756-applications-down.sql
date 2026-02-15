@@ -46,11 +46,13 @@ ALTER TABLE public.terms DISABLE ROW LEVEL SECURITY;
 -- Drop helper function
 DROP FUNCTION IF EXISTS public.is_application_draft(uuid);
 
--- Drop trigger
+-- Drop triggers
 DROP TRIGGER IF EXISTS enforce_position_limit ON application_position_selections;
+DROP TRIGGER IF EXISTS terms_sync_hard_deadline ON terms;
 
 -- Drop functions
 DROP FUNCTION IF EXISTS check_position_limit();
+DROP FUNCTION IF EXISTS sync_terms_hard_deadline();
 DROP FUNCTION IF EXISTS delete_old_terms();
 
 -- Drop tables in reverse dependency order

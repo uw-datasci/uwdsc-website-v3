@@ -22,7 +22,8 @@ export class ApplicationRepository extends BaseRepository {
         code,
         is_active,
         application_release_date,
-        application_deadline,
+        application_soft_deadline,
+        application_hard_deadline,
         created_at
       FROM terms
       WHERE is_active = true
@@ -37,7 +38,7 @@ export class ApplicationRepository extends BaseRepository {
       SELECT
         apa.id,
         ep.id as position_id,
-        ep.name,
+        ep.name
       FROM application_positions_available apa
       JOIN exec_positions ep ON apa.position_id = ep.id
       ORDER BY ep.name
@@ -121,15 +122,7 @@ export class ApplicationRepository extends BaseRepository {
 
   async createApplication(data: CreateApplicationData): Promise<Application> {
     const result = await this.sql<Application[]>`
-      INSERT INTO applications (
-        profile_id,
-        term_id,
-        full_name,
-        personal_email,
-        location,
-        club_experience,
-        status
-      )
+      INSERT INTO applications (profile_id, term_id, full_name, status)
       VALUES (${data.profile_id}, ${data.term_id}, ${data.full_name}, 'draft')
       RETURNING
         id,

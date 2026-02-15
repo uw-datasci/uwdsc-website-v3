@@ -112,7 +112,7 @@ export default function ApplyPage() {
         });
 
         const existing = await getApplication(term.id);
-        if (existing && existing.status === "draft") {
+        if (existing?.status === "draft") {
           setApplicationId(existing.id);
           const genIds = new Set(
             positionsData.generalQuestions.map((q) => q.id),
@@ -311,12 +311,16 @@ export default function ApplyPage() {
 
   const renderButton = () => {
     const isLastStep = currentStep === 4;
+    const isPastHardDeadline = Boolean(
+      currentTerm && new Date() > new Date(currentTerm.application_hard_deadline),
+    );
     const isValid =
       isStepValid(form, currentStep, {
         positions,
         generalQuestionIds,
       }) || false;
-    const isButtonDisabled = !isValid || isLoading;
+    const isButtonDisabled =
+      !isValid || isLoading || (isLastStep && isPastHardDeadline);
 
     let buttonClassName = "hover:scale-105 ";
     if (isLastStep) {
@@ -351,13 +355,23 @@ export default function ApplyPage() {
 
   const renderStep = () => {
     switch (currentStep) {
-      case 0:
+      case 0: {
+        if (!currentTerm) return null;
+        const softDeadline = new Date(currentTerm.application_soft_deadline);
+        const isPastSoftDeadline = new Date() > softDeadline;
         return (
           <Intro
             onStartApplication={handleStartApplication}
             isLoading={isLoading}
+            isStartDisabled={isPastSoftDeadline}
+            disabledMessage={
+              isPastSoftDeadline
+                ? "New applications cannot be created after the application deadline."
+                : undefined
+            }
           />
         );
+      }
       case 1:
         return <Personal form={form} />;
       case 2:
@@ -391,7 +405,7 @@ export default function ApplyPage() {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <DueDateTag deadline={new Date(currentTerm.application_deadline)} />
+      <DueDateTag deadline={new Date(currentTerm.application_soft_deadline)} />
 
       <div className="mx-auto max-w-4xl text-center mb-6">
         <h1 className="mb-2 text-3xl font-bold text-white">

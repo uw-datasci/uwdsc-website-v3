@@ -43,7 +43,7 @@ export const isStepValid = (
         generalQuestionIds.every(
           (id) =>
             generalAnswers[id] &&
-            generalAnswers[id].trim().length >= 10 &&
+            generalAnswers[id].trim().length >= 1 &&
             generalAnswers[id].trim().length <= 1000,
         );
       return !errors.general_answers && allAnswered;

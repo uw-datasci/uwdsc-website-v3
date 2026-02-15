@@ -20,7 +20,8 @@ export interface Term {
   code: string;
   is_active: boolean;
   application_release_date: string;
-  application_deadline: string;
+  application_soft_deadline: string;
+  application_hard_deadline: string;
   created_at: string;
 }
 

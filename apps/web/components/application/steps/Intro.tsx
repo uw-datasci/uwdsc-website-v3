@@ -5,9 +5,18 @@ import { Button, CardDescription } from "@uwdsc/ui";
 interface IntroProps {
   readonly onStartApplication: () => void | Promise<void>;
   readonly isLoading?: boolean;
+  readonly isStartDisabled?: boolean;
+  readonly disabledMessage?: string;
 }
 
-export function Intro({ onStartApplication, isLoading }: IntroProps) {
+export function Intro({
+  onStartApplication,
+  isLoading,
+  isStartDisabled = false,
+  disabledMessage,
+}: IntroProps) {
+  const isDisabled = isLoading || isStartDisabled;
+
   return (
     <div className="space-y-6">
       <div className="space-y-4">
@@ -33,10 +42,14 @@ export function Intro({ onStartApplication, isLoading }: IntroProps) {
         </CardDescription>
       </div>
 
+      {disabledMessage && (
+        <p className="text-center text-amber-400 text-sm">{disabledMessage}</p>
+      )}
+
       <div className="flex justify-center pt-4">
         <Button
           onClick={onStartApplication}
-          disabled={isLoading}
+          disabled={isDisabled}
           size="lg"
           className="relative overflow-hidden bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 animate-pulse hover:animate-none disabled:opacity-70"
         >

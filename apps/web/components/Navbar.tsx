@@ -22,7 +22,7 @@ export function Navbar() {
     { href: "/apply", label: "Apply" },
     { href: "/calendar", label: "Calendar" },
     // Add Admin link if user is an admin
-    ...(user?.user_role === "admin"
+    ...(user?.role === "admin"
       ? [
         {
           href:

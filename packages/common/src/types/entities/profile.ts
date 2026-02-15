@@ -13,7 +13,7 @@ export interface Profile {
   faculty: Faculty | null;
   term: string | null;
   is_math_soc_member: boolean;
-  user_role: UserRole;
+  role: UserRole;
 }
 
 export interface CompleteProfileData {

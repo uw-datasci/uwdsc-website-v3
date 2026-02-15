@@ -1,13 +1,13 @@
 export type ExecMember = {
-  id: string;
+  id: number;
   name: string;
   position: string;
   photo_url: string;
-  instagram: string;
+  instagram: string | null;
 };
 
 export type Subteam = {
-  id: string;
+  id: number;
   name: string;
   members: ExecMember[];
 };

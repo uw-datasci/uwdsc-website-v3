@@ -4,7 +4,6 @@ import folder from "@/public/graphics/folder.png";
 import computer from "@/public/graphics/computer.png";
 import documents from "@/public/graphics/documents.png";
 import chat from "@/public/graphics/chat.png";
-import { Stat, Event, Sponsor, QandA } from "@/types/home";
 
 import EventPlaceholder from "@/public/placeholder/event.png";
 import AiCompanion from "@/public/pastEvents/event-ai-companion.png";
@@ -59,7 +58,7 @@ export const WHAT_WE_DO_CARDS = [
   },
 ];
 
-export const CLUB_STATS: Stat[] = [
+export const CLUB_STATS = [
   {
     id: "workshops-held",
     title: "Workshops Held",
@@ -80,7 +79,8 @@ export const CLUB_STATS: Stat[] = [
   },
 ];
 
-export const PAST_EVENTS: Event[] = [
+
+export const PAST_EVENTS = [
   {
     id: "1",
     title: "Upper Year Co-op Panel",
@@ -133,13 +133,13 @@ export const PAST_EVENTS: Event[] = [
   },
 ];
 
-export const CURRENT_SPONSORS: Sponsor[] = [
+export const CURRENT_SPONSORS = [
   { name: "MathSoc", logo: MathsocLogo },
   { name: "MEF", logo: MEF },
   { name: "Techyon", logo: Techyon, link: "https://techyon.org/" },
 ];
 
-export const GENERAL_FAQ: QandA[] = [
+export const GENERAL_FAQ = [
   {
     id: "1",
     question: "What is DSC?",

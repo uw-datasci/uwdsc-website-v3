@@ -1,6 +1,3 @@
-import { Subteam } from "@/types/team";
-
-
 import team from "@/public/placeholder/team.png";
 //W26 team
 // Presidents
@@ -96,7 +93,7 @@ import jerryZhu from "@/public/teams/Jerry-Zhu.jpg";
 import winstonYu from "@/public/teams/Winston-Yu.jpg";
 import karthikViriyala from "@/public/teams/Karthik-Viriyala.jpg";
 
-export const TEAM: Subteam[] = [
+export const TEAM = [
   {
     id: "presidents",
     name: "Presidents",

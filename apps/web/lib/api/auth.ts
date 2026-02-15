@@ -5,16 +5,16 @@
  * Components should use these functions instead of making direct fetch calls.
  */
 
-import type {
-  RegisterRequest,
-  RegisterResponse,
-  LoginRequest,
-  LoginResponse,
-  ResendVerificationEmailRequest,
-  ResendVerificationEmailResponse,
-  GetCurrentUserResponse,
-} from "@/types/api";
 import { createApiError } from "./errors";
+import { LoginData, Profile } from "@uwdsc/common/types";
+import { User, Session } from "@supabase/supabase-js";
+
+interface LoginResponse {
+  success: boolean;
+  user?: User;
+  session?: Session;
+  error?: string;
+}
 
 // ============================================================================
 // Authentication API Functions
@@ -27,9 +27,7 @@ import { createApiError } from "./errors";
  * @returns Promise with registration response
  * @throws Error if registration fails
  */
-export async function register(
-  credentials: RegisterRequest,
-): Promise<RegisterResponse> {
+export async function register(credentials: LoginData) {
   const response = await fetch("/api/auth/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -38,9 +36,7 @@ export async function register(
 
   const data = await response.json();
 
-  if (!response.ok) {
-    throw createApiError(data, response.status);
-  }
+  if (!response.ok) throw createApiError(data, response.status);
 
   return data;
 }
@@ -52,7 +48,7 @@ export async function register(
  * @returns Promise with login response containing session and user data
  * @throws Error if login fails
  */
-export async function login(credentials: LoginRequest): Promise<LoginResponse> {
+export async function login(credentials: LoginData): Promise<LoginResponse> {
   const response = await fetch("/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -61,9 +57,7 @@ export async function login(credentials: LoginRequest): Promise<LoginResponse> {
 
   const data = await response.json();
 
-  if (!response.ok) {
-    throw createApiError(data, response.status);
-  }
+  if (!response.ok) throw createApiError(data, response.status);
 
   return data;
 }
@@ -75,9 +69,9 @@ export async function login(credentials: LoginRequest): Promise<LoginResponse> {
  * @returns Promise with success message
  * @throws Error if resend fails
  */
-export async function resendVerificationEmail(
-  request: ResendVerificationEmailRequest,
-): Promise<ResendVerificationEmailResponse> {
+export async function resendVerificationEmail(request: {
+  email: string;
+}): Promise<{ message: string }> {
   const response = await fetch("/api/auth/resend-verification-email", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -86,9 +80,7 @@ export async function resendVerificationEmail(
 
   const data = await response.json();
 
-  if (!response.ok) {
-    throw createApiError(data, response.status);
-  }
+  if (!response.ok) throw createApiError(data, response.status);
 
   return data;
 }
@@ -107,9 +99,7 @@ export async function signOut(): Promise<{ message: string }> {
 
   const data = await response.json();
 
-  if (!response.ok) {
-    throw createApiError(data, response.status);
-  }
+  if (!response.ok) throw createApiError(data, response.status);
 
   return data;
 }
@@ -120,7 +110,7 @@ export async function signOut(): Promise<{ message: string }> {
  * @returns Promise with user data
  * @throws Error if fetching user fails
  */
-export async function getCurrentUser(): Promise<GetCurrentUserResponse> {
+export async function getCurrentUser(): Promise<Profile | null> {
   const response = await fetch("/api/auth/user", {
     method: "GET",
     headers: { "Content-Type": "application/json" },
@@ -130,5 +120,5 @@ export async function getCurrentUser(): Promise<GetCurrentUserResponse> {
 
   if (!response.ok) throw createApiError(data, response.status);
 
-  return data;
+  return data.user;
 }

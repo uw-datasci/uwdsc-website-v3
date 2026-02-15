@@ -1,15 +1,15 @@
 "use client";
 
 import { signOut } from "@/lib/api";
-import { AuthUser } from "@/types/api";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { CountingNumber, GlassSurface } from "@uwdsc/ui";
+import { Profile } from "@uwdsc/common/types";
 
 interface HeroProps {
-  user: AuthUser | null;
+  user: Profile | null;
   mutate: () => Promise<void>;
 }
 

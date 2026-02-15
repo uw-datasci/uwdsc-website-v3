@@ -1,9 +1,9 @@
 import Image from "next/image";
-import { Member } from "@/types/team";
 import { Card, CardHeader, CardTitle, CardDescription } from "@uwdsc/ui";
+import { ExecMember } from "@uwdsc/common/types";
 
 interface TeamCardProps {
-  readonly member: Member;
+  readonly member: ExecMember;
 }
 
 export default function TeamCard({ member }: TeamCardProps) {
@@ -15,7 +15,7 @@ export default function TeamCard({ member }: TeamCardProps) {
       {/* Member Image */}
       <div className="relative h-80 w-full overflow-hidden">
         <Image
-          src={member.image}
+          src={member.photo_url}
           alt={member.name}
           fill
           priority

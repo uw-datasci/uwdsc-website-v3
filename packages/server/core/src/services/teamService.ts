@@ -5,7 +5,7 @@ import { TeamRepository } from "../repositories/teamRepository";
 
 class TeamService {
   private readonly repository: TeamRepository;
-  private readonly bucketUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/team`
+  private readonly BUCKET_URL = `${process.env.SUPABASE_URL}/storage/v1/object/public/team`
   private readonly PRESIDENTS_SUBTEAM_NAME = "Presidents";
   private readonly CXC_SUBTEAM_NAME = "CxC";
   private readonly ADVISORS_SUBTEAM_NAME = "Advisors";
@@ -58,7 +58,7 @@ class TeamService {
         id: row.id,
         name: row.name,
         position: row.position_name,
-        photo_url: `${this.bucketUrl}/${row.photo_url}`,
+        photo_url: `${this.BUCKET_URL}/${row.photo_url}`,
         instagram: row.instagram ?? null,
       });
     }

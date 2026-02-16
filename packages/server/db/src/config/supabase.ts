@@ -9,7 +9,7 @@ import { createClient } from "@supabase/supabase-js";
 export function createSupabaseBrowserClient() {
   return createBrowserClient(
     process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_DEFAULT_KEY!,
+    process.env.SUPABASE_PUBLISHABLE_KEY!,
   );
 }
 
@@ -23,7 +23,7 @@ export function createSupabaseServerClient(cookieStore: {
 }) {
   return createServerClient(
     process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_DEFAULT_KEY!,
+    process.env.SUPABASE_PUBLISHABLE_KEY!,
     {
       cookies: {
         getAll() {
@@ -75,7 +75,7 @@ export function createSupabaseMiddlewareClient<
 ) {
   return createServerClient(
     process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_DEFAULT_KEY!,
+    process.env.SUPABASE_PUBLISHABLE_KEY!,
     {
       cookies: {
         getAll() {
@@ -102,11 +102,11 @@ export function createSupabaseMiddlewareClient<
  * This client has full access to all data and should be used with extreme caution
  */
 export function createSupabaseServiceRoleClient() {
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceRoleKey = process.env.SUPABASE_SECRET_KEY;
 
   if (!serviceRoleKey) {
     throw new Error(
-      "SUPABASE_SERVICE_ROLE_KEY environment variable is not set. " +
+      "SUPABASE_SECRET_KEY environment variable is not set. " +
       "This is required for admin operations that bypass RLS.",
     );
   }

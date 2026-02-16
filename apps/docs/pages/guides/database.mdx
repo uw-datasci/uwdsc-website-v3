@@ -41,7 +41,7 @@ Create `.env.local` files in your apps:
 DATABASE_URL="postgresql://user:password@host:5432/database"
 SUPABASE_URL="https://your-project.supabase.co"
 SUPABASE_ANON_KEY="your-anon-key"
-SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
+SUPABASE_SECRET_KEY="your-service-role-key"
 ```
 
 ### 2. Database Migrations
@@ -99,6 +99,7 @@ db-mate new add_user_bio
 ```
 
 This creates two files:
+
 - `001_add_user_bio.up.sql` - Migration to apply
 - `001_add_user_bio.down.sql` - Migration to rollback
 
@@ -164,17 +165,14 @@ import { pool } from "@uwdsc/server/core/database/connection";
 export class UserRepository {
   // Find one
   async findById(id: string) {
-    const result = await pool.query(
-      "SELECT * FROM users WHERE id = $1",
-      [id]
-    );
+    const result = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
     return result.rows[0] || null;
   }
 
   // Find many
   async findAll() {
     const result = await pool.query(
-      "SELECT * FROM users ORDER BY created_at DESC"
+      "SELECT * FROM users ORDER BY created_at DESC",
     );
     return result.rows;
   }
@@ -185,7 +183,7 @@ export class UserRepository {
       `INSERT INTO users (email, name)
        VALUES ($1, $2)
        RETURNING *`,
-      [data.email, data.name]
+      [data.email, data.name],
     );
     return result.rows[0];
   }
@@ -217,7 +215,7 @@ export class UserRepository {
        SET ${updates.join(", ")}
        WHERE id = $${paramIndex}
        RETURNING *`,
-      values
+      values,
     );
     return result.rows[0];
   }
@@ -226,7 +224,7 @@ export class UserRepository {
   async delete(id: string) {
     const result = await pool.query(
       "DELETE FROM users WHERE id = $1 RETURNING *",
-      [id]
+      [id],
     );
     return result.rows[0];
   }
@@ -239,7 +237,7 @@ export class UserRepository {
 // Include related data
 async findUserWithProfile(userId: string) {
   const result = await pool.query(
-    `SELECT 
+    `SELECT
        u.*,
        p.bio as profile_bio
      FROM users u
@@ -384,7 +382,7 @@ async transferCredits(fromId: string, toId: string, amount: number) {
 ```typescript
 async getStats() {
   const result = await pool.query(
-    `SELECT 
+    `SELECT
        COUNT(*) as total_users,
        AVG(age) as avg_age,
        MIN(created_at) as first_user,
@@ -414,7 +412,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SECRET_KEY!,
 );
 
 export class AuthService {
@@ -493,28 +491,28 @@ async function main() {
     `INSERT INTO users (email, name)
      VALUES ($1, $2)
      RETURNING *`,
-    ["john@example.com", "John Doe"]
+    ["john@example.com", "John Doe"],
   );
   const user1 = user1Result.rows[0];
 
   await pool.query(
     `INSERT INTO profiles (user_id, bio)
      VALUES ($1, $2)`,
-    [user1.id, "Software developer"]
+    [user1.id, "Software developer"],
   );
 
   const user2Result = await pool.query(
     `INSERT INTO users (email, name)
      VALUES ($1, $2)
      RETURNING *`,
-    ["jane@example.com", "Jane Smith"]
+    ["jane@example.com", "Jane Smith"],
   );
   const user2 = user2Result.rows[0];
 
   await pool.query(
     `INSERT INTO profiles (user_id, bio)
      VALUES ($1, $2)`,
-    [user2.id, "Product designer"]
+    [user2.id, "Product designer"],
   );
 
   // Create applications
@@ -528,7 +526,7 @@ async function main() {
       user2.id,
       "approved",
       JSON.stringify({}),
-    ]
+    ],
   );
 
   console.log("Database seeded successfully");
@@ -582,17 +580,16 @@ import { pool } from "@uwdsc/server/core/database/connection";
 
 export class UserRepository {
   async findByEmail(email: string) {
-    const result = await pool.query(
-      "SELECT * FROM users WHERE email = $1",
-      [email]
-    );
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [
+      email,
+    ]);
     return result.rows[0] || null;
   }
 
   async existsByEmail(email: string): Promise<boolean> {
     const result = await pool.query(
       "SELECT COUNT(*) as count FROM users WHERE email = $1",
-      [email]
+      [email],
     );
     return parseInt(result.rows[0].count) > 0;
   }

@@ -128,7 +128,7 @@ pnpm ui:add <component-name>
 
 ### 🔧 Features
 
-Implement new features in the web or CxC apps.
+Implement new features in the web or admin apps.
 
 ### 📝 Documentation
 
@@ -168,11 +168,10 @@ Improve accessibility of components and pages.
 
 ### Database Guidelines
 
-- Use pg (node-postgres) with raw SQL queries for database operations
-- Use db-mate for database migrations (SQL files)
-- Add migrations for schema changes
-- Follow naming conventions
-- Document relationships
+- Use postgres.js (via `@uwdsc/db`) for database operations; repositories extend `BaseRepository`
+- Use db-migrate for database migrations (migrations in `packages/server/db`)
+- Add migrations for schema changes; run from root with `pnpm migrate`
+- Follow naming conventions and document relationships
 - Always use parameterized queries to prevent SQL injection
 
 ## Testing
@@ -180,11 +179,14 @@ Improve accessibility of components and pages.
 ### Running Tests
 
 ```bash
-# Run all tests
-pnpm test
+# Run type checking across the monorepo
+pnpm check-types
 
-# Run tests for specific package
-pnpm test --filter=web
+# Run lint
+pnpm lint
+
+# Run tests for a specific package (if the package defines a test script)
+pnpm --filter=web test
 ```
 
 ### Writing Tests

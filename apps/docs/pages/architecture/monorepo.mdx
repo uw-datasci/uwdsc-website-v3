@@ -8,18 +8,19 @@ A detailed look at the monorepo organization and package relationships.
 uwdsc-website-v3/
 ├── .github/                # GitHub Actions
 ├── apps/                   # Frontend applications
-│   ├── web/                # Main website
-│   ├── cxc/                # CXC AI hackathon app
+│   ├── web/                # Main website and member applications
+│   ├── admin/              # Admin dashboard and CXC application/review
 │   └── docs/               # Documentation site
 ├── packages/               # Shared packages
-│   ├── ui/                 # Design system
-│   ├── server/             # Backend services
-│   │   ├── core/           # Shared utilities
-│   │   ├── web/            # Web backend
-│   │   └── cxc/            # CxC backend
+│   ├── ui/                 # Design system (@uwdsc/ui)
+│   ├── common/             # Shared types and utils (@uwdsc/common)
+│   ├── server/             # Backend
+│   │   ├── db/            # @uwdsc/db - Postgres, Supabase, BaseRepository, migrations
+│   │   ├── core/          # @uwdsc/core - Shared services
+│   │   └── admin/         # @uwdsc/admin - Admin-only services
 │   ├── eslint-config/      # ESLint configuration
 │   └── typescript-config/  # TypeScript configuration
-├── scripts/                # Tool scripts
+├── scripts/                # Tool scripts (migrate, ui-add, pull-secrets)
 ├── package.json            # Root package configuration
 ├── pnpm-workspace.yaml     # Workspace configuration
 └── turbo.json              # Turborepo configuration
@@ -35,7 +36,7 @@ The primary UW Data Science Club website.
 
 **Tech Stack**:
 
-- Next.js 15 (App Router)
+- Next.js 16 (App Router)
 - React 19
 - TypeScript
 - Tailwind CSS
@@ -52,32 +53,54 @@ The primary UW Data Science Club website.
 
 ```
 apps/web/
-├── app/                 # Next.js pages and API routes
-│   ├── api/            # API endpoints
-│   ├── (auth)/         # Auth pages
-│   ├── admin/          # Admin dashboard
-│   └── ...             # Other pages
+├── app/                 # Next.js App Router
+│   ├── api/             # API routes
+│   ├── (auth)/          # Auth pages (login, register, etc.)
+│   ├── apply/           # Member application flow
+│   ├── calendar/        # Calendar page
+│   ├── passport/        # Member passport
+│   ├── team/            # Team directory
+│   ├── layout.tsx
+│   └── page.tsx         # Home
 ├── components/          # React components
-├── lib/                # Utilities and API client
-├── constants/          # App constants
+├── constants/           # App constants
 ├── contexts/           # React contexts
-└── types/              # TypeScript types
+├── hooks/               # React hooks
+├── lib/                 # Utilities, API client, services
+├── providers/           # React providers
+└── public/              # Static assets
 ```
 
-### `apps/cxc` - CXC App
+### `apps/admin` - Admin App
 
-Dedicated application for CXC.
+Admin dashboard and CXC (AI hackathon) application and review system.
 
-**Purpose**: AI hackathon-specific features and application flow
+**Purpose**: Admin-only features: member management, CXC applications table, review interface, superadmin dashboard and leaderboard
 
-**Tech Stack**: Same as web app
+**Tech Stack**: Next.js 16, React 19, TypeScript, Tailwind, `@uwdsc/ui`, `@uwdsc/core`, `@uwdsc/admin`, `@uwdsc/db`
 
 **Key Features**:
 
-- AI hackathon information
-- Team application system
-- Application tracking
-- Custom branding
+- Member listing and management
+- CXC application submissions table and details
+- Review interface with scoring
+- Superadmin dashboard (analytics, RSVP timeline) and review leaderboard
+
+**Structure**:
+
+```
+apps/admin/
+├── app/                 # Next.js App Router
+│   ├── (admin)/         # Admin dashboard, applications, review, leaderboard
+│   ├── api/             # API routes
+│   ├── login/           # Login page
+│   └── unauthorized/    # Unauthorized page
+├── components/          # React components
+├── contexts/           # React contexts
+├── hooks/               # React hooks
+├── lib/                 # Utilities, API client, services
+└── providers/           # React providers
+```
 
 ### `apps/docs` - Documentation
 
@@ -85,11 +108,21 @@ This documentation site.
 
 **Purpose**: Developer documentation and guides
 
-**Tech Stack**:
+**Tech Stack**: Next.js 15 (Nextra-compatible), Nextra, MDX
 
-- Next.js 15
-- Nextra
-- MDX
+**Structure**:
+
+```
+apps/docs/
+├── pages/               # Nextra/Pages Router (MDX docs)
+│   ├── architecture/
+│   ├── changelog/
+│   ├── guides/
+│   ├── packages/
+│   ├── _meta.js         # Section navigation
+│   └── ...
+└── public/              # Static assets
+```
 
 ## Packages
 
@@ -107,71 +140,85 @@ Shared UI components built with shadcn/ui.
 - Avatar, Badge, Progress
 - And more shadcn components
 
-**Dependencies**:
-
-- Radix UI primitives
-- Tailwind CSS
-- Framer Motion
-- Lucide React icons
-
-### `packages/server/core` - Shared Backend
-
-Common backend services used by both apps.
-
-**Exports**: `@uwdsc/server/core/*`
-
-**Contents**:
-
-- Database connection utilities
-- Authentication services
-- File upload services
-- Resume processing
-- Base repository pattern
-- Error handling utilities
+**Dependencies**: Radix UI primitives, Tailwind CSS, Framer Motion, Lucide React icons
 
 **Structure**:
 
 ```
-packages/server/core/src/
-├── database/          # Supabase client
-├── services/          # Shared services
-├── repository/        # Data access layer
-├── types/            # TypeScript types
-└── utils/            # Utilities
+packages/ui/
+└── src/
+    ├── components/      # shadcn/ui components
+    ├── hooks/           # useToast, useMobile, etc.
+    ├── lib/             # utils (cn, etc.)
+    └── styles/          # globals.css
 ```
 
-### `packages/server/web` - Web Backend
+### `packages/server/db` - Database & Supabase (`@uwdsc/db`)
 
-Backend services specific to the main website.
+Database connection, Supabase clients, and base repository.
 
-**Exports**: `@uwdsc/server/web/*`
-
-**Contents**:
-
-- Database migrations (db-mate SQL files) for web app
-- Application services
-- Event services
-- Profile services
-- Web-specific repositories
-
-**Dependencies**:
-
-- Extends `@uwdsc/server/core`
-- pg (node-postgres) for database access
-- Supabase
-
-### `packages/server/cxc` - CXC Backend
-
-Backend services specific to CXC app.
-
-**Exports**: `@uwdsc/server/cxc/*`
+**Exports**: `@uwdsc/db`, `@uwdsc/db/connection`, `@uwdsc/db/supabase`, `@uwdsc/db/baseRepository`
 
 **Contents**:
 
-- Database migrations (db-mate SQL files) for CXC
-- CXC-specific services
-- Application logic
-- CXC-specific repositories
+- Postgres connection (postgres.js, Supabase Transaction Pooler)
+- `createSupabaseBrowserClient`, `createSupabaseServerClient`, `createSupabaseMiddlewareClient`
+- `BaseRepository` abstract class (repositories extend this and use protected `sql`)
+- Migrations (db-migrate; SQL files in `src/migrations/`)
+
+**Structure**:
+
+```
+packages/server/db/
+└── src/
+    ├── config/          # connection.ts, supabase.ts, baseRepository.ts
+    └── migrations/      # db-migrate SQL and runner
+```
+
+**Run migrations from root**: `pnpm migrate`, `pnpm migrate:down`, `pnpm migrate:create`, etc.
+
+### `packages/server/core` - Shared Backend (`@uwdsc/core`)
+
+Shared services and repositories used by web and admin apps.
+
+**Exports**: `@uwdsc/core` — service classes and singletons: `profileService`, `applicationService`, `teamService`; `AuthService`, `ResumeService` (create per-request in app `lib/services.ts` via `createAuthService()` / `createResumeService()`)
+
+**Contents**:
+
+- AuthService, ProfileService, ApplicationService, FileService, ResumeService, TeamService
+- Repositories (ProfileRepository, ApplicationRepository, AuthRepository, etc.) extending `BaseRepository` from `@uwdsc/db`
+- Types and utilities
+
+**Structure**:
+
+```
+packages/server/core/
+└── src/
+    ├── repositories/    # ProfileRepository, ApplicationRepository, etc.
+    ├── services/        # Auth, Profile, Application, File, Resume, Team
+    └── utils/           # Shared utilities
+```
+
+**Dependencies**: `@uwdsc/db`, `@uwdsc/common`
+
+### `packages/server/admin` - Admin Backend (`@uwdsc/admin`)
+
+Admin-only services (e.g. profile/member management for admin dashboard).
+
+**Exports**: `@uwdsc/admin` — e.g. `profileService` for member listing/updates
+
+**Used by**: `apps/admin` API routes only
+
+**Dependencies**: `@uwdsc/core`, `@uwdsc/db`, `@uwdsc/common`
+
+**Structure**:
+
+```
+packages/server/admin/
+└── src/
+    ├── repositories/    # Admin-specific data access
+    └── services/       # Admin profile/member services
+```
 
 ### `packages/eslint-config`
 
@@ -212,19 +259,19 @@ packages:
 
 ### `turbo.json`
 
-Configures Turborepo build pipeline:
+Configures Turborepo tasks (build order, caching, env):
 
 ```json
 {
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**"]
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [".next/**", "!.next/cache/**"]
     },
-    "dev": {
-      "cache": false,
-      "persistent": true
-    }
+    "dev": { "cache": false, "persistent": true },
+    "lint": { "dependsOn": ["^lint"] },
+    "check-types": { "dependsOn": ["^check-types"] }
   }
 }
 ```
@@ -239,7 +286,8 @@ Packages reference each other using workspace protocol:
 {
   "dependencies": {
     "@uwdsc/ui": "workspace:*",
-    "@uwdsc/server": "workspace:*"
+    "@uwdsc/core": "workspace:*",
+    "@uwdsc/db": "workspace:*"
   }
 }
 ```
@@ -257,18 +305,20 @@ Common dependencies are installed once at the root:
 
 Apps can have their own unique dependencies:
 
-- `apps/web` might use specific charting libraries
-- `apps/cxc` might use different animation libraries
+- `apps/web`: e.g. SWR, react-feather, babel-plugin-react-compiler
+- `apps/admin`: e.g. @tanstack/react-table, sonner
 
 ## Build Order
 
 Turborepo automatically determines build order:
 
 1. **Config packages** (eslint-config, typescript-config)
-2. **UI package** (no dependencies on other workspace packages)
-3. **Server/core** (no dependencies on other workspace packages)
-4. **Server/web and server/cxc** (depend on core)
-5. **Apps** (depend on ui and server packages)
+2. **packages/common** (shared types/utils)
+3. **packages/ui** (design system)
+4. **packages/server/db** (connection, BaseRepository, migrations)
+5. **packages/server/core** (depends on db, common)
+6. **packages/server/admin** (depends on core, db, common)
+7. **Apps** (depend on ui, core, and optionally admin/db)
 
 ## Import Paths
 
@@ -278,23 +328,23 @@ Turborepo automatically determines build order:
 // UI components
 import { Button, Card } from "@uwdsc/ui";
 
-// Backend services (web app)
-import { HealthService } from "@uwdsc/server/web/services/healthService";
+// Shared backend (web and admin)
+import { profileService, applicationService } from "@uwdsc/core";
+import { createAuthService, createResumeService } from "@/lib/services"; // uses @uwdsc/db + @uwdsc/core
 
-// Backend services (CXC app)
-import { ApplicationService } from "@uwdsc/server/cxc/services/applicationService";
+// Admin-only (admin app API routes)
+import { profileService } from "@uwdsc/admin";
 
-// Shared backend
-import { AuthService } from "@uwdsc/server/core/services/authService";
+// Database / Supabase (when creating services)
+import { createSupabaseServerClient } from "@uwdsc/db";
 ```
 
 ### In Packages
 
 ```tsx
-// Core services in web/cxc server packages
-import { AuthService } from "@uwdsc/server/core/services/authService";
-
-// UI components don't import from other packages (pure atoms)
+// In @uwdsc/core or @uwdsc/admin
+import { BaseRepository } from "@uwdsc/db/baseRepository";
+import { sql } from "@uwdsc/db/connection";
 ```
 
 ## Adding New Packages

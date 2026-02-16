@@ -5,9 +5,9 @@ Our monorepo is built on modern web technologies with a focus on code reuse, typ
 ## Tech Stack
 
 ### Frontend
-- **Framework**: Next.js 15 (App Router)
+- **Framework**: Next.js 16 (App Router) for web and admin; docs uses Next.js 15
 - **UI Library**: React 19
-- **Language**: TypeScript 5.7
+- **Language**: TypeScript 5.x
 - **Styling**: Tailwind CSS
 - **Component Library**: shadcn/ui (Radix UI primitives)
 - **Animation**: Framer Motion
@@ -15,9 +15,9 @@ Our monorepo is built on modern web technologies with a focus on code reuse, typ
 
 ### Backend
 - **Database**: PostgreSQL (via Supabase)
-- **Database Client**: pg (node-postgres) with raw SQL
-- **Migrations**: db-mate with SQL files
-- **Auth**: Supabase Auth
+- **Database Client**: postgres.js (via `@uwdsc/db`); repositories extend `BaseRepository` from `@uwdsc/db/baseRepository`
+- **Migrations**: db-migrate (migrations in `packages/server/db`); run from root with `pnpm migrate`
+- **Auth**: Supabase Auth (clients from `@uwdsc/db`; `AuthService` from `@uwdsc/core`)
 - **Storage**: Supabase Storage
 - **API**: Next.js API Routes
 
@@ -60,8 +60,8 @@ Each layer has a specific responsibility:
 ### 3. **Shared-First Approach**
 
 Common functionality lives in shared packages:
-- **UI components** in `packages/ui`
-- **Backend utilities** in `packages/server/core`
+- **UI components** in `packages/ui` (`@uwdsc/ui`)
+- **Backend**: `@uwdsc/db` (connection, Supabase, BaseRepository), `@uwdsc/core` (shared services), `@uwdsc/admin` (admin-only services)
 - **Config** in `packages/eslint-config` and `packages/typescript-config`
 
 ### 4. **Type Safety Everywhere**
@@ -75,13 +75,13 @@ Common functionality lives in shared packages:
 
 ### Apps (`apps/`)
 
-Frontend applications that users interact with:
+Frontend applications:
 
 ```
 apps/
-├── web/          # Main UWDSC website
-├── cxc/          # CXC AI hackathon app
-└── docs/         # This documentation site
+├── web/          # Main UWDSC website and member applications
+├── admin/       # Admin dashboard and CXC application/review system
+└── docs/        # This documentation site
 ```
 
 ### Shared Packages (`packages/`)
@@ -90,11 +90,12 @@ Reusable code shared across apps:
 
 ```
 packages/
-├── ui/                    # Design system (atoms)
-├── server/                # Backend services
-│   ├── core/             # Shared backend utilities
-│   ├── web/              # Web app backend
-│   └── cxc/              # CxC app backend
+├── ui/                    # Design system (@uwdsc/ui)
+├── common/                # Shared types and utils (@uwdsc/common)
+├── server/                # Backend
+│   ├── db/               # @uwdsc/db - Postgres, Supabase, BaseRepository, migrations
+│   ├── core/             # @uwdsc/core - Shared services (auth, profile, application, etc.)
+│   └── admin/            # @uwdsc/admin - Admin-only services (e.g. member listing)
 ├── eslint-config/         # Shared ESLint config
 └── typescript-config/     # Shared TypeScript config
 ```
@@ -104,11 +105,16 @@ packages/
 ```mermaid
 graph TD
     A[apps/web] --> B[packages/ui]
-    A --> C[packages/server/web]
-    C --> D[packages/server/core]
+    A --> C[packages/server/core]
+    A --> N[packages/common]
     
-    E[apps/cxc] --> B
-    E --> F[packages/server/cxc]
+    E[apps/admin] --> B
+    E --> C
+    E --> F[packages/server/admin]
+    E --> N
+    
+    C --> D[packages/server/db]
+    F --> C
     F --> D
     
     A --> G[packages/eslint-config]

@@ -6,9 +6,9 @@ Learn how to work with db-mate, pg, and Supabase in this project.
 
 Our project uses:
 
-- **pg** (node-postgres) - PostgreSQL client for raw SQL queries
-- **db-mate** - Database migration tool with SQL files
-- **Supabase** - PostgreSQL database and authentication
+- **postgres.js** - PostgreSQL client (used via `@uwdsc/db`; Supabase Transaction Pooler–compatible)
+- **db-migrate** - Database migration tool; migrations in `packages/server/db`
+- **Supabase** - PostgreSQL database, authentication, and storage
 - **PostgreSQL** - Relational database
 
 ## Architecture
@@ -20,8 +20,8 @@ Our project uses:
 └───────────┬─────────────────────────────┘
             │
 ┌───────────▼─────────────────────────────┐
-│        pg (node-postgres)                │
-│   (Raw SQL queries)                      │
+│     @uwdsc/db (postgres.js)              │
+│   Repositories extend BaseRepository     │
 └───────────┬─────────────────────────────┘
             │
 ┌───────────▼─────────────────────────────┐
@@ -34,27 +34,26 @@ Our project uses:
 
 ### 1. Environment Variables
 
-Create `.env.local` files in your apps:
+Environment variables (including `DATABASE_URL`, `SUPABASE_*`, etc.) are synced via **pull-secrets**. From the repo root, run:
 
 ```bash
-# apps/web/.env.local
-DATABASE_URL="postgresql://user:password@host:5432/database"
-SUPABASE_URL="https://your-project.supabase.co"
-SUPABASE_ANON_KEY="your-anon-key"
-SUPABASE_SECRET_KEY="your-service-role-key"
+pnpm pull-secrets
 ```
+
+This creates or updates `.env.local` in each app (web, admin) and loads the values needed for the database and Supabase. You do not need to create or edit these files manually. See [Getting Started](/getting-started) for Infisical/pull-secrets setup.
 
 ### 2. Database Migrations
 
-Migrations are located in:
+Migrations are in `packages/server/db`. Run from repo root:
 
-- `packages/server/web/src/db/migrations/`
-- `packages/server/cxc/src/db/migrations/`
+- `pnpm migrate` — apply migrations
+- `pnpm migrate:down` — rollback last
+- `pnpm migrate:create <name>` — create new migration
 
-**Example migration file** (`001_create_users_table.up.sql`):
+**Example migration file** (in `packages/server/db/src/migrations/`):
 
 ```sql
--- packages/server/web/src/db/migrations/001_create_users_table.up.sql
+-- packages/server/db: migration up file
 
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -69,164 +68,75 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE INDEX idx_users_email ON users(email);
 ```
 
-**Down migration** (`001_create_users_table.down.sql`):
+**Down migration** (matching `.down.sql` in `packages/server/db`):
 
 ```sql
--- packages/server/web/src/db/migrations/001_create_users_table.down.sql
-
 DROP TABLE IF EXISTS users;
 ```
 
-## db-mate Workflow
+## db-migrate Workflow
 
-### Install db-mate
-
-```bash
-# Install globally
-npm install -g db-mate
-
-# Or use npx
-npx db-mate
-```
+Migrations are in `packages/server/db`. Use root scripts (they load env and run db-migrate):
 
 ### Create Migration
 
-Create a new migration:
-
 ```bash
-cd packages/server/web
-db-mate new add_user_bio
+pnpm migrate:create add_user_bio
 ```
 
-This creates two files:
-
-- `001_add_user_bio.up.sql` - Migration to apply
-- `001_add_user_bio.down.sql` - Migration to rollback
+This creates migration files in `packages/server/db`.
 
 ### Apply Migrations
 
-Apply all pending migrations:
-
 ```bash
-cd packages/server/web
-db-mate up
+pnpm migrate
 ```
 
-### Rollback Migration
-
-Rollback the last migration:
+### Rollback / Reset / Status
 
 ```bash
-cd packages/server/web
-db-mate down
+pnpm migrate:down    # Rollback last migration
+pnpm migrate:reset   # Reset (drops and reapplies) — warning: deletes data
+pnpm migrate:check   # Check migration status
 ```
 
-### Reset Database
+## Using postgres.js via @uwdsc/db
 
-**Warning**: This deletes all data!
+Repositories extend `BaseRepository` from `@uwdsc/db/baseRepository` and use the protected `this.sql` tagged template (postgres.js). Do not use a global pool in app code; use the repository layer.
 
-```bash
-cd packages/server/web
-db-mate drop
-db-mate up
-```
-
-### Migration Status
-
-Check which migrations have been applied:
-
-```bash
-cd packages/server/web
-db-mate status
-```
-
-## Using pg (node-postgres)
-
-### Connection Pool
+### Repository pattern
 
 ```typescript
-// packages/server/core/src/database/connection.ts
-import { Pool } from "pg";
+// packages/server/core/src/repositories/UserRepository.ts
+import { BaseRepository } from "@uwdsc/db/baseRepository";
 
-export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
-});
-```
-
-### Basic Queries
-
-```typescript
-// packages/server/web/src/repository/userRepository.ts
-import { pool } from "@uwdsc/server/core/database/connection";
-
-export class UserRepository {
-  // Find one
+export class UserRepository extends BaseRepository {
   async findById(id: string) {
-    const result = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
-    return result.rows[0] || null;
+    const rows = await this.sql`SELECT * FROM users WHERE id = ${id}`;
+    return rows[0] ?? null;
   }
 
-  // Find many
   async findAll() {
-    const result = await pool.query(
-      "SELECT * FROM users ORDER BY created_at DESC",
-    );
-    return result.rows;
+    return this.sql`SELECT * FROM users ORDER BY created_at DESC`;
   }
 
-  // Create
   async create(data: { email: string; name: string }) {
-    const result = await pool.query(
-      `INSERT INTO users (email, name)
-       VALUES ($1, $2)
-       RETURNING *`,
-      [data.email, data.name],
-    );
-    return result.rows[0];
+    const rows = await this.sql`
+      INSERT INTO users (email, name) VALUES (${data.email}, ${data.name})
+      RETURNING *
+    `;
+    return rows[0];
   }
 
-  // Update
   async update(id: string, data: { name?: string; bio?: string }) {
-    const updates: string[] = [];
-    const values: any[] = [];
-    let paramIndex = 1;
-
-    if (data.name !== undefined) {
-      updates.push(`name = $${paramIndex++}`);
-      values.push(data.name);
-    }
-    if (data.bio !== undefined) {
-      updates.push(`bio = $${paramIndex++}`);
-      values.push(data.bio);
-    }
-
-    if (updates.length === 0) {
-      return this.findById(id);
-    }
-
-    updates.push(`updated_at = NOW()`);
-    values.push(id);
-
-    const result = await pool.query(
-      `UPDATE users
-       SET ${updates.join(", ")}
-       WHERE id = $${paramIndex}
-       RETURNING *`,
-      values,
-    );
-    return result.rows[0];
+    // Use this.sql with dynamic fragments; see existing repos in core for patterns
+    const rows = await this.sql`UPDATE users SET ... WHERE id = ${id} RETURNING *`;
+    return rows[0];
   }
 
-  // Delete
   async delete(id: string) {
-    const result = await pool.query(
-      "DELETE FROM users WHERE id = $1 RETURNING *",
-      [id],
-    );
-    return result.rows[0];
+    const rows = await this.sql`DELETE FROM users WHERE id = ${id} RETURNING *`;
+    return rows[0];
   }
 }
 ```
@@ -234,53 +144,28 @@ export class UserRepository {
 ### Relations
 
 ```typescript
-// Include related data
+// In a repository — include related data with this.sql
 async findUserWithProfile(userId: string) {
-  const result = await pool.query(
-    `SELECT
-       u.*,
-       p.bio as profile_bio
-     FROM users u
-     LEFT JOIN profiles p ON p.user_id = u.id
-     WHERE u.id = $1`,
-    [userId]
-  );
-  return result.rows[0] || null;
+  const rows = await this.sql`
+    SELECT u.*, p.bio as profile_bio
+    FROM users u
+    LEFT JOIN profiles p ON p.user_id = u.id
+    WHERE u.id = ${userId}
+  `;
+  return rows[0] ?? null;
 }
 
-// Nested writes (using transactions)
-async createUserWithProfile(data: {
-  email: string;
-  name: string;
-  bio: string;
-}) {
-  const client = await pool.connect();
+// Nested writes: use this.sql in a transaction (see postgres.js docs)
+async createUserWithProfile(data: { email: string; name: string; bio: string }) {
+  // Use this.sql with BEGIN/COMMIT or postgres.js transaction helpers
   try {
-    await client.query("BEGIN");
 
-    // Create user
-    const userResult = await client.query(
-      `INSERT INTO users (email, name)
-       VALUES ($1, $2)
-       RETURNING *`,
-      [data.email, data.name]
-    );
-    const user = userResult.rows[0];
-
-    // Create profile
-    await client.query(
-      `INSERT INTO profiles (user_id, bio)
-       VALUES ($1, $2)`,
-      [user.id, data.bio]
-    );
-
-    await client.query("COMMIT");
-    return user;
+    // Create user and profile in one transaction (pseudo-code; use this.sql)
+    const user = await this.sql`INSERT INTO users ... RETURNING *`;
+    await this.sql`INSERT INTO profiles ...`;
+    return user[0];
   } catch (error) {
-    await client.query("ROLLBACK");
     throw error;
-  } finally {
-    client.release();
   }
 }
 ```
@@ -288,26 +173,19 @@ async createUserWithProfile(data: {
 ### Filtering
 
 ```typescript
-// Where clause
+// In a repository — use this.sql with tagged templates
 async findActiveUsers() {
-  const result = await pool.query(
-    `SELECT * FROM users
-     WHERE status = $1
-       AND created_at >= $2`,
-    ["active", new Date("2024-01-01")]
-  );
-  return result.rows;
+  return this.sql`
+    SELECT * FROM users
+    WHERE status = ${"active"} AND created_at >= ${new Date("2024-01-01")}
+  `;
 }
 
-// OR conditions
 async search(query: string) {
   const searchTerm = `%${query}%`;
-  const result = await pool.query(
-    `SELECT * FROM users
-     WHERE name ILIKE $1 OR email ILIKE $1`,
-    [searchTerm]
-  );
-  return result.rows;
+  return this.sql`
+    SELECT * FROM users WHERE name ILIKE ${searchTerm} OR email ILIKE ${searchTerm}
+  `;
 }
 ```
 
@@ -316,238 +194,45 @@ async search(query: string) {
 ```typescript
 async findWithPagination(page: number, limit: number) {
   const offset = (page - 1) * limit;
-
-  const [usersResult, countResult] = await Promise.all([
-    pool.query(
-      `SELECT * FROM users
-       ORDER BY created_at DESC
-       LIMIT $1 OFFSET $2`,
-      [limit, offset]
-    ),
-    pool.query("SELECT COUNT(*) as total FROM users"),
+  const [users, countResult] = await Promise.all([
+    this.sql`SELECT * FROM users ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`,
+    this.sql`SELECT COUNT(*) as total FROM users`,
   ]);
-
-  return {
-    users: usersResult.rows,
-    total: parseInt(countResult.rows[0].total),
-    page,
-    pages: Math.ceil(parseInt(countResult.rows[0].total) / limit),
-  };
+  const total = Number(countResult[0]?.total ?? 0);
+  return { users, total, page, pages: Math.ceil(total / limit) };
 }
 ```
 
 ### Transactions
 
-```typescript
-async transferCredits(fromId: string, toId: string, amount: number) {
-  const client = await pool.connect();
-  try {
-    await client.query("BEGIN");
-
-    // Deduct from sender
-    await client.query(
-      `UPDATE users
-       SET credits = credits - $1
-       WHERE id = $2`,
-      [amount, fromId]
-    );
-
-    // Add to receiver
-    await client.query(
-      `UPDATE users
-       SET credits = credits + $1
-       WHERE id = $2`,
-      [amount, toId]
-    );
-
-    // Create transaction record
-    await client.query(
-      `INSERT INTO transactions (from_id, to_id, amount)
-       VALUES ($1, $2, $3)`,
-      [fromId, toId, amount]
-    );
-
-    await client.query("COMMIT");
-  } catch (error) {
-    await client.query("ROLLBACK");
-    throw error;
-  } finally {
-    client.release();
-  }
-}
-```
+Use postgres.js transaction API within a repository (see postgres.js docs). Pattern: get a connection, run BEGIN, queries, COMMIT/ROLLBACK, then release.
 
 ### Aggregations
 
 ```typescript
 async getStats() {
-  const result = await pool.query(
-    `SELECT
-       COUNT(*) as total_users,
-       AVG(age) as avg_age,
-       MIN(created_at) as first_user,
-       MAX(created_at) as latest_user
-     FROM users`
-  );
-  return result.rows[0];
+  const rows = await this.sql`
+    SELECT COUNT(*) as total_users, AVG(age) as avg_age,
+           MIN(created_at) as first_user, MAX(created_at) as latest_user
+    FROM users
+  `;
+  return rows[0];
 }
 
 async groupByStatus() {
-  const result = await pool.query(
-    `SELECT status, COUNT(*) as count
-     FROM users
-     GROUP BY status`
-  );
-  return result.rows;
+  return this.sql`SELECT status, COUNT(*) as count FROM users GROUP BY status`;
 }
 ```
 
 ## Supabase Integration
 
-### Authentication
-
-```typescript
-// packages/server/core/src/services/authService.ts
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SECRET_KEY!,
-);
-
-export class AuthService {
-  async signUp(email: string, password: string) {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
-    if (error) throw error;
-    return data;
-  }
-
-  async signIn(email: string, password: string) {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) throw error;
-    return data;
-  }
-
-  async getUser(token: string) {
-    const { data, error } = await supabase.auth.getUser(token);
-    if (error) throw error;
-    return data.user;
-  }
-}
-```
-
-### File Storage
-
-```typescript
-// packages/server/core/src/services/fileService.ts
-export class FileService {
-  async uploadFile(bucket: string, path: string, file: File) {
-    const { data, error } = await supabase.storage
-      .from(bucket)
-      .upload(path, file);
-
-    if (error) throw error;
-    return data;
-  }
-
-  getPublicUrl(bucket: string, path: string) {
-    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-
-    return data.publicUrl;
-  }
-
-  async deleteFile(bucket: string, path: string) {
-    const { error } = await supabase.storage.from(bucket).remove([path]);
-
-    if (error) throw error;
-  }
-}
-```
+Supabase is used for **auth** and **storage**. Apps create a Supabase client via `@uwdsc/db` (`createSupabaseServerClient`, etc.) and use `AuthService` / `ResumeService` from `@uwdsc/core` (created per-request in `lib/services.ts`). See [API Architecture](/architecture/api-flow) and the code in `packages/server/core` and `apps/web/lib/services.ts`.
 
 ## Data Seeding
 
-### Create Seed File
+### Seed scripts
 
-```typescript
-// packages/server/web/src/db/seed.ts
-import { pool } from "@uwdsc/server/core/database/connection";
-
-async function main() {
-  // Clear existing data
-  await pool.query("DELETE FROM applications");
-  await pool.query("DELETE FROM profiles");
-  await pool.query("DELETE FROM users");
-
-  // Create test users
-  const user1Result = await pool.query(
-    `INSERT INTO users (email, name)
-     VALUES ($1, $2)
-     RETURNING *`,
-    ["john@example.com", "John Doe"],
-  );
-  const user1 = user1Result.rows[0];
-
-  await pool.query(
-    `INSERT INTO profiles (user_id, bio)
-     VALUES ($1, $2)`,
-    [user1.id, "Software developer"],
-  );
-
-  const user2Result = await pool.query(
-    `INSERT INTO users (email, name)
-     VALUES ($1, $2)
-     RETURNING *`,
-    ["jane@example.com", "Jane Smith"],
-  );
-  const user2 = user2Result.rows[0];
-
-  await pool.query(
-    `INSERT INTO profiles (user_id, bio)
-     VALUES ($1, $2)`,
-    [user2.id, "Product designer"],
-  );
-
-  // Create applications
-  await pool.query(
-    `INSERT INTO applications (user_id, status, data)
-     VALUES ($1, $2, $3), ($4, $5, $6)`,
-    [
-      user1.id,
-      "pending",
-      JSON.stringify({}),
-      user2.id,
-      "approved",
-      JSON.stringify({}),
-    ],
-  );
-
-  console.log("Database seeded successfully");
-}
-
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await pool.end();
-  });
-```
-
-### Run Seed
-
-```bash
-cd packages/server/web
-tsx src/db/seed.ts
-```
+Create a seed script that uses the database connection from `@uwdsc/db` (or run SQL via db-migrate/psql). Ensure you have run `pnpm pull-secrets` so `DATABASE_URL` and other env vars are available. Run the seed with `tsx` or from an app script.
 
 ## Best Practices
 
@@ -576,22 +261,17 @@ tsx src/db/seed.ts
 ### Repository Pattern
 
 ```typescript
-import { pool } from "@uwdsc/server/core/database/connection";
+import { BaseRepository } from "@uwdsc/db/baseRepository";
 
-export class UserRepository {
+export class UserRepository extends BaseRepository {
   async findByEmail(email: string) {
-    const result = await pool.query("SELECT * FROM users WHERE email = $1", [
-      email,
-    ]);
-    return result.rows[0] || null;
+    const rows = await this.sql`SELECT * FROM users WHERE email = ${email}`;
+    return rows[0] ?? null;
   }
 
   async existsByEmail(email: string): Promise<boolean> {
-    const result = await pool.query(
-      "SELECT COUNT(*) as count FROM users WHERE email = $1",
-      [email],
-    );
-    return parseInt(result.rows[0].count) > 0;
+    const rows = await this.sql`SELECT 1 FROM users WHERE email = ${email} LIMIT 1`;
+    return rows.length > 0;
   }
 }
 ```
@@ -606,21 +286,14 @@ CREATE INDEX idx_users_deleted_at ON users(deleted_at);
 
 ```typescript
 async softDelete(id: string) {
-  const result = await pool.query(
-    `UPDATE users
-     SET deleted_at = NOW()
-     WHERE id = $1
-     RETURNING *`,
-    [id]
-  );
-  return result.rows[0];
+  const rows = await this.sql`
+    UPDATE users SET deleted_at = NOW() WHERE id = ${id} RETURNING *
+  `;
+  return rows[0];
 }
 
 async findActive() {
-  const result = await pool.query(
-    "SELECT * FROM users WHERE deleted_at IS NULL"
-  );
-  return result.rows;
+  return this.sql`SELECT * FROM users WHERE deleted_at IS NULL`;
 }
 ```
 
@@ -632,19 +305,12 @@ ALTER TABLE users ADD COLUMN version INTEGER DEFAULT 0;
 ```
 
 ```typescript
-async updateWithVersion(
-  id: string,
-  currentVersion: number,
-  data: any
-) {
-  const result = await pool.query(
-    `UPDATE users
-     SET name = $1, version = version + 1
-     WHERE id = $2 AND version = $3
-     RETURNING *`,
-    [data.name, id, currentVersion]
-  );
-  return result.rows[0];
+async updateWithVersion(id: string, currentVersion: number, data: { name: string }) {
+  const rows = await this.sql`
+    UPDATE users SET name = ${data.name}, version = version + 1
+    WHERE id = ${id} AND version = ${currentVersion} RETURNING *
+  `;
+  return rows[0];
 }
 ```
 
@@ -655,11 +321,11 @@ async updateWithVersion(
 Check environment variables and database connectivity:
 
 ```typescript
-import { pool } from "@uwdsc/server/core/database/connection";
+import { sql } from "@uwdsc/db/connection";
 
 async function testConnection() {
   try {
-    const result = await pool.query("SELECT 1");
+    await sql`SELECT 1`;
     console.log("Database connected");
   } catch (error) {
     console.error("Database connection failed:", error);
@@ -671,13 +337,11 @@ async function testConnection() {
 
 ```bash
 # Check migration status
-db-mate status
+pnpm migrate:check
 
-# Force rollback if needed
-db-mate down --force
-
-# Re-apply migrations
-db-mate up
+# Rollback and re-apply (from root)
+pnpm migrate:down
+pnpm migrate
 ```
 
 ### Query Performance

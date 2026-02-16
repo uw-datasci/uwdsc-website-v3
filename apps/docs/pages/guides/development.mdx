@@ -37,8 +37,8 @@ Improve your development workflow with these tips and best practices.
 # Terminal 1: Web app
 pnpm dev:web
 
-# Terminal 2: CxC app
-pnpm dev:cxc
+# Terminal 2: Admin app
+pnpm dev:admin
 
 # Terminal 3: Documentation
 pnpm dev:docs
@@ -63,7 +63,7 @@ If changes don't reflect:
 ```bash
 # Clear Next.js cache
 rm -rf apps/web/.next
-rm -rf apps/cxc/.next
+rm -rf apps/admin/.next
 
 # Restart dev server
 pnpm dev
@@ -207,53 +207,27 @@ export function Component({ items }) {
 
 ## Database Development
 
-### db-mate Workflow
+### db-migrate Workflow
+
+Migrations live in `packages/server/db`. Use the root scripts:
 
 ```bash
-# Create new migration
-cd packages/server/web
-db-mate new add_user_bio
-
-# Edit migration files:
-# - 001_add_user_bio.up.sql (apply)
-# - 001_add_user_bio.down.sql (rollback)
+# From repo root: create new migration
+pnpm migrate:create add_user_bio
 
 # Apply migrations
-db-mate up
+pnpm migrate
 
 # Rollback last migration
-db-mate down
+pnpm migrate:down
 
 # Check migration status
-db-mate status
+pnpm migrate:check
 ```
 
 ### Database Seeding
 
-```typescript
-// packages/server/web/src/db/seed.ts
-import { pool } from "@uwdsc/server/core/database/connection";
-
-async function main() {
-  await pool.query(
-    `INSERT INTO users (email, name)
-     VALUES ($1, $2)`,
-    ["test@example.com", "Test User"]
-  );
-}
-
-main()
-  .catch(console.error)
-  .finally(async () => {
-    await pool.end();
-  });
-```
-
-```bash
-# Run seed
-cd packages/server/web
-tsx src/db/seed.ts
-```
+Use the Postgres connection from `@uwdsc/db` (see [Database Setup](/guides/database)). Run seed scripts from the app or a script that loads env and uses the db package.
 
 ## Testing
 
@@ -340,7 +314,7 @@ Add to `.bashrc` or `.zshrc`:
 ```bash
 alias dev="pnpm dev"
 alias devw="pnpm dev:web"
-alias devc="pnpm dev:cxc"
+alias deva="pnpm dev:admin"
 alias devd="pnpm dev:docs"
 alias build="pnpm build"
 alias lint="pnpm lint"

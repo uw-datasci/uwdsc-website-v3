@@ -10,49 +10,46 @@ This project follows an **Atomic Design System** pattern using shadcn/ui as the 
 
 ### 🧬 Atoms: UI Package (`packages/ui`)
 
-The [packages/ui](mdc:packages/ui) directory contains **shared, reusable UI primitives** built with shadcn/ui components. These are the foundational building blocks of the design system.
+The `packages/ui` directory contains **shared, reusable UI primitives** built with shadcn/ui components. These are the foundational building blocks of the design system.
 
 **Package Configuration:**
-
 - Uses shadcn/ui "new-york" style
-- Exports via [packages/ui/src/index.ts](mdc:packages/ui/src/index.ts)
-- Includes global styles at [packages/ui/src/styles/globals.css](mdc:packages/ui/src/styles/globals.css)
-- UI components at [packages/ui/src/components](mdc:packages/ui/src/components)
-- Configuration: [packages/ui/components.json](mdc:packages/ui/components.json)
+- Exports via `packages/ui/src/index.ts`
+- Includes global styles at `packages/ui/src/styles/globals.css`
+- UI components at `packages/ui/src/components`
+- Configuration: `packages/ui/components.json`
 
 ### 🧩 Molecules: App Components
 
-Each app (e.g., `apps/web/components`, `apps/cxc/components`) contains **composed components** that combine atoms from the UI package with app-specific logic.
+Each app (`apps/web/components`, `apps/admin/components`) contains **composed components** that combine atoms from the UI package with app-specific logic.
 
 **Examples:**
-
-- [apps/web/components/TeamCard.tsx](mdc:apps/web/components/TeamCard.tsx) - Composes Card, CardHeader, CardContent from `@uwdsc/ui`
-- [apps/cxc/components/MotionCard.tsx](mdc:apps/cxc/components/MotionCard.tsx) - Combines Card and Button with Framer Motion animations
+- `apps/web/components/team/TeamCard.tsx` - Composes Card, CardHeader, CardContent from `@uwdsc/ui`
+- `apps/web/components/home_sections/Hero.tsx` - Uses CountingNumber, GlassSurface from `@uwdsc/ui`
+- `apps/admin/components/memberships/MembershipsTable.tsx` - Uses table and form atoms from `@uwdsc/ui`
 
 ## Adding New Shadcn Components
 
-To add a new shadcn component to the shared UI package:
+To add a new shadcn component to the shared UI package, from the **repository root**:
 
 ```bash
 pnpm ui:add <component-name>
 ```
 
 **Example:**
-
 ```bash
 pnpm ui:add dialog
 pnpm ui:add dropdown-menu
 pnpm ui:add input
 ```
 
-This script (defined in [package.json](mdc:package.json) and implemented in [scripts/ui-add.js](mdc:scripts/ui-add.js)) runs `pnpm dlx shadcn@canary add <component-name>` in the `packages/ui` directory.
+This script is defined in the root `package.json` and implemented in `scripts/ui-add.js`; it runs shadcn in the `packages/ui` directory. The web app also has a local `ui:add` script in `apps/web/package.json` that targets the same UI package.
 
 ## Usage Guidelines
 
 ### ✅ Do
 
 1. **Import atoms from `@uwdsc/ui`** in your app components:
-
    ```tsx
    import { Card, Button, Avatar } from "@uwdsc/ui";
    ```
@@ -63,7 +60,7 @@ This script (defined in [package.json](mdc:package.json) and implemented in [scr
    - Creating feature-specific compositions
 
 3. **Add new primitives to the UI package** when:
-   - The component will be reused across multiple apps
+   - The component will be reused across multiple apps (web, admin)
    - It's a pure UI component with minimal business logic
    - It follows shadcn/ui patterns
 
@@ -71,20 +68,19 @@ This script (defined in [package.json](mdc:package.json) and implemented in [scr
 
 1. **Don't duplicate shadcn components** in app folders - add them to the UI package instead
 2. **Don't add business logic** to UI package atoms - keep them pure and reusable
-3. **Don't manually install shadcn components** - always use `pnpm ui:add`
+3. **Don't manually install shadcn components** - always use `pnpm ui:add` from the repo root
 
 ## Package Exports
 
 The UI package exports:
-
 - `@uwdsc/ui` - All component exports
 - `@uwdsc/ui/globals.css` - Global styles
 - `@uwdsc/ui/postcss.config` - PostCSS configuration
+- `@uwdsc/ui/lib/utils` - Utilities such as `cn` (used in apps and docs)
 
 ## Dependencies
 
 The UI package includes:
-
 - **Radix UI** primitives (headless components)
 - **Tailwind CSS** for styling
 - **Framer Motion** for animations

@@ -1,282 +1,184 @@
+# UWDSC Website v3 – Copilot Instructions
+
+This document describes the monorepo layout, design system, and API architecture so AI and developers can work consistently across the codebase.
+
+## Monorepo Overview
+
+- **Package manager**: pnpm (workspace root)
+- **Apps**: `apps/web` (main site), `apps/admin` (admin dashboard), `apps/docs` (documentation)
+- **Shared packages**:
+  - `packages/ui` – shared UI primitives (shadcn/ui)
+  - `packages/common` – shared types and utils (e.g. `ApiResponse`)
+  - `packages/server/db` – `@uwdsc/db`: Supabase clients, Postgres connection, `BaseRepository`, migrations
+  - `packages/server/core` – `@uwdsc/core`: shared services and repositories (auth, profile, application, file, resume, team)
+  - `packages/server/admin` – `@uwdsc/admin`: admin-specific services (e.g. profile/members for admin)
+  - `packages/typescript-config`, `packages/eslint-config` – shared config
+
+**Commands**: From repo root use `pnpm dev`, `pnpm dev:web`, `pnpm dev:admin`, `pnpm build`, `pnpm lint`, `pnpm ui:add <component-name>`, `pnpm migrate`, etc.
+
+---
+
 # Design System Architecture
 
 This project follows an **Atomic Design System** pattern using shadcn/ui as the foundation.
 
 ## Structure Overview
 
-### 🧬 Atoms: UI Package (`packages/ui`)
+### Atoms: UI Package (`packages/ui`)
 
-The [packages/ui](mdc:packages/ui) directory contains **shared, reusable UI primitives** built with shadcn/ui components. These are the foundational building blocks of the design system.
+The `packages/ui` directory contains **shared, reusable UI primitives** built with shadcn/ui components.
 
-**Package Configuration:**
+- **Style**: shadcn/ui "new-york"
+- **Exports**: `packages/ui/src/index.ts`
+- **Global styles**: `packages/ui/src/styles/globals.css`
+- **Components**: `packages/ui/src/components`
+- **Config**: `packages/ui/components.json`
 
-- Uses shadcn/ui "new-york" style
-- Exports via [packages/ui/src/index.ts](mdc:packages/ui/src/index.ts)
-- Includes global styles at [packages/ui/src/styles/globals.css](mdc:packages/ui/src/styles/globals.css)
-- UI components at [packages/ui/src/components](mdc:packages/ui/src/components)
-- Configuration: [packages/ui/components.json](mdc:packages/ui/components.json)
+### Molecules: App Components
 
-### 🧩 Molecules: App Components
+Each app (`apps/web/components`, `apps/admin/components`) contains **composed components** that combine atoms from the UI package with app-specific logic.
 
-Each app (e.g., `apps/web/components`, `apps/cxc/components`) contains **composed components** that combine atoms from the UI package with app-specific logic.
-
-**Examples:**
-
-- [apps/web/components/TeamCard.tsx](mdc:apps/web/components/TeamCard.tsx) - Composes Card, CardHeader, CardContent from `@uwdsc/ui`
-- [apps/cxc/components/MotionCard.tsx](mdc:apps/cxc/components/MotionCard.tsx) - Combines Card and Button with Framer Motion animations
+**Examples**: `apps/web/components/team/TeamCard.tsx`, `apps/web/components/home_sections/Hero.tsx`
 
 ## Adding New Shadcn Components
 
-To add a new shadcn component to the shared UI package:
+From the **repository root**:
 
 ```bash
 pnpm ui:add <component-name>
 ```
 
-**Example:**
+Examples: `pnpm ui:add dialog`, `pnpm ui:add dropdown-menu`, `pnpm ui:add input`
 
-```bash
-pnpm ui:add dialog
-pnpm ui:add dropdown-menu
-pnpm ui:add input
-```
-
-This script (defined in [package.json](mdc:package.json) and implemented in [scripts/ui-add.js](mdc:scripts/ui-add.js)) runs `pnpm dlx shadcn@canary add <component-name>` in the `packages/ui` directory.
+The script is in `scripts/ui-add.js` and runs `shadcn` in `packages/ui`.
 
 ## Usage Guidelines
 
-### ✅ Do
+### Do
 
-1. **Import atoms from `@uwdsc/ui`** in your app components:
-
+1. **Import atoms from `@uwdsc/ui`** in app components:
    ```tsx
    import { Card, Button, Avatar } from "@uwdsc/ui";
    ```
+2. **Create molecules in app-specific `components/`** when combining atoms or adding app logic.
+3. **Add primitives to the UI package** when the component will be reused across apps and is mostly presentational.
 
-2. **Create molecules in app-specific `components/` folders** when:
-   - Combining multiple atoms
-   - Adding app-specific business logic
-   - Creating feature-specific compositions
+### Don't
 
-3. **Add new primitives to the UI package** when:
-   - The component will be reused across multiple apps
-   - It's a pure UI component with minimal business logic
-   - It follows shadcn/ui patterns
+1. Don’t duplicate shadcn components in app folders; add them to the UI package.
+2. Don’t put business logic in UI package atoms.
+3. Don’t manually install shadcn components; use `pnpm ui:add`.
 
-### ❌ Don't
+## Package Exports (UI)
 
-1. **Don't duplicate shadcn components** in app folders - add them to the UI package instead
-2. **Don't add business logic** to UI package atoms - keep them pure and reusable
-3. **Don't manually install shadcn components** - always use `pnpm ui:add`
-
-## Package Exports
-
-The UI package exports:
-
-- `@uwdsc/ui` - All component exports
-- `@uwdsc/ui/globals.css` - Global styles
-- `@uwdsc/ui/postcss.config` - PostCSS configuration
-
-## Dependencies
-
-The UI package includes:
-
-- **Radix UI** primitives (headless components)
-- **Tailwind CSS** for styling
-- **Framer Motion** for animations
-- **Lucide React** for icons (via shadcn)
-- **next-themes** for theme support
-- **class-variance-authority** for variant styling
+- `@uwdsc/ui` – component exports
+- `@uwdsc/ui/globals.css` – global styles
+- `@uwdsc/ui/postcss.config` – PostCSS config
 
 ---
 
 # Server Packages & API Architecture
 
-This project follows a **clean architecture pattern** with clear separation between frontend apps and backend services.
+The backend is split into **database/config**, **shared core**, and **app-specific** layers. There is **no Prisma**; data access uses **postgres.js** (via `@uwdsc/db`) and **Supabase** for auth and storage.
 
-## Server Package Structure
+## Package Structure
 
-The `packages/server/` directory contains backend services organized into three sub-packages:
+### `@uwdsc/db` – Database & Supabase
 
-### 📦 `@uwdsc/server/core` - Shared Backend Utilities
-
-**Purpose**: Common backend services shared across all apps
-
-**Location**: `packages/server/core/src/`
-
-**Structure**:
-
-- `database/` - Supabase client and connection utilities
-- `services/` - Shared services (AuthService, FileService, ResumeService)
-- `repository/` - Base repository and shared data access (BaseRepository, AuthRepository, FileRepository)
-- `types/` - Common TypeScript types
-- `utils/` - Error handling and utilities
-
-**Exports**:
+- **Location**: `packages/server/db/src/`
+- **Exports**: `connection` (postgres.js `sql`), `supabase` (Supabase client factories), `baseRepository`
+- **Responsibilities**: Supabase browser/server/middleware clients, Postgres connection for Transaction Pooler, `BaseRepository`, and db-migrate migrations.
 
 ```typescript
-import { AuthService } from "@uwdsc/server/core/services/authService";
-import { FileService } from "@uwdsc/server/core/services/fileService";
-import { BaseRepository } from "@uwdsc/server/core/repository/baseRepository";
+import { createSupabaseServerClient, createSupabaseMiddlewareClient } from "@uwdsc/db";
+import { BaseRepository } from "@uwdsc/db/baseRepository";
 ```
 
-**Tech Stack**: Supabase, PostgreSQL, TypeScript
+### `@uwdsc/core` – Shared Backend Logic
 
-### 📦 `@uwdsc/server/web` - Web App Backend
-
-**Purpose**: Backend services specific to the main website
-
-**Location**: `packages/server/web/src/`
-
-**Structure**:
-
-- `prisma/schema/` - Prisma schema files (application, event, profile, etc.)
-- `services/` - Web-specific business logic (ProfileService, ApplicationService, EventService)
-- `repository/` - Web-specific data access layer
-- `types/` - Web-specific types
-- `middleware/` - (Placeholder for future middleware)
-- `policies/` - (Placeholder for authorization policies)
-
-**Exports**:
+- **Location**: `packages/server/core/src/`
+- **Structure**: `services/` (AuthService, ProfileService, ApplicationService, FileService, ResumeService, TeamService), `repositories/` (extend `BaseRepository` from `@uwdsc/db`)
+- **Exports**: Service classes and **singleton instances** for stateless services that use the shared Postgres connection: `profileService`, `applicationService`, `teamService`. `AuthService` and `ResumeService` require a Supabase client and are **not** singletons; apps create them via `createAuthService()` / `createResumeService()` in `lib/services.ts`.
 
 ```typescript
-import { ProfileService } from "@uwdsc/server/web/services/profileService";
-import { ApplicationService } from "@uwdsc/server/web/services/applicationService";
+import { profileService, applicationService, teamService } from "@uwdsc/core";
+import { AuthService, ResumeService } from "@uwdsc/core";
 ```
 
-**Dependencies**: Extends `@uwdsc/server/core`, uses Prisma for app-specific database
+**Tech**: Postgres (postgres.js), Supabase (auth + storage), TypeScript. Types live in `@uwdsc/common/types`.
 
-**Tech Stack**: Prisma, Supabase, PostgreSQL, TypeScript
+### `@uwdsc/admin` – Admin App Backend
 
-### 📦 `@uwdsc/server/cxc` - CxC App Backend
-
-**Purpose**: Backend services specific to CxC app
-
-**Location**: `packages/server/cxc/src/`
-
-**Structure**: Same as web backend with CxC-specific schemas and services
-
-**Exports**:
+- **Location**: `packages/server/admin/src/`
+- **Purpose**: Admin-specific services (e.g. profile/member listing and updates for the admin app).
+- **Used by**: `apps/admin` API routes only.
 
 ```typescript
-import { ProfileService } from "@uwdsc/server/cxc/services/profileService";
-import { ApplicationService } from "@uwdsc/server/cxc/services/applicationService";
+import { profileService } from "@uwdsc/admin";
 ```
-
-**Dependencies**: Extends `@uwdsc/server/core`, uses Prisma for app-specific database
-
-**Tech Stack**: Prisma, Supabase, PostgreSQL, TypeScript
 
 ## API Architecture & Data Flow
 
-The application follows a layered architecture pattern:
+Flow: **React → `lib/api/` → API route → Service (from `@uwdsc/core` or `@uwdsc/admin`) → Repository → Database**.
 
-### Flow: React Component → Client API → API Route → Service → Repository → Database
+1. **React components** – Call client API functions from `lib/api/` (e.g. `getProfile()`, `login()`).
+2. **Client API** (`apps/{web,admin}/lib/api/`) – Type-safe wrappers that call Next.js API routes; use types from `@uwdsc/common/types`.
+3. **API routes** (`apps/{web,admin}/app/api/`) – Thin HTTP layer: parse request, call service, return `ApiResponse.*` from `@uwdsc/common/utils`.
+4. **Services** (`packages/server/core` or `admin`) – Business logic and validation; use repositories. Use **singletons** from `@uwdsc/core` where applicable; create **AuthService** / **ResumeService** in the app (e.g. `lib/services.ts`) with a server Supabase client.
+5. **Repositories** – Extend `BaseRepository` from `@uwdsc/db`; use `this.sql` (postgres.js) for queries. No Prisma.
+6. **Database** – Postgres (migrations in `packages/server/db`), Supabase for auth and storage.
 
-```
-┌─────────────────┐     ┌─────────────────┐    ┌─────────────────┐
-│   React Page    │───▶│ lib/api/ funcs  │───▶│   app/api/      │
-│   (Frontend)    │     │  (Client SDK)   │    │  (API Routes)   │
-└─────────────────┘     └─────────────────┘    └─────────────────┘
+**Standard API responses**: Use `ApiResponse` from `@uwdsc/common/utils` in API routes (e.g. `ApiResponse.ok()`, `ApiResponse.badRequest()`, `ApiResponse.serverError()`).
 
-┌─────────────────┐     ┌─────────────────┐    ┌─────────────────┐
-│    Database     │◀───│   Repository    │◀───│    Service      │
-│   (Supabase)    │     │  (Data Layer)   │    │ (Business Logic)│
-└─────────────────┘     └─────────────────┘    └─────────────────┘
-```
-
-### Layer Breakdown
-
-1. **React Components** (`apps/{web,cxc}/components/`)
-   - UI components that consume data
-   - These are your **molecular components** built from UI atoms
-   - Call client API functions from `lib/api/`
-
-2. **Client API Functions** (`apps/{web,cxc}/lib/api/`)
-   - Type-safe API wrapper functions for frontend consumption
-   - Handle request/response formatting and error handling
-   - Example: `register()`, `login()`, `getProfile()`
-   - Import types from `apps/{app}/types/api.ts`
-   - Make HTTP requests to Next.js API routes
-
-3. **API Routes** (`apps/{web,cxc}/app/api/`)
-   - Handle HTTP requests and responses
-   - Thin layer that calls service methods
-   - **Import services from respective server package**
-   - Example: `apps/web/app/api/profile/route.ts` imports from `@uwdsc/server/web`
-
-4. **Services** (`packages/server/{core,web,cxc}/src/services/`)
-   - Business logic and validation
-   - Orchestrate repository calls
-   - Shared services in `core`, app-specific in `web`/`cxc`
-   - Example: `ProfileService.getProfile()`, `AuthService.signIn()`
-
-5. **Repositories** (`packages/server/{core,web,cxc}/src/repository/`)
-   - Data access layer
-   - Direct database interactions via Prisma or Supabase client
-   - Extend `BaseRepository` for common functionality
-   - Core repositories in `core`, app-specific in `web`/`cxc`
-
-6. **Database**
-   - **Prisma**: App-specific database schemas for web and cxc
-   - **Supabase**: Authentication and shared services
-   - PostgreSQL as the underlying database
-
-### Example: Profile API Flow
+### Example: Profile API
 
 ```typescript
-// 1. React component (apps/web/app/page.tsx) calls API function
+// 1. Component calls client API
 import { getProfile } from "@/lib/api";
 const profile = await getProfile();
 
-// 2. API function (apps/web/lib/api/user.ts) calls Next.js route
-const response = await fetch("/api/profile");
-return response.json();
+// 2. Client API (lib/api/profile.ts) calls fetch("/api/profile")
 
-// 3. API route (apps/web/app/api/profile/route.ts) calls service
-import { ProfileService } from "@uwdsc/server/web/services/profileService";
-const profileService = new ProfileService();
-const profile = await profileService.getProfileByUserId(userId);
+// 3. API route (app/api/profile/route.ts)
+import { profileService } from "@uwdsc/core";
+import { ApiResponse } from "@uwdsc/common/utils";
+const profile = await profileService.getProfileByUserId(user.id);
+return ApiResponse.ok({ profile, isComplete });
 
-// 4. Service (packages/server/web/src/services/profileService.ts) calls repository
-return await this.repository.getProfileByUserId(userId);
+// 4. Service uses repository; repository extends BaseRepository from @uwdsc/db and uses this.sql
+```
 
-// 5. Repository (packages/server/web/src/repository/profileRepository.ts) queries database
-const profile = await this.prisma.profile.findUnique({ where: { userId } });
-return profile;
+### Example: Auth (needs Supabase in request context)
+
+```typescript
+// API route
+import { createAuthService } from "@/lib/services";
+const authService = await createAuthService();
+const result = await authService.login({ email, password });
 ```
 
 ## Usage Guidelines
 
-### ✅ Do
+### Do
 
-1. **Import services from server packages in API routes**:
+1. Import **services** from `@uwdsc/core` or `@uwdsc/admin` in API routes; use **singletons** (`profileService`, `applicationService`, `teamService`) where the service is stateless.
+2. Create **AuthService** / **ResumeService** in the app (e.g. `lib/services.ts`) with `createSupabaseServerClient` from `@uwdsc/db`.
+3. Extend **BaseRepository** from `@uwdsc/db/baseRepository` when adding new repositories.
+4. Use **ApiResponse** from `@uwdsc/common/utils` in API routes.
+5. Keep API routes thin; put business logic in services.
 
-   ```typescript
-   // apps/web/app/api/profile/route.ts
-   import { ProfileService } from "@uwdsc/server/web/services/profileService";
-   ```
+### Don't
 
-2. **Use core services for shared functionality**:
+1. Don’t import server packages in React components; use `lib/api/` client functions.
+2. Don’t put business logic in API routes or repositories.
+3. Don’t access the database directly from API routes; go through services and repositories.
+4. Don’t assume Prisma; the project uses postgres.js and Supabase.
 
-   ```typescript
-   import { AuthService } from "@uwdsc/server/core/services/authService";
-   ```
+---
 
-3. **Extend BaseRepository** when creating new repositories:
+# Shared Types & Utils (`@uwdsc/common`)
 
-   ```typescript
-   import { BaseRepository } from "@uwdsc/server/core/repository/baseRepository";
-   ```
+- **Types**: `@uwdsc/common/types` – entities (Profile, Application, etc.), API types, shared enums, errors.
+- **Utils**: `@uwdsc/common/utils` – `ApiResponse` for API routes, and other shared helpers (e.g. `filterPartialUpdate`).
 
-4. **Keep API routes thin** - they should only handle HTTP concerns and delegate to services
-
-5. **Put business logic in services**, not in API routes or repositories
-
-### ❌ Don't
-
-1. **Don't import server packages in React components** - use client API functions instead
-2. **Don't put business logic in API routes** - use services
-3. **Don't put business logic in repositories** - they should only handle data access
-4. **Don't duplicate services** - use `@uwdsc/server/core` for shared functionality
-5. **Don't access database directly from API routes** - always go through services and repositories
+Use these in both apps and server packages for consistent DTOs and response shapes.

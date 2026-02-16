@@ -84,7 +84,7 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
   className = "",
   style = {},
 }) => {
-  const uniqueId = useId().replaceAll(':', "-");
+  const uniqueId = useId().replaceAll(":", "-");
   const filterId = `glass-filter-${uniqueId}`;
   const redGradId = `red-grad-${uniqueId}`;
   const blueGradId = `blue-grad-${uniqueId}`;
@@ -271,46 +271,46 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
              0px 16px 56px rgba(17, 17, 26, 0.05) inset`,
       };
     } else if (isDarkMode) {
-        if (backdropFilterSupported) {
-          return {
-            ...baseStyles,
-            background: "rgba(255, 255, 255, 0.1)",
-            backdropFilter: "blur(12px) saturate(1.8) brightness(1.2)",
-            WebkitBackdropFilter: "blur(12px) saturate(1.8) brightness(1.2)",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-            boxShadow: `inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
+      if (backdropFilterSupported) {
+        return {
+          ...baseStyles,
+          background: "rgba(255, 255, 255, 0.1)",
+          backdropFilter: "blur(12px) saturate(1.8) brightness(1.2)",
+          WebkitBackdropFilter: "blur(12px) saturate(1.8) brightness(1.2)",
+          border: "1px solid rgba(255, 255, 255, 0.2)",
+          boxShadow: `inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
                         inset 0 -1px 0 0 rgba(255, 255, 255, 0.1)`,
-          };
-        } else {
-          return {
-            ...baseStyles,
-            background: "rgba(0, 0, 0, 0.4)",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-            boxShadow: `inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
+        };
+      } else {
+        return {
+          ...baseStyles,
+          background: "rgba(0, 0, 0, 0.4)",
+          border: "1px solid rgba(255, 255, 255, 0.2)",
+          boxShadow: `inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
                         inset 0 -1px 0 0 rgba(255, 255, 255, 0.1)`,
-          };
-        }
-      } else if (backdropFilterSupported) {
-          return {
-            ...baseStyles,
-            background: "rgba(255, 255, 255, 0.25)",
-            backdropFilter: "blur(12px) saturate(1.8) brightness(1.1)",
-            WebkitBackdropFilter: "blur(12px) saturate(1.8) brightness(1.1)",
-            border: "1px solid rgba(255, 255, 255, 0.3)",
-            boxShadow: `0 8px 32px 0 rgba(31, 38, 135, 0.2),
+        };
+      }
+    } else if (backdropFilterSupported) {
+      return {
+        ...baseStyles,
+        background: "rgba(255, 255, 255, 0.25)",
+        backdropFilter: "blur(12px) saturate(1.8) brightness(1.1)",
+        WebkitBackdropFilter: "blur(12px) saturate(1.8) brightness(1.1)",
+        border: "1px solid rgba(255, 255, 255, 0.3)",
+        boxShadow: `0 8px 32px 0 rgba(31, 38, 135, 0.2),
                         0 2px 16px 0 rgba(31, 38, 135, 0.1),
                         inset 0 1px 0 0 rgba(255, 255, 255, 0.4),
                         inset 0 -1px 0 0 rgba(255, 255, 255, 0.2)`,
-          };
-        } else {
-          return {
-            ...baseStyles,
-            background: "rgba(255, 255, 255, 0.4)",
-            border: "1px solid rgba(255, 255, 255, 0.3)",
-            boxShadow: `inset 0 1px 0 0 rgba(255, 255, 255, 0.5),
+      };
+    } else {
+      return {
+        ...baseStyles,
+        background: "rgba(255, 255, 255, 0.4)",
+        border: "1px solid rgba(255, 255, 255, 0.3)",
+        boxShadow: `inset 0 1px 0 0 rgba(255, 255, 255, 0.5),
                         inset 0 -1px 0 0 rgba(255, 255, 255, 0.3)`,
-          };
-        }
+      };
+    }
   };
 
   const glassSurfaceClasses =

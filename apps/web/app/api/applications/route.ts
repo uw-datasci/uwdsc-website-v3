@@ -1,7 +1,7 @@
-import { ApiError } from "@uwdsc/common/types";
+import { ApiResponse } from "@uwdsc/common/utils";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 import { applicationService } from "@uwdsc/core";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,24 +10,16 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const termId = searchParams.get("termId");
-    if (!termId) {
-      return NextResponse.json(
-        { error: "termId is required" },
-        { status: 400 },
-      );
-    }
+    if (!termId) return ApiResponse.badRequest("termId is required");
 
     const application = await applicationService.getApplicationForUser(
       user.id,
       termId,
     );
-    return NextResponse.json(application);
+    return ApiResponse.ok(application);
   } catch (error) {
     console.error("Error fetching application:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch application" },
-      { status: 500 },
-    );
+    return ApiResponse.serverError(error, "Failed to fetch application");
   }
 }
 
@@ -39,25 +31,16 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { termId } = body;
     if (!termId) {
-      return NextResponse.json(
-        { error: "termId is required" },
-        { status: 400 },
-      );
+      return ApiResponse.badRequest("termId is required");
     }
 
     const application = await applicationService.createApplication(
       user.id,
       termId,
     );
-    return NextResponse.json(application);
+    return ApiResponse.ok(application);
   } catch (error) {
     console.error("Error creating application:", error);
-    const message =
-      error && typeof error === "object" && "message" in error
-        ? (error as Error).message
-        : "Failed to create application";
-    const status =
-      error instanceof ApiError ? error.statusCode : 500;
-    return NextResponse.json({ error: message }, { status });
+    return ApiResponse.serverError(error, "Failed to create application");
   }
 }

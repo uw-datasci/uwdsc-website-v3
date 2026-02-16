@@ -51,9 +51,7 @@ export function Resume({ form }: ResumeProps) {
         const result = await uploadResume(file);
         form.setValue("resumeKey", result.key);
       } catch (err) {
-        setUploadError(
-          err instanceof Error ? err.message : "Upload failed",
-        );
+        setUploadError(err instanceof Error ? err.message : "Upload failed");
         form.setValue("resumeKey", "");
       } finally {
         setIsUploading(false);
@@ -102,10 +100,7 @@ export function Resume({ form }: ResumeProps) {
                       PDF, DOC, or DOCX (max {MAX_SIZE_MB} MB)
                     </span>
                   </label>
-                  <input
-                    type="hidden"
-                    {...field}
-                  />
+                  <input type="hidden" {...field} />
                 </div>
               </FormControl>
               <FormDescription>

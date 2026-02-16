@@ -110,7 +110,7 @@ export function Positions({ form, positions }: PositionsProps) {
             <FormField
               control={form.control}
               name="position_1"
-              render={({ field }) => (
+              render={({ field }) =>
                 renderSelectField({
                   placeholder: "Choose a position to apply for",
                   options: getAvailablePositions(position1),
@@ -130,7 +130,7 @@ export function Positions({ form, positions }: PositionsProps) {
                       positions.find((p) => p.id === field.value)?.name || "",
                   },
                 })
-              )}
+              }
             />
 
             {position1Data?.questions.map((q) => (
@@ -162,7 +162,7 @@ export function Positions({ form, positions }: PositionsProps) {
             <FormField
               control={form.control}
               name="position_2"
-              render={({ field }) => (
+              render={({ field }) =>
                 renderSelectField({
                   placeholder: "Choose a position to apply for",
                   options: getAvailablePositions(position2, true),
@@ -182,7 +182,7 @@ export function Positions({ form, positions }: PositionsProps) {
                       positions.find((p) => p.id === field.value)?.name || "",
                   },
                 })
-              )}
+              }
             />
 
             {position2Data?.questions.map((q) => (
@@ -214,7 +214,7 @@ export function Positions({ form, positions }: PositionsProps) {
             <FormField
               control={form.control}
               name="position_3"
-              render={({ field }) => (
+              render={({ field }) =>
                 renderSelectField({
                   placeholder: "Choose a position to apply for",
                   options: getAvailablePositions(position3, true),
@@ -234,7 +234,7 @@ export function Positions({ form, positions }: PositionsProps) {
                       positions.find((p) => p.id === field.value)?.name || "",
                   },
                 })
-              )}
+              }
             />
 
             {position3Data?.questions.map((q) => (

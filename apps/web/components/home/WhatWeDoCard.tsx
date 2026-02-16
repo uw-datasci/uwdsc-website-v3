@@ -4,7 +4,7 @@ interface WhatWeDoCardProps {
   title: string;
   description: string;
   graphic: StaticImageData;
-};
+}
 
 /**
  * Card to display what we do

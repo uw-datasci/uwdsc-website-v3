@@ -1,24 +1,21 @@
-import { NextResponse } from "next/server";
+import { ApiResponse } from "@uwdsc/common/utils";
 import { createAuthService } from "@/lib/services";
 
-export async function POST(): Promise<NextResponse> {
+export async function POST() {
   try {
     const authService = await createAuthService();
     const result = await authService.signOut();
 
     if (!result.success) {
-      return NextResponse.json({ error: result.error }, { status: 400 });
+      return ApiResponse.badRequest(result.error, "Sign out failed");
     }
 
-    return NextResponse.json({
+    return ApiResponse.ok({
       success: true,
       message: result.message,
     });
   } catch (error) {
     console.error("Signout error:", error);
-    return NextResponse.json(
-      { error: "An unexpected error occurred" },
-      { status: 500 },
-    );
+    return ApiResponse.serverError(error, "An unexpected error occurred");
   }
 }

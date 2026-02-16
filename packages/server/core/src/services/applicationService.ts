@@ -132,10 +132,7 @@ class ApplicationService {
     termId: string,
   ): Promise<ApplicationWithDetails | null> {
     try {
-      return await this.repository.getApplicationByUserAndTerm(
-        userId,
-        termId,
-      );
+      return await this.repository.getApplicationByUserAndTerm(userId, termId);
     } catch (error) {
       throw new ApiError(
         `Failed to get application: ${(error as Error).message}`,
@@ -177,7 +174,6 @@ class ApplicationService {
       );
     }
   }
-
 }
 
 export const applicationService = new ApplicationService();

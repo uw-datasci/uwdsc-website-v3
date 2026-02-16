@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { ApiResponse } from "@uwdsc/common/utils";
 import { profileService } from "@uwdsc/admin";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 
@@ -24,23 +24,14 @@ export async function GET(request: Request) {
     if (statsOnly) {
       // Return only statistics
       const stats = await profileService.getMembershipStats();
-      return NextResponse.json({ stats }, { status: 200 });
+      return ApiResponse.ok({ stats });
     }
 
     // Return all profiles
     const profiles = await profileService.getAllProfiles();
-    return NextResponse.json(profiles, { status: 200 });
+    return ApiResponse.ok(profiles);
   } catch (error: unknown) {
     console.error("Error fetching memberships:", error);
-    return NextResponse.json(
-      {
-        error: "Internal server error",
-        message:
-          error instanceof Error
-            ? error.message
-            : "Failed to fetch membership data",
-      },
-      { status: 500 },
-    );
+    return ApiResponse.serverError(error, "Failed to fetch membership data");
   }
 }

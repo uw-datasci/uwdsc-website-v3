@@ -1,7 +1,7 @@
-import { ApiError } from "@uwdsc/common/types";
+import { ApiResponse } from "@uwdsc/common/utils";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 import { applicationService } from "@uwdsc/core";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 export async function PATCH(
   request: NextRequest,
@@ -12,12 +12,7 @@ export async function PATCH(
     if (isUnauthorized || !user) return isUnauthorized;
 
     const { id } = await params;
-    if (!id) {
-      return NextResponse.json(
-        { error: "Application ID is required" },
-        { status: 400 },
-      );
-    }
+    if (!id) return ApiResponse.badRequest("Application ID is required");
 
     const body = await request.json();
     const application = await applicationService.updateApplication(
@@ -27,20 +22,12 @@ export async function PATCH(
     );
 
     if (!application) {
-      return NextResponse.json(
-        { error: "Application not found or cannot be updated" },
-        { status: 404 },
-      );
+      return ApiResponse.notFound("Application not found or cannot be updated");
     }
 
-    return NextResponse.json(application);
+    return ApiResponse.ok(application);
   } catch (error) {
     console.error("Error updating application:", error);
-    const message =
-      error instanceof ApiError
-        ? error.message
-        : "Failed to update application";
-    const status = error instanceof ApiError ? error.statusCode : 500;
-    return NextResponse.json({ error: message }, { status });
+    return ApiResponse.serverError(error, "Failed to update application");
   }
 }

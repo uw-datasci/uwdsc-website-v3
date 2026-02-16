@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { ApiResponse } from "@uwdsc/common/utils";
 import { markAsPaidSchema, editMemberSchema } from "@/lib/schemas/membership";
 import { profileService } from "@uwdsc/admin";
 import { tryGetCurrentUser } from "@/lib/api/utils";
+import { NextRequest } from "next/server";
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -31,13 +32,9 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       const validationResult = markAsPaidSchema.safeParse(body);
 
       if (!validationResult.success) {
-        return NextResponse.json(
-          {
-            error: "Validation error",
-            message:
-              validationResult.error.issues[0]?.message || "Invalid data",
-          },
-          { status: 400 },
+        return ApiResponse.badRequest(
+          validationResult.error.issues[0]?.message || "Invalid data",
+          "Validation error",
         );
       }
 
@@ -47,58 +44,38 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       );
 
       if (!result.success) {
-        return NextResponse.json(
-          { error: result.error || "Failed to mark as paid" },
-          { status: 400 },
-        );
+        return ApiResponse.badRequest(result.error, "Failed to mark as paid");
       }
 
-      return NextResponse.json(
-        { success: true, message: "Member marked as paid" },
-        { status: 200 },
-      );
-    } else {
-      // Validate edit member data
-      const validationResult = editMemberSchema.safeParse(body);
+      return ApiResponse.ok({
+        success: true,
+        message: "Member marked as paid",
+      });
+    }
 
-      if (!validationResult.success) {
-        return NextResponse.json(
-          {
-            error: "Validation error",
-            message:
-              validationResult.error.issues[0]?.message || "Invalid data",
-          },
-          { status: 400 },
-        );
-      }
+    // Validate edit member data
+    const validationResult = editMemberSchema.safeParse(body);
 
-      const result = await profileService.updateMember(
-        id,
-        validationResult.data,
-      );
-
-      if (!result.success) {
-        return NextResponse.json(
-          { error: result.error || "Failed to update member" },
-          { status: 400 },
-        );
-      }
-
-      return NextResponse.json(
-        { success: true, message: "Member updated successfully" },
-        { status: 200 },
+    if (!validationResult.success) {
+      return ApiResponse.badRequest(
+        validationResult.error.issues[0]?.message || "Invalid data",
+        "Validation error",
       );
     }
+
+    const result = await profileService.updateMember(id, validationResult.data);
+
+    if (!result.success) {
+      return ApiResponse.badRequest(result.error, "Failed to update member");
+    }
+
+    return ApiResponse.ok({
+      success: true,
+      message: "Member updated successfully",
+    });
   } catch (error) {
     console.error("Error updating member:", error);
-    return NextResponse.json(
-      {
-        error: "Internal server error",
-        message:
-          error instanceof Error ? error.message : "Failed to update member",
-      },
-      { status: 500 },
-    );
+    return ApiResponse.serverError(error, "Failed to update member");
   }
 }
 
@@ -120,25 +97,15 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     const result = await profileService.deleteMember(id);
 
     if (!result.success) {
-      return NextResponse.json(
-        { error: result.error || "Failed to delete member" },
-        { status: 400 },
-      );
+      return ApiResponse.badRequest(result.error, "Failed to delete member");
     }
 
-    return NextResponse.json(
-      { success: true, message: "Member deleted successfully" },
-      { status: 200 },
-    );
+    return ApiResponse.ok({
+      success: true,
+      message: "Member deleted successfully",
+    });
   } catch (error) {
     console.error("Error deleting member:", error);
-    return NextResponse.json(
-      {
-        error: "Internal server error",
-        message:
-          error instanceof Error ? error.message : "Failed to delete member",
-      },
-      { status: 500 },
-    );
+    return ApiResponse.serverError(error, "Failed to delete member");
   }
 }

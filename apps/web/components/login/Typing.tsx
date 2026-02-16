@@ -40,11 +40,7 @@ export function Typing({
   return (
     <span className={className}>
       {displayedText}
-      <span
-        className={`inline-block cursor-blink ${caretSize || ""}`}
-      >
-        |
-      </span>
+      <span className={`inline-block cursor-blink ${caretSize || ""}`}>|</span>
     </span>
   );
 }

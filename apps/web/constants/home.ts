@@ -79,7 +79,6 @@ export const CLUB_STATS = [
   },
 ];
 
-
 export const PAST_EVENTS = [
   {
     id: "1",

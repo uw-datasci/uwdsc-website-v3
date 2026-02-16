@@ -11,7 +11,10 @@ interface VerifyEmailViewProps {
   readonly loginHref?: string;
 }
 
-export function VerifyEmailView({ email, loginHref = "/login" }: VerifyEmailViewProps) {
+export function VerifyEmailView({
+  email,
+  loginHref = "/login",
+}: VerifyEmailViewProps) {
   const [resendStatus, setResendStatus] = useState("");
   const [isResending, setIsResending] = useState(false);
 

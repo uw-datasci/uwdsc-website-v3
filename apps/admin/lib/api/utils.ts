@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAuthService } from "@/lib/services";
 import type { User } from "@supabase/supabase-js";
+import { ApiResponse } from "@uwdsc/common/utils";
 
 interface AuthResult {
   user: User | null;
@@ -25,10 +26,7 @@ export async function tryGetCurrentUser(): Promise<AuthResult> {
   if (userError || !user) {
     return {
       user: null,
-      isUnauthorized: NextResponse.json(
-        { error: "Unauthorized", message: "Authentication required" },
-        { status: 401 },
-      ),
+      isUnauthorized: ApiResponse.unauthorized("Authentication required"),
     };
   }
 

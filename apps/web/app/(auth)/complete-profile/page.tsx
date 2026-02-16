@@ -58,7 +58,8 @@ export default function CompleteProfilePage() {
         if (profile.term) form.setValue("term", profile.term);
       })
       .catch((err) => {
-        if (!cancelled) console.error("Failed to load profile for prefill:", err);
+        if (!cancelled)
+          console.error("Failed to load profile for prefill:", err);
       });
 
     return () => {

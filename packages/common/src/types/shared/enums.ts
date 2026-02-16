@@ -9,7 +9,7 @@ export type Faculty =
   | "science"
   | "arts"
   | "health"
-  | "environment"
+  | "environment";
 
 export type PaymentMethod = "cash" | "online" | "math_soc";
 
@@ -20,7 +20,7 @@ export type ApplicationStatus =
   | "submitted"
   | "under_review"
   | "accepted"
-  | "rejected"
+  | "rejected";
 
 export type ApplicationReviewStatus =
   | "In Review"

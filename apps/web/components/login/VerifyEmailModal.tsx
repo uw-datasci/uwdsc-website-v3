@@ -92,10 +92,11 @@ export function VerifyEmailModal({
 
           {resendStatus && (
             <p
-              className={`text-sm text-center ${resendStatus.includes("successfully")
-                ? "text-green-400"
-                : "text-red-400"
-                }`}
+              className={`text-sm text-center ${
+                resendStatus.includes("successfully")
+                  ? "text-green-400"
+                  : "text-red-400"
+              }`}
             >
               {resendStatus}
             </p>

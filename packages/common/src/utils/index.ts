@@ -1,3 +1,3 @@
-export * from "./nextResponse";
+export * from "./apiResponse";
 export * from "./serviceResponse";
 export * from "./filterPartialUpdate";

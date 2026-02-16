@@ -15,9 +15,7 @@ export function partitionDraftAnswers(
   pos2Answers: Record<string, string>;
   pos3Answers: Record<string, string>;
 } {
-  const genIds = new Set(
-    positionsData.generalQuestions.map((q) => q.id),
-  );
+  const genIds = new Set(positionsData.generalQuestions.map((q) => q.id));
   const generalAnswers: Record<string, string> = {};
   const pos1Answers: Record<string, string> = {};
   const pos2Answers: Record<string, string> = {};
@@ -34,7 +32,8 @@ export function partitionDraftAnswers(
     }
     for (const p of positionsData.positions) {
       if (!p.questions.some((pq) => pq.id === a.question_id)) continue;
-      if (pos1?.position_id === p.id) pos1Answers[a.question_id] = a.answer_text;
+      if (pos1?.position_id === p.id)
+        pos1Answers[a.question_id] = a.answer_text;
       else if (pos2?.position_id === p.id)
         pos2Answers[a.question_id] = a.answer_text;
       else if (pos3?.position_id === p.id)
@@ -125,13 +124,12 @@ export const isStepValid = (
     case 2: {
       // General - dynamic questions
       const generalAnswers = form.watch("general_answers") || {};
-      const allAnswered =
-        generalQuestionIds.every(
-          (id) =>
-            generalAnswers[id] &&
-            generalAnswers[id].trim().length >= 1 &&
-            generalAnswers[id].trim().length <= 1000,
-        );
+      const allAnswered = generalQuestionIds.every(
+        (id) =>
+          generalAnswers[id] &&
+          generalAnswers[id].trim().length >= 1 &&
+          generalAnswers[id].trim().length <= 1000,
+      );
       return !errors.general_answers && allAnswered;
     }
     case 3: {

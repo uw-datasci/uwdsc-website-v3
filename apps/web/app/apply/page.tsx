@@ -71,7 +71,12 @@ export default function ApplyPage() {
   const [positions, setPositions] = useState<PositionWithQuestions[]>([]);
   const [generalQuestionIds, setGeneralQuestionIds] = useState<string[]>([]);
   const [generalQuestions, setGeneralQuestions] = useState<
-    { id: string; question_text: string; sort_order: number; placeholder: string | null }[]
+    {
+      id: string;
+      question_text: string;
+      sort_order: number;
+      placeholder: string | null;
+    }[]
   >([]);
   const [applicationId, setApplicationId] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<number>(0);
@@ -98,9 +103,7 @@ export default function ApplyPage() {
         ]);
         setCurrentTerm(term);
         setPositions(positionsData.positions);
-        setGeneralQuestionIds(
-          positionsData.generalQuestions.map((q) => q.id),
-        );
+        setGeneralQuestionIds(positionsData.generalQuestions.map((q) => q.id));
         setGeneralQuestions(positionsData.generalQuestions);
 
         const fullName =
@@ -206,10 +209,13 @@ export default function ApplyPage() {
     [form],
   );
 
-  const goToStep = useCallback((step: number) => {
-    setDirection(step > currentStep ? 1 : -1);
-    setCurrentStep(step);
-  }, [currentStep]);
+  const goToStep = useCallback(
+    (step: number) => {
+      setDirection(step > currentStep ? 1 : -1);
+      setCurrentStep(step);
+    },
+    [currentStep],
+  );
 
   const handleNext = useCallback(async () => {
     if (!applicationId) return;
@@ -235,7 +241,8 @@ export default function ApplyPage() {
   const renderButton = () => {
     const isLastStep = currentStep === 4;
     const isPastHardDeadline = Boolean(
-      currentTerm && new Date() > new Date(currentTerm.application_hard_deadline),
+      currentTerm &&
+      new Date() > new Date(currentTerm.application_hard_deadline),
     );
     const isValid =
       isStepValid(form, currentStep, {

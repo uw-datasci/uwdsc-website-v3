@@ -29,7 +29,7 @@ export async function GET(request: Request) {
 
     // Return all profiles
     const profiles = await profileService.getAllProfiles();
-    return NextResponse.json({ profiles }, { status: 200 });
+    return NextResponse.json(profiles, { status: 200 });
   } catch (error: any) {
     console.error("Error fetching memberships:", error);
     return NextResponse.json(

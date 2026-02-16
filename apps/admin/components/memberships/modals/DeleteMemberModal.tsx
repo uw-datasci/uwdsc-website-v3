@@ -11,17 +11,17 @@ import {
   DialogFooter,
 } from "@uwdsc/ui";
 import { deleteMember } from "@/lib/api";
-import type { MemberProfile } from "@/types/api";
+import { Member } from "@uwdsc/common/types";
 import { toast } from "sonner";
 
 interface DeleteMemberModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  member: MemberProfile;
+  member: Member;
   onSuccess?: () => void;
 }
 
-function getMemberDisplayName(member: MemberProfile): string {
+function getMemberDisplayName(member: Member): string {
   const name = [member.first_name, member.last_name].filter(Boolean).join(" ");
   return name || member.email;
 }

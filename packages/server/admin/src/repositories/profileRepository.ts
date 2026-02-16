@@ -1,15 +1,16 @@
 import { BaseRepository } from "@uwdsc/db/baseRepository";
-import { MarkAsPaidData, MembershipStats, Profile } from "@uwdsc/common/types";
+import { MarkAsPaidData, Member, MembershipStats } from "@uwdsc/common/types";
 
 export class ProfileRepository extends BaseRepository {
   /**
    * Get all user profiles with email from auth.users
    * Used for admin membership management
    */
-  async getAllProfiles(): Promise<Profile[]> {
+  async getAllProfiles(): Promise<Member[]> {
     try {
-      const result = await this.sql<Profile[]>`
-      SELECT 
+      const result = await this.sql<Member[]>`
+      SELECT
+        p.id,
         p.first_name,
         p.last_name,
         au.email,
@@ -18,15 +19,15 @@ export class ProfileRepository extends BaseRepository {
         p.term,
         p.is_math_soc_member,
         r.role,
-        payment_method,
-        payment_location,
-        pv.first_name,
-        pv.last_name
+        m.payment_method,
+        m.payment_location,
+        pv.first_name AS verifier_first_name,
+        pv.last_name AS verifier_last_name
       FROM profiles p
       JOIN auth.users au ON p.id = au.id
       JOIN user_roles r ON p.id = r.id
-      JOIN memberships m ON m.user_id = p.id
-      JOIN profiles pv ON pv.id = verifier_id
+      LEFT JOIN memberships m ON m.user_id = p.id
+      LEFT JOIN profiles pv ON pv.id = m.verifier_id
       ORDER BY au.created_at DESC
       `;
 

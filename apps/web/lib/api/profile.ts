@@ -8,10 +8,6 @@
 import { createApiError } from "./errors";
 import { Profile, ProfileUpdateData } from "@uwdsc/common/types";
 
-// ============================================================================
-// User Profile API Functions
-// ============================================================================
-
 /**
  * Get the current user's profile with full response data
  *

@@ -2,8 +2,8 @@ import { ProfileRepository } from "../repositories/profileRepository";
 import {
   ApiError,
   MarkAsPaidData,
+  Member,
   MembershipStats,
-  Profile,
   UpdateMemberData,
 } from "@uwdsc/common/types";
 import { filterPartialUpdate } from "@uwdsc/common/utils";
@@ -27,7 +27,7 @@ class ProfileService {
   /**
    * Get all user profiles
    */
-  async getAllProfiles(): Promise<Profile[]> {
+  async getAllProfiles(): Promise<Member[]> {
     try {
       return await this.repository.getAllProfiles();
     } catch (error) {

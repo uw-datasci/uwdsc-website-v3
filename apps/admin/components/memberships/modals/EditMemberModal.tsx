@@ -8,7 +8,6 @@ import {
   editMemberSchema,
   type EditMemberFormValues,
 } from "@/lib/schemas/membership";
-import type { MemberProfile } from "@/types/api";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -32,11 +31,12 @@ import {
   SelectItem,
   Checkbox,
 } from "@uwdsc/ui";
+import { Member } from "@uwdsc/common/types";
 
 interface EditMemberModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  member: MemberProfile;
+  member: Member;
   onSuccess?: () => void;
 }
 

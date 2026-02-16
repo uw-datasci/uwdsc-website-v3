@@ -5,16 +5,15 @@ import {
   MembershipStatsCards,
   MembershipsTable,
 } from "@/components/memberships";
-import type { MemberProfile, MembershipStats } from "@/types/api";
 import { getAllProfiles, getMembershipStats } from "@/lib/api";
-import { MembershipFilterType } from "@/types/members";
+import { Member, MembershipFilter, MembershipStats } from "@uwdsc/common/types";
 
 export default function MembersPage() {
-  const [profiles, setProfiles] = useState<MemberProfile[]>([]);
+  const [profiles, setProfiles] = useState<Member[]>([]);
   const [stats, setStats] = useState<MembershipStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeFilter, setActiveFilter] = useState<MembershipFilterType>("all");
+  const [activeFilter, setActiveFilter] = useState<MembershipFilter>("all");
 
   const fetchData = async () => {
     try {

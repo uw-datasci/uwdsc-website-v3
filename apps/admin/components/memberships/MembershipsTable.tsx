@@ -19,8 +19,6 @@ import {
   ChevronsRight,
   Download,
 } from "lucide-react";
-import type { MemberProfile } from "@/types/api";
-import type { MembershipFilterType } from "@/types/members";
 import {
   membershipColumns,
   type MembershipActionType,
@@ -44,10 +42,11 @@ import {
 } from "@uwdsc/ui";
 import { exportToCsv } from "@/lib/utils/csv";
 import { globalMembershipFilter } from "@/lib/utils/table";
+import { Member, MembershipFilter } from "@uwdsc/common/types";
 
 interface MembershipsTableProps {
-  readonly profiles: MemberProfile[];
-  readonly activeFilter: MembershipFilterType;
+  readonly profiles: Member[];
+  readonly activeFilter: MembershipFilter;
   readonly onRefresh?: () => void;
 }
 
@@ -90,13 +89,13 @@ const FACULTY_OPTIONS = [
   { value: "other_non_waterloo", label: "Other / Non-UW" },
 ] as const;
 
-function getMembershipCsvValue(row: MemberProfile, key: string): unknown {
+function getMembershipCsvValue(row: Member, key: string): unknown {
   if (key === "name") {
     const first = row.first_name ?? "";
     const last = row.last_name ?? "";
     return [first, last].filter(Boolean).join(" ");
   }
-  return row[key as keyof MemberProfile];
+  return row[key as keyof Member];
 }
 
 export function MembershipsTable({
@@ -109,7 +108,7 @@ export function MembershipsTable({
   const [globalFilter, setGlobalFilter] = useState("");
   const [actionModal, setActionModal] = useState<{
     type: MembershipActionType;
-    member: MemberProfile;
+    member: Member;
   } | null>(null);
 
   // Sync column filters with activeFilter from stats cards
@@ -150,7 +149,7 @@ export function MembershipsTable({
     state: { sorting, columnFilters, globalFilter },
     initialState: { pagination: { pageSize: 20 } },
     meta: {
-      onAction: (type: MembershipActionType, member: MemberProfile) => {
+      onAction: (type: MembershipActionType, member: Member) => {
         setActionModal({ type, member });
       },
     },
@@ -349,49 +348,49 @@ export function MembershipsTable({
           <div className="rounded-lg overflow-x-auto border">
             <Table className="min-w-160">
               <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
                             header.column.columnDef.header,
                             header.getContext(),
                           )}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
+                      </TableHead>
                     ))}
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={membershipColumns.length}
-                    className="h-24 text-center"
-                  >
-                    No members found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={membershipColumns.length}
+                      className="h-24 text-center"
+                    >
+                      No members found.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </div>
-      </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4 px-1">
           <p className="text-xs text-muted-foreground">

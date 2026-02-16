@@ -3,14 +3,13 @@
 import { useState } from "react";
 import { Users, DollarSign, GraduationCap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { MembershipStats } from "@/types/api";
-import type { MembershipFilterType } from "@/types/members";
 import { cn, Card, CardHeader, CardTitle, CardContent } from "@uwdsc/ui";
+import { MembershipFilter, MembershipStats } from "@uwdsc/common/types";
 
 interface MembershipStatsCardsProps {
   readonly stats: MembershipStats;
-  readonly activeFilter: MembershipFilterType;
-  readonly onFilterChange: (filter: MembershipFilterType) => void;
+  readonly activeFilter: MembershipFilter;
+  readonly onFilterChange: (filter: MembershipFilter) => void;
 }
 
 export function MembershipStatsCards({
@@ -18,18 +17,18 @@ export function MembershipStatsCards({
   activeFilter,
   onFilterChange,
 }: MembershipStatsCardsProps) {
-  const [hoveredCard, setHoveredCard] = useState<MembershipFilterType | null>(
+  const [hoveredCard, setHoveredCard] = useState<MembershipFilter | null>(
     null,
   );
 
   const paidPercentage =
-    stats.totalUsers > 0
-      ? ((stats.paidUsers / stats.totalUsers) * 100).toFixed(1)
+    stats.total_users > 0
+      ? ((stats.paid_users / stats.total_users) * 100).toFixed(1)
       : "0.0";
 
   const mathSocPercentage =
-    stats.paidUsers > 0
-      ? ((stats.mathSocMembers / stats.paidUsers) * 100).toFixed(1)
+    stats.paid_users > 0
+      ? ((stats.math_soc_members / stats.paid_users) * 100).toFixed(1)
       : "0.0";
 
   const cardBaseStyles =
@@ -48,12 +47,12 @@ export function MembershipStatsCards({
         onMouseEnter={() => setHoveredCard("all")}
         onMouseLeave={() => setHoveredCard(null)}
       >
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <CardTitle className="text-sm font-medium">Total Users</CardTitle>
           <Users className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.totalUsers}</div>
+          <div className="text-2xl font-bold">{stats.total_users}</div>
           <p className="text-xs text-muted-foreground">Registered members</p>
         </CardContent>
         <AnimatePresence>
@@ -83,12 +82,12 @@ export function MembershipStatsCards({
         onMouseEnter={() => setHoveredCard("paid")}
         onMouseLeave={() => setHoveredCard(null)}
       >
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <CardTitle className="text-sm font-medium">Paid Members</CardTitle>
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.paidUsers}</div>
+          <div className="text-2xl font-bold">{stats.paid_users}</div>
           <p className="text-xs text-muted-foreground">
             {paidPercentage}% of total users
           </p>
@@ -120,14 +119,14 @@ export function MembershipStatsCards({
         onMouseEnter={() => setHoveredCard("paid-mathsoc")}
         onMouseLeave={() => setHoveredCard(null)}
       >
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <CardTitle className="text-sm font-medium">
             Paid MathSoc Members
           </CardTitle>
           <GraduationCap className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.mathSocMembers}</div>
+          <div className="text-2xl font-bold">{stats.math_soc_members}</div>
           <p className="text-xs text-muted-foreground">
             {mathSocPercentage}% of paid users
           </p>

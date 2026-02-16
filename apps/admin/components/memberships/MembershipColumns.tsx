@@ -10,8 +10,8 @@ import {
   Trash2,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import type { MemberProfile } from "@/types/api";
 import { Button, Tooltip, TooltipContent, TooltipTrigger } from "@uwdsc/ui";
+import { Member } from "@uwdsc/common/types";
 
 const SORT_ICONS = {
   asc: ArrowUp,
@@ -56,10 +56,10 @@ function SortIcon({
 export type MembershipActionType = "edit" | "markPaid" | "delete";
 
 export interface MembershipTableMeta {
-  onAction: (type: MembershipActionType, member: MemberProfile) => void;
+  onAction: (type: MembershipActionType, member: Member) => void;
 }
 
-export const membershipColumns: ColumnDef<MemberProfile>[] = [
+export const membershipColumns: ColumnDef<Member>[] = [
   {
     id: "name",
     accessorFn: (row) =>

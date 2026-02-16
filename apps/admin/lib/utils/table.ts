@@ -1,11 +1,11 @@
-import type { MemberProfile } from "@/types/api";
+import { Member } from "@uwdsc/common/types";
 
 /**
  * Global filter function for membership table.
  * Filters members by name, email, or WatIAM.
  */
 export function globalMembershipFilter(
-  row: { original: MemberProfile },
+  row: { original: Member },
   columnId: string,
   filterValue: string,
 ): boolean {

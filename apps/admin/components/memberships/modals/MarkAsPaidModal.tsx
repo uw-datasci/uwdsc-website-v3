@@ -9,9 +9,9 @@ import {
   markAsPaidSchema,
   type MarkAsPaidFormValues,
 } from "@/lib/schemas/membership";
-import type { MemberProfile } from "@/types/api";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { Member } from "@uwdsc/common/types";
 import {
   Dialog,
   DialogContent,
@@ -36,11 +36,11 @@ import {
 interface MarkAsPaidModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  member: MemberProfile;
+  member: Member;
   onSuccess?: () => void;
 }
 
-function getMemberDisplayName(member: MemberProfile): string {
+function getMemberDisplayName(member: Member): string {
   const name = [member.first_name, member.last_name].filter(Boolean).join(" ");
   return name || member.email;
 }

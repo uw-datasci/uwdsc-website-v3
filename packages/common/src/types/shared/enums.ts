@@ -33,3 +33,5 @@ export type ApplicationReviewStatus =
   | "Accepted Offer"
   | "Declined Offer"
   | "Rejection Sent";
+
+export type MembershipFilter = "all" | "paid" | "paid-mathsoc";

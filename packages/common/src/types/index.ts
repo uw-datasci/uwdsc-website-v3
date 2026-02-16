@@ -7,8 +7,5 @@ export * from "./entities";
 // Re-export all API types
 export * from "./api";
 
-// Re-export all form types
-export * from "./forms";
-
 // Re-export all shared types
 export * from "./shared";

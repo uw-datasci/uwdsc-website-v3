@@ -1,6 +1,92 @@
-import { UseFormReturn } from "react-hook-form";
+import type { PositionsWithQuestionsResponse } from "@/lib/api/application";
 import { AppFormValues } from "@/lib/schemas/application";
-import type { PositionWithQuestions } from "@uwdsc/common/types";
+import { UseFormReturn } from "react-hook-form";
+import type {
+  ApplicationWithDetails,
+  PositionWithQuestions,
+} from "@uwdsc/common/types";
+
+export function partitionDraftAnswers(
+  existing: ApplicationWithDetails,
+  positionsData: PositionsWithQuestionsResponse,
+): {
+  generalAnswers: Record<string, string>;
+  pos1Answers: Record<string, string>;
+  pos2Answers: Record<string, string>;
+  pos3Answers: Record<string, string>;
+} {
+  const genIds = new Set(
+    positionsData.generalQuestions.map((q) => q.id),
+  );
+  const generalAnswers: Record<string, string> = {};
+  const pos1Answers: Record<string, string> = {};
+  const pos2Answers: Record<string, string> = {};
+  const pos3Answers: Record<string, string> = {};
+
+  const pos1 = existing.position_selections.find((s) => s.priority === 1);
+  const pos2 = existing.position_selections.find((s) => s.priority === 2);
+  const pos3 = existing.position_selections.find((s) => s.priority === 3);
+
+  for (const a of existing.answers) {
+    if (genIds.has(a.question_id)) {
+      generalAnswers[a.question_id] = a.answer_text;
+      continue;
+    }
+    for (const p of positionsData.positions) {
+      if (!p.questions.some((pq) => pq.id === a.question_id)) continue;
+      if (pos1?.position_id === p.id) pos1Answers[a.question_id] = a.answer_text;
+      else if (pos2?.position_id === p.id)
+        pos2Answers[a.question_id] = a.answer_text;
+      else if (pos3?.position_id === p.id)
+        pos3Answers[a.question_id] = a.answer_text;
+      break;
+    }
+  }
+
+  return { generalAnswers, pos1Answers, pos2Answers, pos3Answers };
+}
+
+type AnswerPair = { question_id: string; answer_text: string };
+
+function recordToAnswerPairs(
+  record: Record<string, string> | undefined,
+): AnswerPair[] {
+  if (!record) return [];
+  return Object.entries(record)
+    .filter(([, text]) => text)
+    .map(([question_id, answer_text]) => ({ question_id, answer_text }));
+}
+
+/** Collect general + position answers into a single array for API payloads. */
+export function collectAllAnswers(values: {
+  general_answers?: Record<string, string>;
+  position_1_answers?: Record<string, string>;
+  position_2_answers?: Record<string, string>;
+  position_3_answers?: Record<string, string>;
+}): AnswerPair[] {
+  return [
+    ...recordToAnswerPairs(values.general_answers),
+    ...recordToAnswerPairs(values.position_1_answers),
+    ...recordToAnswerPairs(values.position_2_answers),
+    ...recordToAnswerPairs(values.position_3_answers),
+  ];
+}
+
+/** Build position_selections array from form position_1/2/3. */
+export function buildPositionSelections(values: {
+  position_1?: string;
+  position_2?: string;
+  position_3?: string;
+}): { position_id: string; priority: number }[] {
+  const list: { position_id: string; priority: number }[] = [];
+  if (values.position_1)
+    list.push({ position_id: values.position_1, priority: 1 });
+  if (values.position_2)
+    list.push({ position_id: values.position_2, priority: 2 });
+  if (values.position_3)
+    list.push({ position_id: values.position_3, priority: 3 });
+  return list;
+}
 
 interface ValidationContext {
   positions: PositionWithQuestions[];

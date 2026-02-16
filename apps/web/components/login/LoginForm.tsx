@@ -7,7 +7,6 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { renderTextField, Form, FormField, Button } from "@uwdsc/ui";
 import { Loader2 } from "lucide-react";
 import { VerifyEmailModal } from "./VerifyEmailModal";
@@ -20,7 +19,6 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [userEmail, setUserEmail] = useState<string>("");
-  const router = useRouter();
   const { mutate } = useAuth();
 
   const form = useForm<LoginFormValues>({
@@ -38,34 +36,27 @@ export function LoginForm() {
         password: data.password,
       });
 
-      // Check if this is a successful login with unverified email
-      if (responseData.error === "email_not_verified") {
-        setUserEmail(data.email);
+      // Success (200): API returns { success: true, user, session }
+      await mutate();
+      if (!responseData.user?.email_confirmed_at && responseData.user?.email) {
+        setUserEmail(responseData.user.email);
         setShowVerifyModal(true);
-      } else if (responseData.session && responseData.user) {
-        // Update the auth context with the new user data
-        await mutate();
-
-        if (responseData.user.email_confirmed_at) {
-          // Email verified, redirect to landing with full page reload
-          // This ensures cookies are synced and SWR cache is fresh
-          globalThis.location.href = "/";
-        } else {
-          // Email not verified, show modal
-          setUserEmail(data.email);
-          setShowVerifyModal(true);
-        }
       } else {
-        // Fallback: refresh and let middleware handle
-        router.refresh();
+        globalThis.location.href = "/";
       }
-    } catch (error: any) {
-      console.error("An unexpected error occurred:", error);
-      setAuthError(
-        error?.error ||
-          error?.message ||
-          "An unexpected error occurred. Please try again.",
-      );
+    } catch (error: unknown) {
+      const err = error as Error & {
+        details?: { needsVerification?: boolean; email?: string };
+      };
+      // 400 with needsVerification: show verify modal instead of error message
+      if (err.details?.needsVerification && err.details?.email) {
+        setUserEmail(err.details.email);
+        setShowVerifyModal(true);
+      } else {
+        setAuthError(
+          err.message ?? "An unexpected error occurred. Please try again.",
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -124,7 +115,7 @@ export function LoginForm() {
               <Button
                 variant="link"
                 size="sm"
-                onClick={() => {}} // TODO: implement logic for forgot password
+                onClick={() => { }} // TODO: implement logic for forgot password
                 className="text-gray-400/60 hover:text-gray-200 transition-colors text-sm font-medium p-0"
                 type="button"
               >

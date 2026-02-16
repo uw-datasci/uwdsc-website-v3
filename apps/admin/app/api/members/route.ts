@@ -30,12 +30,15 @@ export async function GET(request: Request) {
     // Return all profiles
     const profiles = await profileService.getAllProfiles();
     return NextResponse.json(profiles, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching memberships:", error);
     return NextResponse.json(
       {
         error: "Internal server error",
-        message: error.message || "Failed to fetch membership data",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch membership data",
       },
       { status: 500 },
     );

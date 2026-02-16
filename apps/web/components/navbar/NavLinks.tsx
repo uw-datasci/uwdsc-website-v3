@@ -23,7 +23,6 @@ export function NavLinks({ navLinks }: NavLinksProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -39,27 +38,27 @@ export function NavLinks({ navLinks }: NavLinksProps) {
 
   const glassStyles = isDark
     ? {
-        background: "rgba(255, 255, 255, 0.1)",
-        backdropFilter: "blur(10px) saturate(1.8) brightness(1.3)",
-        WebkitBackdropFilter: "blur(10px) saturate(1.8) brightness(1.3)",
-        border: "1px solid rgba(255, 255, 255, 0.2)",
-        boxShadow: `
+      background: "rgba(255, 255, 255, 0.1)",
+      backdropFilter: "blur(10px) saturate(1.8) brightness(1.3)",
+      WebkitBackdropFilter: "blur(10px) saturate(1.8) brightness(1.3)",
+      border: "1px solid rgba(255, 255, 255, 0.2)",
+      boxShadow: `
           inset 0 1px 0 0 rgba(255, 255, 255, 0.25),
           inset 0 -1px 0 0 rgba(255, 255, 255, 0.1),
           0 4px 12px 0 rgba(0, 0, 0, 0.3)
         `,
-      }
+    }
     : {
-        background: "rgba(255, 255, 255, 0.35)",
-        backdropFilter: "blur(10px) saturate(1.5) brightness(1.15)",
-        WebkitBackdropFilter: "blur(10px) saturate(1.5) brightness(1.15)",
-        border: "1px solid rgba(255, 255, 255, 0.4)",
-        boxShadow: `
+      background: "rgba(255, 255, 255, 0.35)",
+      backdropFilter: "blur(10px) saturate(1.5) brightness(1.15)",
+      WebkitBackdropFilter: "blur(10px) saturate(1.5) brightness(1.15)",
+      border: "1px solid rgba(255, 255, 255, 0.4)",
+      boxShadow: `
           inset 0 1px 0 0 rgba(255, 255, 255, 0.5),
           inset 0 -1px 0 0 rgba(255, 255, 255, 0.2),
           0 2px 8px 0 rgba(0, 0, 0, 0.08)
         `,
-      };
+    };
 
   return (
     <>

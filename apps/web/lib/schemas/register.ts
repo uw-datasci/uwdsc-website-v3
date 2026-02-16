@@ -1,8 +1,33 @@
 import { z } from "zod";
 
-/**
- * Registration form validation schema
- */
+// ==========================================
+//  Register form validation schema
+// ==========================================
+
+export const registerSchema = z
+  .object({
+    email: z.email("Please enter a valid email address"),
+    password: z
+      .string()
+      .min(8, "Your password needs to be at least 8 characters long"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
+export type RegisterFormValues = z.infer<typeof registerSchema>;
+
+export const registerDefaultValues: Partial<RegisterFormValues> = {
+  email: "",
+  password: "",
+  confirmPassword: "",
+};
+
+// ==========================================
+//  Complete profile form validation schema
+// ==========================================
 
 export const registrationSchema = z
   .object({

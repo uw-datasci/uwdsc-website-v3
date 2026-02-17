@@ -1,6 +1,6 @@
 CREATE TABLE public.memberships (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL UNIQUE REFERENCES auth.users ON DELETE CASCADE,
+  profile_id UUID NOT NULL UNIQUE REFERENCES public.profiles(id) ON DELETE CASCADE,
   payment_method public.payment_method_enum,
   payment_location VARCHAR(255),
   verifier_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
@@ -20,14 +20,14 @@ ALTER TABLE public.memberships ENABLE ROW LEVEL SECURITY;
 CREATE POLICY memberships_select_own_or_elevated ON public.memberships
   FOR SELECT
   USING (
-    user_id = auth.uid() OR 
+    profile_id = auth.uid() OR 
     public.is_exec_or_admin(auth.uid())
   );
 
--- memberships: INSERT - Authenticated users can create own membership
-CREATE POLICY memberships_insert_own ON public.memberships
+-- memberships: INSERT - Exec/admin only (users cannot create their own; someone else creates it for them)
+CREATE POLICY memberships_insert_exec_admin ON public.memberships
   FOR INSERT
-  WITH CHECK (user_id = auth.uid());
+  WITH CHECK (public.is_exec_or_admin(auth.uid()));
 
 -- memberships: UPDATE - Exec/admin only
 CREATE POLICY memberships_update_exec_admin ON public.memberships

@@ -1,5 +1,5 @@
 CREATE TABLE public.memberships (
-  id SERIAL PRIMARY KEY,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL UNIQUE REFERENCES auth.users ON DELETE CASCADE,
   payment_method public.payment_method_enum,
   payment_location VARCHAR(255),

@@ -1,18 +1,22 @@
 import { UseFormReturn } from "react-hook-form";
 import { AppFormValues } from "@/lib/schemas/application";
-import { AVAILABLE_POSITIONS } from "@/constants/positions";
+import type { PositionWithQuestions } from "@uwdsc/common/types";
+
+interface ValidationContext {
+  positions: PositionWithQuestions[];
+  generalQuestionIds: string[];
+}
 
 /**
  * Checks if the current step in the application form is valid
- * @param form - The react-hook-form instance
- * @param currentStep - The current step number (0-5)
- * @returns boolean indicating if the step is valid
  */
 export const isStepValid = (
   form: UseFormReturn<AppFormValues>,
   currentStep: number,
+  context: ValidationContext,
 ): boolean => {
   const { errors } = form.formState;
+  const { positions, generalQuestionIds } = context;
 
   switch (currentStep) {
     case 1: // Personal Details
@@ -32,17 +36,19 @@ export const isStepValid = (
         !!form.watch("location") &&
         form.watch("club_experience") !== undefined
       );
-    case 2: // General
-      return (
-        !errors.exec_positions &&
-        !errors.new_idea &&
-        !errors.hobbies &&
-        !!form.watch("exec_positions") &&
-        !!form.watch("new_idea") &&
-        !!form.watch("hobbies")
-      );
+    case 2: {
+      // General - dynamic questions
+      const generalAnswers = form.watch("general_answers") || {};
+      const allAnswered =
+        generalQuestionIds.every(
+          (id) =>
+            generalAnswers[id] &&
+            generalAnswers[id].trim().length >= 1 &&
+            generalAnswers[id].trim().length <= 1000,
+        );
+      return !errors.general_answers && allAnswered;
+    }
     case 3: {
-      // Positions
       const position1 = form.watch("position_1");
       const position2 = form.watch("position_2");
       const position3 = form.watch("position_3");
@@ -51,56 +57,34 @@ export const isStepValid = (
       const position2Answers = form.watch("position_2_answers") || {};
       const position3Answers = form.watch("position_3_answers") || {};
 
-      // Helper function to validate position answers
       const validatePositionAnswers = (
         positionId: string | undefined,
         answers: Record<string, string>,
       ): boolean => {
-        if (!positionId) return true; // No position selected, so valid
-
-        // Find the position data to get the expected number of questions
-        const positionData = AVAILABLE_POSITIONS.find(
-          (p) => p.id === positionId,
-        );
+        if (!positionId) return true;
+        const positionData = positions.find((p) => p.id === positionId);
         if (!positionData) return false;
-
         const answerValues = Object.values(answers);
         const expectedQuestionCount = positionData.questions.length;
-
-        // Check that we have the correct number of answers and all are filled
         return (
           answerValues.length === expectedQuestionCount &&
-          answerValues.every((answer) => answer && answer.trim().length >= 10)
+          answerValues.every((a) => a && a.trim().length >= 10)
         );
       };
 
-      const hasPosition1 = !!position1;
-      const hasPosition1Answers = validatePositionAnswers(
-        position1,
-        position1Answers,
-      );
-      const hasPosition2Answers = validatePositionAnswers(
-        position2,
-        position2Answers,
-      );
-      const hasPosition3Answers = validatePositionAnswers(
-        position3,
-        position3Answers,
-      );
-
       return (
-        hasPosition1 &&
+        !!position1 &&
         !errors.position_1 &&
-        hasPosition1Answers &&
+        validatePositionAnswers(position1, position1Answers) &&
+        validatePositionAnswers(position2, position2Answers) &&
+        validatePositionAnswers(position3, position3Answers) &&
         !errors.position_1_answers &&
-        hasPosition2Answers &&
         !errors.position_2_answers &&
-        hasPosition3Answers &&
         !errors.position_3_answers
       );
     }
     case 4: // Resume
-      return !errors.resumeUrl && !!form.watch("resumeUrl");
+      return !errors.resumeKey && !!form.watch("resumeKey");
     default:
       return true;
   }

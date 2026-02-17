@@ -14,10 +14,10 @@ DROP POLICY IF EXISTS applications_update_own_draft_or_admin ON public.applicati
 DROP POLICY IF EXISTS applications_insert_members_only ON public.applications;
 DROP POLICY IF EXISTS applications_select_own_or_admin ON public.applications;
 
-DROP POLICY IF EXISTS term_position_questions_delete_admin_only ON public.term_position_questions;
-DROP POLICY IF EXISTS term_position_questions_update_admin_only ON public.term_position_questions;
-DROP POLICY IF EXISTS term_position_questions_insert_admin_only ON public.term_position_questions;
-DROP POLICY IF EXISTS term_position_questions_select_authenticated ON public.term_position_questions;
+DROP POLICY IF EXISTS position_questions_delete_admin_only ON public.position_questions;
+DROP POLICY IF EXISTS position_questions_update_admin_only ON public.position_questions;
+DROP POLICY IF EXISTS position_questions_insert_admin_only ON public.position_questions;
+DROP POLICY IF EXISTS position_questions_select_authenticated ON public.position_questions;
 
 DROP POLICY IF EXISTS questions_delete_admin_only ON public.questions;
 DROP POLICY IF EXISTS questions_update_admin_only ON public.questions;
@@ -38,7 +38,7 @@ DROP POLICY IF EXISTS terms_select_authenticated ON public.terms;
 ALTER TABLE public.answers DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.application_position_selections DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.applications DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.term_position_questions DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.position_questions DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.questions DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.application_positions_available DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.terms DISABLE ROW LEVEL SECURITY;
@@ -46,11 +46,13 @@ ALTER TABLE public.terms DISABLE ROW LEVEL SECURITY;
 -- Drop helper function
 DROP FUNCTION IF EXISTS public.is_application_draft(uuid);
 
--- Drop trigger
+-- Drop triggers
 DROP TRIGGER IF EXISTS enforce_position_limit ON application_position_selections;
+DROP TRIGGER IF EXISTS terms_sync_hard_deadline ON terms;
 
 -- Drop functions
 DROP FUNCTION IF EXISTS check_position_limit();
+DROP FUNCTION IF EXISTS sync_terms_hard_deadline();
 DROP FUNCTION IF EXISTS delete_old_terms();
 
 -- Drop tables in reverse dependency order
@@ -58,7 +60,7 @@ DROP FUNCTION IF EXISTS delete_old_terms();
 DROP TABLE IF EXISTS answers CASCADE;
 DROP TABLE IF EXISTS application_position_selections CASCADE;
 DROP TABLE IF EXISTS applications CASCADE;
-DROP TABLE IF EXISTS term_position_questions CASCADE;
+DROP TABLE IF EXISTS position_questions CASCADE;
 
 -- Drop independent tables
 DROP TABLE IF EXISTS application_positions_available CASCADE;

@@ -15,33 +15,30 @@ import { MessageSquare } from "lucide-react";
 
 import { GeneralTip } from "../banners/GeneralTip";
 
-interface GeneralProps {
-  readonly form: UseFormReturn<AppFormValues>;
+interface GeneralQuestion {
+  id: string;
+  question_text: string;
+  sort_order: number;
+  placeholder: string | null;
 }
 
-const questions = [
-  {
-    name: "exec_positions" as const,
-    question:
-      "List all executive positions at clubs or community organizations that you've held within the last year (ie: UW Data Science Club, Events Coordinator, September - December 2024)",
-    placeholder:
-      "It's completely okay if you haven't held any positions before! We just love learning more about everyone's experiences.",
-  },
-  {
-    name: "new_idea" as const,
-    question:
-      "At UW DSC, we place a high emphasis on innovation. We don't want to just repeat what was previously done, we want execs to brainstorm new ideas to positively impact the technology community at UWaterloo. Tell us about a new idea you have for the club that would be a significant improvement from what we currently do. This could be related to the subteam you're applying to, or relate to another one.",
-    placeholder:
-      "Share your innovative ideas for improving or expanding the club's impact...",
-  },
-  {
-    name: "hobbies" as const,
-    question: "Tell us about your hobbies :)",
-    placeholder: "We'd love to hear more about who you are!",
-  },
-];
+interface GeneralProps {
+  readonly form: UseFormReturn<AppFormValues>;
+  readonly questions: GeneralQuestion[];
+}
 
-export function General({ form }: GeneralProps) {
+export function General({ form, questions }: GeneralProps) {
+  if (questions.length === 0) {
+    return (
+      <div className="space-y-6">
+        <GeneralTip />
+        <p className="text-muted-foreground">
+          No general questions for this application period.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <GeneralTip />
@@ -57,12 +54,12 @@ export function General({ form }: GeneralProps) {
           <CardContent className="space-y-6">
             {questions.map((q) => (
               <FormField
-                key={q.name}
+                key={q.id}
                 control={form.control}
-                name={q.name}
+                name={`general_answers.${q.id}`}
                 render={renderTextAreaField({
-                  placeholder: q.placeholder,
-                  label: q.question,
+                  placeholder: q.placeholder ?? "",
+                  label: q.question_text,
                   required: true,
                 })}
               />

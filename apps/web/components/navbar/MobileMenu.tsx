@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { signOut, type AuthUser } from "@/lib/api";
+import { signOut } from "@/lib/api";
+import { Profile } from "@uwdsc/common/types";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -27,7 +28,7 @@ interface NavLink {
 
 interface MobileMenuProps {
   navLinks: NavLink[];
-  user: AuthUser | null;
+  user: Profile | null;
 }
 
 function HamburgerIcon() {

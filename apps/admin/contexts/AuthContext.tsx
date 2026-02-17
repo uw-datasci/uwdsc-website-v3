@@ -1,11 +1,12 @@
 "use client";
 
-import { type AuthUser, getCurrentUser } from "@/lib/api";
 import { createContext, useContext, ReactNode, useMemo } from "react";
 import useSWR from "swr";
+import { getCurrentUser } from "@/lib/api";
+import type { Profile } from "@uwdsc/common/types";
 
 interface AuthContextType {
-  user: AuthUser | null;
+  user: Profile | null;
   isLoading: boolean;
   isError: boolean;
   mutate: () => Promise<void>;
@@ -18,7 +19,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const fetcher = async () => {
   try {
     const data = await getCurrentUser();
-    return data.user;
+    return data;
   } catch (error) {
     console.error("Error fetching user in AuthContext:", error);
     return null;
@@ -26,7 +27,7 @@ const fetcher = async () => {
 };
 
 export function AuthProvider({ children }: { readonly children: ReactNode }) {
-  const { data, error, isLoading, mutate } = useSWR<AuthUser | null>(
+  const { data, error, isLoading, mutate } = useSWR<Profile | null>(
     "/api/auth/user",
     fetcher,
     {

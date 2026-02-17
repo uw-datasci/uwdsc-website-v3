@@ -22,6 +22,7 @@
   },
   "exports": {
     "./connection": "./src/config/connection.ts",
-    "./supabase": "./src/config/supabase.ts"
+    "./supabase": "./src/config/supabase.ts",
+    "./baseRepository": "./src/config/baseRepository.ts"
   }
 }

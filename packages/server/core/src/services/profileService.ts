@@ -1,11 +1,10 @@
-import { ProfileRepository } from "../repositories/profileRepository";
-import { ApiError } from "../types/errors";
-import type {
-  MarkAsPaidData,
+import {
+  ApiError,
+  CompleteProfileData,
   Profile,
   ProfileUpdateData,
-  UpdateMemberData,
-} from "../types/profile";
+} from "@uwdsc/common/types";
+import { ProfileRepository } from "../repositories/profileRepository";
 
 class ProfileService {
   private readonly repository: ProfileRepository;
@@ -31,12 +30,46 @@ class ProfileService {
   /**
    * Update user profile
    */
+  async completeProfile(
+    userId: string,
+    data: CompleteProfileData,
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      data.is_math_soc_member = data.faculty === "math";
+      const result = await this.repository.completeProfile(userId, data);
+      if (!result) {
+        return {
+          success: false,
+          error: "Profile not found",
+        };
+      }
+
+      return { success: true };
+    } catch (error) {
+      throw new ApiError(
+        `Failed to update profile: ${(error as Error).message}`,
+        500,
+      );
+    }
+  }
+
+  /**
+   * Update user profile (excludes is_math_soc_member and heard_from_where)
+   */
   async updateProfile(
     userId: string,
     data: ProfileUpdateData,
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      return await this.repository.updateProfile(userId, data);
+      const result = await this.repository.updateProfileByUser(userId, data);
+      if (!result) {
+        return {
+          success: false,
+          error: "Profile not found",
+        };
+      }
+
+      return { success: true };
     } catch (error) {
       throw new ApiError(
         `Failed to update profile: ${(error as Error).message}`,
@@ -59,94 +92,11 @@ class ProfileService {
         profile.first_name &&
         profile.last_name &&
         profile.faculty &&
-        profile.term &&
-        profile.heard_from_where
+        profile.term
       );
     } catch (error) {
       console.error("Error checking profile completion:", error);
       return false;
-    }
-  }
-
-  /**
-   * Get all user profiles (admin only)
-   */
-  async getAllProfiles(): Promise<Profile[]> {
-    try {
-      return await this.repository.getAllProfiles();
-    } catch (error) {
-      throw new ApiError(
-        `Failed to get all profiles: ${(error as Error).message}`,
-        500,
-      );
-    }
-  }
-
-  /**
-   * Get membership statistics (admin only)
-   */
-  async getMembershipStats(): Promise<{
-    totalUsers: number;
-    paidUsers: number;
-    mathSocMembers: number;
-  }> {
-    try {
-      return await this.repository.getMembershipStats();
-    } catch (error) {
-      throw new ApiError(
-        `Failed to get membership stats: ${(error as Error).message}`,
-        500,
-      );
-    }
-  }
-
-  /**
-   * Mark a member as paid (admin only)
-   */
-  async markMemberAsPaid(
-    profileId: string,
-    data: MarkAsPaidData,
-  ): Promise<{ success: boolean; error?: string }> {
-    try {
-      return await this.repository.markAsPaid(profileId, data);
-    } catch (error) {
-      throw new ApiError(
-        `Failed to mark member as paid: ${(error as Error).message}`,
-        500,
-      );
-    }
-  }
-
-  /**
-   * Update member information (admin only)
-   */
-  async updateMember(
-    profileId: string,
-    data: UpdateMemberData,
-  ): Promise<{ success: boolean; error?: string }> {
-    try {
-      return await this.repository.updateMemberById(profileId, data);
-    } catch (error) {
-      throw new ApiError(
-        `Failed to update member: ${(error as Error).message}`,
-        500,
-      );
-    }
-  }
-
-  /**
-   * Delete a member (admin only)
-   */
-  async deleteMember(
-    profileId: string,
-  ): Promise<{ success: boolean; error?: string }> {
-    try {
-      return await this.repository.deleteMemberById(profileId);
-    } catch (error) {
-      throw new ApiError(
-        `Failed to delete member: ${(error as Error).message}`,
-        500,
-      );
     }
   }
 }

@@ -1,18 +1,18 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { LoginData, RegisterCredentials } from "../types/auth";
+import type { LoginData, RegisterData } from "@uwdsc/common/types";
 
 export class AuthRepository {
-  private readonly client: SupabaseClient;
+  private readonly supabase: SupabaseClient;
 
-  constructor(client: SupabaseClient) {
-    this.client = client;
+  constructor(supabase: SupabaseClient) {
+    this.supabase = supabase;
   }
 
   /**
    * Sign in user with email and password
    */
   async signInWithPassword(credentials: LoginData) {
-    const { data, error } = await this.client.auth.signInWithPassword({
+    const { data, error } = await this.supabase.auth.signInWithPassword({
       email: credentials.email,
       password: credentials.password,
     });
@@ -23,13 +23,11 @@ export class AuthRepository {
   /**
    * Sign up new user
    */
-  async signUp(credentials: RegisterCredentials) {
-    const { data, error } = await this.client.auth.signUp({
+  async signUp(credentials: RegisterData) {
+    const { data, error } = await this.supabase.auth.signUp({
       email: credentials.email,
       password: credentials.password,
-      options: {
-        emailRedirectTo: credentials?.emailRedirectTo,
-      },
+      options: { emailRedirectTo: credentials.emailRedirectTo },
     });
 
     return { data, error };
@@ -39,7 +37,7 @@ export class AuthRepository {
    * Sign out current user
    */
   async signOut() {
-    const { error } = await this.client.auth.signOut();
+    const { error } = await this.supabase.auth.signOut();
     return { error };
   }
 
@@ -47,7 +45,7 @@ export class AuthRepository {
    * Get current authenticated user
    */
   async getUser() {
-    const { data, error } = await this.client.auth.getUser();
+    const { data, error } = await this.supabase.auth.getUser();
     return { data, error };
   }
 
@@ -55,12 +53,10 @@ export class AuthRepository {
    * Resend verification email
    */
   async resendVerificationEmail(email: string, emailRedirectTo?: string) {
-    const { data, error } = await this.client.auth.resend({
+    const { data, error } = await this.supabase.auth.resend({
       type: "signup",
       email,
-      options: {
-        emailRedirectTo,
-      },
+      options: { emailRedirectTo },
     });
 
     return { data, error };
@@ -70,7 +66,7 @@ export class AuthRepository {
    * Exchange code for session
    */
   async exchangeCodeForSession(code: string) {
-    const { error } = await this.client.auth.exchangeCodeForSession(code);
+    const { error } = await this.supabase.auth.exchangeCodeForSession(code);
     return error;
   }
 
@@ -78,11 +74,9 @@ export class AuthRepository {
    * Send password reset email
    */
   async resetPasswordForEmail(email: string, emailRedirectTo?: string) {
-    const { data, error } = await this.client.auth.resetPasswordForEmail(
+    const { data, error } = await this.supabase.auth.resetPasswordForEmail(
       email,
-      {
-        redirectTo: emailRedirectTo,
-      },
+      { redirectTo: emailRedirectTo },
     );
 
     return { data, error };
@@ -92,7 +86,7 @@ export class AuthRepository {
    * Update user password
    */
   async updateUserPassword(newPassword: string) {
-    const { data, error } = await this.client.auth.updateUser({
+    const { data, error } = await this.supabase.auth.updateUser({
       password: newPassword,
     });
 

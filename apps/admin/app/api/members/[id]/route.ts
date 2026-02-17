@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { markAsPaidSchema, editMemberSchema } from "@/lib/schemas/membership";
-import { profileService } from "@uwdsc/core";
+import { profileService } from "@uwdsc/admin";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 
 interface Params {

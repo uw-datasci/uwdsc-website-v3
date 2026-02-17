@@ -1,8 +1,13 @@
 import { FileRepository } from "../repositories/fileRepository";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { FileObject } from "@supabase/storage-js";
-import type { FileValidationConfig, FileUploadData } from "../types/file";
-import { ApiError } from "../types/errors";
+import {
+  ApiError,
+  FileValidationConfig,
+  FileUploadData,
+} from "@uwdsc/common/types";
+
+// TODO: Cleanup
 
 export class FileService {
   protected readonly repository: FileRepository;

@@ -1,13 +1,14 @@
 {
   "extends": "@uwdsc/typescript-config/nextjs.json",
   "compilerOptions": {
-    "baseUrl": ".",
+    "baseUrl": "../..",
     "noImplicitAny": false,
     "paths": {
-      "@/*": ["./*"],
-      "@uwdsc/ui": ["../../packages/ui/src/index.ts"],
-      "@uwdsc/core": ["../../packages/server/core/src/index.ts"],
-      "@uwdsc/db": ["../../packages/server/db/src/config/supabase.ts"]
+      "@/*": ["apps/web/*"],
+      "@uwdsc/common/types": ["packages/common/src/types/index.ts"],
+      "@uwdsc/ui": ["packages/ui/src/index.ts"],
+      "@uwdsc/core": ["packages/server/core/src/index.ts"],
+      "@uwdsc/db": ["packages/server/db/src/config/supabase.ts"]
     },
     "plugins": [{ "name": "next" }]
   },

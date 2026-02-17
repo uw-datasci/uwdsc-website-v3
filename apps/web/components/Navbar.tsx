@@ -24,14 +24,14 @@ export function Navbar() {
     // Add Admin link if user is an admin
     ...(user?.role === "admin"
       ? [
-          {
-            href:
-              process.env.NEXT_PUBLIC_ADMIN_URL ||
-              "https://admin.uwdatascience.ca/",
-            label: "Admin",
-            target: "_blank",
-          },
-        ]
+        {
+          href:
+            process.env.NEXT_PUBLIC_ADMIN_URL ||
+            "https://admin.uwdatascience.ca/",
+          label: "Admin",
+          target: "_blank",
+        },
+      ]
       : []),
   ];
 

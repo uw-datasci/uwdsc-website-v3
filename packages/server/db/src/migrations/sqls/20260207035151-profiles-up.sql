@@ -1,31 +1,31 @@
 CREATE TABLE public.profiles (
   id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
-  first_name VARCHAR(255) NOT NULL,
-  last_name VARCHAR(255) NOT NULL,
+  first_name VARCHAR(255),
+  last_name VARCHAR(255),
   wat_iam VARCHAR(8) UNIQUE,
   faculty public.faculty_enum,
-  term VARCHAR(4) NOT NULL,
-  heard_from_where text null,
+  term VARCHAR(4),
+  heard_from_where text,
   is_math_soc_member BOOLEAN NOT NULL DEFAULT false,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE public.exec_positions(
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id SERIAL PRIMARY KEY,
   name text UNIQUE NOT NULL
 );
 
 CREATE TABLE public.subteams (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id SERIAL PRIMARY KEY,
   name text UNIQUE NOT NULL
 );
 
 CREATE TABLE public.exec_team (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id SERIAL PRIMARY KEY,
   profile_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-  position_id UUID NOT NULL REFERENCES public.exec_positions(id) ON DELETE CASCADE,
-  subteam_id UUID NOT NULL REFERENCES public.subteams(id) ON DELETE CASCADE,
+  position_id INT NOT NULL REFERENCES public.exec_positions(id) ON DELETE CASCADE,
+  subteam_id INT NOT NULL REFERENCES public.subteams(id) ON DELETE CASCADE,
   instagram VARCHAR(30) UNIQUE,
   photo_url TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -37,10 +37,9 @@ CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
   -- Create profile with user id
-  -- Using empty strings for first_name and last_name as placeholders
-  -- These should be updated when the user completes their profile
-  INSERT INTO public.profiles (id, first_name, last_name)
-  VALUES (NEW.id, '', '');
+  -- Profile fields will be NULL until user completes their profile
+  INSERT INTO public.profiles (id)
+  VALUES (NEW.id);
   
   -- Add user to user_roles table with default 'member' role
   INSERT INTO public.user_roles (id, role)

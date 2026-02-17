@@ -1,13 +1,13 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { FileObject } from "@supabase/storage-js";
-import { FileUploadOptions } from "../types/file";
+import { FileUploadOptions } from "@uwdsc/common/types";
 
 export class FileRepository {
-  protected readonly client: SupabaseClient;
+  protected readonly supabase: SupabaseClient;
   protected readonly bucketName: string;
 
-  constructor(client: SupabaseClient, bucketName: string) {
-    this.client = client;
+  constructor(supabase: SupabaseClient, bucketName: string) {
+    this.supabase = supabase;
     this.bucketName = bucketName;
   }
 
@@ -19,7 +19,7 @@ export class FileRepository {
   ): Promise<{ data: { path: string } | null; error: Error | null }> {
     const { file, objectKey, contentType } = options;
 
-    const { data, error } = await this.client.storage
+    const { data, error } = await this.supabase.storage
       .from(this.bucketName)
       .upload(objectKey, file, {
         cacheControl: "3600",
@@ -36,7 +36,7 @@ export class FileRepository {
    * Get public URL for a file
    */
   async getFileUrl(objectKey: string) {
-    const { data } = this.client.storage
+    const { data } = this.supabase.storage
       .from(this.bucketName)
       .getPublicUrl(objectKey);
 
@@ -49,7 +49,7 @@ export class FileRepository {
    * @param expiresIn - Expiration time in seconds (default: 3600 = 1 hour)
    */
   async createSignedUrl(objectKey: string, expiresIn: number = 3600) {
-    const { data, error } = await this.client.storage
+    const { data, error } = await this.supabase.storage
       .from(this.bucketName)
       .createSignedUrl(objectKey, expiresIn);
 
@@ -62,7 +62,7 @@ export class FileRepository {
    * Delete a file
    */
   async deleteFile(objectKey: string): Promise<{ error: Error | null }> {
-    const { error } = await this.client.storage
+    const { error } = await this.supabase.storage
       .from(this.bucketName)
       .remove([objectKey]);
 
@@ -76,7 +76,7 @@ export class FileRepository {
     data: FileObject[] | null;
     error: Error | null;
   }> {
-    const { data, error } = await this.client.storage
+    const { data, error } = await this.supabase.storage
       .from(this.bucketName)
       .list(userId);
 

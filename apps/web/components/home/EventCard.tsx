@@ -1,8 +1,14 @@
-import Image from "next/image";
-import { Event } from "@/types/home";
+import Image, { StaticImageData } from "next/image";
 import { Clock, MapPin, Link } from "lucide-react";
 
-interface EventCardProps extends Event {
+interface EventCardProps {
+  id: string;
+  title: string;
+  image: StaticImageData;
+  description?: string;
+  date?: string;
+  location?: string;
+  link?: string;
   startTime?: string;
   endTime?: string;
 };
@@ -41,9 +47,8 @@ export default function EventCard({
         <div className="bg-gradient-purple absolute inset-0 opacity-10" />
         <div className="relative px-5 py-3 md:px-6 md:pb-8 md:pt-5">
           <h4
-            className={`text-2xl font-bold text-white md:text-3xl ${
-              description ? "mb-2" : ""
-            }`}
+            className={`text-2xl font-bold text-white md:text-3xl ${description ? "mb-2" : ""
+              }`}
           >
             {title}
           </h4>

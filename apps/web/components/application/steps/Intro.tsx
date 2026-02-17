@@ -3,17 +3,19 @@
 import { Button, CardDescription } from "@uwdsc/ui";
 
 interface IntroProps {
-  readonly onStartApplication: () => void;
+  readonly onStartApplication: () => void | Promise<void>;
+  readonly isLoading?: boolean;
+  readonly isStartDisabled?: boolean;
+  readonly disabledMessage?: string;
 }
 
-export function Intro({ onStartApplication }: IntroProps) {
-  const handleStart = () => {
-    console.log("📝 API Call: Creating new application...");
-    // Simulate API response
-    const mockApplicationId = `app_${Date.now()}`;
-    console.log(`✅ Application created with ID: ${mockApplicationId}`);
-    onStartApplication();
-  };
+export function Intro({
+  onStartApplication,
+  isLoading,
+  isStartDisabled = false,
+  disabledMessage,
+}: IntroProps) {
+  const isDisabled = isLoading || isStartDisabled;
 
   return (
     <div className="space-y-6">
@@ -40,14 +42,19 @@ export function Intro({ onStartApplication }: IntroProps) {
         </CardDescription>
       </div>
 
+      {disabledMessage && (
+        <p className="text-center text-amber-400 text-sm">{disabledMessage}</p>
+      )}
+
       <div className="flex justify-center pt-4">
         <Button
-          onClick={handleStart}
+          onClick={onStartApplication}
+          disabled={isDisabled}
           size="lg"
-          className="relative overflow-hidden bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 animate-pulse hover:animate-none"
+          className="relative overflow-hidden bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 animate-pulse hover:animate-none disabled:opacity-70"
         >
           <span className="relative z-10 font-semibold">
-            Start Application →
+            {isLoading ? "Creating..." : "Start Application →"}
           </span>
         </Button>
       </div>

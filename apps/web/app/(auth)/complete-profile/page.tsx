@@ -97,7 +97,7 @@ export default function CompleteProfilePage() {
       try {
         const data = await getProfile();
         setIsAuthenticated(true);
-        if (data.profile) prefillForm(data.profile);
+        if (data) prefillForm(data);
       } catch (error: any) {
         console.error("Auth check failed:", error);
         router.push("/login");
@@ -139,8 +139,8 @@ export default function CompleteProfilePage() {
       console.error(error);
       setAuthError(
         error?.error ||
-          error?.message ||
-          "An unexpected error occurred. Please try again",
+        error?.message ||
+        "An unexpected error occurred. Please try again",
       );
     } finally {
       setIsLoading(false);

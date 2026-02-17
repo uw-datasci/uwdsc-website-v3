@@ -5,12 +5,16 @@
  * Components should use these functions instead of making direct fetch calls.
  */
 
-import {
-  GetCurrentUserResponse,
-  SignInRequest,
-  SignInResponse,
-} from "@/types/api";
 import { createApiError } from "./error";
+import { LoginData, Profile } from "@uwdsc/common/types";
+import { Session, User } from "@supabase/supabase-js";
+
+interface LoginResponse {
+  success: boolean;
+  user?: User;
+  session?: Session;
+  error?: string;
+}
 
 // ============================================================================
 // Authentication API Functions
@@ -24,8 +28,8 @@ import { createApiError } from "./error";
  * @throws Error if sign in fails
  */
 export async function signIn(
-  credentials: SignInRequest,
-): Promise<SignInResponse> {
+  credentials: LoginData,
+): Promise<LoginResponse> {
   const response = await fetch("/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -68,7 +72,7 @@ export async function signOut(): Promise<{ message: string }> {
  * @returns Promise with user data
  * @throws Error if fetching user fails
  */
-export async function getCurrentUser(): Promise<GetCurrentUserResponse> {
+export async function getCurrentUser(): Promise<Profile | null> {
   const response = await fetch("/api/auth/user", {
     method: "GET",
     headers: { "Content-Type": "application/json" },
@@ -78,5 +82,5 @@ export async function getCurrentUser(): Promise<GetCurrentUserResponse> {
 
   if (!response.ok) throw createApiError(data, response.status);
 
-  return data;
+  return data.user;
 }

@@ -15,13 +15,13 @@ export const markAsPaidSchema = z.object({
 export type MarkAsPaidFormValues = z.infer<typeof markAsPaidSchema>;
 
 /**
- * Schema for editing member information
- * Allows admins to update member profile details (email is excluded)
+ * Schema for editing member information (PATCH - partial updates)
+ * All fields optional - only include fields to change
  */
 export const editMemberSchema = z.object({
-  first_name: z.string().trim().min(1, "First name is required"),
-  last_name: z.string().trim().min(1, "Last name is required"),
-  wat_iam: z.string().trim().optional().nullable(),
+  first_name: z.string().trim().min(1, "First name is required").optional(),
+  last_name: z.string().trim().min(1, "Last name is required").optional(),
+  wat_iam: z.string().trim().optional(),
   faculty: z
     .enum([
       "math",
@@ -32,10 +32,9 @@ export const editMemberSchema = z.object({
       "environment",
       "other_non_waterloo",
     ])
-    .optional()
-    .nullable(),
-  term: z.string().trim().optional().nullable(),
-  is_math_soc_member: z.boolean(),
+    .optional(),
+  term: z.string().trim().optional(),
+  is_math_soc_member: z.boolean().optional(),
 });
 
 export type EditMemberFormValues = z.infer<typeof editMemberSchema>;

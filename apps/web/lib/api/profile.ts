@@ -5,16 +5,8 @@
  * Components should use these functions instead of making direct fetch calls.
  */
 
-import type {
-  GetProfileResponse,
-  UpdateProfileRequest,
-  UpdateProfileResponse,
-} from "@/types/api";
 import { createApiError } from "./errors";
-
-// ============================================================================
-// User Profile API Functions
-// ============================================================================
+import { Profile, ProfileUpdateData } from "@uwdsc/common/types";
 
 /**
  * Get the current user's profile with full response data
@@ -22,10 +14,10 @@ import { createApiError } from "./errors";
  * @returns Promise with full profile response including profile and isComplete
  * @throws Error if not authenticated or request fails
  */
-export async function getProfile(): Promise<GetProfileResponse> {
+export async function getProfile(): Promise<Profile> {
   const response = await fetch("/api/profile");
 
-  const data: GetProfileResponse = await response.json();
+  const data = await response.json();
 
   if (!response.ok) throw createApiError(data, response.status);
 
@@ -40,8 +32,8 @@ export async function getProfile(): Promise<GetProfileResponse> {
  * @throws Error if update fails
  */
 export async function updateUserProfile(
-  profileData: UpdateProfileRequest,
-): Promise<UpdateProfileResponse> {
+  profileData: ProfileUpdateData,
+): Promise<{ message: string, profile: Profile }> {
   const response = await fetch("/api/profile", {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },

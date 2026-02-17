@@ -93,8 +93,8 @@ export default function CompleteProfilePage() {
       console.error(error);
       setAuthError(
         err?.error ??
-          err?.message ??
-          "An unexpected error occurred. Please try again",
+        err?.message ??
+        "An unexpected error occurred. Please try again",
       );
     } finally {
       setIsLoading(false);

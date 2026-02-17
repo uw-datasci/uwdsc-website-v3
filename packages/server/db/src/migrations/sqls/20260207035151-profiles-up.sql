@@ -100,6 +100,9 @@ CREATE POLICY profiles_delete_admin_only ON public.profiles
   FOR DELETE
   USING (public.is_admin(auth.uid()));
 
+-- Allow Supabase API (authenticated role) to access profiles; RLS restricts rows
+GRANT SELECT, UPDATE ON public.profiles TO authenticated;
+
 -- exec_positions: SELECT - Public (anyone can read)
 CREATE POLICY exec_positions_select_public ON public.exec_positions
   FOR SELECT

@@ -13,8 +13,6 @@ export async function isProfileComplete(
     .eq("id", userId)
     .maybeSingle();
 
-
-
   return !!(
     profile &&
     !error &&

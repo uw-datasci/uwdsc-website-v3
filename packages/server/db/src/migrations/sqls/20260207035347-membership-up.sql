@@ -1,5 +1,6 @@
 CREATE TABLE public.memberships (
-  user_id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
+  user_id UUID NOT NULL UNIQUE REFERENCES auth.users ON DELETE CASCADE,
   payment_method public.payment_method_enum,
   payment_location VARCHAR(255),
   verifier_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,

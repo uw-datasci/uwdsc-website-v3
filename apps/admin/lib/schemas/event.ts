@@ -8,8 +8,8 @@ export const createEventSchema = z.object({
   description: z.string().trim().min(1, "Description is required"),
   location: z.string().trim().min(1, "Location is required"),
   image_url: z.string().trim().optional().nullable(),
-  start_time: z.string().datetime({ message: "Invalid start time" }),
-  end_time: z.string().datetime({ message: "Invalid end time" }),
+  start_time: z.iso.datetime({ error: "Invalid start time" }),
+  end_time: z.iso.datetime({ error: "Invalid end time" }),
 });
 
 export type CreateEventFormValues = z.infer<typeof createEventSchema>;

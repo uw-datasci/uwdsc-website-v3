@@ -26,3 +26,15 @@ export * from "./components/tooltip";
 
 export * from "./components/sidebar";
 export * from "./components/skeleton";
+
+export * from "./components/toggle";
+
+export * from "./components/popover";
+
+export * from "./components/event-calendar";
+
+export * from "./components/calendar";
+
+export * from "./components/datetime-picker";
+
+export * from "./components/scroll-area";

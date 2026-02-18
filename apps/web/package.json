@@ -17,11 +17,12 @@
     "migrate:create": "node scripts/migrate.js create"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
+    "@supabase/supabase-js": "^2.94.0",
     "@uwdsc/common": "workspace:*",
     "@uwdsc/core": "workspace:*",
     "@uwdsc/ui": "workspace:*",
-    "@hookform/resolvers": "^5.2.2",
-    "@supabase/supabase-js": "^2.94.0",
+    "date-fns": "^4.1.0",
     "framer-motion": "^12.23.25",
     "lucide-react": "^0.555.0",
     "next": "^16.1.6",

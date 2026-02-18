@@ -6,19 +6,42 @@ on:
       confirm:
         description: 'Type "migrate" to confirm running migrations'
         required: true
-  # push:
-  #   branches:
-  #     - main
-  #   paths:
-  #     - packages/server/db/src/migrations/**
-  #     - packages/server/db/database.json
-  #     - scripts/migrate.js
+  push:
+    branches:
+      - main
+    paths:
+      - packages/server/db/src/migrations/**
+      - packages/server/db/database.json
+      - scripts/migrate.js
 
-# TODO: pull secrets into packages/server/db
+env:
+  NODE_VERSION: 24
+  PNPM_VERSION: 10.29.3
+  INFISICAL_PROJECT_SLUG: uwdsc-54e-y
+
 jobs:
-  migrate:
-    name: Run Database Migrations
+  setup:
+    name: Setup & Install Dependencies
     # Only run if manually confirmed or if changes are in main branch
     if: github.event_name == 'push' || github.event.inputs.confirm == 'migrate'
+    runs-on: ubuntu-latest
+    outputs:
+      node-version: ${{ env.NODE_VERSION }}
+      pnpm-version: ${{ env.PNPM_VERSION }}
+      infisical-project-slug: ${{ env.INFISICAL_PROJECT_SLUG }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+  migrate:
+    name: Run Database Migrations
+    needs: setup
     uses: uw-datasci/nexus-workflows/.github/workflows/migrate-db.yml@v4
-    
+    with:
+      node-version: ${{ needs.setup.outputs.node-version }}
+      pnpm-version: ${{ needs.setup.outputs.pnpm-version }}
+      infisical-project-slug: ${{ needs.setup.outputs.infisical-project-slug }}
+      infisical-secret-path: "/web-db"
+    secrets:
+      INFISICAL_CLIENT_ID: ${{ secrets.INFISICAL_CLIENT_ID }}
+      INFISICAL_CLIENT_SECRET: ${{ secrets.INFISICAL_CLIENT_SECRET }}

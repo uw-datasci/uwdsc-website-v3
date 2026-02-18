@@ -1,0 +1,157 @@
+# Common Package
+
+Shared types and utilities used across the monorepo (web, admin, and server packages).
+
+## Overview
+
+The `@uwdsc/common` package holds:
+
+- **Types** — Domain entities, API request/response types, shared enums, and error types
+- **Utils** — ApiResponse (standardized API responses), filterPartialUpdate, and other helpers
+
+**Location**: `packages/common/`
+
+**Exports**:
+
+- `@uwdsc/common/types` — All shared types
+- `@uwdsc/common/utils` — ApiResponse, filterPartialUpdate, and other utilities
+
+## Types (`@uwdsc/common/types`)
+
+Import types from `@uwdsc/common/types` in apps and server code so both sides use the same definitions.
+
+### Entities
+
+Domain entities (often aligned with DB tables) in `packages/common/src/types/entities/`:
+
+- **Application** — Application and related entity types
+- **File** — File/resume types
+- **Profile** — Profile entity
+- **Membership** — Membership entity
+- **Team** — Team entity
+
+### API types
+
+Request/response and API-layer types in `packages/common/src/types/api/`:
+
+- **application** — Application API types (e.g. update payloads, autofill, position/answer inputs)
+
+Use these in API routes, client `lib/api` functions, and services so request/response shapes stay in sync.
+
+### Shared
+
+Shared enums, errors, and common types in `packages/common/src/types/shared/`:
+
+- **enums** — Shared enums (e.g. application-related)
+- **errors** — `ApiError` class for consistent error handling
+- **common** — Common utility types
+- **auth** — Auth-related types
+
+### Usage
+
+```typescript
+// In API routes, services, or client code
+import type { UserProfile, UpdateProfileRequest } from "@uwdsc/common/types";
+import type { ApplicationUpdatePayload } from "@uwdsc/common/types";
+import { ApiError } from "@uwdsc/common/types";
+```
+
+When adding new API or entity types, add them under `packages/common/src/types/api/` or `entities/` and export from the corresponding `index.ts`.
+
+## Utils (`@uwdsc/common/utils`)
+
+### ApiResponse
+
+Standardized helpers for Next.js API route responses. Use these instead of building `NextResponse.json()` manually so status codes and body shapes are consistent.
+
+**Import**: `import { ApiResponse } from "@uwdsc/common/utils";`
+
+| Method | Status | Use |
+|--------|--------|-----|
+| `ApiResponse.ok(data)` | 200 | Success with optional JSON body |
+| `ApiResponse.badRequest(message?, error?)` | 400 | Validation or client error |
+| `ApiResponse.unauthorized(message?, error?)` | 401 | Not authenticated |
+| `ApiResponse.notFound(error?)` | 404 | Resource not found |
+| `ApiResponse.serverError(message?, error?)` | 500 | Server error; `message` can be `Error` or `unknown` |
+| `ApiResponse.json(data, status?, init?)` | custom | Custom status or body |
+
+Example:
+
+```typescript
+import { ApiResponse } from "@uwdsc/common/utils";
+
+export async function GET() {
+  const profile = await profileService.getProfileByUserId(user.id);
+  if (!profile) return ApiResponse.notFound("Profile not found");
+  return ApiResponse.ok(profile);
+}
+```
+
+See [Creating API Endpoints](/guides/creating-api#standardized-responses-apiresponse) for more detail.
+
+### filterPartialUpdate
+
+Builds safe partial-update payloads by keeping only defined, allowed keys. Useful for PATCH-style updates in repositories or services.
+
+**Signature**:
+
+```typescript
+function filterPartialUpdate<T extends Record<string, unknown>>(
+  data: T,
+  allowedColumns: readonly string[],
+): { filteredData: Record<string, string | boolean | null>; columns: string[] }
+```
+
+**Example**:
+
+```typescript
+import { filterPartialUpdate } from "@uwdsc/common/utils";
+
+const allowed = ["name", "bio", "avatar"] as const;
+const { filteredData, columns } = filterPartialUpdate(
+  { name: "Jane", bio: "Dev", ignored: "x" },
+  allowed,
+);
+// filteredData: { name: "Jane", bio: "Dev" }
+// columns: ["name", "bio"]
+```
+
+## Package structure
+
+```
+packages/common/
+└── src/
+    ├── types/
+    │   ├── index.ts         # Re-exports entities, api, shared
+    │   ├── entities/        # Profile, Application, File, Membership, Team
+    │   ├── api/             # API request/response types
+    │   └── shared/          # enums, errors, common, auth
+    └── utils/
+        ├── index.ts
+        ├── apiResponse.ts   # ApiResponse class
+        ├── serviceResponse.ts
+        └── filterPartialUpdate.ts
+```
+
+## Dependencies
+
+`@uwdsc/common` depends on `next` (for `NextResponse` in ApiResponse). It is used by `@uwdsc/core`, `@uwdsc/admin`, and the web and admin apps.
+
+## Best practices
+
+### Do
+
+- Define API and entity types in `@uwdsc/common/types` and import them in both client and server code
+- Use `ApiResponse` in all API routes for consistent responses
+- Use `ApiError` from `@uwdsc/common/types` in services when throwing typed errors
+- Use `filterPartialUpdate` when building dynamic PATCH/update payloads from partial input
+
+### Don't
+
+- Define duplicate types in apps or server packages; add shared types to common
+- Return raw `NextResponse.json()` in API routes when a standard status applies; use `ApiResponse` instead
+
+## Next steps
+
+- [Creating API Endpoints](/guides/creating-api) — Using ApiResponse and types in routes
+- [Server Package](/packages/server) — How core and admin use common types and utils

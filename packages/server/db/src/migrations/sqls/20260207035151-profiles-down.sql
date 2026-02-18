@@ -18,6 +18,8 @@ DROP POLICY IF EXISTS profiles_delete_admin_only ON public.profiles;
 DROP POLICY IF EXISTS profiles_update_own_or_elevated ON public.profiles;
 DROP POLICY IF EXISTS profiles_select_own_or_elevated ON public.profiles;
 
+REVOKE SELECT ON public.profiles FROM authenticated;
+
 -- Disable RLS
 ALTER TABLE public.exec_team DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.subteams DISABLE ROW LEVEL SECURITY;

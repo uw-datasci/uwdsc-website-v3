@@ -6,10 +6,10 @@ Welcome to the **UW Data Science Club** monorepo documentation! This comprehensi
 
 This is a modern, full-stack monorepo that powers the UW Data Science Club's digital presence, including:
 
-- **Main Website** (`apps/web`) - The primary UWDSC website
-- **CXC App** (`apps/cxc`) - Dedicated AI hackathon application
+- **Main Website** (`apps/web`) - The primary UWDSC website and member applications
+- **Admin App** (`apps/admin`) - Admin dashboard and CXC (AI hackathon) application/review system
 - **Shared UI Package** (`packages/ui`) - Design system with shadcn/ui components
-- **Backend Services** (`packages/server`) - Shared backend logic and data layer
+- **Backend** (`packages/server`) - `@uwdsc/db`, `@uwdsc/core`, `@uwdsc/admin` for data, shared logic, and admin services
 
 ## 🎯 Quick Links
 
@@ -49,9 +49,9 @@ This is a modern, full-stack monorepo that powers the UW Data Science Club's dig
 
 Our monorepo is built with modern technologies:
 
-- **Frontend**: Next.js 15, React 19, TypeScript
+- **Frontend**: Next.js 16 (web, admin), React 19, TypeScript
 - **Styling**: Tailwind CSS, shadcn/ui
-- **Backend**: Supabase, pg (node-postgres), db-mate, PostgreSQL
+- **Backend**: Supabase, postgres.js (via `@uwdsc/db`), db-migrate, PostgreSQL
 - **Monorepo**: Turborepo, pnpm workspaces
 - **Validation**: Zod
 - **Animation**: Framer Motion

@@ -38,10 +38,7 @@ export const applicationSchema = z
           Object.values(answers).length > 0 &&
           Object.values(answers).every(
             (a) =>
-              a &&
-              typeof a === "string" &&
-              a.length >= 10 &&
-              a.length <= 1000,
+              a && typeof a === "string" && a.length >= 10 && a.length <= 1000,
           )
         );
       }
@@ -60,10 +57,7 @@ export const applicationSchema = z
           Object.values(answers).length > 0 &&
           Object.values(answers).every(
             (a) =>
-              a &&
-              typeof a === "string" &&
-              a.length >= 10 &&
-              a.length <= 1000,
+              a && typeof a === "string" && a.length >= 10 && a.length <= 1000,
           )
         );
       }
@@ -82,10 +76,7 @@ export const applicationSchema = z
           Object.values(answers).length > 0 &&
           Object.values(answers).every(
             (a) =>
-              a &&
-              typeof a === "string" &&
-              a.length >= 10 &&
-              a.length <= 1000,
+              a && typeof a === "string" && a.length >= 10 && a.length <= 1000,
           )
         );
       }

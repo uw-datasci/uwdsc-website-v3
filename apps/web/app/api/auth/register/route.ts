@@ -1,16 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
+import { ApiResponse } from "@uwdsc/common/utils";
 import { createAuthService } from "@/lib/services";
+import { NextRequest } from "next/server";
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { email, password } = body;
 
     if (!email || !password) {
-      return NextResponse.json(
-        { error: "Email and password are required" },
-        { status: 400 },
-      );
+      return ApiResponse.badRequest("Email and password are required");
     }
 
     const authService = await createAuthService();
@@ -22,21 +20,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     });
 
     if (!result.success) {
-      return NextResponse.json({ error: result.error }, { status: 400 });
+      return ApiResponse.badRequest(result.error, "Registration failed");
     }
 
-    return NextResponse.json({
+    const data = {
       success: true,
       user: result.user,
       session: result.session,
       needsEmailConfirmation: result.needsEmailConfirmation,
       message: result.message,
-    });
+    };
+
+    return ApiResponse.ok(data);
   } catch (error) {
     console.error("Registration error:", error);
-    return NextResponse.json(
-      { error: "An unexpected error occurred" },
-      { status: 500 },
-    );
+    return ApiResponse.serverError(error, "An unexpected error occurred");
   }
 }

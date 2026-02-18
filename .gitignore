@@ -35,3 +35,4 @@ npm-debug.log*
 *.pem
 .npmrc
 next-env.d.ts
+.vscode/

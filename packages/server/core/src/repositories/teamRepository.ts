@@ -8,7 +8,7 @@ interface ExecTeamRow {
   subteam_name: string;
   photo_url: string;
   instagram: string | null;
-};
+}
 
 export class TeamRepository extends BaseRepository {
   /**

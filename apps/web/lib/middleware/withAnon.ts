@@ -1,6 +1,4 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { isProfileComplete } from "./utils";
-import { SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * Middleware to redirect anonymous users to login page
@@ -8,7 +6,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 export async function withAnon(
   request: NextRequest,
   response: NextResponse,
-  supabase: SupabaseClient,
+  isComplete: boolean,
   userId: string | undefined,
 ) {
   // 1. User is not authenticated
@@ -17,7 +15,7 @@ export async function withAnon(
   }
 
   // 2. User is authenticated and profile is complete
-  if (await isProfileComplete(supabase, userId)) {
+  if (isComplete) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 

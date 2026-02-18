@@ -108,129 +108,86 @@ export async function login(credentials: LoginRequest): Promise<LoginResponse> {
 
 ### 3. Next.js API Routes (HTTP Layer)
 
-**Location**: `apps/{web,cxc}/app/api/`
+**Location**: `apps/web/app/api/`, `apps/admin/app/api/`
 
-**Purpose**: Handle HTTP requests and responses
+**Purpose**: Handle HTTP requests and responses. Use **ApiResponse** from `@uwdsc/common/utils` for consistent status codes and body shapes (`ok`, `badRequest`, `unauthorized`, `notFound`, `serverError`). See [Creating API Endpoints](/guides/creating-api#standardized-responses-apiresponse) for the full reference.
 
-**Example** (`apps/web/app/api/health/route.ts`):
+**Example** (`apps/web/app/api/profile/route.ts`):
 
 ```tsx
-import { NextResponse } from "next/server";
-import { HealthService } from "@uwdsc/server/web/services/healthService";
+import { ApiResponse } from "@uwdsc/common/utils";
+import { profileService } from "@uwdsc/core";
 
 export async function GET() {
   try {
-    const healthService = new HealthService();
-    const health = await healthService.getSystemHealth();
-
-    return NextResponse.json(health);
+    const profile = await profileService.getProfileByUserId(user.id);
+    if (!profile) return ApiResponse.notFound("Profile not found");
+    return ApiResponse.ok(profile);
   } catch (error) {
-    console.error("Health check failed:", error);
-    return NextResponse.json({ error: "Health check failed" }, { status: 500 });
+    console.error("Profile fetch failed:", error);
+    return ApiResponse.serverError(error, "Failed to fetch profile");
   }
 }
 ```
 
 ### 4. Services (Business Logic Layer)
 
-**Location**: `packages/server/{core,web,cxc}/src/services/`
+**Location**: `packages/server/core/src/services/` (and admin-specific in `packages/server/admin/src/`)
 
 **Purpose**: Business logic and orchestration
 
-**Example** (`packages/server/web/src/services/healthService.ts`):
+**Example** (service in `packages/server/core` using a repository):
 
 ```tsx
-import { HealthRepository } from "../repository/healthRepository";
+import { ProfileRepository } from "../repositories/ProfileRepository";
 
-export class HealthService {
-  private repository: HealthRepository;
+export class ProfileService {
+  private repository: ProfileRepository;
 
   constructor() {
-    this.repository = new HealthRepository();
+    this.repository = new ProfileRepository();
   }
 
-  async getSystemHealth() {
-    const dbHealth = await this.repository.checkDatabaseConnection();
-    const timestamp = new Date().toISOString();
-
-    return {
-      status: dbHealth ? "healthy" : "unhealthy",
-      timestamp,
-      database: dbHealth ? "connected" : "disconnected",
-    };
-  }
-
-  async performHealthCheck() {
-    // More complex health check logic
-    const checks = await Promise.all([
-      this.repository.checkDatabaseConnection(),
-      this.checkExternalServices(),
-      this.checkMemoryUsage(),
-    ]);
-
-    return {
-      status: checks.every(Boolean) ? "healthy" : "degraded",
-      checks,
-    };
-  }
-
-  private async checkExternalServices() {
-    // Check external service health
-    return true;
-  }
-
-  private async checkMemoryUsage() {
-    // Check memory usage
-    return true;
+  async getProfileByUserId(userId: string) {
+    const profile = await this.repository.findByUserId(userId);
+    if (!profile) throw new ApiError("Profile not found", 404);
+    return profile;
   }
 }
 ```
+
+Use **singletons** (`profileService`, `applicationService`, `teamService`) from `@uwdsc/core` in API routes when the service is stateless. Create **AuthService** and **ResumeService** per-request in the app via `createAuthService()` / `createResumeService()` from `lib/services.ts` (they need a Supabase client).
 
 ### 5. Repositories (Data Access Layer)
 
-**Location**: `packages/server/{core,web,cxc}/src/repository/`
+**Location**: `packages/server/core/src/repositories/` (extend `BaseRepository` from `@uwdsc/db/baseRepository`)
 
 **Purpose**: Database queries and data access
 
-**Example** (`packages/server/web/src/repository/healthRepository.ts`):
+**Example** (repository in `packages/server/core`):
 
 ```tsx
-import { BaseRepository } from "@uwdsc/server/core/repository/baseRepository";
+import { BaseRepository } from "@uwdsc/db/baseRepository";
 
-export class HealthRepository extends BaseRepository {
-  async checkDatabaseConnection(): Promise<boolean> {
-    try {
-      const result = await this.pool.query("SELECT 1");
-      return result.rows.length > 0;
-    } catch (error) {
-      console.error("Database connection check failed:", error);
-      return false;
-    }
-  }
-
-  async getSystemMetrics() {
-    const [userResult, applicationResult, eventResult] = await Promise.all([
-      this.pool.query("SELECT COUNT(*) as count FROM users"),
-      this.pool.query("SELECT COUNT(*) as count FROM applications"),
-      this.pool.query("SELECT COUNT(*) as count FROM events"),
-    ]);
-
-    return {
-      userCount: parseInt(userResult.rows[0].count),
-      applicationCount: parseInt(applicationResult.rows[0].count),
-      eventCount: parseInt(eventResult.rows[0].count),
-    };
+export class ProfileRepository extends BaseRepository {
+  async findByUserId(userId: string) {
+    const rows = await this.sql`
+      SELECT * FROM profiles WHERE id = ${userId}
+    `;
+    return rows[0] ?? null;
   }
 }
 ```
+
+Repositories use `this.sql` (postgres.js) from `BaseRepository`; the database connection is provided by `@uwdsc/db`.
 
 ### 6. Database (Persistence Layer)
 
 **Technologies**:
 
-- **pg**: PostgreSQL client for Node.js (raw SQL queries)
-- **db-mate**: Database migration tool (SQL files)
-- **Supabase**: PostgreSQL database and auth
+- **postgres.js**: Used via `@uwdsc/db` (Supabase Transaction Pooler–compatible)
+- **db-migrate**: Migrations in `packages/server/db`; run with `pnpm migrate` from root
+- **Supabase**: PostgreSQL database, auth, and storage
 - **PostgreSQL**: Relational database
 
 ## Complete Flow Example
@@ -263,32 +220,17 @@ export async function getSystemHealth() {
   return response.json();
 }
 
-// 3. API Route (apps/web/app/api/health/route.ts)
+// 3. API Route (apps/web/app/api/profile/route.ts)
 import { NextResponse } from "next/server";
-import { HealthService } from "@uwdsc/server/web/services/healthService";
+import { profileService } from "@uwdsc/core";
 
 export async function GET() {
-  const healthService = new HealthService();
-  const health = await healthService.getSystemHealth();
-  return NextResponse.json(health);
+  const profile = await profileService.getProfileByUserId(user.id);
+  return NextResponse.json(profile);
 }
 
-// 4. Service (packages/server/web/src/services/healthService.ts)
-export class HealthService {
-  private repository: HealthRepository;
-
-  async getSystemHealth() {
-    return await this.repository.checkDatabaseConnection();
-  }
-}
-
-// 5. Repository (packages/server/web/src/repository/healthRepository.ts)
-export class HealthRepository extends BaseRepository {
-  async checkDatabaseConnection() {
-    await this.pool.query("SELECT 1");
-    return { status: "healthy" };
-  }
-}
+// 4. Service (packages/server/core) — use profileService singleton from @uwdsc/core
+// 5. Repository extends BaseRepository from @uwdsc/db/baseRepository, uses this.sql (postgres.js)
 ```
 
 ## Authentication Flow
@@ -373,14 +315,11 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// 4. Service (packages/server/core/src/services/authService.ts)
-import { AuthRepository } from "../repository/authRepository";
-
+// 4. Service (packages/server/core) — AuthService and ResumeService take a Supabase client
+//    Create in app: const authService = await createAuthService(); (from lib/services.ts)
 export class AuthService {
-  private readonly repository: AuthRepository;
-
   constructor(supabaseClient: SupabaseClient) {
-    this.repository = new AuthRepository(supabaseClient);
+    // uses AuthRepository(supabaseClient)
   }
 
   async login(credentials: LoginData) {
@@ -412,23 +351,7 @@ export class AuthService {
   }
 }
 
-// 5. Repository (packages/server/core/src/repository/authRepository.ts)
-export class AuthRepository {
-  private readonly client: SupabaseClient;
-
-  constructor(client: SupabaseClient) {
-    this.client = client;
-  }
-
-  async signInWithPassword(credentials: LoginCredentials) {
-    const { data, error } = await this.client.auth.signInWithPassword({
-      email: credentials.email,
-      password: credentials.password,
-    });
-
-    return { data, error };
-  }
-}
+// 5. Repository (packages/server/core) — AuthRepository uses Supabase client for auth (no postgres.js)
 ```
 
 ## Error Handling

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, ArrowRight, Loader2 } from "lucide-react";
+import { Mail, Loader2 } from "lucide-react";
 import { resendVerificationEmail } from "@/lib/api";
 import {
   Dialog,
@@ -39,11 +39,11 @@ export function VerifyEmailModal({
     try {
       await resendVerificationEmail({ email });
       setResendStatus("Verification email resent successfully.");
-    } catch (error: any) {
+    } catch (error: unknown) {
       setResendStatus(
-        error?.error ||
-          error?.message ||
-          "Failed to resend verification email.",
+        error instanceof Error
+          ? error.message
+          : "Failed to resend verification email.",
       );
     } finally {
       setIsLoading(false);
@@ -88,15 +88,6 @@ export function VerifyEmailModal({
             ) : (
               "Resend Verification Email"
             )}
-          </Button>
-
-          <Button
-            onClick={() => onOpenChange(false)}
-            variant="outline"
-            className="w-full border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white transition-all"
-          >
-            Continue to Site
-            <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
 
           {resendStatus && (

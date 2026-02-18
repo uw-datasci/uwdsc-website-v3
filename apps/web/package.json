@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack --port 3000",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings 0",
     "check-types": "tsc --noEmit",
     "ui:add": "node scripts/ui-add.mjs",
     "pull-secrets": "node scripts/pull-secrets.js",

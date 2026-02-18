@@ -10,7 +10,9 @@ export default function ApplicationsPage() {
 
       {/* Applications table will go here */}
       <div className="rounded-lg border bg-card p-6">
-        <p className="text-muted-foreground">Application review interface coming soon.</p>
+        <p className="text-muted-foreground">
+          Application review interface coming soon.
+        </p>
       </div>
     </div>
   );

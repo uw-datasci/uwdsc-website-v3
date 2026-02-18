@@ -202,9 +202,7 @@ export class ApplicationRepository extends BaseRepository {
     }
   }
 
-  async getProfileForAutofill(
-    userId: string,
-  ): Promise<ProfileAutofill | null> {
+  async getProfileForAutofill(userId: string): Promise<ProfileAutofill | null> {
     const result = await this.sql<ProfileAutofill[]>`
       SELECT p.first_name, p.last_name, au.email, p.term
       FROM profiles p

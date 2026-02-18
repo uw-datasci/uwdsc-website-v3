@@ -1,6 +1,6 @@
+import { ApiResponse } from "@uwdsc/common/utils";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 import { profileService } from "@uwdsc/core";
-import { NextResponse } from "next/server";
 
 /**
  * GET /api/auth/user
@@ -12,9 +12,7 @@ export async function GET() {
 
     if (isUnauthorized) return isUnauthorized;
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+    if (!user) return ApiResponse.notFound("User not found");
 
     // Extract role from app_metadata
     const role = user.app_metadata?.role ?? null;
@@ -23,21 +21,17 @@ export async function GET() {
     const profile = await profileService.getProfileByUserId(user.id);
 
     // Flatten user and profile data into a single object
-    return NextResponse.json({
-      user: {
-        email: user.email,
-        role,
-        first_name: profile?.first_name,
-        last_name: profile?.last_name,
-        wat_iam: profile?.wat_iam,
-        faculty: profile?.faculty,
-      },
-    });
+    const data = {
+      email: user.email,
+      role,
+      first_name: profile?.first_name,
+      last_name: profile?.last_name,
+      wat_iam: profile?.wat_iam,
+      faculty: profile?.faculty,
+    };
+    return ApiResponse.ok(data);
   } catch (error) {
     console.error("Error fetching current user:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch user" },
-      { status: 500 },
-    );
+    return ApiResponse.serverError(error, "Failed to fetch user");
   }
 }

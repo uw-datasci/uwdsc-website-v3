@@ -20,58 +20,20 @@ import { Typing } from "@/components/login/Typing";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { getProfile, updateUserProfile } from "@/lib/api/profile";
-
-// Map the displayed faculty options to enum values
-const facultyMap: Record<string, string> = {
-  Math: "math",
-  Engineering: "engineering",
-  Science: "science",
-  Arts: "arts",
-  Health: "health",
-  Environment: "environment",
-  "Other/Non-Waterloo": "other_non_waterloo",
-};
-
-const facultyOptions = [
-  "Math",
-  "Engineering",
-  "Science",
-  "Arts",
-  "Health",
-  "Environment",
-];
-
-const termOptions = [
-  "1A",
-  "1B",
-  "2A",
-  "2B",
-  "3A",
-  "3B",
-  "4A",
-  "4B",
-  "5A",
-  "5B",
-];
-
-const facultyReverseMap: Record<string, string> = {
-  math: "Math",
-  engineering: "Engineering",
-  science: "Science",
-  arts: "Arts",
-  health: "Health",
-  environment: "Environment",
-  other_non_waterloo: "Other/Non-Waterloo",
-};
+import { getProfile, completeProfile } from "@/lib/api/profile";
+import type { Profile } from "@uwdsc/common/types";
+import {
+  FACULTY_OPTIONS,
+  TERM_OPTIONS,
+  facultyLabelToValue,
+  facultyValueToLabel,
+} from "@/constants/profile";
 
 export default function CompleteProfilePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState("");
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const router = useRouter();
-  const { mutate } = useAuth();
+  const { user, isLoading: isAuthLoading, mutate } = useAuth();
 
   const form = useForm<CompleteProfileFormValues>({
     resolver: zodResolver(completeProfileSchema),
@@ -79,67 +41,59 @@ export default function CompleteProfilePage() {
     mode: "onTouched",
   });
 
-  const prefillForm = (profile: any) => {
-    if (profile.first_name) form.setValue("first_name", profile.first_name);
-    if (profile.last_name) form.setValue("last_name", profile.last_name);
-    if (profile.wat_iam) form.setValue("wat_iam", profile.wat_iam);
-    if (profile.faculty) {
-      const mappedFaculty = facultyReverseMap[profile.faculty];
-      if (mappedFaculty) form.setValue("faculty", mappedFaculty);
-    }
-    if (profile.term) form.setValue("term", profile.term);
-    if (profile.heard_from_where)
-      form.setValue("heard_from_where", profile.heard_from_where);
-  };
+  useEffect(() => {
+    if (!user) return;
+
+    let cancelled = false;
+    getProfile()
+      .then((profile: Profile) => {
+        if (cancelled) return;
+        if (profile.first_name) form.setValue("first_name", profile.first_name);
+        if (profile.last_name) form.setValue("last_name", profile.last_name);
+        if (profile.wat_iam) form.setValue("wat_iam", profile.wat_iam);
+        if (profile.faculty) {
+          const label = facultyValueToLabel[profile.faculty];
+          if (label) form.setValue("faculty", label);
+        }
+        if (profile.term) form.setValue("term", profile.term);
+      })
+      .catch((err) => {
+        if (!cancelled)
+          console.error("Failed to load profile for prefill:", err);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- prefill once when user is available
+  }, [user]);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const data = await getProfile();
-        setIsAuthenticated(true);
-        if (data) prefillForm(data);
-      } catch (error: any) {
-        console.error("Auth check failed:", error);
-        router.push("/login");
-      } finally {
-        setIsCheckingAuth(false);
-      }
-    };
+    if (!isAuthLoading && !user) router.push("/login");
+  }, [isAuthLoading, user, router]);
 
-    checkAuth();
-  }, [router, form]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (formData: CompleteProfileFormValues) => {
     setAuthError("");
     setIsLoading(true);
     try {
-      const isValid = await form.trigger();
-      if (isValid) {
-        const formData = form.getValues();
+      const profileData = {
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        wat_iam: formData.wat_iam,
+        faculty: facultyLabelToValue[formData.faculty] ?? "other_non_waterloo",
+        term: formData.term,
+        heard_from_where: formData.heard_from_where,
+      };
 
-        // Map faculty to enum value
-        const profileData = {
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          wat_iam: formData.wat_iam,
-          faculty: facultyMap[formData.faculty] ?? "other_non_waterloo",
-          term: formData.term,
-          heard_from_where: formData.heard_from_where,
-        };
-
-        await updateUserProfile(profileData);
-
-        // Refresh the user profile in the auth context
-        await mutate();
-        // Redirect to home page after successful profile completion
-        router.push("/");
-      }
-    } catch (error: any) {
+      await completeProfile(profileData);
+      await mutate();
+      router.push("/");
+    } catch (error: unknown) {
+      const err = error as { error?: string; message?: string };
       console.error(error);
       setAuthError(
-        error?.error ||
-        error?.message ||
+        err?.error ??
+        err?.message ??
         "An unexpected error occurred. Please try again",
       );
     } finally {
@@ -147,7 +101,7 @@ export default function CompleteProfilePage() {
     }
   };
 
-  if (isCheckingAuth || !isAuthenticated) {
+  if (isAuthLoading || !user) {
     return (
       <div className="bg-black w-full min-h-screen flex items-center justify-center">
         <div className="text-white">Loading...</div>
@@ -229,7 +183,7 @@ export default function CompleteProfilePage() {
                   name="faculty"
                   render={renderSelectField({
                     placeholder: "Faculty",
-                    options: facultyOptions,
+                    options: FACULTY_OPTIONS,
                     triggerClassName:
                       "w-full !bg-black !h-auto !px-4.5 !py-3.5 !rounded-lg xl:px-6 xl:py-4.5 border border-gray-100/75 text-base",
                     contentClassName:
@@ -243,7 +197,7 @@ export default function CompleteProfilePage() {
                   name="term"
                   render={renderSelectField({
                     placeholder: "Current/Last completed term",
-                    options: termOptions,
+                    options: TERM_OPTIONS,
                     triggerClassName:
                       "w-full !bg-black !h-auto !px-4.5 !py-3.5 !rounded-lg xl:px-6 xl:py-4.5 border border-gray-100/75 text-base",
                     contentClassName:
@@ -268,7 +222,7 @@ export default function CompleteProfilePage() {
               )}
               <div className="flex flex-col gap-1 items-start justify-between mt-6">
                 <Button
-                  onClick={handleSubmit}
+                  onClick={form.handleSubmit(onSubmit)}
                   size="lg"
                   disabled={isLoading}
                   type="button"

@@ -4,191 +4,131 @@ alwaysApply: true
 
 # Server Packages & API Architecture
 
-This project follows a **clean architecture pattern** with clear separation between frontend apps and backend services.
+This project follows a **clean architecture pattern** with clear separation between frontend apps and backend services. There is **no Prisma**; data access uses **postgres.js** (via `@uwdsc/db`) and **Supabase** for auth and storage.
 
 ## Server Package Structure
 
-The `packages/server/` directory contains backend services organized into three sub-packages:
+The `packages/server/` directory contains three sub-packages:
 
-### 📦 `@uwdsc/server/core` - Shared Backend Utilities
+### 📦 `@uwdsc/db` - Database & Supabase
 
-**Purpose**: Common backend services shared across all apps
+**Purpose**: Database connection, Supabase clients, base repository, migrations
+
+**Location**: `packages/server/db/src/`
+
+**Exports**:
+- `@uwdsc/db` (or `@uwdsc/db/connection`, `@uwdsc/db/supabase`) - Postgres `sql` connection, `createSupabaseBrowserClient`, `createSupabaseServerClient`, `createSupabaseMiddlewareClient`
+- `@uwdsc/db/baseRepository` - `BaseRepository` (abstract class with protected `sql` for postgres.js)
+
+**Tech**: postgres.js (Supabase Transaction Pooler), Supabase JS/SSR, db-migrate for migrations
+
+### 📦 `@uwdsc/core` - Shared Backend Logic
+
+**Purpose**: Shared services and repositories used by web and admin apps
 
 **Location**: `packages/server/core/src/`
 
 **Structure**:
+- `services/` - AuthService, ProfileService, ApplicationService, FileService, ResumeService, TeamService
+- `repositories/` - ProfileRepository, ApplicationRepository, AuthRepository, etc. (extend `BaseRepository` from `@uwdsc/db`)
 
-- `database/` - Supabase client and connection utilities
-- `services/` - Shared services (AuthService, FileService, ResumeService)
-- `repository/` - Base repository and shared data access (BaseRepository, AuthRepository, FileRepository)
-- `types/` - Common TypeScript types
-- `utils/` - Error handling and utilities
-
-**Exports**:
+**Exports**: Service classes and **singleton instances** `profileService`, `applicationService`, `teamService`. `AuthService` and `ResumeService` take a Supabase client and are created per-request in app `lib/services.ts` via `createAuthService()` / `createResumeService()`.
 
 ```typescript
-import { AuthService } from "@uwdsc/server/core/services/authService";
-import { FileService } from "@uwdsc/server/core/services/fileService";
-import { BaseRepository } from "@uwdsc/server/core/repository/baseRepository";
+import { profileService, applicationService, teamService } from "@uwdsc/core";
+import { AuthService, ResumeService } from "@uwdsc/core";
 ```
 
-**Tech Stack**: Supabase, PostgreSQL, TypeScript
+**Dependencies**: `@uwdsc/db`, `@uwdsc/common` (types)
 
-### 📦 `@uwdsc/server/web` - Web App Backend
+**Tech**: Postgres (postgres.js), Supabase, TypeScript
 
-**Purpose**: Backend services specific to the main website
+### 📦 `@uwdsc/admin` - Admin App Backend
 
-**Location**: `packages/server/web/src/`
+**Purpose**: Admin-specific services (e.g. profile/member management for admin dashboard)
 
-**Structure**:
+**Location**: `packages/server/admin/src/`
 
-- `prisma/schema/` - Prisma schema files (application, event, profile, etc.)
-- `services/` - Web-specific business logic (ProfileService, ApplicationService, EventService)
-- `repository/` - Web-specific data access layer
-- `types/` - Web-specific types
-- `middleware/` - (Placeholder for future middleware)
-- `policies/` - (Placeholder for authorization policies)
-
-**Exports**:
+**Exports**: Admin-specific `profileService` (and related) for member listing/updates
 
 ```typescript
-import { ProfileService } from "@uwdsc/server/web/services/profileService";
-import { ApplicationService } from "@uwdsc/server/web/services/applicationService";
+import { profileService } from "@uwdsc/admin";
 ```
 
-**Dependencies**: Extends `@uwdsc/server/core`, uses Prisma for app-specific database
-
-**Tech Stack**: Prisma, Supabase, PostgreSQL, TypeScript
-
-### 📦 `@uwdsc/server/cxc` - CxC App Backend
-
-**Purpose**: Backend services specific to CxC app
-
-**Location**: `packages/server/cxc/src/`
-
-**Structure**: Same as web backend with CxC-specific schemas and services
-
-**Exports**:
-
-```typescript
-import { ProfileService } from "@uwdsc/server/cxc/services/profileService";
-import { ApplicationService } from "@uwdsc/server/cxc/services/applicationService";
-```
-
-**Dependencies**: Extends `@uwdsc/server/core`, uses Prisma for app-specific database
-
-**Tech Stack**: Prisma, Supabase, PostgreSQL, TypeScript
+**Used by**: `apps/admin` API routes only. **Dependencies**: `@uwdsc/core`, `@uwdsc/db`, `@uwdsc/common`
 
 ## API Architecture & Data Flow
 
-The application follows a layered architecture pattern:
-
-### Flow: React Component → Client API → API Route → Service → Repository → Database
+### Flow: React Component → lib/api/ → API Route → Service → Repository → Database
 
 ```
 ┌─────────────────┐     ┌─────────────────┐    ┌─────────────────┐
 │   React Page    │───▶│ lib/api/ funcs  │───▶│   app/api/      │
 │   (Frontend)    │     │  (Client SDK)   │    │  (API Routes)   │
 └─────────────────┘     └─────────────────┘    └─────────────────┘
-
-┌─────────────────┐     ┌─────────────────┐    ┌─────────────────┐
+                                                         │
+┌─────────────────┐     ┌─────────────────┐    ┌────────▼────────┐
 │    Database     │◀───│   Repository    │◀───│    Service      │
-│   (Supabase)    │     │  (Data Layer)   │    │ (Business Logic)│
-└─────────────────┘     └─────────────────┘    └─────────────────┘
+│ (Postgres +     │     │ (extends        │    │ (Business Logic)│
+│  Supabase)      │     │ BaseRepository) │    │ @uwdsc/core or  │
+└─────────────────┘     └─────────────────┘    │ @uwdsc/admin    │
+                                               └─────────────────┘
 ```
 
 ### Layer Breakdown
 
-1. **React Components** (`apps/{web,cxc}/components/`)
-   - UI components that consume data
-   - These are your **molecular components** built from UI atoms
-   - Call client API functions from `lib/api/`
+1. **React Components** (`apps/web/components`, `apps/admin/components`) - Call client API functions from `lib/api/`.
 
-2. **Client API Functions** (`apps/{web,cxc}/lib/api/`)
-   - Type-safe API wrapper functions for frontend consumption
-   - Handle request/response formatting and error handling
-   - Example: `register()`, `login()`, `getProfile()`
-   - Import types from `apps/{app}/types/api.ts`
-   - Make HTTP requests to Next.js API routes
+2. **Client API Functions** (`apps/{web,admin}/lib/api/`) - Type-safe wrappers; import types from `@uwdsc/common/types`; call Next.js API routes.
 
-3. **API Routes** (`apps/{web,cxc}/app/api/`)
-   - Handle HTTP requests and responses
-   - Thin layer that calls service methods
-   - **Import services from respective server package**
-   - Example: `apps/web/app/api/profile/route.ts` imports from `@uwdsc/server/web`
+3. **API Routes** (`apps/{web,admin}/app/api/`) - Thin HTTP layer; import services from `@uwdsc/core` or `@uwdsc/admin`; return responses using `ApiResponse` from `@uwdsc/common/utils`.
 
-4. **Services** (`packages/server/{core,web,cxc}/src/services/`)
-   - Business logic and validation
-   - Orchestrate repository calls
-   - Shared services in `core`, app-specific in `web`/`cxc`
-   - Example: `ProfileService.getProfile()`, `AuthService.signIn()`
+4. **Services** (`packages/server/core` or `admin`) - Business logic; use **singletons** (`profileService`, `applicationService`, `teamService`) from `@uwdsc/core` where applicable; create **AuthService** / **ResumeService** in app with `createAuthService()` / `createResumeService()` from `lib/services.ts`.
 
-5. **Repositories** (`packages/server/{core,web,cxc}/src/repository/`)
-   - Data access layer
-   - Direct database interactions via Prisma or Supabase client
-   - Extend `BaseRepository` for common functionality
-   - Core repositories in `core`, app-specific in `web`/`cxc`
+5. **Repositories** (`packages/server/core/src/repositories/`, `admin/...`) - Extend `BaseRepository` from `@uwdsc/db`; use `this.sql` (postgres.js) for queries. No Prisma.
 
-6. **Database**
-   - **Prisma**: App-specific database schemas for web and cxc
-   - **Supabase**: Authentication and shared services
-   - PostgreSQL as the underlying database
+6. **Database** - Postgres (migrations in `packages/server/db`), Supabase for auth and storage.
 
 ### Example: Profile API Flow
 
 ```typescript
-// 1. React component (apps/web/app/page.tsx) calls API function
+// 1. React component calls API function
 import { getProfile } from "@/lib/api";
 const profile = await getProfile();
 
-// 2. API function (apps/web/lib/api/user.ts) calls Next.js route
-const response = await fetch("/api/profile");
-return response.json();
+// 2. API function (lib/api/profile.ts) calls fetch("/api/profile")
 
-// 3. API route (apps/web/app/api/profile/route.ts) calls service
-import { ProfileService } from "@uwdsc/server/web/services/profileService";
-const profileService = new ProfileService();
-const profile = await profileService.getProfileByUserId(userId);
+// 3. API route (app/api/profile/route.ts) calls service
+import { profileService } from "@uwdsc/core";
+import { ApiResponse } from "@uwdsc/common/utils";
+const profile = await profileService.getProfileByUserId(user.id);
+return ApiResponse.ok({ profile, isComplete });
 
-// 4. Service (packages/server/web/src/services/profileService.ts) calls repository
-return await this.repository.getProfileByUserId(userId);
+// 4. Service uses repository; repository extends BaseRepository from @uwdsc/db
+```
 
-// 5. Repository (packages/server/web/src/repository/profileRepository.ts) queries database
-const profile = await this.prisma.profile.findUnique({ where: { userId } });
-return profile;
+### Example: Auth (Supabase required)
+
+```typescript
+// API route
+import { createAuthService } from "@/lib/services";
+const authService = await createAuthService();
+const result = await authService.login({ email, password });
 ```
 
 ## Usage Guidelines
 
 ### ✅ Do
 
-1. **Import services from server packages in API routes**:
-
-   ```typescript
-   // apps/web/app/api/profile/route.ts
-   import { ProfileService } from "@uwdsc/server/web/services/profileService";
-   ```
-
-2. **Use core services for shared functionality**:
-
-   ```typescript
-   import { AuthService } from "@uwdsc/server/core/services/authService";
-   ```
-
-3. **Extend BaseRepository** when creating new repositories:
-
-   ```typescript
-   import { BaseRepository } from "@uwdsc/server/core/repository/baseRepository";
-   ```
-
-4. **Keep API routes thin** - they should only handle HTTP concerns and delegate to services
-
-5. **Put business logic in services**, not in API routes or repositories
+1. **Import services from `@uwdsc/core` or `@uwdsc/admin`** in API routes; use singletons (`profileService`, `applicationService`, `teamService`) when the service is stateless.
+2. **Create AuthService/ResumeService in the app** via `lib/services.ts` using `createSupabaseServerClient` from `@uwdsc/db`.
+3. **Extend BaseRepository** from `@uwdsc/db/baseRepository` when creating new repositories.
+4. **Use ApiResponse** from `@uwdsc/common/utils` in API routes for consistent responses.
+5. **Keep API routes thin** - delegate to services.
 
 ### ❌ Don't
 
-1. **Don't import server packages in React components** - use client API functions instead
-2. **Don't put business logic in API routes** - use services
-3. **Don't put business logic in repositories** - they should only handle data access
-4. **Don't duplicate services** - use `@uwdsc/server/core` for shared functionality
-5. **Don't access database directly from API routes** - always go through services and repositories
+1. **Don't import server packages in React components** - use client API functions from `lib/api/`.
+2. **Don't put business logic in API routes or repositories** - use services.
+3. **Don't access the database directly from API routes** - always go through services and repositories.
+4. **Don't assume Prisma** - the project uses postgres.js and Supabase.

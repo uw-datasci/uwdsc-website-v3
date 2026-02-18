@@ -17,9 +17,7 @@ export function MembershipStatsCards({
   activeFilter,
   onFilterChange,
 }: MembershipStatsCardsProps) {
-  const [hoveredCard, setHoveredCard] = useState<MembershipFilter | null>(
-    null,
-  );
+  const [hoveredCard, setHoveredCard] = useState<MembershipFilter | null>(null);
 
   const paidPercentage =
     stats.total_users > 0

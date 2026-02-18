@@ -1,11 +1,9 @@
 import type { ExecMember, Subteam } from "@uwdsc/common/types";
 import { TeamRepository } from "../repositories/teamRepository";
 
-
-
 class TeamService {
   private readonly repository: TeamRepository;
-  private readonly BUCKET_URL = `${process.env.SUPABASE_URL}/storage/v1/object/public/team`
+  private readonly BUCKET_URL = `${process.env.SUPABASE_URL}/storage/v1/object/public/team`;
   private readonly PRESIDENTS_SUBTEAM_NAME = "Presidents";
   private readonly CXC_SUBTEAM_NAME = "CxC";
   private readonly ADVISORS_SUBTEAM_NAME = "Advisors";
@@ -32,7 +30,6 @@ class TeamService {
     return member.position.startsWith("VP");
   }
 
-
   /**
    * Get team grouped by subteams, formatted for the team page.
    * Subteams are ordered: Presidents first, CxC second, rest by name, Advisors last.
@@ -41,7 +38,10 @@ class TeamService {
   async getTeam(): Promise<Subteam[]> {
     const rows = await this.repository.getExecTeam();
 
-    const subteamMap = new Map<number, { id: number; name: string; members: ExecMember[] }>();
+    const subteamMap = new Map<
+      number,
+      { id: number; name: string; members: ExecMember[] }
+    >();
 
     for (const row of rows) {
       const subteamId = row.subteam_id;

@@ -7,7 +7,9 @@
     "lint": "eslint . --max-warnings 0",
     "check-types": "tsc --noEmit"
   },
-  "dependencies": {},
+  "dependencies": {
+    "next": "^16.1.6"
+  },
   "devDependencies": {
     "@types/node": "^20",
     "@uwdsc/eslint-config": "workspace:*",

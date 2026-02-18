@@ -24,6 +24,22 @@ interface PositionsProps {
 }
 
 export function Positions({ form, positions }: PositionsProps) {
+  const position1 = form.watch("position_1");
+  const position2 = form.watch("position_2");
+  const position3 = form.watch("position_3");
+
+  useEffect(() => {
+    if (!position1) form.setValue("position_1_answers", {});
+  }, [position1, form]);
+
+  useEffect(() => {
+    if (!position2) form.setValue("position_2_answers", {});
+  }, [position2, form]);
+
+  useEffect(() => {
+    if (!position3) form.setValue("position_3_answers", {});
+  }, [position3, form]);
+
   if (positions.length === 0) {
     return (
       <p className="text-muted-foreground">
@@ -31,10 +47,6 @@ export function Positions({ form, positions }: PositionsProps) {
       </p>
     );
   }
-
-  const position1 = form.watch("position_1");
-  const position2 = form.watch("position_2");
-  const position3 = form.watch("position_3");
 
   const getPositionData = (positionId: string) => {
     return positions.find((p) => p.id === positionId);
@@ -68,18 +80,6 @@ export function Positions({ form, positions }: PositionsProps) {
     return positions.find((p) => p.name === name)?.id || "";
   };
 
-  useEffect(() => {
-    if (!position1) form.setValue("position_1_answers", {});
-  }, [position1, form]);
-
-  useEffect(() => {
-    if (!position2) form.setValue("position_2_answers", {});
-  }, [position2, form]);
-
-  useEffect(() => {
-    if (!position3) form.setValue("position_3_answers", {});
-  }, [position3, form]);
-
   return (
     <div className="space-y-6">
       <VPConsideration />
@@ -110,7 +110,7 @@ export function Positions({ form, positions }: PositionsProps) {
             <FormField
               control={form.control}
               name="position_1"
-              render={({ field }) => (
+              render={({ field }) =>
                 renderSelectField({
                   placeholder: "Choose a position to apply for",
                   options: getAvailablePositions(position1),
@@ -130,7 +130,7 @@ export function Positions({ form, positions }: PositionsProps) {
                       positions.find((p) => p.id === field.value)?.name || "",
                   },
                 })
-              )}
+              }
             />
 
             {position1Data?.questions.map((q) => (
@@ -162,7 +162,7 @@ export function Positions({ form, positions }: PositionsProps) {
             <FormField
               control={form.control}
               name="position_2"
-              render={({ field }) => (
+              render={({ field }) =>
                 renderSelectField({
                   placeholder: "Choose a position to apply for",
                   options: getAvailablePositions(position2, true),
@@ -182,7 +182,7 @@ export function Positions({ form, positions }: PositionsProps) {
                       positions.find((p) => p.id === field.value)?.name || "",
                   },
                 })
-              )}
+              }
             />
 
             {position2Data?.questions.map((q) => (
@@ -214,7 +214,7 @@ export function Positions({ form, positions }: PositionsProps) {
             <FormField
               control={form.control}
               name="position_3"
-              render={({ field }) => (
+              render={({ field }) =>
                 renderSelectField({
                   placeholder: "Choose a position to apply for",
                   options: getAvailablePositions(position3, true),
@@ -234,7 +234,7 @@ export function Positions({ form, positions }: PositionsProps) {
                       positions.find((p) => p.id === field.value)?.name || "",
                   },
                 })
-              )}
+              }
             />
 
             {position3Data?.questions.map((q) => (

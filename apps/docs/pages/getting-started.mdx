@@ -6,8 +6,8 @@ Get your development environment up and running in minutes.
 
 Before you begin, ensure you have the following installed:
 
-- **Node.js** >= 20
-- **pnpm** >= 10.26.0
+- **Node.js** >= 24 (see `engines` in root `package.json`)
+- **pnpm** >= 10 (packageManager in root)
 
 ### Installing pnpm
 
@@ -72,8 +72,8 @@ The `pull-secrets` script will:
 - Install the Infisical CLI globally if it's not already installed
 - Initialize Infisical configuration if needed
 - Authenticate with Infisical (using machine identity or user login)
-- Sync environment variables from Infisical for all apps (`web` and `cxc`)
-- Create `.env.local` files in each app directory with the synced secrets
+- Sync environment variables from Infisical for `web` and `admin` apps
+- Create `.env.local` in each app directory with the synced secrets
 
 ## Running the Apps
 
@@ -83,10 +83,10 @@ The `pull-secrets` script will:
 pnpm dev
 ```
 
-This will start all applications in development mode:
+This starts all applications in development mode:
 
 - **Web app**: http://localhost:3000
-- **CXC app**: http://localhost:3001
+- **Admin app**: http://localhost:3001
 - **Docs**: http://localhost:3002
 
 ### Start Specific Apps
@@ -97,8 +97,8 @@ If you only want to work on a specific app:
 # Main website only
 pnpm dev:web
 
-# CXC app only
-pnpm dev:cxc
+# Admin app only
+pnpm dev:admin
 
 # Documentation only
 pnpm dev:docs
@@ -116,7 +116,7 @@ pnpm build
 
 ```bash
 pnpm build --filter=web
-pnpm build --filter=cxc
+pnpm build --filter=admin
 pnpm build --filter=docs
 ```
 
@@ -126,7 +126,7 @@ pnpm build --filter=docs
 # Development
 pnpm dev                    # Start all apps
 pnpm dev:web               # Start main website only
-pnpm dev:cxc               # Start CXC app only
+pnpm dev:admin             # Start admin app only
 pnpm dev:docs              # Start documentation only
 
 # Building

@@ -30,7 +30,7 @@ type BooleanFieldProps = ControllerRenderProps<
   string
 >;
 
-export interface TextFieldOptions {
+interface TextFieldOptions {
   placeholder: string;
   label?: string;
   required?: boolean;
@@ -38,7 +38,7 @@ export interface TextFieldOptions {
   inputProps?: Partial<ComponentProps<typeof Input>>;
 }
 
-export interface SelectFieldOptions {
+interface SelectFieldOptions {
   placeholder: string;
   options: string[];
   label?: string;
@@ -48,7 +48,7 @@ export interface SelectFieldOptions {
   itemClassName?: string;
 }
 
-export interface TextAreaFieldOptions {
+interface TextAreaFieldOptions {
   placeholder: string;
   label?: string;
   required?: boolean;
@@ -56,7 +56,7 @@ export interface TextAreaFieldOptions {
   textareaProps?: Partial<ComponentProps<typeof Textarea>>;
 }
 
-export interface RadioFieldOptions {
+interface RadioFieldOptions {
   label: string;
   required?: boolean;
 }

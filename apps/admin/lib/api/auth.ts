@@ -27,9 +27,7 @@ interface LoginResponse {
  * @returns Promise with sign in response containing session and user data
  * @throws Error if sign in fails
  */
-export async function signIn(
-  credentials: LoginData,
-): Promise<LoginResponse> {
+export async function signIn(credentials: LoginData): Promise<LoginResponse> {
   const response = await fetch("/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

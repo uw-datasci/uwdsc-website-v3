@@ -2,7 +2,7 @@ interface InputFeedbackProps {
   state: "success" | "error";
   children: React.ReactNode;
   classes?: string;
-};
+}
 
 export default function InputFeedback({
   state,

@@ -9,8 +9,7 @@ export type Faculty =
   | "science"
   | "arts"
   | "health"
-  | "environment"
-  | "other_non_waterloo";
+  | "environment";
 
 export type PaymentMethod = "cash" | "online" | "math_soc";
 
@@ -21,8 +20,7 @@ export type ApplicationStatus =
   | "submitted"
   | "under_review"
   | "accepted"
-  | "rejected"
-  | "waitlisted";
+  | "rejected";
 
 export type ApplicationReviewStatus =
   | "In Review"

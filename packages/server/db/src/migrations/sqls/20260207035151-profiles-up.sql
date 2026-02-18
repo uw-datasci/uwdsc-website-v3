@@ -7,6 +7,7 @@ CREATE TABLE public.profiles (
   term VARCHAR(4),
   heard_from_where text,
   is_math_soc_member BOOLEAN NOT NULL DEFAULT false,
+  membership_token UUID NOT NULL UNIQUE DEFAULT gen_random_uuid(),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -98,6 +99,9 @@ CREATE POLICY profiles_update_own_or_elevated ON public.profiles
 CREATE POLICY profiles_delete_admin_only ON public.profiles
   FOR DELETE
   USING (public.is_admin(auth.uid()));
+
+-- Allow Supabase API (authenticated role) to read profiles; RLS restricts rows. Updates go via API/server.
+GRANT SELECT ON public.profiles TO authenticated;
 
 -- exec_positions: SELECT - Public (anyone can read)
 CREATE POLICY exec_positions_select_public ON public.exec_positions

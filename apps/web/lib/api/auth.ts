@@ -120,5 +120,5 @@ export async function getCurrentUser(): Promise<Profile | null> {
 
   if (!response.ok) throw createApiError(data, response.status);
 
-  return data.user;
+  return data;
 }

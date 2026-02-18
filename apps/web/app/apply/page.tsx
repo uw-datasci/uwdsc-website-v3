@@ -14,7 +14,12 @@ import {
   applicationSchema,
   type AppFormValues,
 } from "@/lib/schemas/application";
-import { isStepValid } from "@/lib/utils/application";
+import {
+  buildPositionSelections,
+  collectAllAnswers,
+  isStepValid,
+  partitionDraftAnswers,
+} from "@/lib/utils/application";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -66,7 +71,12 @@ export default function ApplyPage() {
   const [positions, setPositions] = useState<PositionWithQuestions[]>([]);
   const [generalQuestionIds, setGeneralQuestionIds] = useState<string[]>([]);
   const [generalQuestions, setGeneralQuestions] = useState<
-    { id: string; question_text: string; sort_order: number; placeholder: string | null }[]
+    {
+      id: string;
+      question_text: string;
+      sort_order: number;
+      placeholder: string | null;
+    }[]
   >([]);
   const [applicationId, setApplicationId] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<number>(0);
@@ -93,17 +103,16 @@ export default function ApplyPage() {
         ]);
         setCurrentTerm(term);
         setPositions(positionsData.positions);
-        setGeneralQuestionIds(
-          positionsData.generalQuestions.map((q) => q.id),
-        );
+        setGeneralQuestionIds(positionsData.generalQuestions.map((q) => q.id));
         setGeneralQuestions(positionsData.generalQuestions);
 
+        const fullName =
+          autofill.first_name && autofill.last_name
+            ? `${autofill.first_name} ${autofill.last_name}`.trim()
+            : "";
         form.reset({
           ...applicationDefaultValues,
-          full_name:
-            autofill.first_name && autofill.last_name
-              ? `${autofill.first_name} ${autofill.last_name}`.trim()
-              : "",
+          full_name: fullName,
           waterloo_email: autofill.email ?? "",
           academic_term: autofill.term ?? "",
           personal_email: form.getValues("personal_email") || "",
@@ -112,63 +121,34 @@ export default function ApplyPage() {
         });
 
         const existing = await getApplication(term.id);
-        if (existing?.status === "draft") {
-          setApplicationId(existing.id);
-          const genIds = new Set(
-            positionsData.generalQuestions.map((q) => q.id),
-          );
-          const generalAnswers: Record<string, string> = {};
-          const pos1Answers: Record<string, string> = {};
-          const pos2Answers: Record<string, string> = {};
-          const pos3Answers: Record<string, string> = {};
+        const isDraft = existing?.status === "draft";
+        if (!isDraft) return;
 
-          const pos1 = existing.position_selections.find(
-            (s) => s.priority === 1,
-          );
-          const pos2 = existing.position_selections.find(
-            (s) => s.priority === 2,
-          );
-          const pos3 = existing.position_selections.find(
-            (s) => s.priority === 3,
-          );
+        setApplicationId(existing.id);
+        const { generalAnswers, pos1Answers, pos2Answers, pos3Answers } =
+          partitionDraftAnswers(existing, positionsData);
+        const pos1 = existing.position_selections.find((s) => s.priority === 1);
+        const pos2 = existing.position_selections.find((s) => s.priority === 2);
+        const pos3 = existing.position_selections.find((s) => s.priority === 3);
 
-          for (const a of existing.answers) {
-            if (genIds.has(a.question_id)) {
-              generalAnswers[a.question_id] = a.answer_text;
-            } else {
-              for (const p of positionsData.positions) {
-                if (p.questions.some((pq) => pq.id === a.question_id)) {
-                  if (pos1?.position_id === p.id)
-                    pos1Answers[a.question_id] = a.answer_text;
-                  else if (pos2?.position_id === p.id)
-                    pos2Answers[a.question_id] = a.answer_text;
-                  else if (pos3?.position_id === p.id)
-                    pos3Answers[a.question_id] = a.answer_text;
-                  break;
-                }
-              }
-            }
-          }
-
-          form.reset({
-            full_name: existing.full_name,
-            personal_email: existing.personal_email ?? "",
-            waterloo_email: autofill.email ?? "",
-            program: existing.major ?? "",
-            academic_term: existing.year_of_study ?? "",
-            location: existing.location ?? "",
-            club_experience: existing.club_experience ?? undefined,
-            general_answers: generalAnswers,
-            position_1: pos1?.position_id ?? "",
-            position_1_answers: pos1Answers,
-            position_2: pos2?.position_id ?? "",
-            position_2_answers: pos2Answers,
-            position_3: pos3?.position_id ?? "",
-            position_3_answers: pos3Answers,
-            resumeKey: existing.resume_url ?? "",
-          });
-          setCurrentStep(1);
-        }
+        form.reset({
+          full_name: existing.full_name,
+          personal_email: existing.personal_email ?? "",
+          waterloo_email: autofill.email ?? "",
+          program: existing.major ?? "",
+          academic_term: existing.year_of_study ?? "",
+          location: existing.location ?? "",
+          club_experience: existing.club_experience ?? undefined,
+          general_answers: generalAnswers,
+          position_1: pos1?.position_id ?? "",
+          position_1_answers: pos1Answers,
+          position_2: pos2?.position_id ?? "",
+          position_2_answers: pos2Answers,
+          position_3: pos3?.position_id ?? "",
+          position_3_answers: pos3Answers,
+          resumeKey: existing.resume_url ?? "",
+        });
+        setCurrentStep(1);
       } catch (err) {
         console.error("Failed to fetch application data:", err);
         setFetchError(
@@ -179,7 +159,7 @@ export default function ApplyPage() {
       }
     }
     fetchInitialData();
-  }, []);
+  }, [form]);
 
   useEffect(() => {
     setProgressValue(currentStep === 0 ? -1 : currentStep);
@@ -213,67 +193,13 @@ export default function ApplyPage() {
             location: values.location,
             club_experience: values.club_experience,
           };
-        case 2: {
-          const generalAnswers = values.general_answers || {};
-          const allAnswers: { question_id: string; answer_text: string }[] =
-            Object.entries(generalAnswers)
-              .filter(([, t]) => t)
-              .map(([question_id, answer_text]) => ({
-                question_id,
-                answer_text,
-              }));
-          for (const [qid, text] of Object.entries(
-            values.position_1_answers || {},
-          )) {
-            if (text) allAnswers.push({ question_id: qid, answer_text: text });
-          }
-          for (const [qid, text] of Object.entries(
-            values.position_2_answers || {},
-          )) {
-            if (text) allAnswers.push({ question_id: qid, answer_text: text });
-          }
-          for (const [qid, text] of Object.entries(
-            values.position_3_answers || {},
-          )) {
-            if (text) allAnswers.push({ question_id: qid, answer_text: text });
-          }
-          return { answers: allAnswers };
-        }
-        case 3: {
-          const positionsList: { position_id: string; priority: number }[] = [];
-          if (values.position_1)
-            positionsList.push({ position_id: values.position_1, priority: 1 });
-          if (values.position_2)
-            positionsList.push({ position_id: values.position_2, priority: 2 });
-          if (values.position_3)
-            positionsList.push({ position_id: values.position_3, priority: 3 });
-
-          const allAnswers: { question_id: string; answer_text: string }[] = [];
-          const generalAnswers = values.general_answers || {};
-          for (const [qid, text] of Object.entries(generalAnswers)) {
-            if (text) allAnswers.push({ question_id: qid, answer_text: text });
-          }
-          for (const [qid, text] of Object.entries(
-            values.position_1_answers || {},
-          )) {
-            if (text) allAnswers.push({ question_id: qid, answer_text: text });
-          }
-          for (const [qid, text] of Object.entries(
-            values.position_2_answers || {},
-          )) {
-            if (text) allAnswers.push({ question_id: qid, answer_text: text });
-          }
-          for (const [qid, text] of Object.entries(
-            values.position_3_answers || {},
-          )) {
-            if (text) allAnswers.push({ question_id: qid, answer_text: text });
-          }
-
+        case 2:
+          return { answers: collectAllAnswers(values) };
+        case 3:
           return {
-            position_selections: positionsList,
-            answers: allAnswers,
+            position_selections: buildPositionSelections(values),
+            answers: collectAllAnswers(values),
           };
-        }
         case 4:
           return { resume_url: values.resumeKey };
         default:
@@ -281,6 +207,14 @@ export default function ApplyPage() {
       }
     },
     [form],
+  );
+
+  const goToStep = useCallback(
+    (step: number) => {
+      setDirection(step > currentStep ? 1 : -1);
+      setCurrentStep(step);
+    },
+    [currentStep],
   );
 
   const handleNext = useCallback(async () => {
@@ -298,21 +232,17 @@ export default function ApplyPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [applicationId, currentStep, buildUpdatePayload]);
+  }, [applicationId, currentStep, buildUpdatePayload, goToStep]);
 
   const handlePrevious = () => {
     goToStep(currentStep - 1);
   };
 
-  const goToStep = (step: number) => {
-    setDirection(step > currentStep ? 1 : -1);
-    setCurrentStep(step);
-  };
-
   const renderButton = () => {
     const isLastStep = currentStep === 4;
     const isPastHardDeadline = Boolean(
-      currentTerm && new Date() > new Date(currentTerm.application_hard_deadline),
+      currentTerm &&
+      new Date() > new Date(currentTerm.application_hard_deadline),
     );
     const isValid =
       isStepValid(form, currentStep, {

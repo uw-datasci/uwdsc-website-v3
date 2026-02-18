@@ -17,10 +17,10 @@ Let's create a complete example: **User Profile API**
 
 ## Step 1: Define Types
 
-Create types for your API in `apps/web/types/api.ts`:
+Define API types in the **common package** so they can be shared by apps and server packages. Add a new file under `packages/common/src/types/api/` (e.g. `profile.ts`), then export it from `packages/common/src/types/api/index.ts` (e.g. `export * from "./profile";`):
 
 ```typescript
-// apps/web/types/api.ts
+// packages/common/src/types/api/profile.ts
 
 export interface UserProfile {
   id: string;
@@ -43,6 +43,12 @@ export interface UpdateProfileResponse {
 }
 ```
 
+Import in apps and API code from `@uwdsc/common/types`:
+
+```typescript
+import type { UserProfile, UpdateProfileRequest, UpdateProfileResponse } from "@uwdsc/common/types";
+```
+
 ## Step 2: Create Validation Schema
 
 Create Zod schemas in `apps/web/lib/schemas/profile.ts`:
@@ -62,89 +68,44 @@ export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 
 ## Step 3: Create Repository Method
 
-Add database queries in `packages/server/web/src/repository/profileRepository.ts`:
+Add database queries in `packages/server/core/src/repositories/`. Repositories extend `BaseRepository` from `@uwdsc/db/baseRepository` and use `this.sql` (postgres.js):
 
 ```typescript
-// packages/server/web/src/repository/profileRepository.ts
-import { BaseRepository } from "@uwdsc/server/core/repository/baseRepository";
+// packages/server/core/src/repositories/ProfileRepository.ts
+import { BaseRepository } from "@uwdsc/db/baseRepository";
 
 export class ProfileRepository extends BaseRepository {
-  /**
-   * Find user profile by user ID
-   */
   async findProfileByUserId(userId: string) {
-    const result = await this.pool.query(
-      `SELECT id, email, name, bio, avatar, created_at as "createdAt"
-       FROM users
-       WHERE id = $1`,
-      [userId]
-    );
-    return result.rows[0] || null;
+    const rows = await this.sql`
+      SELECT id, email, name, bio, avatar, created_at as "createdAt"
+      FROM profiles WHERE id = ${userId}
+    `;
+    return rows[0] ?? null;
   }
 
-  /**
-   * Update user profile
-   */
-  async updateProfile(userId: string, data: {
-    name?: string;
-    bio?: string;
-    avatar?: string;
-  }) {
-    const updates: string[] = [];
-    const values: any[] = [];
-    let paramIndex = 1;
-
-    if (data.name !== undefined) {
-      updates.push(`name = $${paramIndex++}`);
-      values.push(data.name);
-    }
-    if (data.bio !== undefined) {
-      updates.push(`bio = $${paramIndex++}`);
-      values.push(data.bio);
-    }
-    if (data.avatar !== undefined) {
-      updates.push(`avatar = $${paramIndex++}`);
-      values.push(data.avatar);
-    }
-
-    if (updates.length === 0) {
-      return this.findProfileByUserId(userId);
-    }
-
-    updates.push(`updated_at = NOW()`);
-    values.push(userId);
-
-    const result = await this.pool.query(
-      `UPDATE users
-       SET ${updates.join(", ")}
-       WHERE id = $${paramIndex}
-       RETURNING id, email, name, bio, avatar, created_at as "createdAt"`,
-      values
-    );
-    return result.rows[0];
+  async updateProfile(userId: string, data: { name?: string; bio?: string; avatar?: string }) {
+    // Build dynamic update with this.sql — see existing repos in core for patterns
+    const updated = await this.sql`...`;
+    return updated[0] ?? null;
   }
 
-  /**
-   * Check if profile exists
-   */
   async profileExists(userId: string): Promise<boolean> {
-    const result = await this.pool.query(
-      "SELECT COUNT(*) as count FROM users WHERE id = $1",
-      [userId]
-    );
-    return parseInt(result.rows[0].count) > 0;
+    const rows = await this.sql`
+      SELECT 1 FROM profiles WHERE id = ${userId} LIMIT 1
+    `;
+    return rows.length > 0;
   }
 }
 ```
 
 ## Step 4: Create Service Method
 
-Add business logic in `packages/server/web/src/services/profileService.ts`:
+Add business logic in `packages/server/core/src/services/`. For profile, the app already uses the shared `profileService` singleton from `@uwdsc/core`. If you add a new service:
 
 ```typescript
-// packages/server/web/src/services/profileService.ts
-import { ProfileRepository } from "../repository/profileRepository";
-import { ApiError } from "@uwdsc/server/core/utils/errors";
+// packages/server/core/src/services/ProfileService.ts
+import { ProfileRepository } from "../repositories/ProfileRepository";
+import { ApiError } from "@uwdsc/common/utils"; // or project error type
 
 export class ProfileService {
   private repository: ProfileRepository;
@@ -220,38 +181,52 @@ export class ProfileService {
 
 ## Step 5: Create API Routes
 
-Create Next.js API routes in `apps/web/app/api/profile/`:
+Create Next.js API routes in `apps/web/app/api/profile/`. Use the **ApiResponse** helper from `@uwdsc/common/utils` for consistent status codes and response body shapes.
+
+### Standardized responses (ApiResponse)
+
+`ApiResponse` is a static helper class in `@uwdsc/common/utils`. Use it in API routes instead of building `NextResponse.json()` by hand:
+
+| Method | Status | Use |
+|--------|--------|-----|
+| `ApiResponse.ok(data)` | 200 | Success with optional JSON body |
+| `ApiResponse.badRequest(message?, error?)` | 400 | Validation or client error |
+| `ApiResponse.unauthorized(message?, error?)` | 401 | Not authenticated |
+| `ApiResponse.notFound(error?)` | 404 | Resource not found |
+| `ApiResponse.serverError(message?, error?)` | 500 | Server/catch-all error; `message` can be `Error` or `unknown` |
+| `ApiResponse.json(data, status?, init?)` | custom | Custom status or body shape |
+
+Response bodies follow a consistent shape: success uses the data you pass; errors use `{ error }` or `{ error, message }`. Client code can rely on `error` (and optionally `message`) when `!response.ok`.
+
+```typescript
+import { ApiResponse } from "@uwdsc/common/utils";
+
+// In a route:
+return ApiResponse.ok({ profile, isComplete });
+return ApiResponse.badRequest("Email is required");
+return ApiResponse.notFound("Profile not found");
+return ApiResponse.serverError(error, "Failed to fetch profile");
+```
 
 ### GET Profile Route
 
 ```typescript
 // apps/web/app/api/profile/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { ProfileService } from "@uwdsc/server/web/services/profileService";
+import { NextRequest } from "next/server";
+import { ApiResponse } from "@uwdsc/common/utils";
+import { profileService } from "@uwdsc/core";
 import { getCurrentUser } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
-    // Get current user from session
     const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    // Get profile
-    const profileService = new ProfileService();
-    const profile = await profileService.getProfile(user.id);
-
-    return NextResponse.json(profile);
+    if (!user) return ApiResponse.unauthorized("Authentication required");
+    const profile = await profileService.getProfileByUserId(user.id);
+    if (!profile) return ApiResponse.notFound("Profile not found");
+    return ApiResponse.ok(profile);
   } catch (error) {
     console.error("Get profile error:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to fetch profile" },
-      { status: error.statusCode || 500 }
-    );
+    return ApiResponse.serverError(error, "Failed to fetch profile");
   }
 }
 ```
@@ -260,41 +235,24 @@ export async function GET(request: NextRequest) {
 
 ```typescript
 // apps/web/app/api/profile/route.ts (continued)
+import { z } from "zod";
 import { updateProfileSchema } from "@/lib/schemas/profile";
 
 export async function PATCH(request: NextRequest) {
   try {
-    // Get current user
     const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
+    if (!user) return ApiResponse.unauthorized("Authentication required");
 
-    // Parse and validate request body
     const body = await request.json();
     const validated = updateProfileSchema.parse(body);
-
-    // Update profile
-    const profileService = new ProfileService();
     const result = await profileService.updateProfile(user.id, validated);
-
-    return NextResponse.json(result);
+    return ApiResponse.ok(result);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: "Validation failed", details: error.errors },
-        { status: 400 }
-      );
+      return ApiResponse.badRequest("Validation failed", JSON.stringify(error.errors));
     }
-
     console.error("Update profile error:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to update profile" },
-      { status: error.statusCode || 500 }
-    );
+    return ApiResponse.serverError(error, "Failed to update profile");
   }
 }
 ```
@@ -305,7 +263,7 @@ Create client-side API wrappers in `apps/web/lib/api/profile.ts`:
 
 ```typescript
 // apps/web/lib/api/profile.ts
-import type { UserProfile, UpdateProfileRequest, UpdateProfileResponse } from "@/types/api";
+import type { UserProfile, UpdateProfileRequest, UpdateProfileResponse } from "@uwdsc/common/types";
 
 /**
  * Get current user profile
@@ -418,136 +376,17 @@ export default function ProfilePage() {
 }
 ```
 
-## Testing Your API
+## Manual testing
 
-### 1. Manual Testing
+Start the app and call the API (e.g. with curl or the browser):
 
 ```bash
-# Start dev server
 pnpm dev:web
-
-# Test GET endpoint
-curl http://localhost:3000/api/profile
-
-# Test PATCH endpoint
-curl -X PATCH http://localhost:3000/api/profile \
-  -H "Content-Type: application/json" \
-  -d '{"name":"John Doe","bio":"Software developer"}'
+# GET http://localhost:3000/api/profile
+# PATCH http://localhost:3000/api/profile with JSON body
 ```
 
-### 2. Unit Testing Service
-
-```typescript
-// packages/server/web/src/services/__tests__/profileService.test.ts
-import { ProfileService } from "../profileService";
-
-describe("ProfileService", () => {
-  let service: ProfileService;
-
-  beforeEach(() => {
-    service = new ProfileService();
-  });
-
-  it("should get user profile", async () => {
-    const profile = await service.getProfile("user-id");
-    expect(profile).toBeDefined();
-    expect(profile.id).toBe("user-id");
-  });
-
-  it("should update profile", async () => {
-    const result = await service.updateProfile("user-id", {
-      name: "New Name",
-    });
-    expect(result.profile.name).toBe("New Name");
-  });
-});
-```
-
-## Common Patterns
-
-### Pagination
-
-```typescript
-// Repository
-async findManyWithPagination(page: number, limit: number) {
-  const offset = (page - 1) * limit;
-  
-  const [itemsResult, countResult] = await Promise.all([
-    this.pool.query(
-      `SELECT * FROM items
-       LIMIT $1 OFFSET $2`,
-      [limit, offset]
-    ),
-    this.pool.query("SELECT COUNT(*) as total FROM items"),
-  ]);
-
-  return {
-    items: itemsResult.rows,
-    total: parseInt(countResult.rows[0].total),
-    page,
-    totalPages: Math.ceil(parseInt(countResult.rows[0].total) / limit),
-  };
-}
-```
-
-### Filtering
-
-```typescript
-// Repository
-async findFiltered(filters: {
-  search?: string;
-  category?: string;
-  status?: string;
-}) {
-  const conditions: string[] = [];
-  const values: any[] = [];
-  let paramIndex = 1;
-
-  if (filters.search) {
-    conditions.push(
-      `(name ILIKE $${paramIndex} OR description ILIKE $${paramIndex})`
-    );
-    values.push(`%${filters.search}%`);
-    paramIndex++;
-  }
-  if (filters.category) {
-    conditions.push(`category = $${paramIndex++}`);
-    values.push(filters.category);
-  }
-  if (filters.status) {
-    conditions.push(`status = $${paramIndex++}`);
-    values.push(filters.status);
-  }
-
-  const whereClause = conditions.length > 0
-    ? `WHERE ${conditions.join(" AND ")}`
-    : "";
-
-  const result = await this.pool.query(
-    `SELECT * FROM items ${whereClause}`,
-    values
-  );
-  return result.rows;
-}
-```
-
-### File Upload
-
-```typescript
-// Service
-async uploadAvatar(userId: string, file: File) {
-  // Upload to storage (Supabase)
-  const { data, error } = await supabase.storage
-    .from("avatars")
-    .upload(`${userId}/avatar.png`, file);
-
-  if (error) throw new ApiError("Upload failed", 500);
-
-  // Update profile with new avatar URL
-  const url = supabase.storage.from("avatars").getPublicUrl(data.path);
-  return this.repository.updateProfile(userId, { avatar: url.data.publicUrl });
-}
-```
+For pagination, filtering, and file uploads, follow patterns in existing repositories in `packages/server/core` (use `this.sql` tagged templates) and see `ResumeService` in `@uwdsc/core` for file uploads.
 
 ## Best Practices
 
@@ -559,7 +398,6 @@ async uploadAvatar(userId: string, file: File) {
 - Check authentication/authorization
 - Use transactions for multi-step operations
 - Add JSDoc comments
-- Write unit tests
 
 ### ❌ Don't
 
@@ -571,6 +409,6 @@ async uploadAvatar(userId: string, file: File) {
 
 ## Next Steps
 
-- [Database Setup](/guides/database) - Working with db-mate and pg
+- [Database Setup](/guides/database) - Migrations and postgres.js
 - [Development Tips](/guides/development) - Improve workflow
 

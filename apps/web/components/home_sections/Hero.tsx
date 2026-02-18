@@ -4,7 +4,7 @@ import { signOut } from "@/lib/api";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CountingNumber, GlassSurface } from "@uwdsc/ui";
 import { Profile } from "@uwdsc/common/types";
 
@@ -14,9 +14,17 @@ interface HeroProps {
 }
 
 export default function Hero({ user, mutate }: Readonly<HeroProps>) {
-  const [memberCount, setMemberCount] = useState(350); // TODO: update count from db
-  const [eventCount, setEventCount] = useState(20); // TODO: update count from db
+  const [memberCount, setMemberCount] = useState(0);
+  const [eventCount, setEventCount] = useState(0);
   const router = useRouter();
+
+  // Simulate API call for stats; replace with real fetch when backend is ready
+  useEffect(() => {
+    // TODO: fetch from API
+    setMemberCount(350);
+    setEventCount(20);
+  }, []);
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -28,6 +36,7 @@ export default function Hero({ user, mutate }: Readonly<HeroProps>) {
       console.error("Failed to sign out:", error);
     }
   };
+
   return (
     <section className="relative w-full min-h-screen flex flex-col items-center justify-center">
       <video

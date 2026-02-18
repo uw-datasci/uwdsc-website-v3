@@ -1,251 +1,162 @@
-# Server Package
+# Server Packages
 
-Backend services and data layer for the monorepo.
+Backend services and data layer: `@uwdsc/db`, `@uwdsc/core`, and `@uwdsc/admin`.
 
 ## Overview
 
-The `packages/server/` directory contains backend services, repositories, and utilities shared across applications.
-
-**Location**: `packages/server/`
+The `packages/server/` directory contains three sub-packages. There is **no Prisma**; data access uses **postgres.js** (via `@uwdsc/db`) and **Supabase** for auth and storage.
 
 **Sub-packages**:
 
-- `@uwdsc/server/core` - Shared backend utilities
-- `@uwdsc/server/web` - Web app backend
-- `@uwdsc/server/cxc` - CxC app backend
+- **@uwdsc/db** — Database connection, Supabase clients, BaseRepository, migrations
+- **@uwdsc/core** — Shared services and repositories used by web and admin apps
+- **@uwdsc/admin** — Admin-only services (e.g. member management for admin dashboard)
 
 ## Structure
 
 ```
 packages/server/
-├── core/              # Shared backend utilities
-│   ├── src/
-│   │   ├── database/     # Supabase client
-│   │   ├── services/     # Auth, file services
-│   │   ├── repository/   # Base repository
-│   │   ├── types/        # TypeScript types
-│   │   └── utils/        # Error handling
-│   └── package.json
-├── web/               # Web app backend
-│   ├── src/
-│   │   ├── db/          # Database migrations (db-mate)
-│   │   ├── services/     # Business logic
-│   │   ├── repository/   # Data access
-│   │   └── types/        # Types
-│   └── package.json
-└── cxc/               # CxC app backend
-    ├── src/
-    │   ├── db/          # Database migrations (db-mate)
-    │   ├── services/     # Business logic
-    │   ├── repository/   # Data access
-    │   └── types/        # Types
-    └── package.json
+├── db/              # @uwdsc/db
+│   └── src/
+│       ├── config/       # connection, supabase, baseRepository
+│       └── migrations/   # db-migrate SQL files
+├── core/            # @uwdsc/core
+│   └── src/
+│       ├── services/     # Auth, Profile, Application, File, Resume, Team
+│       ├── repositories/ # Data access (extend BaseRepository)
+│       └── ...
+└── admin/           # @uwdsc/admin
+    └── src/              # Admin-specific services (e.g. profileService for members)
 ```
 
-## Core Package (`@uwdsc/server/core`)
+## @uwdsc/db
 
-Shared backend utilities used by both web and cxc backends.
+**Purpose**: Database connection, Supabase clients, base repository, migrations.
 
-### Exports
+**Exports**:
+
+- `@uwdsc/db/connection` — Postgres `sql` (postgres.js)
+- `@uwdsc/db/supabase` — `createSupabaseBrowserClient`, `createSupabaseServerClient`, `createSupabaseMiddlewareClient`
+- `@uwdsc/db/baseRepository` — `BaseRepository` (abstract class with protected `this.sql`)
+
+**Tech**: postgres.js (Supabase Transaction Pooler), Supabase JS/SSR, db-migrate. Run migrations from root: `pnpm migrate`, `pnpm migrate:down`, `pnpm migrate:create <name>`.
+
+## @uwdsc/core
+
+**Purpose**: Shared services and repositories used by **web** and **admin** apps.
+
+**Exports**: Service classes and **singleton instances**: `profileService`, `applicationService`, `teamService`. `AuthService` and `ResumeService` require a Supabase client and are created per-request in each app’s `lib/services.ts` via `createAuthService()` / `createResumeService()`.
 
 ```typescript
-import { AuthService } from "@uwdsc/server/core/services/authService";
-import { FileService } from "@uwdsc/server/core/services/fileService";
-import { BaseRepository } from "@uwdsc/server/core/repository/baseRepository";
+import { profileService, applicationService, teamService } from "@uwdsc/core";
+import { AuthService, ResumeService } from "@uwdsc/core";
 ```
 
-### Services
+**Contents**:
 
-**AuthService** - Authentication with Supabase
+- **Services**: AuthService, ProfileService, ApplicationService, FileService, ResumeService, TeamService
+- **Repositories**: Extend `BaseRepository` from `@uwdsc/db/baseRepository`; use `this.sql` for queries
+- **Dependencies**: `@uwdsc/db`, `@uwdsc/common`
 
-- Sign up
-- Sign in
-- User management
-- Session handling
+## @uwdsc/admin
 
-**FileService** - File upload/storage with Supabase Storage
+**Purpose**: Admin-only services (e.g. profile/member listing and updates for the admin dashboard).
 
-- Upload files
-- Get public URLs
-- Delete files
-
-**ResumeService** - Resume processing
-
-- Parse resumes
-- Extract data
-
-### Repository
-
-**BaseRepository** - Base class for all repositories
-
-- pg connection pool access
-- Common database operations
-- Transaction support
-
-## Web Package (`@uwdsc/server/web`)
-
-Backend services specific to the main website.
-
-### Exports
+**Exports**: Admin-specific `profileService` (and related) for member management.
 
 ```typescript
-import { HealthService } from "@uwdsc/server/web/services/healthService";
-import { ProfileService } from "@uwdsc/server/web/services/profileService";
-import { ApplicationService } from "@uwdsc/server/web/services/applicationService";
+import { profileService } from "@uwdsc/admin";
 ```
 
-### Services
-
-- **HealthService** - System health checks
-- **ProfileService** - User profile management
-- **ApplicationService** - Membership applications
-- **EventService** - Event management
-
-### Repositories
-
-- **HealthRepository** - Health check queries
-- **ProfileRepository** - Profile data access
-- **ApplicationRepository** - Application data access
-- **EventRepository** - Event data access
-
-## CxC Package (`@uwdsc/server/cxc`)
-
-Backend services specific to the CxC AI hackathon app.
-
-### Exports
-
-```typescript
-import { ApplicationService } from "@uwdsc/server/cxc/services/applicationService";
-import { TeamService } from "@uwdsc/server/cxc/services/teamService";
-import { DashboardService } from "@uwdsc/server/cxc/services/dashboardService";
-import { AdminApplicationService } from "@uwdsc/server/cxc/services/adminApplicationService";
-import { AdminReviewService } from "@uwdsc/server/cxc/services/adminReviewService";
-import { ProfileService } from "@uwdsc/server/cxc/services/profileService";
-```
-
-### Services
-
-- **ApplicationService** - AI hackathon applications
-- **TeamService** - Team management
-- **EventService** - AI hackathon events
-- **DashboardService** - Superadmin analytics and statistics
-- **AdminApplicationService** - Admin application management
-- **AdminReviewService** - Review assignment and tracking
-- **ProfileService** - User profile and role management
+**Used by**: `apps/admin` API routes only. **Dependencies**: `@uwdsc/core`, `@uwdsc/db`, `@uwdsc/common`.
 
 ## Usage
 
-### In API Routes
+### In API Routes (web or admin)
 
 ```typescript
 // apps/web/app/api/profile/route.ts
-import { NextResponse } from "next/server";
-import { ProfileService } from "@uwdsc/server/web/services/profileService";
+import { profileService } from "@uwdsc/core";
 
 export async function GET() {
-  const profileService = new ProfileService();
-  const profile = await profileService.getProfile(userId);
+  const profile = await profileService.getProfileByUserId(user.id);
   return NextResponse.json(profile);
 }
 ```
 
-### Service Layer
-
 ```typescript
-// packages/server/web/src/services/profileService.ts
-import { ProfileRepository } from "../repository/profileRepository";
+// apps/admin/app/api/members/route.ts
+import { profileService } from "@uwdsc/admin";
 
-export class ProfileService {
-  private repository: ProfileRepository;
-
-  constructor() {
-    this.repository = new ProfileRepository();
-  }
-
-  async getProfile(userId: string) {
-    return await this.repository.findById(userId);
-  }
+export async function GET() {
+  const members = await profileService.listMembers();
+  return NextResponse.json(members);
 }
 ```
 
-### Repository Layer
+### Auth and resume (per-request)
+
+Create Supabase-backed services in the app:
 
 ```typescript
-// packages/server/web/src/repository/profileRepository.ts
-import { BaseRepository } from "@uwdsc/server/core/repository/baseRepository";
+// apps/web/lib/services.ts
+import { createSupabaseServerClient } from "@uwdsc/db";
+import { AuthService, ResumeService } from "@uwdsc/core";
+
+export async function createAuthService() {
+  const supabase = await createSupabaseServerClient();
+  return new AuthService(supabase);
+}
+
+export async function createResumeService() {
+  const supabase = await createSupabaseServerClient();
+  return new ResumeService(supabase);
+}
+```
+
+### Repository layer
+
+Repositories extend `BaseRepository` and use `this.sql` (postgres.js):
+
+```typescript
+import { BaseRepository } from "@uwdsc/db/baseRepository";
 
 export class ProfileRepository extends BaseRepository {
-  async findById(userId: string) {
-    const result = await this.pool.query(
-      "SELECT * FROM users WHERE id = $1",
-      [userId]
-    );
-    return result.rows[0] || null;
+  async findByUserId(userId: string) {
+    const rows = await this.sql`SELECT * FROM profiles WHERE id = ${userId}`;
+    return rows[0] ?? null;
   }
 }
 ```
 
-## Database
+## Database migrations
 
-### Migrations (db-mate)
+Migrations live in `packages/server/db`. From repo root:
 
-Each app-specific package has its own migration directory:
+- `pnpm migrate` — apply
+- `pnpm migrate:down` — rollback last
+- `pnpm migrate:create <name>` — create new migration
+- `pnpm migrate:check` — status
 
-```sql
--- packages/server/web/src/db/migrations/001_create_users_table.up.sql
+## Best practices
 
-CREATE TABLE IF NOT EXISTS users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  email VARCHAR(255) UNIQUE NOT NULL,
-  name VARCHAR(255) NOT NULL,
-  created_at TIMESTAMP DEFAULT NOW()
-);
+### Do
 
-CREATE INDEX idx_users_email ON users(email);
-```
+- Use services from `@uwdsc/core` or `@uwdsc/admin` in API routes
+- Use singletons (`profileService`, `applicationService`, `teamService`) where the service is stateless
+- Create AuthService/ResumeService per-request via `lib/services.ts`
+- Extend `BaseRepository` from `@uwdsc/db/baseRepository` for new repositories
+- Use `ApiResponse` from `@uwdsc/common/utils` in API routes when applicable
 
-Migrations are managed with db-mate:
+### Don’t
 
-```bash
-# Create new migration
-db-mate new add_user_bio
+- Import server packages in React components — use client API functions from `lib/api/`
+- Put business logic in API routes or repositories
+- Access the database directly from API routes
+- Assume Prisma — the project uses postgres.js and Supabase
 
-# Apply migrations
-db-mate up
+## Next steps
 
-# Rollback last migration
-db-mate down
-```
-
-### Supabase
-
-Core package uses Supabase for:
-
-- Authentication
-- File storage
-- Real-time subscriptions
-
-## Best Practices
-
-### ✅ Do
-
-- Use services for business logic
-- Use repositories for data access
-- Extend BaseRepository for common functionality
-- Handle errors appropriately
-- Use TypeScript types
-- Write unit tests
-
-### ❌ Don't
-
-- Put business logic in repositories
-- Access database directly from services
-- Skip error handling
-- Expose internal errors to clients
-- Mix concerns across layers
-
-## Next Steps
-
-- [API Architecture](/architecture/api-flow) - Learn about backend patterns
-- [Creating API Endpoints](/guides/creating-api) - Build APIs
-- [Database Setup](/guides/database) - Work with db-mate and pg
+- [API Architecture](/architecture/api-flow) — Request flow and layers
+- [Creating API Endpoints](/guides/creating-api) — Step-by-step API guide
+- [Database Setup](/guides/database) — Migrations and postgres.js usage

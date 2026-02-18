@@ -8,5 +8,4 @@ export default {
   guides: "Guides",
   packages: "Packages",
   changelog: "Timeline",
-  contributing: "Contributing",
 };

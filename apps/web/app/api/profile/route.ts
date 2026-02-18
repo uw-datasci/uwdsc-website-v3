@@ -1,92 +1,83 @@
-import { createAuthService } from "@/lib/services";
-import { tryGetCurrentUser } from "@/lib/api/utils";
+import {
+  tryGetCurrentUser,
+  validateBaseProfileFields,
+  trimBaseProfilePayload,
+} from "@/lib/api/utils";
 import { profileService } from "@uwdsc/core";
-import { NextRequest, NextResponse } from "next/server";
+import { ApiResponse } from "@uwdsc/common/utils";
+import { NextRequest } from "next/server";
 
-// Handle GET requests - get user profile
 export async function GET() {
   try {
-    // Verify admin access
     const { user, isUnauthorized } = await tryGetCurrentUser();
     if (isUnauthorized || !user) return isUnauthorized;
 
-    // Get the user's profile
     const profile = await profileService.getProfileByUserId(user.id);
+    if (!profile) return ApiResponse.notFound("Profile not found");
 
-    if (!profile) {
-      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
-    }
-
-    // Check if profile is complete
     const isComplete = await profileService.isProfileComplete(user.id);
-
-    return NextResponse.json({
-      profile,
-      isComplete,
-    });
+    return ApiResponse.ok({ profile, isComplete });
   } catch (error) {
     console.error("Error fetching profile:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch profile" },
-      { status: 500 },
-    );
+    return ApiResponse.serverError(error, "Failed to fetch profile");
   }
 }
 
-// Handle PATCH requests - update user profile
-export async function PATCH(request: NextRequest) {
+// PUT - complete profile (post-verification); requires heard_from_where
+export async function PUT(request: NextRequest) {
   try {
-    const authService = await createAuthService();
-    const { user, error } = await authService.getCurrentUser();
+    const { user, isUnauthorized } = await tryGetCurrentUser();
+    if (isUnauthorized || !user) return isUnauthorized;
 
-    if (error || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const body = (await request.json()) as Record<string, unknown>;
+    const validationError = validateBaseProfileFields(body);
+    if (validationError) return ApiResponse.badRequest(validationError.error);
 
-    // Get the request body
-    const body = await request.json();
-
-    // Validate required fields
-    const requiredFields = [
-      "first_name",
-      "last_name",
-      "faculty",
-      "term",
-      "heard_from_where",
-    ];
-    for (const field of requiredFields) {
-      if (!body[field]) {
-        return NextResponse.json(
-          { error: `${field} is required` },
-          { status: 400 },
-        );
-      }
-    }
-
-    // Update the profile
-    const result = await profileService.completeProfile(user.id, {
-      first_name: body.first_name,
-      last_name: body.last_name,
-      wat_iam: body.wat_iam,
-      faculty: body.faculty,
-      term: body.term,
-      heard_from_where: body.heard_from_where,
-      is_math_soc_member: body.faculty === "math",
-    });
-
-    if (!result.success) {
-      return NextResponse.json(
-        { error: result.error || "Failed to update profile" },
-        { status: 400 },
+    if (
+      typeof body.heard_from_where !== "string" ||
+      !body.heard_from_where.trim()
+    ) {
+      return ApiResponse.badRequest(
+        "heard_from_where is required and must be non-empty",
       );
     }
 
-    return NextResponse.json({ success: true });
+    const base = trimBaseProfilePayload(body);
+    const result = await profileService.completeProfile(user.id, {
+      ...base,
+      heard_from_where: body.heard_from_where.trim(),
+      is_math_soc_member: base.faculty === "math",
+    });
+    if (!result.success) {
+      return ApiResponse.badRequest("Failed to complete profile", result.error);
+    }
+
+    return ApiResponse.ok({ success: true });
+  } catch (error) {
+    console.error("Error completing profile:", error);
+    return ApiResponse.serverError(error, "Failed to complete profile");
+  }
+}
+
+// PATCH - update profile (e.g. settings/dashboard); no heard_from_where
+export async function PATCH(request: NextRequest) {
+  try {
+    const { user, isUnauthorized } = await tryGetCurrentUser();
+    if (isUnauthorized || !user) return isUnauthorized;
+
+    const body = (await request.json()) as Record<string, unknown>;
+    const validationError = validateBaseProfileFields(body);
+    if (validationError) return ApiResponse.badRequest(validationError.error);
+
+    const base = trimBaseProfilePayload(body);
+    const result = await profileService.updateProfile(user.id, base);
+    if (!result.success) {
+      return ApiResponse.badRequest("Failed to update profile", result.error);
+    }
+
+    return ApiResponse.ok({ success: true });
   } catch (error) {
     console.error("Error updating profile:", error);
-    return NextResponse.json(
-      { error: "Failed to update profile" },
-      { status: 500 },
-    );
+    return ApiResponse.serverError(error, "Failed to update profile");
   }
 }

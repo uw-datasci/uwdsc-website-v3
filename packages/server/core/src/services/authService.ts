@@ -14,7 +14,8 @@ export class AuthService {
    */
   async login(credentials: LoginData) {
     try {
-      const { data, error } = await this.repository.signInWithPassword(credentials);
+      const { data, error } =
+        await this.repository.signInWithPassword(credentials);
 
       if (error) {
         // Check for specific error cases

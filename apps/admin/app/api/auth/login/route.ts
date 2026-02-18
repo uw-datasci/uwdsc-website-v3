@@ -1,42 +1,37 @@
-import { NextRequest, NextResponse } from "next/server";
+import { ApiResponse } from "@uwdsc/common/utils";
 import { createAuthService } from "@/lib/services";
+import { NextRequest } from "next/server";
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { email, password } = body;
 
     if (!email || !password) {
-      return NextResponse.json(
-        { error: "Email and password are required" },
-        { status: 400 },
-      );
+      return ApiResponse.badRequest("Email and password are required");
     }
 
     const authService = await createAuthService();
     const result = await authService.login({ email, password });
 
     if (!result.success) {
-      return NextResponse.json(
+      return ApiResponse.json(
         {
           error: result.error,
           needsVerification: result.needsVerification,
           email: result.email,
         },
-        { status: 400 },
+        400,
       );
     }
 
-    return NextResponse.json({
+    return ApiResponse.ok({
       success: true,
       user: result.user,
       session: result.session,
     });
   } catch (error) {
     console.error("Login error:", error);
-    return NextResponse.json(
-      { error: "An unexpected error occurred" },
-      { status: 500 },
-    );
+    return ApiResponse.serverError(error, "An unexpected error occurred");
   }
 }

@@ -1,14 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { ApiResponse } from "@uwdsc/common/utils";
 import { createAuthService } from "@/lib/services";
+import { NextRequest } from "next/server";
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { email } = body;
 
-    if (!email) {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 });
-    }
+    if (!email) return ApiResponse.badRequest("Email is required");
 
     const authService = await createAuthService();
     const emailRedirectTo = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback?next=/complete-profile`;
@@ -18,18 +17,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
 
     if (!result.success) {
-      return NextResponse.json({ error: result.error }, { status: 400 });
+      return ApiResponse.badRequest(
+        result.error,
+        "Failed to resend verification email",
+      );
     }
 
-    return NextResponse.json({
+    return ApiResponse.ok({
       success: true,
       message: result.message,
     });
   } catch (error) {
     console.error("Resend verification error:", error);
-    return NextResponse.json(
-      { error: "An unexpected error occurred" },
-      { status: 500 },
-    );
+    return ApiResponse.serverError(error, "An unexpected error occurred");
   }
 }

@@ -4,8 +4,8 @@
 CREATE TABLE public.events (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name VARCHAR(255) NOT NULL,
-  description TEXT,
-  location VARCHAR(255),
+  description TEXT NOT NULL,
+  location VARCHAR(255) NOT NULL,
   image_url TEXT,
   start_time TIMESTAMPTZ NOT NULL,
   end_time TIMESTAMPTZ NOT NULL,

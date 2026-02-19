@@ -17,7 +17,9 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isComplete = await isProfileComplete(supabase, user?.id);
-  const completeProfileResponse = NextResponse.redirect(new URL(COMPLETE_PROFILE_ROUTE, request.url));
+  const completeProfileResponse = NextResponse.redirect(
+    new URL(COMPLETE_PROFILE_ROUTE, request.url),
+  );
 
   switch (true) {
     // 1. User is not authenticated and trying to access auth routes
@@ -26,7 +28,7 @@ export async function proxy(request: NextRequest) {
     // 2. complete profile route
     case pathname === COMPLETE_PROFILE_ROUTE:
       return await withAnon(request, response, isComplete, user?.id);
-    case !isComplete:
+    case user && !isComplete:
       return completeProfileResponse;
   }
 

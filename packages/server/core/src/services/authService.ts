@@ -129,25 +129,47 @@ export class AuthService {
   }
 
   /**
-   * Resend verification email
+   * Resend verification email.
+   * Uses signUp() instead of auth.resend() because resend() does not support PKCE:
+   * the link it sends uses implicit flow (token in URL fragment), so the server
+   * callback never receives it and the user cannot be logged in. signUp() with
+   * the same email sends a PKCE verification link that works with exchangeCodeForSession.
    */
   async resendVerificationEmail(email: string, emailRedirectTo: string) {
     try {
-      const { error } = await this.repository.resendVerificationEmail(
+      const placeholderPassword = `Tmp${Math.random().toString(36).slice(2)}A1!`;
+      const { data, error } = await this.repository.signUp({
         email,
+        password: placeholderPassword,
         emailRedirectTo,
-      );
+      });
 
       if (error) {
+        if (
+          error.message.includes("already registered") ||
+          error.message.includes("already exists")
+        ) {
+          return {
+            success: true,
+            message: "If an account exists, a new verification email was sent.",
+          };
+        }
         return {
           success: false,
           error: error.message,
         };
       }
 
+      if (data?.user && !data?.session) {
+        return {
+          success: true,
+          message: "Verification email sent successfully",
+        };
+      }
+
       return {
         success: true,
-        message: "Verification email sent successfully",
+        message: "If an account exists, a new verification email was sent.",
       };
     } catch (error) {
       throw new ApiError(
@@ -158,7 +180,7 @@ export class AuthService {
   }
 
   /**
-   * Exchange code for session
+   * Exchange code for session (PKCE flow - initial signup verification link)
    */
   async exchangeCodeForSession(code: string) {
     try {
@@ -175,6 +197,29 @@ export class AuthService {
     } catch (error) {
       throw new ApiError(
         `Failed to exchange code for session: ${(error as Error).message}`,
+        500,
+      );
+    }
+  }
+
+  /**
+   * Verify OTP (implicit flow - when redirect has token_hash; auth.resend() does not use PKCE)
+   */
+  async verifyOtp(params: { token_hash: string; type: "signup" | "email" }) {
+    try {
+      const { error } = await this.repository.verifyOtp(params);
+
+      if (error) {
+        return {
+          success: false,
+          error: error.message,
+        };
+      }
+
+      return { success: true, error: null };
+    } catch (error) {
+      throw new ApiError(
+        `Failed to verify OTP: ${(error as Error).message}`,
         500,
       );
     }

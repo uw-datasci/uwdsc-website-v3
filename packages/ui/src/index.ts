@@ -38,3 +38,7 @@ export * from "./components/calendar";
 export * from "./components/datetime-picker";
 
 export * from "./components/scroll-area";
+
+export * from "./components/tabs";
+
+export * from "./icons";

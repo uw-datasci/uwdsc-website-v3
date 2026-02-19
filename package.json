@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "turbo build",
-    "dev": "turbo dev",
+    "dev": "turbo dev --filter=web... --filter=admin...",
     "dev:web": "turbo dev --filter=web...",
     "dev:admin": "turbo dev --filter=admin...",
     "dev:docs": "turbo dev --filter=docs...",

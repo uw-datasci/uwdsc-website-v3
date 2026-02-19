@@ -1,87 +1,25 @@
 "use client";
 
-import { format, parseISO } from "date-fns";
-import { CalendarPlus, Bell } from "lucide-react";
+import Image from "next/image";
+import { CalendarPlus, Clock, MapPin, Timer } from "lucide-react";
 import {
   Button,
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
 } from "@uwdsc/ui";
 import type { Event } from "@uwdsc/common/types";
+import {
+  formatDateTime,
+  getGoogleCalendarUrl,
+  downloadICS,
+} from "@/lib/utils/events";
 
 interface EventDetailsDialogProps {
   readonly event: Event | null;
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
-}
-
-function formatDateTime(iso: string): string {
-  try {
-    return format(parseISO(iso), "MMM d, yyyy h:mm a");
-  } catch {
-    return iso;
-  }
-}
-
-function toICSDate(iso: string): string {
-  const d = new Date(iso);
-  return d
-    .toISOString()
-    .replaceAll("-", "")
-    .replaceAll(":", "")
-    .replace(/\.\d{3}/, "");
-}
-
-function escapeICSText(text: string): string {
-  return text
-    .replaceAll("\\", "\\\\")
-    .replaceAll(";", String.raw`\;`)
-    .replaceAll(",", String.raw`\,`)
-    .replaceAll("\n", String.raw`\n`);
-}
-
-function getGoogleCalendarUrl(event: Event): string {
-  const params = new URLSearchParams({
-    action: "TEMPLATE",
-    text: event.name,
-    dates: `${toICSDate(event.start_time)}/${toICSDate(event.end_time)}`,
-    details: event.description || "",
-    location: event.location || "",
-  });
-  return `https://calendar.google.com/calendar/render?${params.toString()}`;
-}
-
-function downloadICS(event: Event): void {
-  const start = toICSDate(event.start_time);
-  const end = toICSDate(event.end_time);
-  const ics = [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//UWDSC//Calendar//EN",
-    "BEGIN:VEVENT",
-    `UID:${event.id}@uwdsc`,
-    `DTSTAMP:${start}`,
-    `DTSTART:${start}`,
-    `DTEND:${end}`,
-    `SUMMARY:${escapeICSText(event.name)}`,
-    `DESCRIPTION:${escapeICSText(event.description || "")}`,
-    `LOCATION:${escapeICSText(event.location || "")}`,
-    "END:VEVENT",
-    "END:VCALENDAR",
-  ].join("\r\n");
-  const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${event.name.replaceAll(/[^a-z0-9]/gi, "_")}.ics`;
-  a.click();
-  URL.revokeObjectURL(url);
 }
 
 export function EventDetailsDialog({
@@ -105,62 +43,50 @@ export function EventDetailsDialog({
       <DialogContent className="sm:max-w-[480px]">
         <DialogHeader>
           <DialogTitle>{event.name}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-3 text-sm">
-          <div>
-            <span className="font-medium text-muted-foreground">Start</span>
-            <p>{formatDateTime(event.start_time)}</p>
-          </div>
-          <div>
-            <span className="font-medium text-muted-foreground">End</span>
-            <p>{formatDateTime(event.end_time)}</p>
-          </div>
-          <div>
-            <span className="font-medium text-muted-foreground">Location</span>
-            <p>{event.location}</p>
-          </div>
-          <div>
-            <span className="font-medium text-muted-foreground">
-              Description
-            </span>
-            <p className="whitespace-pre-wrap">{event.description}</p>
-          </div>
-          {event.image_url && (
-            <div>
-              <span className="font-medium text-muted-foreground">Image</span>
-              <a
-                href={event.image_url}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="text-primary underline"
-              >
-                View image
-              </a>
+          {event.image_url ? (
+            <div className="flex justify-center pt-1">
+              <Image
+                src={event.image_url}
+                alt={event.name}
+                width={240}
+                height={135}
+                className="object-cover"
+              />
             </div>
-          )}
-        </div>
-        <div className="flex flex-wrap gap-2 pt-2">
-          <Button variant="outline" size="sm" onClick={handleAddToCalendar}>
-            <CalendarPlus className="mr-1.5 size-4" />
-            Add to Google Calendar
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleDownloadICS}>
-            <CalendarPlus className="mr-1.5 size-4" />
-            Download .ics
-          </Button>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="inline-block">
-                  <Button variant="outline" size="sm" disabled>
-                    <Bell className="mr-1.5 size-4" />
-                    Subscribe to calendar
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>Coming soon</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          ) : null}
+          {event.description ? (
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap pt-1">
+              {event.description}
+            </p>
+          ) : null}
+        </DialogHeader>
+        <div className="flex gap-6 pt-2">
+          <div className="flex min-w-0 flex-1 flex-col gap-2 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <Clock className="size-4 shrink-0 text-sky-500" />
+              {formatDateTime(event.start_time)}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Timer className="size-4 shrink-0 text-amber-500" />
+              {formatDateTime(event.end_time)}
+            </span>
+            {event.location ? (
+              <span className="flex items-center gap-1.5">
+                <MapPin className="size-4 shrink-0 text-emerald-500" />
+                {event.location}
+              </span>
+            ) : null}
+          </div>
+          <div className="flex shrink-0 flex-col gap-2">
+            <Button variant="outline" size="sm" onClick={handleAddToCalendar}>
+              <CalendarPlus className="mr-1.5 size-4" />
+              Add to Calendar
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleDownloadICS}>
+              <CalendarPlus className="mr-1.5 size-4" />
+              Download .ics
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

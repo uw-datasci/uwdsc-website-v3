@@ -66,7 +66,7 @@ export default function CalendarPage() {
     <main className="flex flex-col items-center min-h-[60vh] w-full max-w-6xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-2">Calendar</h1>
       <p className="text-muted-foreground mb-6">
-        View upcoming UWaterloo Data Science Club events and workshops.
+        Check out our events and workshops.
       </p>
       <div className="w-full">
         <MonthlyEventCalendar
@@ -75,6 +75,7 @@ export default function CalendarPage() {
           onMonthChange={setCurrentMonth}
           onTodayClick={handleTodayClick}
           onEventClick={handleEventClick}
+          subscribeUrl="/api/events/feed"
         />
       </div>
       <EventDetailsDialog

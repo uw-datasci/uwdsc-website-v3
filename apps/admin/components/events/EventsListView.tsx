@@ -17,19 +17,17 @@ import { DeleteEventDialog } from "@/components/events";
 interface EventsListViewProps {
   readonly events: Event[];
   readonly onEdit: (event: Event) => void;
-  readonly onCreateClick: () => void;
   readonly onRefresh?: () => void;
 }
 
 export function EventsListView({
   events,
   onEdit,
-  onCreateClick,
   onRefresh,
 }: Readonly<EventsListViewProps>) {
   const formatDateTime = (iso: string) => {
     try {
-      return format(parseISO(iso), "MMM d, yyyy h:mm a");
+      return format(parseISO(iso), "EEE, MMM d, yyyy h:mm a");
     } catch {
       return iso;
     }
@@ -37,18 +35,15 @@ export function EventsListView({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
-        <Button onClick={onCreateClick}>Create event</Button>
-      </div>
       <div className="rounded-lg border bg-card">
-        <Table>
+        <Table className="[&_th]:p-4 [&_td]:p-4">
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Start</TableHead>
-              <TableHead>End</TableHead>
+              <TableHead>Start Time</TableHead>
+              <TableHead>End Time</TableHead>
               <TableHead>Location</TableHead>
-              <TableHead className="w-[100px] text-right">Actions</TableHead>
+              <TableHead className="w-[100px] text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

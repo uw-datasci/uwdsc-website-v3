@@ -1,23 +1,15 @@
 "use client";
 
-import { format, parseISO } from "date-fns";
 import { Pencil } from "lucide-react";
 import { Button, Dialog, DialogContent, DialogHeader, DialogTitle } from "@uwdsc/ui";
 import type { Event } from "@uwdsc/common/types";
+import { formatDateTime } from "@/lib/utils/events";
 
 interface EventDetailsDialogProps {
   readonly event: Event | null;
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
   readonly onEdit: (event: Event) => void;
-}
-
-function formatDateTime(iso: string): string {
-  try {
-    return format(parseISO(iso), "MMM d, yyyy h:mm a");
-  } catch {
-    return iso;
-  }
 }
 
 export function EventDetailsDialog({

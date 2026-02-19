@@ -16,7 +16,7 @@ async function getCachedFeed(): Promise<string> {
  * Returns an iCal feed of all events. Clients can subscribe to this URL
  * so their calendar app shows current and future events.
  *
- * Caching (per Vercel docs):
+ * Caching:
  * - Runtime: use cache: remote (shared across serverless instances, 1 hour revalidate).
  * - CDN: Cache-Control + CDN-Cache-Control so edge caches full responses.
  */

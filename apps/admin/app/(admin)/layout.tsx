@@ -1,9 +1,19 @@
+import { ReactNode } from "react";
+import { createAuthService } from "@/lib/services";
 import { AdminLayout } from "@/components/admin-layout";
+import { AccessDenied } from "@/components/AccessDenied";
+import { ADMIN_ROLES } from "@/constants/roles";
 
-export default function AdminPagesLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+interface AdminLayoutProps {
+  readonly children: ReactNode;
+}
+
+export default async function AdminPagesLayout({ children }: AdminLayoutProps) {
+  const authService = await createAuthService();
+  const { user, error } = await authService.getCurrentUser();
+
+  const isAdmin = ADMIN_ROLES.has(user?.app_metadata.role);
+  if (error || !isAdmin) return <AccessDenied />;
+
   return <AdminLayout>{children}</AdminLayout>;
 }

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createSupabaseMiddlewareClient } from "@uwdsc/db";
+import { ADMIN_ROLES } from "@/constants/roles";
 
-const ADMIN_ROLES = new Set(["admin", "exec"]);
 const LOGIN_ROUTE = "/login";
 const UNAUTHORIZED_ROUTE = "/unauthorized";
 

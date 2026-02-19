@@ -1,37 +1,31 @@
 import { ApiResponse } from "@uwdsc/common/utils";
 import { eventService as adminEventService } from "@uwdsc/admin";
 import { eventService as coreEventService } from "@uwdsc/core";
-import { tryGetCurrentUser } from "@/lib/api/utils";
+import { withAuth } from "@/lib/guards/withAuth";
 import { createEventSchema } from "@/lib/schemas/event";
 
 /**
  * GET /api/events
  * Get all events
- * Authenticated endpoint
+ * Admin/exec only
  */
-export async function GET() {
+export const GET = withAuth(async () => {
   try {
-    const { isUnauthorized } = await tryGetCurrentUser();
-    if (isUnauthorized) return isUnauthorized;
-
     const events = await coreEventService.getAllEvents();
     return ApiResponse.ok(events);
   } catch (error: unknown) {
     console.error("Error fetching events:", error);
     return ApiResponse.serverError(error, "Failed to fetch events");
   }
-}
+});
 
 /**
  * POST /api/events
  * Create a new event
- * Exec/admin only endpoint
+ * Admin/exec only
  */
-export async function POST(request: Request) {
+export const POST = withAuth(async (request) => {
   try {
-    const { isUnauthorized } = await tryGetCurrentUser();
-    if (isUnauthorized) return isUnauthorized;
-
     const body = await request.json();
     const validationResult = createEventSchema.safeParse(body);
 
@@ -56,4 +50,4 @@ export async function POST(request: Request) {
     console.error("Error creating event:", error);
     return ApiResponse.serverError(error, "Failed to create event");
   }
-}
+});

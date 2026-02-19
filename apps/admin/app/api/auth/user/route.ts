@@ -1,26 +1,16 @@
 import { ApiResponse } from "@uwdsc/common/utils";
-import { tryGetCurrentUser } from "@/lib/api/utils";
+import { withAuth } from "@/lib/guards/withAuth";
 import { profileService } from "@uwdsc/core";
 
 /**
  * GET /api/auth/user
- * Get the currently authenticated user
+ * Get the currently authenticated user (admin/exec only)
  */
-export async function GET() {
+export const GET = withAuth(async (_request, _context, user) => {
   try {
-    const { user, isUnauthorized } = await tryGetCurrentUser();
-
-    if (isUnauthorized) return isUnauthorized;
-
-    if (!user) return ApiResponse.notFound("User not found");
-
-    // Extract role from app_metadata
     const role = user.app_metadata?.role ?? null;
-
-    // Fetch profile using user.id
     const profile = await profileService.getProfileByUserId(user.id);
 
-    // Flatten user and profile data into a single object
     const data = {
       email: user.email,
       role,
@@ -34,4 +24,4 @@ export async function GET() {
     console.error("Error fetching current user:", error);
     return ApiResponse.serverError(error, "Failed to fetch user");
   }
-}
+});

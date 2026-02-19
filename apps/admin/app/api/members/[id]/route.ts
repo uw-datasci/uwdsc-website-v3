@@ -1,26 +1,20 @@
 import { ApiResponse } from "@uwdsc/common/utils";
 import { markAsPaidSchema, editMemberSchema } from "@/lib/schemas/membership";
 import { profileService } from "@uwdsc/admin";
-import { tryGetCurrentUser } from "@/lib/api/utils";
-import { NextRequest } from "next/server";
+import { withAuth } from "@/lib/guards/withAuth";
+import type { WithAuthContext } from "@/lib/guards/withAuth";
 
-interface Params {
+interface Params extends WithAuthContext {
   params: Promise<{ id: string }>;
 }
 
 /**
  * PATCH /api/members/[id]
  * Update member information or mark as paid
- * Admin only endpoint
+ * Admin/exec only
  */
-export async function PATCH(request: NextRequest, { params }: Params) {
+export const PATCH = withAuth<Params>(async (request, { params }) => {
   try {
-    // Verify admin access
-    const { isUnauthorized } = await tryGetCurrentUser();
-    if (isUnauthorized) return isUnauthorized;
-
-    // TODO: Add proper admin role check
-
     const body = await request.json();
     const { id } = await params;
 
@@ -77,21 +71,15 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     console.error("Error updating member:", error);
     return ApiResponse.serverError(error, "Failed to update member");
   }
-}
+});
 
 /**
  * DELETE /api/members/[id]
  * Delete a member
- * Admin only endpoint
+ * Admin/exec only
  */
-export async function DELETE(request: NextRequest, { params }: Params) {
+export const DELETE = withAuth<Params>(async (_request, { params }) => {
   try {
-    // Verify admin access
-    const { isUnauthorized } = await tryGetCurrentUser();
-    if (isUnauthorized) return isUnauthorized;
-
-    // TODO: Add proper admin role check
-
     const { id } = await params;
 
     const result = await profileService.deleteMember(id);
@@ -108,4 +96,4 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     console.error("Error deleting member:", error);
     return ApiResponse.serverError(error, "Failed to delete member");
   }
-}
+});

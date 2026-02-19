@@ -1,24 +1,21 @@
 import { ApiResponse } from "@uwdsc/common/utils";
 import { eventService as adminEventService } from "@uwdsc/admin";
 import { eventService as coreEventService } from "@uwdsc/core";
-import { tryGetCurrentUser } from "@/lib/api/utils";
+import { withAuth } from "@/lib/guards/withAuth";
 import { updateEventSchema } from "@/lib/schemas/event";
-import { NextRequest } from "next/server";
+import type { WithAuthContext } from "@/lib/guards/withAuth";
 
-interface Params {
+interface Params extends WithAuthContext {
   params: Promise<{ id: string }>;
 }
 
 /**
  * GET /api/events/[id]
  * Get a single event by ID
- * Authenticated endpoint
+ * Admin/exec only
  */
-export async function GET(request: NextRequest, { params }: Params) {
+export const GET = withAuth<Params>(async (_request, { params }) => {
   try {
-    const { isUnauthorized } = await tryGetCurrentUser();
-    if (isUnauthorized) return isUnauthorized;
-
     const { id } = await params;
     const event = await coreEventService.getEventById(id);
 
@@ -29,18 +26,15 @@ export async function GET(request: NextRequest, { params }: Params) {
     console.error("Error fetching event:", error);
     return ApiResponse.serverError(error, "Failed to fetch event");
   }
-}
+});
 
 /**
  * PATCH /api/events/[id]
  * Update an event (partial update)
- * Exec/admin only endpoint
+ * Admin/exec only
  */
-export async function PATCH(request: NextRequest, { params }: Params) {
+export const PATCH = withAuth<Params>(async (request, { params }) => {
   try {
-    const { isUnauthorized } = await tryGetCurrentUser();
-    if (isUnauthorized) return isUnauthorized;
-
     const body = await request.json();
     const { id } = await params;
 
@@ -70,18 +64,15 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     console.error("Error updating event:", error);
     return ApiResponse.serverError(error, "Failed to update event");
   }
-}
+});
 
 /**
  * DELETE /api/events/[id]
  * Delete an event
- * Admin only endpoint
+ * Admin/exec only
  */
-export async function DELETE(request: NextRequest, { params }: Params) {
+export const DELETE = withAuth<Params>(async (_request, { params }) => {
   try {
-    const { isUnauthorized } = await tryGetCurrentUser();
-    if (isUnauthorized) return isUnauthorized;
-
     const { id } = await params;
     const result = await adminEventService.deleteEvent(id);
 
@@ -97,4 +88,4 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     console.error("Error deleting event:", error);
     return ApiResponse.serverError(error, "Failed to delete event");
   }
-}
+});

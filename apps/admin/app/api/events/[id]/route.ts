@@ -1,9 +1,9 @@
 import { ApiResponse } from "@uwdsc/common/utils";
 import { eventService as adminEventService } from "@uwdsc/admin";
 import { eventService as coreEventService } from "@uwdsc/core";
-import { withAuth } from "@/lib/guards/withAuth";
+import { withAuth } from "@/guards/withAuth";
 import { updateEventSchema } from "@/lib/schemas/event";
-import type { WithAuthContext } from "@/lib/guards/withAuth";
+import type { WithAuthContext } from "@/guards/withAuth";
 
 interface Params extends WithAuthContext {
   params: Promise<{ id: string }>;

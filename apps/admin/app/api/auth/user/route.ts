@@ -1,5 +1,5 @@
 import { ApiResponse } from "@uwdsc/common/utils";
-import { withAuth } from "@/lib/guards/withAuth";
+import { withAuth } from "@/guards/withAuth";
 import { profileService } from "@uwdsc/core";
 
 /**

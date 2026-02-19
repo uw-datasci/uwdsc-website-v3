@@ -1,8 +1,8 @@
 import { ApiResponse } from "@uwdsc/common/utils";
 import { markAsPaidSchema, editMemberSchema } from "@/lib/schemas/membership";
 import { profileService } from "@uwdsc/admin";
-import { withAuth } from "@/lib/guards/withAuth";
-import type { WithAuthContext } from "@/lib/guards/withAuth";
+import { withAuth } from "@/guards/withAuth";
+import type { WithAuthContext } from "@/guards/withAuth";
 
 interface Params extends WithAuthContext {
   params: Promise<{ id: string }>;

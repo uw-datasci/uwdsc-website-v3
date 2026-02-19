@@ -1,7 +1,7 @@
 import { ApiResponse } from "@uwdsc/common/utils";
 import { eventService as adminEventService } from "@uwdsc/admin";
 import { eventService as coreEventService } from "@uwdsc/core";
-import { withAuth } from "@/lib/guards/withAuth";
+import { withAuth } from "@/guards/withAuth";
 import { createEventSchema } from "@/lib/schemas/event";
 
 /**

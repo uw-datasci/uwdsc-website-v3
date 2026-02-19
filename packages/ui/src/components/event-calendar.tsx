@@ -16,14 +16,9 @@ import {
   isWithinInterval,
 } from "date-fns";
 import { CalendarPlus, ChevronLeft, ChevronRight } from "lucide-react";
-import { cn } from "@uwdsc/ui/lib/utils";
+import { cn } from "../lib/utils";
 import { Button } from "./button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "./dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
 import {
   GoogleCalendarIcon,
@@ -167,7 +162,7 @@ export function MonthlyEventCalendar({
 
   const fullFeedUrl =
     globalThis.window === undefined
-      ? subscribeUrl ?? ""
+      ? (subscribeUrl ?? "")
       : (globalThis.window.location.origin ?? "") + (subscribeUrl ?? "");
 
   const handleCopyUrl = React.useCallback(() => {
@@ -269,7 +264,10 @@ export function MonthlyEventCalendar({
                     </p>
                     <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
                       <li>Go to calendar.google.com</li>
-                      <li>Click the &quot;+&quot; next to &quot;Other calendars&quot;</li>
+                      <li>
+                        Click the &quot;+&quot; next to &quot;Other
+                        calendars&quot;
+                      </li>
                       <li>Choose &quot;From URL&quot;</li>
                       <li>Paste the link and click &quot;Add calendar&quot;</li>
                     </ol>
@@ -289,8 +287,14 @@ export function MonthlyEventCalendar({
                       Add the calendar to Outlook using the link above:
                     </p>
                     <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
-                      <li>Go to outlook.live.com/calendar or outlook.office.com/calendar</li>
-                      <li>Click &quot;Add calendar&quot; → &quot;Subscribe from web&quot;</li>
+                      <li>
+                        Go to outlook.live.com/calendar or
+                        outlook.office.com/calendar
+                      </li>
+                      <li>
+                        Click &quot;Add calendar&quot; → &quot;Subscribe from
+                        web&quot;
+                      </li>
                       <li>Paste the link and add the calendar</li>
                     </ol>
                   </TabsContent>

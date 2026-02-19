@@ -1,5 +1,5 @@
 import { BaseRepository } from "@uwdsc/db/baseRepository";
-import { CreateEventData, Event, UpdateEventData } from "@uwdsc/common/types";
+import { CreateEventData, Event } from "@uwdsc/common/types";
 
 export class EventRepository extends BaseRepository {
   /**

@@ -4,7 +4,7 @@ import * as React from "react";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 
-import { cn } from "@uwdsc/ui/lib/utils";
+import { cn } from "../lib/utils";
 import {
   Button,
   Calendar,
@@ -17,7 +17,8 @@ import {
 
 function parseValue(value: string | Date | null | undefined): Date | undefined {
   if (value == null || value === "") return undefined;
-  if (value instanceof Date) return Number.isNaN(value.getTime()) ? undefined : value;
+  if (value instanceof Date)
+    return Number.isNaN(value.getTime()) ? undefined : value;
   const parsed = new Date(value);
   return Number.isNaN(parsed.getTime()) ? undefined : parsed;
 }

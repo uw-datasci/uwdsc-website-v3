@@ -39,7 +39,6 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./*": "./src/*",
     "./globals.css": "./src/styles/globals.css",
     "./postcss.config": "./postcss.config.mjs"
   }

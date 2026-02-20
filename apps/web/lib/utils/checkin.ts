@@ -46,16 +46,19 @@ export async function generateCheckInToken(userId: string): Promise<string> {
 
 /**
  * Build the full QR code data URL with check-in token.
+ * Points to the admin app's /checkin page.
  */
 export async function buildCheckInQRData(params: {
-  baseUrl: string;
   eventId: string;
   membershipId: string;
   userId: string;
 }): Promise<string> {
   const token = await generateCheckInToken(params.userId);
 
-  const url = new URL("/api/checkin", params.baseUrl);
+  const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL;
+  if (!adminUrl) throw new Error("NEXT_PUBLIC_ADMIN_URL is not configured");
+
+  const url = new URL("/checkin", adminUrl);
   url.searchParams.set("event_id", params.eventId);
   url.searchParams.set("membership_id", params.membershipId);
   url.searchParams.set("token", token);

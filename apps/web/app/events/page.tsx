@@ -56,13 +56,12 @@ export default function EventsPage() {
 
   const refreshQR = useCallback(async () => {
     if (!activeEvent || !membershipId || !user) return;
+    console.log("HERE", user)
 
-    const baseUrl = globalThis.location.origin;
     const data = await buildCheckInQRData({
-      baseUrl,
       eventId: activeEvent.id,
       membershipId,
-      userId: user.wat_iam ?? "",
+      userId: user.id,
     });
     await generateQR(data);
     setCountdown(getNextStep());

@@ -76,7 +76,7 @@ export class ProfileRepository extends BaseRepository {
   async getProfileByUserId(userId: string): Promise<Profile | null> {
     try {
       const result = await this.sql<Profile[]>`
-        SELECT 
+        SELECT
           first_name,
           last_name,
           email,

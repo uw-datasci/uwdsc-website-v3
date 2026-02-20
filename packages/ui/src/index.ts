@@ -23,24 +23,15 @@ export * from "./components/sonner";
 export * from "./components/table";
 export * from "./components/textarea";
 export * from "./components/tooltip";
-
 export * from "./components/sidebar";
 export * from "./components/skeleton";
-
 export * from "./components/toggle";
-
 export * from "./components/popover";
-
 export * from "./components/event-calendar";
-
 export * from "./components/calendar";
-
 export * from "./components/datetime-picker";
-
 export * from "./components/scroll-area";
-
 export * from "./components/tabs";
-
 export * from "./icons";
-
 export * from "./hooks/use-mobile";
+export * from "./components/dropdown-menu";

@@ -1,13 +1,10 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
@@ -23,15 +20,24 @@ import {
   FileText,
   Calendar,
   Settings,
-  LogOut,
+  Shield,
 } from "lucide-react";
 import { signOut as signOutApi } from "@/lib/api/auth";
+import { NavUser } from "./nav/NavUser";
+import { NavMain } from "./nav/NavMain";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Members", href: "/members", icon: Users },
   { name: "Applications", href: "/applications", icon: FileText },
-  { name: "Events", href: "/events", icon: Calendar },
+  {
+    name: "Events",
+    icon: Calendar,
+    subItems: [
+      { name: "Manage Events", href: "/events" },
+      { name: "Check-in", href: "/checkin" },
+    ],
+  },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 
@@ -40,7 +46,6 @@ interface AdminLayoutProps {
 }
 
 export function AdminLayout({ children }: AdminLayoutProps) {
-  const pathname = usePathname();
   const router = useRouter();
 
   const handleSignOut = async () => {
@@ -54,46 +59,27 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <SidebarProvider>
-      <Sidebar>
+      <Sidebar collapsible="icon">
         <SidebarHeader>
-          <div className="flex items-center gap-2 px-2 py-1.5">
-            <h2 className="text-lg font-semibold">Admin Panel</h2>
-          </div>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {navigation.map((item) => {
-                  const isActive = pathname === item.href;
-                  return (
-                    <SidebarMenuItem key={item.name}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={isActive}
-                        tooltip={item.name}
-                      >
-                        <Link href={item.href}>
-                          <item.icon />
-                          <span>{item.name}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-        <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton onClick={handleSignOut}>
-                <LogOut />
-                <span>Sign Out</span>
+              <SidebarMenuButton size="lg">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                  <Shield className="size-4" />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold text-base">Admin Panel</span>
+                  <span className="truncate text-xs">UWDSC</span>
+                </div>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
+        </SidebarHeader>
+        <SidebarContent>
+          <NavMain items={navigation} />
+        </SidebarContent>
+        <SidebarFooter>
+          <NavUser onSignOut={handleSignOut} />
         </SidebarFooter>
         <SidebarRail />
       </Sidebar>

@@ -6,6 +6,7 @@
 
 export * from "./auth";
 export * from "./applications";
+export * from "./checkin";
 export * from "./events";
 export * from "./profile";
 

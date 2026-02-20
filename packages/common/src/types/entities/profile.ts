@@ -6,7 +6,7 @@ import type { Faculty, UserRole } from "../shared/enums";
 // ==========================================
 
 export interface Profile {
-  id: string | null;
+  id: string;
   first_name: string | null;
   last_name: string | null;
   email: string;

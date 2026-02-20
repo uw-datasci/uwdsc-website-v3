@@ -20,6 +20,7 @@ export async function GET() {
 
     // Flatten user and profile data into a single object
     const data = {
+      id: user.id,
       email: user.email,
       role,
       first_name: profile?.first_name,

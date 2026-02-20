@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { createAuthService } from "@/lib/services";
-import { AdminLayout } from "@/components/admin-layout";
+import { AdminLayout } from "@/components/AdminLayout";
 import { AccessDenied } from "@/components/AccessDenied";
 import { ADMIN_ROLES } from "@/constants/roles";
 

@@ -137,13 +137,13 @@ export default function EventsPage() {
           onRefresh={fetchEvents}
         />
       ) : (
-        <MonthlyEventCalendar
-          events={events}
-          currentMonth={currentMonth}
-          onMonthChange={setCurrentMonth}
-          onTodayClick={handleTodayClick}
-          onEventClick={handleEventClick}
-        />
+          <MonthlyEventCalendar
+            events={events}
+            currentMonth={currentMonth}
+            onMonthChange={setCurrentMonth}
+            onTodayClick={handleTodayClick}
+            onEventClick={handleEventClick}
+          />
       )}
 
       <EventDetailsDialog

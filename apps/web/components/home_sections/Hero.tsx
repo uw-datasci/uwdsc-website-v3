@@ -117,7 +117,7 @@ export default function Hero({ user, mutate }: Readonly<HeroProps>) {
           className={`${user ? "px-4 py-2" : "px-3 py-1"} md:px-6 md:py-3 overflow-visible! hover:cursor-pointer hover:scale-105 transition-transform duration-200`}
         >
           <Link
-            href={user ? "/check-in" : "/register"}
+            href={user ? "/events" : "/register"}
             className="text-base md:text-xl font-medium flex items-center w-full justify-center hover:cursor-pointer"
           >
             {user ? "Check in for an event →" : "Sign up →"}

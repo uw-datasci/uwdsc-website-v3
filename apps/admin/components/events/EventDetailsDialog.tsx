@@ -1,7 +1,14 @@
 "use client";
 
-import { Pencil } from "lucide-react";
-import { Button, Dialog, DialogContent, DialogHeader, DialogTitle } from "@uwdsc/ui";
+import { Pencil, Clock, Timer, MapPin } from "lucide-react";
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@uwdsc/ui";
 import type { Event } from "@uwdsc/common/types";
 import { formatDateTime } from "@/lib/utils/events";
 
@@ -27,51 +34,45 @@ export function EventDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[480px]">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <div className="flex items-start justify-between gap-2">
-            <DialogTitle className="pr-8">{event.name}</DialogTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleEdit}
-              aria-label="Edit event"
-            >
-              <Pencil className="size-4" />
-            </Button>
-          </div>
+          <DialogTitle>{event.name}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-3 text-sm">
-          <div>
-            <span className="font-medium text-muted-foreground">Start</span>
-            <p>{formatDateTime(event.start_time)}</p>
+        <div className="grid grid-cols-2 gap-8 text-sm pt-4">
+          <div className="flex flex-col gap-3 text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <Clock className="size-4 shrink-0 text-sky-500" />
+              {formatDateTime(event.start_time)}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Timer className="size-4 shrink-0 text-amber-500" />
+              {formatDateTime(event.end_time)}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <MapPin className="size-4 shrink-0 text-emerald-500" />
+              {event.location}
+            </span>
           </div>
           <div>
-            <span className="font-medium text-muted-foreground">End</span>
-            <p>{formatDateTime(event.end_time)}</p>
+            <span className="font-medium text-muted-foreground">
+              Description:
+            </span>
+            <p className="whitespace-pre-wrap mt-1 text-muted-foreground">
+              {event.description}
+            </p>
           </div>
-          <div>
-            <span className="font-medium text-muted-foreground">Location</span>
-            <p>{event.location}</p>
-          </div>
-          <div>
-            <span className="font-medium text-muted-foreground">Description</span>
-            <p className="whitespace-pre-wrap">{event.description}</p>
-          </div>
-          {event.image_url && (
-            <div>
-              <span className="font-medium text-muted-foreground">Image</span>
-              <a
-                href={event.image_url}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="text-primary underline"
-              >
-                View image
-              </a>
-            </div>
-          )}
         </div>
+
+        <DialogFooter>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Edit event"
+            onClick={handleEdit}
+          >
+            <Pencil className="size-4" />
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

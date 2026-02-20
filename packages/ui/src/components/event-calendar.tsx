@@ -91,7 +91,7 @@ function DayCell({
   return (
     <div
       className={cn(
-        "min-h-[100px] bg-card p-1.5 text-sm",
+        "aspect-square bg-card p-1.5 text-sm",
         !isCurrentMonth && "bg-muted/30 text-muted-foreground",
       )}
     >
@@ -114,13 +114,23 @@ function DayCell({
               onEventClick?.(event);
             }}
             className={cn(
-              "w-full truncate rounded border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-left text-xs transition-colors hover:bg-primary/20",
+              "w-full flex flex-col items-start overflow-hidden rounded border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-left transition-colors hover:bg-primary/20",
               !onEventClick && "cursor-default",
             )}
+            title={`${event.name} — ${formatTime(event.start_time)} to ${formatTime(event.end_time)}`}
           >
-            {renderEventContent
-              ? renderEventContent(event)
-              : `${event.name} — ${formatTime(event.start_time)}`}
+            {renderEventContent ? (
+              renderEventContent(event)
+            ) : (
+              <>
+                <span className="w-full truncate text-xs font-medium">
+                  {event.name}
+                </span>
+                <span className="w-full truncate text-[10px] text-muted-foreground">
+                  {formatTime(event.start_time)} - {formatTime(event.end_time)}
+                </span>
+              </>
+            )}
           </button>
         ))}
       </div>
@@ -203,7 +213,7 @@ export function MonthlyEventCalendar({
           >
             <ChevronRight className="size-4" />
           </Button>
-          <h2 className="min-w-[180px] text-2xl font-semibold ml-2">
+          <h2 className="min-w-45 text-2xl font-semibold ml-2">
             {format(currentMonth, "MMMM yyyy")}
           </h2>
         </div>
@@ -222,7 +232,7 @@ export function MonthlyEventCalendar({
               open={subscribeDialogOpen}
               onOpenChange={setSubscribeDialogOpen}
             >
-              <DialogContent className="sm:max-w-[480px] max-h-[90vh] overflow-y-auto">
+              <DialogContent className="sm:max-w-120 max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Subscribe to calendar</DialogTitle>
                 </DialogHeader>

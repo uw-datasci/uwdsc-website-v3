@@ -65,16 +65,16 @@ jobs:
       INFISICAL_CLIENT_ID: ${{ secrets.INFISICAL_CLIENT_ID }}
       INFISICAL_CLIENT_SECRET: ${{ secrets.INFISICAL_CLIENT_SECRET }}
 
-  build-cxc:
-    name: Build - CxC
+  build-admin:
+    name: Build - Admin
     needs: [setup, code-quality]
     uses: uw-datasci/nexus-workflows/.github/workflows/build-node.yml@v4
     with:
       node-version: ${{ needs.setup.outputs.node-version }}
       pnpm-version: ${{ needs.setup.outputs.pnpm-version }}
-      build-command: pnpm --filter=cxc... build
+      build-command: pnpm --filter=admin... build
       infisical-project-slug: ${{ needs.setup.outputs.infisical-project-slug }}
-      infisical-secret-path: /cxc
+      infisical-secret-path: /admin
     secrets:
       INFISICAL_CLIENT_ID: ${{ secrets.INFISICAL_CLIENT_ID }}
       INFISICAL_CLIENT_SECRET: ${{ secrets.INFISICAL_CLIENT_SECRET }}
@@ -82,7 +82,7 @@ jobs:
   quality-summary:
     name: Quality Gate Summary
     runs-on: ubuntu-latest
-    needs: [code-quality, build-web, build-cxc]
+    needs: [code-quality, build-web, build-admin]
     if: always()
     permissions:
       pull-requests: write
@@ -94,4 +94,4 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           code-quality-result: ${{ needs.code-quality.result }}
-          build-result: ${{ needs.build-web.result == 'success' && needs.build-cxc.result == 'success' && 'success' || 'failure' }}
+          build-result: ${{ needs.build-web.result == 'success' && needs.build-admin.result == 'success' && 'success' || 'failure' }}

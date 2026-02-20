@@ -5,6 +5,7 @@
  */
 
 export * from "./auth";
+export * from "./applications";
 export * from "./events";
 export * from "./profile";
 

@@ -106,3 +106,19 @@ export interface ApplicationWithDetails extends Application {
   position_selections: ApplicationPositionSelection[];
   answers: Answer[];
 }
+
+/** Position selection with position name (for admin review) */
+export interface PositionSelectionWithName extends ApplicationPositionSelection {
+  position_name: string;
+}
+
+/** Answer with question text (for admin review) */
+export interface AnswerWithQuestion extends Answer {
+  question_text: string;
+}
+
+/** Full application data for admin list/detail view */
+export interface ApplicationListItem extends Application {
+  position_selections: PositionSelectionWithName[];
+  answers: AnswerWithQuestion[];
+}

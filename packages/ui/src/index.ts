@@ -42,3 +42,5 @@ export * from "./components/scroll-area";
 export * from "./components/tabs";
 
 export * from "./icons";
+
+export * from "./hooks/use-mobile";

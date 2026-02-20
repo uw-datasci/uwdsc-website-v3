@@ -2,6 +2,7 @@ export * from "./services/applicationService";
 export * from "./services/authService";
 export * from "./services/eventService";
 export * from "./services/fileService";
+export * from "./services/membershipService";
 export * from "./services/profileService";
 export * from "./services/resumeService";
 export * from "./services/teamService";

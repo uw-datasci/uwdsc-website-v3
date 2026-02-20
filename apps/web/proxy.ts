@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createSupabaseMiddlewareClient } from "@uwdsc/db";
-import { withAuth, withAnon, isProfileComplete } from "./lib/middleware";
+import {
+  isProfileComplete,
+  withAuth,
+  withAnon,
+  withProtected,
+} from "./lib/middleware";
 
 const AUTH_ROUTES = new Set(["/login", "/register"]);
+const PROTECTED_ROUTES = new Set(["/events"]);
 const COMPLETE_PROFILE_ROUTE = "/complete-profile";
 
 export async function proxy(request: NextRequest) {
@@ -25,7 +31,10 @@ export async function proxy(request: NextRequest) {
     // 1. User is not authenticated and trying to access auth routes
     case AUTH_ROUTES.has(pathname):
       return withAuth(request, response, user);
-    // 2. complete profile route
+    // 2. Redirect anonymous users from protected pages to login page
+    case PROTECTED_ROUTES.has(pathname):
+      return withProtected(request, response, user);
+    // 3. complete profile route
     case pathname === COMPLETE_PROFILE_ROUTE:
       return await withAnon(request, response, isComplete, user?.id);
     case user && !isComplete:

@@ -112,7 +112,10 @@ export function EditMemberModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-150 max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        className="sm:max-w-150 max-h-[90vh] overflow-y-auto"
+        aria-describedby="edit-member-modal"
+      >
         <DialogHeader>
           <DialogTitle>Edit member</DialogTitle>
           <p className="text-sm text-muted-foreground mt-1">{member.email}</p>

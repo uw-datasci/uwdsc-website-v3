@@ -12,6 +12,7 @@ export const GET = withAuth(async (_request, _context, user) => {
     const profile = await profileService.getProfileByUserId(user.id);
 
     const data = {
+      id: user.id,
       email: user.email,
       role,
       first_name: profile?.first_name,

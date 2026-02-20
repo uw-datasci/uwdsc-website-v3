@@ -5,6 +5,9 @@ CREATE TABLE public.memberships (
   payment_location VARCHAR(255),
   verifier_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
   verified_at TIMESTAMPTZ,
+  CONSTRAINT memberships_verifier_not_self CHECK (
+    verifier_id IS NULL OR verifier_id <> profile_id
+  ),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );

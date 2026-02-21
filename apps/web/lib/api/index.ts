@@ -12,3 +12,6 @@ export * from "./application";
 
 // Export resume upload
 export * from "./resume";
+
+// Export events (public calendar)
+export * from "./events";

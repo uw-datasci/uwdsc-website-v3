@@ -1,3 +1,4 @@
+import SectionWrapper from "@/components/SectionWrapper";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -23,5 +24,5 @@ export default function CalendarLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <>{children}</>;
+  return <SectionWrapper className="pt-14 lg:pt-20">{children}</SectionWrapper>;
 }

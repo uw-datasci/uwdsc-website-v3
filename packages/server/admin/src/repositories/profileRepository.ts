@@ -26,7 +26,7 @@ export class ProfileRepository extends BaseRepository {
       FROM profiles p
       JOIN auth.users au ON p.id = au.id
       JOIN user_roles r ON p.id = r.id
-      LEFT JOIN memberships m ON m.user_id = p.id
+      LEFT JOIN memberships m ON m.profile_id = p.id
       LEFT JOIN profiles pv ON pv.id = m.verifier_id
       ORDER BY au.created_at DESC
       `;
@@ -46,10 +46,10 @@ export class ProfileRepository extends BaseRepository {
       const result = await this.sql<MembershipStats[]>`
         SELECT 
           COUNT(*) as total_users,
-          COUNT(*) FILTER (WHERE m.user_id IS NOT NULL) as paid_users,
-          COUNT(*) FILTER (WHERE m.user_id IS NOT NULL AND p.is_math_soc_member = true) as math_soc_members
+          COUNT(*) FILTER (WHERE m.profile_id IS NOT NULL) as paid_users,
+          COUNT(*) FILTER (WHERE m.profile_id IS NOT NULL AND p.is_math_soc_member = true) as math_soc_members
         FROM profiles p
-        LEFT JOIN memberships m ON p.id = m.user_id
+        LEFT JOIN memberships m ON p.id = m.profile_id
       `;
 
       return (
@@ -73,9 +73,9 @@ export class ProfileRepository extends BaseRepository {
   async markAsPaid(profileId: string, data: MarkAsPaidData): Promise<boolean> {
     try {
       const result = await this.sql`
-        INSERT INTO memberships (user_id, payment_method, payment_location, verifier_id, verified_at, updated_at)
+        INSERT INTO memberships (profile_id, payment_method, payment_location, verifier_id, verified_at, updated_at)
         VALUES (${profileId}, ${data.payment_method}::payment_method_enum, ${data.payment_location}, ${data.verifier}::uuid, NOW(), NOW())
-        ON CONFLICT (user_id) 
+        ON CONFLICT (profile_id) 
         DO UPDATE SET
           payment_method = ${data.payment_method}::payment_method_enum,
           payment_location = ${data.payment_location},

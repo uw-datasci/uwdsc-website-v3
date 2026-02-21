@@ -63,11 +63,19 @@ export class AuthRepository {
   }
 
   /**
-   * Exchange code for session
+   * Exchange code for session (PKCE flow - used by initial signup verification link)
    */
   async exchangeCodeForSession(code: string) {
     const { error } = await this.supabase.auth.exchangeCodeForSession(code);
     return error;
+  }
+
+  /**
+   * Verify OTP/token (implicit flow - used when redirect has token_hash; resend() does not use PKCE)
+   */
+  async verifyOtp(params: { token_hash: string; type: "signup" | "email" }) {
+    const { data, error } = await this.supabase.auth.verifyOtp(params);
+    return { data, error };
   }
 
   /**

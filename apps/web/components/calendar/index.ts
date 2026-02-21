@@ -1,0 +1,1 @@
+export { EventDetailsDialog } from "./EventDetailsDialog";

@@ -53,7 +53,7 @@ export function DeleteMemberModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent aria-describedby="delete-member-modal">
         <DialogHeader>
           <DialogTitle>Delete member</DialogTitle>
           <DialogDescription>

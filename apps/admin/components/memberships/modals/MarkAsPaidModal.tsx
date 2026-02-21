@@ -71,13 +71,14 @@ export function MarkAsPaidModal({
     defaultValues: {
       payment_method: undefined,
       payment_location: "",
-      verifier: verifierName,
+      // keep the form's `verifier` as the user id (sent to the API)
+      verifier: user?.id ?? "",
     },
   });
 
   // Update verifier when profile changes
-  if (form.getValues("verifier") !== verifierName) {
-    form.setValue("verifier", verifierName);
+  if (form.getValues("verifier") !== (user?.id ?? "")) {
+    form.setValue("verifier", user?.id ?? "");
   }
 
   const onSubmit = async (data: MarkAsPaidFormValues) => {
@@ -107,7 +108,10 @@ export function MarkAsPaidModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-125">
+      <DialogContent
+        className="sm:max-w-125"
+        aria-describedby="mark-as-paid-modal"
+      >
         <DialogHeader>
           <DialogTitle>Mark as paid</DialogTitle>
           <p className="text-sm text-muted-foreground mt-1">
@@ -165,18 +169,27 @@ export function MarkAsPaidModal({
               )}
             />
 
-            {/* Verifier (disabled, auto-populated) */}
+            {/* Verifier: show display name but send user.id to API */}
             <FormField
               control={form.control}
               name="verifier"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Verified By</FormLabel>
-                  <FormControl>
-                    <Input {...field} disabled className="bg-muted" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+                <>
+                  {/* keep the actual form value as the user id (hidden input) */}
+                  <input type="hidden" {...field} />
+                  <FormItem>
+                    <FormLabel>Verified By</FormLabel>
+                    <FormControl>
+                      {/* show the human-friendly name but don't bind it to the form */}
+                      <Input
+                        value={verifierName}
+                        disabled
+                        className="bg-muted"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                </>
               )}
             />
 

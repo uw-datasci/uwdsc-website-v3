@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
     fetcher,
     {
       // Revalidate on window focus
-      revalidateOnFocus: true,
+      revalidateOnFocus: false,
       // Revalidate on reconnect
       revalidateOnReconnect: true,
       // Revalidate every 5 minutes in the background

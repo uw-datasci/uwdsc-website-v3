@@ -58,4 +58,24 @@ export class ApiResponse {
   static json<T>(data: T, status = 200, init?: ResponseInit): NextResponse {
     return NextResponse.json(data, { status, ...init });
   }
+
+  /**
+   * Returns a response with a string body and custom Content-Type.
+   * Use for non-JSON responses (e.g. text/calendar, text/plain, text/csv).
+   */
+  static text(
+    body: string,
+    contentType: string,
+    status = 200,
+    init?: ResponseInit,
+  ): NextResponse {
+    return new NextResponse(body, {
+      status,
+      ...init,
+      headers: {
+        "Content-Type": contentType,
+        ...init?.headers,
+      },
+    });
+  }
 }

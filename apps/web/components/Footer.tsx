@@ -1,3 +1,4 @@
+import { Button } from "@uwdsc/ui";
 import Image from "next/image";
 import Link from "next/link";
 import { Mail, Instagram, Linkedin, Youtube } from "react-feather";
@@ -6,35 +7,43 @@ import { RxDiscordLogo } from "react-icons/rx";
 
 const SOCIALS = [
   {
-    icon: <Mail className="w-6 text-white" />,
+    name: "Email",
+    icon: <Mail className="size-6" />,
     href: "mailto:contact@uwdatascience.ca",
   },
   {
-    icon: <Instagram className="w-6 text-white" />,
+    name: "Instagram",
+    icon: <Instagram className="size-6" />,
     href: "https://www.instagram.com/uwaterloodsc/",
   },
   {
-    icon: <RxDiscordLogo size={24} className="text-white" />,
+    name: "Discord",
+    icon: <RxDiscordLogo className="size-6" />,
     href: "https://discord.gg/VFVkyP5mgm",
   },
   {
-    icon: <Linkedin className="w-6 text-white" />,
+    name: "LinkedIn",
+    icon: <Linkedin className="size-6" />,
     href: "https://www.linkedin.com/company/waterloo-data-science-club/",
   },
   {
-    icon: <Youtube className="w-6 text-white" />,
+    name: "Youtube",
+    icon: <Youtube className="size-6" />,
     href: "https://www.youtube.com/channel/UCknY88pglf2xz_S72WHIDxg",
   },
   {
-    icon: <RiTwitterXLine size={24} className="text-white" />,
+    name: "Twitter",
+    icon: <RiTwitterXLine className="size-6" />,
     href: "https://twitter.com/uwaterloodsc",
   },
   {
-    icon: <RiTiktokLine size={24} className="text-white" />,
+    name: "Tiktok",
+    icon: <RiTiktokLine className="size-6" />,
     href: "https://vm.tiktok.com/ZMF3YveUq/",
   },
   {
-    icon: <RiSpotifyLine size={24} className="text-white" />,
+    name: "Spotify",
+    icon: <RiSpotifyLine className="size-6" />,
     href: "https://open.spotify.com/show/4iWipypyDClyRHM47JIMzg",
   },
 ];
@@ -65,15 +74,16 @@ export default function Footer() {
           </a>
         </div>
         <div className="flex flex-wrap justify-center gap-5">
-          {SOCIALS.map((social, i) => (
-            <a
-              href={social.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              key={`social-${i}`}
-            >
-              {social.icon}
-            </a>
+          {SOCIALS.map((social) => (
+            <Button size="icon" key={social.name} variant="ghost">
+              <Link
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {social.icon}
+              </Link>
+            </Button>
           ))}
         </div>
       </footer>

@@ -9,7 +9,7 @@ export async function isProfileComplete(
 
   const { data: profile, error } = await supabase
     .from("profiles")
-    .select("first_name, last_name, faculty, term, heard_from_where")
+    .select("first_name, last_name, wat_iam, faculty, term, heard_from_where")
     .eq("id", userId)
     .maybeSingle();
 
@@ -18,6 +18,7 @@ export async function isProfileComplete(
     !error &&
     profile.first_name &&
     profile.last_name &&
+    profile.wat_iam &&
     profile.faculty &&
     profile.term &&
     profile.heard_from_where

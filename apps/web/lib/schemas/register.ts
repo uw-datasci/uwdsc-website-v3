@@ -12,6 +12,10 @@ export const registerSchema = z
       .min(8, "Your password needs to be at least 8 characters long"),
     confirmPassword: z.string(),
   })
+  .refine((data) => data.email.toLowerCase().endsWith("@uwaterloo.ca"), {
+    message: "Please use your @uwaterloo.ca email address",
+    path: ["email"],
+  })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],

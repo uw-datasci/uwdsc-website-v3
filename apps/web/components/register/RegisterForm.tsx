@@ -95,7 +95,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
         <div className="flex flex-col gap-1 items-start justify-between mt-6">
           <Button
             size="lg"
-            disabled={isLoading}
+            disabled={isLoading || !form.formState.isValid}
             type="submit"
             className="w-full rounded-md xl:rounded-lg bg-gradient-purple text-lg font-bold h-auto! py-2.5"
           >

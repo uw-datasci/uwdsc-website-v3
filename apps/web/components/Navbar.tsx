@@ -9,11 +9,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { GlassSurface, NavigationMenu, NavigationMenuList } from "@uwdsc/ui";
 
+const hideNavbarPaths = new Set(["/login", "/register", "/complete-profile"]);
+
 export function Navbar() {
   const pathname = usePathname();
   const { user } = useAuth();
 
-  const hideNavbar = pathname === "/login" || pathname === "/register";
+  const hideNavbar = hideNavbarPaths.has(pathname);
 
   // Navigation links
   const navLinks = [
@@ -24,14 +26,14 @@ export function Navbar() {
     // Add Admin link if user is an admin
     ...(user?.role === "admin"
       ? [
-          {
-            href:
-              process.env.NEXT_PUBLIC_ADMIN_URL ||
-              "https://admin.uwdatascience.ca/",
-            label: "Admin",
-            target: "_blank",
-          },
-        ]
+        {
+          href:
+            process.env.NEXT_PUBLIC_ADMIN_URL ||
+            "https://admin.uwdatascience.ca/",
+          label: "Admin",
+          target: "_blank",
+        },
+      ]
       : []),
   ];
 

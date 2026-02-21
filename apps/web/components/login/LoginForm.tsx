@@ -98,7 +98,7 @@ export function LoginForm() {
           <div>
             <Button
               size="lg"
-              disabled={isLoading}
+              disabled={isLoading || !form.formState.isValid}
               type="submit"
               className="w-full rounded-md xl:rounded-lg bg-gradient-purple text-lg font-bold h-auto! py-2.5"
             >
@@ -115,7 +115,7 @@ export function LoginForm() {
               <Button
                 variant="link"
                 size="sm"
-                onClick={() => {}} // TODO: implement logic for forgot password
+                onClick={() => { }} // TODO: implement logic for forgot password
                 className="text-gray-400/60 hover:text-gray-200 transition-colors text-sm font-medium p-0"
                 type="button"
               >

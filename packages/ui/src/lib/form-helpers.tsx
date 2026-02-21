@@ -46,6 +46,8 @@ interface SelectFieldOptions {
   triggerClassName?: string;
   contentClassName?: string;
   itemClassName?: string;
+  /** Use "popper" for stable dropdown positioning (avoids content shifting on hover). */
+  contentPosition?: "item-aligned" | "popper";
 }
 
 interface TextAreaFieldOptions {
@@ -115,6 +117,7 @@ export function renderSelectField(opts: SelectFieldOptions) {
     triggerClassName,
     contentClassName,
     itemClassName,
+    contentPosition,
   } = opts;
 
   function SelectFieldRender({ field }: StringFieldRenderProps) {
@@ -131,7 +134,7 @@ export function renderSelectField(opts: SelectFieldOptions) {
               <SelectValue placeholder={placeholder} />
             </SelectTrigger>
           </FormControl>
-          <SelectContent className={contentClassName}>
+          <SelectContent className={contentClassName} position={contentPosition}>
             {options.map((option) => (
               <SelectItem key={option} value={option} className={itemClassName}>
                 {option}

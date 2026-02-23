@@ -19,10 +19,12 @@ export class ProfileRepository extends BaseRepository {
         p.term,
         p.is_math_soc_member,
         r.role,
+        m.profile_id IS NOT NULL AS has_paid,
         m.payment_method,
         m.payment_location,
         pv.first_name AS verifier_first_name,
         pv.last_name AS verifier_last_name
+        
       FROM profiles p
       JOIN auth.users au ON p.id = au.id
       JOIN user_roles r ON p.id = r.id

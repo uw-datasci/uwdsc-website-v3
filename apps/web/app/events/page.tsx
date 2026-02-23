@@ -8,10 +8,7 @@ import {
   getAttendanceStatus,
   getMembershipStatus,
 } from "@/lib/api";
-import {
-  buildCheckInQRData,
-  getTimeNextStep as getNextStep,
-} from "@/lib/utils/checkin";
+import { buildCheckInQRData, getTimeNextStep } from "@/lib/utils/checkin";
 import type { Event } from "@uwdsc/common/types";
 import {
   LoadingState,
@@ -56,7 +53,6 @@ export default function EventsPage() {
 
   const refreshQR = useCallback(async () => {
     if (!activeEvent || !membershipId || !user) return;
-    console.log("HERE", user)
 
     const data = await buildCheckInQRData({
       eventId: activeEvent.id,
@@ -64,7 +60,7 @@ export default function EventsPage() {
       userId: user.id,
     });
     await generateQR(data);
-    setCountdown(getNextStep());
+    setCountdown(getTimeNextStep());
   }, [activeEvent, membershipId, user, generateQR]);
 
   const loadData = useCallback(async () => {
@@ -119,7 +115,10 @@ export default function EventsPage() {
 
     intervalRef.current = setInterval(() => refreshQR(), 30_000);
 
-    countdownRef.current = setInterval(() => setCountdown(getNextStep()), 1000);
+    countdownRef.current = setInterval(
+      () => setCountdown(getTimeNextStep()),
+      1000,
+    );
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);

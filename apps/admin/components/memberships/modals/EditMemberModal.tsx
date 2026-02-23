@@ -17,19 +17,14 @@ import {
   DialogHeader,
   DialogTitle,
   Form,
-  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormControl,
   Button,
-  Input,
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
   Checkbox,
+  renderTextField,
+  renderSelectField,
 } from "@uwdsc/ui";
 import { Member } from "@uwdsc/common/types";
 
@@ -41,13 +36,12 @@ interface EditMemberModalProps {
 }
 
 const FACULTY_OPTIONS = [
-  { value: "math", label: "Math" },
-  { value: "engineering", label: "Engineering" },
-  { value: "science", label: "Science" },
-  { value: "arts", label: "Arts" },
-  { value: "health", label: "Health" },
-  { value: "environment", label: "Environment" },
-  { value: "other_non_waterloo", label: "Other (Non-Waterloo)" },
+  "math",
+  "engineering",
+  "science",
+  "arts",
+  "health",
+  "environment",
 ] as const;
 
 export function EditMemberModal({
@@ -123,105 +117,68 @@ export function EditMemberModal({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* First Name */}
-            <FormField
-              control={form.control}
-              name="first_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    First Name <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="Enter first name" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* First Name & Last Name */}
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="first_name"
+                render={({ field }) =>
+                  renderTextField({
+                    label: "First Name",
+                    placeholder: "Enter first name",
+                    required: true,
+                  })({ field })
+                }
+              />
+              <FormField
+                control={form.control}
+                name="last_name"
+                render={({ field }) =>
+                  renderTextField({
+                    label: "Last Name",
+                    placeholder: "Enter last name",
+                    required: true,
+                  })({ field })
+                }
+              />
+            </div>
 
-            {/* Last Name */}
-            <FormField
-              control={form.control}
-              name="last_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Last Name <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="Enter last name" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* WatIAM */}
-            <FormField
-              control={form.control}
-              name="wat_iam"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>WatIAM</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      value={field.value || ""}
-                      placeholder="Enter WatIAM username"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* WatIAM & Term */}
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="wat_iam"
+                render={({ field }) =>
+                  renderTextField({
+                    label: "WatIAM",
+                    placeholder: "Enter WatIAM username",
+                  })({ field: { ...field, value: field.value ?? "" } })
+                }
+              />
+              <FormField
+                control={form.control}
+                name="term"
+                render={({ field }) =>
+                  renderTextField({
+                    label: "Term",
+                    placeholder: "e.g., 1A, 2B, 4A",
+                  })({ field: { ...field, value: field.value ?? "" } })
+                }
+              />
+            </div>
 
             {/* Faculty */}
             <FormField
               control={form.control}
               name="faculty"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Faculty</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value || undefined}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select faculty" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {FACULTY_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Term */}
-            <FormField
-              control={form.control}
-              name="term"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Term</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      value={field.value || ""}
-                      placeholder="e.g., 1A, 2B, 4A"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) =>
+                renderSelectField({
+                  label: "Faculty",
+                  placeholder: "Select faculty",
+                  options: [...FACULTY_OPTIONS],
+                  triggerClassName: "w-full",
+                })({ field: { ...field, value: field.value ?? "" } })
+              }
             />
 
             {/* MathSoc Member */}

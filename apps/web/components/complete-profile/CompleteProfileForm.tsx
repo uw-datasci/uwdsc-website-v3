@@ -63,7 +63,7 @@ export function CompleteProfileForm({
         first_name: formData.first_name,
         last_name: formData.last_name,
         wat_iam: formData.wat_iam,
-        faculty: facultyLabelToValue[formData.faculty] ?? "other_non_waterloo",
+        faculty: facultyLabelToValue[formData.faculty] ?? "math",
         term: formData.term,
         heard_from_where: formData.heard_from_where,
       };
@@ -75,8 +75,8 @@ export function CompleteProfileForm({
       console.error(error);
       setAuthError(
         err?.error ??
-        err?.message ??
-        "An unexpected error occurred. Please try again",
+          err?.message ??
+          "An unexpected error occurred. Please try again",
       );
     } finally {
       setIsLoading(false);

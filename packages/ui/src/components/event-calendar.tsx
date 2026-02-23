@@ -91,7 +91,7 @@ function DayCell({
   return (
     <div
       className={cn(
-        "aspect-square bg-card p-1.5 text-sm",
+        "min-h-24 md:min-h-32 bg-card p-1.5 text-sm",
         !isCurrentMonth && "bg-muted/30 text-muted-foreground",
       )}
     >

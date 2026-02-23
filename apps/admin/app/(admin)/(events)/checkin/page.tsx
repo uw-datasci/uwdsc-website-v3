@@ -160,22 +160,6 @@ export default function CheckInPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          {pageState === "idle" ? (
-            <Button onClick={() => setPageState("scanning")}>
-              <Camera className="mr-2 size-4" />
-              Open Scanner
-            </Button>
-          ) : pageState === "scanning" ? (
-            <Button variant="outline" onClick={() => setPageState("idle")}>
-              <CameraOff className="mr-2 size-4" />
-              Close Scanner
-            </Button>
-          ) : null}
-        </div>
-      </div>
-
       <div className="flex flex-col items-center gap-6 max-w-md w-full mx-auto">
         {pageState === "idle" && (
           <ManualCheckInForm
@@ -187,6 +171,7 @@ export default function CheckInPage() {
             setSearchQuery={setSearchQuery}
             filteredProfiles={filteredProfiles}
             onCheckIn={handleManualCheckIn}
+            onOpenScanner={() => setPageState("scanning")}
           />
         )}
 

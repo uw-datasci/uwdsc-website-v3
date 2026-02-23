@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import { Search, Camera } from "lucide-react";
 import {
   Button,
   Input,
@@ -23,6 +23,7 @@ interface ManualCheckInFormProps {
   setSearchQuery: (query: string) => void;
   filteredProfiles: Member[];
   onCheckIn: (profileId: string) => void;
+  onOpenScanner: () => void;
 }
 
 export function ManualCheckInForm({
@@ -34,11 +35,15 @@ export function ManualCheckInForm({
   setSearchQuery,
   filteredProfiles,
   onCheckIn,
+  onOpenScanner,
 }: ManualCheckInFormProps) {
   return (
     <Card className="w-full text-left">
-      <CardHeader className="pb-4">
+      <CardHeader className="pb-4 flex flex-row items-center justify-between">
         <CardTitle className="text-lg">Manual Check-in</CardTitle>
+        <Button variant="outline" size="icon" onClick={onOpenScanner}>
+          <Camera className="size-4" />
+        </Button>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">

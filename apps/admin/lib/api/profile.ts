@@ -12,11 +12,15 @@ import { Member, MembershipStats } from "@uwdsc/common/types";
 /**
  * Get all user profiles
  *
+ * @param options - Optional query parameters
  * @returns Promise with array of all member profiles
  * @throws Error if request fails or unauthorized
  */
-export async function getAllProfiles(): Promise<Member[]> {
-  const response = await fetch("/api/members");
+export async function getAllProfiles(options?: {
+  paidOnly?: boolean;
+}): Promise<Member[]> {
+  const url = options?.paidOnly ? "/api/members?paid=true" : "/api/members";
+  const response = await fetch(url);
 
   const data = await response.json();
 

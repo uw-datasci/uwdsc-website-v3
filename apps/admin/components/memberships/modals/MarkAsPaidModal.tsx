@@ -26,11 +26,8 @@ import {
   FormControl,
   FormMessage,
   Input,
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
+  renderTextField,
+  renderSelectField,
 } from "@uwdsc/ui";
 
 interface MarkAsPaidModalProps {
@@ -45,11 +42,7 @@ function getMemberDisplayName(member: Member): string {
   return name || member.email;
 }
 
-const PAYMENT_METHOD_OPTIONS = [
-  { value: "cash", label: "Cash" },
-  { value: "online", label: "Online" },
-  { value: "math_soc", label: "MathSoc" },
-] as const;
+const PAYMENT_METHOD_OPTIONS = ["cash", "online", "math_soc"];
 
 export function MarkAsPaidModal({
   open,
@@ -121,55 +114,29 @@ export function MarkAsPaidModal({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* Payment Method */}
-            <FormField
-              control={form.control}
-              name="payment_method"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Payment Method <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select payment method" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {PAYMENT_METHOD_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="payment_method"
+                render={renderSelectField({
+                  label: "Payment Method",
+                  placeholder: "Select payment method",
+                  options: PAYMENT_METHOD_OPTIONS,
+                  required: true,
+                })}
+              />
 
-            {/* Payment Location */}
-            <FormField
-              control={form.control}
-              name="payment_location"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Payment Location <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="e.g., DSC Office, SLC, Online"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="payment_location"
+                render={renderTextField({
+                  label: "Payment Location",
+                  placeholder: "e.g., DSC Office, SLC, Online",
+                  required: true,
+                })}
+              />
+            </div>
 
-            {/* Verifier: show display name but send user.id to API */}
             <FormField
               control={form.control}
               name="verifier"

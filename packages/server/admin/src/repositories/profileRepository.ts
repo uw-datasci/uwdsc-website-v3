@@ -1,12 +1,17 @@
 import { BaseRepository } from "@uwdsc/db/baseRepository";
-import { MarkAsPaidData, Member, MembershipStats } from "@uwdsc/common/types";
+import {
+  MarkAsPaidData,
+  Member,
+  MembershipStats,
+  Profile,
+} from "@uwdsc/common/types";
 
 export class ProfileRepository extends BaseRepository {
   /**
    * Get all user profiles with email from auth.users
    * Used for admin membership management
    */
-  async getAllProfiles(): Promise<Member[]> {
+  async getAllProfiles(options?: { paidOnly?: boolean }): Promise<Member[]> {
     try {
       const result = await this.sql<Member[]>`
       SELECT
@@ -18,17 +23,19 @@ export class ProfileRepository extends BaseRepository {
         p.faculty,
         p.term,
         p.is_math_soc_member,
-        r.role,
+        r.role AS user_role,
         m.profile_id IS NOT NULL AS has_paid,
         m.payment_method,
         m.payment_location,
-        pv.first_name AS verifier_first_name,
-        pv.last_name AS verifier_last_name
-        
+        NULLIF(TRIM(CONCAT_WS(' ', pv.first_name, pv.last_name)), '') AS verifier
       FROM profiles p
       JOIN auth.users au ON p.id = au.id
       JOIN user_roles r ON p.id = r.id
-      LEFT JOIN memberships m ON m.profile_id = p.id
+      ${
+        options?.paidOnly
+          ? this.sql`JOIN memberships m ON m.profile_id = p.id`
+          : this.sql`LEFT JOIN memberships m ON m.profile_id = p.id`
+      }
       LEFT JOIN profiles pv ON pv.id = m.verifier_id
       ORDER BY au.created_at DESC
       `;
@@ -36,6 +43,31 @@ export class ProfileRepository extends BaseRepository {
       return result;
     } catch (error: unknown) {
       console.error("Error fetching all profiles:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get the profile by profile ID
+   */
+  async getProfileById(profileId: string): Promise<Profile | null> {
+    try {
+      const result = await this.sql<Profile[]>`
+        SELECT
+          p.id,
+          p.first_name,
+          p.last_name,
+          p.wat_iam,
+          p.faculty,
+          p.term,
+          p.is_math_soc_member
+        FROM profiles p
+        WHERE p.id = ${profileId}
+        LIMIT 1
+      `;
+      return result[0] ?? null;
+    } catch (error: unknown) {
+      console.error("Error fetching profile by ID:", error);
       throw error;
     }
   }

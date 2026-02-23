@@ -1,5 +1,6 @@
 import { ApiError, type Profile, type Event } from "@uwdsc/common/types";
 import { CheckinRepository } from "../repositories/checkinRepository";
+import { profileService } from "./profileService";
 
 const TIME_STEP_SECONDS = 30;
 
@@ -43,9 +44,7 @@ class CheckinService {
    * Checks current time step and ±1 step to allow for clock drift.
    */
   async verifyToken(userId: string, token: string): Promise<boolean> {
-    const currentStep = Math.floor(
-      Date.now() / (TIME_STEP_SECONDS * 1000),
-    );
+    const currentStep = Math.floor(Date.now() / (TIME_STEP_SECONDS * 1000));
 
     // Check current step and ±1 for clock drift tolerance
     for (const step of [currentStep, currentStep - 1, currentStep + 1]) {
@@ -89,10 +88,7 @@ class CheckinService {
       }
 
       // 3. Verify TOTP token
-      const tokenValid = await this.verifyToken(
-        profile.id,
-        token,
-      );
+      const tokenValid = await this.verifyToken(profile.id, token);
       if (!tokenValid) {
         return {
           success: false,
@@ -118,8 +114,56 @@ class CheckinService {
 
       return { success: true, profile };
     } catch (error) {
+      throw new ApiError(`Check-in failed: ${(error as Error).message}`, 500);
+    }
+  }
+
+  /**
+   * Manual check-in flow (bypasses TOTP token and membership checks):
+   * 1. Validate event exists and is active
+   * 2. Validate profile exists
+   * 3. Check not already checked in
+   * 4. Insert attendance
+   */
+  async manualCheckIn(event: Event, profileId: string): Promise<CheckInResult> {
+    try {
+      // 1. Validate event is active
+      const now = new Date();
+      const bufferedStart = new Date(event.buffered_start_time);
+      const bufferedEnd = new Date(event.buffered_end_time);
+      if (now < bufferedStart || now > bufferedEnd) {
+        return {
+          success: false,
+          error: "Event is not currently active for check-in",
+        };
+      }
+
+      // 2. Validate profile exists
+      const profile = await profileService.getProfileById(profileId);
+      if (!profile) {
+        return { success: false, error: "Invalid profile ID" };
+      }
+
+      // 3. Check not already checked in
+      const alreadyCheckedIn = await this.repository.hasAttendance(
+        event.id,
+        profile.id,
+      );
+      if (alreadyCheckedIn) {
+        return {
+          success: false,
+          error: "Already checked in",
+          profile,
+        };
+      }
+
+      // 4. Insert attendance
+      await this.repository.insertAttendance(event.id, profile.id);
+
+      return { success: true, profile };
+    } catch (error) {
       throw new ApiError(
-        `Check-in failed: ${(error as Error).message}`,
+        `Manual Check-in failed: ${(error as Error).message}`,
         500,
       );
     }
@@ -132,10 +176,7 @@ class CheckinService {
     try {
       return await this.repository.deleteAttendance(eventId, profileId);
     } catch (error) {
-      throw new ApiError(
-        `Uncheck-in failed: ${(error as Error).message}`,
-        500,
-      );
+      throw new ApiError(`Uncheck-in failed: ${(error as Error).message}`, 500);
     }
   }
 }

@@ -3,7 +3,7 @@ import type { Profile } from "@uwdsc/common/types";
 
 interface CheckInResponse {
   success: boolean;
-  profile: Profile
+  profile: Profile;
 }
 
 interface UncheckInResponse {
@@ -16,6 +16,20 @@ export async function validateAndCheckIn(data: {
   token: string;
 }): Promise<CheckInResponse> {
   const response = await fetch("/api/checkin", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  const result = await response.json();
+  if (!response.ok) throw createApiError(result, response.status);
+  return result;
+}
+
+export async function manualCheckIn(data: {
+  event_id: string;
+  profile_id: string;
+}): Promise<CheckInResponse> {
+  const response = await fetch("/api/checkin/manual", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),

@@ -5,6 +5,7 @@ import {
   Member,
   MembershipStats,
   UpdateMemberData,
+  Profile,
 } from "@uwdsc/common/types";
 import { filterPartialUpdate } from "@uwdsc/common/utils";
 
@@ -27,12 +28,26 @@ class ProfileService {
   /**
    * Get all user profiles
    */
-  async getAllProfiles(): Promise<Member[]> {
+  async getAllProfiles(options?: { paidOnly?: boolean }): Promise<Member[]> {
     try {
-      return await this.repository.getAllProfiles();
+      return await this.repository.getAllProfiles(options);
     } catch (error) {
       throw new ApiError(
         `Failed to get all profiles: ${(error as Error).message}`,
+        500,
+      );
+    }
+  }
+
+  /**
+   * Get the profile by profile ID
+   */
+  async getProfileById(profileId: string): Promise<Profile | null> {
+    try {
+      return await this.repository.getProfileById(profileId);
+    } catch (error) {
+      throw new ApiError(
+        `Failed to get profile by ID: ${(error as Error).message}`,
         500,
       );
     }

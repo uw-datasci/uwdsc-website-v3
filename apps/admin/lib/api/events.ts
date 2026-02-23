@@ -15,11 +15,15 @@ import { Event } from "@uwdsc/common/types";
 /**
  * Get all events
  *
+ * @param options - Optional query parameters
  * @returns Promise with array of all events
  * @throws Error if request fails or unauthorized
  */
-export async function getAllEvents(): Promise<Event[]> {
-  const response = await fetch("/api/events");
+export async function getAllEvents(options?: {
+  activeOnly?: boolean;
+}): Promise<Event[]> {
+  const url = options?.activeOnly ? "/api/events?active=true" : "/api/events";
+  const response = await fetch(url);
 
   const data = await response.json();
 

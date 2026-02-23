@@ -1,12 +1,23 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Loader2, QrCode, Camera, CameraOff } from "lucide-react";
+import { Loader2, Camera, CameraOff } from "lucide-react";
 import { Button } from "@uwdsc/ui";
-import { validateAndCheckIn, uncheckIn } from "@/lib/api";
-import { QrScanner, SuccessState, FailureState } from "@/components/checkin";
-import type { Profile } from "@uwdsc/common/types";
+import {
+  validateAndCheckIn,
+  uncheckIn,
+  getAllEvents,
+  getAllProfiles,
+  manualCheckIn,
+} from "@/lib/api";
+import {
+  QrScanner,
+  SuccessState,
+  FailureState,
+  ManualCheckInForm,
+} from "@/components/checkin";
+import type { Event, Member, Profile } from "@uwdsc/common/types";
 
 type PageState = "idle" | "scanning" | "validating" | "success" | "failure";
 
@@ -19,6 +30,59 @@ export default function CheckInPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [eventId, setEventId] = useState<string>("");
   const [isUnchecking, setIsUnchecking] = useState(false);
+
+  // Manual Check-in State
+  const [events, setEvents] = useState<Event[]>([]);
+  const [profiles, setProfiles] = useState<Member[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedEventId, setSelectedEventId] = useState<string>("");
+
+  useEffect(() => {
+    getAllEvents({ activeOnly: true })
+      .then((evts) => {
+        setEvents(evts);
+        const firstActive = evts[0];
+        if (firstActive) setSelectedEventId(firstActive.id);
+      })
+      .catch(console.error);
+
+    getAllProfiles({ paidOnly: true }).then(setProfiles).catch(console.error);
+  }, []);
+
+  const filteredProfiles = useMemo(() => {
+    if (!searchQuery) return [];
+    const query = searchQuery.toLowerCase();
+    return profiles
+      .filter(
+        (p) =>
+          (p.first_name?.toLowerCase() ?? "").includes(query) ||
+          (p.last_name?.toLowerCase() ?? "").includes(query) ||
+          (p.email?.toLowerCase() ?? "").includes(query) ||
+          (p.wat_iam?.toLowerCase() ?? "").includes(query),
+      )
+      .slice(0, 5);
+  }, [searchQuery, profiles]);
+
+  const handleManualCheckIn = async (profileId: string) => {
+    if (!selectedEventId) {
+      setError("Please select an event before checking in");
+      setPageState("failure");
+      return;
+    }
+    setPageState("validating");
+    setEventId(selectedEventId);
+    try {
+      const result = await manualCheckIn({
+        event_id: selectedEventId,
+        profile_id: profileId,
+      });
+      setProfile(result.profile);
+      setPageState("success");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Manual Check-in failed");
+      setPageState("failure");
+    }
+  };
 
   // Auto-validate when query params are present
   const processCheckIn = useCallback(
@@ -35,9 +99,7 @@ export default function CheckInPage() {
         setProfile(result.profile);
         setPageState("success");
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Check-in failed",
-        );
+        setError(err instanceof Error ? err.message : "Check-in failed");
         setPageState("failure");
       }
     },
@@ -89,70 +151,68 @@ export default function CheckInPage() {
       setPageState("idle");
       router.replace("/checkin");
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Uncheck-in failed",
-      );
+      setError(err instanceof Error ? err.message : "Uncheck-in failed");
       setPageState("failure");
     } finally {
       setIsUnchecking(false);
     }
   };
 
-  switch (pageState) {
-    case "idle":
-      return (
-        <div className="flex flex-col items-center text-center">
-          <div className="rounded-2xl border bg-card p-8 max-w-md w-full shadow-sm">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-              <QrCode className="size-8 text-primary" />
-            </div>
-            <h2 className="text-xl font-bold mb-2">Ready to Scan</h2>
-            <p className="text-sm text-muted-foreground mb-6">
-              Activate the camera to scan a member&apos;s check-in QR code.
-              The QR code is displayed on the member&apos;s Events page.
-            </p>
-            <Button
-              onClick={() => setPageState("scanning")}
-              className="w-full"
-            >
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          {pageState === "idle" ? (
+            <Button onClick={() => setPageState("scanning")}>
               <Camera className="mr-2 size-4" />
               Open Scanner
             </Button>
-          </div>
+          ) : pageState === "scanning" ? (
+            <Button variant="outline" onClick={() => setPageState("idle")}>
+              <CameraOff className="mr-2 size-4" />
+              Close Scanner
+            </Button>
+          ) : null}
         </div>
-      );
-    case "scanning":
-      return (
-        <div className="flex flex-col items-center gap-4">
+      </div>
+
+      <div className="flex flex-col items-center gap-6 max-w-md w-full mx-auto">
+        {pageState === "idle" && (
+          <ManualCheckInForm
+            events={events}
+            profiles={profiles}
+            selectedEventId={selectedEventId}
+            setSelectedEventId={setSelectedEventId}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            filteredProfiles={filteredProfiles}
+            onCheckIn={handleManualCheckIn}
+          />
+        )}
+
+        {pageState === "scanning" && (
           <QrScanner onScan={handleScan} onError={handleScanError} />
-          <Button
-            variant="outline"
-            onClick={() => setPageState("idle")}
-          >
-            <CameraOff className="mr-2 size-4" />
-            Close Scanner
-          </Button>
-        </div>
-      );
-    case "validating":
-      return (
-        <div className="flex flex-col items-center text-center py-12">
-          <Loader2 className="size-12 text-primary animate-spin mb-4" />
-          <p className="text-muted-foreground">Validating check-in...</p>
-        </div>
-      );
-    case "success":
-      if (!profile) return null;
-      return (
-        <SuccessState
-          profile={profile}
-          onUncheckIn={handleUncheckIn}
-          isUnchecking={isUnchecking}
-        />
-      );
-    case "failure":
-      return (
-        <FailureState error={error} onRetry={handleRetry} />
-      );
-  }
+        )}
+
+        {pageState === "validating" && (
+          <div className="flex flex-col items-center text-center py-12">
+            <Loader2 className="size-12 text-primary animate-spin mb-4" />
+            <p className="text-muted-foreground">Validating check-in...</p>
+          </div>
+        )}
+
+        {pageState === "success" && profile && (
+          <SuccessState
+            profile={profile}
+            onUncheckIn={handleUncheckIn}
+            isUnchecking={isUnchecking}
+          />
+        )}
+
+        {pageState === "failure" && (
+          <FailureState error={error} onRetry={handleRetry} />
+        )}
+      </div>
+    </div>
+  );
 }

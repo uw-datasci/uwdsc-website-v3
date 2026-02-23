@@ -16,9 +16,7 @@ export class CheckinRepository extends BaseRepository {
   /**
    * Get a membership record by its own ID
    */
-  async getMembershipById(
-    membershipId: string,
-  ): Promise<MembershipRow | null> {
+  async getMembershipById(membershipId: string): Promise<MembershipRow | null> {
     try {
       const result = await this.sql<MembershipRow[]>`
         SELECT id, profile_id
@@ -85,10 +83,7 @@ export class CheckinRepository extends BaseRepository {
   /**
    * Delete an attendance record
    */
-  async deleteAttendance(
-    eventId: string,
-    profileId: string,
-  ): Promise<boolean> {
+  async deleteAttendance(eventId: string, profileId: string): Promise<boolean> {
     try {
       const result = await this.sql`
         DELETE FROM attendance
@@ -105,10 +100,7 @@ export class CheckinRepository extends BaseRepository {
   /**
    * Check if attendance already exists
    */
-  async hasAttendance(
-    eventId: string,
-    profileId: string,
-  ): Promise<boolean> {
+  async hasAttendance(eventId: string, profileId: string): Promise<boolean> {
     try {
       const result = await this.sql<{ exists: boolean }[]>`
         SELECT EXISTS(

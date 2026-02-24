@@ -47,19 +47,13 @@ export const PATCH = withAuth<Params>(async (request, { params }) => {
       );
     }
 
-    const result = await adminEventService.updateEvent(
-      id,
-      validationResult.data,
-    );
+    const result = await adminEventService.updateEvent(id, validationResult.data);
 
     if (!result.success) {
       return ApiResponse.badRequest(result.error, "Failed to update event");
     }
 
-    return ApiResponse.ok({
-      success: true,
-      message: "Event updated successfully",
-    });
+    return ApiResponse.ok({ success: true, message: "Event updated successfully" });
   } catch (error: unknown) {
     console.error("Error updating event:", error);
     return ApiResponse.serverError(error, "Failed to update event");
@@ -80,10 +74,7 @@ export const DELETE = withAuth<Params>(async (_request, { params }) => {
       return ApiResponse.badRequest(result.error, "Failed to delete event");
     }
 
-    return ApiResponse.ok({
-      success: true,
-      message: "Event deleted successfully",
-    });
+    return ApiResponse.ok({ success: true, message: "Event deleted successfully" });
   } catch (error: unknown) {
     console.error("Error deleting event:", error);
     return ApiResponse.serverError(error, "Failed to delete event");

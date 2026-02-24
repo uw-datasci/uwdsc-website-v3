@@ -32,19 +32,13 @@ export const PATCH = withAuth<Params>(async (request, { params }) => {
         );
       }
 
-      const result = await profileService.markMemberAsPaid(
-        id,
-        validationResult.data,
-      );
+      const result = await profileService.markMemberAsPaid(id, validationResult.data);
 
       if (!result.success) {
         return ApiResponse.badRequest(result.error, "Failed to mark as paid");
       }
 
-      return ApiResponse.ok({
-        success: true,
-        message: "Member marked as paid",
-      });
+      return ApiResponse.ok({ success: true, message: "Member marked as paid" });
     }
 
     // Validate edit member data
@@ -63,10 +57,7 @@ export const PATCH = withAuth<Params>(async (request, { params }) => {
       return ApiResponse.badRequest(result.error, "Failed to update member");
     }
 
-    return ApiResponse.ok({
-      success: true,
-      message: "Member updated successfully",
-    });
+    return ApiResponse.ok({ success: true, message: "Member updated successfully" });
   } catch (error) {
     console.error("Error updating member:", error);
     return ApiResponse.serverError(error, "Failed to update member");
@@ -88,10 +79,7 @@ export const DELETE = withAuth<Params>(async (_request, { params }) => {
       return ApiResponse.badRequest(result.error, "Failed to delete member");
     }
 
-    return ApiResponse.ok({
-      success: true,
-      message: "Member deleted successfully",
-    });
+    return ApiResponse.ok({ success: true, message: "Member deleted successfully" });
   } catch (error) {
     console.error("Error deleting member:", error);
     return ApiResponse.serverError(error, "Failed to delete member");

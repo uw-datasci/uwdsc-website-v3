@@ -34,7 +34,7 @@ export function ManualCheckInForm({
   setSearchQuery,
   onCheckIn,
   onOpenScanner,
-}: ManualCheckInFormProps) {
+}: Readonly<ManualCheckInFormProps>) {
   return (
     <Card className="w-full text-left">
       <CardHeader className="pb-4 flex flex-row items-center justify-between">
@@ -45,7 +45,7 @@ export function ManualCheckInForm({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Select Event</label>
+          <div className="text-sm font-medium">Select Event</div>
           <Select value={selectedEventId} onValueChange={setSelectedEventId}>
             <SelectTrigger defaultValue="">
               <SelectValue placeholder="Select an event" />
@@ -61,7 +61,7 @@ export function ManualCheckInForm({
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Search Member</label>
+          <div className="text-sm font-medium">Search Member</div>
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
             <Input
@@ -88,8 +88,13 @@ export function ManualCheckInForm({
                     {p.wat_iam} • {p.email}
                   </span>
                 </div>
-                <Button size="sm" onClick={() => onCheckIn(p.id)}>
-                  Check In
+                <Button
+                  size="sm"
+                  variant={p.has_paid ? "default" : "destructive"}
+                  disabled={!p.has_paid}
+                  onClick={() => onCheckIn(p.id)}
+                >
+                  {p.has_paid ? "Check In" : "Unpaid"}
                 </Button>
               </div>
             ))}

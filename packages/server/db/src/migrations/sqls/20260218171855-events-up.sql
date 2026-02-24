@@ -9,6 +9,7 @@ CREATE TABLE public.events (
   image_url TEXT,
   start_time TIMESTAMPTZ NOT NULL,
   end_time TIMESTAMPTZ NOT NULL,
+  CONSTRAINT events_end_after_start CHECK (end_time >= start_time),
   buffered_start_time TIMESTAMPTZ NOT NULL DEFAULT '1970-01-01 00:00:00+00'::timestamptz, -- overwritten by trigger
   buffered_end_time TIMESTAMPTZ NOT NULL DEFAULT '1970-01-01 00:00:00+00'::timestamptz,   -- overwritten by trigger
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),

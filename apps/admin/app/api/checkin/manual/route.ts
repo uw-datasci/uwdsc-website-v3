@@ -1,6 +1,6 @@
 import { ApiResponse } from "@uwdsc/common/utils";
 import { checkinService } from "@uwdsc/admin";
-import { eventService } from "@uwdsc/core";
+import { eventService, membershipService } from "@uwdsc/core";
 import { withAuth } from "@/guards/withAuth";
 
 /**
@@ -20,16 +20,19 @@ export const POST = withAuth(async (request) => {
     const event = await eventService.getEventById(event_id);
     if (!event) return ApiResponse.badRequest("Event not found");
 
+    const membershipStatus =
+      await membershipService.getMembershipStatus(profile_id);
+    if (!membershipStatus.has_membership) {
+      return ApiResponse.badRequest("User has not paid for membership");
+    }
+
     const result = await checkinService.manualCheckIn(event, profile_id);
 
     if (!result.success) {
-      return ApiResponse.badRequest(result.error ?? "Manual check-in failed");
+      return ApiResponse.badRequest(result.error, "Manual check-in failed");
     }
 
-    return ApiResponse.ok({
-      success: true,
-      profile: result.profile,
-    });
+    return ApiResponse.ok({ success: true, profile: result.profile });
   } catch (error: unknown) {
     console.error("Error during manual check-in:", error);
     return ApiResponse.serverError(error, "Manual check-in failed");

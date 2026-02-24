@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useCallback } from "react";
 import { Html5Qrcode } from "html5-qrcode";
+import { X } from "lucide-react";
+import { Button } from "@uwdsc/ui";
 
 interface QrScannerProps {
   readonly onScan: (data: {
@@ -10,9 +12,10 @@ interface QrScannerProps {
     token: string;
   }) => void;
   readonly onError?: (error: string) => void;
+  readonly onClose?: () => void;
 }
 
-export function QrScanner({ onScan, onError }: QrScannerProps) {
+export function QrScanner({ onScan, onError, onClose }: QrScannerProps) {
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -103,6 +106,14 @@ export function QrScanner({ onScan, onError }: QrScannerProps) {
 
   return (
     <div className="w-full max-w-sm mx-auto">
+      <div className="flex justify-between items-center mb-4 px-2">
+        <p className="font-medium">Scan QR Code</p>
+        {onClose && (
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="size-4" />
+          </Button>
+        )}
+      </div>
       <div
         id="qr-scanner-container"
         ref={containerRef}

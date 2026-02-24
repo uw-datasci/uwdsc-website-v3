@@ -32,10 +32,7 @@ export const POST = withAuth(async (request) => {
       return ApiResponse.badRequest(result.error ?? "Check-in failed");
     }
 
-    return ApiResponse.ok({
-      success: true,
-      profile: result.profile,
-    });
+    return ApiResponse.ok({ success: true, profile: result.profile });
   } catch (error: unknown) {
     console.error("Error during check-in:", error);
     return ApiResponse.serverError(error, "Check-in failed");

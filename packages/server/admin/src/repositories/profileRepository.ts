@@ -11,8 +11,29 @@ export class ProfileRepository extends BaseRepository {
    * Get all user profiles with email from auth.users
    * Used for admin membership management
    */
-  async getAllProfiles(options?: { paidOnly?: boolean }): Promise<Member[]> {
+  async getAllProfiles(options?: {
+    paidOnly?: boolean;
+    searchQuery?: string;
+  }): Promise<Member[]> {
     try {
+      let searchCondition = this.sql``;
+      if (options?.searchQuery) {
+        const query = `%${options.searchQuery}%`;
+        searchCondition = this.sql`
+          WHERE (
+            p.wat_iam ILIKE ${query} OR
+            au.email ILIKE ${query} OR
+            p.first_name ILIKE ${query} OR
+            p.last_name ILIKE ${query} OR
+            CONCAT(p.first_name, ' ', p.last_name) ILIKE ${query}
+          )
+        `;
+      }
+
+      const limitCondition = options?.searchQuery
+        ? this.sql`LIMIT 10`
+        : this.sql``;
+
       const result = await this.sql<Member[]>`
       SELECT
         p.id,
@@ -37,7 +58,9 @@ export class ProfileRepository extends BaseRepository {
           : this.sql`LEFT JOIN memberships m ON m.profile_id = p.id`
       }
       LEFT JOIN profiles pv ON pv.id = m.verifier_id
+      ${searchCondition}
       ORDER BY au.created_at DESC
+      ${limitCondition}
       `;
 
       return result;

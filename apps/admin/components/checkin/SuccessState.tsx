@@ -89,10 +89,7 @@ export function SuccessState({
             attendance record for this event. Are you sure?
           </p>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setConfirmOpen(false)}
-            >
+            <Button variant="outline" onClick={() => setConfirmOpen(false)}>
               Cancel
             </Button>
             <Button
@@ -118,11 +115,7 @@ interface InfoRowProps {
   value: string;
 }
 
-function InfoRow({
-  icon,
-  label,
-  value,
-}: Readonly<InfoRowProps>) {
+function InfoRow({ icon, label, value }: Readonly<InfoRowProps>) {
   return (
     <div className="flex items-center justify-between">
       <span className="flex items-center gap-2 text-muted-foreground">

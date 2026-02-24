@@ -28,7 +28,10 @@ class ProfileService {
   /**
    * Get all user profiles
    */
-  async getAllProfiles(options?: { paidOnly?: boolean }): Promise<Member[]> {
+  async getAllProfiles(options?: {
+    paidOnly?: boolean;
+    searchQuery?: string;
+  }): Promise<Member[]> {
     try {
       return await this.repository.getAllProfiles(options);
     } catch (error) {

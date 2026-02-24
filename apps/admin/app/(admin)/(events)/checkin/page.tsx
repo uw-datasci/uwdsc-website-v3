@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useDebounce } from "@/hooks/useDebounce";
 import { Loader2 } from "lucide-react";
 import {
   validateAndCheckIn,
@@ -34,6 +35,7 @@ export default function CheckInPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [profiles, setProfiles] = useState<Member[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [selectedEventId, setSelectedEventId] = useState<string>("");
 
   useEffect(() => {
@@ -44,23 +46,18 @@ export default function CheckInPage() {
         if (firstActive) setSelectedEventId(firstActive.id);
       })
       .catch(console.error);
-
-    getAllProfiles({ paidOnly: true }).then(setProfiles).catch(console.error);
   }, []);
 
-  const filteredProfiles = useMemo(() => {
-    if (!searchQuery) return [];
-    const query = searchQuery.toLowerCase();
-    return profiles
-      .filter(
-        (p) =>
-          (p.first_name?.toLowerCase() ?? "").includes(query) ||
-          (p.last_name?.toLowerCase() ?? "").includes(query) ||
-          (p.email?.toLowerCase() ?? "").includes(query) ||
-          (p.wat_iam?.toLowerCase() ?? "").includes(query),
-      )
-      .slice(0, 5);
-  }, [searchQuery, profiles]);
+  useEffect(() => {
+    if (!debouncedSearchQuery || debouncedSearchQuery.trim().length < 2) {
+      setProfiles([]);
+      return;
+    }
+
+    getAllProfiles({ searchQuery: debouncedSearchQuery.trim() })
+      .then(setProfiles)
+      .catch(console.error);
+  }, [debouncedSearchQuery]);
 
   const handleManualCheckIn = async (profileId: string) => {
     if (!selectedEventId) {
@@ -157,6 +154,46 @@ export default function CheckInPage() {
     }
   };
 
+  const renderContent = (pageState: PageState) => {
+    switch (pageState) {
+      case "idle":
+        return (
+          <ManualCheckInForm
+            events={events}
+            selectedEventId={selectedEventId}
+            setSelectedEventId={setSelectedEventId}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            profiles={profiles}
+            onCheckIn={handleManualCheckIn}
+            onOpenScanner={() => setPageState("scanning")}
+          />
+        );
+      case "scanning":
+        return <QrScanner onScan={handleScan} onError={handleScanError} />;
+      case "validating":
+        return (
+          <div className="flex flex-col items-center text-center py-12">
+            <Loader2 className="size-12 text-primary animate-spin mb-4" />
+            <p className="text-muted-foreground">Validating check-in...</p>
+          </div>
+        );
+      case "success":
+        if (!profile) return null;
+        return (
+          <SuccessState
+            profile={profile}
+            onUncheckIn={handleUncheckIn}
+            isUnchecking={isUnchecking}
+          />
+        );
+      case "failure":
+        return <FailureState error={error} onRetry={handleRetry} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="space-y-6 w-full">
       <div className="my-8">
@@ -167,41 +204,7 @@ export default function CheckInPage() {
       </div>
       <div className="space-y-6">
         <div className="flex flex-col items-center gap-6 max-w-md w-full mx-auto">
-          {pageState === "idle" && (
-            <ManualCheckInForm
-              events={events}
-              selectedEventId={selectedEventId}
-              setSelectedEventId={setSelectedEventId}
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              profiles={filteredProfiles}
-              onCheckIn={handleManualCheckIn}
-              onOpenScanner={() => setPageState("scanning")}
-            />
-          )}
-
-          {pageState === "scanning" && (
-            <QrScanner onScan={handleScan} onError={handleScanError} />
-          )}
-
-          {pageState === "validating" && (
-            <div className="flex flex-col items-center text-center py-12">
-              <Loader2 className="size-12 text-primary animate-spin mb-4" />
-              <p className="text-muted-foreground">Validating check-in...</p>
-            </div>
-          )}
-
-          {pageState === "success" && profile && (
-            <SuccessState
-              profile={profile}
-              onUncheckIn={handleUncheckIn}
-              isUnchecking={isUnchecking}
-            />
-          )}
-
-          {pageState === "failure" && (
-            <FailureState error={error} onRetry={handleRetry} />
-          )}
+          {renderContent(pageState)}
         </div>
       </div>
     </div>

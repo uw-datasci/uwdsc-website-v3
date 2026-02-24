@@ -18,8 +18,14 @@ import { Member, MembershipStats } from "@uwdsc/common/types";
  */
 export async function getAllProfiles(options?: {
   paidOnly?: boolean;
+  searchQuery?: string;
 }): Promise<Member[]> {
-  const url = options?.paidOnly ? "/api/members?paid=true" : "/api/members";
+  const params = new URLSearchParams();
+  if (options?.paidOnly) params.append("paid", "true");
+  if (options?.searchQuery) params.append("search", options.searchQuery);
+
+  const queryString = params.toString();
+  const url = queryString ? `/api/members?${queryString}` : "/api/members";
   const response = await fetch(url);
 
   const data = await response.json();

@@ -2,8 +2,7 @@
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Loader2, Camera, CameraOff } from "lucide-react";
-import { Button } from "@uwdsc/ui";
+import { Loader2 } from "lucide-react";
 import {
   validateAndCheckIn,
   uncheckIn,
@@ -164,12 +163,11 @@ export default function CheckInPage() {
         {pageState === "idle" && (
           <ManualCheckInForm
             events={events}
-            profiles={profiles}
             selectedEventId={selectedEventId}
             setSelectedEventId={setSelectedEventId}
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
-            filteredProfiles={filteredProfiles}
+            profiles={filteredProfiles}
             onCheckIn={handleManualCheckIn}
             onOpenScanner={() => setPageState("scanning")}
           />

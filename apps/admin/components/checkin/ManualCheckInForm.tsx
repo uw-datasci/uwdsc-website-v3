@@ -16,12 +16,11 @@ import type { Event, Member } from "@uwdsc/common/types";
 
 interface ManualCheckInFormProps {
   events: Event[];
-  profiles: Member[];
   selectedEventId: string;
   setSelectedEventId: (id: string) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  filteredProfiles: Member[];
+  profiles: Member[];
   onCheckIn: (profileId: string) => void;
   onOpenScanner: () => void;
 }
@@ -33,7 +32,6 @@ export function ManualCheckInForm({
   setSelectedEventId,
   searchQuery,
   setSearchQuery,
-  filteredProfiles,
   onCheckIn,
   onOpenScanner,
 }: ManualCheckInFormProps) {
@@ -75,9 +73,9 @@ export function ManualCheckInForm({
           </div>
         </div>
 
-        {filteredProfiles.length > 0 && (
+        {profiles.length > 0 && (
           <div className="flex flex-col gap-2 pt-2">
-            {filteredProfiles.map((p) => (
+            {profiles.map((p) => (
               <div
                 key={p.id}
                 className="flex items-center justify-between p-2 rounded-md border text-sm"
@@ -97,7 +95,7 @@ export function ManualCheckInForm({
             ))}
           </div>
         )}
-        {searchQuery && filteredProfiles.length === 0 && (
+        {searchQuery && profiles.length === 0 && (
           <div className="text-sm text-muted-foreground text-center py-4">
             No members found matching &quot;{searchQuery}&quot;
           </div>

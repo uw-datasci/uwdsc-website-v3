@@ -33,10 +33,7 @@ const navigation = [
   {
     name: "Events",
     icon: Calendar,
-    subItems: [
-      { name: "Manage Events", href: "/events" },
-      { name: "Check-in", href: "/checkin" },
-    ],
+    subItems: [{ name: "Manage Events", href: "/events" }],
   },
   { name: "Settings", href: "/settings", icon: Settings },
 ];

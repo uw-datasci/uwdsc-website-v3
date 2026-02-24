@@ -158,43 +158,51 @@ export default function CheckInPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col items-center gap-6 max-w-md w-full mx-auto">
-        {pageState === "idle" && (
-          <ManualCheckInForm
-            events={events}
-            selectedEventId={selectedEventId}
-            setSelectedEventId={setSelectedEventId}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            profiles={filteredProfiles}
-            onCheckIn={handleManualCheckIn}
-            onOpenScanner={() => setPageState("scanning")}
-          />
-        )}
+    <div className="space-y-6 w-full">
+      <div className="my-8">
+        <h1 className="text-3xl font-bold mb-2">Event Check-in</h1>
+        <p className="text-muted-foreground">
+          Scan a member&apos;s QR code to check them in.
+        </p>
+      </div>
+      <div className="space-y-6">
+        <div className="flex flex-col items-center gap-6 max-w-md w-full mx-auto">
+          {pageState === "idle" && (
+            <ManualCheckInForm
+              events={events}
+              selectedEventId={selectedEventId}
+              setSelectedEventId={setSelectedEventId}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              profiles={filteredProfiles}
+              onCheckIn={handleManualCheckIn}
+              onOpenScanner={() => setPageState("scanning")}
+            />
+          )}
 
-        {pageState === "scanning" && (
-          <QrScanner onScan={handleScan} onError={handleScanError} />
-        )}
+          {pageState === "scanning" && (
+            <QrScanner onScan={handleScan} onError={handleScanError} />
+          )}
 
-        {pageState === "validating" && (
-          <div className="flex flex-col items-center text-center py-12">
-            <Loader2 className="size-12 text-primary animate-spin mb-4" />
-            <p className="text-muted-foreground">Validating check-in...</p>
-          </div>
-        )}
+          {pageState === "validating" && (
+            <div className="flex flex-col items-center text-center py-12">
+              <Loader2 className="size-12 text-primary animate-spin mb-4" />
+              <p className="text-muted-foreground">Validating check-in...</p>
+            </div>
+          )}
 
-        {pageState === "success" && profile && (
-          <SuccessState
-            profile={profile}
-            onUncheckIn={handleUncheckIn}
-            isUnchecking={isUnchecking}
-          />
-        )}
+          {pageState === "success" && profile && (
+            <SuccessState
+              profile={profile}
+              onUncheckIn={handleUncheckIn}
+              isUnchecking={isUnchecking}
+            />
+          )}
 
-        {pageState === "failure" && (
-          <FailureState error={error} onRetry={handleRetry} />
-        )}
+          {pageState === "failure" && (
+            <FailureState error={error} onRetry={handleRetry} />
+          )}
+        </div>
       </div>
     </div>
   );

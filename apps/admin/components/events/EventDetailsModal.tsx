@@ -11,12 +11,14 @@ import {
 } from "@uwdsc/ui";
 import type { Event } from "@uwdsc/common/types";
 import { formatDateTime } from "@/lib/utils/events";
+import { DeleteEventDialog } from "./DeleteEventModal";
 
 interface EventDetailsDialogProps {
   readonly event: Event | null;
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
   readonly onEdit: (event: Event) => void;
+  readonly onDelete?: () => void;
 }
 
 export function EventDetailsDialog({
@@ -24,6 +26,7 @@ export function EventDetailsDialog({
   open,
   onOpenChange,
   onEdit,
+  onDelete,
 }: Readonly<EventDetailsDialogProps>) {
   if (!event) return null;
 
@@ -72,6 +75,14 @@ export function EventDetailsDialog({
           >
             <Pencil className="size-4" />
           </Button>
+
+          <DeleteEventDialog
+            event={event}
+            onSuccess={() => {
+              onOpenChange(false);
+              onDelete?.();
+            }}
+          />
         </DialogFooter>
       </DialogContent>
     </Dialog>

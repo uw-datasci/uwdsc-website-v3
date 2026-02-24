@@ -1,1 +1,1 @@
-export { EventDetailsDialog } from "./EventDetailsDialog";
+export * from "./EventDetailsModal";

@@ -1,4 +1,4 @@
-export { EventForm } from "./EventForm";
-export { EventsListView } from "./EventsListView";
-export { EventDetailsDialog } from "./EventDetailsDialog";
-export { DeleteEventDialog } from "./DeleteEventDialog";
+export * from "./EventForm";
+export * from "./EventsListView";
+export * from "./EventDetailsModal";
+export * from "./DeleteEventModal";

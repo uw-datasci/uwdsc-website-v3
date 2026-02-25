@@ -43,7 +43,6 @@ CREATE TABLE applications (
   personal_email text,
   location text,
   club_experience boolean,
-  resume_url text,
   full_name text NOT NULL,
   major text,
   year_of_study text,

@@ -18,7 +18,6 @@ export class ApplicationRepository extends BaseRepository {
         id,
         profile_id,
         term_id,
-        resume_url,
         full_name,
         major,
         year_of_study,
@@ -55,9 +54,7 @@ export class ApplicationRepository extends BaseRepository {
     `;
 
     // 3. Get all answers with question text
-    const answers = await this.sql<
-      (AnswerWithQuestion & { application_id: string })[]
-    >`
+    const answers = await this.sql<(AnswerWithQuestion & { application_id: string })[]>`
       SELECT
         a.id,
         a.application_id,

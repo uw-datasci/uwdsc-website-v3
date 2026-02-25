@@ -15,7 +15,7 @@ export const GET = withAuth(async (request) => {
     const activeOnly = searchParams.get("active") === "true";
 
     const events = activeOnly
-      ? await coreEventService.getActiveEvents()
+      ? await coreEventService.getEventsByTimeRange({ range: "active" })
       : await coreEventService.getAllEvents();
     return ApiResponse.ok(events);
   } catch (error: unknown) {

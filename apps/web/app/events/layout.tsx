@@ -22,5 +22,5 @@ export default function EventsLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <SectionWrapper className="pt-14 lg:pt-20">{children}</SectionWrapper>;
+  return <SectionWrapper className="lg:pt-20">{children}</SectionWrapper>;
 }

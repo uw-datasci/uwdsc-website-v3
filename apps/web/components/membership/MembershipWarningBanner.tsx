@@ -60,7 +60,7 @@ export function MembershipWarningBanner() {
 
     toast.warning("Membership incomplete", {
       description: `Please ${description} to access all member benefits.`,
-      duration: Infinity,
+      duration: 10000,
       icon: <AlertTriangle className="h-4 w-4" aria-hidden />,
     });
 

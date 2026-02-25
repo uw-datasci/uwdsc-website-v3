@@ -7,7 +7,8 @@ import {
   checkInToEvent,
 } from "@/lib/api/events";
 import { getMembershipStatus } from "@/lib/api/profile";
-import type { Event, MembershipStatus } from "@uwdsc/common/types";
+import type { Event } from "@uwdsc/common/types";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   ActiveEventSection,
   EventCardMemberSection,
@@ -18,10 +19,10 @@ import { Badge, Card, CardContent, CardHeader, Spinner } from "@uwdsc/ui";
 import Image from "next/image";
 
 export default function EventsPage() {
+  const { user } = useAuth();
   const [activeEvents, setActiveEvents] = useState<Event[] | null>(null);
   const [nextEvent, setNextEvent] = useState<Event | null>(null);
-  const [membershipStatus, setMembershipStatus] =
-    useState<MembershipStatus | null>(null);
+  const [canCheckIn, setCanCheckIn] = useState(false);
   const [loading, setLoading] = useState(true);
   const [checkingIn, setCheckingIn] = useState(false);
   const [checkInSuccess, setCheckInSuccess] = useState<boolean>(false);
@@ -36,13 +37,17 @@ export default function EventsPage() {
 
         const active =
           activeResult.status === "fulfilled" ? activeResult.value : [];
+
         const membership =
           membershipResult.status === "fulfilled"
             ? membershipResult.value
             : { has_membership: false, membership_id: null };
 
+        const isValidMember =
+          membership.has_membership && user?.is_math_soc_member;
+
         setActiveEvents(active);
-        setMembershipStatus(membership);
+        setCanCheckIn(isValidMember ?? false);
 
         const firstActive = active[0];
         if (firstActive) {
@@ -60,7 +65,7 @@ export default function EventsPage() {
       }
     }
     fetchData();
-  }, []);
+  }, [user?.is_math_soc_member]);
 
   const currentEvent =
     activeEvents && activeEvents.length > 0 ? (activeEvents[0] ?? null) : null;
@@ -114,7 +119,7 @@ export default function EventsPage() {
                 </p>
               </motion.div>
 
-              {membershipStatus?.has_membership ? (
+              {canCheckIn ? (
                 <Badge
                   variant="outline"
                   className="shrink-0 bg-emerald-500/20 text-emerald-300 border-emerald-500/50 text-[10px] sm:text-xs px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full font-bold tracking-widest sm:tracking-[0.15em] shadow-[0_0_20px_rgba(16,185,129,0.4)] backdrop-blur-md"
@@ -142,7 +147,7 @@ export default function EventsPage() {
                 {currentEvent ? (
                   <ActiveEventSection
                     event={currentEvent}
-                    membershipStatus={membershipStatus}
+                    canCheckIn={canCheckIn}
                     checkInSuccess={checkInSuccess}
                     checkingIn={checkingIn}
                     onCheckIn={handleCheckIn}

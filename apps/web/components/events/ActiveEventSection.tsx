@@ -1,10 +1,10 @@
-import type { Event, MembershipStatus } from "@uwdsc/common/types";
+import type { Event } from "@uwdsc/common/types";
 import { CheckInSuccess } from "./CheckInSuccess";
 import { CheckInButton } from "./CheckInButton";
 
 type ActiveEventSectionProps = {
   event: Event;
-  membershipStatus: MembershipStatus | null;
+  canCheckIn: boolean;
   checkInSuccess: boolean;
   checkingIn: boolean;
   onCheckIn: () => void;
@@ -12,7 +12,7 @@ type ActiveEventSectionProps = {
 
 export function ActiveEventSection({
   event,
-  membershipStatus,
+  canCheckIn,
   checkInSuccess,
   checkingIn,
   onCheckIn,
@@ -38,7 +38,7 @@ export function ActiveEventSection({
         <CheckInSuccess />
       ) : (
         <CheckInButton
-          hasMembership={membershipStatus?.has_membership ?? false}
+          hasMembership={canCheckIn}
           checkingIn={checkingIn}
           onCheckIn={onCheckIn}
         />

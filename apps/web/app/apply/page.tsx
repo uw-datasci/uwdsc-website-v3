@@ -9,6 +9,7 @@ import {
   getProfileAutofill,
   updateApplication,
 } from "@/lib/api/application";
+
 import {
   applicationDefaultValues,
   applicationSchema,
@@ -84,6 +85,7 @@ export default function ApplyPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
+
   const { setProgressValue } = useApplicationProgress();
 
   const form = useForm<AppFormValues>({

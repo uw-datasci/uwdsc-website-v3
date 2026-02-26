@@ -49,7 +49,7 @@ export function Resume({ form }: ResumeProps) {
       setIsUploading(true);
       try {
         const result = await uploadResume(file);
-        form.setValue("resumeKey", result.key);
+        form.setValue("resumeKey", result.key, { shouldValidate: true });
       } catch (err) {
         setUploadError(err instanceof Error ? err.message : "Upload failed");
         form.setValue("resumeKey", "");
@@ -62,6 +62,24 @@ export function Resume({ form }: ResumeProps) {
   );
 
   const resumeKey = form.watch("resumeKey");
+
+  let statusIcon: React.ReactNode;
+  if (isUploading) {
+    statusIcon = <Loader2 className="w-10 h-10 animate-spin text-blue-400" />;
+  } else if (resumeKey) {
+    statusIcon = <CheckCircle className="w-10 h-10 text-green-400" />;
+  } else {
+    statusIcon = <FileUp className="w-10 h-10 text-slate-400" />;
+  }
+
+  let statusLabel: string;
+  if (isUploading) {
+    statusLabel = "Uploading...";
+  } else if (resumeKey) {
+    statusLabel = "Resume uploaded. Click to replace.";
+  } else {
+    statusLabel = "Drop your resume here or click to upload";
+  }
 
   return (
     <div className="space-y-6">
@@ -82,19 +100,9 @@ export function Resume({ form }: ResumeProps) {
                       onChange={handleFileChange}
                       disabled={isUploading}
                     />
-                    {isUploading ? (
-                      <Loader2 className="w-10 h-10 animate-spin text-blue-400" />
-                    ) : resumeKey ? (
-                      <CheckCircle className="w-10 h-10 text-green-400" />
-                    ) : (
-                      <FileUp className="w-10 h-10 text-slate-400" />
-                    )}
+                    {statusIcon}
                     <span className="mt-2 text-sm text-slate-300">
-                      {isUploading
-                        ? "Uploading..."
-                        : resumeKey
-                          ? "Resume uploaded. Click to replace."
-                          : "Drop your resume here or click to upload"}
+                      {statusLabel}
                     </span>
                     <span className="mt-1 text-xs text-slate-500">
                       PDF, DOC, or DOCX (max {MAX_SIZE_MB} MB)
@@ -104,12 +112,10 @@ export function Resume({ form }: ResumeProps) {
                 </div>
               </FormControl>
               <FormDescription>
-                Upload your resume as a PDF or Word document. It will be shared
-                with the selection committee.
+                Upload your resume as a PDF or Word document. It will be shared with the
+                selection committee.
               </FormDescription>
-              {uploadError && (
-                <p className="text-sm text-destructive">{uploadError}</p>
-              )}
+              {uploadError && <p className="text-sm text-destructive">{uploadError}</p>}
               <FormMessage />
             </FormItem>
           )}

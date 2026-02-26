@@ -1,10 +1,7 @@
 import type { PositionsWithQuestionsResponse } from "@/lib/api/application";
 import { AppFormValues } from "@/lib/schemas/application";
 import { UseFormReturn } from "react-hook-form";
-import type {
-  ApplicationWithDetails,
-  PositionWithQuestions,
-} from "@uwdsc/common/types";
+import type { ApplicationWithDetails, PositionWithQuestions } from "@uwdsc/common/types";
 
 export function partitionDraftAnswers(
   existing: ApplicationWithDetails,
@@ -32,12 +29,9 @@ export function partitionDraftAnswers(
     }
     for (const p of positionsData.positions) {
       if (!p.questions.some((pq) => pq.id === a.question_id)) continue;
-      if (pos1?.position_id === p.id)
-        pos1Answers[a.question_id] = a.answer_text;
-      else if (pos2?.position_id === p.id)
-        pos2Answers[a.question_id] = a.answer_text;
-      else if (pos3?.position_id === p.id)
-        pos3Answers[a.question_id] = a.answer_text;
+      if (pos1?.position_id === p.id) pos1Answers[a.question_id] = a.answer_text;
+      else if (pos2?.position_id === p.id) pos2Answers[a.question_id] = a.answer_text;
+      else if (pos3?.position_id === p.id) pos3Answers[a.question_id] = a.answer_text;
       break;
     }
   }
@@ -47,9 +41,7 @@ export function partitionDraftAnswers(
 
 type AnswerPair = { question_id: string; answer_text: string };
 
-function recordToAnswerPairs(
-  record: Record<string, string> | undefined,
-): AnswerPair[] {
+function recordToAnswerPairs(record: Record<string, string> | undefined): AnswerPair[] {
   if (!record) return [];
   return Object.entries(record)
     .filter(([, text]) => text)
@@ -78,12 +70,9 @@ export function buildPositionSelections(values: {
   position_3?: string;
 }): { position_id: string; priority: number }[] {
   const list: { position_id: string; priority: number }[] = [];
-  if (values.position_1)
-    list.push({ position_id: values.position_1, priority: 1 });
-  if (values.position_2)
-    list.push({ position_id: values.position_2, priority: 2 });
-  if (values.position_3)
-    list.push({ position_id: values.position_3, priority: 3 });
+  if (values.position_1) list.push({ position_id: values.position_1, priority: 1 });
+  if (values.position_2) list.push({ position_id: values.position_2, priority: 2 });
+  if (values.position_3) list.push({ position_id: values.position_3, priority: 3 });
   return list;
 }
 

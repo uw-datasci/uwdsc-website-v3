@@ -44,7 +44,6 @@ export class ResumeService extends FileService {
    */
   async getResumeUrl(userId: string): Promise<string | null> {
     try {
-      console.log("HERE", userId);
       const files = await this.repository.listFiles(userId);
       const firstFile = files[0];
       if (!firstFile) return null;

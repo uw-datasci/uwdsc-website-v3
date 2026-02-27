@@ -27,6 +27,8 @@ export async function GET() {
       last_name: profile?.last_name,
       wat_iam: profile?.wat_iam,
       faculty: profile?.faculty,
+      term: profile?.term ?? null,
+      is_math_soc_member: profile?.is_math_soc_member ?? false,
     };
     return ApiResponse.ok(data);
   } catch (error) {

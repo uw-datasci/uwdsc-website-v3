@@ -38,12 +38,11 @@ CREATE TABLE position_questions (
 -- 3. The Submissions
 CREATE TABLE applications (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  profile_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
+  profile_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE,
   term_id uuid REFERENCES terms(id) ON DELETE CASCADE,
   personal_email text,
   location text,
   club_experience boolean,
-  resume_url text,
   full_name text NOT NULL,
   major text,
   year_of_study text,

@@ -9,7 +9,7 @@ CREATE TYPE faculty_enum AS ENUM (
   'arts',
   'health',
   'environment',
-  'other_non_waterloo'
+  'other'
 );
 
 -- Create payment_method_enum

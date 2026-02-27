@@ -39,6 +39,7 @@
   },
   "exports": {
     ".": "./src/index.ts",
+    "./lib/utils": "./src/lib/utils.ts",
     "./globals.css": "./src/styles/globals.css",
     "./postcss.config": "./postcss.config.mjs"
   }

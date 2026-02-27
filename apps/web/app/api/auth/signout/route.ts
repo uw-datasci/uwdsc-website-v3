@@ -10,10 +10,7 @@ export async function POST() {
       return ApiResponse.badRequest(result.error, "Sign out failed");
     }
 
-    return ApiResponse.ok({
-      success: true,
-      message: result.message,
-    });
+    return ApiResponse.ok({ success: true, message: result.message });
   } catch (error) {
     console.error("Signout error:", error);
     return ApiResponse.serverError(error, "An unexpected error occurred");

@@ -30,14 +30,7 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Members", href: "/members", icon: Users },
   { name: "Applications", href: "/applications", icon: FileText },
-  {
-    name: "Events",
-    icon: Calendar,
-    subItems: [
-      { name: "Manage Events", href: "/events" },
-      { name: "Check-in", href: "/checkin" },
-    ],
-  },
+  { name: "Events", href: "/events", icon: Calendar },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 

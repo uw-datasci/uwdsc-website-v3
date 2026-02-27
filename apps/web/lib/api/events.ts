@@ -12,32 +12,34 @@ export async function getEvents(): Promise<Event[]> {
   return data;
 }
 
-export async function getActiveEvents(): Promise<{
-  activeEvents: Event[];
-  nextEvent: Event | null;
-}> {
-  const response = await fetch("/api/events/active");
+export type EventsRange = "active" | "next";
+
+export async function getEventsByRange(range: "active"): Promise<Event[]>;
+export async function getEventsByRange(range: "next"): Promise<Event | null>;
+export async function getEventsByRange(
+  range: EventsRange,
+): Promise<Event[] | Event | null> {
+  const response = await fetch(`/api/events?range=${range}`);
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);
   return data;
 }
 
-export async function getAttendanceStatus(
+export async function getCheckInStatus(
   eventId: string,
-): Promise<{ checked_in: boolean }> {
-  const response = await fetch(
-    `/api/events/attendance?event_id=${encodeURIComponent(eventId)}`,
-  );
+): Promise<{ checkedIn: boolean }> {
+  const response = await fetch(`/api/events/${eventId}/checkin`);
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);
   return data;
 }
 
-export async function getMembershipStatus(): Promise<{
-  has_membership: boolean;
-  membership_id: string | null;
-}> {
-  const response = await fetch("/api/membership");
+export async function checkInToEvent(
+  eventId: string,
+): Promise<{ success: boolean; message: string }> {
+  const response = await fetch(`/api/events/${eventId}/checkin`, {
+    method: "POST",
+  });
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);
   return data;

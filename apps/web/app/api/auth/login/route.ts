@@ -25,11 +25,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return ApiResponse.ok({
-      success: true,
-      user: result.user,
-      session: result.session,
-    });
+    return ApiResponse.ok({ success: true, user: result.user, session: result.session });
   } catch (error) {
     console.error("Login error:", error);
     return ApiResponse.serverError(error, "An unexpected error occurred");

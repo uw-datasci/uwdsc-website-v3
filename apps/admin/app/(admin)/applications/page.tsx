@@ -9,7 +9,6 @@ import {
   SelectValue,
   Card,
   Input,
-  Skeleton,
   Sheet,
   SheetContent,
   SheetTitle,
@@ -17,7 +16,12 @@ import {
 } from "@uwdsc/ui";
 
 import { Search } from "lucide-react";
-import { ApplicationList, ApplicationDetail } from "@/components/applications";
+import {
+  ApplicationList,
+  ApplicationDetail,
+  ApplicationsLoading,
+  ApplicationsError,
+} from "@/components/applications";
 import { getAllApplications } from "@/lib/api";
 import type { ApplicationListItem } from "@uwdsc/common/types";
 
@@ -87,29 +91,8 @@ export default function ApplicationsPage() {
     if (isMobile) setMobileDetailOpen(true);
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-4 mt-8 w-full">
-        <h1 className="text-3xl font-bold">Applications</h1>
-        <p className="text-muted-foreground">Loading applications...</p>
-        <div className="flex gap-4 h-[calc(100vh-220px)]">
-          <Skeleton className="w-full md:w-[350px] h-full rounded-lg" />
-          <Skeleton className="hidden md:block flex-1 h-full rounded-lg" />
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="space-y-4 mt-8 w-full">
-        <h1 className="text-3xl font-bold">Applications</h1>
-        <div className="rounded-lg border border-destructive bg-destructive/10 p-4">
-          <p className="text-sm text-destructive">Error: {error}</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <ApplicationsLoading />;
+  if (error) return <ApplicationsError message={error} />;
 
   return (
     <div className="mt-8 flex flex-col h-[calc(100vh-130px)]">

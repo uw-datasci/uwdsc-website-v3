@@ -10,6 +10,7 @@ import {
   Profile,
   ProfileUpdateData,
   CompleteProfileData,
+  MembershipStatus,
 } from "@uwdsc/common/types";
 
 /** Payload for completing profile (after email verification). Server sets is_math_soc_member from faculty. */
@@ -71,5 +72,20 @@ export async function completeProfile(
   });
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);
+  return data;
+}
+
+/**
+ * Get the user's membership status
+ *
+ * @returns Promise with membership status
+ * @throws Error if fetch fails
+ */
+export async function getMembershipStatus(): Promise<MembershipStatus> {
+  const response = await fetch("/api/profile/membership");
+  const data = await response.json();
+
+  if (!response.ok) throw createApiError(data, response.status);
+
   return data;
 }

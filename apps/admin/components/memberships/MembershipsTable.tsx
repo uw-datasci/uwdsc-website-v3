@@ -86,7 +86,6 @@ const FACULTY_OPTIONS = [
   { value: "arts", label: "Arts" },
   { value: "health", label: "Health" },
   { value: "environment", label: "Environment" },
-  { value: "other_non_waterloo", label: "Other / Non-UW" },
 ] as const;
 
 function getMembershipCsvValue(row: Member, key: string): unknown {

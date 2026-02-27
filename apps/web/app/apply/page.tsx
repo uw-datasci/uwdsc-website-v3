@@ -9,6 +9,7 @@ import {
   getProfileAutofill,
   updateApplication,
 } from "@/lib/api/application";
+
 import {
   applicationDefaultValues,
   applicationSchema,
@@ -84,6 +85,7 @@ export default function ApplyPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
+
   const { setProgressValue } = useApplicationProgress();
 
   const form = useForm<AppFormValues>({
@@ -146,14 +148,12 @@ export default function ApplyPage() {
           position_2_answers: pos2Answers,
           position_3: pos3?.position_id ?? "",
           position_3_answers: pos3Answers,
-          resumeKey: existing.resume_url ?? "",
+          resumeKey: "",
         });
         setCurrentStep(1);
       } catch (err) {
         console.error("Failed to fetch application data:", err);
-        setFetchError(
-          err instanceof Error ? err.message : "Failed to load application",
-        );
+        setFetchError(err instanceof Error ? err.message : "Failed to load application");
       } finally {
         setIsFetching(false);
       }
@@ -200,8 +200,6 @@ export default function ApplyPage() {
             position_selections: buildPositionSelections(values),
             answers: collectAllAnswers(values),
           };
-        case 4:
-          return { resume_url: values.resumeKey };
         default:
           return {};
       }
@@ -241,16 +239,14 @@ export default function ApplyPage() {
   const renderButton = () => {
     const isLastStep = currentStep === 4;
     const isPastHardDeadline = Boolean(
-      currentTerm &&
-      new Date() > new Date(currentTerm.application_hard_deadline),
+      currentTerm && new Date() > new Date(currentTerm.application_hard_deadline),
     );
     const isValid =
       isStepValid(form, currentStep, {
         positions,
         generalQuestionIds,
       }) || false;
-    const isButtonDisabled =
-      !isValid || isLoading || (isLastStep && isPastHardDeadline);
+    const isButtonDisabled = !isValid || isLoading || (isLastStep && isPastHardDeadline);
 
     let buttonClassName = "hover:scale-105 ";
     if (isLastStep) {
@@ -338,9 +334,7 @@ export default function ApplyPage() {
       <DueDateTag deadline={new Date(currentTerm.application_soft_deadline)} />
 
       <div className="mx-auto max-w-4xl text-center mb-6">
-        <h1 className="mb-2 text-3xl font-bold text-white">
-          DSC Exec Application Form
-        </h1>
+        <h1 className="mb-2 text-3xl font-bold text-white">DSC Exec Application Form</h1>
         <p className="text-3xl font-semibold text-blue-400">
           {formatTermCode(currentTerm.code)}
         </p>

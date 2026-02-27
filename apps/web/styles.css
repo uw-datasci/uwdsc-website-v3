@@ -335,3 +335,15 @@ html {
 [data-sonner-toast][data-type="error"] [data-content] {
   color: white !important;
 }
+
+/* Warning toast – persistent membership alert */
+[data-sonner-toast][data-type="warning"] {
+  background: oklch(0.72 0.12 73) !important;
+  border-color: oklch(0.76 0.14 73) !important;
+  color: oklch(0.99 0.01 75) !important;
+}
+
+[data-sonner-toast][data-type="warning"] [data-icon],
+[data-sonner-toast][data-type="warning"] [data-content] {
+  color: oklch(0.99 0.01 75) !important;
+}

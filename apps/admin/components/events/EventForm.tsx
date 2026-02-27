@@ -47,6 +47,7 @@ export function EventForm({
 
   const form = useForm<CreateEventFormValues>({
     resolver: zodResolver(createEventSchema),
+    mode: "onChange",
     defaultValues: {
       name: "",
       description: "",
@@ -179,7 +180,7 @@ export function EventForm({
                 name="start_time"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Start date & time</FormLabel>
+                    <FormLabel>Start</FormLabel>
                     <FormControl>
                       <DateTimePicker
                         value={field.value}
@@ -196,7 +197,7 @@ export function EventForm({
                 name="end_time"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>End date & time</FormLabel>
+                    <FormLabel>End</FormLabel>
                     <FormControl>
                       <DateTimePicker
                         value={field.value}
@@ -204,11 +205,15 @@ export function EventForm({
                         placeholder="MM/DD/YYYY HH:MM"
                       />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
+            {form.formState.errors.end_time && (
+              <p className="text-sm text-destructive">
+                {form.formState.errors.end_time.message}
+              </p>
+            )}
             <DialogFooter>
               <Button
                 type="button"
@@ -217,7 +222,12 @@ export function EventForm({
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
+              <Button
+                type="submit"
+                disabled={
+                  !form.formState.isValid || form.formState.isSubmitting
+                }
+              >
                 {form.formState.isSubmitting && (
                   <Loader2 className="mr-2 size-4 animate-spin" />
                 )}

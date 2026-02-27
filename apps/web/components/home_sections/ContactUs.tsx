@@ -1,20 +1,23 @@
 import { Instagram, Mail } from "react-feather";
 import { RxDiscordLogo } from "react-icons/rx";
 import SectionWrapper from "../SectionWrapper";
-import Chip from "../home/Chip";
+import { Button } from "@uwdsc/ui";
 
-const CHIPS = [
+const CONTACT_BUTTONS = [
   {
+    id: "email",
     label: "contact@uwdatascience.ca",
     href: "mailto:contact@uwdatascience.ca",
     icon: <Mail className="w-5 text-white" />,
   },
   {
+    id: "instagram",
     label: "@uwaterloodsc",
     href: "https://www.instagram.com/uwaterloodsc/",
     icon: <Instagram className="w-5 text-white" />,
   },
   {
+    id: "discord",
     label: "discord.gg/VFVkyP5mgm",
     href: "https://discord.gg/VFVkyP5mgm",
     icon: <RxDiscordLogo size={24} className="text-white" />,
@@ -40,16 +43,16 @@ export default function ContactUs() {
       </div>
 
       <div className="flex flex-col justify-center items-center gap-4">
-        {CHIPS.map((chip, i) => (
-          <div
-            key={`chip-${i}`}
-            className="w-40 text-sm px-3 py-1"
-            style={{ display: "flex", justifyContent: "center" }}
+        {CONTACT_BUTTONS.map((button) => (
+          <Button
+            key={button.id}
+            variant="default"
+            size="lg"
+            className="text-sm px-3 py-1"
           >
-            <Chip icon={chip.icon} href={chip.href}>
-              {chip.label}
-            </Chip>
-          </div>
+            {button.icon}
+            {button.label}
+          </Button>
         ))}
       </div>
     </SectionWrapper>

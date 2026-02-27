@@ -3,7 +3,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@uwdsc/common/types": ["../common/src/types/index.ts"]
+      "@uwdsc/common/types": ["../common/src/types/index.ts"],
+      "@uwdsc/ui/lib/utils": ["./src/lib/utils.ts"],
+      "@uwdsc/ui/*": ["./src/*"]
     }
   },
   "include": ["."],

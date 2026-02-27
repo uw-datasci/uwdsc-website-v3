@@ -1,164 +1,165 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
-import QRCode from "qrcode";
+import { useEffect, useState } from "react";
+import {
+  getEventsByRange,
+  getCheckInStatus,
+  checkInToEvent,
+} from "@/lib/api/events";
+import { getMembershipStatus } from "@/lib/api/profile";
+import type { Event } from "@uwdsc/common/types";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  getActiveEvents,
-  getAttendanceStatus,
-  getMembershipStatus,
-} from "@/lib/api";
-import { buildCheckInQRData, getTimeNextStep } from "@/lib/utils/checkin";
-import type { Event } from "@uwdsc/common/types";
-import {
-  LoadingState,
-  NoMembershipState,
-  NoEventState,
-  CheckedInState,
-  ActiveEventState,
+  ActiveEventSection,
+  EventCardMemberSection,
+  NextEventSection,
 } from "@/components/events";
-
-type PageState =
-  | "loading"
-  | "no-event"
-  | "no-membership"
-  | "active"
-  | "checked-in";
+import { motion } from "framer-motion";
+import { Badge, Card, CardContent, CardHeader, Spinner } from "@uwdsc/ui";
+import Image from "next/image";
 
 export default function EventsPage() {
   const { user } = useAuth();
-
-  const [pageState, setPageState] = useState<PageState>("loading");
-  const [activeEvent, setActiveEvent] = useState<Event | null>(null);
+  const [activeEvents, setActiveEvents] = useState<Event[] | null>(null);
   const [nextEvent, setNextEvent] = useState<Event | null>(null);
-  const [membershipId, setMembershipId] = useState<string | null>(null);
-  const [qrDataUrl, setQrDataUrl] = useState<string>("");
-  const [countdown, setCountdown] = useState(30);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [canCheckIn, setCanCheckIn] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [checkingIn, setCheckingIn] = useState(false);
+  const [checkInSuccess, setCheckInSuccess] = useState<boolean>(false);
 
-  const generateQR = useCallback(async (data: string) => {
-    try {
-      const url = await QRCode.toDataURL(data, {
-        width: 280,
-        margin: 2,
-        color: { dark: "#000000", light: "#ffffff" },
-        errorCorrectionLevel: "M",
-      });
-      setQrDataUrl(url);
-    } catch (err) {
-      console.error("QR generation failed:", err);
-    }
-  }, []);
-
-  const refreshQR = useCallback(async () => {
-    if (!activeEvent || !membershipId || !user) return;
-
-    const data = await buildCheckInQRData({
-      eventId: activeEvent.id,
-      membershipId,
-      userId: user.id,
-    });
-    await generateQR(data);
-    setCountdown(getTimeNextStep());
-  }, [activeEvent, membershipId, user, generateQR]);
-
-  const loadData = useCallback(async () => {
-    if (!user) return;
-
-    try {
-      const [eventsData, membershipData] = await Promise.all([
-        getActiveEvents(),
-        getMembershipStatus(),
-      ]);
-
-      if (!membershipData.has_membership) {
-        setNextEvent(eventsData.nextEvent);
-        setPageState("no-membership");
-        return;
-      }
-
-      setMembershipId(membershipData.membership_id);
-
-      if (eventsData.activeEvents.length === 0) {
-        setNextEvent(eventsData.nextEvent);
-        setPageState("no-event");
-        return;
-      }
-
-      const event = eventsData.activeEvents[0]!;
-      setActiveEvent(event);
-
-      const attendance = await getAttendanceStatus(event.id);
-      if (attendance.checked_in) {
-        setPageState("checked-in");
-        return;
-      }
-
-      setPageState("active");
-    } catch (err) {
-      console.error("Failed to load events data:", err);
-      setPageState("no-event");
-    }
-  }, [user]);
-
-  // Initial data fetch
   useEffect(() => {
-    if (user) loadData();
-  }, [user, loadData]);
-
-  // QR refresh interval (every 30 seconds) & countdown
-  useEffect(() => {
-    if (pageState !== "active") return;
-
-    refreshQR();
-
-    intervalRef.current = setInterval(() => refreshQR(), 30_000);
-
-    countdownRef.current = setInterval(
-      () => setCountdown(getTimeNextStep()),
-      1000,
-    );
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      if (countdownRef.current) clearInterval(countdownRef.current);
-    };
-  }, [pageState, refreshQR]);
-
-  // Poll for attendance changes every 5 seconds
-  useEffect(() => {
-    if (pageState !== "active" || !activeEvent) return;
-
-    const pollAttendance = setInterval(async () => {
+    async function fetchData() {
       try {
-        const attendance = await getAttendanceStatus(activeEvent.id);
-        if (attendance.checked_in) setPageState("checked-in");
-      } catch {
-        // Silently ignore polling errors
+        const [activeResult, membershipResult] = await Promise.allSettled([
+          getEventsByRange("active"),
+          getMembershipStatus(),
+        ]);
+
+        const active =
+          activeResult.status === "fulfilled" ? activeResult.value : [];
+
+        const membership =
+          membershipResult.status === "fulfilled"
+            ? membershipResult.value
+            : { has_membership: false, membership_id: null };
+
+        const isValidMember =
+          membership.has_membership && user?.is_math_soc_member;
+
+        setActiveEvents(active);
+        setCanCheckIn(isValidMember ?? false);
+
+        const firstActive = active[0];
+        if (firstActive) {
+          setNextEvent(null);
+          const status = await getCheckInStatus(firstActive.id);
+          setCheckInSuccess(status.checkedIn);
+        } else {
+          const next = await getEventsByRange("next");
+          setNextEvent(next);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
-    }, 10000);
+    }
+    fetchData();
+  }, [user?.is_math_soc_member]);
 
-    return () => clearInterval(pollAttendance);
-  }, [pageState, activeEvent]);
+  const currentEvent =
+    activeEvents && activeEvents.length > 0 ? (activeEvents[0] ?? null) : null;
 
-  switch (pageState) {
-    case "loading":
-      return <LoadingState />;
-    case "no-membership":
-      return <NoMembershipState nextEvent={nextEvent} />;
-    case "no-event":
-      return <NoEventState nextEvent={nextEvent} />;
-    case "checked-in":
-      return <CheckedInState activeEvent={activeEvent} />;
-    case "active":
-      return (
-        <ActiveEventState
-          activeEvent={activeEvent!}
-          user={user!}
-          qrDataUrl={qrDataUrl}
-          countdown={countdown}
-        />
-      );
+  const handleCheckIn = async () => {
+    if (!currentEvent) return;
+    setCheckingIn(true);
+    try {
+      await checkInToEvent(currentEvent.id);
+      setCheckInSuccess(true);
+    } catch (err) {
+      alert("Failed to check in: " + (err as Error).message);
+    } finally {
+      setCheckingIn(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center">
+        <Spinner className="size-8 text-emerald-500" />
+      </div>
+    );
   }
+
+  return (
+    <div className="min-h-dvh sm:min-h-[80vh] flex flex-col items-center justify-center px-3 py-4 sm:p-4 relative overflow-hidden">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] h-[90vw] max-w-2xl max-h-2xl bg-emerald-500/10 rounded-full blur-[120px] -z-10 pointer-events-none" />
+      <motion.div className="w-full max-w-[500px] flex justify-center">
+        <Card className="relative w-full max-w-[500px] aspect-3/4 min-h-[420px] sm:min-h-0 overflow-hidden shadow-2xl group border-0 p-0 bg-transparent flex flex-col">
+          <Image
+            src="/membership/memCardBg.svg"
+            alt="Membership Card"
+            fill
+            priority
+            className="object-cover z-0 transition-transform duration-1000 group-hover:scale-105"
+          />
+
+          <div className="absolute inset-0 z-10 bg-linear-to-br from-black/40 via-black/20 to-black/80 backdrop-blur-sm p-4 sm:p-6 md:p-8 flex flex-col justify-between transition-colors duration-500">
+            <CardHeader className="flex flex-row flex-wrap justify-between items-start gap-2 sm:gap-0 sm:flex-nowrap space-y-0 p-0">
+              <motion.div
+                whileHover={{ x: 4 }}
+                transition={{ duration: 0.3 }}
+                className="min-w-0"
+              >
+                <h2 className="text-xl sm:text-2xl font-black tracking-[0.15em] sm:tracking-[0.2em] text-white drop-shadow-lg">
+                  UWDSC
+                </h2>
+                <p className="text-[10px] sm:text-xs text-white/70 tracking-widest uppercase mt-0.5 sm:mt-1 font-medium">
+                  Data Science Club
+                </p>
+              </motion.div>
+
+              {canCheckIn ? (
+                <Badge
+                  variant="outline"
+                  className="shrink-0 bg-emerald-500/20 text-emerald-300 border-emerald-500/50 text-[10px] sm:text-xs px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full font-bold tracking-widest sm:tracking-[0.15em] shadow-[0_0_20px_rgba(16,185,129,0.4)] backdrop-blur-md"
+                >
+                  ACTIVE MEMBER
+                </Badge>
+              ) : (
+                <Badge
+                  variant="outline"
+                  className="shrink-0 bg-red-500/20 text-red-300 border-red-500/50 text-[10px] sm:text-xs px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full font-bold tracking-widest sm:tracking-[0.15em] backdrop-blur-md"
+                >
+                  NOT PAID
+                </Badge>
+              )}
+            </CardHeader>
+
+            <EventCardMemberSection />
+
+            <CardContent className="p-0 min-h-0 flex flex-col">
+              <motion.div
+                whileHover={{ y: -4 }}
+                transition={{ duration: 0.3 }}
+                className="min-h-0"
+              >
+                {currentEvent ? (
+                  <ActiveEventSection
+                    event={currentEvent}
+                    canCheckIn={canCheckIn}
+                    checkInSuccess={checkInSuccess}
+                    checkingIn={checkingIn}
+                    onCheckIn={handleCheckIn}
+                  />
+                ) : (
+                  <NextEventSection nextEvent={nextEvent} />
+                )}
+              </motion.div>
+            </CardContent>
+          </div>
+        </Card>
+      </motion.div>
+    </div>
+  );
 }

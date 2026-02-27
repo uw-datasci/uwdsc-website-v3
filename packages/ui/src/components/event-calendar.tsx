@@ -13,7 +13,10 @@ import {
   isSameMonth,
   isSameDay,
   parseISO,
-  isWithinInterval,
+  max,
+  min,
+  differenceInCalendarDays,
+  startOfDay,
 } from "date-fns";
 import { CalendarPlus, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "../lib/utils";
@@ -53,89 +56,79 @@ export interface MonthlyEventCalendarProps {
 
 const WEEKDAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-function getEventsForDay(events: CalendarEvent[], day: Date): CalendarEvent[] {
-  return events.filter((event) => {
-    const start = parseISO(event.start_time);
-    const end = parseISO(event.end_time);
-    return (
-      isSameDay(start, day) ||
-      isSameDay(end, day) ||
-      isWithinInterval(day, { start, end })
-    );
-  });
-}
-
 function formatEventTime(isoString: string): string {
   return format(parseISO(isoString), "h:mm a");
 }
 
-interface DayCellProps {
-  readonly date: Date;
-  readonly events: CalendarEvent[];
-  readonly currentMonth: Date;
-  readonly onEventClick?: (event: CalendarEvent) => void;
-  readonly renderEventContent?: (event: CalendarEvent) => React.ReactNode;
-  readonly formatEventTime: (isoString: string) => string;
+interface EventLayout {
+  event: CalendarEvent;
+  startIndex: number;
+  span: number;
+  lane: number;
 }
 
-function DayCell({
-  date,
-  events,
-  currentMonth,
-  onEventClick,
-  renderEventContent,
-  formatEventTime: formatTime,
-}: DayCellProps) {
-  const dayEvents = getEventsForDay(events, date);
-  const isCurrentMonth = isSameMonth(date, currentMonth);
-  return (
-    <div
-      className={cn(
-        "aspect-square bg-card p-1.5 text-sm",
-        !isCurrentMonth && "bg-muted/30 text-muted-foreground",
-      )}
-    >
-      <div
-        className={cn(
-          "mb-1 flex h-7 w-7 items-center justify-center rounded-full text-xs",
-          isSameDay(date, new Date()) &&
-            "bg-primary text-primary-foreground font-medium",
-        )}
-      >
-        {format(date, "d")}
-      </div>
-      <div className="flex flex-col gap-1">
-        {dayEvents.map((event) => (
-          <button
-            key={event.id}
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEventClick?.(event);
-            }}
-            className={cn(
-              "w-full flex flex-col items-start overflow-hidden rounded border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-left transition-colors hover:bg-primary/20",
-              !onEventClick && "cursor-default",
-            )}
-            title={`${event.name} — ${formatTime(event.start_time)} to ${formatTime(event.end_time)}`}
-          >
-            {renderEventContent ? (
-              renderEventContent(event)
-            ) : (
-              <>
-                <span className="w-full truncate text-xs font-medium">
-                  {event.name}
-                </span>
-                <span className="w-full truncate text-[10px] text-muted-foreground">
-                  {formatTime(event.start_time)} - {formatTime(event.end_time)}
-                </span>
-              </>
-            )}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
+function getWeekEventLayouts(
+  week: Date[],
+  events: CalendarEvent[],
+): EventLayout[] {
+  const ws = startOfDay(week[0] as Date);
+  const we = startOfDay(week[6] as Date);
+
+  const overlappingEvents = events.filter((event) => {
+    const s = startOfDay(parseISO(event.start_time));
+    const e = startOfDay(parseISO(event.end_time));
+    return s <= we && e >= ws;
+  });
+
+  overlappingEvents.sort((a, b) => {
+    const aS = startOfDay(parseISO(a.start_time)).getTime();
+    const bS = startOfDay(parseISO(b.start_time)).getTime();
+    if (aS !== bS) return aS - bS;
+
+    const aE = startOfDay(parseISO(a.end_time)).getTime();
+    const bE = startOfDay(parseISO(b.end_time)).getTime();
+    return bE - bS - (aE - aS);
+  });
+
+  const layouts: EventLayout[] = [];
+  const occupied: boolean[][] = [];
+
+  for (const event of overlappingEvents) {
+    const s = startOfDay(parseISO(event.start_time));
+    const e = startOfDay(parseISO(event.end_time));
+
+    const eventStart = max([s, ws]);
+    const eventEnd = min([e, we]);
+
+    const startIndex = differenceInCalendarDays(eventStart, ws);
+    const endIndex = differenceInCalendarDays(eventEnd, ws);
+    const span = endIndex - startIndex + 1;
+
+    let lane = 0;
+    while (true) {
+      const currentLane = occupied[lane] || Array(7).fill(false);
+      if (!occupied[lane]) occupied[lane] = currentLane;
+
+      let canFit = true;
+      for (let i = startIndex; i <= endIndex; i++) {
+        if (currentLane[i]) {
+          canFit = false;
+          break;
+        }
+      }
+      if (canFit) {
+        for (let i = startIndex; i <= endIndex; i++) {
+          currentLane[i] = true;
+        }
+        break;
+      }
+      lane++;
+    }
+
+    layouts.push({ event, startIndex, span, lane });
+  }
+
+  return layouts;
 }
 
 export function MonthlyEventCalendar({
@@ -323,25 +316,107 @@ export function MonthlyEventCalendar({
             </div>
           ))}
         </div>
-        <div className="divide-y">
-          {weeks.map((week, weekIndex) => (
-            <div
-              key={weekIndex}
-              className="grid grid-cols-7 divide-x last:divide-y-0"
-            >
-              {week.map((date) => (
-                <DayCell
-                  key={date.toISOString()}
-                  date={date}
-                  events={events}
-                  currentMonth={currentMonth}
-                  onEventClick={onEventClick}
-                  renderEventContent={renderEventContent}
-                  formatEventTime={formatEventTime}
-                />
-              ))}
-            </div>
-          ))}
+        <div className="divide-y relative">
+          {weeks.map((week, weekIndex) => {
+            const layouts = getWeekEventLayouts(week, events);
+            return (
+              <div key={weekIndex} className="relative min-h-24 md:min-h-32">
+                {/* Background blocks */}
+                <div className="absolute inset-0 grid grid-cols-7 divide-x pointer-events-none">
+                  {week.map((date) => {
+                    const isCurrentMonth = isSameMonth(date, currentMonth);
+                    return (
+                      <div
+                        key={date.toISOString()}
+                        className={cn(
+                          "bg-card",
+                          !isCurrentMonth && "bg-muted/30",
+                        )}
+                      />
+                    );
+                  })}
+                </div>
+
+                {/* Content grid */}
+                <div className="relative z-10 grid grid-cols-7 auto-rows-max gap-y-1 pb-1">
+                  {/* Row 1: Dates */}
+                  {week.map((date, i) => {
+                    const isToday = isSameDay(date, new Date());
+                    const isCurrentMonth = isSameMonth(date, currentMonth);
+                    return (
+                      <div
+                        key={`date-${i}`}
+                        className={cn(
+                          "col-span-1 flex justify-start p-1.5 pointer-events-none text-sm",
+                          !isCurrentMonth && "text-muted-foreground",
+                        )}
+                        style={{ gridColumnStart: i + 1, gridRowStart: 1 }}
+                      >
+                        <div
+                          className={cn(
+                            "flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs",
+                            isToday &&
+                              "bg-primary text-primary-foreground font-medium",
+                          )}
+                        >
+                          {format(date, "d")}
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {/* Rows 2+: Events */}
+                  {layouts.map((layout) => {
+                    const { event, startIndex, span, lane } = layout;
+                    const isMultiDay = !isSameDay(
+                      parseISO(event.start_time),
+                      parseISO(event.end_time),
+                    );
+
+                    return (
+                      <div
+                        key={event.id}
+                        className="px-1 z-20"
+                        style={{
+                          gridColumnStart: startIndex + 1,
+                          gridColumnEnd: `span ${span}`,
+                          gridRowStart: lane + 2,
+                        }}
+                      >
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEventClick?.(event);
+                          }}
+                          className={cn(
+                            "w-full flex flex-col items-start overflow-hidden rounded border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-left transition-colors hover:bg-primary/20",
+                            onEventClick ? "cursor-pointer" : "cursor-default",
+                          )}
+                          title={`${event.name} — ${formatEventTime(event.start_time)} to ${formatEventTime(event.end_time)}`}
+                        >
+                          {renderEventContent ? (
+                            renderEventContent(event)
+                          ) : (
+                            <>
+                              <span className="w-full truncate text-xs font-medium">
+                                {event.name}
+                              </span>
+                              <span className="w-full truncate text-[10px] text-muted-foreground">
+                                {isMultiDay
+                                  ? `${format(parseISO(event.start_time), "MMM d, h:mm a")} - ${format(parseISO(event.end_time), "MMM d, h:mm a")}`
+                                  : `${formatEventTime(event.start_time)} - ${formatEventTime(event.end_time)}`}
+                              </span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

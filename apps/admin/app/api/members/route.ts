@@ -11,13 +11,18 @@ export const GET = withAuth(async (request) => {
   try {
     const { searchParams } = new URL(request.url);
     const statsOnly = searchParams.get("stats") === "true";
+    const paidOnly = searchParams.get("paid") === "true";
+    const searchQuery = searchParams.get("search") || undefined;
 
     if (statsOnly) {
       const stats = await profileService.getMembershipStats();
       return ApiResponse.ok({ stats });
     }
 
-    const profiles = await profileService.getAllProfiles();
+    const profiles = await profileService.getAllProfiles({
+      paidOnly,
+      searchQuery,
+    });
     return ApiResponse.ok(profiles);
   } catch (error: unknown) {
     console.error("Error fetching memberships:", error);

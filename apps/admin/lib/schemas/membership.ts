@@ -30,7 +30,6 @@ export const editMemberSchema = z.object({
       "arts",
       "health",
       "environment",
-      "other_non_waterloo",
     ])
     .optional(),
   term: z.string().trim().optional(),

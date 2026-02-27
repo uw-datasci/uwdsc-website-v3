@@ -9,9 +9,14 @@ import { createEventSchema } from "@/lib/schemas/event";
  * Get all events
  * Admin/exec only
  */
-export const GET = withAuth(async () => {
+export const GET = withAuth(async (request) => {
   try {
-    const events = await coreEventService.getAllEvents();
+    const { searchParams } = new URL(request.url);
+    const activeOnly = searchParams.get("active") === "true";
+
+    const events = activeOnly
+      ? await coreEventService.getEventsByTimeRange({ range: "active" })
+      : await coreEventService.getAllEvents();
     return ApiResponse.ok(events);
   } catch (error: unknown) {
     console.error("Error fetching events:", error);

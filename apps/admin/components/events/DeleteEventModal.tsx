@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@uwdsc/ui";
-import { deleteEvent } from "@/lib/api/events";
+import { deleteEvent } from "@/lib/api";
 import type { Event } from "@uwdsc/common/types";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";

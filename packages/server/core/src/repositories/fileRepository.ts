@@ -1,6 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { FileObject } from "@supabase/storage-js";
-import { FileUploadOptions } from "@uwdsc/common/types";
+import type { FileUploadOptions } from "@uwdsc/common/types";
 
 export class FileRepository {
   protected readonly supabase: SupabaseClient;
@@ -12,74 +11,72 @@ export class FileRepository {
   }
 
   /**
-   * Upload a file to Supabase storage
+   * List all files in a folder within the bucket.
    */
-  async uploadFile(
-    options: FileUploadOptions,
-  ): Promise<{ data: { path: string } | null; error: Error | null }> {
-    const { file, objectKey, contentType } = options;
-
+  async listFiles(folder: string): Promise<string[]> {
     const { data, error } = await this.supabase.storage
       .from(this.bucketName)
-      .upload(objectKey, file, {
-        cacheControl: "3600",
-        upsert: true,
-        contentType,
-      });
+      .list(folder);
 
-    if (error) return { data: null, error };
+    if (error) {
+      throw new Error(`Failed to list files: ${error.message}`);
+    }
 
-    return { data, error: null };
+    // Filter out folder placeholders (they have null id)
+    return (data ?? [])
+      .filter((file) => file.id !== null)
+      .map((file) => `${folder}/${file.name}`);
   }
 
   /**
-   * Get public URL for a file
+   * Delete files at the given paths within the bucket.
    */
-  async getFileUrl(objectKey: string) {
-    const { data } = this.supabase.storage
-      .from(this.bucketName)
-      .getPublicUrl(objectKey);
+  async deleteFiles(paths: string[]): Promise<void> {
+    if (paths.length === 0) return;
 
-    return data.publicUrl;
+    const { error } = await this.supabase.storage.from(this.bucketName).remove(paths);
+
+    if (error) {
+      throw new Error(`Failed to delete files: ${error.message}`);
+    }
   }
 
   /**
-   * Create a signed URL for a file (for private buckets)
-   * @param objectKey - The file path/key
-   * @param expiresIn - Expiration time in seconds (default: 3600 = 1 hour)
+   * Upload a file to the bucket. Uses upsert so existing files at the same
+   * path are replaced.
    */
-  async createSignedUrl(objectKey: string, expiresIn: number = 3600) {
-    const { data, error } = await this.supabase.storage
-      .from(this.bucketName)
-      .createSignedUrl(objectKey, expiresIn);
+  async uploadFile(options: FileUploadOptions): Promise<string> {
+    const buffer = Buffer.from(await options.file.arrayBuffer());
 
-    if (error) throw error;
-
-    return data.signedUrl;
-  }
-
-  /**
-   * Delete a file
-   */
-  async deleteFile(objectKey: string): Promise<{ error: Error | null }> {
     const { error } = await this.supabase.storage
       .from(this.bucketName)
-      .remove([objectKey]);
+      .upload(options.objectKey, buffer, {
+        contentType: options.contentType,
+        upsert: true,
+      });
 
-    return { error };
+    if (error) {
+      throw new Error(`Failed to upload file: ${error.message}`);
+    }
+
+    return options.objectKey;
   }
 
   /**
-   * List all files for a user
+   * Generate a signed URL for a file in the private bucket.
+   * @param path - The file path within the bucket
+   * @param expiresIn - URL expiry in seconds (default: 1 hour)
    */
-  async listUserFiles(userId: string): Promise<{
-    data: FileObject[] | null;
-    error: Error | null;
-  }> {
+  async getSignedUrl(path: string, expiresIn: number = 3600): Promise<string | null> {
     const { data, error } = await this.supabase.storage
       .from(this.bucketName)
-      .list(userId);
+      .createSignedUrl(path, expiresIn);
 
-    return { data, error };
+    if (error) {
+      console.error(`Failed to create signed URL for ${path}:`, error.message);
+      return null;
+    }
+
+    return data.signedUrl;
   }
 }

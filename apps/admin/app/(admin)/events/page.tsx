@@ -151,6 +151,7 @@ export default function EventsPage() {
         open={detailsOpen}
         onOpenChange={setDetailsOpen}
         onEdit={handleEdit}
+        onDelete={fetchEvents}
       />
 
       <EventForm

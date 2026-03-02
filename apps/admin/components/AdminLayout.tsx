@@ -31,6 +31,7 @@ const navigation = [
   { name: "Members", href: "/members", icon: Users },
   { name: "Applications", href: "/applications", icon: FileText },
   { name: "Events", href: "/events", icon: Calendar },
+  { name: "Onboarding", href: "/onboarding", icon: Shield },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { Button, CardDescription } from "@uwdsc/ui";
-import { Loader2 } from "lucide-react";
 
 interface IntroProps {
   readonly onStartOnboarding: () => void | Promise<void>;

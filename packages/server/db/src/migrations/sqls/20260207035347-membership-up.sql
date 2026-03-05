@@ -3,6 +3,7 @@ CREATE TABLE public.memberships (
   profile_id UUID NOT NULL UNIQUE REFERENCES public.profiles(id) ON DELETE CASCADE,
   payment_method public.payment_method_enum,
   payment_location VARCHAR(255),
+  term_id UUID NOT NULL REFERENCES public.terms(id) ON DELETE RESTRICT,
   verifier_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
   verified_at TIMESTAMPTZ,
   CONSTRAINT memberships_verifier_not_self CHECK (

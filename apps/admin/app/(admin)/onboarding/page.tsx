@@ -7,7 +7,7 @@ import { Button, Card, CardHeader, CardTitle, CardContent } from "@uwdsc/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Intro,
-  Personal,
+  ExecProfile,
   General,
   Submitted,
 } from "@/components/onboarding/steps";
@@ -16,8 +16,8 @@ import { useForm } from "react-hook-form";
 
 const STEP_NAMES = [
   "Exec Onboarding", 
-  "General Information",
-  "Socials & Questions",
+  "Exec Profile",
+  "Socials & Background",
 ] as const;
 
 const slideVariants = {
@@ -132,7 +132,7 @@ export default function OnboardingPage() {
         );
       case 1:
         return (
-          <Personal form={form} />
+          <ExecProfile form={form} />
         );
       case 2:
         return (

@@ -1,4 +1,4 @@
 export * from "./Intro";
-export * from "./Personal";
+export * from "./ExecProfile";
 export * from "./General";
 export * from "./Submitted";

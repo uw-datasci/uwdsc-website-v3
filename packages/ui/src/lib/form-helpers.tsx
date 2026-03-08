@@ -63,6 +63,12 @@ interface RadioFieldOptions {
   required?: boolean;
 }
 
+interface ScaleFieldOptions {
+  label: string;
+  labels: string[];  // length determines the scale, e.g. ["None", "Beginner", "Intermediate", "Advanced", "Expert"]
+  required?: boolean;
+}
+
 // ---------------------------------------------------------------------------
 // Helpers: each returns a component that receives { field } for FormField render
 // ---------------------------------------------------------------------------
@@ -226,4 +232,40 @@ export function renderRadioField(opts: RadioFieldOptions) {
   }
   RadioFieldRender.displayName = `RadioField(${label})`;
   return RadioFieldRender;
+}
+
+export function renderScaleField(opts: ScaleFieldOptions) {
+  const { label, labels, required = true } = opts;
+
+  function ScaleFieldRender({ field }: StringFieldRenderProps) {
+    return (
+      <FormItem className="space-y-3">
+        <FormLabel>
+          {label} {required && <span className="text-red-500">*</span>}
+        </FormLabel>
+        <FormControl>
+          <RadioGroup
+            onValueChange={(v) => field.onChange(v)}
+            value={field.value !== undefined ? String(field.value) : undefined}
+            className="flex items-center gap-4"
+          >
+            {labels.map((scaleLabel, index) => (
+              <FormItem key={index} className="flex flex-col items-center space-y-1 space-x-0">
+                <FormControl>
+                  <RadioGroupItem value={String(index)} />
+                </FormControl>
+                <FormLabel className="font-normal cursor-pointer text-center text-sm">
+                  {scaleLabel}
+                </FormLabel>
+              </FormItem>
+            ))}
+          </RadioGroup>
+        </FormControl>
+        <FormMessage />
+      </FormItem>
+    );
+  }
+
+  ScaleFieldRender.displayName = `ScaleField(${label})`;
+  return ScaleFieldRender;
 }

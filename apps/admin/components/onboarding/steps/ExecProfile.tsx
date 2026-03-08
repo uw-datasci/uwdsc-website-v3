@@ -10,39 +10,39 @@ import {
   FormField,
   renderTextField,
   renderSelectField,
+  renderRadioField,
 } from "@uwdsc/ui";
 
-import { UseFormReturn } from "react-hook-form";
+import { UseFormReturn, useWatch } from "react-hook-form";
 
 const termtypeOptions = [
   "Study Term",
   "Co-op Term",
 ];
 
-const locationOptions = [
-   "Waterloo",
-   "Can Comunte to Waterloo",
-   "Not in Waterloo",
-];
 
-
-interface PersonalProps {
+interface ExecProfileProps {
   readonly form: UseFormReturn<OnboardingFormValues>;
 }
 
 const positionOptions = EXEC_POSITIONS.map((pos) => pos.name);
 
-export function Personal({ form }: PersonalProps) {
+export function ExecProfile({ form }: ExecProfileProps) {
+  const consentWebsite = useWatch({
+    control: form.control,
+    name: "consent_website",
+  });
+
   return (
     <div className="space-y-6 ">
       <Form {...form}>
         {/* Two Column Grid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
           {/* Left Column: Basic Information */}
-          <Card className="border-white/20 bg-[var(--grey4)]">
+          <Card className="border-white/20 bg-[var(--grey4)] h-full">
             <CardHeader>
               <CardTitle className="flex items-center text-xl">
-                Basic Information
+                Personal Information
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -72,10 +72,10 @@ export function Personal({ form }: PersonalProps) {
           </Card>
           
           {/* Right Column: Academic Information */}
-          <Card className="border-white/20 bg-[var(--grey4)]">
+          <Card className="border-gradient/80 bg-[var(--grey4)] h-full">
             <CardHeader>
-              <CardTitle className="flex items-center text-xl rounded-t-xl -mt-6 py-4">
-                Academic Information
+              <CardTitle className="flex items-center text-xl">
+                Term Information
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -100,15 +100,10 @@ export function Personal({ form }: PersonalProps) {
               <FormField
                 control={form.control}
                 name="in_waterloo"
-                render={renderSelectField({
-                  placeholder: "Where will you be located next term?",
-                  options: locationOptions,
+                render={renderTextField({
+                  placeholder: "Will you be located in Waterloo next term?",
                   label: "Location Next Term",
                   required: true,
-                  triggerClassName: "w-full",
-                  contentClassName: "bg-[var(--grey4)]",
-                  itemClassName:
-                    "text-slate-200 focus:bg-[var(--grey3)] focus:text-white hover:bg-[var(--grey3)] hover:text-white transition-colors",
                 })}
               />
             </CardContent>
@@ -117,7 +112,7 @@ export function Personal({ form }: PersonalProps) {
         <Card className="border-white/20 bg-[var(--grey4)]">
           <CardHeader>
             <CardTitle className="flex items-center text-xl">
-                Exec Position 
+                Exec Role 
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6"> 
@@ -136,6 +131,34 @@ export function Personal({ form }: PersonalProps) {
                     "text-slate-200 focus:bg-[var(--grey3)] focus:text-white hover:bg-[var(--grey3)] hover:text-white transition-colors",
                 })}
               />
+            </CardContent>
+          </Card>
+          <Card className="border-white/20 bg-[var(--grey4)]">
+            <CardHeader>
+              <CardTitle className="flex items-center text-xl">Public Profile</CardTitle>
+              </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Headshot URL */}
+              <FormField
+                control={form.control}
+                name="consent_website"
+                render={({ field }) =>
+                  renderRadioField({
+                    label: "Can we display your headshot on our website?",
+                    required: true,
+                  })({ field })
+                }
+              />
+              {consentWebsite && (
+                <FormField
+                  control={form.control}
+                  name="headshot_url"
+                  render={renderTextField({
+                    placeholder: "Headshot URL",
+                    label: "Headshot URL",
+                  })}
+                />
+              )}
             </CardContent>
           </Card>
         </Form>

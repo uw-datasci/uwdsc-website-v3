@@ -2,7 +2,7 @@ import { ApiResponse } from "@uwdsc/common/utils";
 import { membershipService } from "@uwdsc/core";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 
-export async function GET() {
+export async function GET(): Promise<Response> {
   try {
     const { user, isUnauthorized } = await tryGetCurrentUser();
     if (isUnauthorized || !user) return isUnauthorized;

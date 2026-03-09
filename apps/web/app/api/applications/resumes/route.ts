@@ -3,7 +3,7 @@ import { tryGetCurrentUser } from "@/lib/api/utils";
 import { createResumeService } from "@/lib/services";
 import { NextRequest } from "next/server";
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<Response> {
   try {
     const { user, isUnauthorized } = await tryGetCurrentUser();
     if (isUnauthorized || !user) return isUnauthorized;

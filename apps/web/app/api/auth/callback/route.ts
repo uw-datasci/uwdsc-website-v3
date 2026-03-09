@@ -7,7 +7,7 @@ import { createAuthService } from "@/lib/services";
  * - Implicit (resend verification): auth.resend() does not use PKCE; Supabase may redirect
  *   with ?token_hash=...&type=... → verifyOtp({ token_hash, type })
  */
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<Response> {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
   const token_hash = requestUrl.searchParams.get("token_hash");

@@ -6,7 +6,7 @@ import { NextRequest } from "next/server";
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
-) {
+): Promise<Response> {
   try {
     const { user, isUnauthorized } = await tryGetCurrentUser();
     if (isUnauthorized || !user) return isUnauthorized;

@@ -5,7 +5,7 @@ import { tryGetCurrentUser } from "@/lib/api/utils";
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
-) {
+): Promise<Response> {
   try {
     const { id } = await params;
 
@@ -23,7 +23,7 @@ export async function GET(
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
-) {
+): Promise<Response> {
   try {
     const { id } = await params;
 

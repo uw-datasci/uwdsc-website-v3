@@ -62,6 +62,7 @@ Builds on Fall 2025 with new features across the main site and CxC.
 - **Utils**: `splitCommaSeparatedString()` in core for ethnicity/experience.
 - **DB**: `reviews` table (id, application_id, reviewer_id, basic_info_score, q1_score, q2_score, reviewed_at); `team_members` comma-separated; app queries include team display names.
 - **Storage**: Private resume bucket; signed URLs (e.g. 1 hr); old resume cleanup on new upload.
+- **DB (PR #35)**: `memberships` table now requires a `term_id` foreign key referencing `public.terms`, scoping each membership record to a specific term.
 
 ---
 

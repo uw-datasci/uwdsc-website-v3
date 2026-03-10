@@ -13,10 +13,7 @@ export interface ParsedEmail {
 }
 
 class WebhookService {
-  private decodePubSubData(encodedData: string): {
-    emailAddress: string;
-    historyId: string;
-  } {
+  private decodePubSubData(encodedData: string) {
     const decodedStr = Buffer.from(encodedData, "base64").toString("utf-8");
     const { emailAddress, historyId } = JSON.parse(decodedStr);
     return { emailAddress, historyId };
@@ -38,9 +35,7 @@ class WebhookService {
 
     const data = await response.json();
 
-    if (!data.access_token) {
-      throw new Error("Failed to obtain access token from Google");
-    }
+    if (!data.access_token) throw new Error("Failed to obtain access token");
 
     return data.access_token;
   }

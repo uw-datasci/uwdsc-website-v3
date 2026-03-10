@@ -26,8 +26,6 @@ export async function POST(request: NextRequest): Promise<Response> {
       refreshToken: gmailRefreshToken,
     });
 
-    console.log("Verified Gmail credentials");
-
     if (!email) return ApiResponse.ok({ received: false });
 
     console.log("Extracted Forwarded Email Content:", email.body);

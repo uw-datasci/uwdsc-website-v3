@@ -6,7 +6,7 @@ import { NextRequest } from "next/server";
 export async function POST(request: NextRequest): Promise<Response> {
   try {
     const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (isUnauthorized || !user) return isUnauthorized;
+    if (!user) return isUnauthorized;
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;

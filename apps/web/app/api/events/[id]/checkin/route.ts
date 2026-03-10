@@ -10,7 +10,7 @@ export async function GET(
     const { id } = await params;
 
     const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (isUnauthorized || !user) return ApiResponse.ok({ checkedIn: false });
+    if (!user) return isUnauthorized;
 
     const checkedIn = await eventService.getAttendanceForUser(id, user.id);
     return ApiResponse.ok({ checkedIn });
@@ -29,7 +29,7 @@ export async function POST(
 
     // 1. Check auth
     const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (isUnauthorized || !user) return isUnauthorized;
+    if (!user) return isUnauthorized;
 
     // 2. Check if user has membership
     const { has_membership } = await membershipService.getMembershipStatus(

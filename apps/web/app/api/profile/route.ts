@@ -10,7 +10,7 @@ import { NextRequest } from "next/server";
 export async function GET(): Promise<Response> {
   try {
     const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (isUnauthorized || !user) return isUnauthorized;
+    if (!user) return isUnauthorized;
 
     const profile = await profileService.getProfileByUserId(user.id);
     if (!profile) return ApiResponse.notFound("Profile not found");
@@ -27,7 +27,7 @@ export async function GET(): Promise<Response> {
 export async function PUT(request: NextRequest): Promise<Response> {
   try {
     const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (isUnauthorized || !user) return isUnauthorized;
+    if (!user) return isUnauthorized;
 
     const body = (await request.json()) as Record<string, unknown>;
     const validationError = validateBaseProfileFields(body);
@@ -63,7 +63,7 @@ export async function PUT(request: NextRequest): Promise<Response> {
 export async function PATCH(request: NextRequest): Promise<Response> {
   try {
     const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (isUnauthorized || !user) return isUnauthorized;
+    if (!user) return isUnauthorized;
 
     const body = (await request.json()) as Record<string, unknown>;
     const validationError = validateBaseProfileFields(body);

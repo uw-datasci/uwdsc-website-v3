@@ -9,7 +9,7 @@ export async function PATCH(
 ): Promise<Response> {
   try {
     const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (isUnauthorized || !user) return isUnauthorized;
+    if (!user) return isUnauthorized;
 
     const { id } = await params;
     if (!id) return ApiResponse.badRequest("Application ID is required");

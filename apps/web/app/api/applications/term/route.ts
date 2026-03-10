@@ -5,7 +5,7 @@ import { applicationService } from "@uwdsc/core";
 export async function GET(): Promise<Response> {
   try {
     const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (isUnauthorized || !user) return isUnauthorized;
+    if (!user) return isUnauthorized;
 
     const term = await applicationService.getActiveTerm();
     if (!term) return ApiResponse.notFound("No active application period");

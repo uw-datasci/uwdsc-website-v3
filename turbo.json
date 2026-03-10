@@ -12,18 +12,14 @@
         "NEXT_PUBLIC_APP_URL",
         "SUPABASE_URL",
         "SUPABASE_PUBLISHABLE_KEY",
-        "SUPABASE_SECRET_KEY"
+        "SUPABASE_SECRET_KEY",
+        "GMAIL_CLIENT_ID",
+        "GMAIL_CLIENT_SECRET",
+        "GMAIL_REFRESH_TOKEN"
       ]
     },
-    "lint": {
-      "dependsOn": ["^lint"]
-    },
-    "check-types": {
-      "dependsOn": ["^check-types"]
-    },
-    "dev": {
-      "cache": false,
-      "persistent": true
-    }
+    "lint": { "dependsOn": ["^lint"] },
+    "check-types": { "dependsOn": ["^check-types"] },
+    "dev": { "cache": false, "persistent": true }
   }
 }

@@ -38,9 +38,14 @@ interface TextFieldOptions {
   inputProps?: Partial<ComponentProps<typeof Input>>;
 }
 
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
 interface SelectFieldOptions {
   placeholder: string;
-  options: string[];
+  options: (string | SelectOption)[];
   label?: string;
   required?: boolean;
   triggerClassName?: string;
@@ -141,11 +146,15 @@ export function renderSelectField(opts: SelectFieldOptions) {
             </SelectTrigger>
           </FormControl>
           <SelectContent className={contentClassName} position={contentPosition}>
-            {options.map((option) => (
-              <SelectItem key={option} value={option} className={itemClassName}>
-                {option}
-              </SelectItem>
-            ))}
+            {options.map((option) => {
+              const value = typeof option === "string" ? option : option.value;
+              const label = typeof option === "string" ? option : option.label;
+              return (
+                <SelectItem key={value} value={value} className={itemClassName}>
+                  {label}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
         <FormMessage />

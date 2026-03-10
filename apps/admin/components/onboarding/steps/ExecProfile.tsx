@@ -16,8 +16,8 @@ import {
 import { UseFormReturn, useWatch } from "react-hook-form";
 
 const termtypeOptions = [
-  "Study Term",
-  "Co-op Term",
+  { value: "study", label: "Study Term" },
+  { value: "coop", label: "Co-op Term" },
 ];
 
 

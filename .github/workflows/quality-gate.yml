@@ -48,8 +48,8 @@ jobs:
     with:
       node-version: ${{ needs.setup.outputs.node-version }}
       pnpm-version: ${{ needs.setup.outputs.pnpm-version }}
-      lint-command: pnpm lint
-      typecheck-command: pnpm check-types
+      lint-command: turbo exec lint
+      typecheck-command: turbo exec check-types
 
   build-web:
     name: Build - Web

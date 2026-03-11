@@ -22,8 +22,8 @@ import { stat } from "fs/promises";
 import { set } from "zod";
 
 const termtypeOptions = [
-  "Study Term",
-  "Co-op Term",
+  { value: "study", label: "Study Term" },
+  { value: "coop", label: "Co-op Term" },
 ];
 
 // headshot upload constants

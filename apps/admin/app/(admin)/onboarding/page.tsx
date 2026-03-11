@@ -14,6 +14,11 @@ import {
 import { OnboardingFormValues, OnboardingDefaultValues, onboardingSchema } from "@/lib/schemas/onboarding";
 import { useForm } from "react-hook-form";
 
+const STEP_FIELDS: Record<number, (keyof OnboardingFormValues)[]> = {
+  1: ["fullname", "gmail", "term_type", "in_waterloo", "role", "consent_website"],
+  2: ["discord", "consent_instagram", "datasci_competency"],
+};
+
 const STEP_NAMES = [
   "Exec Onboarding", 
   "Exec Profile",
@@ -67,12 +72,18 @@ export default function OnboardingPage() {
   );
 
   const handleNext = useCallback(async () => {
+    const fieldsToValidate = STEP_FIELDS[currentStep];
+    if (fieldsToValidate) {
+      const valid = await form.trigger(fieldsToValidate);
+      if (!valid) return;
+    }
+
     setIsLoading(true);
     try {
       // TODO: Add API call to save form data
-      if (currentStep === 4) {
+      if (currentStep === 2) {
         // Submission logic
-        goToStep(4);
+        goToStep(3);
       } else {
         goToStep(currentStep + 1);
       }
@@ -81,7 +92,7 @@ export default function OnboardingPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentStep, goToStep]);
+  }, [currentStep, goToStep, form]);
 
   const handlePrevious = () => {
     goToStep(currentStep - 1);
@@ -89,7 +100,7 @@ export default function OnboardingPage() {
 
   
   const renderButton = () => {
-    const isLastStep = currentStep === 5;
+    const isLastStep = currentStep === 2;
 
     let buttonClassName = "hover:scale-105 ";
     if (isLastStep) {

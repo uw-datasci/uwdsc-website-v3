@@ -25,9 +25,7 @@ import {
   useSidebar,
 } from "@uwdsc/ui";
 
-export function NavMain({
-  items,
-}: {
+interface NavMainProps {
   readonly items: {
     name: string;
     href?: string;
@@ -37,9 +35,15 @@ export function NavMain({
       href: string;
     }[];
   }[];
-}) {
+}
+
+export function NavMain({ items }: NavMainProps) {
   const pathname = usePathname();
-  const { state, isMobile } = useSidebar();
+  const { state, isMobile, setOpenMobile } = useSidebar();
+
+  const closeSidebarOnMobile = () => {
+    if (isMobile) setOpenMobile(false);
+  };
 
   return (
     <SidebarGroup>
@@ -79,6 +83,7 @@ export function NavMain({
                             <Link
                               href={subItem.href}
                               className="cursor-pointer"
+                              onClick={closeSidebarOnMobile}
                             >
                               {subItem.name}
                             </Link>
@@ -116,7 +121,10 @@ export function NavMain({
                               asChild
                               isActive={pathname === subItem.href}
                             >
-                              <Link href={subItem.href}>
+                              <Link
+                                href={subItem.href}
+                                onClick={closeSidebarOnMobile}
+                              >
                                 <span>{subItem.name}</span>
                               </Link>
                             </SidebarMenuSubButton>
@@ -136,7 +144,10 @@ export function NavMain({
                   isActive={!!isActive}
                   tooltip={item.name}
                 >
-                  <Link href={item.href as string}>
+                  <Link
+                    href={item.href as string}
+                    onClick={closeSidebarOnMobile}
+                  >
                     <item.icon />
                     <span>{item.name}</span>
                   </Link>

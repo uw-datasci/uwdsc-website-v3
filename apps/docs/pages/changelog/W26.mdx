@@ -5,6 +5,7 @@ Builds on Fall 2025 with new features across the main site and CxC.
 ## Main Website (apps/web)
 
 - **Password reset (PR #126)**: Forgot-password link on login; email-based reset with time-limited link; dedicated reset page with confirmation.
+- **Analytics & performance monitoring (PR #38)**: Vercel Analytics and Speed Insights added to track page views and real-world performance metrics.
 
 ## CxC App (apps/cxc)
 
@@ -47,6 +48,7 @@ Builds on Fall 2025 with new features across the main site and CxC.
 ### Content
 
 - **Branding (PR #114)**: Standardized “CXC” across components.
+- **Admin events list (PR #38)**: Events list is now mobile-friendly; displays as cards on small screens and a table on desktop.
 
 ## Design System (packages/ui)
 
@@ -54,6 +56,7 @@ Builds on Fall 2025 with new features across the main site and CxC.
 - **Dialog**: Close button cursor; formatting.
 - **GlassSurface**: useCallback fixes for hook deps.
 - **Forms**: FileUploadField callbacks and `existingFileName`; SelectField undefined handling.
+- **Event calendar (PR #38)**: Now mobile-friendly; uses a bottom sheet on mobile and a dialog on desktop; shorter weekday labels on small screens.
 
 ## Infrastructure
 
@@ -63,6 +66,7 @@ Builds on Fall 2025 with new features across the main site and CxC.
 - **DB**: `reviews` table (id, application_id, reviewer_id, basic_info_score, q1_score, q2_score, reviewed_at); `team_members` comma-separated; app queries include team display names.
 - **Storage**: Private resume bucket; signed URLs (e.g. 1 hr); old resume cleanup on new upload.
 - **DB (PR #35)**: `memberships` table now requires a `term_id` foreign key referencing `public.terms`, scoping each membership record to a specific term.
+- **Gmail webhook (PR #38)**: New `POST /api/webhooks/gmail` endpoint receives Gmail push notifications via Google Cloud Pub/Sub, laying the groundwork for automated membership payment verification.
 
 ---
 

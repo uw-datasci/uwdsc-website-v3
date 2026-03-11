@@ -50,11 +50,7 @@ jobs:
       pnpm-version: ${{ needs.setup.outputs.pnpm-version }}
       lint-command: pnpm exec turbo lint
       typecheck-command: pnpm exec turbo check-types
-      infisical-project-slug: ${{ needs.setup.outputs.infisical-project-slug }}
-      infisical-secret-path: /web
     secrets:
-      INFISICAL_CLIENT_ID: ${{ secrets.INFISICAL_CLIENT_ID }}
-      INFISICAL_CLIENT_SECRET: ${{ secrets.INFISICAL_CLIENT_SECRET }}
       TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
 

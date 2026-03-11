@@ -48,8 +48,8 @@ jobs:
     with:
       node-version: ${{ needs.setup.outputs.node-version }}
       pnpm-version: ${{ needs.setup.outputs.pnpm-version }}
-      lint-command: turbo exec lint
-      typecheck-command: turbo exec check-types
+      lint-command: pnpm exec turbo lint
+      typecheck-command: pnpm exec turbo check-types
       infisical-project-slug: ${{ needs.setup.outputs.infisical-project-slug }}
       infisical-secret-path: /web
     secrets:

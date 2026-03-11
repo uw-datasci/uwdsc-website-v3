@@ -50,6 +50,11 @@ jobs:
       pnpm-version: ${{ needs.setup.outputs.pnpm-version }}
       lint-command: turbo exec lint
       typecheck-command: turbo exec check-types
+      infisical-project-slug: ${{ needs.setup.outputs.infisical-project-slug }}
+      infisical-secret-path: /web
+    secrets:
+      INFISICAL_CLIENT_ID: ${{ secrets.INFISICAL_CLIENT_ID }}
+      INFISICAL_CLIENT_SECRET: ${{ secrets.INFISICAL_CLIENT_SECRET }}
 
   build-web:
     name: Build - Web

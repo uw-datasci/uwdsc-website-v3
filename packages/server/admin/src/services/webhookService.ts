@@ -116,6 +116,8 @@ class WebhookService {
         accessToken,
       );
 
+      // TODO: verify email has webhook trigger tag
+
       return { messageId, emailAddress, body };
     } catch (error) {
       throw new ApiError(

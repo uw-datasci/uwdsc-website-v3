@@ -292,6 +292,7 @@ export function MonthlyEventCalendar({
   className,
 }: MonthlyEventCalendarProps) {
   const [subscribeDialogOpen, setSubscribeDialogOpen] = React.useState(false);
+  const isMobile = useIsMobile();
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -361,7 +362,7 @@ export function MonthlyEventCalendar({
               aria-label="Subscribe to calendar"
             >
               <CalendarPlus className="size-4" />
-              <span className="hidden sm:inline">Subscribe to calendar</span>
+              {!isMobile && <span>Subscribe to calendar</span>}
             </Button>
             <SubscribeCalendarDialog
               open={subscribeDialogOpen}

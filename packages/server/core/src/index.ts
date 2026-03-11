@@ -6,3 +6,4 @@ export * from "./services/membershipService";
 export * from "./services/profileService";
 export * from "./services/resumeService";
 export * from "./services/teamService";
+export * from "./services/headshotService"

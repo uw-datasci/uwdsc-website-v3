@@ -1,4 +1,5 @@
 "use client";
+
 import { OnboardingFormValues } from "@/lib/schemas/onboarding";
 import { EXEC_POSITIONS } from "@/constants/execPositions";
 import {
@@ -14,11 +15,20 @@ import {
 } from "@uwdsc/ui";
 
 import { UseFormReturn, useWatch } from "react-hook-form";
+import { useCallback, useState, useEffect } from "react";
+import { FileUp, Loader2, CheckCircle } from "lucide-react";
+import { uploadHeadshot } from "@/lib/api/headshot";
+import { stat } from "fs/promises";
+import { set } from "zod";
 
 const termtypeOptions = [
   "Study Term",
   "Co-op Term",
 ];
+
+// headshot upload constants
+const IMAGE_ACCEPT = "image/jpeg,image/jpg,image/png,image/webp";
+const IMAGE_MAX_MB = 5;
 
 
 interface ExecProfileProps {
@@ -28,10 +38,77 @@ interface ExecProfileProps {
 const positionOptions = EXEC_POSITIONS.map((pos) => pos.name);
 
 export function ExecProfile({ form }: ExecProfileProps) {
+  
   const consentWebsite = useWatch({
     control: form.control,
     name: "consent_website",
   });
+
+   // "Clears" headshot if user revokes consent
+  useEffect(() => {
+    if (!consentWebsite) {
+      form.setValue("headshot_url", "");
+      setUploadError(null);
+      setIsUploading(false);
+    }
+  }, [consentWebsite, form]);
+
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const handleHeadshotChange = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      setUploadError(null);
+
+      if (file.size > IMAGE_MAX_MB * 1024 * 1024) {
+        setUploadError(`File must be under ${IMAGE_MAX_MB} MB`);
+        return;
+      }
+
+      const allowed = ["image/jpeg", "image/png", "image/webp"];
+      if (!allowed.includes(file.type)) {
+        setUploadError("Allowed formats: JPG, PNG, WEBP");
+        return;
+      }
+
+      setIsUploading(true);
+
+      try {
+        const result = await uploadHeadshot(file);
+        form.setValue("headshot_url", result.url, { shouldValidate: true });
+      } catch (err) {
+        setUploadError(err instanceof Error ? err.message : "Upload failed");
+        form.setValue("headshot_url", "");
+      } finally {
+        setIsUploading(false);
+        e.target.value = "";
+      }
+    },
+    [form],
+  );
+
+  const headshotUrl = form.watch("headshot_url");
+
+  let statusIcon: React.ReactNode;
+  if (isUploading) {
+    statusIcon = <Loader2 className="w-10 h-10 animate-spin text-blue-400" />;
+  } else if (headshotUrl) {
+    statusIcon = <CheckCircle className="w-10 h-10 text-green-400" />;
+  } else {
+    statusIcon = <FileUp className="w-10 h-10 text-white/70" />;
+  }
+
+  let statusLabel: string;
+  if (isUploading) {
+    statusLabel = "Uploading...";
+  } else if (headshotUrl) {
+    statusLabel = "Headshot uploaded. Click to replace.";
+  } else {
+    statusLabel = "Drop your headshot here or click to upload";
+  }
 
   return (
     <div className="space-y-6 ">
@@ -153,10 +230,28 @@ export function ExecProfile({ form }: ExecProfileProps) {
                 <FormField
                   control={form.control}
                   name="headshot_url"
-                  render={renderTextField({
-                    placeholder: "Headshot URL",
-                    label: "Headshot URL",
-                  })}
+                  render={({ field }) => (
+                    <div className="space-y-3">
+                      <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-[var(--grey2)] rounded-lg cursor-pointer bg-[var(--grey4)] hover:bg-[var(--grey3)] transition-colors">
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept={IMAGE_ACCEPT}
+                          onChange={handleHeadshotChange}
+                          disabled={isUploading}
+                        />
+                        {statusIcon}
+                        <span className="mt-2 text-sm text-white/70">
+                          {statusLabel}
+                        </span>
+                        <span className="mt-1 text-xs text-white/70">
+                          JPG, PNG, WEBP (max {IMAGE_MAX_MB} MB)
+                        </span>
+                      </label>
+                      <input type="hidden" {...field} value={field.value ?? ""} />
+                      {uploadError && <p className="text-sm text-destructive">{uploadError}</p>}
+                    </div>
+                  )}
                 />
               )}
             </CardContent>

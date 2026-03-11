@@ -6,11 +6,11 @@ import { profileService } from "@uwdsc/core";
  * GET /api/auth/user
  * Get the currently authenticated user
  */
-export async function GET() {
+export async function GET(): Promise<Response> {
   try {
     const { user, isUnauthorized } = await tryGetCurrentUser();
 
-    if (isUnauthorized || !user) return isUnauthorized;
+    if (!user) return isUnauthorized;
 
     // Extract role from app_metadata
     const role = user.app_metadata?.role ?? null;

@@ -30,12 +30,15 @@ export interface DateTimePickerProps {
   onChange?: (value: string) => void;
   /** Placeholder when no value is set. */
   placeholder?: string;
+  /** Optional class name for the trigger (e.g. rounded-md to match Input fields). */
+  className?: string;
 }
 
 export function DateTimePicker({
   value,
   onChange,
   placeholder = "MM/DD/YYYY hh:mm aa",
+  className,
 }: Readonly<DateTimePickerProps>) {
   const [isOpen, setIsOpen] = React.useState(false);
   const date = parseValue(value);
@@ -83,8 +86,9 @@ export function DateTimePicker({
           variant="outline"
           type="button"
           className={cn(
-            "w-full justify-start text-left font-normal",
+            "w-full justify-start text-left font-normal rounded-md",
             !date && "text-muted-foreground",
+            className,
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />

@@ -22,7 +22,9 @@ import { CalendarPlus, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "../lib/utils";
 import { Button } from "./button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
+import { useIsMobile } from "../hooks/use-mobile";
 import {
   GoogleCalendarIcon,
   AppleCalendarIcon,
@@ -55,6 +57,7 @@ export interface MonthlyEventCalendarProps {
 }
 
 const WEEKDAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const WEEKDAY_SHORT_NAMES = ["S", "M", "T", "W", "T", "F", "S"];
 
 function formatEventTime(isoString: string): string {
   return format(parseISO(isoString), "h:mm a");
@@ -131,6 +134,153 @@ function getWeekEventLayouts(
   return layouts;
 }
 
+const GOOGLE_INSTRUCTIONS = (
+  <>
+    <p className="mb-2 text-muted-foreground">
+      Add the calendar to Google Calendar using the link above:
+    </p>
+    <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+      <li>Go to calendar.google.com</li>
+      <li>Click the &quot;+&quot; next to &quot;Other calendars&quot;</li>
+      <li>Choose &quot;From URL&quot;</li>
+      <li>Paste the link and click &quot;Add calendar&quot;</li>
+    </ol>
+  </>
+);
+
+const APPLE_INSTRUCTIONS = (
+  <>
+    <p className="mb-2 text-muted-foreground">
+      Add the calendar to Apple Calendar using the link above:
+    </p>
+    <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+      <li>Open the Calendar app</li>
+      <li>Go to File → New Calendar Subscription</li>
+      <li>Paste the link and click Subscribe</li>
+    </ol>
+  </>
+);
+
+const OUTLOOK_INSTRUCTIONS = (
+  <>
+    <p className="mb-2 text-muted-foreground">
+      Add the calendar to Outlook using the link above:
+    </p>
+    <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+      <li>Go to outlook.live.com/calendar or outlook.office.com/calendar</li>
+      <li>Click &quot;Add calendar&quot; → &quot;Subscribe from web&quot;</li>
+      <li>Paste the link and add the calendar</li>
+    </ol>
+  </>
+);
+
+interface SubscribeCalendarDialogProps {
+  readonly open: boolean;
+  readonly onOpenChange: (open: boolean) => void;
+  readonly feedUrl: string;
+}
+
+function SubscribeCalendarDialog({
+  open,
+  onOpenChange,
+  feedUrl,
+}: SubscribeCalendarDialogProps) {
+  const [copied, setCopied] = React.useState(false);
+  const isMobile = useIsMobile();
+
+  const handleCopyUrl = React.useCallback(() => {
+    if (!feedUrl) return;
+    void navigator.clipboard.writeText(feedUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [feedUrl]);
+
+  const copySection = (
+    <div className="flex flex-col gap-2 sm:flex-row sm:gap-2">
+      <code className="flex-1 truncate rounded border bg-muted p-2 text-xs">
+        {feedUrl}
+      </code>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={handleCopyUrl}
+        className="shrink-0 sm:w-auto"
+      >
+        {copied ? "Copied!" : "Copy"}
+      </Button>
+    </div>
+  );
+
+  const tabsContent = (
+    <Tabs defaultValue="google" className="w-full pt-2">
+      <TabsList className="grid w-full grid-cols-3">
+        <TabsTrigger value="google" className="gap-1.5 text-xs sm:text-sm">
+          <GoogleCalendarIcon className="size-4 shrink-0" />
+          Google
+        </TabsTrigger>
+        <TabsTrigger value="apple" className="gap-1.5 text-xs sm:text-sm">
+          <AppleCalendarIcon className="size-5 shrink-0 text-gray-700" />
+          Apple
+        </TabsTrigger>
+        <TabsTrigger value="outlook" className="gap-1.5 text-xs sm:text-sm">
+          <OutlookCalendarIcon className="size-4 shrink-0" />
+          Outlook
+        </TabsTrigger>
+      </TabsList>
+      <TabsContent value="google" className="pt-3 text-sm">
+        {GOOGLE_INSTRUCTIONS}
+      </TabsContent>
+      <TabsContent value="apple" className="pt-3 text-sm">
+        {APPLE_INSTRUCTIONS}
+      </TabsContent>
+      <TabsContent value="outlook" className="pt-3 text-sm">
+        {OUTLOOK_INSTRUCTIONS}
+      </TabsContent>
+    </Tabs>
+  );
+
+  if (isMobile) {
+    return (
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent
+          side="bottom"
+          className="max-h-[90vh] overflow-y-auto rounded-t-xl"
+        >
+          <SheetHeader>
+            <SheetTitle>Subscribe to calendar</SheetTitle>
+          </SheetHeader>
+          <div className="flex flex-col gap-4 px-4 pb-6">
+            <p className="text-sm text-muted-foreground">
+              Copy the link below and add it to your calendar app to see events
+              and updates automatically.
+            </p>
+            {copySection}
+            {tabsContent}
+          </div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-120 max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Subscribe to calendar</DialogTitle>
+        </DialogHeader>
+        <p className="text-sm text-muted-foreground">
+          Copy the link below and add it to your calendar app to see events and
+          updates automatically.
+        </p>
+        {copySection}
+        {tabsContent}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function MonthlyEventCalendar({
   events,
   currentMonth,
@@ -142,7 +292,7 @@ export function MonthlyEventCalendar({
   className,
 }: MonthlyEventCalendarProps) {
   const [subscribeDialogOpen, setSubscribeDialogOpen] = React.useState(false);
-  const [copied, setCopied] = React.useState(false);
+  const isMobile = useIsMobile();
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -167,14 +317,6 @@ export function MonthlyEventCalendar({
     globalThis.window === undefined
       ? (subscribeUrl ?? "")
       : (globalThis.window.location.origin ?? "") + (subscribeUrl ?? "");
-
-  const handleCopyUrl = React.useCallback(() => {
-    if (!fullFeedUrl) return;
-    void navigator.clipboard.writeText(fullFeedUrl).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  }, [fullFeedUrl]);
 
   return (
     <div className={cn("flex flex-col gap-4", className)}>
@@ -206,7 +348,7 @@ export function MonthlyEventCalendar({
           >
             <ChevronRight className="size-4" />
           </Button>
-          <h2 className="min-w-45 text-2xl font-semibold ml-2">
+          <h2 className="sm:min-w-45 text-xl sm:text-2xl font-semibold ml-2">
             {format(currentMonth, "MMMM yyyy")}
           </h2>
         </div>
@@ -217,102 +359,26 @@ export function MonthlyEventCalendar({
               variant="outline"
               size="sm"
               onClick={() => setSubscribeDialogOpen(true)}
+              aria-label="Subscribe to calendar"
             >
-              <CalendarPlus className="mr-1.5 size-4" />
-              Subscribe to calendar
+              <CalendarPlus className="size-4" />
+              {!isMobile && <span>Subscribe to calendar</span>}
             </Button>
-            <Dialog
+            <SubscribeCalendarDialog
               open={subscribeDialogOpen}
               onOpenChange={setSubscribeDialogOpen}
-            >
-              <DialogContent className="sm:max-w-120 max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>Subscribe to calendar</DialogTitle>
-                </DialogHeader>
-                <p className="text-sm text-muted-foreground">
-                  Copy the link below and add it to your calendar app to see
-                  events and updates automatically.
-                </p>
-                <div className="flex gap-2">
-                  <code className="flex-1 truncate rounded border bg-muted px-2 py-1.5 text-xs">
-                    {fullFeedUrl}
-                  </code>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleCopyUrl}
-                  >
-                    {copied ? "Copied!" : "Copy"}
-                  </Button>
-                </div>
-                <Tabs defaultValue="google" className="w-full pt-2">
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="google" className="gap-1.5">
-                      <GoogleCalendarIcon className="size-4 shrink-0" />
-                      Google
-                    </TabsTrigger>
-                    <TabsTrigger value="apple" className="gap-1.5">
-                      <AppleCalendarIcon className="size-5 shrink-0 text-gray-700" />
-                      Apple
-                    </TabsTrigger>
-                    <TabsTrigger value="outlook" className="gap-1.5">
-                      <OutlookCalendarIcon className="size-4 shrink-0" />
-                      Outlook
-                    </TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="google" className="pt-3 text-sm">
-                    <p className="mb-2 text-muted-foreground">
-                      Add the calendar to Google Calendar using the link above:
-                    </p>
-                    <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
-                      <li>Go to calendar.google.com</li>
-                      <li>
-                        Click the &quot;+&quot; next to &quot;Other
-                        calendars&quot;
-                      </li>
-                      <li>Choose &quot;From URL&quot;</li>
-                      <li>Paste the link and click &quot;Add calendar&quot;</li>
-                    </ol>
-                  </TabsContent>
-                  <TabsContent value="apple" className="pt-3 text-sm">
-                    <p className="mb-2 text-muted-foreground">
-                      Add the calendar to Apple Calendar using the link above:
-                    </p>
-                    <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
-                      <li>Open the Calendar app</li>
-                      <li>Go to File → New Calendar Subscription</li>
-                      <li>Paste the link and click Subscribe</li>
-                    </ol>
-                  </TabsContent>
-                  <TabsContent value="outlook" className="pt-3 text-sm">
-                    <p className="mb-2 text-muted-foreground">
-                      Add the calendar to Outlook using the link above:
-                    </p>
-                    <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
-                      <li>
-                        Go to outlook.live.com/calendar or
-                        outlook.office.com/calendar
-                      </li>
-                      <li>
-                        Click &quot;Add calendar&quot; → &quot;Subscribe from
-                        web&quot;
-                      </li>
-                      <li>Paste the link and add the calendar</li>
-                    </ol>
-                  </TabsContent>
-                </Tabs>
-              </DialogContent>
-            </Dialog>
+              feedUrl={fullFeedUrl}
+            />
           </>
         ) : null}
       </div>
 
       <div className="rounded-lg border bg-card">
         <div className="grid grid-cols-7 border-b bg-muted/50 text-center text-sm font-medium text-muted-foreground">
-          {WEEKDAY_NAMES.map((name) => (
+          {WEEKDAY_NAMES.map((name, i) => (
             <div key={name} className="border-r py-2 last:border-r-0">
-              {name}
+              <span className="max-sm:hidden">{name}</span>
+              <span className="sm:hidden">{WEEKDAY_SHORT_NAMES[i]}</span>
             </div>
           ))}
         </div>
@@ -320,7 +386,10 @@ export function MonthlyEventCalendar({
           {weeks.map((week, weekIndex) => {
             const layouts = getWeekEventLayouts(week, events);
             return (
-              <div key={weekIndex} className="relative min-h-24 md:min-h-32">
+              <div
+                key={weekIndex}
+                className="relative min-h-16 sm:min-h-24 md:min-h-32"
+              >
                 {/* Background blocks */}
                 <div className="absolute inset-0 grid grid-cols-7 divide-x pointer-events-none">
                   {week.map((date) => {
@@ -338,7 +407,7 @@ export function MonthlyEventCalendar({
                 </div>
 
                 {/* Content grid */}
-                <div className="relative z-10 grid grid-cols-7 auto-rows-max gap-y-1 pb-1">
+                <div className="relative z-10 grid grid-cols-7 auto-rows-max gap-y-0.5 pb-1">
                   {/* Row 1: Dates */}
                   {week.map((date, i) => {
                     const isToday = isSameDay(date, new Date());
@@ -347,7 +416,7 @@ export function MonthlyEventCalendar({
                       <div
                         key={`date-${i}`}
                         className={cn(
-                          "col-span-1 flex justify-start p-1.5 pointer-events-none text-sm",
+                          "col-span-1 flex justify-start px-1.5 pt-1 pb-0 pointer-events-none text-sm",
                           !isCurrentMonth && "text-muted-foreground",
                         )}
                         style={{ gridColumnStart: i + 1, gridRowStart: 1 }}
@@ -390,7 +459,7 @@ export function MonthlyEventCalendar({
                             onEventClick?.(event);
                           }}
                           className={cn(
-                            "w-full flex flex-col items-start overflow-hidden rounded border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-left transition-colors hover:bg-primary/20",
+                            "w-full flex flex-col items-start overflow-hidden rounded border border-primary/20 bg-primary/10 px-1 sm:px-1.5 py-0.5 text-left transition-colors hover:bg-primary/20",
                             onEventClick ? "cursor-pointer" : "cursor-default",
                           )}
                           title={`${event.name} — ${formatEventTime(event.start_time)} to ${formatEventTime(event.end_time)}`}
@@ -402,7 +471,7 @@ export function MonthlyEventCalendar({
                               <span className="w-full truncate text-xs font-medium">
                                 {event.name}
                               </span>
-                              <span className="w-full truncate text-[10px] text-muted-foreground">
+                              <span className="max-sm:hidden w-full truncate text-[10px] text-muted-foreground">
                                 {isMultiDay
                                   ? `${format(parseISO(event.start_time), "MMM d, h:mm a")} - ${format(parseISO(event.end_time), "MMM d, h:mm a")}`
                                   : `${formatEventTime(event.start_time)} - ${formatEventTime(event.end_time)}`}

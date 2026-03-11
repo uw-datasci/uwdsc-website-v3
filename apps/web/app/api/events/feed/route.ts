@@ -7,7 +7,7 @@ import { buildICS } from "@/lib/utils/events";
  * Returns an iCal feed of all events. Clients can subscribe to this URL
  * so their calendar app shows current and future events.
  */
-export async function GET() {
+export async function GET(): Promise<Response> {
   try {
     const events = await eventService.getAllEvents();
     const ics = buildICS(events);

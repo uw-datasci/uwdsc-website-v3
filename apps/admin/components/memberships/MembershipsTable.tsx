@@ -404,7 +404,7 @@ export function MembershipsTable({
                 value={`${table.getState().pagination.pageSize}`}
                 onValueChange={(value) => table.setPageSize(Number(value))}
               >
-                <SelectTrigger className="h-8 w-17.5">
+                <SelectTrigger className="h-8">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent side="top">

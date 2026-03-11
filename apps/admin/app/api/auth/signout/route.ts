@@ -1,7 +1,7 @@
 import { ApiResponse } from "@uwdsc/common/utils";
 import { createAuthService } from "@/lib/services";
 
-export async function POST() {
+export async function POST(): Promise<Response> {
   try {
     const authService = await createAuthService();
     const result = await authService.signOut();

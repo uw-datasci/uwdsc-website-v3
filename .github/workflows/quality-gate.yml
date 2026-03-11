@@ -58,7 +58,7 @@ jobs:
     with:
       node-version: ${{ needs.setup.outputs.node-version }}
       pnpm-version: ${{ needs.setup.outputs.pnpm-version }}
-      build-command: turbo build --filter=web...
+      build-command: pnpm exec turbo build --filter=web...
       infisical-project-slug: ${{ needs.setup.outputs.infisical-project-slug }}
       infisical-secret-path: /web
     secrets:
@@ -72,7 +72,7 @@ jobs:
     with:
       node-version: ${{ needs.setup.outputs.node-version }}
       pnpm-version: ${{ needs.setup.outputs.pnpm-version }}
-      build-command: turbo build --filter=admin...
+      build-command: pnpm exec turbo build --filter=admin...
       infisical-project-slug: ${{ needs.setup.outputs.infisical-project-slug }}
       infisical-secret-path: /admin
     secrets:

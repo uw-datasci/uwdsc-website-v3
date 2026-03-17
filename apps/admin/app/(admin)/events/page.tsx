@@ -66,7 +66,7 @@ export default function EventsPage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <h1 className="text-3xl font-bold">Nexus Terminal</h1>
+        <h1 className="text-3xl font-bold">Events Portal</h1>
         <p className="text-muted-foreground">Loading events...</p>
       </div>
     );
@@ -75,7 +75,7 @@ export default function EventsPage() {
   if (error) {
     return (
       <div className="space-y-6">
-        <h1 className="text-3xl font-bold">Nexus Terminal</h1>
+        <h1 className="text-3xl font-bold">Events Portal</h1>
         <div className="rounded-lg border border-destructive bg-destructive/10 p-4">
           <p className="text-sm text-destructive">{error}</p>
         </div>
@@ -87,7 +87,7 @@ export default function EventsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="p-4">
-          <h1 className="text-3xl font-bold">Nexus Terminal</h1>
+          <h1 className="text-3xl font-bold">Events Portal</h1>
           <p className="text-muted-foreground">
             Create and manage club events.
           </p>
@@ -137,13 +137,13 @@ export default function EventsPage() {
           onRefresh={fetchEvents}
         />
       ) : (
-          <MonthlyEventCalendar
-            events={events}
-            currentMonth={currentMonth}
-            onMonthChange={setCurrentMonth}
-            onTodayClick={handleTodayClick}
-            onEventClick={handleEventClick}
-          />
+        <MonthlyEventCalendar
+          events={events}
+          currentMonth={currentMonth}
+          onMonthChange={setCurrentMonth}
+          onTodayClick={handleTodayClick}
+          onEventClick={handleEventClick}
+        />
       )}
 
       <EventDetailsDialog

@@ -21,6 +21,10 @@ import {
   Calendar,
   Settings,
   Shield,
+  Anvil,
+  Code2,
+  Activity,
+  Library,
 } from "lucide-react";
 import { signOut as signOutApi } from "@/lib/api/auth";
 import { NavUser } from "./nav/NavUser";
@@ -32,6 +36,16 @@ const navigation = [
   { name: "Applications", href: "/applications", icon: FileText },
   { name: "Events", href: "/events", icon: Calendar },
   { name: "Onboarding", href: "/onboarding", icon: Shield },
+  {
+    name: "Nexus",
+    href: "/nexus",
+    icon: Code2,
+    subItems: [
+      { name: "Foundry", href: "/nexus/foundry", icon: Anvil },
+      { name: "Optics", href: "/nexus/optics", icon: Activity },
+      { name: "Archive", href: "/nexus/archive", icon: Library },
+    ],
+  },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 
@@ -62,7 +76,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                   <Shield className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold text-base">Admin Panel</span>
+                  <span className="truncate font-semibold text-base">
+                    Admin Panel
+                  </span>
                   <span className="truncate text-xs">UWDSC</span>
                 </div>
               </SidebarMenuButton>

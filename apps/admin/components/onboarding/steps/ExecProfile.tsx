@@ -1,7 +1,5 @@
 "use client";
-
 import { OnboardingFormValues } from "@/lib/schemas/onboarding";
-import { EXEC_POSITIONS } from "@/constants/execPositions";
 import {
   Card,
   CardContent,
@@ -13,13 +11,11 @@ import {
   renderSelectField,
   renderRadioField,
 } from "@uwdsc/ui";
-
 import { UseFormReturn, useWatch } from "react-hook-form";
 import { useCallback, useState, useEffect } from "react";
 import { FileUp, Loader2, CheckCircle } from "lucide-react";
 import { uploadHeadshot } from "@/lib/api/headshot";
-import { stat } from "fs/promises";
-import { set } from "zod";
+import type { ExecPosition } from "@uwdsc/common/types";
 
 const termtypeOptions = [
   { value: "study", label: "Study Term" },
@@ -33,11 +29,10 @@ const IMAGE_MAX_MB = 5;
 
 interface ExecProfileProps {
   readonly form: UseFormReturn<OnboardingFormValues>;
+  readonly execPositions: ExecPosition[];
 }
 
-const positionOptions = EXEC_POSITIONS.map((pos) => pos.name);
-
-export function ExecProfile({ form }: ExecProfileProps) {
+export function ExecProfile({ form, execPositions }: ExecProfileProps) {
   
   const consentWebsite = useWatch({
     control: form.control,
@@ -199,11 +194,12 @@ export function ExecProfile({ form }: ExecProfileProps) {
                 name="role"
                 render={renderSelectField({
                   placeholder: "Select your executive position",
-                  options: positionOptions,
+                  options: execPositions.map((pos) => ({ value: pos.id, label: pos.name })) ,
                   label: "What is your Executive Position for this term?",
                   required: true,
                   triggerClassName: "w-full",
-                  contentClassName: "bg-[var(--grey4)]",
+                  contentClassName: " bg-[var(--grey4)] h-48 overflow-y-auto",
+                  contentPosition: "popper",
                   itemClassName:
                     "text-slate-200 focus:bg-[var(--grey3)] focus:text-white hover:bg-[var(--grey3)] hover:text-white transition-colors",
                 })}

@@ -1,10 +1,12 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Loader2, MoveLeft, MoveRight, User } from "lucide-react";
 import { Button, Card, CardHeader, CardTitle, CardContent } from "@uwdsc/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
+
+import { getAllExecPositions } from "@/lib/api/onboarding";
 import {
   Intro,
   ExecProfile,
@@ -13,6 +15,7 @@ import {
 } from "@/components/onboarding/steps";
 import { OnboardingFormValues, OnboardingDefaultValues, onboardingSchema } from "@/lib/schemas/onboarding";
 import { useForm } from "react-hook-form";
+import { ExecPosition, Term } from "@uwdsc/common/types";
 
 const STEP_FIELDS: Record<number, (keyof OnboardingFormValues)[]> = {
   1: ["fullname", "gmail", "term_type", "in_waterloo", "role", "consent_website"],
@@ -44,12 +47,37 @@ export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [direction, setDirection] = useState<number>(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  //const [currentTerm, setCurrentTerm] = useState<Term | null>(null);
+  const [positions, setPositions] = useState<ExecPosition[]>([]);
 
   const form = useForm<OnboardingFormValues>({
     resolver: zodResolver(onboardingSchema),
     defaultValues: OnboardingDefaultValues,
     mode: "onTouched",
   });
+
+   useEffect(() => {
+    async function fetchInitialData() {
+      setIsFetching(true);
+      try {
+        const [positionsData] = await Promise.all([
+          getAllExecPositions(),
+        ]);
+
+        setPositions(positionsData);
+        setCurrentStep(1);
+      } catch (err) {
+        console.error("Failed to fetch application data:", err);
+        setFetchError(err instanceof Error ? err.message : "Failed to load application");
+      } finally {
+        setIsFetching(false);
+      }
+    }
+    fetchInitialData();
+  }, [form]);
+
 
   const handleStartOnboarding = useCallback(() => {
     setIsLoading(true);
@@ -143,18 +171,40 @@ export default function OnboardingPage() {
         );
       case 1:
         return (
-          <ExecProfile form={form} />
+          <ExecProfile form={form} execPositions={positions} />
         );
       case 2:
         return (
           <General form={form} />
         );
-      case 3:
-        return (<Submitted name={form.getValues("fullname")} />);
       default:
         return null;
     }
   };
+
+  if (isFetching) {
+    return (
+      <div className="container mx-auto flex min-h-[50vh] items-center justify-center px-4">
+        <Loader2 className="size-8 animate-spin text-blue-400" />
+      </div>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <div className="container mx-auto flex min-h-[50vh] flex-col items-center justify-center px-4 text-center">
+        <p className="text-lg text-red-400">
+          {fetchError ?? "No active application period"}
+        </p>
+      </div>
+    );
+  }
+
+  if (currentStep === 3) {
+    return (
+        <Submitted name={form.getValues("fullname")} />
+    );
+  }
 
   return (
    <div className="mt-8 px-4 h-[calc(100vh-130px)] ">

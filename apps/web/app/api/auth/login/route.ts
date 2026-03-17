@@ -2,7 +2,7 @@ import { ApiResponse } from "@uwdsc/common/utils";
 import { createAuthService } from "@/lib/services";
 import { NextRequest } from "next/server";
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<Response> {
   try {
     const body = await request.json();
     const { email, password } = body;
@@ -25,7 +25,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return ApiResponse.ok({ success: true, user: result.user, session: result.session });
+    return ApiResponse.ok({
+      success: true,
+      user: result.user,
+      session: result.session,
+    });
   } catch (error) {
     console.error("Login error:", error);
     return ApiResponse.serverError(error, "An unexpected error occurred");

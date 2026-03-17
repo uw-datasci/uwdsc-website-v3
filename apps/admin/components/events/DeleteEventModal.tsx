@@ -69,6 +69,7 @@ export function DeleteEventDialog({
           <DialogFooter>
             <Button
               variant="outline"
+              className="rounded-md"
               onClick={() => setOpen(false)}
               disabled={isDeleting}
             >
@@ -76,6 +77,7 @@ export function DeleteEventDialog({
             </Button>
             <Button
               variant="destructive"
+              className="rounded-md"
               onClick={handleDelete}
               disabled={isDeleting}
             >

@@ -11,7 +11,7 @@ import type { ProfileUpdateData } from "@uwdsc/common/types";
 
 interface AuthResult {
   user: User | null;
-  isUnauthorized: NextResponse | null;
+  isUnauthorized: NextResponse;
 }
 
 /**
@@ -38,7 +38,7 @@ export async function tryGetCurrentUser(): Promise<AuthResult> {
 
   return {
     user,
-    isUnauthorized: null,
+    isUnauthorized: ApiResponse.unauthorized("Authentication required"),
   };
 }
 

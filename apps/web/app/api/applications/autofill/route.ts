@@ -2,10 +2,10 @@ import { ApiResponse } from "@uwdsc/common/utils";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 import { applicationService } from "@uwdsc/core";
 
-export async function GET() {
+export async function GET(): Promise<Response> {
   try {
     const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (isUnauthorized || !user) return isUnauthorized;
+    if (!user) return isUnauthorized;
 
     const profile = await applicationService.getProfileAutofill(user.id);
     return ApiResponse.ok(profile);

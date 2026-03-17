@@ -18,7 +18,7 @@ env:
 
 jobs:
   setup:
-    name: Setup & Install Dependencies
+    name: Setup Variables
     if: ${{ !startsWith(github.head_ref, 'auto-docs/merge-') }}
     runs-on: ubuntu-latest
     outputs:
@@ -26,20 +26,8 @@ jobs:
       pnpm-version: ${{ env.PNPM_VERSION }}
       infisical-project-slug: ${{ env.INFISICAL_PROJECT_SLUG }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - name: Output variables
+        run: echo "Variables mapped to outputs."
 
   code-quality:
     name: Code Quality
@@ -48,8 +36,11 @@ jobs:
     with:
       node-version: ${{ needs.setup.outputs.node-version }}
       pnpm-version: ${{ needs.setup.outputs.pnpm-version }}
-      lint-command: pnpm lint
-      typecheck-command: pnpm check-types
+      lint-command: pnpm exec turbo lint
+      typecheck-command: pnpm exec turbo check-types
+    secrets:
+      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
 
   build-web:
     name: Build - Web
@@ -58,12 +49,14 @@ jobs:
     with:
       node-version: ${{ needs.setup.outputs.node-version }}
       pnpm-version: ${{ needs.setup.outputs.pnpm-version }}
-      build-command: pnpm --filter=web... build
+      build-command: pnpm exec turbo build --filter=web...
       infisical-project-slug: ${{ needs.setup.outputs.infisical-project-slug }}
       infisical-secret-path: /web
     secrets:
       INFISICAL_CLIENT_ID: ${{ secrets.INFISICAL_CLIENT_ID }}
       INFISICAL_CLIENT_SECRET: ${{ secrets.INFISICAL_CLIENT_SECRET }}
+      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
 
   build-admin:
     name: Build - Admin
@@ -72,12 +65,14 @@ jobs:
     with:
       node-version: ${{ needs.setup.outputs.node-version }}
       pnpm-version: ${{ needs.setup.outputs.pnpm-version }}
-      build-command: pnpm --filter=admin... build
+      build-command: pnpm exec turbo build --filter=admin...
       infisical-project-slug: ${{ needs.setup.outputs.infisical-project-slug }}
       infisical-secret-path: /admin
     secrets:
       INFISICAL_CLIENT_ID: ${{ secrets.INFISICAL_CLIENT_ID }}
       INFISICAL_CLIENT_SECRET: ${{ secrets.INFISICAL_CLIENT_SECRET }}
+      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
 
   quality-summary:
     name: Quality Gate Summary

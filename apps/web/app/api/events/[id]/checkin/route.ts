@@ -5,12 +5,12 @@ import { tryGetCurrentUser } from "@/lib/api/utils";
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
-) {
+): Promise<Response> {
   try {
     const { id } = await params;
 
     const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (isUnauthorized || !user) return ApiResponse.ok({ checkedIn: false });
+    if (!user) return isUnauthorized;
 
     const checkedIn = await eventService.getAttendanceForUser(id, user.id);
     return ApiResponse.ok({ checkedIn });
@@ -23,13 +23,13 @@ export async function GET(
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
-) {
+): Promise<Response> {
   try {
     const { id } = await params;
 
     // 1. Check auth
     const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (isUnauthorized || !user) return isUnauthorized;
+    if (!user) return isUnauthorized;
 
     // 2. Check if user has membership
     const { has_membership } = await membershipService.getMembershipStatus(

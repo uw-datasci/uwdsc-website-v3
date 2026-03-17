@@ -174,7 +174,7 @@ export function EventForm({
                 </FormItem>
               )}
             />
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="start_time"
@@ -218,12 +218,14 @@ export function EventForm({
               <Button
                 type="button"
                 variant="outline"
+                className="rounded-md"
                 onClick={() => onOpenChange(false)}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
+                className="rounded-md"
                 disabled={
                   !form.formState.isValid || form.formState.isSubmitting
                 }

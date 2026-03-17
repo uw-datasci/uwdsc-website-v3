@@ -1,14 +1,13 @@
+import { FoundryHeader, FoundryForm } from "@/components/foundry";
+
 export default function FoundryPage() {
   return (
-    <div className="space-y-6 p-4">
-      <div>
-        <h1 className="text-3xl font-bold">Nexus Foundry</h1>
-        <p className="text-muted-foreground">
-          Manage Nexus Foundry projects and resources.
-        </p>
-      </div>
+    <div className="flex flex-col gap-8 max-w-5xl w-full">
+      <FoundryHeader />
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"></div>
+      <div className="grid gap-6 xl:grid-cols-[1fr_400px]">
+        <FoundryForm />
+      </div>
     </div>
   );
 }

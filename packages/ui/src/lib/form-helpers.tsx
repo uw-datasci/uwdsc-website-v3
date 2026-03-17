@@ -5,6 +5,7 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
+  FormDescription,
   Select,
   SelectTrigger,
   SelectValue,
@@ -34,18 +35,16 @@ interface TextFieldOptions {
   placeholder: string;
   label?: string;
   required?: boolean;
+  description?: string;
   className?: string;
   inputProps?: Partial<ComponentProps<typeof Input>>;
 }
 
-interface SelectOption {
-  value: string;
-  label: string;
-}
+type SelectOption = string | { value: string; label: string };
 
 interface SelectFieldOptions {
   placeholder: string;
-  options: (string | SelectOption)[];
+  options: SelectOption[];
   label?: string;
   required?: boolean;
   triggerClassName?: string;
@@ -59,6 +58,7 @@ interface TextAreaFieldOptions {
   placeholder: string;
   label?: string;
   required?: boolean;
+  description?: string | ((value: string) => React.ReactNode);
   className?: string;
   textareaProps?: Partial<ComponentProps<typeof Textarea>>;
 }
@@ -70,7 +70,7 @@ interface RadioFieldOptions {
 
 interface ScaleFieldOptions {
   label: string;
-  labels: string[];  // length determines the scale, e.g. ["None", "Beginner", "Intermediate", "Advanced", "Expert"]
+  labels: string[]; // length determines the scale, e.g. ["None", "Beginner", "Intermediate", "Advanced", "Expert"]
   required?: boolean;
 }
 
@@ -91,6 +91,7 @@ export function renderTextField(opts: TextFieldOptions) {
     placeholder,
     label,
     required = false,
+    description,
     className,
     inputProps = {},
   } = opts;
@@ -111,6 +112,9 @@ export function renderTextField(opts: TextFieldOptions) {
             className={className}
           />
         </FormControl>
+        {description != null && (
+          <FormDescription>{description}</FormDescription>
+        )}
         <FormMessage />
       </FormItem>
     );
@@ -145,7 +149,10 @@ export function renderSelectField(opts: SelectFieldOptions) {
               <SelectValue placeholder={placeholder} />
             </SelectTrigger>
           </FormControl>
-          <SelectContent className={contentClassName} position={contentPosition}>
+          <SelectContent
+            className={contentClassName}
+            position={contentPosition}
+          >
             {options.map((option) => {
               const value = typeof option === "string" ? option : option.value;
               const label = typeof option === "string" ? option : option.label;
@@ -170,11 +177,16 @@ export function renderTextAreaField(opts: TextAreaFieldOptions) {
     placeholder,
     label,
     required = false,
+    description,
     className,
     textareaProps = {},
   } = opts;
 
   function TextAreaFieldRender({ field }: StringFieldRenderProps) {
+    const desc =
+      typeof description === "function"
+        ? description(field.value ?? "")
+        : description;
     return (
       <FormItem>
         {label != null && (
@@ -190,6 +202,7 @@ export function renderTextAreaField(opts: TextAreaFieldOptions) {
             className={className}
           />
         </FormControl>
+        {desc != null && <FormDescription>{desc}</FormDescription>}
         <FormMessage />
       </FormItem>
     );
@@ -255,11 +268,14 @@ export function renderScaleField(opts: ScaleFieldOptions) {
         <FormControl>
           <RadioGroup
             onValueChange={(v) => field.onChange(v)}
-            value={field.value !== undefined ? String(field.value) : undefined}
+            value={field.value === undefined ? undefined : String(field.value)}
             className="flex items-center gap-4"
           >
             {labels.map((scaleLabel, index) => (
-              <FormItem key={index} className="flex flex-col items-center space-y-1 space-x-0">
+              <FormItem
+                key={index}
+                className="flex flex-col items-center space-y-1 space-x-0"
+              >
                 <FormControl>
                   <RadioGroupItem value={String(index)} />
                 </FormControl>

@@ -2,6 +2,7 @@
 
 import { useFormContext } from "react-hook-form";
 import { FormField, renderTextAreaField } from "@uwdsc/ui";
+import { Bot } from "lucide-react";
 import type { FoundryFormValues } from "@/lib/schemas/foundry";
 
 export function Description() {
@@ -12,7 +13,12 @@ export function Description() {
       control={form.control}
       name="description"
       render={renderTextAreaField({
-        label: "Description",
+        label: (
+          <div className="flex items-center gap-1.5">
+            Description
+            <Bot className="size-3.5 text-blue-500" />
+          </div>
+        ) as unknown as string, // ReactHookForm may expect string type for some wrappers depending on uwdsc/ui implementation
         placeholder:
           "What are you building? Include goals, scope, and any relevant context.",
         required: true,

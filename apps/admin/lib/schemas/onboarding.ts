@@ -3,7 +3,10 @@ import { z } from "zod";
 // Schema matching the `exec_form_submissions` table
 export const onboardingSchema = z.object({
   fullname: z.string().min(2, "Full name is required"),
-  gmail: z.email("A valid email is required"),
+  gmail: z.email("A valid email is required").refine(
+    (email) => !email.toLowerCase().endsWith("@uwaterloo.ca"),
+    "Please use a personal email (Gmail, Outlook, etc.), not your Waterloo email"
+  ),
   role: z.string().min(1, "Please select an executive position"),
   in_waterloo: z.string().min(1, "Please indicate your location next term"),
   term_type: z.enum(["study", "coop"], { message: "Please select study or co-op term" }),

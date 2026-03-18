@@ -16,7 +16,7 @@ import {
 } from "@/components/onboarding/steps";
 import { OnboardingFormValues, OnboardingDefaultValues, onboardingSchema } from "@/lib/schemas/onboarding";
 import { useForm } from "react-hook-form";
-import { ExecPosition, Term } from "@uwdsc/common/types";
+import { ExecPosition } from "@uwdsc/common/types";
 
 const STEP_FIELDS: Record<number, (keyof OnboardingFormValues)[]> = {
   1: ["fullname", "gmail", "term_type", "in_waterloo", "role", "consent_website"],

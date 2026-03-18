@@ -7,6 +7,7 @@ import { Button, Card, CardHeader, CardTitle, CardContent } from "@uwdsc/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { getAllExecPositions } from "@/lib/api/onboarding";
+import { getCurrentUser } from "@/lib/api/auth";
 import {
   Intro,
   ExecProfile,
@@ -58,15 +59,42 @@ export default function OnboardingPage() {
     mode: "onTouched",
   });
 
+  const prefillFromUser = useCallback(
+    (user: { first_name?: string | null; last_name?: string | null; email?: string | null } | null) => {
+      if (!user) return;
+
+      const firstName = user.first_name?.trim() ?? "";
+      const lastName = user.last_name?.trim() ?? "";
+      const fullName = `${firstName} ${lastName}`.trim();
+      const email = user.email?.trim() ?? "";
+
+      if (!form.getValues("fullname") && fullName) {
+        form.setValue("fullname", fullName, { shouldDirty: false });
+      }
+
+      // Keep personal email requirement: don't autofill Waterloo email into gmail field.
+      if (
+        !form.getValues("gmail") &&
+        email &&
+        !email.toLowerCase().endsWith("@uwaterloo.ca")
+      ) {
+        form.setValue("gmail", email, { shouldDirty: false });
+      }
+    },
+    [form],
+  );
+
    useEffect(() => {
     async function fetchInitialData() {
       setIsFetching(true);
       try {
-        const [positionsData] = await Promise.all([
+        const [positionsData, currentUser] = await Promise.all([
           getAllExecPositions(),
+          getCurrentUser(),
         ]);
 
         setPositions(positionsData);
+        prefillFromUser(currentUser);
         setCurrentStep(1);
       } catch (err) {
         console.error("Failed to fetch application data:", err);
@@ -76,7 +104,7 @@ export default function OnboardingPage() {
       }
     }
     fetchInitialData();
-  }, [form]);
+  }, [prefillFromUser]);
 
 
   const handleStartOnboarding = useCallback(() => {

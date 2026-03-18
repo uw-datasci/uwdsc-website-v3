@@ -194,7 +194,10 @@ export function ExecProfile({ form, execPositions }: ExecProfileProps) {
                 name="role"
                 render={renderSelectField({
                   placeholder: "Select your executive position",
-                  options: execPositions.map((pos) => ({ value: pos.id, label: pos.name })) ,
+                  options: execPositions.map((pos) => ({
+                    value: String(pos.id),
+                    label: pos.name,
+                  })),
                   label: "What is your Executive Position for this term?",
                   required: true,
                   triggerClassName: "w-full",

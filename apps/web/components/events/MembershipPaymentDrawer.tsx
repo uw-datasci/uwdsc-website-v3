@@ -4,26 +4,41 @@ import { useEffect, useState } from "react";
 import * as QRCode from "qrcode";
 import { Button, Sheet, SheetContent, SheetTitle, SheetTrigger } from "@uwdsc/ui";
 import { QrCode as QrCodeIcon } from "lucide-react";
+import Image from "next/image";
 
 export type MembershipPaymentDrawerProps = {
-  membershipId: string | null;
+  profileId: string | null;
 };
 
 export function MembershipPaymentDrawer({
-  membershipId,
+  profileId,
 }: Readonly<MembershipPaymentDrawerProps>) {
   const [open, setOpen] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
 
+  const adminBaseUrl =
+    process.env.NEXT_PUBLIC_ADMIN_BASE_URL ??
+    "admin.uwdatascience.ca";
+
+  const normalizedAdminBaseUrl = adminBaseUrl.startsWith("http://")
+    ? adminBaseUrl
+    : adminBaseUrl.startsWith("https://")
+      ? adminBaseUrl
+      : `https://${adminBaseUrl}`;
+
   useEffect(() => {
     let cancelled = false;
 
-    if (!membershipId) {
+    if (!profileId) {
       setQrDataUrl(null);
       return;
     }
 
-    QRCode.toDataURL(membershipId)
+    const targetUrl = `${normalizedAdminBaseUrl}/members?id=${encodeURIComponent(
+      profileId,
+    )}&action=markPaid`;
+
+    QRCode.toDataURL(targetUrl)
       .then((url) => {
         if (cancelled) return;
         setQrDataUrl(url);
@@ -37,7 +52,7 @@ export function MembershipPaymentDrawer({
     return () => {
       cancelled = true;
     };
-  }, [membershipId]);
+  }, [profileId, normalizedAdminBaseUrl]);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -60,19 +75,22 @@ export function MembershipPaymentDrawer({
           <div className="w-full flex justify-center">
             <div
               aria-label="QR code placeholder"
-              className="aspect-square w-44 max-w-[80vw] rounded-lg border border-dashed border-muted-foreground/35 bg-muted/20 overflow-hidden"
+              className="relative aspect-square w-44 max-w-[80vw] rounded-lg border border-dashed border-muted-foreground/35 bg-muted/20 overflow-hidden"
             >
               {qrDataUrl ? (
-                <img
+                <Image
                   src={qrDataUrl}
                   alt="Membership QR code"
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="(max-width: 80vw) 80vw, 176px"
+                  className="object-cover"
+                  unoptimized
                 />
               ) : null}
             </div>
           </div>
 
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground sm:text-center">
             Once you have paid, please show this QR code to a DSC exec, along
             with proof of purchase.
           </p>

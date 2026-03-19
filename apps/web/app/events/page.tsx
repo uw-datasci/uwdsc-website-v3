@@ -170,7 +170,7 @@ export default function EventsPage() {
 
       {shouldShowPaymentQr ? (
         <MembershipPaymentDrawer
-          membershipId={membershipStatus?.membership_id ?? null}
+          profileId={user?.id ?? null}
         />
       ) : null}
     </div>

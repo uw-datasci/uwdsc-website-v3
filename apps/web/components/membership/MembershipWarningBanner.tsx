@@ -8,7 +8,12 @@ import { getMembershipStatus } from "@/lib/api/profile";
 import type { MembershipStatus } from "@uwdsc/common/types";
 import { toast } from "sonner";
 
-const HIDE_ON_PATHS = new Set(["/login", "/register", "/complete-profile"]);
+const HIDE_ON_PATHS = new Set([
+  "/login",
+  "/register",
+  "/complete-profile",
+  "/events",
+]);
 
 export function MembershipWarningBanner() {
   const { user, isAuthenticated } = useAuth();

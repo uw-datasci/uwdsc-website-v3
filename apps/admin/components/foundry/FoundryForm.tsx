@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useMemo, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -26,18 +26,12 @@ import {
 } from "@uwdsc/ui";
 import {
   foundryFormSchema,
+  foundryFormDefaultValues,
   type FoundryFormValues,
 } from "@/lib/schemas/foundry";
 import { FOUNDRY_STEPS } from "@/constants/foundry";
+import { FOUNDRY_STEP_FIELDS, isFoundryStepValid } from "@/lib/utils/foundry";
 import { ProjectDetails, TechStack, Description, Introduction } from "./steps";
-
-/** Step field slices used for partial trigger validation */
-const STEP_FIELDS: Record<number, (keyof FoundryFormValues)[]> = {
-  1: [],
-  2: ["projectName", "teamAccess"],
-  3: ["projectType", "database"],
-  4: ["description"],
-};
 
 type SubmitState = "idle" | "submitting" | "success" | "error";
 
@@ -76,7 +70,7 @@ function StateCard({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
     >
-      <Card className={cardClassName}>
+      <Card className={`w-full ${cardClassName}`}>
         <CardContent className="flex flex-col items-center gap-4 py-10 text-center">
           <div
             className={`flex size-14 items-center justify-center rounded-full ${iconClassName}`}
@@ -105,18 +99,53 @@ export function FoundryForm() {
   const form = useForm<FoundryFormValues>({
     resolver: zodResolver(foundryFormSchema),
     mode: "onChange",
-    defaultValues: {
-      projectName: "",
-      teamAccess: "",
-      projectType: "nextjs-node",
-      database: "postgresql",
-      extras: { redis: false, s3: false },
-      description: "",
-    },
+    defaultValues: foundryFormDefaultValues,
   });
 
+  // Ensure the parent form component re-renders when step fields change,
+  // so Next button enabled/disabled state stays accurate.
+  const watchedProjectName = useWatch({
+    control: form.control,
+    name: "projectName",
+  });
+  const watchedTeamAccess = useWatch({
+    control: form.control,
+    name: "teamAccess",
+  });
+  const watchedProjectType = useWatch({
+    control: form.control,
+    name: "projectType",
+  });
+  const watchedDatabase = useWatch({
+    control: form.control,
+    name: "database",
+  });
+  const watchedDescription = useWatch({
+    control: form.control,
+    name: "description",
+  });
+
+  const isCurrentStepValid = useMemo(() => {
+    return isFoundryStepValid(
+      {
+        projectName: watchedProjectName,
+        teamAccess: watchedTeamAccess,
+        projectType: watchedProjectType,
+        database: watchedDatabase,
+        description: watchedDescription,
+      },
+      step,
+    );
+  }, [
+    watchedProjectName,
+    watchedTeamAccess,
+    watchedProjectType,
+    watchedDatabase,
+    watchedDescription,
+    step,
+  ]);
   const goNext = async () => {
-    const fields = STEP_FIELDS[step];
+    const fields = FOUNDRY_STEP_FIELDS[step];
     const valid = await form.trigger(fields);
     if (!valid) return;
     setDirection(1);
@@ -131,7 +160,7 @@ export function FoundryForm() {
   const onSubmit = async (data: FoundryFormValues) => {
     setSubmitState("submitting");
     try {
-      // TODO: replace with real API call
+      // Mocked submission (replace with a real API call when available).
       await new Promise((res, rej) => {
         setTimeout(() => {
           if (Math.random() > 0.2) res(data);
@@ -205,7 +234,7 @@ export function FoundryForm() {
 
     default:
       return (
-        <Card>
+        <Card className="w-full">
           <CardHeader className="pb-0">
             <div className="flex items-center justify-between mb-1">
               <CardTitle className="text-base">New Project</CardTitle>
@@ -283,7 +312,11 @@ export function FoundryForm() {
                 </Button>
 
                 {step < FOUNDRY_STEPS.length ? (
-                  <Button type="button" onClick={goNext}>
+                  <Button
+                    type="button"
+                    onClick={goNext}
+                    disabled={!isCurrentStepValid}
+                  >
                     Next
                     <ChevronRight className="size-4" />
                   </Button>
@@ -291,7 +324,9 @@ export function FoundryForm() {
                   <Button
                     type="button"
                     onClick={form.handleSubmit(onSubmit)}
-                    disabled={submitState === "submitting"}
+                    disabled={
+                      !isCurrentStepValid || submitState === "submitting"
+                    }
                     className="gap-2"
                   >
                     {submitState === "submitting" ? (

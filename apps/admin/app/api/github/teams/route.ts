@@ -1,19 +1,25 @@
 import { ApiResponse } from "@uwdsc/common/utils";
-import { GITHUB_TEAMS_FALLBACK } from "@/constants/foundry";
+import { withAuth } from "@/guards/withAuth";
+import { githubService } from "@/lib/services/githubService";
 
 /**
  * GET /api/github/teams
  * Returns the list of teams in the GitHub organization.
  *
- * TODO: Replace hardcoded fallback with real GitHub API call
- * e.g. GET https://api.github.com/orgs/{org}/teams using a stored PAT
+ * Admin/exec only.
  */
-export async function GET() {
+export const GET = withAuth(async () => {
   try {
-    const teams = [...GITHUB_TEAMS_FALLBACK];
-    return ApiResponse.ok(teams);
+    const teams = await githubService.getTeams();
+
+    return ApiResponse.ok(
+      teams.map((t) => ({
+        value: t.slug,
+        label: t.name,
+      })),
+    );
   } catch (error: unknown) {
     console.error("Error fetching GitHub teams:", error);
     return ApiResponse.serverError(error, "Failed to fetch GitHub teams");
   }
-}
+});

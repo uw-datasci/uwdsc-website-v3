@@ -8,22 +8,52 @@ import {
   Spinner,
 } from "@uwdsc/ui";
 import type { FoundryFormValues } from "@/lib/schemas/foundry";
-import { getGitHubOrgTeams, GitHubTeam } from "@/lib/api/github";
+import { getGitHubTeams, GitHubTeam } from "@/lib/api/github";
 import { useEffect, useState } from "react";
 
 export function ProjectDetails() {
   const form = useFormContext<FoundryFormValues>();
 
   const [teams, setTeams] = useState<GitHubTeam[] | null>(null);
+  const [teamsError, setTeamsError] = useState<string | null>(null);
 
   useEffect(() => {
-    getGitHubOrgTeams().then(setTeams);
+    let mounted = true;
+
+    (async () => {
+      try {
+        const fetchedTeams = await getGitHubTeams();
+        if (!mounted) return;
+        setTeams(fetchedTeams);
+        setTeamsError(null);
+      } catch (error: unknown) {
+        if (!mounted) return;
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Failed to load GitHub teams";
+        setTeams([]);
+        setTeamsError(message);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  if (teams === null) return <Spinner className="text-muted-foreground" />;
+  if (teams === null)
+    return (
+      <div className="flex items-center justify-center w-full py-10">
+        <Spinner className="size-16 text-primary" />
+      </div>
+    );
 
   return (
     <>
+      {teamsError && (
+        <p className="text-sm text-destructive mb-4">{teamsError}</p>
+      )}
       <FormField
         control={form.control}
         name="projectName"

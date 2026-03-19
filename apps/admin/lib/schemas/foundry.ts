@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { PROJECT_TYPES, DATABASE_OPTIONS } from "@/constants/foundry";
+import { DATABASE_OPTIONS } from "@/constants/foundry";
 
-export { PROJECT_TYPES, DATABASE_OPTIONS } from "@/constants/foundry";
-export type { ProjectTypeValue, DatabaseValue } from "@/constants/foundry";
+export { DATABASE_OPTIONS } from "@/constants/foundry";
+export type { DatabaseValue } from "@/constants/foundry";
 
 export const foundryFormSchema = z.object({
   // Step 1 — Project Details
@@ -18,10 +18,10 @@ export const foundryFormSchema = z.object({
   teamAccess: z.string().trim().min(1, "Select a GitHub team"),
 
   // Step 2 — Tech Stack & Infrastructure
-  projectType: z.enum(
-    PROJECT_TYPES.map((p) => p.value) as [string, ...string[]],
-    { error: "Select a project type" },
-  ),
+  projectType: z
+    .string()
+    .trim()
+    .min(1, "Select a project template"),
   database: z.enum(
     DATABASE_OPTIONS.map((d) => d.value) as [string, ...string[]],
     { error: "Select a database" },
@@ -40,3 +40,12 @@ export const foundryFormSchema = z.object({
 });
 
 export type FoundryFormValues = z.infer<typeof foundryFormSchema>;
+
+export const foundryFormDefaultValues: FoundryFormValues = {
+  projectName: "",
+  teamAccess: "",
+  projectType: "",
+  database: "postgresql",
+  extras: { redis: false, s3: false },
+  description: "",
+};

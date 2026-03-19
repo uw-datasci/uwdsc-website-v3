@@ -6,6 +6,7 @@ import {
   FormControl,
   FormMessage,
   FormDescription,
+  Checkbox,
   Select,
   SelectTrigger,
   SelectValue,
@@ -72,6 +73,16 @@ interface ScaleFieldOptions {
   label: string;
   labels: string[]; // length determines the scale, e.g. ["None", "Beginner", "Intermediate", "Advanced", "Expert"]
   required?: boolean;
+}
+
+interface CheckboxFieldOptions {
+  label?: string;
+  required?: boolean;
+  description?: string | ((checked: boolean) => React.ReactNode);
+  containerClassName?: string;
+  labelClassName?: string;
+  descriptionClassName?: string;
+  checkboxClassName?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -290,7 +301,52 @@ export function renderScaleField(opts: ScaleFieldOptions) {
       </FormItem>
     );
   }
-
   ScaleFieldRender.displayName = `ScaleField(${label})`;
   return ScaleFieldRender;
+}
+
+export function renderCheckboxField(opts: CheckboxFieldOptions) {
+  const {
+    label,
+    required = false,
+    description,
+    containerClassName = "flex items-start gap-3",
+    labelClassName = "cursor-pointer",
+    descriptionClassName,
+    checkboxClassName = "mt-0.5",
+  } = opts;
+
+  function CheckboxFieldRender({ field }: BooleanFieldRenderProps) {
+    const checked = field.value ?? false;
+    const desc =
+      typeof description === "function" ? description(checked) : description;
+
+    return (
+      <FormItem className={containerClassName}>
+        <FormControl>
+          <Checkbox
+            checked={checked}
+            onCheckedChange={(v) => field.onChange(v === true)}
+            className={checkboxClassName}
+          />
+        </FormControl>
+
+        <div className="flex flex-col gap-0.5">
+          {label != null && (
+            <FormLabel className={labelClassName}>
+              {label} {required && <span className="text-red-500">*</span>}
+            </FormLabel>
+          )}
+          {desc != null && (
+            <FormDescription className={descriptionClassName}>
+              {desc}
+            </FormDescription>
+          )}
+        </div>
+        <FormMessage />
+      </FormItem>
+    );
+  }
+  CheckboxFieldRender.displayName = `CheckboxField(${label ?? "unknown"})`;
+  return CheckboxFieldRender;
 }

@@ -11,14 +11,37 @@ export interface GitHubTeam {
   label: string;
 }
 
+export interface GitHubTemplateOption {
+  value: string;
+  label: string;
+  name: string;
+  description: string;
+  language: string;
+}
+
 /**
  * Get teams in the GitHub organization.
  *
  * @returns Promise with array of GitHub teams
  * @throws Error if request fails or unauthorized
  */
-export async function getGitHubOrgTeams(): Promise<GitHubTeam[]> {
+export async function getGitHubTeams(): Promise<GitHubTeam[]> {
   const response = await fetch("/api/github/teams");
+  const data = await response.json();
+  if (!response.ok) throw createApiError(data, response.status);
+  return data;
+}
+
+/**
+ * Get template repos in the GitHub organization.
+ *
+ * @returns Promise with array of template repos
+ * @throws Error if request fails or unauthorized
+ */
+export async function getGitHubTemplateRepos(): Promise<
+  GitHubTemplateOption[]
+> {
+  const response = await fetch("/api/github/templates");
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);
   return data;

@@ -18,7 +18,7 @@ export function Description() {
             Description
             <Bot className="size-3.5 text-blue-500" />
           </div>
-        ) as unknown as string, // ReactHookForm may expect string type for some wrappers depending on uwdsc/ui implementation
+        ) as unknown as string,
         placeholder:
           "What are you building? Include goals, scope, and any relevant context.",
         required: true,

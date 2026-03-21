@@ -45,6 +45,10 @@ Builds on Fall 2025 with new features across the main site and CxC.
 - **Endpoints**: `GET /api/admin/dashboard`, `/admin/applications`, `/admin/applications/[id]`, `/api/applications/random`, `/api/applications/resumes`, `POST /api/review/submit`, `GET /api/users/emails`; `POST /api/applications/resumes` (replace), `PATCH /api/applications` (better errors).
 - **Auth**: `/admin/**` requires admin; superadmin-only: `/admin/assign`, `/admin/dashboard`, `/admin/leaderboard`; `/start` in protected auth routes.
 
+### Onboarding (PR #42)
+
+- **Exec onboarding form (`/onboarding`)**: Multi-step form for new exec members; collects profile info (name, email, role, term type), headshot upload with consent, socials (Discord, Instagram), and data science competency level; submissions linked to term and stored in `exec_form_submissions` table.
+
 ### Content
 
 - **Branding (PR #114)**: Standardized “CXC” across components.

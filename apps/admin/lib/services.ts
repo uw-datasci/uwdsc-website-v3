@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { cookies } from "next/headers";
 import { createSupabaseServerClient } from "@uwdsc/db";
-import { AuthService, ResumeService, HeadshotService} from "@uwdsc/core";
+import { AuthService, ResumeService } from "@uwdsc/core";
+import { HeadshotService } from "@uwdsc/admin";
 
 /**
  * Create a Supabase client with Next.js server-side cookies

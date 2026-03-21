@@ -1,16 +1,6 @@
 import { FileRepository } from "../repositories/fileRepository";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { FileValidationConfig, FileUploadData } from "@uwdsc/common/types";
-
-interface UploadResult {
-  success: true;
-  key: string;
-}
-
-interface UploadError {
-  success: false;
-  error: string;
-}
+import type { FileValidationConfig, FileUploadData, UploadResult, UploadError } from "@uwdsc/common/types";
 
 export class FileService {
   protected readonly repository: FileRepository;
@@ -52,17 +42,25 @@ export class FileService {
   }
 
   /**
-   * Validate and upload a file to {userId}/{filename}.
+   * Resolve the final filename for a file, normalising the extension via
+   * the validation config's mimeToExtension mapping when available.
    */
-  async upload(data: FileUploadData): Promise<UploadResult | UploadError> {
+  protected resolveFileName(file: File): string {
+    const extension = this.validationConfig.mimeToExtension?.(file.type);
+    return extension
+      ? `${file.name.replace(/\.[^.]+$/, "")}.${extension}`
+      : file.name;
+  }
+
+  /**
+   * Validate and upload a file to the given object key within the bucket.
+   */
+  async upload(
+    data: FileUploadData,
+    objectKey: string,
+  ): Promise<UploadResult | UploadError> {
     const validationError = this.validateFile(data.file);
     if (validationError) return validationError;
-
-    const extension = this.validationConfig.mimeToExtension?.(data.file.type);
-    const fileName = extension
-      ? `${data.file.name.replace(/\.[^.]+$/, "")}.${extension}`
-      : data.file.name;
-    const objectKey = `${data.userId}/${fileName}`;
 
     try {
       const key = await this.repository.uploadFile({

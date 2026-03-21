@@ -3,8 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "@uwdsc/ui/globals.css";
 import { Providers } from "@/providers/providers";
 
-const fontSans = Geist({ subsets: ["latin"], variable: "--font-sans" });
-const fontMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
+const geistSans = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
+const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
 
 export default function RootLayout({
   children,
@@ -14,7 +14,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <body
-        className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased `}
+        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
       >
         <Providers>{children}</Providers>
       </body>

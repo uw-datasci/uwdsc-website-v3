@@ -1,16 +1,6 @@
 import { FileRepository } from "../repositories/fileRepository";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { FileValidationConfig, FileUploadData } from "@uwdsc/common/types";
-
-interface UploadResult {
-  success: true;
-  key: string;
-}
-
-interface UploadError {
-  success: false;
-  error: string;
-}
+import type { FileValidationConfig, FileUploadData, UploadResult, UploadError } from "@uwdsc/common/types";
 
 export class FileService {
   protected readonly repository: FileRepository;

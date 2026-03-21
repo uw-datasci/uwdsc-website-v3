@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { HeadshotUploadData } from "@uwdsc/common/types";
+import type { HeadshotUploadData, UploadError, UploadResult } from "@uwdsc/common/types";
 import { FileService } from "@uwdsc/core";
 import { HEADSHOT_VALIDATION_CONFIG } from "../utils/headshot";
 
@@ -24,9 +24,7 @@ export class HeadshotService extends FileService {
 
   async uploadHeadshot(
     data: HeadshotUploadData,
-  ): Promise<
-    { success: true; key: string } | { success: false; error: string }
-  > {
+  ): Promise<UploadResult | UploadError> {
     const validationError = this.validateFile(data.file);
     if (validationError) return validationError;
 

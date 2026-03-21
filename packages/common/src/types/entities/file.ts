@@ -3,6 +3,10 @@ export interface FileUploadData {
   userId: string;
 }
 
+export interface HeadshotUploadData extends FileUploadData {
+  fullName: string;
+}
+
 export interface FileValidationConfig {
   maxBytes: number;
   allowedMimeTypes: Set<string>;

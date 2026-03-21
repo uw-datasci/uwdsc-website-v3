@@ -27,9 +27,11 @@ export class ResumeService extends FileService {
     const validationError = this.validateFile(data.file);
     if (validationError) return validationError;
 
+    const objectKey = `${data.userId}/${this.resolveFileName(data.file)}`;
+
     try {
       await this.clearFolder(data.userId);
-      return await this.upload(data);
+      return await this.upload(data, objectKey);
     } catch (error) {
       return {
         success: false,

@@ -25,7 +25,7 @@ export class FileRepository {
     // Filter out folder placeholders (they have null id)
     return (data ?? [])
       .filter((file) => file.id !== null)
-      .map((file) => `${folder}/${file.name}`);
+      .map((file) => (folder ? `${folder}/${file.name}` : file.name));
   }
 
   /**

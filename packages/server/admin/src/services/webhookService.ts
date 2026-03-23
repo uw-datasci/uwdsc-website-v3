@@ -1,4 +1,5 @@
 import { ApiError } from "@uwdsc/common/types";
+import { gmailWatchRepository } from "../repositories/gmailWatchRepository";
 
 interface GmailCredentials {
   clientId: string;
@@ -15,8 +16,11 @@ export interface ParsedEmail {
 class WebhookService {
   private decodePubSubData(encodedData: string) {
     const decodedStr = Buffer.from(encodedData, "base64").toString("utf-8");
-    const { emailAddress, historyId } = JSON.parse(decodedStr);
-    return { emailAddress, historyId };
+    const { emailAddress, historyId } = JSON.parse(decodedStr) as {
+      emailAddress: string;
+      historyId: string | number;
+    };
+    return { emailAddress, historyId: String(historyId) };
   }
 
   private async refreshAccessToken(
@@ -42,11 +46,11 @@ class WebhookService {
 
   private async resolveMessageId(
     emailAddress: string,
-    historyId: string,
+    startHistoryId: string,
     accessToken: string,
   ): Promise<string | null> {
     const response = await fetch(
-      `https://gmail.googleapis.com/gmail/v1/users/${emailAddress}/history?startHistoryId=${historyId}`,
+      `https://gmail.googleapis.com/gmail/v1/users/${emailAddress}/history?startHistoryId=${startHistoryId}`,
       { headers: { Authorization: `Bearer ${accessToken}` } },
     );
 
@@ -100,15 +104,28 @@ class WebhookService {
     credentials: GmailCredentials,
   ): Promise<ParsedEmail | null> {
     try {
-      const { emailAddress, historyId } = this.decodePubSubData(encodedData);
+      const { emailAddress, historyId: newHistoryIdFromPubSub } =
+        this.decodePubSubData(encodedData);
       const accessToken = await this.refreshAccessToken(credentials);
+
+      const storedHistoryId = await gmailWatchRepository.getHistoryId();
+      if (storedHistoryId === null) {
+        throw new ApiError(
+          "gmail_watch_state is not initialized (missing row id=1). Seed history_id from users.watch / Gmail.",
+          500,
+        );
+      }
+
       const messageId = await this.resolveMessageId(
         emailAddress,
-        historyId,
+        storedHistoryId,
         accessToken,
       );
 
-      if (!messageId) return null;
+      if (!messageId) {
+        await gmailWatchRepository.updateHistoryId(newHistoryIdFromPubSub);
+        return null;
+      }
 
       const body = await this.fetchEmailBody(
         emailAddress,
@@ -116,10 +133,13 @@ class WebhookService {
         accessToken,
       );
 
+      await gmailWatchRepository.updateHistoryId(newHistoryIdFromPubSub);
+
       // TODO: verify email has webhook trigger tag
 
       return { messageId, emailAddress, body };
     } catch (error) {
+      if (error instanceof ApiError) throw error;
       throw new ApiError(
         `Failed to process Gmail webhook: ${(error as Error).message}`,
         500,

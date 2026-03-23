@@ -154,7 +154,10 @@ export function renderSelectField(opts: SelectFieldOptions) {
             {label} {required && <span className="text-red-500">*</span>}
           </FormLabel>
         )}
-        <Select onValueChange={field.onChange} value={field.value}>
+        <Select
+          onValueChange={field.onChange}
+          value={field.value === "" ? undefined : field.value}
+        >
           <FormControl>
             <SelectTrigger className={triggerClassName}>
               <SelectValue placeholder={placeholder} />

@@ -14,11 +14,46 @@ export const FOUNDRY_STEPS = [
 // ---------------------------------------------------------------------------
 
 export const DATABASE_OPTIONS = [
-  { label: "PostgreSQL (Neon)", value: "postgresql" },
+  { label: "PostgreSQL", value: "postgres" },
   { label: "MongoDB", value: "mongodb" },
 ] as const;
 
 export type DatabaseValue = (typeof DATABASE_OPTIONS)[number]["value"];
+
+export const POSTGRES_PROVIDER_OPTIONS = [
+  {
+    value: "neon" as const,
+    label: "Neon",
+    description:
+      "Serverless Postgres tuned for branching and scale-to-zero — best when you only need a database.",
+  },
+  {
+    value: "supabase" as const,
+    label: "Supabase",
+    description:
+      "Postgres plus auth, storage, and realtime — best when you want the full backend platform.",
+  },
+] as const;
+
+export type PostgresProviderValue =
+  (typeof POSTGRES_PROVIDER_OPTIONS)[number]["value"];
+
+export const MONGO_CLIENT_OPTIONS = [
+  {
+    value: "mongodb-driver" as const,
+    label: "mongodb",
+    description:
+      "Official node.js driver with minimal overhead - best for maximum control and raw performance.",
+  },
+  {
+    value: "mongoose" as const,
+    label: "mongoose",
+    description:
+      "Library with schemas, middleware, and validation - best for structure and developer experience.",
+  },
+] as const;
+
+export type MongoClientValue = (typeof MONGO_CLIENT_OPTIONS)[number]["value"];
 
 // ---------------------------------------------------------------------------
 // Extras (optional add-ons)

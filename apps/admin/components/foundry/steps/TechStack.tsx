@@ -1,21 +1,33 @@
 "use client";
 
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
+  cn,
   FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  RadioGroup,
+  RadioGroupItem,
   Spinner,
   renderSelectField,
   renderCheckboxField,
 } from "@uwdsc/ui";
-import { DATABASE_OPTIONS, EXTRAS_OPTIONS } from "@/constants/foundry";
+import {
+  DATABASE_OPTIONS,
+  EXTRAS_OPTIONS,
+  MONGO_CLIENT_OPTIONS,
+  POSTGRES_PROVIDER_OPTIONS,
+} from "@/constants/foundry";
 import type { FoundryFormValues } from "@/lib/schemas/foundry";
 import { getGitHubTemplateRepos, GitHubTemplateOption } from "@/lib/api/github";
 
 export function TechStack() {
   const form = useFormContext<FoundryFormValues>();
+  const database = useWatch({ control: form.control, name: "database" });
 
   const [templates, setTemplates] = useState<GitHubTemplateOption[]>([]);
   const [templatesLoading, setTemplatesLoading] = useState<boolean>(true);
@@ -32,7 +44,10 @@ export function TechStack() {
         setTemplatesError(null);
       } catch (error: unknown) {
         if (!mounted) return;
-        const message = error instanceof Error ? error.message : String(error);
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Failed to load project templates from GitHub.";
         setTemplatesError(
           message || "Failed to load project templates from GitHub.",
         );
@@ -44,6 +59,15 @@ export function TechStack() {
       mounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (database !== "postgres") {
+      form.setValue("postgresProvider", undefined);
+    }
+    if (database !== "mongodb") {
+      form.setValue("mongoClient", undefined);
+    }
+  }, [database, form]);
 
   const templateOptions = templates.map((t) => ({
     value: t.value,
@@ -110,6 +134,114 @@ export function TechStack() {
           triggerClassName: "w-full",
         })}
       />
+
+      {database === "postgres" && (
+        <FormField
+          control={form.control}
+          name="postgresProvider"
+          render={({ field }) => (
+            <FormItem className="space-y-3">
+              <FormLabel>
+                PostgreSQL hosting{" "}
+                <span className="text-red-500" aria-hidden>
+                  *
+                </span>
+              </FormLabel>
+              <RadioGroup
+                onValueChange={field.onChange}
+                value={field.value}
+                className="flex flex-col gap-3"
+              >
+                {POSTGRES_PROVIDER_OPTIONS.map((opt) => {
+                  const optionId = `foundry-postgres-${opt.value}`;
+                  const isSelected = field.value === opt.value;
+                  return (
+                    <label
+                      key={opt.value}
+                      htmlFor={optionId}
+                      className={cn(
+                        "flex cursor-pointer gap-3 rounded-lg border p-3 transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring",
+                        isSelected
+                          ? "border-primary bg-primary/10 shadow-sm"
+                          : "border-border hover:bg-muted/40",
+                      )}
+                    >
+                      <RadioGroupItem
+                        id={optionId}
+                        value={opt.value}
+                        className="mt-0.5"
+                      />
+                      <div className="flex flex-col gap-0.5 text-left">
+                        <span className="text-sm font-medium leading-none">
+                          {opt.label}
+                        </span>
+                        <span className="text-xs text-muted-foreground leading-snug">
+                          {opt.description}
+                        </span>
+                      </div>
+                    </label>
+                  );
+                })}
+              </RadioGroup>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
+
+      {database === "mongodb" && (
+        <FormField
+          control={form.control}
+          name="mongoClient"
+          render={({ field }) => (
+            <FormItem className="space-y-3">
+              <FormLabel>
+                MongoDB client{" "}
+                <span className="text-red-500" aria-hidden>
+                  *
+                </span>
+              </FormLabel>
+              <RadioGroup
+                onValueChange={field.onChange}
+                value={field.value}
+                className="flex flex-col gap-3"
+              >
+                {MONGO_CLIENT_OPTIONS.map((opt) => {
+                  const optionId = `foundry-mongo-${opt.value}`;
+                  const isSelected = field.value === opt.value;
+                  return (
+                    <label
+                      key={opt.value}
+                      htmlFor={optionId}
+                      className={cn(
+                        "flex cursor-pointer gap-3 rounded-lg border p-3 transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring",
+                        isSelected
+                          ? "border-primary bg-primary/10 shadow-sm"
+                          : "border-border hover:bg-muted/40",
+                      )}
+                    >
+                      <RadioGroupItem
+                        id={optionId}
+                        value={opt.value}
+                        className="mt-0.5"
+                      />
+                      <div className="flex flex-col gap-0.5 text-left">
+                        <span className="text-sm font-medium leading-none">
+                          {opt.label}
+                        </span>
+                        <span className="text-xs text-muted-foreground leading-snug">
+                          {opt.description}
+                        </span>
+                      </div>
+                    </label>
+                  );
+                })}
+              </RadioGroup>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
 
       <div className="flex flex-col gap-2">
         <p className="text-sm font-medium">Extras (optional)</p>

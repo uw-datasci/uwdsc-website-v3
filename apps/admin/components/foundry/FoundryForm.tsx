@@ -35,6 +35,46 @@ import { ProjectDetails, TechStack, Description, Introduction } from "./steps";
 
 type SubmitState = "idle" | "submitting" | "success" | "error";
 
+const launchGlowShadow =
+  "0 0 0 1px rgb(52 211 153 / 0.4), 0 4px 24px rgb(16 185 129 / 0.45), 0 0 52px rgb(34 197 94 / 0.3)";
+
+/** Parent variants: hover sweep + glow; `processing` = full green while submitting. */
+const launchProjectButtonVariants = {
+  rest: {
+    boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+    transition: { duration: 0.25, ease: [0.4, 0, 0.2, 1] as const },
+  },
+  hover: {
+    boxShadow: launchGlowShadow,
+    transition: {
+      boxShadow: {
+        delay: 0.5,
+        duration: 0.5,
+        ease: [0.4, 0, 0.2, 1] as const,
+      },
+    },
+  },
+  processing: {
+    boxShadow: launchGlowShadow,
+    transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] as const },
+  },
+};
+
+const launchProjectOverlayVariants = {
+  rest: {
+    x: "-100%",
+    transition: { duration: 0.35, ease: [0.4, 0, 0.2, 1] as const },
+  },
+  hover: {
+    x: "0%",
+    transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] as const },
+  },
+  processing: {
+    x: "0%",
+    transition: { duration: 0.45, ease: [0.4, 0, 0.2, 1] as const },
+  },
+};
+
 const foundrySlideVariants = {
   enter: (direction: number) => ({
     x: direction > 0 ? 32 : -32,
@@ -120,6 +160,14 @@ export function FoundryForm() {
     control: form.control,
     name: "database",
   });
+  const watchedPostgresProvider = useWatch({
+    control: form.control,
+    name: "postgresProvider",
+  });
+  const watchedMongoClient = useWatch({
+    control: form.control,
+    name: "mongoClient",
+  });
   const watchedDescription = useWatch({
     control: form.control,
     name: "description",
@@ -132,6 +180,8 @@ export function FoundryForm() {
         teamAccess: watchedTeamAccess,
         projectType: watchedProjectType,
         database: watchedDatabase,
+        postgresProvider: watchedPostgresProvider,
+        mongoClient: watchedMongoClient,
         description: watchedDescription,
       },
       step,
@@ -141,6 +191,8 @@ export function FoundryForm() {
     watchedTeamAccess,
     watchedProjectType,
     watchedDatabase,
+    watchedPostgresProvider,
+    watchedMongoClient,
     watchedDescription,
     step,
   ]);
@@ -196,8 +248,8 @@ export function FoundryForm() {
           icon={<CheckCircle2 className="size-8 text-green-500" />}
           iconClassName="bg-green-500/15"
           cardClassName="border-green-500/30 bg-green-500/5"
-          title="Pipeline Launched!"
-          description="The onboarding GitHub Actions workflow has been triggered. Your project will be ready in under 2 minutes."
+          title="Project Launched!"
+          description="Your project is in the onboarding queue. In order to continue, it must be approved by the VP of Development."
           actions={
             <div className="flex gap-2 mt-2">
               <Button asChild>
@@ -321,25 +373,50 @@ export function FoundryForm() {
                     <ChevronRight className="size-4" />
                   </Button>
                 ) : (
-                  <Button
-                    type="button"
-                    onClick={form.handleSubmit(onSubmit)}
-                    disabled={
-                      !isCurrentStepValid || submitState === "submitting"
-                    }
-                    className="gap-2"
-                  >
-                    {submitState === "submitting" ? (
-                      <>
-                        <Loader2 className="size-4 animate-spin" />
-                        Launching…
-                      </>
-                    ) : (
-                      <>
-                        <Rocket className="size-4" />
-                        Launch Project
-                      </>
-                    )}
+                  <Button asChild className="relative gap-2">
+                    <motion.button
+                      type="button"
+                      onClick={form.handleSubmit(onSubmit)}
+                      disabled={
+                        !isCurrentStepValid || submitState === "submitting"
+                      }
+                      variants={launchProjectButtonVariants}
+                      initial="rest"
+                      animate={
+                        submitState === "submitting" ? "processing" : "rest"
+                      }
+                      whileHover={
+                        submitState === "submitting" ? undefined : "hover"
+                      }
+                      whileTap={
+                        submitState === "submitting"
+                          ? undefined
+                          : { scale: 0.98 }
+                      }
+                    >
+                      <span
+                        className="pointer-events-none absolute inset-0 overflow-hidden rounded-full"
+                        aria-hidden
+                      >
+                        <motion.span
+                          variants={launchProjectOverlayVariants}
+                          className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-green-600 to-emerald-500"
+                        />
+                      </span>
+                      <span className="relative z-10 flex items-center gap-2">
+                        {submitState === "submitting" ? (
+                          <>
+                            <Loader2 className="size-4 animate-spin" />
+                            Launching…
+                          </>
+                        ) : (
+                          <>
+                            <Rocket className="size-4" />
+                            Launch Project
+                          </>
+                        )}
+                      </span>
+                    </motion.button>
                   </Button>
                 )}
               </CardFooter>

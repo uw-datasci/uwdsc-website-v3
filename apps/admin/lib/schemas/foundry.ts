@@ -1,10 +1,75 @@
 import { z } from "zod";
-import { DATABASE_OPTIONS } from "@/constants/foundry";
+import {
+  DATABASE_OPTIONS,
+  MONGO_CLIENT_OPTIONS,
+  POSTGRES_PROVIDER_OPTIONS,
+} from "@/constants/foundry";
 
 export { DATABASE_OPTIONS } from "@/constants/foundry";
 export type { DatabaseValue } from "@/constants/foundry";
 
-export const foundryFormSchema = z.object({
+const postgresProviderEnum = z.enum(
+  POSTGRES_PROVIDER_OPTIONS.map((o) => o.value) as [
+    string,
+    ...string[],
+  ],
+);
+
+const mongoClientEnum = z.enum(
+  MONGO_CLIENT_OPTIONS.map((o) => o.value) as [string, ...string[]],
+);
+
+const databaseEnum = z.enum(
+  DATABASE_OPTIONS.map((d) => d.value) as [string, ...string[]],
+);
+
+/** Empty string = no selection (matches team dropdown); refine requires a real choice. */
+const databaseFieldSchema = z
+  .union([z.literal(""), databaseEnum])
+  .refine((v) => v !== "", { message: "Select a database" });
+
+function refineDatabaseStack(
+  data: {
+    database: string;
+    postgresProvider?: string;
+    mongoClient?: string;
+  },
+  ctx: z.RefinementCtx,
+) {
+  if (data.database === "postgres") {
+    if (data.postgresProvider == null) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Select a PostgreSQL provider",
+        path: ["postgresProvider"],
+      });
+    }
+  }
+  if (data.database === "mongodb") {
+    if (data.mongoClient == null) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Select a MongoDB client",
+        path: ["mongoClient"],
+      });
+    }
+  }
+}
+
+export const foundryStep3Schema = z
+  .object({
+    projectType: z
+      .string()
+      .trim()
+      .min(1, "Select a project template"),
+    database: databaseFieldSchema,
+    postgresProvider: postgresProviderEnum.optional(),
+    mongoClient: mongoClientEnum.optional(),
+  })
+  .superRefine(refineDatabaseStack);
+
+/** Plain object shape — use this for `.pick()`; the full form adds refinements below. */
+export const foundryFormObjectSchema = z.object({
   // Step 1 — Project Details
   projectName: z
     .string()
@@ -22,30 +87,34 @@ export const foundryFormSchema = z.object({
     .string()
     .trim()
     .min(1, "Select a project template"),
-  database: z.enum(
-    DATABASE_OPTIONS.map((d) => d.value) as [string, ...string[]],
-    { error: "Select a database" },
-  ),
+  database: databaseFieldSchema,
+  postgresProvider: postgresProviderEnum.optional(),
+  mongoClient: mongoClientEnum.optional(),
   extras: z.object({
     redis: z.boolean(),
     s3: z.boolean(),
   }),
 
-  // Step 3 — Description
+  // Step 3 — Description (optional)
   description: z
     .string()
     .trim()
-    .min(10, "Please write at least 10 characters")
     .max(1000, "Description must be 1000 characters or fewer"),
 });
 
-export type FoundryFormValues = z.infer<typeof foundryFormSchema>;
+export const foundryFormSchema = foundryFormObjectSchema.superRefine(
+  refineDatabaseStack,
+);
+
+export type FoundryFormValues = z.infer<typeof foundryFormObjectSchema>;
 
 export const foundryFormDefaultValues: FoundryFormValues = {
   projectName: "",
   teamAccess: "",
   projectType: "",
-  database: "postgresql",
+  database: "",
+  postgresProvider: undefined,
+  mongoClient: undefined,
   extras: { redis: false, s3: false },
   description: "",
 };

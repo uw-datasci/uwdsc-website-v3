@@ -57,15 +57,23 @@ class GitHubService {
 
       return data
         .map((t) => {
-          const team = t as { slug?: unknown; name?: unknown };
-          return {
-            slug: typeof team.slug === "string" ? team.slug : "",
-            name: typeof team.name === "string" ? team.name : "",
+          const team = t as {
+            slug?: unknown;
+            name?: unknown;
+            parent?: { id?: unknown } | null;
           };
+          const slug = typeof team.slug === "string" ? team.slug : "";
+          const name = typeof team.name === "string" ? team.name : "";
+          const hasParentId =
+            team.parent != null &&
+            typeof team.parent.id === "number" &&
+            Number.isFinite(team.parent.id);
+          return { slug, name, hasParentId };
         })
-        .filter((t) => t.slug && t.name);
+        .filter((t) => t.slug && t.name && t.hasParentId)
+        .map(({ slug, name }) => ({ slug, name }));
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
+      const message = error instanceof Error ? error.message : "Unknown error";
       throw new Error(
         `GitHub teams request failed for org="${this.org}": ${message}`,
       );
@@ -119,7 +127,7 @@ class GitHubService {
         })
         .filter((r): r is GitHubOrgTemplateRepo => r !== null);
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
+      const message = error instanceof Error ? error.message : "Unknown error";
       throw new Error(
         `GitHub template repos request failed for org="${this.org}": ${message}`,
       );

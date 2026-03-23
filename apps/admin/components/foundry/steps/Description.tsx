@@ -21,7 +21,7 @@ export function Description() {
         ) as unknown as string,
         placeholder:
           "What are you building? Include goals, scope, and any relevant context.",
-        required: true,
+        required: false,
         description: (value) => `${value?.length ?? 0} / 1000 characters`,
         className: "min-h-48",
       })}

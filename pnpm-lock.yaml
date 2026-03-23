@@ -344,6 +344,12 @@ importers:
 
   packages/server/admin:
     dependencies:
+      '@supabase/storage-js':
+        specifier: ^2.94.0
+        version: 2.98.0
+      '@supabase/supabase-js':
+        specifier: ^2.94.0
+        version: 2.98.0
       '@uwdsc/common':
         specifier: workspace:*
         version: link:../../common

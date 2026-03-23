@@ -38,9 +38,14 @@ interface TextFieldOptions {
   inputProps?: Partial<ComponentProps<typeof Input>>;
 }
 
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
 interface SelectFieldOptions {
   placeholder: string;
-  options: string[];
+  options: (string | SelectOption)[];
   label?: string;
   required?: boolean;
   triggerClassName?: string;
@@ -60,6 +65,12 @@ interface TextAreaFieldOptions {
 
 interface RadioFieldOptions {
   label: string;
+  required?: boolean;
+}
+
+interface ScaleFieldOptions {
+  label: string;
+  labels: string[];  // length determines the scale, e.g. ["None", "Beginner", "Intermediate", "Advanced", "Expert"]
   required?: boolean;
 }
 
@@ -135,11 +146,15 @@ export function renderSelectField(opts: SelectFieldOptions) {
             </SelectTrigger>
           </FormControl>
           <SelectContent className={contentClassName} position={contentPosition}>
-            {options.map((option) => (
-              <SelectItem key={option} value={option} className={itemClassName}>
-                {option}
-              </SelectItem>
-            ))}
+            {options.map((option) => {
+              const value = typeof option === "string" ? option : option.value;
+              const label = typeof option === "string" ? option : option.label;
+              return (
+                <SelectItem key={value} value={value} className={itemClassName}>
+                  {label}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
         <FormMessage />
@@ -226,4 +241,40 @@ export function renderRadioField(opts: RadioFieldOptions) {
   }
   RadioFieldRender.displayName = `RadioField(${label})`;
   return RadioFieldRender;
+}
+
+export function renderScaleField(opts: ScaleFieldOptions) {
+  const { label, labels, required = true } = opts;
+
+  function ScaleFieldRender({ field }: StringFieldRenderProps) {
+    return (
+      <FormItem className="space-y-3">
+        <FormLabel>
+          {label} {required && <span className="text-red-500">*</span>}
+        </FormLabel>
+        <FormControl>
+          <RadioGroup
+            onValueChange={(v) => field.onChange(v)}
+            value={field.value !== undefined ? String(field.value) : undefined}
+            className="flex items-center gap-4"
+          >
+            {labels.map((scaleLabel, index) => (
+              <FormItem key={index} className="flex flex-col items-center space-y-1 space-x-0">
+                <FormControl>
+                  <RadioGroupItem value={String(index)} />
+                </FormControl>
+                <FormLabel className="font-normal cursor-pointer text-center text-sm">
+                  {scaleLabel}
+                </FormLabel>
+              </FormItem>
+            ))}
+          </RadioGroup>
+        </FormControl>
+        <FormMessage />
+      </FormItem>
+    );
+  }
+
+  ScaleFieldRender.displayName = `ScaleField(${label})`;
+  return ScaleFieldRender;
 }

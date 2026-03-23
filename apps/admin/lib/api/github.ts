@@ -5,6 +5,7 @@
  */
 
 import { createApiError } from "./error";
+import type { FoundryFormValues } from "@/lib/schemas/foundry";
 
 export interface GitHubTeam {
   value: string;
@@ -42,6 +43,25 @@ export async function getGitHubTemplateRepos(): Promise<
   GitHubTemplateOption[]
 > {
   const response = await fetch("/api/github/templates");
+  const data = await response.json();
+  if (!response.ok) throw createApiError(data, response.status);
+  return data;
+}
+
+/**
+ * Launches a Foundry project by dispatching provisioning workflow.
+ *
+ * @param payload - validated Foundry form values
+ * @throws Error if dispatch fails or unauthorized
+ */
+export async function launchFoundryProject(
+  payload: FoundryFormValues,
+): Promise<{ success: boolean; message: string }> {
+  const response = await fetch("/api/github/foundry/launch", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);
   return data;

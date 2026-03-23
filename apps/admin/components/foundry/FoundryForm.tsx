@@ -29,6 +29,7 @@ import {
   foundryFormDefaultValues,
   type FoundryFormValues,
 } from "@/lib/schemas/foundry";
+import { launchFoundryProject } from "@/lib/api/github";
 import { FOUNDRY_STEPS } from "@/constants/foundry";
 import { FOUNDRY_STEP_FIELDS, isFoundryStepValid } from "@/lib/utils/foundry";
 import { ProjectDetails, TechStack, Description, Introduction } from "./steps";
@@ -212,18 +213,7 @@ export function FoundryForm() {
   const onSubmit = async (data: FoundryFormValues) => {
     setSubmitState("submitting");
     try {
-      // Mocked submission (replace with a real API call when available).
-      await new Promise((res, rej) => {
-        setTimeout(() => {
-          if (Math.random() > 0.2) res(data);
-          else
-            rej(
-              new Error(
-                "GitHub Actions workflow dispatch failed. Check your PAT permissions.",
-              ),
-            );
-        }, 2000);
-      });
+      await launchFoundryProject(data);
       setSubmitState("success");
     } catch (err) {
       setErrorMessage(
@@ -249,7 +239,7 @@ export function FoundryForm() {
           iconClassName="bg-green-500/15"
           cardClassName="border-green-500/30 bg-green-500/5"
           title="Project Launched!"
-          description="Your project is in the onboarding queue. In order to continue, it must be approved by the VP of Development."
+          description="Your project is in the onboarding queue"
           actions={
             <div className="flex gap-2 mt-2">
               <Button asChild>

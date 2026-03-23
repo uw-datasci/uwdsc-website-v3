@@ -9,8 +9,25 @@ interface GitHubOrgTemplateRepo {
   language: string;
 }
 
+interface FoundryLaunchPayload {
+  projectName: string;
+  teamAccess: string;
+  projectType: string;
+  database: string;
+  postgresProvider?: string;
+  mongoClient?: string;
+  extras: {
+    redis: boolean;
+    s3: boolean;
+  };
+  description: string;
+}
+
 const githubToken = process.env.GITHUB_TOKEN;
 if (!githubToken) throw new Error("GITHUB_TOKEN is not set");
+
+const foundryWorkflowId = process.env.FOUNDRY_WORKFLOW_ID;
+if (!foundryWorkflowId) throw new Error("FOUNDRY_WORKFLOW_ID is not set");
 
 /**
  * GitHub service for the admin app.
@@ -21,6 +38,7 @@ class GitHubService {
   private readonly headers: Record<string, string>;
   private readonly baseUrl: string = "https://api.github.com";
   private readonly templateTopic: string = "nexus-template";
+  private readonly foundryRepo: string = "nexus-foundry";
 
   constructor() {
     this.headers = {
@@ -130,6 +148,82 @@ class GitHubService {
       const message = error instanceof Error ? error.message : "Unknown error";
       throw new Error(
         `GitHub template repos request failed for org="${this.org}": ${message}`,
+      );
+    }
+  }
+
+  /**
+   * Dispatch a Foundry launch workflow in the `nexus-foundry` repository.
+   *
+   * If FOUNDRY_WORKFLOW_ID is provided, uses workflow dispatch with inputs.
+   * Otherwise falls back to repository_dispatch with event_type=foundry-launch.
+   */
+  async launchFoundryProject(payload: FoundryLaunchPayload): Promise<void> {
+    const repoPath = `/repos/${this.org}/${this.foundryRepo}`;
+
+    if (foundryWorkflowId) {
+      const workflowUrl = `${this.baseUrl}${repoPath}/actions/workflows/${foundryWorkflowId}/dispatches`;
+      const workflowBody = {
+        ref: "main",
+        inputs: {
+          project_name: payload.projectName,
+          team_access: payload.teamAccess,
+          project_type: payload.projectType,
+          database: payload.database,
+          postgres_provider: payload.postgresProvider ?? "",
+          mongo_client: payload.mongoClient ?? "",
+          redis: String(payload.extras.redis),
+          s3: String(payload.extras.s3),
+          description: payload.description,
+        },
+      };
+
+      try {
+        const res = await fetch(workflowUrl, {
+          method: "POST",
+          headers: this.headers,
+          body: JSON.stringify(workflowBody),
+        });
+
+        if (!res.ok) {
+          const body = await res.text().catch(() => "");
+          throw new Error(
+            `Workflow dispatch failed (${res.status} ${res.statusText}) ${body}`,
+          );
+        }
+        return;
+      } catch (error: unknown) {
+        const message =
+          error instanceof Error ? error.message : "Unknown error";
+        throw new Error(
+          `Failed to launch Foundry workflow for repo="${this.foundryRepo}": ${message}`,
+        );
+      }
+    }
+
+    const dispatchUrl = `${this.baseUrl}${repoPath}/dispatches`;
+    const dispatchBody = {
+      event_type: "foundry-launch",
+      client_payload: payload,
+    };
+
+    try {
+      const res = await fetch(dispatchUrl, {
+        method: "POST",
+        headers: this.headers,
+        body: JSON.stringify(dispatchBody),
+      });
+
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        throw new Error(
+          `Repository dispatch failed (${res.status} ${res.statusText}) ${body}`,
+        );
+      }
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      throw new Error(
+        `Failed to launch Foundry dispatch for repo="${this.foundryRepo}": ${message}`,
       );
     }
   }

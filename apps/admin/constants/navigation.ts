@@ -21,8 +21,8 @@ export const ADMIN_NAVIGATION = [
     href: "/applications",
     icon: FileText,
     subItems: [
-      { name: "Review", href: "/review", icon: ClipboardCheck },
-      { name: "Questions", href: "/questions", icon: CircleHelp },
+      { name: "Review", href: "/applications/review", icon: ClipboardCheck },
+      { name: "Questions", href: "/applications/questions", icon: CircleHelp },
     ],
   },
   { name: "Events", href: "/events", icon: Calendar },

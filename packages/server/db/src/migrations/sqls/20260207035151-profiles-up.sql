@@ -12,14 +12,16 @@ CREATE TABLE public.profiles (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE public.exec_positions(
+CREATE TABLE public.subteams (
   id SERIAL PRIMARY KEY,
   name text UNIQUE NOT NULL
 );
 
-CREATE TABLE public.subteams (
+CREATE TABLE public.exec_positions(
   id SERIAL PRIMARY KEY,
-  name text UNIQUE NOT NULL
+  name text UNIQUE NOT NULL,
+  is_vp BOOLEAN NOT NULL DEFAULT false,
+  subteam_id INT REFERENCES public.subteams(id) ON DELETE SET NULL
 );
 
 CREATE TABLE public.exec_team (

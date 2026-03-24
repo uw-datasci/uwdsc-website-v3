@@ -214,7 +214,7 @@ export const membershipColumns: ColumnDef<Member>[] = [
       const member = row.original;
       if (!meta?.onAction) return null;
       return (
-        <div className="flex items-center justify-end gap-1">
+        <div className="flex items-center justify-center gap-1">
           <Button
             variant="ghost"
             size="icon"

@@ -14,40 +14,11 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from "@uwdsc/ui";
-import {
-  LayoutDashboard,
-  Users,
-  FileText,
-  Calendar,
-  Settings,
-  Shield,
-  Anvil,
-  Code2,
-  Activity,
-  Library,
-} from "lucide-react";
+import { Shield } from "lucide-react";
 import { signOut as signOutApi } from "@/lib/api/auth";
+import { ADMIN_NAVIGATION } from "@/constants/navigation";
 import { NavUser } from "./nav/NavUser";
 import { NavMain } from "./nav/NavMain";
-
-const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Members", href: "/members", icon: Users },
-  { name: "Applications", href: "/applications", icon: FileText },
-  { name: "Events", href: "/events", icon: Calendar },
-  { name: "Onboarding", href: "/onboarding", icon: Shield },
-  {
-    name: "Nexus",
-    href: "/nexus",
-    icon: Code2,
-    subItems: [
-      { name: "Foundry", href: "/nexus/foundry", icon: Anvil },
-      { name: "Optics", href: "/nexus/optics", icon: Activity },
-      { name: "Archive", href: "/nexus/archive", icon: Library },
-    ],
-  },
-  { name: "Settings", href: "/settings", icon: Settings },
-];
 
 interface AdminLayoutProps {
   readonly children: React.ReactNode;
@@ -86,7 +57,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           </SidebarMenu>
         </SidebarHeader>
         <SidebarContent>
-          <NavMain items={navigation} />
+          <NavMain items={ADMIN_NAVIGATION} />
         </SidebarContent>
         <SidebarFooter>
           <NavUser onSignOut={handleSignOut} />

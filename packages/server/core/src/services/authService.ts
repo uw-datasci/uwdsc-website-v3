@@ -1,6 +1,11 @@
 import { AuthRepository } from "../repositories/authRepository";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { ApiError, LoginData, RegisterData } from "@uwdsc/common/types";
+import {
+  ApiError,
+  type QuestionScope,
+  LoginData,
+  RegisterData,
+} from "@uwdsc/common/types";
 
 export class AuthService {
   private readonly repository: AuthRepository;
@@ -278,5 +283,42 @@ export class AuthService {
         500,
       );
     }
+  }
+
+  /**
+   * Resolve VP / Presidents scope for application-question CRUD (admin).
+   * Presidents see all positions; other VPs see roles in their subteam(s) (all APA rows whose
+   * exec position shares a subteam with any VP role they hold).
+   */
+  async getQuestionScopeForUser(userId: string): Promise<QuestionScope> {
+    const [roles, vpPositionIds] = await Promise.all([
+      this.repository.getExecTeamVpRolesForProfile(userId),
+      this.repository.getVpApplicationPositionIdsForProfile(userId),
+    ]);
+
+    const hasVpExecRole = roles.some((r) => r.is_vp);
+    const isPresident = roles.some(
+      (r) => r.is_vp && (r.subteam_name ?? "") === "Presidents",
+    );
+    const vpSubteamNames = Array.from(
+      new Set(
+        roles
+          .filter(
+            (r) =>
+              r.is_vp &&
+              r.subteam_name !== null &&
+              r.subteam_name.trim().length > 0 &&
+              r.subteam_name !== "Presidents",
+          )
+          .map((r) => r.subteam_name as string),
+      ),
+    );
+
+    return {
+      hasVpExecRole,
+      isPresident,
+      vpSubteamNames,
+      vpPositionIds,
+    };
   }
 }

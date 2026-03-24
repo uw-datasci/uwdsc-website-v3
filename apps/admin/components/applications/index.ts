@@ -1,4 +1,4 @@
-export { ApplicationList } from "./ApplicationList";
-export { ApplicationDetail } from "./ApplicationDetail";
-export { ApplicationsLoading } from "./ApplicationsLoading";
-export { ApplicationsError } from "./ApplicationsError";
+export * from "./ApplicationList";
+export * from "./ApplicationDetail";
+export * from "./ApplicationsLoading";
+export * from "./ApplicationsError";

@@ -14,26 +14,11 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from "@uwdsc/ui";
-import {
-  LayoutDashboard,
-  Users,
-  FileText,
-  Calendar,
-  Settings,
-  Shield,
-} from "lucide-react";
+import { Shield } from "lucide-react";
 import { signOut as signOutApi } from "@/lib/api/auth";
+import { ADMIN_NAVIGATION } from "@/constants/navigation";
 import { NavUser } from "./nav/NavUser";
 import { NavMain } from "./nav/NavMain";
-
-const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Members", href: "/members", icon: Users },
-  { name: "Applications", href: "/applications", icon: FileText },
-  { name: "Events", href: "/events", icon: Calendar },
-  { name: "Onboarding", href: "/onboarding", icon: Shield },
-  { name: "Settings", href: "/settings", icon: Settings },
-];
 
 interface AdminLayoutProps {
   readonly children: React.ReactNode;
@@ -62,7 +47,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                   <Shield className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold text-base">Admin Panel</span>
+                  <span className="truncate font-semibold text-base">
+                    Admin Panel
+                  </span>
                   <span className="truncate text-xs">UWDSC</span>
                 </div>
               </SidebarMenuButton>
@@ -70,7 +57,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           </SidebarMenu>
         </SidebarHeader>
         <SidebarContent>
-          <NavMain items={navigation} />
+          <NavMain items={ADMIN_NAVIGATION} />
         </SidebarContent>
         <SidebarFooter>
           <NavUser onSignOut={handleSignOut} />

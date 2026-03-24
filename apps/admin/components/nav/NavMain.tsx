@@ -17,6 +17,7 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
+  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -33,6 +34,7 @@ interface NavMainProps {
     subItems?: {
       name: string;
       href: string;
+      icon: LucideIcon;
     }[];
   }[];
 }
@@ -76,7 +78,15 @@ export function NavMain({ items }: NavMainProps) {
                         sideOffset={8}
                         className="w-48"
                       >
-                        <DropdownMenuLabel>{item.name}</DropdownMenuLabel>
+                        {item.href ? (
+                          <DropdownMenuItem asChild>
+                            <Link href={item.href} onClick={closeSidebarOnMobile} className="font-semibold px-2 py-1.5 focus:bg-accent">
+                              {item.name} Overview
+                            </Link>
+                          </DropdownMenuItem>
+                        ) : (
+                          <DropdownMenuLabel>{item.name}</DropdownMenuLabel>
+                        )}
                         <DropdownMenuSeparator />
                         {item.subItems.map((subItem) => (
                           <DropdownMenuItem asChild key={subItem.name}>
@@ -85,7 +95,8 @@ export function NavMain({ items }: NavMainProps) {
                               className="cursor-pointer"
                               onClick={closeSidebarOnMobile}
                             >
-                              {subItem.name}
+                              <subItem.icon />
+                              <span>{subItem.name}</span>
                             </Link>
                           </DropdownMenuItem>
                         ))}
@@ -105,13 +116,20 @@ export function NavMain({ items }: NavMainProps) {
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton
+                        asChild
                         tooltip={item.name}
                         isActive={!!isActive}
                       >
-                        <item.icon />
-                        <span>{item.name}</span>
-                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                        <Link href={item.href || "#"} onClick={closeSidebarOnMobile}>
+                          <item.icon />
+                          <span>{item.name}</span>
+                        </Link>
                       </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuAction className="transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90">
+                        <ChevronRight />
+                      </SidebarMenuAction>
                     </CollapsibleTrigger>
                     <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-[collapsible-up_0.2s_ease-out] data-[state=open]:animate-[collapsible-down_0.2s_ease-out]">
                       <SidebarMenuSub>
@@ -125,6 +143,7 @@ export function NavMain({ items }: NavMainProps) {
                                 href={subItem.href}
                                 onClick={closeSidebarOnMobile}
                               >
+                                {subItem.icon && <subItem.icon />}
                                 <span>{subItem.name}</span>
                               </Link>
                             </SidebarMenuSubButton>

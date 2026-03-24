@@ -83,6 +83,7 @@ Builds on Fall 2025 with new features across the main site and CxC.
 - **DB (PR #35)**: `memberships` table now requires a `term_id` foreign key referencing `public.terms`, scoping each membership record to a specific term.
 - **Gmail webhook (PR #38)**: New `POST /api/webhooks/gmail` endpoint receives Gmail push notifications via Google Cloud Pub/Sub, laying the groundwork for automated membership payment verification.
 - **GitHub API integration (PR #41)**: GitHubService with org team listing, template repository discovery, and workflow dispatch for automated project provisioning.
+- **Gmail watch state (PR #45)**: Added `gmail_watch_state` table to persist the last processed Gmail history ID, enabling reliable incremental processing of Gmail notifications and preventing duplicate event handling.
 
 ---
 

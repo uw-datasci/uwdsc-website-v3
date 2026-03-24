@@ -4,6 +4,10 @@ import type {
   PositionSelectionWithName,
   AnswerWithQuestion,
   ApplicationListItem,
+  AppQuestion,
+  QuestionPositionOption,
+  QuestionScope,
+  QuestionUpsertInput,
 } from "@uwdsc/common/types";
 
 export class ApplicationRepository extends BaseRepository {
@@ -86,5 +90,212 @@ export class ApplicationRepository extends BaseRepository {
       position_selections: selectionsMap.get(app.id) ?? [],
       answers: answersMap.get(app.id) ?? [],
     }));
+  }
+
+  async getPositionOptions(
+    scope: QuestionScope,
+  ): Promise<QuestionPositionOption[]> {
+    if (scope.isPresident) {
+      return this.sql<QuestionPositionOption[]>`
+        SELECT
+          apa.id,
+          ep.name
+        FROM application_positions_available apa
+        JOIN exec_positions ep ON apa.position_id = ep.id
+        LEFT JOIN subteams st ON st.id = ep.subteam_id
+        WHERE st.name IS DISTINCT FROM 'Presidents'
+        ORDER BY ep.name ASC
+      `;
+    }
+
+    if (scope.vpPositionIds.length === 0) return [];
+
+    return this.sql<QuestionPositionOption[]>`
+      SELECT
+        apa.id,
+        ep.name
+      FROM application_positions_available apa
+      JOIN exec_positions ep ON apa.position_id = ep.id
+      LEFT JOIN subteams st ON st.id = ep.subteam_id
+      WHERE apa.id IN ${this.sql(scope.vpPositionIds)}
+        AND st.name IS DISTINCT FROM 'Presidents'
+      ORDER BY ep.name ASC
+    `;
+  }
+
+  async getQuestions(scope: QuestionScope): Promise<AppQuestion[]> {
+    if (scope.isPresident) {
+      return this.sql<AppQuestion[]>`
+        SELECT
+          pq.id AS relation_id,
+          q.id AS question_id,
+          pq.position_id,
+          ep.name AS position_name,
+          q.question_text,
+          q.type,
+          q.max_length,
+          q.placeholder,
+          q.help_text,
+          pq.sort_order,
+          q.created_at
+        FROM position_questions pq
+        JOIN questions q ON q.id = pq.question_id
+        LEFT JOIN application_positions_available apa ON apa.id = pq.position_id
+        LEFT JOIN exec_positions ep ON ep.id = apa.position_id
+        ORDER BY ep.name NULLS LAST, pq.sort_order ASC, q.created_at ASC
+      `;
+    }
+
+    if (scope.vpPositionIds.length === 0) return [];
+
+    return this.sql<AppQuestion[]>`
+      SELECT
+        pq.id AS relation_id,
+        q.id AS question_id,
+        pq.position_id,
+        ep.name AS position_name,
+        q.question_text,
+        q.type,
+        q.max_length,
+        q.placeholder,
+        q.help_text,
+        pq.sort_order,
+        q.created_at
+      FROM position_questions pq
+      JOIN questions q ON q.id = pq.question_id
+      JOIN application_positions_available apa ON apa.id = pq.position_id
+      JOIN exec_positions ep ON ep.id = apa.position_id
+      WHERE pq.position_id IN ${this.sql(scope.vpPositionIds)}
+      ORDER BY ep.name ASC, pq.sort_order ASC, q.created_at ASC
+    `;
+  }
+
+  async createQuestion(data: QuestionUpsertInput): Promise<AppQuestion> {
+    const createdQuestion = await this.sql<
+      { id: number; created_at: string }[]
+    >`
+      INSERT INTO questions (
+        question_text,
+        type,
+        max_length,
+        placeholder,
+        help_text
+      ) VALUES (
+        ${data.question_text},
+        ${data.type},
+        ${data.max_length ?? null},
+        ${data.placeholder ?? null},
+        ${data.help_text ?? null}
+      )
+      RETURNING id, created_at
+    `;
+    const question = createdQuestion[0];
+    if (!question) throw new Error("Failed to create question");
+
+    const relation = await this.sql<{ id: number }[]>`
+      INSERT INTO position_questions (position_id, question_id, sort_order)
+      VALUES (${data.position_id}, ${question.id}, ${data.sort_order})
+      RETURNING id
+    `;
+    const relationId = relation[0]?.id;
+    if (!relationId)
+      throw new Error("Failed to create position question relation");
+
+    const full = await this.sql<AppQuestion[]>`
+      SELECT
+        pq.id AS relation_id,
+        q.id AS question_id,
+        pq.position_id,
+        ep.name AS position_name,
+        q.question_text,
+        q.type,
+        q.max_length,
+        q.placeholder,
+        q.help_text,
+        pq.sort_order,
+        q.created_at
+      FROM position_questions pq
+      JOIN questions q ON q.id = pq.question_id
+      LEFT JOIN application_positions_available apa ON apa.id = pq.position_id
+      LEFT JOIN exec_positions ep ON ep.id = apa.position_id
+      WHERE pq.id = ${relationId}
+      LIMIT 1
+    `;
+    const record = full[0];
+    if (!record) throw new Error("Failed to load created question");
+    return record;
+  }
+
+  async updateQuestion(
+    relationId: number,
+    data: QuestionUpsertInput,
+  ): Promise<AppQuestion | null> {
+    const relationRows = await this.sql<{ question_id: number }[]>`
+      SELECT question_id
+      FROM position_questions
+      WHERE id = ${relationId}
+      LIMIT 1
+    `;
+    const relation = relationRows[0];
+    if (!relation) return null;
+
+    await this.sql`
+      UPDATE questions
+      SET
+        question_text = ${data.question_text},
+        type = ${data.type},
+        max_length = ${data.max_length ?? null},
+        placeholder = ${data.placeholder ?? null},
+        help_text = ${data.help_text ?? null}
+      WHERE id = ${relation.question_id}
+    `;
+
+    await this.sql`
+      UPDATE position_questions
+      SET
+        position_id = ${data.position_id},
+        sort_order = ${data.sort_order}
+      WHERE id = ${relationId}
+    `;
+
+    const full = await this.sql<AppQuestion[]>`
+      SELECT
+        pq.id AS relation_id,
+        q.id AS question_id,
+        pq.position_id,
+        ep.name AS position_name,
+        q.question_text,
+        q.type,
+        q.max_length,
+        q.placeholder,
+        q.help_text,
+        pq.sort_order,
+        q.created_at
+      FROM position_questions pq
+      JOIN questions q ON q.id = pq.question_id
+      LEFT JOIN application_positions_available apa ON apa.id = pq.position_id
+      LEFT JOIN exec_positions ep ON ep.id = apa.position_id
+      WHERE pq.id = ${relationId}
+      LIMIT 1
+    `;
+    return full[0] ?? null;
+  }
+
+  async deleteQuestion(relationId: number): Promise<boolean> {
+    const relationRows = await this.sql<{ question_id: number }[]>`
+      SELECT question_id
+      FROM position_questions
+      WHERE id = ${relationId}
+      LIMIT 1
+    `;
+    const relation = relationRows[0];
+    if (!relation) return false;
+
+    const deleted = await this.sql`
+      DELETE FROM questions
+      WHERE id = ${relation.question_id}
+      RETURNING id
+    `;
+    return deleted.length > 0;
   }
 }

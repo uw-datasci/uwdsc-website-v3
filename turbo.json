@@ -15,7 +15,9 @@
         "SUPABASE_SECRET_KEY",
         "GMAIL_CLIENT_ID",
         "GMAIL_CLIENT_SECRET",
-        "GMAIL_REFRESH_TOKEN"
+        "GMAIL_REFRESH_TOKEN",
+        "GITHUB_TOKEN",
+        "FOUNDRY_WORKFLOW_ID"
       ]
     },
     "lint": { "dependsOn": ["^lint"] },

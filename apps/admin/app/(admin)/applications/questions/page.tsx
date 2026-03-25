@@ -17,12 +17,14 @@ export default function QuestionsPage() {
     load,
     form,
     dialogOpen,
+    dialogMode,
     deleteTarget,
     editing,
     saving,
     deleting,
     openCreate,
     openEdit,
+    openView,
     requestDelete,
     submitQuestion,
     confirmDelete,
@@ -53,6 +55,7 @@ export default function QuestionsPage() {
             isPresident={isPresident}
             onAddClick={openCreate}
             onEdit={openEdit}
+            onView={openView}
             onRequestDelete={requestDelete}
           />
 
@@ -60,7 +63,8 @@ export default function QuestionsPage() {
             form={form}
             open={dialogOpen}
             onOpenChange={onFormDialogOpenChange}
-            editing={editing !== null}
+            mode={dialogMode}
+            question={editing}
             isPresident={isPresident}
             positions={positions}
             saving={saving}

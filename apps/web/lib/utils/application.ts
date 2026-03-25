@@ -141,7 +141,7 @@ export const isStepValid = (
         const expectedQuestionCount = positionData.questions.length;
         return (
           answerValues.length === expectedQuestionCount &&
-          answerValues.every((a) => a && a.trim().length >= 10)
+          answerValues.every((a) => a && a.trim().length >= 1)
         );
       };
 

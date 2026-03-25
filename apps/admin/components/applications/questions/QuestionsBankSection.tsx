@@ -18,6 +18,7 @@ interface QuestionsBankSectionProps {
   readonly isPresident: boolean;
   readonly onAddClick: () => void;
   readonly onEdit: (question: AppQuestion) => void;
+  readonly onView: (question: AppQuestion) => void;
   readonly onRequestDelete: (question: AppQuestion) => void;
 }
 
@@ -27,6 +28,7 @@ export function QuestionsBankSection({
   isPresident,
   onAddClick,
   onEdit,
+  onView,
   onRequestDelete,
 }: QuestionsBankSectionProps) {
   const ownQuestions = questions.filter((q) => q.can_edit);
@@ -64,6 +66,7 @@ export function QuestionsBankSection({
             <QuestionsTable
               questions={questions}
               onEdit={onEdit}
+              onView={onView}
               onRequestDelete={onRequestDelete}
             />
           </CardContent>
@@ -92,6 +95,7 @@ export function QuestionsBankSection({
               <QuestionsTable
                 questions={ownQuestions}
                 onEdit={onEdit}
+                onView={onView}
                 onRequestDelete={onRequestDelete}
                 emptyMessage="No questions in your VP scope yet."
               />
@@ -110,6 +114,7 @@ export function QuestionsBankSection({
               <QuestionsTable
                 questions={otherQuestions}
                 onEdit={onEdit}
+                onView={onView}
                 onRequestDelete={onRequestDelete}
                 readOnly
                 emptyMessage="No questions outside your VP scope."

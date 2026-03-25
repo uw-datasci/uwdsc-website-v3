@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, Trash2 } from "lucide-react";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 import {
   Button,
   Table,
@@ -15,6 +15,7 @@ import type { AppQuestion } from "@uwdsc/common/types";
 interface QuestionsTableProps {
   readonly questions: AppQuestion[];
   readonly onEdit: (question: AppQuestion) => void;
+  readonly onView: (question: AppQuestion) => void;
   readonly onRequestDelete: (question: AppQuestion) => void;
   readonly readOnly?: boolean;
   readonly emptyMessage?: string;
@@ -23,6 +24,7 @@ interface QuestionsTableProps {
 export function QuestionsTable({
   questions,
   onEdit,
+  onView,
   onRequestDelete,
   readOnly = false,
   emptyMessage = "No questions yet. Add one to get started.",
@@ -44,7 +46,7 @@ export function QuestionsTable({
             <TableHead>Question</TableHead>
             <TableHead className="w-[110px] pr-6">Type</TableHead>
             <TableHead className="w-[140px] pl-6 text-center">
-              {readOnly ? "Access" : "Actions"}
+              Actions
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -67,9 +69,15 @@ export function QuestionsTable({
               <TableCell className="align-top pr-6 text-sm">{q.type}</TableCell>
               <TableCell className="align-top pl-6 text-center">
                 {readOnly ? (
-                  <span className="text-xs text-muted-foreground">
-                    Read only
-                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    aria-label="View question"
+                    onClick={() => onView(q)}
+                  >
+                    <Eye className="size-4" />
+                  </Button>
                 ) : (
                   <div className="flex justify-center gap-1">
                     <Button

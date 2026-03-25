@@ -75,8 +75,10 @@ export default function ApplyPage() {
     {
       id: string;
       question_text: string;
+      type: "text" | "textarea";
       sort_order: number;
       placeholder: string | null;
+      max_length: number | null;
     }[]
   >([]);
   const [applicationId, setApplicationId] = useState<string | null>(null);

@@ -1,6 +1,6 @@
 import { ApiResponse } from "@uwdsc/common/utils";
 import { withAuth } from "@/guards/withAuth";
-import { githubService } from "@/lib/services/githubService";
+import { githubService } from "@uwdsc/admin";
 
 function shortenLabel(input: string, maxLen = 60): string {
   const normalized = input.trim().split(/\s+/).join(" ");

@@ -1,6 +1,6 @@
 import { ApiResponse } from "@uwdsc/common/utils";
 import { withAuth } from "@/guards/withAuth";
-import { githubService } from "@/lib/services/githubService";
+import { githubService } from "@uwdsc/admin";
 
 /**
  * GET /api/github/teams

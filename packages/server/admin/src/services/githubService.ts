@@ -12,6 +12,7 @@ interface GitHubOrgTemplateRepo {
 interface FoundryLaunchPayload {
   projectName: string;
   teamAccess: string;
+  subdomain: string;
   projectType: string;
   database: string;
   postgresProvider?: string;
@@ -39,6 +40,7 @@ class GitHubService {
   private readonly baseUrl: string = "https://api.github.com";
   private readonly templateTopic: string = "nexus-template";
   private readonly foundryRepo: string = "nexus-foundry";
+  private readonly foundryDomain: string = "uwdatascience.ca";
 
   constructor() {
     this.headers = {
@@ -60,7 +62,6 @@ class GitHubService {
       const res = await fetch(url, {
         method: "GET",
         headers: this.headers,
-        next: { revalidate: 300 },
       });
 
       if (!res.ok) {
@@ -112,7 +113,6 @@ class GitHubService {
       const res = await fetch(url, {
         method: "GET",
         headers: this.headers,
-        next: { revalidate: 300 },
       });
 
       if (!res.ok) {
@@ -160,6 +160,7 @@ class GitHubService {
    */
   async launchFoundryProject(payload: FoundryLaunchPayload): Promise<void> {
     const repoPath = `/repos/${this.org}/${this.foundryRepo}`;
+    const subdomainHost = `${payload.subdomain}.${this.foundryDomain}`;
 
     if (foundryWorkflowId) {
       const workflowUrl = `${this.baseUrl}${repoPath}/actions/workflows/${foundryWorkflowId}/dispatches`;
@@ -168,6 +169,7 @@ class GitHubService {
         inputs: {
           project_name: payload.projectName,
           team_access: payload.teamAccess,
+          domain: subdomainHost,
           project_type: payload.projectType,
           database: payload.database,
           postgres_provider: payload.postgresProvider ?? "",
@@ -204,7 +206,10 @@ class GitHubService {
     const dispatchUrl = `${this.baseUrl}${repoPath}/dispatches`;
     const dispatchBody = {
       event_type: "foundry-launch",
-      client_payload: payload,
+      client_payload: {
+        ...payload,
+        subdomain: subdomainHost,
+      },
     };
 
     try {

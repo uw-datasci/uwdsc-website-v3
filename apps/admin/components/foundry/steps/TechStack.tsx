@@ -23,7 +23,8 @@ import {
   POSTGRES_PROVIDER_OPTIONS,
 } from "@/constants/foundry";
 import type { FoundryFormValues } from "@/lib/schemas/foundry";
-import { getGitHubTemplateRepos, GitHubTemplateOption } from "@/lib/api/github";
+import type { GitHubTemplateOption } from "@uwdsc/common/types";
+import { getGitHubTemplateRepos } from "@/lib/api/foundry";
 
 export function TechStack() {
   const form = useFormContext<FoundryFormValues>();

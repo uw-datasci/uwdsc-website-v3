@@ -4,7 +4,7 @@ import {
   foundryFormSchema,
   type FoundryFormValues,
 } from "@/lib/schemas/foundry";
-import { githubService } from "@/lib/services/githubService";
+import { githubService } from "@uwdsc/admin";
 
 /**
  * POST /api/github/foundry/launch

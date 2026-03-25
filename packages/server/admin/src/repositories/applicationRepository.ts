@@ -123,7 +123,7 @@ export class ApplicationRepository extends BaseRepository {
     `;
   }
 
-  async getQuestions(scope: QuestionScope): Promise<AppQuestion[]> {
+  async getScopedQuestions(scope: QuestionScope): Promise<AppQuestion[]> {
     if (scope.isPresident) {
       return this.sql<AppQuestion[]>`
         SELECT
@@ -154,6 +154,7 @@ export class ApplicationRepository extends BaseRepository {
         q.id AS question_id,
         pq.position_id,
         ep.name AS position_name,
+        true AS can_edit,
         q.question_text,
         q.type,
         q.max_length,
@@ -168,6 +169,39 @@ export class ApplicationRepository extends BaseRepository {
       WHERE pq.position_id IN ${this.sql(scope.vpPositionIds)}
       ORDER BY ep.name ASC, pq.sort_order ASC, q.created_at ASC
     `;
+  }
+
+  async getAllQuestions(): Promise<AppQuestion[]> {
+    return this.sql<AppQuestion[]>`
+      SELECT
+        pq.id AS relation_id,
+        q.id AS question_id,
+        pq.position_id,
+        ep.name AS position_name,
+        false AS can_edit,
+        q.question_text,
+        q.type,
+        q.max_length,
+        q.placeholder,
+        q.help_text,
+        pq.sort_order,
+        q.created_at
+      FROM position_questions pq
+      JOIN questions q ON q.id = pq.question_id
+      LEFT JOIN application_positions_available apa ON apa.id = pq.position_id
+      LEFT JOIN exec_positions ep ON ep.id = apa.position_id
+      ORDER BY ep.name NULLS LAST, pq.sort_order ASC, q.created_at ASC
+    `;
+  }
+
+  async getRelationPositionId(relationId: number): Promise<number | null> {
+    const rows = await this.sql<{ position_id: number | null }[]>`
+      SELECT position_id
+      FROM position_questions
+      WHERE id = ${relationId}
+      LIMIT 1
+    `;
+    return rows[0]?.position_id ?? null;
   }
 
   async createQuestion(data: QuestionUpsertInput): Promise<AppQuestion> {

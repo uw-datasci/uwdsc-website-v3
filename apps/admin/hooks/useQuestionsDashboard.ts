@@ -102,6 +102,10 @@ export function useQuestionsDashboard() {
 
   const openEdit = useCallback(
     (q: AppQuestion) => {
+      if (!q.can_edit) {
+        toast.error("You can only edit questions in your VP scope");
+        return;
+      }
       setEditing(q);
       form.reset({
         question_text: q.question_text,
@@ -159,6 +163,14 @@ export function useQuestionsDashboard() {
     }
   }, [deleteTarget, load]);
 
+  const requestDelete = useCallback((q: AppQuestion) => {
+    if (!q.can_edit) {
+      toast.error("You can only delete questions in your VP scope");
+      return;
+    }
+    setDeleteTarget(q);
+  }, []);
+
   const onFormDialogOpenChange = useCallback((open: boolean) => {
     setDialogOpen(open);
     if (!open) setEditing(null);
@@ -179,10 +191,10 @@ export function useQuestionsDashboard() {
     deleting,
     openCreate,
     openEdit,
+    requestDelete,
     submitQuestion,
     confirmDelete,
     onFormDialogOpenChange,
     onDeleteDialogOpenChange,
-    setDeleteTarget,
   };
 }

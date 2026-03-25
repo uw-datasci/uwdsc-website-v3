@@ -23,11 +23,11 @@ export default function QuestionsPage() {
     deleting,
     openCreate,
     openEdit,
+    requestDelete,
     submitQuestion,
     confirmDelete,
     onFormDialogOpenChange,
     onDeleteDialogOpenChange,
-    setDeleteTarget,
   } = useQuestionsDashboard();
 
   let main: ReactNode;
@@ -50,9 +50,10 @@ export default function QuestionsPage() {
           <QuestionsBankSection
             positions={positions}
             questions={questions}
+            isPresident={isPresident}
             onAddClick={openCreate}
             onEdit={openEdit}
-            onRequestDelete={setDeleteTarget}
+            onRequestDelete={requestDelete}
           />
 
           <EditQuestionDialog

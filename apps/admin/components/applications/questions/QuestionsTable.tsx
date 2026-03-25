@@ -16,17 +16,21 @@ interface QuestionsTableProps {
   readonly questions: AppQuestion[];
   readonly onEdit: (question: AppQuestion) => void;
   readonly onRequestDelete: (question: AppQuestion) => void;
+  readonly readOnly?: boolean;
+  readonly emptyMessage?: string;
 }
 
 export function QuestionsTable({
   questions,
   onEdit,
   onRequestDelete,
+  readOnly = false,
+  emptyMessage = "No questions yet. Add one to get started.",
 }: QuestionsTableProps) {
   if (questions.length === 0) {
     return (
       <p className="text-sm text-muted-foreground py-6 text-center">
-        No questions yet. Add one to get started.
+        {emptyMessage}
       </p>
     );
   }
@@ -40,7 +44,7 @@ export function QuestionsTable({
             <TableHead>Question</TableHead>
             <TableHead className="w-[110px] pr-6">Type</TableHead>
             <TableHead className="w-[140px] pl-6 text-center">
-              Actions
+              {readOnly ? "Access" : "Actions"}
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -62,26 +66,32 @@ export function QuestionsTable({
               </TableCell>
               <TableCell className="align-top pr-6 text-sm">{q.type}</TableCell>
               <TableCell className="align-top pl-6 text-center">
-                <div className="flex justify-center gap-1">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Edit question"
-                    onClick={() => onEdit(q)}
-                  >
-                    <Pencil className="size-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Delete question"
-                    onClick={() => onRequestDelete(q)}
-                  >
-                    <Trash2 className="size-4 text-destructive" />
-                  </Button>
-                </div>
+                {readOnly ? (
+                  <span className="text-xs text-muted-foreground">
+                    Read only
+                  </span>
+                ) : (
+                  <div className="flex justify-center gap-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Edit question"
+                      onClick={() => onEdit(q)}
+                    >
+                      <Pencil className="size-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Delete question"
+                      onClick={() => onRequestDelete(q)}
+                    >
+                      <Trash2 className="size-4 text-destructive" />
+                    </Button>
+                  </div>
+                )}
               </TableCell>
             </TableRow>
           ))}

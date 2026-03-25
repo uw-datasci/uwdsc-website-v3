@@ -44,6 +44,7 @@ export interface AppQuestion {
   readonly question_id: number;
   readonly position_id: number | null;
   readonly position_name: string | null;
+  readonly can_edit?: boolean;
   readonly question_text: string;
   readonly type: "text" | "textarea";
   readonly max_length: number | null;

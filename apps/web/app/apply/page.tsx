@@ -160,6 +160,13 @@ export default function ApplyPage() {
         });
 
         const existing = await getApplication(term.id);
+        if (existing && existing.status !== "draft") {
+          clearStoredStep(term.id);
+          setApplicationId(existing.id);
+          setCurrentStep(5);
+          return;
+        }
+
         const isDraft = existing?.status === "draft";
         if (!isDraft) {
           clearStoredStep(term.id);

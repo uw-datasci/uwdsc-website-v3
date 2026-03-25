@@ -2,6 +2,9 @@
 // Step definitions
 // ---------------------------------------------------------------------------
 
+/** Hostname suffix for optional Foundry preview URLs (`{label}.uwdatascience.ca`). */
+export const FOUNDRY_DOMAIN = "uwdatascience.ca";
+
 export const FOUNDRY_STEPS = [
   { id: 1, title: "Introduction" },
   { id: 2, title: "Project Details" },
@@ -25,13 +28,13 @@ export const POSTGRES_PROVIDER_OPTIONS = [
     value: "neon" as const,
     label: "Neon",
     description:
-      "Serverless Postgres tuned for branching and scale-to-zero — best when you only need a database.",
+      "Serverless Postgres tuned for branching and scale-to-zero - best when you only need a database.",
   },
   {
     value: "supabase" as const,
     label: "Supabase",
     description:
-      "Postgres plus auth, storage, and realtime — best when you want the full backend platform.",
+      "Postgres plus auth, storage, and realtime - best when you want the full backend platform.",
   },
 ] as const;
 

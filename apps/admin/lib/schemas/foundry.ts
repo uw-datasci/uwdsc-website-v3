@@ -23,6 +23,23 @@ const databaseEnum = z.enum(
   DATABASE_OPTIONS.map((d) => d.value) as [string, ...string[]],
 );
 
+export const FOUNDRY_SUBDOMAIN_MAX_LEN = 30;
+
+/** DNS label for *.uwdatascience.ca — empty means no custom subdomain. */
+const subdomainLabelSchema = z
+  .string()
+  .trim()
+  .max(
+    FOUNDRY_SUBDOMAIN_MAX_LEN,
+    `Subdomain label must be ${FOUNDRY_SUBDOMAIN_MAX_LEN} characters or fewer`,
+  )
+  .refine(
+    (s) =>
+      s === "" ||
+      /^[a-z0-9](?:[a-z0-9-]{0,28}[a-z0-9])?$/.test(s),
+    "Use lowercase letters, numbers, and hyphens only (e.g. my-app)",
+  );
+
 /** Empty string = no selection (matches team dropdown); refine requires a real choice. */
 const databaseFieldSchema = z
   .union([z.literal(""), databaseEnum])
@@ -81,6 +98,7 @@ export const foundryFormObjectSchema = z.object({
       "Must be lowercase kebab-case (e.g. my-cool-project)",
     ),
   teamAccess: z.string().trim().min(1, "Select a GitHub team"),
+  subdomain: subdomainLabelSchema,
 
   // Step 2 — Tech Stack & Infrastructure
   projectType: z
@@ -111,6 +129,7 @@ export type FoundryFormValues = z.infer<typeof foundryFormObjectSchema>;
 export const foundryFormDefaultValues: FoundryFormValues = {
   projectName: "",
   teamAccess: "",
+  subdomain: "",
   projectType: "",
   database: "",
   postgresProvider: undefined,

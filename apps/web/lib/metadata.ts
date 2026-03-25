@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 
-const siteUrl = "https://www.uwdatascience.ca/"; // Update with your actual domain
+const siteUrl = "https://www.uwdatascience.ca/";
 
 export const baseMetadata: Metadata = {
   metadataBase: new URL(siteUrl),

@@ -153,6 +153,10 @@ export function FoundryForm() {
     control: form.control,
     name: "teamAccess",
   });
+  const watchedSubdomain = useWatch({
+    control: form.control,
+    name: "subdomain",
+  });
   const watchedProjectType = useWatch({
     control: form.control,
     name: "projectType",
@@ -179,6 +183,7 @@ export function FoundryForm() {
       {
         projectName: watchedProjectName,
         teamAccess: watchedTeamAccess,
+        subdomain: watchedSubdomain,
         projectType: watchedProjectType,
         database: watchedDatabase,
         postgresProvider: watchedPostgresProvider,
@@ -190,6 +195,7 @@ export function FoundryForm() {
   }, [
     watchedProjectName,
     watchedTeamAccess,
+    watchedSubdomain,
     watchedProjectType,
     watchedDatabase,
     watchedPostgresProvider,
@@ -229,6 +235,76 @@ export function FoundryForm() {
     setDirection(1);
     setSubmitState("idle");
     setErrorMessage("");
+  };
+
+  const renderFoundryStepContent = (step: number) => {
+    switch (step) {
+      case 1:
+        return <Introduction />;
+      case 2:
+        return <ProjectDetails />;
+      case 3:
+        return <TechStack />;
+      case 4:
+        return <Description />;
+      default:
+        return null;
+    }
+  };
+
+  const renderPrimaryFooterAction = () => {
+    if (step < FOUNDRY_STEPS.length) {
+      return (
+        <Button
+          type="button"
+          onClick={goNext}
+          disabled={!isCurrentStepValid}
+        >
+          {step === 1 ? "Start" : "Next"}
+          <ChevronRight className="size-4" />
+        </Button>
+      );
+    }
+
+    return (
+      <Button asChild className="relative gap-2">
+        <motion.button
+          type="button"
+          onClick={form.handleSubmit(onSubmit)}
+          disabled={!isCurrentStepValid || submitState === "submitting"}
+          variants={launchProjectButtonVariants}
+          initial="rest"
+          animate={submitState === "submitting" ? "processing" : "rest"}
+          whileHover={submitState === "submitting" ? undefined : "hover"}
+          whileTap={
+            submitState === "submitting" ? undefined : { scale: 0.98 }
+          }
+        >
+          <span
+            className="pointer-events-none absolute inset-0 overflow-hidden rounded-full"
+            aria-hidden
+          >
+            <motion.span
+              variants={launchProjectOverlayVariants}
+              className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-green-600 to-emerald-500"
+            />
+          </span>
+          <span className="relative z-10 flex items-center gap-2">
+            {submitState === "submitting" ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                Launching…
+              </>
+            ) : (
+              <>
+                <Rocket className="size-4" />
+                Launch Project
+              </>
+            )}
+          </span>
+        </motion.button>
+      </Button>
+    );
   };
 
   switch (submitState) {
@@ -334,15 +410,12 @@ export function FoundryForm() {
                     transition={{ duration: 0.25, ease: "easeInOut" }}
                     className="flex flex-col gap-5"
                   >
-                    {step === 1 && <Introduction />}
-                    {step === 2 && <ProjectDetails />}
-                    {step === 3 && <TechStack />}
-                    {step === 4 && <Description />}
+                    {renderFoundryStepContent(step)}
                   </motion.div>
                 </AnimatePresence>
               </CardContent>
 
-              <CardFooter className="flex justify-between pt-2">
+              <CardFooter className="flex justify-between pt-4">
                 <Button
                   type="button"
                   variant="ghost"
@@ -353,62 +426,7 @@ export function FoundryForm() {
                   Back
                 </Button>
 
-                {step < FOUNDRY_STEPS.length ? (
-                  <Button
-                    type="button"
-                    onClick={goNext}
-                    disabled={!isCurrentStepValid}
-                  >
-                    Next
-                    <ChevronRight className="size-4" />
-                  </Button>
-                ) : (
-                  <Button asChild className="relative gap-2">
-                    <motion.button
-                      type="button"
-                      onClick={form.handleSubmit(onSubmit)}
-                      disabled={
-                        !isCurrentStepValid || submitState === "submitting"
-                      }
-                      variants={launchProjectButtonVariants}
-                      initial="rest"
-                      animate={
-                        submitState === "submitting" ? "processing" : "rest"
-                      }
-                      whileHover={
-                        submitState === "submitting" ? undefined : "hover"
-                      }
-                      whileTap={
-                        submitState === "submitting"
-                          ? undefined
-                          : { scale: 0.98 }
-                      }
-                    >
-                      <span
-                        className="pointer-events-none absolute inset-0 overflow-hidden rounded-full"
-                        aria-hidden
-                      >
-                        <motion.span
-                          variants={launchProjectOverlayVariants}
-                          className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-green-600 to-emerald-500"
-                        />
-                      </span>
-                      <span className="relative z-10 flex items-center gap-2">
-                        {submitState === "submitting" ? (
-                          <>
-                            <Loader2 className="size-4 animate-spin" />
-                            Launching…
-                          </>
-                        ) : (
-                          <>
-                            <Rocket className="size-4" />
-                            Launch Project
-                          </>
-                        )}
-                      </span>
-                    </motion.button>
-                  </Button>
-                )}
+                {renderPrimaryFooterAction()}
               </CardFooter>
             </div>
           </Form>

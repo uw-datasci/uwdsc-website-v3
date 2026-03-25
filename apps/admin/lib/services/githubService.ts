@@ -1,3 +1,5 @@
+import { FOUNDRY_DOMAIN } from "@/constants/foundry";
+
 interface GitHubOrgTeam {
   slug: string;
   name: string;
@@ -12,6 +14,7 @@ interface GitHubOrgTemplateRepo {
 interface FoundryLaunchPayload {
   projectName: string;
   teamAccess: string;
+  subdomain: string;
   projectType: string;
   database: string;
   postgresProvider?: string;
@@ -160,6 +163,7 @@ class GitHubService {
    */
   async launchFoundryProject(payload: FoundryLaunchPayload): Promise<void> {
     const repoPath = `/repos/${this.org}/${this.foundryRepo}`;
+    const subdomainHost = `${payload.subdomain}.${FOUNDRY_DOMAIN}`;
 
     if (foundryWorkflowId) {
       const workflowUrl = `${this.baseUrl}${repoPath}/actions/workflows/${foundryWorkflowId}/dispatches`;
@@ -168,6 +172,7 @@ class GitHubService {
         inputs: {
           project_name: payload.projectName,
           team_access: payload.teamAccess,
+          subdomain: subdomainHost,
           project_type: payload.projectType,
           database: payload.database,
           postgres_provider: payload.postgresProvider ?? "",
@@ -204,7 +209,10 @@ class GitHubService {
     const dispatchUrl = `${this.baseUrl}${repoPath}/dispatches`;
     const dispatchBody = {
       event_type: "foundry-launch",
-      client_payload: payload,
+      client_payload: {
+        ...payload,
+        subdomain: subdomainHost,
+      },
     };
 
     try {

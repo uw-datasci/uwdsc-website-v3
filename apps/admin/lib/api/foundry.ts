@@ -4,21 +4,9 @@
  * Used by Foundry for fetching org teams, etc.
  */
 
+import type { GitHubTeam, GitHubTemplateOption } from "@uwdsc/common/types";
 import { createApiError } from "./error";
 import type { FoundryFormValues } from "@/lib/schemas/foundry";
-
-export interface GitHubTeam {
-  value: string;
-  label: string;
-}
-
-export interface GitHubTemplateOption {
-  value: string;
-  label: string;
-  name: string;
-  description: string;
-  language: string;
-}
 
 /**
  * Get teams in the GitHub organization.

@@ -19,7 +19,8 @@ import {
   FOUNDRY_SUBDOMAIN_MAX_LEN,
   type FoundryFormValues,
 } from "@/lib/schemas/foundry";
-import { getGitHubTeams, GitHubTeam } from "@/lib/api/github";
+import type { GitHubTeam } from "@uwdsc/common/types";
+import { getGitHubTeams } from "@/lib/api/foundry";
 import { useEffect, useState } from "react";
 
 export function ProjectDetails() {

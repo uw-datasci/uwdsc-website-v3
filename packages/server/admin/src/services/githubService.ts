@@ -1,5 +1,3 @@
-import { FOUNDRY_DOMAIN } from "@/constants/foundry";
-
 interface GitHubOrgTeam {
   slug: string;
   name: string;
@@ -42,6 +40,7 @@ class GitHubService {
   private readonly baseUrl: string = "https://api.github.com";
   private readonly templateTopic: string = "nexus-template";
   private readonly foundryRepo: string = "nexus-foundry";
+  private readonly foundryDomain: string = "uwdatascience.ca";
 
   constructor() {
     this.headers = {
@@ -63,7 +62,6 @@ class GitHubService {
       const res = await fetch(url, {
         method: "GET",
         headers: this.headers,
-        next: { revalidate: 300 },
       });
 
       if (!res.ok) {
@@ -115,7 +113,6 @@ class GitHubService {
       const res = await fetch(url, {
         method: "GET",
         headers: this.headers,
-        next: { revalidate: 300 },
       });
 
       if (!res.ok) {
@@ -163,7 +160,7 @@ class GitHubService {
    */
   async launchFoundryProject(payload: FoundryLaunchPayload): Promise<void> {
     const repoPath = `/repos/${this.org}/${this.foundryRepo}`;
-    const subdomainHost = `${payload.subdomain}.${FOUNDRY_DOMAIN}`;
+    const subdomainHost = `${payload.subdomain}.${this.foundryDomain}`;
 
     if (foundryWorkflowId) {
       const workflowUrl = `${this.baseUrl}${repoPath}/actions/workflows/${foundryWorkflowId}/dispatches`;

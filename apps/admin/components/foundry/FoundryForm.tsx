@@ -29,7 +29,7 @@ import {
   foundryFormDefaultValues,
   type FoundryFormValues,
 } from "@/lib/schemas/foundry";
-import { launchFoundryProject } from "@/lib/api/github";
+import { launchFoundryProject } from "@/lib/api/foundry";
 import { FOUNDRY_STEPS } from "@/constants/foundry";
 import { FOUNDRY_STEP_FIELDS, isFoundryStepValid } from "@/lib/utils/foundry";
 import { ProjectDetails, TechStack, Description, Introduction } from "./steps";
@@ -255,11 +255,7 @@ export function FoundryForm() {
   const renderPrimaryFooterAction = () => {
     if (step < FOUNDRY_STEPS.length) {
       return (
-        <Button
-          type="button"
-          onClick={goNext}
-          disabled={!isCurrentStepValid}
-        >
+        <Button type="button" onClick={goNext} disabled={!isCurrentStepValid}>
           {step === 1 ? "Start" : "Next"}
           <ChevronRight className="size-4" />
         </Button>
@@ -276,9 +272,7 @@ export function FoundryForm() {
           initial="rest"
           animate={submitState === "submitting" ? "processing" : "rest"}
           whileHover={submitState === "submitting" ? undefined : "hover"}
-          whileTap={
-            submitState === "submitting" ? undefined : { scale: 0.98 }
-          }
+          whileTap={submitState === "submitting" ? undefined : { scale: 0.98 }}
         >
           <span
             className="pointer-events-none absolute inset-0 overflow-hidden rounded-full"

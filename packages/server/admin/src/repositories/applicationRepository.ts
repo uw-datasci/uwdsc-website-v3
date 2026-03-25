@@ -58,7 +58,9 @@ export class ApplicationRepository extends BaseRepository {
     `;
 
     // 3. Get all answers with question text
-    const answers = await this.sql<(AnswerWithQuestion & { application_id: string })[]>`
+    const answers = await this.sql<
+      (AnswerWithQuestion & { application_id: string })[]
+    >`
       SELECT
         a.id,
         a.application_id,

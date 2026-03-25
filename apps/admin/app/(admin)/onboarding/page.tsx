@@ -14,17 +14,28 @@ import {
   General,
   Submitted,
 } from "@/components/onboarding/steps";
-import { OnboardingFormValues, OnboardingDefaultValues, onboardingSchema } from "@/lib/schemas/onboarding";
+import {
+  OnboardingFormValues,
+  OnboardingDefaultValues,
+  onboardingSchema,
+} from "@/lib/schemas/onboarding";
 import { useForm } from "react-hook-form";
 import { ExecPosition } from "@uwdsc/common/types";
 
 const STEP_FIELDS: Record<number, (keyof OnboardingFormValues)[]> = {
-  1: ["fullname", "gmail", "term_type", "in_waterloo", "role", "consent_website"],
+  1: [
+    "fullname",
+    "gmail",
+    "term_type",
+    "in_waterloo",
+    "role",
+    "consent_website",
+  ],
   2: ["discord", "consent_instagram", "datasci_competency"],
 };
 
 const STEP_NAMES = [
-  "Exec Onboarding", 
+  "Exec Onboarding",
   "Exec Profile",
   "Socials & Background",
 ] as const;
@@ -60,7 +71,13 @@ export default function OnboardingPage() {
   });
 
   const prefillFromUser = useCallback(
-    (user: { first_name?: string | null; last_name?: string | null; email?: string | null } | null) => {
+    (
+      user: {
+        first_name?: string | null;
+        last_name?: string | null;
+        email?: string | null;
+      } | null,
+    ) => {
       if (!user) return;
 
       const firstName = user.first_name?.trim() ?? "";
@@ -84,7 +101,7 @@ export default function OnboardingPage() {
     [form],
   );
 
-   useEffect(() => {
+  useEffect(() => {
     async function fetchInitialData() {
       setIsFetching(true);
       try {
@@ -98,14 +115,15 @@ export default function OnboardingPage() {
         setCurrentStep(1);
       } catch (err) {
         console.error("Failed to fetch application data:", err);
-        setFetchError(err instanceof Error ? err.message : "Failed to load application");
+        setFetchError(
+          err instanceof Error ? err.message : "Failed to load application",
+        );
       } finally {
         setIsFetching(false);
       }
     }
     fetchInitialData();
   }, [prefillFromUser]);
-
 
   const handleStartOnboarding = useCallback(() => {
     setIsLoading(true);
@@ -154,13 +172,13 @@ export default function OnboardingPage() {
     goToStep(currentStep - 1);
   };
 
-  
   const renderButton = () => {
     const isLastStep = currentStep === 2;
 
     let buttonClassName = "hover:scale-105 ";
     if (isLastStep) {
-      buttonClassName += "bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:opacity-90 ";
+      buttonClassName +=
+        "bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:opacity-90 ";
     } else {
       buttonClassName +=
         "bg-secondary-foreground text-slate-800 hover:bg-secondary-foreground/80";
@@ -198,13 +216,9 @@ export default function OnboardingPage() {
           />
         );
       case 1:
-        return (
-          <ExecProfile form={form} execPositions={positions} />
-        );
+        return <ExecProfile form={form} execPositions={positions} />;
       case 2:
-        return (
-          <General form={form} />
-        );
+        return <General form={form} />;
       default:
         return null;
     }
@@ -229,13 +243,11 @@ export default function OnboardingPage() {
   }
 
   if (currentStep === 3) {
-    return (
-        <Submitted name={form.getValues("fullname")} />
-    );
+    return <Submitted name={form.getValues("fullname")} />;
   }
 
   return (
-   <div className="mt-8 px-4 h-[calc(100vh-130px)] ">
+    <div className="mt-8 px-4 h-[calc(100vh-130px)] ">
       {/* Header */}
       <div className="mb-4 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
@@ -243,12 +255,15 @@ export default function OnboardingPage() {
         </div>
       </div>
 
-        {/* Application Cards */}
-        <Card className={`mx-auto min-h-[calc(100vh-300px)] max-w-4xl shadow-md backdrop-blur-md border border-white/10 ${currentStep === 0 ? "bg-gradient-to-r from-[rgba(80,0,120,0.85)] to-[rgba(8,88,150,0.85)]" : ""}`} >
-        <CardHeader className={`${currentStep === 0 ? "" : "bg-gradient-to-r from-[rgba(80,0,120,0.85)] to-[rgba(59,130,246,0.75)]"} rounded-t-xl -mt-6 py-4}`}>
-
-        {/* Step Title with Icon */}
-          { currentStep > 0 && STEP_NAMES[currentStep] && (
+      {/* Application Cards */}
+      <Card
+        className={`mx-auto min-h-[calc(100vh-300px)] max-w-4xl shadow-md backdrop-blur-md border border-white/10 ${currentStep === 0 ? "bg-gradient-to-r from-[rgba(80,0,120,0.85)] to-[rgba(8,88,150,0.85)]" : ""}`}
+      >
+        <CardHeader
+          className={`${currentStep === 0 ? "" : "bg-gradient-to-r from-[rgba(80,0,120,0.85)] to-[rgba(59,130,246,0.75)]"} rounded-t-xl -mt-6 py-4}`}
+        >
+          {/* Step Title with Icon */}
+          {currentStep > 0 && STEP_NAMES[currentStep] && (
             <div className="flex justify-between items-center">
               <div>
                 <CardTitle className="flex items-center gap-2 pt-2 text-2xl">
@@ -280,14 +295,14 @@ export default function OnboardingPage() {
                 {renderStep()}
               </motion.div>
             </AnimatePresence>
-            
-             {currentStep !== 0 && currentStep !== 3 && (
+
+            {currentStep !== 0 && currentStep !== 3 && (
               <div className="flex justify-between pt-4">
                 <Button
                   size="lg"
                   variant="outline"
                   onClick={handlePrevious}
-                  disabled= {currentStep === -1}
+                  disabled={currentStep === -1}
                   className="hover:scale-105"
                 >
                   <MoveLeft className="size-4" />
@@ -299,7 +314,7 @@ export default function OnboardingPage() {
             )}
           </div>
         </CardContent>
-        </Card>
+      </Card>
     </div>
   );
 }

@@ -34,7 +34,9 @@ export class FileRepository {
   async deleteFiles(paths: string[]): Promise<void> {
     if (paths.length === 0) return;
 
-    const { error } = await this.supabase.storage.from(this.bucketName).remove(paths);
+    const { error } = await this.supabase.storage
+      .from(this.bucketName)
+      .remove(paths);
 
     if (error) {
       throw new Error(`Failed to delete files: ${error.message}`);
@@ -67,7 +69,10 @@ export class FileRepository {
    * @param path - The file path within the bucket
    * @param expiresIn - URL expiry in seconds (default: 1 hour)
    */
-  async getSignedUrl(path: string, expiresIn: number = 3600): Promise<string | null> {
+  async getSignedUrl(
+    path: string,
+    expiresIn: number = 3600,
+  ): Promise<string | null> {
     const { data, error } = await this.supabase.storage
       .from(this.bucketName)
       .createSignedUrl(path, expiresIn);

@@ -17,8 +17,8 @@ export function Submitted({ name }: SubmittedProps) {
         {name && <p className="text-lg text-blue-400 font-semibold">{name}</p>}
       </div>
       <p className="text-gray-300 max-w-md mx-auto">
-        Your onboarding has been submitted successfully. The admin team will review your information
-        and contact you shortly with next steps.
+        Your onboarding has been submitted successfully. The admin team will
+        review your information and contact you shortly with next steps.
       </p>
       <p className="text-sm text-gray-400 pt-4">
         Thank you for being part of the DSC executive team!

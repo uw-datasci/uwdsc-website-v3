@@ -75,14 +75,18 @@ export function EditQuestionDialog({
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {isViewing ? "View question" : isEditing ? "Edit question" : "New question"}
+            {isViewing
+              ? "View question"
+              : isEditing
+                ? "Edit question"
+                : "New question"}
           </DialogTitle>
           <DialogDescription>
             {isViewing
               ? "Review question details. This question is outside your editable scope."
               : isEditing
-              ? "Update copy, validation, and which role this prompt belongs to."
-              : "Create a prompt for an open role applicants can select."}
+                ? "Update copy, validation, and which role this prompt belongs to."
+                : "Create a prompt for an open role applicants can select."}
           </DialogDescription>
         </DialogHeader>
 

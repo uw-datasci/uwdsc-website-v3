@@ -86,9 +86,8 @@ class ApplicationService {
     relationId: number,
     data: QuestionUpsertInput,
   ): Promise<AppQuestion | null> {
-    const relationPositionId = await this.repository.getRelationPositionId(
-      relationId,
-    );
+    const relationPositionId =
+      await this.repository.getRelationPositionId(relationId);
     if (
       relationPositionId === null ||
       !this.canAccessRelation(scope, relationPositionId)
@@ -117,9 +116,8 @@ class ApplicationService {
     scope: QuestionScope,
     relationId: number,
   ): Promise<boolean> {
-    const relationPositionId = await this.repository.getRelationPositionId(
-      relationId,
-    );
+    const relationPositionId =
+      await this.repository.getRelationPositionId(relationId);
     if (
       relationPositionId === null ||
       !this.canAccessRelation(scope, relationPositionId)

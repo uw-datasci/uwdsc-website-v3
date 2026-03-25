@@ -10,12 +10,7 @@ export const FOUNDRY_STEP_FIELDS: Record<number, (keyof FoundryFormValues)[]> =
     // Step 1 (Introduction) has no required fields.
     1: [],
     2: ["projectName", "teamAccess"],
-    3: [
-      "projectType",
-      "database",
-      "postgresProvider",
-      "mongoClient",
-    ],
+    3: ["projectType", "database", "postgresProvider", "mongoClient"],
     4: ["description"],
   };
 

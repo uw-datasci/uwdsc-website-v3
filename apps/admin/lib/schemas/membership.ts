@@ -23,14 +23,7 @@ export const editMemberSchema = z.object({
   last_name: z.string().trim().min(1, "Last name is required").optional(),
   wat_iam: z.string().trim().optional(),
   faculty: z
-    .enum([
-      "math",
-      "engineering",
-      "science",
-      "arts",
-      "health",
-      "environment",
-    ])
+    .enum(["math", "engineering", "science", "arts", "health", "environment"])
     .optional(),
   term: z.string().trim().optional(),
   is_math_soc_member: z.boolean().optional(),

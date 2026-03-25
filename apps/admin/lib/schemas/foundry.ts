@@ -9,10 +9,7 @@ export { DATABASE_OPTIONS } from "@/constants/foundry";
 export type { DatabaseValue } from "@/constants/foundry";
 
 const postgresProviderEnum = z.enum(
-  POSTGRES_PROVIDER_OPTIONS.map((o) => o.value) as [
-    string,
-    ...string[],
-  ],
+  POSTGRES_PROVIDER_OPTIONS.map((o) => o.value) as [string, ...string[]],
 );
 
 const mongoClientEnum = z.enum(
@@ -58,10 +55,7 @@ function refineDatabaseStack(
 
 export const foundryStep3Schema = z
   .object({
-    projectType: z
-      .string()
-      .trim()
-      .min(1, "Select a project template"),
+    projectType: z.string().trim().min(1, "Select a project template"),
     database: databaseFieldSchema,
     postgresProvider: postgresProviderEnum.optional(),
     mongoClient: mongoClientEnum.optional(),
@@ -83,10 +77,7 @@ export const foundryFormObjectSchema = z.object({
   teamAccess: z.string().trim().min(1, "Select a GitHub team"),
 
   // Step 2 — Tech Stack & Infrastructure
-  projectType: z
-    .string()
-    .trim()
-    .min(1, "Select a project template"),
+  projectType: z.string().trim().min(1, "Select a project template"),
   database: databaseFieldSchema,
   postgresProvider: postgresProviderEnum.optional(),
   mongoClient: mongoClientEnum.optional(),
@@ -102,9 +93,8 @@ export const foundryFormObjectSchema = z.object({
     .max(1000, "Description must be 1000 characters or fewer"),
 });
 
-export const foundryFormSchema = foundryFormObjectSchema.superRefine(
-  refineDatabaseStack,
-);
+export const foundryFormSchema =
+  foundryFormObjectSchema.superRefine(refineDatabaseStack);
 
 export type FoundryFormValues = z.infer<typeof foundryFormObjectSchema>;
 

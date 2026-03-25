@@ -76,7 +76,9 @@ export function QuestionsBankSection({
           <Card>
             <CardHeader className="pb-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <CardTitle className="text-base">Your subteam questions</CardTitle>
+                <CardTitle className="text-base">
+                  Your subteam questions
+                </CardTitle>
                 <Button
                   type="button"
                   size="icon"
@@ -104,7 +106,9 @@ export function QuestionsBankSection({
 
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Other subteam questions</CardTitle>
+              <CardTitle className="text-base">
+                Other subteam questions
+              </CardTitle>
               <CardDescription>
                 Visible for context only. Questions outside your VP scope are
                 read-only.

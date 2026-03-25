@@ -1,6 +1,6 @@
 "use client";
 
-import React, {  } from "react";
+import React from "react";
 import {
   Card,
   CardContent,
@@ -20,96 +20,113 @@ interface GeneralProps {
   readonly form: UseFormReturn<OnboardingFormValues>;
 }
 
-export function General({ form }: GeneralProps) { 
-
-    const consentInstagram = useWatch({
-        control: form.control,
-        name: "consent_instagram",
-    });
+export function General({ form }: GeneralProps) {
+  const consentInstagram = useWatch({
+    control: form.control,
+    name: "consent_instagram",
+  });
 
   return (
     <div className="space-y-6 py-8">
-        <Form {...form} >
+      <Form {...form}>
         <div className="grid grid-cols-1 gap-6">
-            {/* Socials + consent card */}
-            <Card className="border-white/20 bg-[var(--grey4)] h-full">
+          {/* Socials + consent card */}
+          <Card className="border-white/20 bg-[var(--grey4)] h-full">
             <CardHeader>
-                <CardTitle className="flex items-center text-xl">Socials</CardTitle>
+              <CardTitle className="flex items-center text-xl">
+                Socials
+              </CardTitle>
             </CardHeader>
-                <CardContent className="space-y-6 h-full flex flex-col">
-        
-                <FormField
+            <CardContent className="space-y-6 h-full flex flex-col">
+              <FormField
                 control={form.control}
                 name="discord"
                 render={renderTextField({
-                    placeholder: "Please enter your Discord username",
-                    label: "Discord",
-                    required: true,
+                  placeholder: "Please enter your Discord username",
+                  label: "Discord",
+                  required: true,
                 })}
-                />
-                
-                <FormField
+              />
+
+              <FormField
                 control={form.control}
                 name="consent_instagram"
-                render={({ field }) => 
-                    renderRadioField({
+                render={({ field }) =>
+                  renderRadioField({
                     label: "Can we tag you on Instagram on our posts?",
                     required: true,
-                })({ field })}
-                />
+                  })({ field })
+                }
+              />
 
-                {consentInstagram && (
-                    <FormField
-                    control={form.control}
-                    name="instagram"
-                    render={({ field }) => renderTextField({
-                        placeholder: "Instagram username",
-                        label: "Instagram Handle",
-                    })({field})}
-                    />
-                )}
-                </CardContent>
-            </Card>
-              
-        {/* Technical Background*/}
-        <Card className="border-white/20 bg-[var(--grey4)]">
+              {consentInstagram && (
+                <FormField
+                  control={form.control}
+                  name="instagram"
+                  render={({ field }) =>
+                    renderTextField({
+                      placeholder: "Instagram username",
+                      label: "Instagram Handle",
+                    })({ field })
+                  }
+                />
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Technical Background*/}
+          <Card className="border-white/20 bg-[var(--grey4)]">
             <CardHeader>
-                <CardTitle className="flex items-center text-xl">Technical Background</CardTitle>
+              <CardTitle className="flex items-center text-xl">
+                Technical Background
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6 h-full flex flex-col">
-                <FormField
+              <FormField
                 control={form.control}
                 name="datasci_competency"
-                render={({ field }) => renderScaleField({
-                label: "Data Science Competency",
-                labels: ["None", "Beginner", "Intermediate", "Advanced", "Expert"],
-                required: true,
-                })({field: {
-                ...field,
-                value: String(field.value),              // convert number → string for display
-                onChange: (v: string) => field.onChange(Number(v)), // convert string → number for storage
-                } 
-                })} />
+                render={({ field }) =>
+                  renderScaleField({
+                    label: "Data Science Competency",
+                    labels: [
+                      "None",
+                      "Beginner",
+                      "Intermediate",
+                      "Advanced",
+                      "Expert",
+                    ],
+                    required: true,
+                  })({
+                    field: {
+                      ...field,
+                      value: String(field.value), // convert number → string for display
+                      onChange: (v: string) => field.onChange(Number(v)), // convert string → number for storage
+                    },
+                  })
+                }
+              />
             </CardContent>
-        </Card>  
-        </div>    
+          </Card>
+        </div>
         {/* Additional Comments */}
-            <Card className="border-white/20 bg-[var(--grey4)]">
-                <CardHeader>
-                    <CardTitle className="flex items-center text-xl">Additional Comments</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    <FormField
-                    control={form.control}
-                    name="anything_else"
-                    render={renderTextField({
-                        placeholder: "",
-                        label: "Anything else we should know?",
-                    })}
-                    /> 
-                </CardContent>
-            </Card>
-        </Form>
+        <Card className="border-white/20 bg-[var(--grey4)]">
+          <CardHeader>
+            <CardTitle className="flex items-center text-xl">
+              Additional Comments
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <FormField
+              control={form.control}
+              name="anything_else"
+              render={renderTextField({
+                placeholder: "",
+                label: "Anything else we should know?",
+              })}
+            />
+          </CardContent>
+        </Card>
+      </Form>
     </div>
   );
 }

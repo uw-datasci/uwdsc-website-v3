@@ -160,7 +160,8 @@ export function Positions({ form, positions }: PositionsProps) {
                             : undefined,
                         description:
                           q.max_length != null
-                            ? (value) => `${value.length}/${q.max_length} characters`
+                            ? (value) =>
+                                `${value.length}/${q.max_length} characters`
                             : undefined,
                       })
                 }
@@ -232,7 +233,8 @@ export function Positions({ form, positions }: PositionsProps) {
                             : undefined,
                         description:
                           q.max_length != null
-                            ? (value) => `${value.length}/${q.max_length} characters`
+                            ? (value) =>
+                                `${value.length}/${q.max_length} characters`
                             : undefined,
                       })
                 }
@@ -304,7 +306,8 @@ export function Positions({ form, positions }: PositionsProps) {
                             : undefined,
                         description:
                           q.max_length != null
-                            ? (value) => `${value.length}/${q.max_length} characters`
+                            ? (value) =>
+                                `${value.length}/${q.max_length} characters`
                             : undefined,
                       })
                 }

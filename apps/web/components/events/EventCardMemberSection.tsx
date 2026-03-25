@@ -22,7 +22,9 @@ export function EventCardMemberSection() {
       <p className="text-[10px] sm:text-xs text-white/50 uppercase tracking-[0.2em] mb-2 sm:mb-3 font-semibold">
         {profile?.role ?? "member"}
       </p>
-      <p className="text-white font-medium truncate text-sm sm:text-base">{displayName}</p>
+      <p className="text-white font-medium truncate text-sm sm:text-base">
+        {displayName}
+      </p>
       <p className="text-white/80 text-xs sm:text-sm mt-1.5 sm:mt-2 font-mono truncate">
         {profile?.wat_iam ?? "—"}
       </p>

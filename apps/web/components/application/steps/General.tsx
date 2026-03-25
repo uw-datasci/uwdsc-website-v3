@@ -82,7 +82,8 @@ export function General({ form, questions }: GeneralProps) {
                             : undefined,
                         description:
                           q.max_length != null
-                            ? (value) => `${value.length}/${q.max_length} characters`
+                            ? (value) =>
+                                `${value.length}/${q.max_length} characters`
                             : undefined,
                       })
                 }

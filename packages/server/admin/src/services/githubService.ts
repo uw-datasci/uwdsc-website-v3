@@ -169,7 +169,7 @@ class GitHubService {
         inputs: {
           project_name: payload.projectName,
           team_access: payload.teamAccess,
-          subdomain: subdomainHost,
+          domain: subdomainHost,
           project_type: payload.projectType,
           database: payload.database,
           postgres_provider: payload.postgresProvider ?? "",

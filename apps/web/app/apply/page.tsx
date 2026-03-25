@@ -9,6 +9,7 @@ import {
   getProfileAutofill,
   updateApplication,
 } from "@/lib/api/application";
+import { getResumeStatus } from "@/lib/api/resume";
 
 import {
   applicationDefaultValues,
@@ -90,6 +91,37 @@ export default function ApplyPage() {
 
   const { setProgressValue } = useApplicationProgress();
 
+  const getStepStorageKey = useCallback(
+    (termId: string) => `application:current-step:${termId}`,
+    [],
+  );
+
+  const readStoredStep = useCallback(
+    (termId: string): number | null => {
+      try {
+        const rawValue = window.localStorage.getItem(getStepStorageKey(termId));
+        if (rawValue === null || rawValue.trim() === "") return null;
+        const parsed = Number(rawValue);
+        if (!Number.isInteger(parsed)) return null;
+        return parsed;
+      } catch {
+        return null;
+      }
+    },
+    [getStepStorageKey],
+  );
+
+  const clearStoredStep = useCallback(
+    (termId: string) => {
+      try {
+        window.localStorage.removeItem(getStepStorageKey(termId));
+      } catch {
+        // no-op
+      }
+    },
+    [getStepStorageKey],
+  );
+
   const form = useForm<AppFormValues>({
     resolver: zodResolver(applicationSchema),
     defaultValues: applicationDefaultValues,
@@ -114,6 +146,8 @@ export default function ApplyPage() {
           autofill.first_name && autofill.last_name
             ? `${autofill.first_name} ${autofill.last_name}`.trim()
             : "";
+        const resumeStatus = await getResumeStatus();
+
         form.reset({
           ...applicationDefaultValues,
           full_name: fullName,
@@ -122,11 +156,15 @@ export default function ApplyPage() {
           personal_email: form.getValues("personal_email") || "",
           program: form.getValues("program") || "",
           location: form.getValues("location") || "",
+          resumeKey: resumeStatus.url ?? "",
         });
 
         const existing = await getApplication(term.id);
         const isDraft = existing?.status === "draft";
-        if (!isDraft) return;
+        if (!isDraft) {
+          clearStoredStep(term.id);
+          return;
+        }
 
         setApplicationId(existing.id);
         const { generalAnswers, pos1Answers, pos2Answers, pos3Answers } =
@@ -150,9 +188,13 @@ export default function ApplyPage() {
           position_2_answers: pos2Answers,
           position_3: pos3?.position_id ?? "",
           position_3_answers: pos3Answers,
-          resumeKey: "",
+          resumeKey: resumeStatus.url ?? "",
         });
-        setCurrentStep(1);
+
+        const storedStep = readStoredStep(term.id);
+        const initialStep =
+          storedStep && storedStep >= 1 && storedStep <= 4 ? storedStep : 1;
+        setCurrentStep(initialStep);
       } catch (err) {
         console.error("Failed to fetch application data:", err);
         setFetchError(
@@ -163,7 +205,25 @@ export default function ApplyPage() {
       }
     }
     fetchInitialData();
-  }, [form]);
+  }, [form, clearStoredStep, readStoredStep]);
+
+  useEffect(() => {
+    if (!currentTerm) return;
+    if (currentStep === 5) {
+      clearStoredStep(currentTerm.id);
+      return;
+    }
+    if (currentStep < 1 || currentStep > 4) return;
+
+    try {
+      window.localStorage.setItem(
+        getStepStorageKey(currentTerm.id),
+        String(currentStep),
+      );
+    } catch {
+      // no-op
+    }
+  }, [currentStep, currentTerm, clearStoredStep, getStepStorageKey]);
 
   useEffect(() => {
     setProgressValue(currentStep === 0 ? -1 : currentStep);
@@ -234,7 +294,7 @@ export default function ApplyPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [applicationId, currentStep, buildUpdatePayload, goToStep]);
+  }, [applicationId, buildUpdatePayload, currentStep, goToStep]);
 
   const handlePrevious = () => {
     goToStep(currentStep - 1);

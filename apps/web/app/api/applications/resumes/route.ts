@@ -3,6 +3,24 @@ import { tryGetCurrentUser } from "@/lib/api/utils";
 import { createResumeService } from "@/lib/services";
 import { NextRequest } from "next/server";
 
+export async function GET(): Promise<Response> {
+  try {
+    const { user, isUnauthorized } = await tryGetCurrentUser();
+    if (!user) return isUnauthorized;
+
+    const resumeService = await createResumeService();
+    const url = await resumeService.getResumeUrl(user.id);
+
+    return ApiResponse.ok({
+      hasResume: Boolean(url),
+      url,
+    });
+  } catch (error) {
+    console.error("Error fetching resume status:", error);
+    return ApiResponse.serverError(error, "Failed to fetch resume status");
+  }
+}
+
 export async function POST(request: NextRequest): Promise<Response> {
   try {
     const { user, isUnauthorized } = await tryGetCurrentUser();

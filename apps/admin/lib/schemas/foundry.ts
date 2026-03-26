@@ -31,9 +31,7 @@ const subdomainLabelSchema = z
     `Subdomain label must be ${FOUNDRY_SUBDOMAIN_MAX_LEN} characters or fewer`,
   )
   .refine(
-    (s) =>
-      s === "" ||
-      /^[a-z0-9](?:[a-z0-9-]{0,28}[a-z0-9])?$/.test(s),
+    (s) => s === "" || /^[a-z0-9](?:[a-z0-9-]{0,28}[a-z0-9])?$/.test(s),
     "Use lowercase letters, numbers, and hyphens only (e.g. my-app)",
   );
 

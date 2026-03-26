@@ -22,6 +22,7 @@ import {
   isStepValid,
   partitionDraftAnswers,
 } from "@/lib/utils/application";
+import { useApplicationStepStorage } from "@/hooks/useApplicationStepStorage";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -91,41 +92,15 @@ export default function ApplyPage() {
 
   const { setProgressValue } = useApplicationProgress();
 
-  const getStepStorageKey = useCallback(
-    (termId: string) => `application:current-step:${termId}`,
-    [],
-  );
-
-  const readStoredStep = useCallback(
-    (termId: string): number | null => {
-      try {
-        const rawValue = window.localStorage.getItem(getStepStorageKey(termId));
-        if (rawValue === null || rawValue.trim() === "") return null;
-        const parsed = Number(rawValue);
-        if (!Number.isInteger(parsed)) return null;
-        return parsed;
-      } catch {
-        return null;
-      }
-    },
-    [getStepStorageKey],
-  );
-
-  const clearStoredStep = useCallback(
-    (termId: string) => {
-      try {
-        window.localStorage.removeItem(getStepStorageKey(termId));
-      } catch {
-        // no-op
-      }
-    },
-    [getStepStorageKey],
-  );
-
   const form = useForm<AppFormValues>({
     resolver: zodResolver(applicationSchema),
     defaultValues: applicationDefaultValues,
     mode: "onTouched",
+  });
+
+  const { readStoredStep, clearStoredStep } = useApplicationStepStorage({
+    termId: currentTerm?.id ?? null,
+    currentStep,
   });
 
   useEffect(() => {
@@ -213,24 +188,6 @@ export default function ApplyPage() {
     }
     fetchInitialData();
   }, [form, clearStoredStep, readStoredStep]);
-
-  useEffect(() => {
-    if (!currentTerm) return;
-    if (currentStep === 5) {
-      clearStoredStep(currentTerm.id);
-      return;
-    }
-    if (currentStep < 1 || currentStep > 4) return;
-
-    try {
-      window.localStorage.setItem(
-        getStepStorageKey(currentTerm.id),
-        String(currentStep),
-      );
-    } catch {
-      // no-op
-    }
-  }, [currentStep, currentTerm, clearStoredStep, getStepStorageKey]);
 
   useEffect(() => {
     setProgressValue(currentStep === 0 ? -1 : currentStep);

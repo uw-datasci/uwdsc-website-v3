@@ -26,7 +26,10 @@ class EventService {
     try {
       return await this.repository.getAllEvents();
     } catch (error) {
-      throw new ApiError(`Failed to get all events: ${(error as Error).message}`, 500);
+      throw new ApiError(
+        `Failed to get all events: ${(error as Error).message}`,
+        500,
+      );
     }
   }
 
@@ -37,7 +40,10 @@ class EventService {
     try {
       return await this.repository.getEventById(eventId);
     } catch (error) {
-      throw new ApiError(`Failed to get event: ${(error as Error).message}`, 500);
+      throw new ApiError(
+        `Failed to get event: ${(error as Error).message}`,
+        500,
+      );
     }
   }
 
@@ -59,7 +65,7 @@ class EventService {
    * Get events by time range (active = now in buffered window, upcoming = start after now).
    */
   async getEventsByTimeRange(
-    options: GetEventsByTimeRangeOptions
+    options: GetEventsByTimeRangeOptions,
   ): Promise<Event[]> {
     return this.getEvents(toTimeFilter(options));
   }
@@ -67,11 +73,17 @@ class EventService {
   /**
    * Check if a user has checked in to an event
    */
-  async getAttendanceForUser(eventId: string, profileId: string): Promise<boolean> {
+  async getAttendanceForUser(
+    eventId: string,
+    profileId: string,
+  ): Promise<boolean> {
     try {
       return await this.repository.getAttendanceForUser(eventId, profileId);
     } catch (error) {
-      throw new ApiError(`Failed to check attendance: ${(error as Error).message}`, 500);
+      throw new ApiError(
+        `Failed to check attendance: ${(error as Error).message}`,
+        500,
+      );
     }
   }
 
@@ -82,7 +94,10 @@ class EventService {
     try {
       return await this.repository.checkInUser(eventId, profileId);
     } catch (error) {
-      throw new ApiError(`Failed to check in user: ${(error as Error).message}`, 500);
+      throw new ApiError(
+        `Failed to check in user: ${(error as Error).message}`,
+        500,
+      );
     }
   }
 }

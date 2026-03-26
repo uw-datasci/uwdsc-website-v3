@@ -28,11 +28,14 @@ export type QuestionsLoadState =
       vpSubteamNames: string[];
     };
 
+export type QuestionDialogMode = "create" | "edit" | "view";
+
 export function useQuestionsDashboard() {
   const [loadState, setLoadState] = useState<QuestionsLoadState>({
     status: "loading",
   });
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogMode, setDialogMode] = useState<QuestionDialogMode>("create");
   const [deleteTarget, setDeleteTarget] = useState<AppQuestion | null>(null);
   const [editing, setEditing] = useState<AppQuestion | null>(null);
   const [saving, setSaving] = useState(false);
@@ -83,6 +86,7 @@ export function useQuestionsDashboard() {
   }, [load]);
 
   const openCreate = useCallback(() => {
+    setDialogMode("create");
     setEditing(null);
     const firstPos =
       loadState.status === "ready"
@@ -102,6 +106,29 @@ export function useQuestionsDashboard() {
 
   const openEdit = useCallback(
     (q: AppQuestion) => {
+      if (!q.can_edit) {
+        toast.error("You can only edit questions in your VP scope");
+        return;
+      }
+      setDialogMode("edit");
+      setEditing(q);
+      form.reset({
+        question_text: q.question_text,
+        type: q.type,
+        max_length: q.max_length,
+        placeholder: q.placeholder,
+        help_text: q.help_text,
+        sort_order: q.sort_order,
+        position_id: q.position_id,
+      });
+      setDialogOpen(true);
+    },
+    [form],
+  );
+
+  const openView = useCallback(
+    (q: AppQuestion) => {
+      setDialogMode("view");
       setEditing(q);
       form.reset({
         question_text: q.question_text,
@@ -119,9 +146,10 @@ export function useQuestionsDashboard() {
 
   const submitQuestion = useCallback(
     async (values: QuestionFormValues) => {
+      if (dialogMode === "view") return;
       setSaving(true);
       try {
-        if (editing) {
+        if (dialogMode === "edit" && editing) {
           await updateQuestion(editing.relation_id, values);
           toast.success("Question updated");
         } else {
@@ -139,7 +167,7 @@ export function useQuestionsDashboard() {
         setSaving(false);
       }
     },
-    [editing, load],
+    [dialogMode, editing, load],
   );
 
   const confirmDelete = useCallback(async () => {
@@ -159,9 +187,20 @@ export function useQuestionsDashboard() {
     }
   }, [deleteTarget, load]);
 
+  const requestDelete = useCallback((q: AppQuestion) => {
+    if (!q.can_edit) {
+      toast.error("You can only delete questions in your VP scope");
+      return;
+    }
+    setDeleteTarget(q);
+  }, []);
+
   const onFormDialogOpenChange = useCallback((open: boolean) => {
     setDialogOpen(open);
-    if (!open) setEditing(null);
+    if (!open) {
+      setEditing(null);
+      setDialogMode("create");
+    }
   }, []);
 
   const onDeleteDialogOpenChange = useCallback((open: boolean) => {
@@ -173,16 +212,18 @@ export function useQuestionsDashboard() {
     load,
     form,
     dialogOpen,
+    dialogMode,
     deleteTarget,
     editing,
     saving,
     deleting,
     openCreate,
     openEdit,
+    openView,
+    requestDelete,
     submitQuestion,
     confirmDelete,
     onFormDialogOpenChange,
     onDeleteDialogOpenChange,
-    setDeleteTarget,
   };
 }

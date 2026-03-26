@@ -1,5 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { HeadshotUploadData, UploadError, UploadResult } from "@uwdsc/common/types";
+import type {
+  HeadshotUploadData,
+  UploadError,
+  UploadResult,
+} from "@uwdsc/common/types";
 import { FileService } from "@uwdsc/core";
 import { HEADSHOT_VALIDATION_CONFIG } from "../utils/headshot";
 

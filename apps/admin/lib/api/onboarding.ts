@@ -5,7 +5,7 @@
  */
 
 import { createApiError } from "./error";
-import type {ExecPosition } from "@uwdsc/common/types";
+import type { ExecPosition } from "@uwdsc/common/types";
 
 /**
  * Get all submitted applications with full details

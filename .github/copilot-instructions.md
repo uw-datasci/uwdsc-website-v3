@@ -90,7 +90,10 @@ The backend is split into **database/config**, **shared core**, and **app-specif
 - **Responsibilities**: Supabase browser/server/middleware clients, Postgres connection for Transaction Pooler, `BaseRepository`, and db-migrate migrations.
 
 ```typescript
-import { createSupabaseServerClient, createSupabaseMiddlewareClient } from "@uwdsc/db";
+import {
+  createSupabaseServerClient,
+  createSupabaseMiddlewareClient,
+} from "@uwdsc/db";
 import { BaseRepository } from "@uwdsc/db/baseRepository";
 ```
 

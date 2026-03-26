@@ -21,13 +21,23 @@ export const applicationSchema = z
     club_experience: z.boolean({
       message: "Please select whether you have past exec experience",
     }),
-    general_answers: z.record(z.string(), z.string()),
+    general_answers: z.record(
+      z.string(),
+      z.string().trim().min(1, "Answer is required"),
+    ),
     position_1: z.string().min(1, "Please select a position"),
-    position_1_answers: z.record(z.string(), z.string()),
+    position_1_answers: z.record(
+      z.string(),
+      z.string().trim().min(1, "Answer is required"),
+    ),
     position_2: z.string().optional(),
-    position_2_answers: z.record(z.string(), z.string()).optional(),
+    position_2_answers: z
+      .record(z.string(), z.string().trim().min(1, "Answer is required"))
+      .optional(),
     position_3: z.string().optional(),
-    position_3_answers: z.record(z.string(), z.string()).optional(),
+    position_3_answers: z
+      .record(z.string(), z.string().trim().min(1, "Answer is required"))
+      .optional(),
     resumeKey: z.string().min(1, "Please upload your resume"),
   })
   .refine(
@@ -38,7 +48,7 @@ export const applicationSchema = z
           Object.values(answers).length > 0 &&
           Object.values(answers).every(
             (a) =>
-              a && typeof a === "string" && a.length >= 10 && a.length <= 1000,
+              a && typeof a === "string" && a.length >= 1 && a.length <= 1000,
           )
         );
       }
@@ -57,7 +67,7 @@ export const applicationSchema = z
           Object.values(answers).length > 0 &&
           Object.values(answers).every(
             (a) =>
-              a && typeof a === "string" && a.length >= 10 && a.length <= 1000,
+              a && typeof a === "string" && a.length >= 1 && a.length <= 1000,
           )
         );
       }
@@ -76,7 +86,7 @@ export const applicationSchema = z
           Object.values(answers).length > 0 &&
           Object.values(answers).every(
             (a) =>
-              a && typeof a === "string" && a.length >= 10 && a.length <= 1000,
+              a && typeof a === "string" && a.length >= 1 && a.length <= 1000,
           )
         );
       }

@@ -1,3 +1,4 @@
+import { ApiError } from "@uwdsc/common/types";
 import { ApiResponse } from "@uwdsc/common/utils";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 import { applicationService } from "@uwdsc/core";
@@ -27,6 +28,12 @@ export async function PATCH(
 
     return ApiResponse.ok(application);
   } catch (error) {
+    if (error instanceof ApiError) {
+      return ApiResponse.json(
+        { error: error.message, message: error.message },
+        error.statusCode,
+      );
+    }
     console.error("Error updating application:", error);
     return ApiResponse.serverError(error, "Failed to update application");
   }

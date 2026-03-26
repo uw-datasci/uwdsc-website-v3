@@ -26,14 +26,12 @@ const termtypeOptions = [
 const IMAGE_ACCEPT = "image/jpeg,image/jpg,image/png,image/webp";
 const IMAGE_MAX_MB = 5;
 
-
 interface ExecProfileProps {
   readonly form: UseFormReturn<OnboardingFormValues>;
   readonly execPositions: ExecPosition[];
 }
 
 export function ExecProfile({ form, execPositions }: ExecProfileProps) {
-
   const consentWebsite = useWatch({
     control: form.control,
     name: "consent_website",
@@ -72,7 +70,9 @@ export function ExecProfile({ form, execPositions }: ExecProfileProps) {
       const fullname = form.getValues("fullname").trim();
 
       if (!fullname) {
-        setUploadError("Please enter your full name before uploading a headshot");
+        setUploadError(
+          "Please enter your full name before uploading a headshot",
+        );
         return;
       }
 
@@ -158,7 +158,6 @@ export function ExecProfile({ form, execPositions }: ExecProfileProps) {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-
               {/* Program */}
               <FormField
                 control={form.control}
@@ -218,7 +217,9 @@ export function ExecProfile({ form, execPositions }: ExecProfileProps) {
         </Card>
         <Card className="border-white/20 bg-[var(--grey4)]">
           <CardHeader>
-            <CardTitle className="flex items-center text-xl">Public Profile</CardTitle>
+            <CardTitle className="flex items-center text-xl">
+              Public Profile
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Headshot URL */}
@@ -255,7 +256,9 @@ export function ExecProfile({ form, execPositions }: ExecProfileProps) {
                       </span>
                     </label>
                     <input type="hidden" {...field} value={field.value ?? ""} />
-                    {uploadError && <p className="text-sm text-destructive">{uploadError}</p>}
+                    {uploadError && (
+                      <p className="text-sm text-destructive">{uploadError}</p>
+                    )}
                   </div>
                 )}
               />

@@ -80,7 +80,11 @@ export function NavMain({ items }: NavMainProps) {
                       >
                         {item.href ? (
                           <DropdownMenuItem asChild>
-                            <Link href={item.href} onClick={closeSidebarOnMobile} className="font-semibold px-2 py-1.5 focus:bg-accent">
+                            <Link
+                              href={item.href}
+                              onClick={closeSidebarOnMobile}
+                              className="font-semibold px-2 py-1.5 focus:bg-accent"
+                            >
                               {item.name} Overview
                             </Link>
                           </DropdownMenuItem>
@@ -120,7 +124,10 @@ export function NavMain({ items }: NavMainProps) {
                         tooltip={item.name}
                         isActive={!!isActive}
                       >
-                        <Link href={item.href || "#"} onClick={closeSidebarOnMobile}>
+                        <Link
+                          href={item.href || "#"}
+                          onClick={closeSidebarOnMobile}
+                        >
                           <item.icon />
                           <span>{item.name}</span>
                         </Link>

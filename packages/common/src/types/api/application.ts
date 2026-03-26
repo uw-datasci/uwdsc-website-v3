@@ -81,6 +81,8 @@ export interface UpdateApplicationData {
 export interface GeneralQuestion {
   id: string;
   question_text: string;
+  type: ApplicationInputType;
   sort_order: number;
   placeholder: string | null;
+  max_length: number | null;
 }

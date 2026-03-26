@@ -133,7 +133,10 @@ export function EventsListView({
                         >
                           <Pencil className="size-4" />
                         </Button>
-                        <DeleteEventDialog event={event} onSuccess={onRefresh} />
+                        <DeleteEventDialog
+                          event={event}
+                          onSuccess={onRefresh}
+                        />
                       </div>
                     </TableCell>
                   </TableRow>

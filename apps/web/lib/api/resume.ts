@@ -16,6 +16,11 @@ export interface UploadResumeResponse {
   key: string;
 }
 
+export interface ResumeStatusResponse {
+  hasResume: boolean;
+  url: string | null;
+}
+
 // ============================================================================
 // File Upload API Functions
 // ============================================================================
@@ -43,4 +48,15 @@ export async function uploadResume(file: File): Promise<UploadResumeResponse> {
   }
 
   return data;
+}
+
+export async function getResumeStatus(): Promise<ResumeStatusResponse> {
+  const response = await fetch("/api/applications/resumes");
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw createApiError(data, response.status);
+  }
+
+  return data as ResumeStatusResponse;
 }

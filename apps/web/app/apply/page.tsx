@@ -9,6 +9,7 @@ import {
   getProfileAutofill,
   updateApplication,
 } from "@/lib/api/application";
+import { getResumeStatus } from "@/lib/api/resume";
 
 import {
   applicationDefaultValues,
@@ -21,6 +22,7 @@ import {
   isStepValid,
   partitionDraftAnswers,
 } from "@/lib/utils/application";
+import { useApplicationStepStorage } from "@/hooks/useApplicationStepStorage";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -75,8 +77,10 @@ export default function ApplyPage() {
     {
       id: string;
       question_text: string;
+      type: "text" | "textarea";
       sort_order: number;
       placeholder: string | null;
+      max_length: number | null;
     }[]
   >([]);
   const [applicationId, setApplicationId] = useState<string | null>(null);
@@ -92,6 +96,11 @@ export default function ApplyPage() {
     resolver: zodResolver(applicationSchema),
     defaultValues: applicationDefaultValues,
     mode: "onTouched",
+  });
+
+  const { readStoredStep, clearStoredStep } = useApplicationStepStorage({
+    termId: currentTerm?.id ?? null,
+    currentStep,
   });
 
   useEffect(() => {
@@ -112,6 +121,8 @@ export default function ApplyPage() {
           autofill.first_name && autofill.last_name
             ? `${autofill.first_name} ${autofill.last_name}`.trim()
             : "";
+        const resumeStatus = await getResumeStatus();
+
         form.reset({
           ...applicationDefaultValues,
           full_name: fullName,
@@ -120,11 +131,22 @@ export default function ApplyPage() {
           personal_email: form.getValues("personal_email") || "",
           program: form.getValues("program") || "",
           location: form.getValues("location") || "",
+          resumeKey: resumeStatus.url ?? "",
         });
 
         const existing = await getApplication(term.id);
+        if (existing && existing.status !== "draft") {
+          clearStoredStep(term.id);
+          setApplicationId(existing.id);
+          setCurrentStep(5);
+          return;
+        }
+
         const isDraft = existing?.status === "draft";
-        if (!isDraft) return;
+        if (!isDraft) {
+          clearStoredStep(term.id);
+          return;
+        }
 
         setApplicationId(existing.id);
         const { generalAnswers, pos1Answers, pos2Answers, pos3Answers } =
@@ -148,18 +170,24 @@ export default function ApplyPage() {
           position_2_answers: pos2Answers,
           position_3: pos3?.position_id ?? "",
           position_3_answers: pos3Answers,
-          resumeKey: "",
+          resumeKey: resumeStatus.url ?? "",
         });
-        setCurrentStep(1);
+
+        const storedStep = readStoredStep(term.id);
+        const initialStep =
+          storedStep && storedStep >= 1 && storedStep <= 4 ? storedStep : 1;
+        setCurrentStep(initialStep);
       } catch (err) {
         console.error("Failed to fetch application data:", err);
-        setFetchError(err instanceof Error ? err.message : "Failed to load application");
+        setFetchError(
+          err instanceof Error ? err.message : "Failed to load application",
+        );
       } finally {
         setIsFetching(false);
       }
     }
     fetchInitialData();
-  }, [form]);
+  }, [form, clearStoredStep, readStoredStep]);
 
   useEffect(() => {
     setProgressValue(currentStep === 0 ? -1 : currentStep);
@@ -230,7 +258,7 @@ export default function ApplyPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [applicationId, currentStep, buildUpdatePayload, goToStep]);
+  }, [applicationId, buildUpdatePayload, currentStep, goToStep]);
 
   const handlePrevious = () => {
     goToStep(currentStep - 1);
@@ -239,14 +267,16 @@ export default function ApplyPage() {
   const renderButton = () => {
     const isLastStep = currentStep === 4;
     const isPastHardDeadline = Boolean(
-      currentTerm && new Date() > new Date(currentTerm.application_hard_deadline),
+      currentTerm &&
+      new Date() > new Date(currentTerm.application_hard_deadline),
     );
     const isValid =
       isStepValid(form, currentStep, {
         positions,
         generalQuestionIds,
       }) || false;
-    const isButtonDisabled = !isValid || isLoading || (isLastStep && isPastHardDeadline);
+    const isButtonDisabled =
+      !isValid || isLoading || (isLastStep && isPastHardDeadline);
 
     let buttonClassName = "hover:scale-105 ";
     if (isLastStep) {
@@ -334,7 +364,9 @@ export default function ApplyPage() {
       <DueDateTag deadline={new Date(currentTerm.application_soft_deadline)} />
 
       <div className="mx-auto max-w-4xl text-center mb-6">
-        <h1 className="mb-2 text-3xl font-bold text-white">DSC Exec Application Form</h1>
+        <h1 className="mb-2 text-3xl font-bold text-white">
+          DSC Exec Application Form
+        </h1>
         <p className="text-3xl font-semibold text-blue-400">
           {formatTermCode(currentTerm.code)}
         </p>

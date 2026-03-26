@@ -30,7 +30,16 @@ class ApplicationService {
   }
 
   async getQuestionsForScope(scope: QuestionScope): Promise<AppQuestion[]> {
-    return this.repository.getQuestions(scope);
+    const allQuestions = await this.repository.getAllQuestions();
+    if (scope.isPresident) {
+      return allQuestions.map((q) => ({ ...q, can_edit: true }));
+    }
+
+    return allQuestions.map((q) => ({
+      ...q,
+      can_edit:
+        q.position_id !== null && scope.vpPositionIds.includes(q.position_id),
+    }));
   }
 
   async getPositionOptionsForScope(
@@ -77,9 +86,12 @@ class ApplicationService {
     relationId: number,
     data: QuestionUpsertInput,
   ): Promise<AppQuestion | null> {
-    const scopedQuestions = await this.repository.getQuestions(scope);
-    const existing = scopedQuestions.find((q) => q.relation_id === relationId);
-    if (!existing || !this.canAccessRelation(scope, existing.position_id)) {
+    const relationPositionId =
+      await this.repository.getRelationPositionId(relationId);
+    if (
+      relationPositionId === null ||
+      !this.canAccessRelation(scope, relationPositionId)
+    ) {
       throw new ApiError("You do not have access to this question", 403);
     }
 
@@ -104,9 +116,12 @@ class ApplicationService {
     scope: QuestionScope,
     relationId: number,
   ): Promise<boolean> {
-    const scopedQuestions = await this.repository.getQuestions(scope);
-    const existing = scopedQuestions.find((q) => q.relation_id === relationId);
-    if (!existing || !this.canAccessRelation(scope, existing.position_id)) {
+    const relationPositionId =
+      await this.repository.getRelationPositionId(relationId);
+    if (
+      relationPositionId === null ||
+      !this.canAccessRelation(scope, relationPositionId)
+    ) {
       throw new ApiError("You do not have access to this question", 403);
     }
 

@@ -24,7 +24,8 @@ export default function CompleteProfilePage() {
         setProfile(p);
       })
       .catch((err) => {
-        if (!cancelled) console.error("Failed to load profile for prefill:", err);
+        if (!cancelled)
+          console.error("Failed to load profile for prefill:", err);
         setProfile(null);
       });
 

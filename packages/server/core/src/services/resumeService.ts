@@ -23,7 +23,9 @@ export class ResumeService extends FileService {
    */
   async uploadResume(
     data: FileUploadData,
-  ): Promise<{ success: true; key: string } | { success: false; error: string }> {
+  ): Promise<
+    { success: true; key: string } | { success: false; error: string }
+  > {
     const validationError = this.validateFile(data.file);
     if (validationError) return validationError;
 

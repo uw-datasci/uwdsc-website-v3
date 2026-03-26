@@ -30,19 +30,20 @@ Builds on Fall 2025 with new features across the main site and CxC.
 - **Review (`/admin/review`)**: Redesigned UI; “Get New Application”; `/api/applications/random` for least-reviewed; score categories; `reviews` table, no duplicate per reviewer.
 - **Nav**: Admin dropdown (Applications, Review) for admins; mobile support.
 
-### Application flow (PR #100, #145)
+### Application flow (PR #100, #145, #48)
 
 - **Teams**: Add up to 3 members via search; `GET /api/users/emails`; team names/emails in review.
 - **Persistence**: localStorage for steps and fields; restore on return; clear on submit.
-- **Resume**: Replace on upload; GET signed URL; private bucket; validation (10 MB, PDF/DOC/DOCX).
-- **Post-submit**: No edit; redirect to Submitted; “No Application Found” page for users without an application (PR #145).
+- **Resume**: Replace on upload; GET signed URL; private bucket; validation (10 MB, PDF/DOC/DOCX); resume status check on page load (PR #48).
+- **Post-submit**: No edit; redirect to Submitted; “No Application Found” page for users without an application (PR #145). Improved redirect handling for already-submitted applications (PR #48).
 - **Steps**: Teams (optional) → MLH (required) → Review & Submit.
+- **Step persistence (PR #48)**: Application progress now saved in localStorage; users return to their last completed step instead of restarting.
 
 ### Backend & API
 
 - **Services**: `AdminApplicationService`, `AdminReviewService`; `DashboardService`/`DashboardRepository`; `ApplicationService.getAllUserEmails()`; `ResumeService` (upload replace, getUserResume, getSignedResumeUrl); `FileService.createSignedUrl()`; `GitHubService` (PR #41) for managing org teams, template repos, and workflow dispatches.
 - **Repos**: `AdminApplicationRepository`, `AdminReviewRepository`, `DashboardRepository`; review assignment, leaderboard, stats, reviewer scores; question CRUD with VP scope filtering (PR #41).
-- **Endpoints**: `GET /api/admin/dashboard`, `/admin/applications`, `/admin/applications/[id]`, `/api/applications/random`, `/api/applications/resumes`, `POST /api/review/submit`, `GET /api/users/emails`; `POST /api/applications/resumes` (replace), `PATCH /api/applications` (better errors); `GET /api/github/teams`, `GET /api/github/templates`, `POST /api/github/foundry/launch` (PR #41); `GET /api/applications/review/questions`, `POST /api/applications/review/questions`, `PATCH /api/applications/review/questions/[id]`, `DELETE /api/applications/review/questions/[id]` (PR #41).
+- **Endpoints**: `GET /api/admin/dashboard`, `/admin/applications`, `/admin/applications/[id]`, `/api/applications/random`, `GET /api/applications/resumes` (resume status, PR #48), `POST /api/review/submit`, `GET /api/users/emails`; `POST /api/applications/resumes` (replace), `PATCH /api/applications` (better errors); `GET /api/github/teams`, `GET /api/github/templates`, `POST /api/github/foundry/launch` (PR #41); `GET /api/applications/review/questions`, `POST /api/applications/review/questions`, `PATCH /api/applications/review/questions/[id]`, `DELETE /api/applications/review/questions/[id]` (PR #41).
 - **Auth**: `/admin/**` requires admin; superadmin-only: `/admin/assign`, `/admin/dashboard`, `/admin/leaderboard`; `/start` in protected auth routes; VP-only: `/applications/questions` with subteam-based question scope (PR #41).
 
 ### Onboarding (PR #42)
@@ -55,10 +56,11 @@ Builds on Fall 2025 with new features across the main site and CxC.
 - **Foundry project generator (`/nexus/foundry`)**: Multi-step form to launch new projects via GitHub Actions; select project type (Next.js, Express, FastAPI), database (PostgreSQL with Neon/Supabase or MongoDB), optional Redis and S3 storage; auto-generates repository from templates and configures team access.
 - **GitHub integration**: Fetches organization teams and template repositories; triggers workflow dispatches to nexus-foundry repo; admins can provision complete project infrastructure with single form submission.
 
-### Application questions dashboard (PR #41)
+### Application questions dashboard (PR #41, #48)
 
 - **Questions bank (`/applications/questions`)**: VP-only dashboard to create, edit, and delete application questions; assign questions to specific positions; text or textarea types with optional character limits, placeholders, and help text.
 - **VP access control**: VPs can only edit questions for their subteam positions; Presidents have full access to all questions across all positions.
+- **Enhanced question management (PR #48)**: VPs can now view read-only details of questions outside their scope; Presidents can filter questions by position or general category; improved dialog modes (view/edit/create) with proper validation and disabled states.
 
 ### Content
 

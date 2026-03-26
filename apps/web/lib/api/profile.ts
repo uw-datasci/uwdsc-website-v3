@@ -36,7 +36,7 @@ export async function getProfile(): Promise<Profile> {
 }
 
 /**
- * Update the current user's profile (settings/dashboard). Uses PATCH.
+ * Update the current user's profile. Uses PATCH.
  *
  * @param profileData - Profile fields to update (first_name, last_name, wat_iam, faculty, term)
  * @returns Promise with success result

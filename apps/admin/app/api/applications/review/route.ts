@@ -1,22 +1,19 @@
 import { ApiResponse } from "@uwdsc/common/utils";
 import { applicationService } from "@uwdsc/admin";
-import { withAuth } from "@/guards/withAuth";
+import { withVpAccess } from "@/guards/withVpAccess";
 import { createResumeService } from "@/lib/services";
 
 /**
- * GET /api/applications
- * Non-draft applications with full details, plus draft/submitted counts (all applications).
- * Admin/exec only
+ * GET /api/applications/review
+ * Scoped application list for Presidents and VPs.
  */
-export const GET = withAuth(async () => {
+export const GET = withVpAccess(async (_request, _context, _user, scope) => {
   try {
-    const [applications, statusCounts, resumeService] = await Promise.all([
-      applicationService.getAllApplications(),
-      applicationService.getDraftAndSubmittedCounts(),
+    const [applications, resumeService] = await Promise.all([
+      applicationService.getApplicationsForScope(scope),
       createResumeService(),
     ]);
 
-    // Hydrate resume_url with signed URLs from private storage bucket
     const applicationsWithResumes = await Promise.all(
       applications.map(async (app) => ({
         ...app,
@@ -26,10 +23,13 @@ export const GET = withAuth(async () => {
 
     return ApiResponse.ok({
       applications: applicationsWithResumes,
-      statusCounts,
+      scope: {
+        isPresident: scope.isPresident,
+        vpSubteamNames: scope.vpSubteamNames,
+      },
     });
   } catch (error: unknown) {
-    console.error("Error fetching applications:", error);
+    console.error("Error fetching review applications:", error);
     return ApiResponse.serverError(error, "Failed to fetch applications");
   }
 });

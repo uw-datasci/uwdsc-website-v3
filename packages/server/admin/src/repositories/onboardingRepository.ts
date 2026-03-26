@@ -5,8 +5,8 @@ import type {
 } from "@uwdsc/common/types";
 
 export class OnboardingRepository extends BaseRepository {
-    /* Get all exec positions for onboarding application form dropdown */
-    async getExecPositions(): Promise<ExecPosition[]> {
+  /* Get all exec positions for onboarding application form dropdown */
+  async getExecPositions(): Promise<ExecPosition[]> {
     const result = await this.sql<ExecPosition[]>`
         SELECT
         id,
@@ -36,4 +36,4 @@ export class OnboardingRepository extends BaseRepository {
 
 }
 
-export const onboardingService= new OnboardingRepository();
+export const onboardingService = new OnboardingRepository();

@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, Trash2 } from "lucide-react";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 import {
   Button,
   Table,
@@ -15,18 +15,24 @@ import type { AppQuestion } from "@uwdsc/common/types";
 interface QuestionsTableProps {
   readonly questions: AppQuestion[];
   readonly onEdit: (question: AppQuestion) => void;
+  readonly onView: (question: AppQuestion) => void;
   readonly onRequestDelete: (question: AppQuestion) => void;
+  readonly readOnly?: boolean;
+  readonly emptyMessage?: string;
 }
 
 export function QuestionsTable({
   questions,
   onEdit,
+  onView,
   onRequestDelete,
+  readOnly = false,
+  emptyMessage = "No questions yet. Add one to get started.",
 }: QuestionsTableProps) {
   if (questions.length === 0) {
     return (
       <p className="text-sm text-muted-foreground py-6 text-center">
-        No questions yet. Add one to get started.
+        {emptyMessage}
       </p>
     );
   }
@@ -62,26 +68,38 @@ export function QuestionsTable({
               </TableCell>
               <TableCell className="align-top pr-6 text-sm">{q.type}</TableCell>
               <TableCell className="align-top pl-6 text-center">
-                <div className="flex justify-center gap-1">
+                {readOnly ? (
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
-                    aria-label="Edit question"
-                    onClick={() => onEdit(q)}
+                    aria-label="View question"
+                    onClick={() => onView(q)}
                   >
-                    <Pencil className="size-4" />
+                    <Eye className="size-4" />
                   </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Delete question"
-                    onClick={() => onRequestDelete(q)}
-                  >
-                    <Trash2 className="size-4 text-destructive" />
-                  </Button>
-                </div>
+                ) : (
+                  <div className="flex justify-center gap-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Edit question"
+                      onClick={() => onEdit(q)}
+                    >
+                      <Pencil className="size-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Delete question"
+                      onClick={() => onRequestDelete(q)}
+                    >
+                      <Trash2 className="size-4 text-destructive" />
+                    </Button>
+                  </div>
+                )}
               </TableCell>
             </TableRow>
           ))}

@@ -42,8 +42,10 @@ class ApplicationService {
         .map((q) => ({
           id: q.id,
           question_text: q.question_text,
+          type: q.type,
           sort_order: q.sort_order,
           placeholder: q.placeholder,
+          max_length: q.max_length,
         }))
         .sort((a, b) => a.sort_order - b.sort_order);
 
@@ -149,6 +151,10 @@ class ApplicationService {
     try {
       const { position_selections, answers, ...applicationData } = data;
 
+      if (answers && answers.length > 0) {
+        await this.validateAnswerLengths(answers);
+      }
+
       const app = await this.repository.updateApplication(
         applicationId,
         userId,
@@ -172,6 +178,28 @@ class ApplicationService {
         `Failed to update application: ${(error as Error).message}`,
         500,
       );
+    }
+  }
+
+  private async validateAnswerLengths(
+    answers: NonNullable<ApplicationUpdatePayload["answers"]>,
+  ): Promise<void> {
+    const questionRows = await this.repository.getQuestionsForPositions();
+    const questionMaxLengthById = new Map(
+      questionRows.map((row) => [row.id, row.max_length] as const),
+    );
+
+    for (const answer of answers) {
+      const maxLength = questionMaxLengthById.get(answer.question_id);
+      if (
+        typeof maxLength === "number" &&
+        answer.answer_text.length > maxLength
+      ) {
+        throw new ApiError(
+          `Answer exceeds max length (${maxLength} characters)`,
+          400,
+        );
+      }
     }
   }
 }

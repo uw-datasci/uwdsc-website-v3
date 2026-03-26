@@ -112,10 +112,12 @@ export function Resume({ form }: ResumeProps) {
                 </div>
               </FormControl>
               <FormDescription>
-                Upload your resume as a PDF or Word document. It will be shared with the
-                selection committee.
+                Upload your resume as a PDF or Word document. It will be shared
+                with the selection committee.
               </FormDescription>
-              {uploadError && <p className="text-sm text-destructive">{uploadError}</p>}
+              {uploadError && (
+                <p className="text-sm text-destructive">{uploadError}</p>
+              )}
               <FormMessage />
             </FormItem>
           )}

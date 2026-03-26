@@ -38,10 +38,7 @@ export type WithAuthHandler<C = WithAuthContext> = (
  */
 export function withAuth<C extends WithAuthContext = WithAuthContext>(
   handler: WithAuthHandler<C>,
-): (
-  request: Request,
-  context?: C,
-) => Promise<Response> {
+): (request: Request, context?: C) => Promise<Response> {
   return async function wrapped(
     request: Request,
     context?: C,

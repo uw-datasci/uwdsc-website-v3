@@ -6,7 +6,7 @@ import { Loader2, MoveLeft, MoveRight, User } from "lucide-react";
 import { Button, Card, CardHeader, CardTitle, CardContent } from "@uwdsc/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { getAllExecPositions } from "@/lib/api/onboarding";
+import {getAllExecPositions, getActiveTerm, submitOnboarding} from "@/lib/api/onboarding";
 import { getCurrentUser } from "@/lib/api/auth";
 import {
   Intro,
@@ -16,7 +16,7 @@ import {
 } from "@/components/onboarding/steps";
 import { OnboardingFormValues, OnboardingDefaultValues, onboardingSchema } from "@/lib/schemas/onboarding";
 import { useForm } from "react-hook-form";
-import { ExecPosition } from "@uwdsc/common/types";
+import { ExecPosition, Term } from "@uwdsc/common/types";
 
 const STEP_FIELDS: Record<number, (keyof OnboardingFormValues)[]> = {
   1: ["fullname", "gmail", "term_type", "in_waterloo", "role", "consent_website"],
@@ -45,12 +45,12 @@ const slideVariants = {
 };
 
 export default function OnboardingPage() {
+  const [currentTerm, setCurrentTerm] = useState<Term | null>(null);
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [direction, setDirection] = useState<number>(1);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  //const [currentTerm, setCurrentTerm] = useState<Term | null>(null);
   const [positions, setPositions] = useState<ExecPosition[]>([]);
 
   const form = useForm<OnboardingFormValues>({
@@ -88,14 +88,16 @@ export default function OnboardingPage() {
     async function fetchInitialData() {
       setIsFetching(true);
       try {
-        const [positionsData, currentUser] = await Promise.all([
+        const [positionsData, currentUser, term] = await Promise.all([
           getAllExecPositions(),
           getCurrentUser(),
+          getActiveTerm(),
         ]);
 
+        setCurrentTerm(term);
         setPositions(positionsData);
         prefillFromUser(currentUser);
-        setCurrentStep(1);
+        setCurrentStep(0);
       } catch (err) {
         console.error("Failed to fetch application data:", err);
         setFetchError(err instanceof Error ? err.message : "Failed to load application");
@@ -106,8 +108,9 @@ export default function OnboardingPage() {
     fetchInitialData();
   }, [prefillFromUser]);
 
-
+  /*
   const handleStartOnboarding = useCallback(() => {
+     if (!currentTerm) return;
     setIsLoading(true);
     try {
       setDirection(1);
@@ -117,7 +120,8 @@ export default function OnboardingPage() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [currentTerm]);
+  */
 
   const goToStep = useCallback(
     (step: number) => {
@@ -133,15 +137,14 @@ export default function OnboardingPage() {
       const valid = await form.trigger(fieldsToValidate);
       if (!valid) return;
     }
-
     setIsLoading(true);
     try {
-      // TODO: Add API call to save form data
       if (currentStep === 2) {
-        // Submission logic
-        goToStep(3);
+        const payload = form.getValues();
+        await submitOnboarding(payload);
+        goToStep(currentStep + 1); // go to confirmation page
       } else {
-        goToStep(currentStep + 1);
+        goToStep(currentStep + 1); // just move forward, no API call
       }
     } catch (err) {
       console.error(err);
@@ -193,7 +196,7 @@ export default function OnboardingPage() {
       case 0:
         return (
           <Intro
-            onStartOnboarding={handleStartOnboarding}
+            onStartOnboarding={handleNext}
             isLoading={isLoading}
           />
         );

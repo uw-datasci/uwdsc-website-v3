@@ -6,7 +6,7 @@ import { Loader2, MoveLeft, MoveRight, User } from "lucide-react";
 import { Button, Card, CardHeader, CardTitle, CardContent } from "@uwdsc/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import {getAllExecPositions, getActiveTerm, submitOnboarding} from "@/lib/api/onboarding";
+import {getAllExecPositions, getActiveTerm} from "@/lib/api/onboarding";
 import { getCurrentUser } from "@/lib/api/auth";
 import {
   Intro,
@@ -159,8 +159,8 @@ export default function OnboardingPage() {
     setIsLoading(true);
     try {
       if (currentStep === 2) {
-        const payload = form.getValues();
-        await submitOnboarding(payload);
+        //const payload = form.getValues();
+        //await submitOnboarding(payload);
         goToStep(currentStep + 1); // go to confirmation page
       } else {
         goToStep(currentStep + 1); // just move forward, no API call

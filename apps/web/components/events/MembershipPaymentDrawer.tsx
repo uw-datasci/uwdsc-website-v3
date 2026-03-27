@@ -17,14 +17,7 @@ export function MembershipPaymentDrawer({
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
 
   const adminBaseUrl =
-    process.env.NEXT_PUBLIC_ADMIN_BASE_URL ??
-    "admin.uwdatascience.ca";
-
-  const normalizedAdminBaseUrl = adminBaseUrl.startsWith("http://")
-    ? adminBaseUrl
-    : adminBaseUrl.startsWith("https://")
-      ? adminBaseUrl
-      : `https://${adminBaseUrl}`;
+    process.env.NEXT_PUBLIC_ADMIN_URL ?? "https://admin.uwdatascience.ca";
 
   useEffect(() => {
     let cancelled = false;
@@ -34,7 +27,7 @@ export function MembershipPaymentDrawer({
       return;
     }
 
-    const targetUrl = `${normalizedAdminBaseUrl}/members?id=${encodeURIComponent(
+    const targetUrl = `${adminBaseUrl.replace(/\/$/, "")}/members?id=${encodeURIComponent(
       profileId,
     )}&action=markPaid`;
 
@@ -52,7 +45,7 @@ export function MembershipPaymentDrawer({
     return () => {
       cancelled = true;
     };
-  }, [profileId, normalizedAdminBaseUrl]);
+  }, [profileId, adminBaseUrl]);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>

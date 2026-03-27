@@ -7,11 +7,12 @@ import {
   checkInToEvent,
 } from "@/lib/api/events";
 import { getMembershipStatus } from "@/lib/api/profile";
-import type { Event } from "@uwdsc/common/types";
+import type { Event, MembershipStatus } from "@uwdsc/common/types";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   ActiveEventSection,
   EventCardMemberSection,
+  MembershipPaymentDrawer,
   NextEventSection,
 } from "@/components/events";
 import { motion } from "framer-motion";
@@ -23,6 +24,8 @@ export default function EventsPage() {
   const [activeEvents, setActiveEvents] = useState<Event[] | null>(null);
   const [nextEvent, setNextEvent] = useState<Event | null>(null);
   const [canCheckIn, setCanCheckIn] = useState(false);
+  const [membershipStatus, setMembershipStatus] =
+    useState<MembershipStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [checkingIn, setCheckingIn] = useState(false);
   const [checkInSuccess, setCheckInSuccess] = useState<boolean>(false);
@@ -43,11 +46,13 @@ export default function EventsPage() {
             ? membershipResult.value
             : { has_membership: false, membership_id: null };
 
+        setMembershipStatus(membership);
+
         const isValidMember =
-          membership.has_membership && user?.is_math_soc_member;
+          membership.has_membership && !!user?.is_math_soc_member;
 
         setActiveEvents(active);
-        setCanCheckIn(isValidMember ?? false);
+        setCanCheckIn(isValidMember);
 
         const firstActive = active[0];
         if (firstActive) {
@@ -69,6 +74,8 @@ export default function EventsPage() {
 
   const currentEvent =
     activeEvents && activeEvents.length > 0 ? (activeEvents[0] ?? null) : null;
+  const shouldShowPaymentQr =
+    membershipStatus !== null && !membershipStatus.has_membership;
 
   const handleCheckIn = async () => {
     if (!currentEvent) return;
@@ -160,6 +167,12 @@ export default function EventsPage() {
           </div>
         </Card>
       </motion.div>
+
+      {shouldShowPaymentQr ? (
+        <MembershipPaymentDrawer
+          profileId={user?.id ?? null}
+        />
+      ) : null}
     </div>
   );
 }

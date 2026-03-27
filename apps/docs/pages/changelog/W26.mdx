@@ -6,6 +6,7 @@ Builds on Fall 2025 with new features across the main site and CxC.
 
 - **Password reset (PR #126)**: Forgot-password link on login; email-based reset with time-limited link; dedicated reset page with confirmation.
 - **Analytics & performance monitoring (PR #38)**: Vercel Analytics and Speed Insights added to track page views and real-world performance metrics.
+- **Membership payment QR (PR #43)**: Members can now display a QR code on the events page after paying membership fees; execs scan the code to quickly mark payments as received.
 
 ## CxC App (apps/cxc)
 
@@ -29,6 +30,10 @@ Builds on Fall 2025 with new features across the main site and CxC.
 - **Applications table (`/admin/applications`)**: Sortable, filterable (email search), pagination (10–50 rows); columns: name, email, university, gender, reviews, date; row click → details modal (basic info, education, links, questions, team, resume, MLH).
 - **Review (`/admin/review`)**: Redesigned UI; “Get New Application”; `/api/applications/random` for least-reviewed; score categories; `reviews` table, no duplicate per reviewer.
 - **Nav**: Admin dropdown (Applications, Review) for admins; mobile support.
+
+### Membership management (PR #43)
+
+- **QR code verification**: Execs can scan member payment QR codes to automatically open the payment confirmation modal for that member; QR codes deep-link to the members page with auto-action.
 
 ### Application flow (PR #100, #145, #48)
 

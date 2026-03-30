@@ -73,17 +73,17 @@ export function ApplicantTable({
   const statusBadgeClassName = (status: ApplicationReviewStatus): string => {
     switch (status) {
       case "Wanted":
-        return "border-emerald-300 bg-emerald-100 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-100";
+        return "border-emerald-300 bg-emerald-100 text-emerald-900 border-emerald-800 bg-emerald-950/60 text-emerald-100";
       case "Accepted Offer":
-        return "border-emerald-600 bg-emerald-600 text-white dark:border-emerald-500 dark:bg-emerald-500";
+        return "border-emerald-600 bg-emerald-600 text-white border-emerald-500 bg-emerald-500";
       case "Not Wanted":
-        return "border-red-300 bg-red-100 text-red-900 dark:border-red-800 dark:bg-red-950/60 dark:text-red-100";
+        return "border-red-300 bg-red-100 text-red-900 border-red-800 bg-red-950/60 text-red-100";
       case "Rejection Sent":
-        return "border-red-600 bg-red-600 text-white dark:border-red-500 dark:bg-red-500";
+        return "border-red-600 bg-red-600 text-white border-red-500 bg-red-500";
       case "Offer Sent":
-        return "border-sky-300 bg-sky-100 text-sky-900 dark:border-sky-800 dark:bg-sky-950/60 dark:text-sky-100";
+        return "border-sky-300 bg-sky-100 text-sky-900 border-sky-800 bg-sky-950/60 text-sky-100";
       case "Declined Offer":
-        return "border-blue-600 bg-blue-600 text-white dark:border-blue-500 dark:bg-blue-500";
+        return "border-blue-600 bg-blue-600 text-white border-blue-500 bg-blue-500";
       default:
         return "border-border bg-muted/60 text-muted-foreground";
     }

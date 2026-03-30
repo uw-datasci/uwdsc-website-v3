@@ -5,3 +5,4 @@ export * from "./services/webhookService";
 export * from "./services/onboardingService";
 export * from "./services/headshotService";
 export * from "./services/githubService";
+export * from "./services/hiringService";

@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Library,
   Shield,
+  UserCheck,
   Users,
 } from "lucide-react";
 
@@ -22,6 +23,7 @@ export const ADMIN_NAVIGATION = [
     subItems: [
       { name: "Questions", href: "/applications/questions", icon: CircleHelp },
       { name: "Review", href: "/applications/review", icon: ClipboardCheck },
+      { name: "Hiring", href: "/applications/hiring", icon: UserCheck },
     ],
   },
   { name: "Events", href: "/events", icon: Calendar },

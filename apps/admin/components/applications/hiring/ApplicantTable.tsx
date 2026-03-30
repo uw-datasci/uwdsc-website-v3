@@ -55,9 +55,7 @@ export function ApplicantTable({
     setSendingOfferSelectionIds((prev) => new Set(prev).add(selectionId));
     try {
       // TODO: replace timeout with send-offer API call
-      await new Promise<void>((resolve) => {
-        setTimeout(resolve, 1000);
-      });
+      await new Promise<void>((resolve) => setTimeout(resolve, 1000));
       setSentOfferSelectionIds((prev) => new Set(prev).add(selectionId));
     } catch (error) {
       console.error("Error sending offer:", error);

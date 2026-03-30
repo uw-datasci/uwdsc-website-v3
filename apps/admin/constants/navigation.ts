@@ -8,6 +8,7 @@ import {
   FileText,
   LayoutDashboard,
   Library,
+  Mail,
   Settings,
   Shield,
   Users,
@@ -26,6 +27,7 @@ export const ADMIN_NAVIGATION = [
     ],
   },
   { name: "Events", href: "/events", icon: Calendar },
+  { name: "Campaigns", href: "/campaigns", icon: Mail },
   { name: "Onboarding", href: "/onboarding", icon: Shield },
   {
     name: "Nexus",

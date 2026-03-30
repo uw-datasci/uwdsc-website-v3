@@ -15,13 +15,10 @@ import { cn } from "@uwdsc/ui/lib/utils";
 import type {
   ApplicationReviewStatus,
   HiringApplicant,
-  HiringPositionSelection,
 } from "@uwdsc/common/types";
+import { flattenApplicantsToSelectionRows } from "@uwdsc/common/utils";
 import { SelectionOutcomeEdit } from "./SelectionOutcomeEdit";
-import {
-  SendOfferButton,
-  type SendOfferPhase,
-} from "./SendOfferButton";
+import { SendOfferButton, type SendOfferPhase } from "./SendOfferButton";
 
 interface ApplicantTableProps {
   readonly applicants: HiringApplicant[];
@@ -32,31 +29,12 @@ interface ApplicantTableProps {
   ) => void;
 }
 
-function flattenRows(applicants: HiringApplicant[]): {
-  applicant: HiringApplicant;
-  selection: HiringPositionSelection;
-}[] {
-  const rows: {
-    applicant: HiringApplicant;
-    selection: HiringPositionSelection;
-  }[] = [];
-  for (const applicant of applicants) {
-    const sorted = applicant.position_selections
-      .slice()
-      .sort((a, b) => a.priority - b.priority);
-    for (const selection of sorted) {
-      rows.push({ applicant, selection });
-    }
-  }
-  return rows;
-}
-
 export function ApplicantTable({
   applicants,
   updatingSelectionId,
   onSelectionStatusChange,
 }: ApplicantTableProps) {
-  const rows = flattenRows(applicants);
+  const rows = flattenApplicantsToSelectionRows(applicants);
   const [sendingOfferSelectionIds, setSendingOfferSelectionIds] = useState(
     () => new Set<string>(),
   );

@@ -21,6 +21,7 @@ import type {
   ApplicationListItem,
   ApplicationReviewStatus,
 } from "@uwdsc/common/types";
+import { sortPositionSelectionsByPriority } from "@uwdsc/common/utils";
 
 interface ReviewDetailProps {
   readonly application: ApplicationListItem | null;
@@ -169,10 +170,9 @@ export function ReviewDetail({
                   (answer) => answer.position_names.length === 0,
                 )}
               />
-              {application.position_selections
-                .slice()
-                .sort((a, b) => a.priority - b.priority)
-                .map((selection) => (
+              {sortPositionSelectionsByPriority(
+                application.position_selections,
+              ).map((selection) => (
                   <AnswersGroup
                     key={selection.id}
                     title={selection.position_name}

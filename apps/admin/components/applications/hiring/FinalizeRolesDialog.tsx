@@ -55,14 +55,14 @@ export function FinalizeRolesDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button disabled={disabled || team.length === 0}>Finalize Roles</Button>
+        <Button disabled={disabled || team.length === 0}>Finalize Team</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Finalize Roles</DialogTitle>
+          <DialogTitle>Finalize Team</DialogTitle>
           <DialogDescription>
-            This will update user roles for the new term. This action affects all
-            current exec and admin members.
+            This will update user roles for the exec team for next term. This
+            action affects all current exec and admin members.
           </DialogDescription>
         </DialogHeader>
 

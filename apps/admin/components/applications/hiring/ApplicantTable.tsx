@@ -99,9 +99,9 @@ export function ApplicantTable({
     );
   }
 
-  /** Inset from card edges via wrapper; first/last cells drop inner horizontal pad so alignment stays even */
-  const headCell = "px-3 py-3 sm:px-4 first:pl-0 last:pr-0";
-  const bodyCell = "px-3 py-2.5 align-middle sm:px-4 first:pl-0 last:pr-0";
+  /** Inset from card edges; first/last cells keep horizontal room so row hover reads inset */
+  const headCell = "px-3 py-3 sm:px-4 first:pl-2 last:pr-2";
+  const bodyCell = "px-3 py-2.5 align-middle sm:px-4 first:pl-2 last:pr-2";
 
   return (
     <ScrollArea className="h-full">

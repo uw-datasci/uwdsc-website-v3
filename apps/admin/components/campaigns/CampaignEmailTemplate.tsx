@@ -71,13 +71,13 @@ export function CampaignEmailTemplate({
                 h2: { fontSize: "20px", fontWeight: "600", color: "#1a1a2e" },
                 h3: { fontSize: "16px", fontWeight: "600", color: "#1a1a2e" },
                 p: { color: "#374151", lineHeight: "1.6", margin: "0 0 16px 0" },
-                a: { color: "#6366f1" },
-                blockquote: {
+                link: { color: "#6366f1" },
+                blockQuote: {
                   borderLeft: "4px solid #e6ebf1",
                   paddingLeft: "16px",
                   color: "#6b7280",
                 },
-                code: {
+                codeInline: {
                   backgroundColor: "#f3f4f6",
                   padding: "2px 6px",
                   borderRadius: "4px",

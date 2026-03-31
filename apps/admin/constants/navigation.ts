@@ -9,7 +9,6 @@ import {
   LayoutDashboard,
   Library,
   Mail,
-  Settings,
   Shield,
   UserCheck,
   Users,

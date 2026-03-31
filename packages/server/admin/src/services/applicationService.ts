@@ -1,6 +1,7 @@
 import {
   ApiError,
   type AppQuestion,
+  type ApplicationReviewStatus,
   type ApplicationListItem,
   type QuestionPositionOption,
   type QuestionScope,
@@ -24,6 +25,72 @@ class ApplicationService {
     } catch (error) {
       throw new ApiError(
         `Failed to get all applications: ${(error as Error).message}`,
+        500,
+      );
+    }
+  }
+
+  async getDraftAndSubmittedCounts(): Promise<{
+    draft: number;
+    submitted: number;
+  }> {
+    try {
+      return await this.repository.countDraftAndSubmittedApplications();
+    } catch (error) {
+      throw new ApiError(
+        `Failed to get application counts: ${(error as Error).message}`,
+        500,
+      );
+    }
+  }
+
+  async getApplicationsForScope(
+    scope: QuestionScope,
+  ): Promise<ApplicationListItem[]> {
+    try {
+      if (scope.isPresident) {
+        return await this.repository.getAllApplicationsWithDetails();
+      }
+      return await this.repository.getApplicationsByPositionIdsWithDetails(
+        scope.vpPositionIds,
+      );
+    } catch (error) {
+      throw new ApiError(
+        `Failed to get scoped applications: ${(error as Error).message}`,
+        500,
+      );
+    }
+  }
+
+  async canAccessApplication(scope: QuestionScope, applicationId: string) {
+    if (scope.isPresident) return true;
+    return this.repository.canAccessApplicationByPositionIds(
+      applicationId,
+      scope.vpPositionIds,
+    );
+  }
+
+  async updateApplicationReviewStatus(
+    scope: QuestionScope,
+    applicationId: string,
+    status: ApplicationReviewStatus,
+  ) {
+    const canAccess = await this.canAccessApplication(scope, applicationId);
+    if (!canAccess) {
+      throw new ApiError("You do not have access to this application", 403);
+    }
+
+    try {
+      const updated = await this.repository.updateApplicationReviewStatus(
+        applicationId,
+        status,
+      );
+      if (!updated) throw new ApiError("Application not found", 404);
+      return true;
+    } catch (error) {
+      if (error instanceof ApiError) throw error;
+      throw new ApiError(
+        `Failed to update application review status: ${(error as Error).message}`,
         500,
       );
     }

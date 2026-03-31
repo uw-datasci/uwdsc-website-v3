@@ -11,6 +11,7 @@ import {
   Mail,
   Settings,
   Shield,
+  UserCheck,
   Users,
 } from "lucide-react";
 
@@ -22,8 +23,9 @@ export const ADMIN_NAVIGATION = [
     href: "/applications",
     icon: FileText,
     subItems: [
-      { name: "Review", href: "/applications/review", icon: ClipboardCheck },
       { name: "Questions", href: "/applications/questions", icon: CircleHelp },
+      { name: "Review", href: "/applications/review", icon: ClipboardCheck },
+      { name: "Hiring", href: "/applications/hiring", icon: UserCheck },
     ],
   },
   { name: "Events", href: "/events", icon: Calendar },
@@ -36,8 +38,7 @@ export const ADMIN_NAVIGATION = [
     subItems: [
       { name: "Foundry", href: "/nexus/foundry", icon: Anvil },
       { name: "Optics", href: "/nexus/optics", icon: Activity },
-      { name: "Archive", href: "/nexus/archive", icon: Library },
+      { name: "Archives", href: "/nexus/archives", icon: Library },
     ],
   },
-  { name: "Settings", href: "/settings", icon: Settings },
 ];

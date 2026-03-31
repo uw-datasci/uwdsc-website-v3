@@ -10,3 +10,4 @@ export * from "./questions";
 export * from "./events";
 export * from "./foundry";
 export * from "./profile";
+export * from "./hiring";

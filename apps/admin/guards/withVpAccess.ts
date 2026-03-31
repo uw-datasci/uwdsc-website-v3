@@ -18,7 +18,7 @@ export function withVpAccess<C extends WithAuthContext = WithAuthContext>(
 ): (request: Request, context?: C) => Promise<Response> {
   return withAuth<C>(async (request, context, user) => {
     const authService = await createAuthService();
-    const scope = await authService.getQuestionScopeForUser(user.id);
+    const scope = await authService.getScopeForUser(user.id);
     const hasVpAccess =
       scope.hasVpExecRole ||
       scope.isPresident ||

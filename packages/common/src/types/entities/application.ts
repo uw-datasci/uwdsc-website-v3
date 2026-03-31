@@ -115,6 +115,8 @@ export interface PositionSelectionWithName extends ApplicationPositionSelection 
 /** Answer with question text (for admin review) */
 export interface AnswerWithQuestion extends Answer {
   question_text: string;
+  /** Position names this question is scoped to; empty for general questions. */
+  position_names: string[];
 }
 
 /** Full application data for admin list/detail view */

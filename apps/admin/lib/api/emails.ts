@@ -1,24 +1,24 @@
 /**
- * Campaigns API Functions
+ * Emails API Functions
  *
- * This file contains all email campaign-related API calls.
+ * This file contains all email-related API calls.
  * Components should use these functions instead of making direct fetch calls.
  */
 
-import type { SendCampaignFormValues } from "@/lib/schemas/campaign";
+import type { SendCampaignFormValues } from "@/lib/schemas/emails";
 import { createApiError } from "./error";
 
 /**
- * Send an email campaign
+ * Send an email blast
  *
- * @param data - Campaign payload: subject, recipients, and markdown body
+ * @param data - Email payload: subject, recipients, and markdown body
  * @returns Promise with the Resend message id
  * @throws Error if request fails or unauthorized
  */
 export async function sendCampaign(
   data: SendCampaignFormValues,
 ): Promise<{ id: string }> {
-  const response = await fetch("/api/campaigns/send", {
+  const response = await fetch("/api/emails/campaigns", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),

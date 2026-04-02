@@ -24,56 +24,51 @@ import {
 import {
   sendCampaignSchema,
   type SendCampaignFormValues,
-} from "@/lib/schemas/campaign";
-import { sendCampaign } from "@/lib/api/campaigns";
+} from "@/lib/schemas/emails";
+import { sendCampaign } from "@/lib/api/emails";
 
-const markdownComponents: Components =
-  {
-    h1: ({ children }) => (
-      <h1 className="mb-4 text-2xl font-bold">{children}</h1>
-    ),
-    h2: ({ children }) => (
-      <h2 className="mb-3 text-xl font-semibold">{children}</h2>
-    ),
-    h3: ({ children }) => (
-      <h3 className="mb-2 text-lg font-semibold">{children}</h3>
-    ),
-    p: ({ children }) => (
-      <p className="mb-4 leading-relaxed">{children}</p>
-    ),
-    ul: ({ children }) => (
-      <ul className="mb-4 list-inside list-disc space-y-1">{children}</ul>
-    ),
-    ol: ({ children }) => (
-      <ol className="mb-4 list-inside list-decimal space-y-1">{children}</ol>
-    ),
-    li: ({ children }) => <li className="leading-relaxed">{children}</li>,
-    strong: ({ children }) => (
-      <strong className="font-semibold">{children}</strong>
-    ),
-    em: ({ children }) => <em className="italic">{children}</em>,
-    code: ({ children }) => (
-      <code className="rounded bg-muted px-1 py-0.5 font-mono text-sm">
-        {children}
-      </code>
-    ),
-    pre: ({ children }) => (
-      <pre className="mb-4 overflow-x-auto rounded-md bg-muted p-4 font-mono text-sm">
-        {children}
-      </pre>
-    ),
-    blockquote: ({ children }) => (
-      <blockquote className="mb-4 border-l-4 border-muted-foreground/30 pl-4 italic text-muted-foreground">
-        {children}
-      </blockquote>
-    ),
-    a: ({ href, children }) => (
-      <a href={href} className="text-primary underline">
-        {children}
-      </a>
-    ),
-    hr: () => <hr className="my-4 border-t border-muted" />,
-  };
+const markdownComponents: Components = {
+  h1: ({ children }) => <h1 className="mb-4 text-2xl font-bold">{children}</h1>,
+  h2: ({ children }) => (
+    <h2 className="mb-3 text-xl font-semibold">{children}</h2>
+  ),
+  h3: ({ children }) => (
+    <h3 className="mb-2 text-lg font-semibold">{children}</h3>
+  ),
+  p: ({ children }) => <p className="mb-4 leading-relaxed">{children}</p>,
+  ul: ({ children }) => (
+    <ul className="mb-4 list-inside list-disc space-y-1">{children}</ul>
+  ),
+  ol: ({ children }) => (
+    <ol className="mb-4 list-inside list-decimal space-y-1">{children}</ol>
+  ),
+  li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+  strong: ({ children }) => (
+    <strong className="font-semibold">{children}</strong>
+  ),
+  em: ({ children }) => <em className="italic">{children}</em>,
+  code: ({ children }) => (
+    <code className="rounded bg-muted px-1 py-0.5 font-mono text-sm">
+      {children}
+    </code>
+  ),
+  pre: ({ children }) => (
+    <pre className="mb-4 overflow-x-auto rounded-md bg-muted p-4 font-mono text-sm">
+      {children}
+    </pre>
+  ),
+  blockquote: ({ children }) => (
+    <blockquote className="mb-4 border-l-4 border-muted-foreground/30 pl-4 italic text-muted-foreground">
+      {children}
+    </blockquote>
+  ),
+  a: ({ href, children }) => (
+    <a href={href} className="text-primary underline">
+      {children}
+    </a>
+  ),
+  hr: () => <hr className="my-4 border-t border-muted" />,
+};
 
 export default function CampaignsPage() {
   const [isSending, setIsSending] = useState(false);

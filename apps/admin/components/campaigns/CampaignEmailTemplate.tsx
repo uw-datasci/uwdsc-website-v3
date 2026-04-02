@@ -18,7 +18,7 @@ interface CampaignEmailTemplateProps {
 export function CampaignEmailTemplate({
   subject,
   body,
-}: CampaignEmailTemplateProps) {
+}: Readonly<CampaignEmailTemplateProps>) {
   return (
     <Html>
       <Head />
@@ -70,7 +70,11 @@ export function CampaignEmailTemplate({
                 h1: { fontSize: "24px", fontWeight: "bold", color: "#1a1a2e" },
                 h2: { fontSize: "20px", fontWeight: "600", color: "#1a1a2e" },
                 h3: { fontSize: "16px", fontWeight: "600", color: "#1a1a2e" },
-                p: { color: "#374151", lineHeight: "1.6", margin: "0 0 16px 0" },
+                p: {
+                  color: "#374151",
+                  lineHeight: "1.6",
+                  margin: "0 0 16px 0",
+                },
                 link: { color: "#6366f1" },
                 blockQuote: {
                   borderLeft: "4px solid #e6ebf1",

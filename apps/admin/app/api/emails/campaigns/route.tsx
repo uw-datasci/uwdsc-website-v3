@@ -2,13 +2,13 @@ import { Resend } from "resend";
 import { render } from "@react-email/render";
 import { ApiResponse } from "@uwdsc/common/utils";
 import { withAuth } from "@/guards/withAuth";
-import { sendCampaignSchema } from "@/lib/schemas/campaign";
+import { sendCampaignSchema } from "@/lib/schemas/emails";
 import { CampaignEmailTemplate } from "@/components/campaigns/CampaignEmailTemplate";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 /**
- * POST /api/campaigns/send
+ * POST /api/emails/campaigns
  * Send an email campaign to the given recipients.
  * Admin/exec only.
  */
@@ -24,11 +24,7 @@ export const POST = withAuth(async (request) => {
       );
     }
 
-    const {
-      subject,
-      recipients,
-      body: emailBody,
-    } = validationResult.data;
+    const { subject, recipients, body: emailBody } = validationResult.data;
 
     const recipientList = recipients
       .split(",")

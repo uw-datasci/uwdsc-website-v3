@@ -29,6 +29,7 @@ dist
 
 # Debug
 npm-debug.log*
+.pnpm-store/
 
 # Misc
 .DS_Store

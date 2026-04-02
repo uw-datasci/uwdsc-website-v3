@@ -5,7 +5,7 @@
 
 export * from "./auth";
 export * from "./applications";
-export * from "./campaigns";
+export * from "./emails";
 export * from "./questions";
 export * from "./events";
 export * from "./foundry";

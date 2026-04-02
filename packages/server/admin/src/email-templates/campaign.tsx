@@ -9,6 +9,7 @@ import {
   Text,
 } from "@react-email/components";
 import { Markdown } from "@react-email/markdown";
+import type { ReactElement } from "react";
 
 interface CampaignEmailTemplateProps {
   subject: string;
@@ -18,7 +19,7 @@ interface CampaignEmailTemplateProps {
 export function CampaignEmailTemplate({
   subject,
   body,
-}: Readonly<CampaignEmailTemplateProps>) {
+}: Readonly<CampaignEmailTemplateProps>): ReactElement {
   return (
     <Html>
       <Head />

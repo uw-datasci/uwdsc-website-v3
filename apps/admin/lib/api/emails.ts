@@ -11,7 +11,7 @@ import { createApiError } from "./error";
 /**
  * Send an email blast
  *
- * @param data - Email payload: subject, recipients, and markdown body
+ * @param data - Email payload: subject, recipient role audiences, and markdown body
  * @returns Promise with the Resend message id
  * @throws Error if request fails or unauthorized
  */

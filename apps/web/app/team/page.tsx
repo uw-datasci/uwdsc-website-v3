@@ -3,6 +3,8 @@ import { SectionTitle } from "@uwdsc/ui";
 import TeamCard from "@/components/team/TeamCard";
 import { teamService } from "@uwdsc/core";
 
+export const dynamic = "force-dynamic";
+
 export default async function Team() {
   const team = await teamService.getTeam();
 

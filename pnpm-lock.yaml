@@ -359,6 +359,15 @@ importers:
 
   packages/server/admin:
     dependencies:
+      '@react-email/components':
+        specifier: ^1.0.10
+        version: 1.0.10(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@react-email/markdown':
+        specifier: ^0.0.18
+        version: 0.0.18(react@19.2.4)
+      '@react-email/render':
+        specifier: ^2.0.4
+        version: 2.0.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@supabase/storage-js':
         specifier: ^2.94.0
         version: 2.98.0
@@ -374,10 +383,19 @@ importers:
       '@uwdsc/db':
         specifier: workspace:*
         version: link:../db
+      react:
+        specifier: ^19.2.4
+        version: 19.2.4
+      resend:
+        specifier: ^6.9.4
+        version: 6.9.4(@react-email/render@2.0.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4))
     devDependencies:
       '@types/node':
         specifier: ^20.19.9
         version: 20.19.37
+      '@types/react':
+        specifier: ^19.2.7
+        version: 19.2.14
       '@uwdsc/eslint-config':
         specifier: workspace:*
         version: link:../../eslint-config

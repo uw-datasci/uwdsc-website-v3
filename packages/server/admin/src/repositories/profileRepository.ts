@@ -4,6 +4,7 @@ import {
   Member,
   MembershipStats,
   Profile,
+  UserRole,
 } from "@uwdsc/common/types";
 
 export class ProfileRepository extends BaseRepository {
@@ -66,6 +67,29 @@ export class ProfileRepository extends BaseRepository {
       return result;
     } catch (error: unknown) {
       console.error("Error fetching all profiles:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Distinct login emails for users whose role is one of the given roles.
+   */
+  async getEmailsByRoles(roles: UserRole[]): Promise<string[]> {
+    if (roles.length === 0) {
+      return [];
+    }
+
+    try {
+      const rows = await this.sql<{ email: string }[]>`
+        SELECT DISTINCT au.email
+        FROM profiles p
+        JOIN auth.users au ON p.id = au.id
+        JOIN user_roles r ON p.id = r.id
+        WHERE r.role IN ${this.sql(roles)}
+      `;
+      return rows.map((row) => row.email).filter(Boolean);
+    } catch (error: unknown) {
+      console.error("Error fetching emails by roles:", error);
       throw error;
     }
   }

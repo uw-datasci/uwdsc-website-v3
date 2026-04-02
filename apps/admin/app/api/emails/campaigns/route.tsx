@@ -1,15 +1,12 @@
-import { Resend } from "resend";
-import { render } from "@react-email/render";
+import { ApiError } from "@uwdsc/common/types";
 import { ApiResponse } from "@uwdsc/common/utils";
+import { emailService } from "@uwdsc/admin";
 import { withAuth } from "@/guards/withAuth";
 import { sendCampaignSchema } from "@/lib/schemas/emails";
-import { CampaignEmailTemplate } from "@/components/campaigns/CampaignEmailTemplate";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 /**
  * POST /api/emails/campaigns
- * Send an email campaign to the given recipients.
+ * Send an email campaign to users in the selected role audiences.
  * Admin/exec only.
  */
 export const POST = withAuth(async (request) => {
@@ -24,38 +21,28 @@ export const POST = withAuth(async (request) => {
       );
     }
 
-    const { subject, recipients, body: emailBody } = validationResult.data;
-
-    const recipientList = recipients
-      .split(",")
-      .map((r) => r.trim())
-      .filter(Boolean);
-
-    if (recipientList.length === 0) {
-      return ApiResponse.badRequest(
-        "At least one valid recipient email is required",
-        "Validation error",
-      );
-    }
-
-    const html = await render(
-      <CampaignEmailTemplate subject={subject} body={emailBody} />,
-    );
-
-    const { data, error } = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL ?? "UWDSC <noreply@uwdsc.ca>",
-      to: recipientList,
+    const { subject, recipientRoles, body: emailBody } =
+      validationResult.data;
+    const result = await emailService.sendCampaignEmail({
       subject,
-      html,
+      recipientRoles,
+      body: emailBody,
     });
 
-    if (error) {
-      console.error("Resend error:", error);
-      return ApiResponse.serverError(error, "Failed to send campaign");
-    }
-
-    return ApiResponse.ok({ success: true, id: data?.id });
+    return ApiResponse.ok({ success: true, id: result.id });
   } catch (error: unknown) {
+    if (error instanceof ApiError) {
+      if (error.statusCode === 400) {
+        return ApiResponse.badRequest(
+          error.message,
+          error.code ?? "Validation error",
+        );
+      }
+      return ApiResponse.json(
+        { error: error.code ?? "Error", message: error.message },
+        error.statusCode,
+      );
+    }
     console.error("Error sending campaign:", error);
     return ApiResponse.serverError(error, "Failed to send campaign");
   }

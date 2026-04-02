@@ -1,11 +1,11 @@
 {
   "extends": "@uwdsc/typescript-config/base.json",
   "compilerOptions": {
-    "baseUrl": "../..",
     "noImplicitAny": false,
+    "types": ["node"],
     "paths": {
-      "@uwdsc/common/types": ["common/src/types/index.ts"],
-      "@uwdsc/common/utils": ["common/src/utils/index.ts"]
+      "@uwdsc/common/types": ["../../common/src/types/index.ts"],
+      "@uwdsc/common/utils": ["../../common/src/utils/index.ts"]
     }
   },
   "include": ["src", "../db/src/config/baseRepository.ts"],

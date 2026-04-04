@@ -34,6 +34,36 @@ class EmailService {
     }
   }
 
+  /**
+   * Create and send a Resend Broadcast (marketing) to the configured segment.
+   */
+  private async sendMarketingBroadcast(params: {
+    segmentId: string;
+    subject: string;
+    html: string;
+  }): Promise<{ id?: string }> {
+    if (!this.resend) {
+      throw new ApiError("Email service is not configured", 500);
+    }
+
+    const { data, error } = await this.resend.broadcasts.create({
+      segmentId: params.segmentId,
+      from: this.from,
+      subject: params.subject,
+      html: params.html,
+      name: `UWDSC admin campaign ${new Date().toISOString()}`,
+      send: true,
+    });
+
+    if (error) {
+      console.error("Resend broadcast error:", error);
+      const message = this.resendErrorMessage(error) ?? "Failed to send campaign broadcast";
+      throw new ApiError(message, 500, "Failed to send campaign");
+    }
+
+    return { id: data?.id };
+  }
+
   private resendErrorMessage(error: unknown): string | undefined {
     if (
       typeof error === "object" &&
@@ -95,36 +125,6 @@ class EmailService {
         }),
       ),
     );
-  }
-
-  /**
-   * Create and send a Resend Broadcast (marketing) to the configured segment.
-   */
-  private async sendMarketingBroadcast(params: {
-    segmentId: string;
-    subject: string;
-    html: string;
-  }): Promise<{ id?: string }> {
-    if (!this.resend) {
-      throw new ApiError("Email service is not configured", 500);
-    }
-
-    const { data, error } = await this.resend.broadcasts.create({
-      segmentId: params.segmentId,
-      from: this.from,
-      subject: params.subject,
-      html: params.html,
-      name: `UWDSC admin campaign ${new Date().toISOString()}`,
-      send: true,
-    });
-
-    if (error) {
-      console.error("Resend broadcast error:", error);
-      const message = this.resendErrorMessage(error) ?? "Failed to send campaign broadcast";
-      throw new ApiError(message, 500, "Failed to send campaign");
-    }
-
-    return { id: data?.id };
   }
 
   /**

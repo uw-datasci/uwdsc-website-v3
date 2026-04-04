@@ -6,6 +6,7 @@ import {
   MembershipStats,
   UpdateMemberData,
   Profile,
+  UserRole,
 } from "@uwdsc/common/types";
 import { filterPartialUpdate } from "@uwdsc/common/utils";
 
@@ -37,6 +38,20 @@ class ProfileService {
     } catch (error) {
       throw new ApiError(
         `Failed to get all profiles: ${(error as Error).message}`,
+        500,
+      );
+    }
+  }
+
+  /**
+   * Emails for users matching any of the given roles (distinct).
+   */
+  async getEmailsByRoles(roles: UserRole[]): Promise<string[]> {
+    try {
+      return await this.repository.getEmailsByRoles(roles);
+    } catch (error) {
+      throw new ApiError(
+        `Failed to get emails by roles: ${(error as Error).message}`,
         500,
       );
     }

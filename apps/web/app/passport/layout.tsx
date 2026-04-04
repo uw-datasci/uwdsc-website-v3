@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import PassportShell from "./PassportShell";
 
 export const metadata: Metadata = {
   title: "My Passport | UWaterloo Data Science Club",
@@ -26,5 +25,5 @@ export default function PassportLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <PassportShell>{children}</PassportShell>;
+  return <>{children}</>;
 }

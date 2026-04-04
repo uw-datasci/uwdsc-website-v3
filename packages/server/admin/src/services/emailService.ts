@@ -41,9 +41,7 @@ class EmailService {
     subject: string;
     html: string;
   }): Promise<{ id?: string }> {
-    if (!this.resend) {
-      throw new ApiError("Email service is not configured", 500);
-    }
+    if (!this.resend) throw new ApiError("Email service is not configured", 500);
 
     const { data, error } = await this.resend.broadcasts.create({
       segmentId: params.segmentId,
@@ -126,14 +124,8 @@ class EmailService {
     );
   }
 
-  /**
-   * Send a markdown campaign as a Resend **Broadcast** (marketing): adds
-   * `recipientEmails` to `RESEND_CAMPAIGN_SEGMENT_ID`, sends once, then returns
-   * the same list so the caller can run {@link removeRecipientsFromSegment}
-   * after a delay (broadcast audience may be resolved asynchronously on Resend’s side).
-   *
-   * Create a dedicated empty segment in the Resend dashboard and set
-   * `RESEND_CAMPAIGN_SEGMENT_ID` to its id.
+  /** Sends a marketing broadcast via Resend; returns `recipientEmails`
+   * for delayed {@link removeRecipientsFromSegment}.
    */
   async sendCampaignEmail(
     subject: string,

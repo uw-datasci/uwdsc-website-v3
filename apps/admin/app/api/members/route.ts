@@ -1,5 +1,5 @@
 import { ApiResponse } from "@uwdsc/common/utils";
-import { profileService } from "@uwdsc/admin";
+import { membershipService, profileService } from "@uwdsc/admin";
 import { withAuth } from "@/guards/withAuth";
 
 /**
@@ -15,7 +15,7 @@ export const GET = withAuth(async (request) => {
     const searchQuery = searchParams.get("search") || undefined;
 
     if (statsOnly) {
-      const stats = await profileService.getMembershipStats();
+      const stats = await membershipService.getMembershipStats();
       return ApiResponse.ok({ stats });
     }
 

@@ -61,8 +61,9 @@ export async function POST(request: NextRequest): Promise<Response> {
       "[Membership Webhook] Loaded received email:",
       contents.email.subject,
       contents.email.id,
-      contents.email.html,
     );
+
+    // TODO: Process email received event - membership service
 
     return ApiResponse.ok({ received: true });
   } catch (error) {

@@ -1,9 +1,7 @@
 import { ProfileRepository } from "../repositories/profileRepository";
 import {
   ApiError,
-  MarkAsPaidData,
   Member,
-  MembershipStats,
   UpdateMemberData,
   Profile,
   UserRole,
@@ -66,46 +64,6 @@ class ProfileService {
     } catch (error) {
       throw new ApiError(
         `Failed to get profile by ID: ${(error as Error).message}`,
-        500,
-      );
-    }
-  }
-
-  /**
-   * Get membership statistics
-   */
-  async getMembershipStats(): Promise<MembershipStats> {
-    try {
-      return await this.repository.getMembershipStats();
-    } catch (error) {
-      throw new ApiError(
-        `Failed to get membership stats: ${(error as Error).message}`,
-        500,
-      );
-    }
-  }
-
-  /**
-   * Mark a member as paid
-   */
-  async markMemberAsPaid(
-    profileId: string,
-    data: MarkAsPaidData,
-  ): Promise<{ success: boolean; error?: string }> {
-    try {
-      const result = await this.repository.markAsPaid(profileId, data);
-
-      if (!result) {
-        return {
-          success: false,
-          error: "Failed to create membership record",
-        };
-      }
-
-      return { success: true };
-    } catch (error) {
-      throw new ApiError(
-        `Failed to mark member as paid: ${(error as Error).message}`,
         500,
       );
     }

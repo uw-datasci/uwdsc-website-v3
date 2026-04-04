@@ -1,6 +1,6 @@
 import { ApiError } from "@uwdsc/common/types";
 import { ApiResponse } from "@uwdsc/common/utils";
-import { emailService } from "@uwdsc/admin";
+import { emailService, profileService } from "@uwdsc/admin";
 import { after } from "next/server";
 import { withAuth } from "@/guards/withAuth";
 import { sendCampaignSchema } from "@/lib/schemas/emails";
@@ -23,11 +23,19 @@ export const POST = withAuth(async (request) => {
     }
 
     const { subject, recipientRoles, body: emailBody } = validationResult.data;
-    const result = await emailService.sendCampaignEmail({
+    const resolvedEmails = await profileService.getEmailsByRoles(recipientRoles);
+    if (resolvedEmails.length === 0) {
+      return ApiResponse.badRequest(
+        "No recipients found for the selected audiences",
+        "Validation error",
+      );
+    }
+
+    const result = await emailService.sendCampaignEmail(
       subject,
-      recipientRoles,
-      body: emailBody,
-    });
+      emailBody,
+      resolvedEmails,
+    );
 
     const { recipientEmails } = result;
     after(async () => {

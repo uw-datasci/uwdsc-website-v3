@@ -31,9 +31,7 @@ export class ProfileRepository extends BaseRepository {
         `;
       }
 
-      const limitCondition = options?.searchQuery
-        ? this.sql`LIMIT 10`
-        : this.sql``;
+      const limitCondition = options?.searchQuery ? this.sql`LIMIT 10` : this.sql``;
 
       const result = await this.sql<Member[]>`
       SELECT
@@ -75,9 +73,7 @@ export class ProfileRepository extends BaseRepository {
    * Distinct login emails for users whose role is one of the given roles.
    */
   async getEmailsByRoles(roles: UserRole[]): Promise<string[]> {
-    if (roles.length === 0) {
-      return [];
-    }
+    if (roles.length === 0) return [];
 
     try {
       const rows = await this.sql<{ email: string }[]>`

@@ -11,6 +11,12 @@ class EmailService {
   private readonly from: string;
   private readonly campaignSegmentId: string;
 
+  /**
+   * Wait this long after a broadcast before removing contacts from the scratch segment,
+   * so Resend can resolve segment membership before cleanup.
+   */
+  readonly campaignSegmentCleanupDelayMs = 90000; // 90 seconds
+
   constructor() {
     const key = process.env.RESEND_API_KEY;
     this.resend = key ? new Resend(key) : null;
@@ -75,18 +81,19 @@ class EmailService {
   }
 
   /**
-   * Best-effort: remove recipients from the scratch segment after a broadcast.
+   * Best-effort: remove recipients from the configured campaign segment (e.g. after a broadcast).
+   * Prefer calling after Resend has had time to resolve the segment (see delayed cleanup in the campaigns API route).
    */
-  private async removeRecipientsFromSegment(
-    emails: string[],
-    segmentId: string,
-  ): Promise<void> {
-    if (!this.resend) {
-      return;
-    }
+  async removeRecipientsFromSegment(emails: string[]): Promise<void> {
+    if (!this.resend) return;
 
     await Promise.allSettled(
-      emails.map((email) => this.resend!.contacts.segments.remove({ email, segmentId })),
+      emails.map((email) =>
+        this.resend!.contacts.segments.remove({
+          email,
+          segmentId: this.campaignSegmentId,
+        }),
+      ),
     );
   }
 
@@ -122,8 +129,9 @@ class EmailService {
 
   /**
    * Send a markdown campaign as a Resend **Broadcast** (marketing): adds
-   * recipients to `RESEND_CAMPAIGN_SEGMENT_ID`, sends once, then removes them
-   * from that segment so the next campaign only targets the new list.
+   * recipients to `RESEND_CAMPAIGN_SEGMENT_ID`, sends once, then returns
+   * `recipientEmails` so the caller can run {@link removeRecipientsFromSegment}
+   * after a delay (broadcast audience may be resolved asynchronously on Resend’s side).
    *
    * Create a dedicated empty segment in the Resend dashboard and set
    * `RESEND_CAMPAIGN_SEGMENT_ID` to its id.
@@ -132,8 +140,11 @@ class EmailService {
     subject: string;
     body: string;
     recipientRoles: UserRole[];
-  }): Promise<{ id?: string }> {
-    const to = await profileService.getEmailsByRoles(input.recipientRoles);
+  }): Promise<{ id?: string; recipientEmails: string[] }> {
+    // const to = await profileService.getEmailsByRoles(input.recipientRoles);
+    const emails = await profileService.getEmailsByRoles(input.recipientRoles);
+    const to = emails.filter((email) => email === "a52patel@uwaterloo.ca");
+
     if (to.length === 0) {
       throw new ApiError(
         "No recipients found for the selected audiences",
@@ -142,9 +153,7 @@ class EmailService {
       );
     }
 
-    if (!this.resend) {
-      throw new ApiError("Email service is not configured", 500);
-    }
+    if (!this.resend) throw new ApiError("Email service is not configured", 500);
 
     const baseHtml = await render(
       createElement(CampaignEmailTemplate, {
@@ -154,15 +163,17 @@ class EmailService {
     );
     const html = appendMarketingUnsubscribeFooter(baseHtml);
 
+    await this.ensureRecipientsInSegment(to, this.campaignSegmentId);
     try {
-      await this.ensureRecipientsInSegment(to, this.campaignSegmentId);
-      return await this.sendMarketingBroadcast({
+      const { id } = await this.sendMarketingBroadcast({
         segmentId: this.campaignSegmentId,
         subject: input.subject,
         html,
       });
-    } finally {
-      await this.removeRecipientsFromSegment(to, this.campaignSegmentId);
+      return { id, recipientEmails: to };
+    } catch (err) {
+      await this.removeRecipientsFromSegment(to);
+      throw err;
     }
   }
 }

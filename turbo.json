@@ -17,7 +17,10 @@
         "GMAIL_CLIENT_SECRET",
         "GMAIL_REFRESH_TOKEN",
         "GITHUB_TOKEN",
-        "FOUNDRY_WORKFLOW_ID"
+        "FOUNDRY_WORKFLOW_ID",
+        "RESEND_API_KEY",
+        "RESEND_FROM_EMAIL",
+        "RESEND_CAMPAIGN_SEGMENT_ID"
       ]
     },
     "lint": { "dependsOn": ["^lint"] },

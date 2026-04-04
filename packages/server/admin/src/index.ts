@@ -6,3 +6,4 @@ export * from "./services/onboardingService";
 export * from "./services/headshotService";
 export * from "./services/githubService";
 export * from "./services/hiringService";
+export * from "./services/emailService";

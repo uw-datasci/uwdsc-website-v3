@@ -1,34 +1,39 @@
 import { ComponentProps } from "react";
+import { ChevronDown } from "lucide-react";
 import { ControllerRenderProps } from "react-hook-form";
 import {
+  Button,
+  Checkbox,
+  FormControl,
+  FormDescription,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
-  FormDescription,
-  Checkbox,
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
+  Input,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   RadioGroup,
   RadioGroupItem,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Textarea,
-  Input,
 } from "@uwdsc/ui";
+import { cn } from "./utils";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
 // Allow optional field values so helpers work with forms that have optional fields (e.g. member_ideas?: string)
-type StringFieldProps = ControllerRenderProps<
-  Record<string, string | undefined>,
-  string
->;
-type BooleanFieldProps = ControllerRenderProps<
-  Record<string, boolean | undefined>,
+type StringFieldProps = ControllerRenderProps<Record<string, string | undefined>, string>;
+type BooleanFieldProps = ControllerRenderProps<Record<string, boolean | undefined>, string>;
+
+type StringArrayFieldProps = ControllerRenderProps<
+  Record<string, string[] | undefined>,
   string
 >;
 
@@ -85,6 +90,17 @@ interface CheckboxFieldOptions {
   checkboxClassName?: string;
 }
 
+interface MultiSelectDropdownFieldOptions {
+  label?: string;
+  required?: boolean;
+  /** Shown on the trigger when nothing is selected */
+  emptyPlaceholder: string;
+  options: readonly string[];
+  formatOption?: (value: string) => string;
+  triggerClassName?: string;
+  contentClassName?: string;
+}
+
 // ---------------------------------------------------------------------------
 // Helpers: each returns a component that receives { field } for FormField render
 // ---------------------------------------------------------------------------
@@ -95,6 +111,17 @@ interface StringFieldRenderProps {
 
 interface BooleanFieldRenderProps {
   readonly field: BooleanFieldProps;
+}
+
+interface StringArrayFieldRenderProps {
+  readonly field: StringArrayFieldProps;
+}
+
+function toggleStringInArray(list: string[], item: string, selected: boolean): string[] {
+  if (selected) {
+    return list.includes(item) ? list : [...list, item];
+  }
+  return list.filter((v) => v !== item);
 }
 
 export function renderTextField(opts: TextFieldOptions) {
@@ -116,16 +143,9 @@ export function renderTextField(opts: TextFieldOptions) {
           </FormLabel>
         )}
         <FormControl>
-          <Input
-            {...field}
-            {...inputProps}
-            placeholder={placeholder}
-            className={className}
-          />
+          <Input {...field} {...inputProps} placeholder={placeholder} className={className} />
         </FormControl>
-        {description != null && (
-          <FormDescription>{description}</FormDescription>
-        )}
+        {description != null && <FormDescription>{description}</FormDescription>}
         <FormMessage />
       </FormItem>
     );
@@ -163,10 +183,7 @@ export function renderSelectField(opts: SelectFieldOptions) {
               <SelectValue placeholder={placeholder} />
             </SelectTrigger>
           </FormControl>
-          <SelectContent
-            className={contentClassName}
-            position={contentPosition}
-          >
+          <SelectContent className={contentClassName} position={contentPosition}>
             {options.map((option) => {
               const value = typeof option === "string" ? option : option.value;
               const label = typeof option === "string" ? option : option.label;
@@ -198,9 +215,7 @@ export function renderTextAreaField(opts: TextAreaFieldOptions) {
 
   function TextAreaFieldRender({ field }: StringFieldRenderProps) {
     const desc =
-      typeof description === "function"
-        ? description(field.value ?? "")
-        : description;
+      typeof description === "function" ? description(field.value ?? "") : description;
     return (
       <FormItem>
         {label != null && (
@@ -286,10 +301,7 @@ export function renderScaleField(opts: ScaleFieldOptions) {
             className="flex items-center gap-4"
           >
             {labels.map((scaleLabel, index) => (
-              <FormItem
-                key={index}
-                className="flex flex-col items-center space-y-1 space-x-0"
-              >
+              <FormItem key={index} className="flex flex-col items-center space-y-1 space-x-0">
                 <FormControl>
                   <RadioGroupItem value={String(index)} />
                 </FormControl>
@@ -321,8 +333,7 @@ export function renderCheckboxField(opts: CheckboxFieldOptions) {
 
   function CheckboxFieldRender({ field }: BooleanFieldRenderProps) {
     const checked = field.value ?? false;
-    const desc =
-      typeof description === "function" ? description(checked) : description;
+    const desc = typeof description === "function" ? description(checked) : description;
 
     return (
       <FormItem className={containerClassName}>
@@ -341,9 +352,7 @@ export function renderCheckboxField(opts: CheckboxFieldOptions) {
             </FormLabel>
           )}
           {desc != null && (
-            <FormDescription className={descriptionClassName}>
-              {desc}
-            </FormDescription>
+            <FormDescription className={descriptionClassName}>{desc}</FormDescription>
           )}
         </div>
         <FormMessage />
@@ -352,4 +361,88 @@ export function renderCheckboxField(opts: CheckboxFieldOptions) {
   }
   CheckboxFieldRender.displayName = `CheckboxField(${label ?? "unknown"})`;
   return CheckboxFieldRender;
+}
+
+export function renderMultiSelectDropdownField(opts: MultiSelectDropdownFieldOptions) {
+  const {
+    label,
+    required = false,
+    emptyPlaceholder,
+    options,
+    formatOption = (v) => v.charAt(0).toUpperCase() + v.slice(1),
+    triggerClassName,
+    contentClassName,
+  } = opts;
+
+  function MultiSelectDropdownFieldRender({ field }: StringArrayFieldRenderProps) {
+    const value = field.value ?? [];
+    return (
+      <FormItem>
+        {label != null && (
+          <FormLabel className="mb-1">
+            {label} {required && <span className="text-red-500">*</span>}
+          </FormLabel>
+        )}
+        <Popover>
+          <PopoverTrigger asChild>
+            <FormControl>
+              <Button
+                type="button"
+                variant="outline"
+                role="combobox"
+                className={cn(
+                  // Align with SelectTrigger + Input: rounded-md, full width, input-like padding
+                  "border-input data-placeholder:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground flex h-9 w-full min-w-0 items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-left text-sm font-normal shadow-xs transition-[color,box-shadow] outline-none",
+                  "hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:hover:bg-input/50",
+                  "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+                  "disabled:cursor-not-allowed disabled:opacity-50",
+                  "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+                  !value.length && "text-muted-foreground",
+                  triggerClassName,
+                )}
+              >
+                <span className="min-w-0 flex-1 truncate">
+                  {value.length ? value.map(formatOption).join(", ") : emptyPlaceholder}
+                </span>
+                <ChevronDown className="size-4 shrink-0 opacity-50" />
+              </Button>
+            </FormControl>
+          </PopoverTrigger>
+          <PopoverContent
+            className={cn(
+              "w-(--radix-popover-trigger-width) p-1 text-popover-foreground",
+              contentClassName,
+            )}
+            align="start"
+          >
+            <div className="flex flex-col">
+              {options.map((option) => (
+                <label
+                  key={option}
+                  className={cn(
+                    "flex w-full cursor-pointer items-center gap-2 rounded-sm py-1.5 pr-2 pl-2 text-sm outline-none select-none",
+                    "hover:bg-accent hover:text-accent-foreground",
+                    "focus-within:bg-accent focus-within:text-accent-foreground",
+                  )}
+                >
+                  <Checkbox
+                    checked={value.includes(option)}
+                    onCheckedChange={(v) =>
+                      field.onChange(toggleStringInArray(value, option, v === true))
+                    }
+                    className="shrink-0"
+                  />
+                  <span className="min-w-0 flex-1">{formatOption(option)}</span>
+                </label>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
+        <FormMessage />
+      </FormItem>
+    );
+  }
+
+  MultiSelectDropdownFieldRender.displayName = `MultiSelectDropdownField(${emptyPlaceholder})`;
+  return MultiSelectDropdownFieldRender;
 }

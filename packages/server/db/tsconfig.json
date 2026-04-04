@@ -1,7 +1,7 @@
 {
   "extends": "@uwdsc/typescript-config/base.json",
   "compilerOptions": {
-    "baseUrl": ".",
+    "types": ["node"],
     "paths": {
       "@uwdsc/db/*": ["./src/*"]
     }

@@ -10,14 +10,11 @@ export type MembershipPaymentDrawerProps = {
   profileId: string | null;
 };
 
-export function MembershipPaymentDrawer({
-  profileId,
-}: Readonly<MembershipPaymentDrawerProps>) {
+export function MembershipPaymentDrawer({ profileId }: Readonly<MembershipPaymentDrawerProps>) {
   const [open, setOpen] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
 
-  const adminBaseUrl =
-    process.env.NEXT_PUBLIC_ADMIN_URL ?? "https://admin.uwdatascience.ca";
+  const adminBaseUrl = process.env.NEXT_PUBLIC_ADMIN_URL ?? "https://admin.uwdatascience.ca";
 
   useEffect(() => {
     let cancelled = false;
@@ -49,7 +46,7 @@ export function MembershipPaymentDrawer({
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      {!open ? (
+      {open ? null : (
         <SheetTrigger asChild>
           <Button
             variant="outline"
@@ -60,7 +57,7 @@ export function MembershipPaymentDrawer({
             Show Payment QR
           </Button>
         </SheetTrigger>
-      ) : null}
+      )}
 
       <SheetContent side="bottom" className="p-0 z-200">
         <SheetTitle className="sr-only">Payment QR code</SheetTitle>
@@ -84,12 +81,11 @@ export function MembershipPaymentDrawer({
           </div>
 
           <p className="text-sm text-muted-foreground sm:text-center">
-            Once you have paid, please show this QR code to a DSC exec, along
-            with proof of purchase.
+            Once you have paid, please show this QR code to a DSC exec, along with proof of
+            purchase.
           </p>
         </div>
       </SheetContent>
     </Sheet>
   );
 }
-

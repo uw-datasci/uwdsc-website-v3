@@ -141,9 +141,7 @@ class EmailService {
     body: string;
     recipientRoles: UserRole[];
   }): Promise<{ id?: string; recipientEmails: string[] }> {
-    // const to = await profileService.getEmailsByRoles(input.recipientRoles);
-    const emails = await profileService.getEmailsByRoles(input.recipientRoles);
-    const to = emails.filter((email) => email === "a52patel@uwaterloo.ca");
+    const to = await profileService.getEmailsByRoles(input.recipientRoles);
 
     if (to.length === 0) {
       throw new ApiError(

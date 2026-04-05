@@ -56,6 +56,20 @@ class ProfileService {
   }
 
   /**
+   * Get profile by login email (case-insensitive).
+   */
+  async getProfileByEmail(email: string): Promise<Profile | null> {
+    try {
+      return await this.repository.getProfileByEmail(email);
+    } catch (error) {
+      throw new ApiError(
+        `Failed to get profile by email: ${(error as Error).message}`,
+        500,
+      );
+    }
+  }
+
+  /**
    * Get the profile by profile ID
    */
   async getProfileById(profileId: string): Promise<Profile | null> {

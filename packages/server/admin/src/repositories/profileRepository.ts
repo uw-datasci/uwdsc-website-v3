@@ -85,6 +85,38 @@ export class ProfileRepository extends BaseRepository {
   }
 
   /**
+   * Get profile by login email (auth.users), case-insensitive.
+   */
+  async getProfileByEmail(email: string): Promise<Profile | null> {
+    const normalized = email.trim().toLowerCase();
+
+    try {
+      const result = await this.sql<Profile[]>`
+        SELECT
+          p.id,
+          p.first_name,
+          p.last_name,
+          au.email,
+          p.wat_iam,
+          p.faculty,
+          p.term,
+          p.is_math_soc_member,
+          r.role AS role
+        FROM profiles p
+        JOIN auth.users au ON p.id = au.id
+        JOIN user_roles r ON p.id = r.id
+        WHERE lower(trim(au.email)) = ${normalized}
+        LIMIT 1
+      `;
+
+      return result[0] ?? null;
+    } catch (error: unknown) {
+      console.error("Error fetching profile by email:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Get the profile by profile ID
    */
   async getProfileById(profileId: string): Promise<Profile | null> {

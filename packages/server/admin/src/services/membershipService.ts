@@ -1,5 +1,7 @@
+import { GetReceivingEmailResponseSuccess } from "resend";
 import { MembershipRepository } from "../repositories/membershipRepository";
 import { ApiError, MarkAsPaidData, MembershipStats } from "@uwdsc/common/types";
+import { profileService } from "./profileService";
 
 class MembershipService {
   private readonly repository: MembershipRepository;
@@ -15,10 +17,7 @@ class MembershipService {
     try {
       return await this.repository.getMembershipStats();
     } catch (error) {
-      throw new ApiError(
-        `Failed to get membership stats: ${(error as Error).message}`,
-        500,
-      );
+      throw new ApiError(`Failed to get membership stats: ${(error as Error).message}`, 500);
     }
   }
 
@@ -41,8 +40,69 @@ class MembershipService {
 
       return { success: true };
     } catch (error) {
+      throw new ApiError(`Failed to mark member as paid: ${(error as Error).message}`, 500);
+    }
+  }
+
+  /**
+   * Process a membership payment email
+   */
+  async processEmailReceipt(email: GetReceivingEmailResponseSuccess): Promise<void> {
+    try {
+      const body = email.text;
+
+      if (!body) throw new ApiError("Email body is missing", 400);
+
+      // RegEx Checks for email receipt
+      const isFromMoneris = /From:\s*WUSA'S ONLINE SHOP\s*<receipt@moneris\.com>/i.test(body);
+
+      // Use \b to ensure it ends exactly at 4.00, avoiding partial matches like 14.00
+      const isCorrectTotal = /Total:\s*\$4\.00\b/i.test(body);
+
+      const hasCorrectItem = /UW Data Science Club Membership/i.test(body);
+      const isApproved = /Transaction Approved/i.test(body);
+
+      // Extract the uwaterloo email from the receipt body
+      const bodyEmailMatch = /([a-z0-9._%+-]+@uwaterloo\.ca)/i.exec(body);
+      const receiptEmail = bodyEmailMatch?.[1]?.toLowerCase() ?? null;
+
+      const dateMatch = new RegExp(/(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})/).exec(body);
+      const transactionDateText = dateMatch?.[1] ?? null;
+
+      if (
+        !isFromMoneris ||
+        !isCorrectTotal ||
+        !hasCorrectItem ||
+        !isApproved ||
+        !receiptEmail ||
+        !transactionDateText
+      ) {
+        throw new ApiError("Invalid email receipt", 400);
+      }
+
+      const sender = email.from;
+
+      if (!sender.includes(receiptEmail)) {
+        throw new ApiError("Sender email does not match receipt email", 400);
+      }
+
+      const profile = await profileService.getProfileByEmail(receiptEmail);
+
+      if (!profile) throw new ApiError("No profile found for receipt email", 404);
+
+      const markResult = await this.markMemberAsPaid(profile.id, {
+        payment_method: "online",
+        payment_location: "WUSA Online Shop",
+        verifier: null,
+      });
+
+      if (!markResult.success) {
+        throw new ApiError(markResult.error ?? "Failed to mark member as paid", 400);
+      }
+    } catch (error) {
+      if (error instanceof ApiError) throw error;
       throw new ApiError(
-        `Failed to mark member as paid: ${(error as Error).message}`,
+        `Failed to process membership payment email: ${(error as Error).message}`,
         500,
       );
     }

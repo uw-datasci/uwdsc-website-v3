@@ -1,7 +1,8 @@
 import { NextRequest } from "next/server";
 import { headers } from "next/headers";
+import { ApiError } from "@uwdsc/common/types";
 import { ApiResponse } from "@uwdsc/common/utils";
-import { webhookService } from "@uwdsc/admin";
+import { membershipService, webhookService } from "@uwdsc/admin";
 import { Webhook } from "svix";
 import { WebhookEventPayload } from "resend";
 
@@ -57,17 +58,21 @@ export async function POST(request: NextRequest): Promise<Response> {
       );
     }
 
-    console.log(
-      "[Membership Webhook] Loaded received email:",
-      contents.email.subject,
-      contents.email.id,
-    );
+    await membershipService.processEmailReceipt(contents.email);
 
-    // TODO: Process email received event - membership service
-
-    return ApiResponse.ok({ received: true });
+    return ApiResponse.ok({
+      success: true,
+      event: evt.type,
+      emailId: evt.data.email_id,
+    });
   } catch (error) {
-    console.error("[Gmail Webhook] Failed to process request:", error);
+    if (error instanceof ApiError) {
+      return ApiResponse.json(
+        { error: "Request failed", message: error.message },
+        error.statusCode,
+      );
+    }
+    console.error("[Membership Webhook] Failed to process request:", error);
     return ApiResponse.badRequest("Invalid request body");
   }
 }

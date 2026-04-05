@@ -35,16 +35,46 @@ export class MembershipRepository extends BaseRepository {
    * @param data - Payment data (method, location, verifier)
    */
   async markAsPaid(profileId: string, data: MarkAsPaidData): Promise<boolean> {
+    const verifiedAtSql = data.verifier
+      ? this.sql`NOW()`
+      : this.sql`NULL`;
+
     try {
       const result = await this.sql`
-        INSERT INTO memberships (profile_id, payment_method, payment_location, verifier_id, verified_at, updated_at)
-        VALUES (${profileId}, ${data.payment_method}::payment_method_enum, ${data.payment_location}, ${data.verifier}::uuid, NOW(), NOW())
-        ON CONFLICT (profile_id) 
+        INSERT INTO memberships (
+          profile_id,
+          payment_method,
+          payment_location,
+          term_id,
+          verifier_id,
+          verified_at,
+          updated_at
+        )
+        VALUES (
+          ${profileId},
+          ${data.payment_method}::payment_method_enum,
+          ${data.payment_location},
+          COALESCE(
+            (
+              SELECT t.id
+              FROM terms t
+              INNER JOIN profiles pr ON pr.term = t.code
+              WHERE pr.id = ${profileId}
+              LIMIT 1
+            ),
+            (SELECT id FROM terms WHERE is_active = true LIMIT 1)
+          ),
+          ${data.verifier},
+          ${verifiedAtSql},
+          NOW()
+        )
+        ON CONFLICT (profile_id)
         DO UPDATE SET
-          payment_method = ${data.payment_method}::payment_method_enum,
-          payment_location = ${data.payment_location},
-          verifier_id = ${data.verifier}::uuid,
-          verified_at = NOW(),
+          payment_method = EXCLUDED.payment_method,
+          payment_location = EXCLUDED.payment_location,
+          term_id = EXCLUDED.term_id,
+          verifier_id = EXCLUDED.verifier_id,
+          verified_at = EXCLUDED.verified_at,
           updated_at = NOW()
         RETURNING *
       `;

@@ -22,6 +22,8 @@ export interface Term {
   application_release_date: string;
   application_soft_deadline: string;
   application_hard_deadline: string;
+  start_date: string | null;
+  onboarding_due_date: string | null;
   created_at: string;
 }
 

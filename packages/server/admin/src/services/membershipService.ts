@@ -1,6 +1,7 @@
 import { GetReceivingEmailResponseSuccess } from "resend";
 import { MembershipRepository } from "../repositories/membershipRepository";
 import { ApiError, MarkAsPaidData, MembershipStats } from "@uwdsc/common/types";
+import { MONERIS_SENT_LINE, parseReceiptDate } from "../utils/monerisReceipt";
 import { profileService } from "./profileService";
 
 class MembershipService {
@@ -45,11 +46,16 @@ class MembershipService {
   }
 
   /**
-   * Process a membership payment email
+   * Process a membership payment email.
+   * @param termStartDate ISO timestamp from the active term's `start_date`, or null if unset.
    */
-  async processEmailReceipt(email: GetReceivingEmailResponseSuccess): Promise<void> {
+  async processEmailReceipt(
+    email: GetReceivingEmailResponseSuccess,
+    termStartDate: string | null,
+  ): Promise<void> {
     try {
       const body = email.text;
+      const sender = email.from;
 
       if (!body) throw new ApiError("Email body is missing", 400);
 
@@ -69,21 +75,43 @@ class MembershipService {
       const dateMatch = new RegExp(/(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})/).exec(body);
       const transactionDateText = dateMatch?.[1] ?? null;
 
+      const monerisSentMatch = MONERIS_SENT_LINE.exec(body);
+      const receiptDate = monerisSentMatch?.[1]?.trim() ?? null;
+
       if (
         !isFromMoneris ||
         !isCorrectTotal ||
         !hasCorrectItem ||
         !isApproved ||
         !receiptEmail ||
-        !transactionDateText
+        !transactionDateText ||
+        !receiptDate
       ) {
+        console.error("Invalid email receipt");
         throw new ApiError("Invalid email receipt", 400);
       }
 
-      const sender = email.from;
-
       if (!sender.includes(receiptEmail)) {
+        console.error("Sender email does not match receipt email");
         throw new ApiError("Sender email does not match receipt email", 400);
+      }
+
+      if (termStartDate === null) {
+        console.error("Active term has no start date");
+        throw new ApiError("Active term has no start date", 400);
+      }
+
+      const inboundAt = parseReceiptDate(receiptDate);
+      const termStartAt = new Date(termStartDate);
+
+      if (Number.isNaN(termStartAt.getTime())) {
+        console.error("Invalid term start timestamp");
+        throw new ApiError("Invalid term start timestamp", 400);
+      }
+
+      if (inboundAt < termStartAt) {
+        console.error("Original receipt was sent before the current term started");
+        throw new ApiError("Original receipt was sent before the current term started", 400);
       }
 
       const profile = await profileService.getProfileByEmail(receiptEmail);
@@ -97,6 +125,7 @@ class MembershipService {
       });
 
       if (!markResult.success) {
+        console.error("Failed to mark member as paid");
         throw new ApiError(markResult.error ?? "Failed to mark member as paid", 400);
       }
     } catch (error) {

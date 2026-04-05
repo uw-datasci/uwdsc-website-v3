@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { ApiError } from "@uwdsc/common/types";
 import { ApiResponse } from "@uwdsc/common/utils";
 import { membershipService, webhookService } from "@uwdsc/admin";
+import { applicationService } from "@uwdsc/core";
 import { Webhook } from "svix";
 import { WebhookEventPayload } from "resend";
 
@@ -58,7 +59,11 @@ export async function POST(request: NextRequest): Promise<Response> {
       );
     }
 
-    await membershipService.processEmailReceipt(contents.email);
+    const activeTerm = await applicationService.getActiveTerm();
+
+    if (!activeTerm) throw new ApiError("No active term is configured", 400);
+
+    await membershipService.processEmailReceipt(contents.email, activeTerm.start_date);
 
     return ApiResponse.ok({
       success: true,

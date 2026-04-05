@@ -8,8 +8,7 @@ const DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
  * Parses the transaction datetime from the Moneris receipt body (local shop time, America/Toronto).
  */
 export function parseTransactionDate(text: string): Date {
-  const trimmed = text.trim();
-  const dt = DateTime.fromFormat(trimmed, DATETIME_FORMAT, { zone: "America/Toronto" });
+  const dt = DateTime.fromFormat(text.trim(), DATETIME_FORMAT, { zone: "America/Toronto" });
 
   if (!dt.isValid) throw new ApiError("Could not parse transaction date from receipt", 400);
 

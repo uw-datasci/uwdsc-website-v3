@@ -1,7 +1,7 @@
 import { GetReceivingEmailResponseSuccess } from "resend";
 import { MembershipRepository } from "../repositories/membershipRepository";
 import { ApiError, MarkAsPaidData, MembershipStats } from "@uwdsc/common/types";
-import { MONERIS_SENT_LINE, parseReceiptDate } from "../utils/monerisReceipt";
+import { parseTransactionDate } from "../utils/monerisReceipt";
 import { profileService } from "./profileService";
 
 class MembershipService {
@@ -72,11 +72,8 @@ class MembershipService {
       const bodyEmailMatch = /([a-z0-9._%+-]+@uwaterloo\.ca)/i.exec(body);
       const receiptEmail = bodyEmailMatch?.[1]?.toLowerCase() ?? null;
 
-      const dateMatch = new RegExp(/(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})/).exec(body);
+      const dateMatch = /(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})/.exec(body);
       const transactionDateText = dateMatch?.[1] ?? null;
-
-      const monerisSentMatch = MONERIS_SENT_LINE.exec(body);
-      const receiptDate = monerisSentMatch?.[1]?.trim() ?? null;
 
       if (
         !isFromMoneris ||
@@ -84,8 +81,7 @@ class MembershipService {
         !hasCorrectItem ||
         !isApproved ||
         !receiptEmail ||
-        !transactionDateText ||
-        !receiptDate
+        !transactionDateText
       ) {
         console.error("Invalid email receipt");
         throw new ApiError("Invalid email receipt", 400);
@@ -101,7 +97,7 @@ class MembershipService {
         throw new ApiError("Active term has no start date", 400);
       }
 
-      const inboundAt = parseReceiptDate(receiptDate);
+      const inboundAt = parseTransactionDate(transactionDateText);
       const termStartAt = new Date(termStartDate);
 
       if (Number.isNaN(termStartAt.getTime())) {
@@ -110,8 +106,8 @@ class MembershipService {
       }
 
       if (inboundAt < termStartAt) {
-        console.error("Original receipt was sent before the current term started");
-        throw new ApiError("Original receipt was sent before the current term started", 400);
+        console.error("Transaction date is before the current term started");
+        throw new ApiError("Transaction date is before the current term started", 400);
       }
 
       const profile = await profileService.getProfileByEmail(receiptEmail);

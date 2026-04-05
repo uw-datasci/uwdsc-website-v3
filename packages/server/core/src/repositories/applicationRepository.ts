@@ -24,6 +24,8 @@ export class ApplicationRepository extends BaseRepository {
         application_release_date,
         application_soft_deadline,
         application_hard_deadline,
+        start_date,
+        onboarding_due_date,
         created_at
       FROM terms
       WHERE is_active = true
@@ -181,10 +183,7 @@ export class ApplicationRepository extends BaseRepository {
     }
   }
 
-  async upsertAnswers(
-    applicationId: string,
-    answers: AnswerInput[],
-  ): Promise<void> {
+  async upsertAnswers(applicationId: string, answers: AnswerInput[]): Promise<void> {
     await this.sql`
       DELETE FROM answers
       WHERE application_id = ${applicationId}

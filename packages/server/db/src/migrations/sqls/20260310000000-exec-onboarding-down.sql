@@ -31,8 +31,8 @@ DROP TABLE IF EXISTS public.exec_form_submissions;
 -- Remove onboarding date columns from terms
 -- ============================================================================
 ALTER TABLE public.terms
-  DROP COLUMN IF EXISTS onboarding_form_due_date,
-  DROP COLUMN IF EXISTS onboarding_form_start_date;
+  DROP COLUMN IF EXISTS onboarding_due_date,
+  DROP COLUMN IF EXISTS start_date;
 
 -- ============================================================================
 -- Drop enum

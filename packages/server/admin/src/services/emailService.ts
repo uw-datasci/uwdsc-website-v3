@@ -1,10 +1,9 @@
 import { render } from "@react-email/render";
 import { createElement } from "react";
 import { Resend } from "resend";
-import { ApiError, type UserRole } from "@uwdsc/common/types";
+import { ApiError } from "@uwdsc/common/types";
 import { CampaignEmailTemplate } from "../email-templates/campaign";
 import { appendMarketingUnsubscribeFooter } from "../utils/marketingEmail";
-import { profileService } from "./profileService";
 
 class EmailService {
   private readonly resend: Resend | null;
@@ -42,9 +41,7 @@ class EmailService {
     subject: string;
     html: string;
   }): Promise<{ id?: string }> {
-    if (!this.resend) {
-      throw new ApiError("Email service is not configured", 500);
-    }
+    if (!this.resend) throw new ApiError("Email service is not configured", 500);
 
     const { data, error } = await this.resend.broadcasts.create({
       segmentId: params.segmentId,
@@ -127,23 +124,15 @@ class EmailService {
     );
   }
 
-  /**
-   * Send a markdown campaign as a Resend **Broadcast** (marketing): adds
-   * recipients to `RESEND_CAMPAIGN_SEGMENT_ID`, sends once, then returns
-   * `recipientEmails` so the caller can run {@link removeRecipientsFromSegment}
-   * after a delay (broadcast audience may be resolved asynchronously on Resend’s side).
-   *
-   * Create a dedicated empty segment in the Resend dashboard and set
-   * `RESEND_CAMPAIGN_SEGMENT_ID` to its id.
+  /** Sends a marketing broadcast via Resend; returns `recipientEmails`
+   * for delayed {@link removeRecipientsFromSegment}.
    */
-  async sendCampaignEmail(input: {
-    subject: string;
-    body: string;
-    recipientRoles: UserRole[];
-  }): Promise<{ id?: string; recipientEmails: string[] }> {
-    const to = await profileService.getEmailsByRoles(input.recipientRoles);
-
-    if (to.length === 0) {
+  async sendCampaignEmail(
+    subject: string,
+    body: string,
+    recipientEmails: string[],
+  ): Promise<{ id?: string; recipientEmails: string[] }> {
+    if (recipientEmails.length === 0) {
       throw new ApiError(
         "No recipients found for the selected audiences",
         400,
@@ -155,22 +144,22 @@ class EmailService {
 
     const baseHtml = await render(
       createElement(CampaignEmailTemplate, {
-        subject: input.subject,
-        body: input.body,
+        subject,
+        body,
       }),
     );
     const html = appendMarketingUnsubscribeFooter(baseHtml);
 
-    await this.ensureRecipientsInSegment(to, this.campaignSegmentId);
+    await this.ensureRecipientsInSegment(recipientEmails, this.campaignSegmentId);
     try {
       const { id } = await this.sendMarketingBroadcast({
         segmentId: this.campaignSegmentId,
-        subject: input.subject,
+        subject,
         html,
       });
-      return { id, recipientEmails: to };
+      return { id, recipientEmails };
     } catch (err) {
-      await this.removeRecipientsFromSegment(to);
+      await this.removeRecipientsFromSegment(recipientEmails);
       throw err;
     }
   }

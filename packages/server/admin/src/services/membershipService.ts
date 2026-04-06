@@ -53,7 +53,6 @@ class MembershipService {
 
   /**
    * Process a membership payment email.
-   * @param termStartDate ISO timestamp from the active term's `start_date`, or null if unset.
    */
   async processEmailReceipt(
     email: GetReceivingEmailResponseSuccess,

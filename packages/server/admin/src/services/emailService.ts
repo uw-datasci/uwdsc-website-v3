@@ -2,7 +2,11 @@ import { render } from "@react-email/render";
 import { createElement } from "react";
 import { Resend } from "resend";
 import { ApiError } from "@uwdsc/common/types";
-import { CampaignEmailTemplate } from "../email-templates/campaign";
+import { CampaignEmail } from "../email-templates/campaign";
+import {
+  MembershipReceipt,
+  getMembershipReceiptSubject,
+} from "../email-templates/membershipReceiptWebhook";
 import { appendMarketingUnsubscribeFooter } from "../utils/marketingEmail";
 
 class EmailService {
@@ -29,6 +33,37 @@ class EmailService {
         "RESEND_CAMPAIGN_SEGMENT_ID is not set. Create a segment in Resend and add its id for marketing broadcasts.",
         500,
         "Configuration error",
+      );
+    }
+  }
+
+  /**
+   * Generic transactional send via Resend (not broadcast; no marketing footer).
+   */
+  private async sendTransactionalEmail(params: {
+    to: string[];
+    subject: string;
+    html: string;
+  }): Promise<void> {
+    if (params.to.length === 0) return;
+
+    if (!this.resend) {
+      console.warn("[EmailService] Transactional send skipped: RESEND_API_KEY not set");
+      return;
+    }
+
+    const { error } = await this.resend.emails.send({
+      from: this.from,
+      to: params.to,
+      subject: params.subject,
+      html: params.html,
+    });
+
+    if (error) {
+      console.error("Resend transactional email error:", error);
+      throw new ApiError(
+        this.resendErrorMessage(error) ?? "Failed to send transactional email",
+        500,
       );
     }
   }
@@ -142,12 +177,7 @@ class EmailService {
 
     if (!this.resend) throw new ApiError("Email service is not configured", 500);
 
-    const baseHtml = await render(
-      createElement(CampaignEmailTemplate, {
-        subject,
-        body,
-      }),
-    );
+    const baseHtml = await render(createElement(CampaignEmail, { subject, body }));
     const html = appendMarketingUnsubscribeFooter(baseHtml);
 
     await this.ensureRecipientsInSegment(recipientEmails, this.campaignSegmentId);
@@ -162,6 +192,22 @@ class EmailService {
       await this.removeRecipientsFromSegment(recipientEmails);
       throw err;
     }
+  }
+
+  /**
+   * Membership payment webhook: welcome or generic “try again / contact us” notice.
+   */
+  async sendMembershipReceiptNotice(
+    recipientEmails: string[],
+    options: { success: boolean },
+  ): Promise<void> {
+    if (recipientEmails.length === 0) return;
+
+    const { success } = options;
+    const subject = getMembershipReceiptSubject(success);
+    const html = await render(createElement(MembershipReceipt, { success }));
+
+    await this.sendTransactionalEmail({ to: recipientEmails, subject, html });
   }
 }
 

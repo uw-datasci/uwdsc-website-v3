@@ -1,7 +1,13 @@
 import { GetReceivingEmailResponseSuccess } from "resend";
 import { MembershipRepository } from "../repositories/membershipRepository";
 import { ApiError, MarkAsPaidData, MembershipStats } from "@uwdsc/common/types";
-import { parseTransactionDate } from "../utils/monerisReceipt";
+import {
+  assertReceiptWithinActiveTerm,
+  parseMembershipReceipt,
+  dedupeRecipients,
+  throwIfParseFailed,
+} from "../utils/membershipReceipt";
+import { emailService } from "./emailService";
 import { profileService } from "./profileService";
 
 class MembershipService {
@@ -53,65 +59,21 @@ class MembershipService {
     email: GetReceivingEmailResponseSuccess,
     termStartDate: string | null,
   ): Promise<void> {
+    let recipientEmails: string[] = [];
+
     try {
       const body = email.text;
-      const sender = email.from;
-
       if (!body) throw new ApiError("Email body is missing", 400);
 
-      // RegEx Checks for email receipt
-      const isFromMoneris = /From:\s*WUSA'S ONLINE SHOP\s*<receipt@moneris\.com>/i.test(body);
+      const parsed = parseMembershipReceipt(body);
+      throwIfParseFailed(parsed);
 
-      // Use \b to ensure it ends exactly at 4.00, avoiding partial matches like 14.00
-      const isCorrectTotal = /Total:\s*\$4\.00\b/i.test(body);
+      const { receiptEmail, transactionDateText } = parsed;
+      recipientEmails = dedupeRecipients(parsed.toRecipientEmail, parsed.receiptEmail);
 
-      const hasCorrectItem = /UW Data Science Club Membership/i.test(body);
-      const isApproved = /Transaction Approved/i.test(body);
-
-      // Extract the uwaterloo email from the receipt body
-      const bodyEmailMatch = /([a-z0-9._%+-]+@uwaterloo\.ca)/i.exec(body);
-      const receiptEmail = bodyEmailMatch?.[1]?.toLowerCase() ?? null;
-
-      const dateMatch = /(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})/.exec(body);
-      const transactionDateText = dateMatch?.[1] ?? null;
-
-      if (
-        !isFromMoneris ||
-        !isCorrectTotal ||
-        !hasCorrectItem ||
-        !isApproved ||
-        !receiptEmail ||
-        !transactionDateText
-      ) {
-        console.error("Invalid email receipt");
-        throw new ApiError("Invalid email receipt", 400);
-      }
-
-      if (!sender.includes(receiptEmail)) {
-        console.error("Sender email does not match receipt email");
-        throw new ApiError("Sender email does not match receipt email", 400);
-      }
-
-      if (termStartDate === null) {
-        console.error("Active term has no start date");
-        throw new ApiError("Active term has no start date", 400);
-      }
-
-      const inboundAt = parseTransactionDate(transactionDateText);
-      const termStartAt = new Date(termStartDate);
-
-      if (Number.isNaN(termStartAt.getTime())) {
-        console.error("Invalid term start timestamp");
-        throw new ApiError("Invalid term start timestamp", 400);
-      }
-
-      if (inboundAt < termStartAt) {
-        console.error("Transaction date is before the current term started");
-        throw new ApiError("Transaction date is before the current term started", 400);
-      }
+      assertReceiptWithinActiveTerm(transactionDateText, termStartDate);
 
       const profile = await profileService.getProfileByEmail(receiptEmail);
-
       if (!profile) throw new ApiError("No profile found for receipt email", 404);
 
       const markResult = await this.markMemberAsPaid(profile.id, {
@@ -124,7 +86,21 @@ class MembershipService {
         console.error("Failed to mark member as paid");
         throw new ApiError(markResult.error ?? "Failed to mark member as paid", 400);
       }
+
+      if (recipientEmails.length > 0) {
+        try {
+          await emailService.sendMembershipReceiptNotice(recipientEmails, { success: true });
+        } catch (notifyErr) {
+          console.error("[MembershipService] Success notice email failed:", notifyErr);
+        }
+      }
     } catch (error) {
+      if (recipientEmails.length > 0) {
+        await emailService
+          .sendMembershipReceiptNotice(recipientEmails, { success: false })
+          .catch((e) => console.error("[MembershipService] Failure notice email failed:", e));
+      }
+
       if (error instanceof ApiError) throw error;
       throw new ApiError(
         `Failed to process membership payment email: ${(error as Error).message}`,

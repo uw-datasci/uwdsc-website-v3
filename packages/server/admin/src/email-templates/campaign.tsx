@@ -11,15 +11,15 @@ import {
 import { Markdown } from "@react-email/markdown";
 import type { ReactElement } from "react";
 
-interface CampaignEmailTemplateProps {
+interface CampaignEmailProps {
   subject: string;
   body: string;
 }
 
-export function CampaignEmailTemplate({
+export function CampaignEmail({
   subject,
   body,
-}: Readonly<CampaignEmailTemplateProps>): ReactElement {
+}: Readonly<CampaignEmailProps>): ReactElement {
   return (
     <Html>
       <Head />

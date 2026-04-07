@@ -1,13 +1,26 @@
 import { ApiError } from "@uwdsc/common/types";
-import { parseTransactionDate } from "./monerisReceipt";
+import { DateTime } from "luxon";
 
-export type MonerisMembershipReceiptParse =
+const DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
+/**
+ * Parses the transaction datetime from the Moneris receipt body (local shop time, America/Toronto).
+ */
+function parseTransactionDate(text: string): Date {
+  const dt = DateTime.fromFormat(text.trim(), DATETIME_FORMAT, { zone: "America/Toronto" });
+
+  if (!dt.isValid) throw new ApiError("Could not parse transaction date from receipt", 400);
+
+  return dt.toJSDate();
+}
+
+type MonerisMembershipReceiptParse =
   | {
-    ok: true;
-    toRecipientEmail: string;
-    receiptEmail: string;
-    transactionDateText: string;
-  }
+      ok: true;
+      toRecipientEmail: string;
+      receiptEmail: string;
+      transactionDateText: string;
+    }
   | { ok: false; kind: "invalid_structure" | "email_mismatch" };
 
 /**

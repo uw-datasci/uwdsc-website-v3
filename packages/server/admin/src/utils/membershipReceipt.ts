@@ -21,7 +21,12 @@ type MembershipReceiptParse =
       receiptEmail: string;
       transactionDateText: string;
     }
-  | { ok: false; kind: "invalid_structure" | "email_mismatch" };
+  | {
+      ok: false;
+      kind: "invalid_structure" | "email_mismatch";
+      toRecipientEmail: string | null;
+      receiptEmail: string | null;
+    };
 
 /**
  * Parse and structurally validate a WUSA receipt body forwarded into the membership webhook.
@@ -36,8 +41,11 @@ export function parseMembershipReceipt(body: string): MembershipReceiptParse {
   const toPlain = /To:\s*([a-z0-9._%+-]+@uwaterloo\.ca)\b/i.exec(body)?.[1] ?? null;
   const toRecipientEmail = (toWithAngle ?? toPlain)?.toLowerCase() ?? null;
 
-  const receiptEmail =
-    /Cust ID:[^\n]*?([a-z0-9._%+-]+@uwaterloo\.ca)/i.exec(body)?.[1]?.toLowerCase() ?? null;
+  const custIdLine = /Cust ID:[^\n]*/i.exec(body)?.[0] ?? "";
+  const receiptEmailAfterPlus = /\+([a-z0-9._%+-]+@uwaterloo\.ca)/i.exec(custIdLine)?.[1];
+  const receiptEmailPlain =
+    /Cust ID:\s*([a-z][a-z0-9._%+-]*@uwaterloo\.ca)/i.exec(body)?.[1] ?? null;
+  const receiptEmail = (receiptEmailAfterPlus ?? receiptEmailPlain)?.toLowerCase() ?? null;
 
   const transactionDateText = /(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})/.exec(body)?.[1] ?? null;
 
@@ -50,9 +58,13 @@ export function parseMembershipReceipt(body: string): MembershipReceiptParse {
     receiptEmail !== null &&
     transactionDateText !== null;
 
-  if (!structureOk) return { ok: false, kind: "invalid_structure" };
+  if (!structureOk) {
+    return { ok: false, kind: "invalid_structure", toRecipientEmail, receiptEmail };
+  }
 
-  if (toRecipientEmail !== receiptEmail) return { ok: false, kind: "email_mismatch" };
+  if (toRecipientEmail !== receiptEmail) {
+    return { ok: false, kind: "email_mismatch", toRecipientEmail, receiptEmail };
+  }
 
   return {
     ok: true,

@@ -60,10 +60,10 @@ class MembershipService {
       if (!body) throw new ApiError("Email body is missing", 400);
 
       const parsed = parseMembershipReceipt(body);
+      recipientEmails = dedupeRecipients(parsed.toRecipientEmail, parsed.receiptEmail);
       throwIfParseFailed(parsed);
 
       const { receiptEmail, transactionDateText } = parsed;
-      recipientEmails = dedupeRecipients(parsed.toRecipientEmail, parsed.receiptEmail);
 
       assertReceiptWithinActiveTerm(transactionDateText, termStartDate);
 

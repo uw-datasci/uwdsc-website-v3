@@ -4,7 +4,7 @@ import { DateTime } from "luxon";
 const DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
 /**
- * Parses the transaction datetime from the Moneris receipt body (local shop time, America/Toronto).
+ * Parses the transaction datetime from the receipt body (local shop time, America/Toronto).
  */
 function parseTransactionDate(text: string): Date {
   const dt = DateTime.fromFormat(text.trim(), DATETIME_FORMAT, { zone: "America/Toronto" });
@@ -14,7 +14,7 @@ function parseTransactionDate(text: string): Date {
   return dt.toJSDate();
 }
 
-type MonerisMembershipReceiptParse =
+type MembershipReceiptParse =
   | {
       ok: true;
       toRecipientEmail: string;
@@ -24,9 +24,9 @@ type MonerisMembershipReceiptParse =
   | { ok: false; kind: "invalid_structure" | "email_mismatch" };
 
 /**
- * Parse and structurally validate a WUSA Moneris body forwarded into the membership webhook.
+ * Parse and structurally validate a WUSA receipt body forwarded into the membership webhook.
  */
-export function parseMembershipReceipt(body: string): MonerisMembershipReceiptParse {
+export function parseMembershipReceipt(body: string): MembershipReceiptParse {
   const isFromMoneris = /From:\s*WUSA'S ONLINE SHOP\s*<receipt@moneris\.com>/i.test(body);
   const isCorrectTotal = /Total:\s*\$4\.00\b/i.test(body);
   const hasCorrectItem = /UW Data Science Club Membership/i.test(body);
@@ -62,7 +62,7 @@ export function parseMembershipReceipt(body: string): MonerisMembershipReceiptPa
   };
 }
 
-export function throwIfParseFailed(parsed: MonerisMembershipReceiptParse): asserts parsed is {
+export function throwIfParseFailed(parsed: MembershipReceiptParse): asserts parsed is {
   ok: true;
   toRecipientEmail: string;
   receiptEmail: string;
@@ -79,7 +79,7 @@ export function throwIfParseFailed(parsed: MonerisMembershipReceiptParse): asser
       throw new ApiError("Invalid email receipt", 400);
     default: {
       const _exhaustive: never = parsed.kind;
-      throw new Error(`Unhandled MonerisMembershipReceiptParse kind: ${_exhaustive}`);
+      throw new Error(`Unhandled MembershipReceiptParse kind: ${_exhaustive}`);
     }
   }
 }

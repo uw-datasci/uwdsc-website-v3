@@ -87,11 +87,9 @@ class MembershipService {
       }
 
       if (recipientEmails.length > 0) {
-        try {
-          await emailService.sendMembershipReceiptNotice(recipientEmails, { success: true });
-        } catch (notifyErr) {
-          console.error("[MembershipService] Success notice email failed:", notifyErr);
-        }
+        await emailService
+          .sendMembershipReceiptNotice(recipientEmails, { success: true })
+          .catch((e) => console.error("[MembershipService] Success notice email failed:", e));
       }
     } catch (error) {
       if (recipientEmails.length > 0) {

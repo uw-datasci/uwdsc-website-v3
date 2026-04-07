@@ -38,12 +38,7 @@ class MembershipService {
     try {
       const result = await this.repository.markAsPaid(profileId, data);
 
-      if (!result) {
-        return {
-          success: false,
-          error: "Failed to create membership record",
-        };
-      }
+      if (!result) return { success: false, error: "Failed to create membership record" };
 
       return { success: true };
     } catch (error) {

@@ -13,14 +13,12 @@
         "SUPABASE_URL",
         "SUPABASE_PUBLISHABLE_KEY",
         "SUPABASE_SECRET_KEY",
-        "GMAIL_CLIENT_ID",
-        "GMAIL_CLIENT_SECRET",
-        "GMAIL_REFRESH_TOKEN",
         "GITHUB_TOKEN",
         "FOUNDRY_WORKFLOW_ID",
         "RESEND_API_KEY",
         "RESEND_FROM_EMAIL",
-        "RESEND_CAMPAIGN_SEGMENT_ID"
+        "RESEND_CAMPAIGN_SEGMENT_ID",
+        "RESEND_WEBHOOK_SECRET"
       ]
     },
     "lint": { "dependsOn": ["^lint"] },

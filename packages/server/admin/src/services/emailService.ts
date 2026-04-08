@@ -1,10 +1,13 @@
 import { render } from "@react-email/render";
 import { createElement } from "react";
 import { Resend } from "resend";
-import { ApiError, type UserRole } from "@uwdsc/common/types";
-import { CampaignEmailTemplate } from "../email-templates/campaign";
+import { ApiError } from "@uwdsc/common/types";
+import { CampaignEmail } from "../email-templates/campaign";
+import {
+  MembershipReceipt,
+  getMembershipReceiptSubject,
+} from "../email-templates/membershipReceiptWebhook";
 import { appendMarketingUnsubscribeFooter } from "../utils/marketingEmail";
-import { profileService } from "./profileService";
 
 class EmailService {
   private readonly resend: Resend | null;
@@ -35,6 +38,37 @@ class EmailService {
   }
 
   /**
+   * Generic transactional send via Resend (not broadcast; no marketing footer).
+   */
+  private async sendTransactionalEmail(params: {
+    to: string[];
+    subject: string;
+    html: string;
+  }): Promise<void> {
+    if (params.to.length === 0) return;
+
+    if (!this.resend) {
+      console.warn("[EmailService] Transactional send skipped: RESEND_API_KEY not set");
+      return;
+    }
+
+    const { error } = await this.resend.emails.send({
+      from: this.from,
+      to: params.to,
+      subject: params.subject,
+      html: params.html,
+    });
+
+    if (error) {
+      console.error("Resend transactional email error:", error);
+      throw new ApiError(
+        this.resendErrorMessage(error) ?? "Failed to send transactional email",
+        500,
+      );
+    }
+  }
+
+  /**
    * Create and send a Resend Broadcast (marketing) to the configured segment.
    */
   private async sendMarketingBroadcast(params: {
@@ -42,9 +76,7 @@ class EmailService {
     subject: string;
     html: string;
   }): Promise<{ id?: string }> {
-    if (!this.resend) {
-      throw new ApiError("Email service is not configured", 500);
-    }
+    if (!this.resend) throw new ApiError("Email service is not configured", 500);
 
     const { data, error } = await this.resend.broadcasts.create({
       segmentId: params.segmentId,
@@ -127,23 +159,15 @@ class EmailService {
     );
   }
 
-  /**
-   * Send a markdown campaign as a Resend **Broadcast** (marketing): adds
-   * recipients to `RESEND_CAMPAIGN_SEGMENT_ID`, sends once, then returns
-   * `recipientEmails` so the caller can run {@link removeRecipientsFromSegment}
-   * after a delay (broadcast audience may be resolved asynchronously on Resend’s side).
-   *
-   * Create a dedicated empty segment in the Resend dashboard and set
-   * `RESEND_CAMPAIGN_SEGMENT_ID` to its id.
+  /** Sends a marketing broadcast via Resend; returns `recipientEmails`
+   * for delayed {@link removeRecipientsFromSegment}.
    */
-  async sendCampaignEmail(input: {
-    subject: string;
-    body: string;
-    recipientRoles: UserRole[];
-  }): Promise<{ id?: string; recipientEmails: string[] }> {
-    const to = await profileService.getEmailsByRoles(input.recipientRoles);
-
-    if (to.length === 0) {
+  async sendCampaignEmail(
+    subject: string,
+    body: string,
+    recipientEmails: string[],
+  ): Promise<{ id?: string; recipientEmails: string[] }> {
+    if (recipientEmails.length === 0) {
       throw new ApiError(
         "No recipients found for the selected audiences",
         400,
@@ -153,26 +177,37 @@ class EmailService {
 
     if (!this.resend) throw new ApiError("Email service is not configured", 500);
 
-    const baseHtml = await render(
-      createElement(CampaignEmailTemplate, {
-        subject: input.subject,
-        body: input.body,
-      }),
-    );
+    const baseHtml = await render(createElement(CampaignEmail, { subject, body }));
     const html = appendMarketingUnsubscribeFooter(baseHtml);
 
-    await this.ensureRecipientsInSegment(to, this.campaignSegmentId);
+    await this.ensureRecipientsInSegment(recipientEmails, this.campaignSegmentId);
     try {
       const { id } = await this.sendMarketingBroadcast({
         segmentId: this.campaignSegmentId,
-        subject: input.subject,
+        subject,
         html,
       });
-      return { id, recipientEmails: to };
+      return { id, recipientEmails };
     } catch (err) {
-      await this.removeRecipientsFromSegment(to);
+      await this.removeRecipientsFromSegment(recipientEmails);
       throw err;
     }
+  }
+
+  /**
+   * Membership payment webhook: welcome or generic “try again / contact us” notice.
+   */
+  async sendMembershipReceiptNotice(
+    recipientEmails: string[],
+    options: { success: boolean },
+  ): Promise<void> {
+    if (recipientEmails.length === 0) return;
+
+    const { success } = options;
+    const subject = getMembershipReceiptSubject(success);
+    const html = await render(createElement(MembershipReceipt, { success }));
+
+    await this.sendTransactionalEmail({ to: recipientEmails, subject, html });
   }
 }
 

@@ -1,6 +1,6 @@
 import { ApiResponse } from "@uwdsc/common/utils";
 import { markAsPaidSchema, editMemberSchema } from "@/lib/schemas/membership";
-import { profileService } from "@uwdsc/admin";
+import { membershipService, profileService } from "@uwdsc/admin";
 import { withAuth } from "@/guards/withAuth";
 import type { WithAuthContext } from "@/guards/withAuth";
 
@@ -32,7 +32,7 @@ export const PATCH = withAuth<Params>(async (request, { params }) => {
         );
       }
 
-      const result = await profileService.markMemberAsPaid(
+      const result = await membershipService.markMemberAsPaid(
         id,
         validationResult.data,
       );

@@ -32,9 +32,10 @@ Builds on Fall 2025 with new features across the main site and CxC.
 - **Hiring dashboard (`/admin/applications/hiring`, PR #51)**: Presidents can view all applicants and their position selections with current status; update offer/rejection status; preview new exec team composition; finalize roles to promote accepted applicants to admin/exec and demote previous execs to member.
 - **Nav**: Admin dropdown (Applications, Review, Hiring) for admins; mobile support.
 
-### Membership management (PR #43)
+### Membership management (PR #43, #59)
 
 - **QR code verification**: Execs can scan member payment QR codes to automatically open the payment confirmation modal for that member; QR codes deep-link to the members page with auto-action.
+- **Automated payment processing (PR #59)**: Membership payments made through WUSA Online Shop are automatically detected and marked as paid; members receive email confirmation when their payment is successfully processed.
 
 ### Application flow (PR #100, #145, #48)
 
@@ -89,9 +90,8 @@ Builds on Fall 2025 with new features across the main site and CxC.
 - **DB**: `reviews` table (id, application_id, reviewer_id, basic_info_score, q1_score, q2_score, reviewed_at); `team_members` comma-separated; app queries include team display names; `questions` and `position_questions` tables (PR #41) for dynamic application forms.
 - **Storage**: Private resume bucket; signed URLs (e.g. 1 hr); old resume cleanup on new upload.
 - **DB (PR #35)**: `memberships` table now requires a `term_id` foreign key referencing `public.terms`, scoping each membership record to a specific term.
-- **Gmail webhook (PR #38)**: New `POST /api/webhooks/gmail` endpoint receives Gmail push notifications via Google Cloud Pub/Sub, laying the groundwork for automated membership payment verification.
 - **GitHub API integration (PR #41)**: GitHubService with org team listing, template repository discovery, and workflow dispatch for automated project provisioning.
-- **Gmail watch state (PR #45)**: Added `gmail_watch_state` table to persist the last processed Gmail history ID, enabling reliable incremental processing of Gmail notifications and preventing duplicate event handling.
+- **Membership webhook (PR #59)**: `POST /api/webhooks/membership` endpoint verifies WUSA receipt emails via Resend inbound webhooks; automatically parses transaction details and updates membership status with email notifications.
 
 ---
 

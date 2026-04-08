@@ -77,8 +77,6 @@ CREATE POLICY events_delete_admin_only ON public.events
   FOR DELETE
   USING (public.is_admin(auth.uid()));
 
-GRANT SELECT ON public.events TO authenticated;
-
 -- ============================================================================
 -- RLS Policies — attendance
 -- ============================================================================
@@ -107,5 +105,3 @@ CREATE POLICY attendance_update_exec_admin ON public.attendance
 CREATE POLICY attendance_delete_exec_admin ON public.attendance
   FOR DELETE
   USING (public.is_exec_or_admin(auth.uid()));
-
-GRANT SELECT ON public.attendance TO authenticated;

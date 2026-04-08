@@ -7,6 +7,21 @@ import { BaseRepository } from "@uwdsc/db/baseRepository";
 
 export class ProfileRepository extends BaseRepository {
   /**
+   * Total number of profiles (registered users).
+   */
+  async getProfileCount(): Promise<number> {
+    try {
+      const result = await this.sql<{ count: number }[]>`
+        SELECT COUNT(*)::int AS count FROM profiles
+      `;
+      return result[0]?.count ?? 0;
+    } catch (error: unknown) {
+      console.error("Error counting profiles:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Update user profile by user ID
    * Uses postgres.js for direct database access
    * @param userId - The auth.users.id (UUID)

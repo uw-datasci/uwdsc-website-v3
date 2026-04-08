@@ -9,6 +9,10 @@ CREATE TABLE terms (
   created_at timestamptz DEFAULT now()
 );
 
+ALTER TABLE public.memberships
+  ADD CONSTRAINT memberships_term_id_fkey
+  FOREIGN KEY (term_id) REFERENCES public.terms(id) ON DELETE RESTRICT;
+
 -- Positions that are available to apply for
 CREATE TABLE application_positions_available (
   id SERIAL PRIMARY KEY,

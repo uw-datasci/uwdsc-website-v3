@@ -7,8 +7,8 @@ CREATE TYPE public.term_type_enum AS ENUM ('study', 'coop');
 -- 2. Add onboarding date columns to terms
 -- ============================================================================
 ALTER TABLE public.terms
-  ADD COLUMN onboarding_form_start_date TIMESTAMPTZ,
-  ADD COLUMN onboarding_form_due_date   TIMESTAMPTZ;
+  ADD COLUMN start_date TIMESTAMPTZ,
+  ADD COLUMN onboarding_due_date   TIMESTAMPTZ;
 
 -- ============================================================================
 -- 3. exec_form_submissions table

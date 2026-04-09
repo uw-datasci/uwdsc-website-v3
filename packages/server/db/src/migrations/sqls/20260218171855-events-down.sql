@@ -10,10 +10,6 @@ DROP POLICY IF EXISTS events_update_exec_admin ON public.events;
 DROP POLICY IF EXISTS events_insert_exec_admin ON public.events;
 DROP POLICY IF EXISTS events_select_public ON public.events;
 
--- Revoke grants
-REVOKE SELECT ON public.attendance FROM authenticated;
-REVOKE SELECT ON public.events FROM authenticated;
-
 -- Disable RLS
 ALTER TABLE public.attendance DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.events DISABLE ROW LEVEL SECURITY;

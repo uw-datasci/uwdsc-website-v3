@@ -1,6 +1,7 @@
 import { BaseRepository } from "@uwdsc/db/baseRepository";
 import type {
   Application,
+  ApplicationReviewStatus,
   PositionSelectionWithName,
   AnswerWithQuestion,
   ApplicationListItem,
@@ -11,6 +12,46 @@ import type {
 } from "@uwdsc/common/types";
 
 export class ApplicationRepository extends BaseRepository {
+  private mapApplicationsWithDetails(
+    applications: Application[],
+    selections: (PositionSelectionWithName & { application_id: string })[],
+    answers: (AnswerWithQuestion & { application_id: string })[],
+  ): ApplicationListItem[] {
+    const selectionsMap = new Map<string, PositionSelectionWithName[]>();
+    for (const sel of selections) {
+      const list = selectionsMap.get(sel.application_id) ?? [];
+      list.push(sel);
+      selectionsMap.set(sel.application_id, list);
+    }
+
+    const answersMap = new Map<string, AnswerWithQuestion[]>();
+    for (const ans of answers) {
+      const list = answersMap.get(ans.application_id) ?? [];
+      list.push(ans);
+      answersMap.set(ans.application_id, list);
+    }
+
+    return applications.map((app) => ({
+      ...app,
+      position_selections: selectionsMap.get(app.id) ?? [],
+      answers: answersMap.get(app.id) ?? [],
+    }));
+  }
+
+  /** Headline counts for admin dashboard (includes drafts not returned by getAllApplicationsWithDetails). */
+  async countDraftAndSubmittedApplications(): Promise<{
+    draft: number;
+    submitted: number;
+  }> {
+    const [row] = await this.sql<{ draft: number; submitted: number }[]>`
+      SELECT
+        COUNT(*) FILTER (WHERE status = 'draft')::int AS draft,
+        COUNT(*) FILTER (WHERE status = 'submitted')::int AS submitted
+      FROM applications
+    `;
+    return row ?? { draft: 0, submitted: 0 };
+  }
+
   /**
    * Get all submitted applications with position selections (incl. names) and answers (incl. question text).
    * Excludes draft applications.
@@ -66,32 +107,150 @@ export class ApplicationRepository extends BaseRepository {
         a.application_id,
         a.question_id,
         a.answer_text,
-        q.question_text
+        q.question_text,
+        COALESCE(
+          ARRAY_AGG(DISTINCT ep.name) FILTER (WHERE pq.position_id IS NOT NULL),
+          '{}'::text[]
+        ) AS position_names
       FROM answers a
       JOIN questions q ON a.question_id = q.id
+      LEFT JOIN position_questions pq ON pq.question_id = a.question_id
+      LEFT JOIN application_position_selections aps
+        ON aps.application_id = a.application_id
+       AND aps.position_id = pq.position_id
+      LEFT JOIN application_positions_available apa ON apa.id = aps.position_id
+      LEFT JOIN exec_positions ep ON ep.id = apa.position_id
       WHERE a.application_id IN ${this.sql(applicationIds)}
+      GROUP BY
+        a.id,
+        a.application_id,
+        a.question_id,
+        a.answer_text,
+        q.question_text
     `;
 
-    // 4. Group by application
-    const selectionsMap = new Map<string, PositionSelectionWithName[]>();
-    for (const sel of selections) {
-      const list = selectionsMap.get(sel.application_id) ?? [];
-      list.push(sel);
-      selectionsMap.set(sel.application_id, list);
-    }
+    return this.mapApplicationsWithDetails(applications, selections, answers);
+  }
 
-    const answersMap = new Map<string, AnswerWithQuestion[]>();
-    for (const ans of answers) {
-      const list = answersMap.get(ans.application_id) ?? [];
-      list.push(ans);
-      answersMap.set(ans.application_id, list);
-    }
+  async getApplicationsByPositionIdsWithDetails(
+    positionIds: readonly number[],
+  ): Promise<ApplicationListItem[]> {
+    if (positionIds.length === 0) return [];
 
-    return applications.map((app) => ({
-      ...app,
-      position_selections: selectionsMap.get(app.id) ?? [],
-      answers: answersMap.get(app.id) ?? [],
-    }));
+    const applications = await this.sql<Application[]>`
+      SELECT DISTINCT
+        a.id,
+        a.profile_id,
+        a.term_id,
+        a.full_name,
+        a.major,
+        a.year_of_study,
+        a.personal_email,
+        a.location,
+        a.club_experience,
+        a.status,
+        a.submitted_at
+      FROM applications a
+      JOIN application_position_selections aps ON aps.application_id = a.id
+      WHERE a.status != 'draft'
+        AND aps.position_id IN ${this.sql(positionIds)}
+      ORDER BY a.submitted_at DESC
+    `;
+
+    if (applications.length === 0) return [];
+
+    const applicationIds = applications.map((a) => a.id);
+    const selections = await this.sql<
+      (PositionSelectionWithName & { application_id: string })[]
+    >`
+      SELECT
+        aps.id,
+        aps.application_id,
+        aps.position_id,
+        aps.priority,
+        aps.status,
+        ep.name AS position_name
+      FROM application_position_selections aps
+      JOIN application_positions_available apa ON aps.position_id = apa.id
+      JOIN exec_positions ep ON apa.position_id = ep.id
+      WHERE aps.application_id IN ${this.sql(applicationIds)}
+        AND aps.position_id IN ${this.sql(positionIds)}
+      ORDER BY aps.priority
+    `;
+
+    const answers = await this.sql<
+      (AnswerWithQuestion & { application_id: string })[]
+    >`
+      SELECT
+        a.id,
+        a.application_id,
+        a.question_id,
+        a.answer_text,
+        q.question_text,
+        COALESCE(
+          ARRAY_AGG(DISTINCT ep.name) FILTER (
+            WHERE pq.position_id IS NOT NULL
+              AND pq.position_id IN ${this.sql(positionIds)}
+          ),
+          '{}'::text[]
+        ) AS position_names
+      FROM answers a
+      JOIN questions q ON a.question_id = q.id
+      LEFT JOIN position_questions pq ON pq.question_id = a.question_id
+      LEFT JOIN application_position_selections aps
+        ON aps.application_id = a.application_id
+       AND aps.position_id = pq.position_id
+      LEFT JOIN application_positions_available apa ON apa.id = aps.position_id
+      LEFT JOIN exec_positions ep ON ep.id = apa.position_id
+      WHERE a.application_id IN ${this.sql(applicationIds)}
+        AND EXISTS (
+          SELECT 1
+          FROM position_questions pq
+          WHERE pq.question_id = a.question_id
+            AND (
+              pq.position_id IS NULL OR
+              pq.position_id IN ${this.sql(positionIds)}
+            )
+        )
+      GROUP BY
+        a.id,
+        a.application_id,
+        a.question_id,
+        a.answer_text,
+        q.question_text
+    `;
+
+    return this.mapApplicationsWithDetails(applications, selections, answers);
+  }
+
+  async canAccessApplicationByPositionIds(
+    applicationId: string,
+    positionIds: readonly number[],
+  ): Promise<boolean> {
+    if (positionIds.length === 0) return false;
+
+    const rows = await this.sql<{ id: string }[]>`
+      SELECT a.id
+      FROM applications a
+      JOIN application_position_selections aps ON aps.application_id = a.id
+      WHERE a.id = ${applicationId}
+        AND aps.position_id IN ${this.sql(positionIds)}
+      LIMIT 1
+    `;
+    return rows.length > 0;
+  }
+
+  async updateApplicationReviewStatus(
+    applicationId: string,
+    status: ApplicationReviewStatus,
+  ): Promise<boolean> {
+    const updated = await this.sql<{ id: string }[]>`
+      UPDATE application_position_selections
+      SET status = ${status}
+      WHERE application_id = ${applicationId}
+      RETURNING id
+    `;
+    return updated.length > 0;
   }
 
   async getPositionOptions(

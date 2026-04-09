@@ -6,6 +6,7 @@ Builds on Fall 2025 with new features across the main site and CxC.
 
 - **Password reset (PR #126)**: Forgot-password link on login; email-based reset with time-limited link; dedicated reset page with confirmation.
 - **Analytics & performance monitoring (PR #38)**: Vercel Analytics and Speed Insights added to track page views and real-world performance metrics.
+- **Membership payment QR (PR #43)**: Members can now display a QR code on the events page after paying membership fees; execs scan the code to quickly mark payments as received.
 
 ## CxC App (apps/cxc)
 
@@ -24,11 +25,17 @@ Builds on Fall 2025 with new features across the main site and CxC.
 - **Scoring**: Resume (0–3), Links (0–2), Q1 (0–7), Q2 (0–3); `AdminReviewService`/`AdminReviewRepository`; `GET /api/admin/leaderboard` and `?reviewerId=`.
 - **DB**: Migration fixed reviews unique indexes; compound `(application_id, reviewer_id)`; RLS disabled for app-level control.
 
-### Admin application management (PR #118, #100)
+### Admin application management (PR #118, #100, #51)
 
 - **Applications table (`/admin/applications`)**: Sortable, filterable (email search), pagination (10–50 rows); columns: name, email, university, gender, reviews, date; row click → details modal (basic info, education, links, questions, team, resume, MLH).
-- **Review (`/admin/review`)**: Redesigned UI; “Get New Application”; `/api/applications/random` for least-reviewed; score categories; `reviews` table, no duplicate per reviewer.
-- **Nav**: Admin dropdown (Applications, Review) for admins; mobile support.
+- **Review system (`/admin/applications/review`, PR #51)**: VPs and Presidents can review applications within their scope (Presidents see all, VPs see their subteam positions); set status (In Review, Interviewing, Wanted, Not Wanted for VPs; Presidents can also set Offer Sent, Accepted/Declined Offer, Rejection Sent); mobile-responsive with side panel for details.
+- **Hiring dashboard (`/admin/applications/hiring`, PR #51)**: Presidents can view all applicants and their position selections with current status; update offer/rejection status; preview new exec team composition; finalize roles to promote accepted applicants to admin/exec and demote previous execs to member.
+- **Nav**: Admin dropdown (Applications, Review, Hiring) for admins; mobile support.
+
+### Membership management (PR #43, #59)
+
+- **QR code verification**: Execs can scan member payment QR codes to automatically open the payment confirmation modal for that member; QR codes deep-link to the members page with auto-action.
+- **Automated payment processing (PR #59)**: Membership payments made through WUSA Online Shop are automatically detected and marked as paid; members receive email confirmation when their payment is successfully processed.
 
 ### Application flow (PR #100, #145, #48)
 
@@ -41,10 +48,10 @@ Builds on Fall 2025 with new features across the main site and CxC.
 
 ### Backend & API
 
-- **Services**: `AdminApplicationService`, `AdminReviewService`; `DashboardService`/`DashboardRepository`; `ApplicationService.getAllUserEmails()`; `ResumeService` (upload replace, getUserResume, getSignedResumeUrl); `FileService.createSignedUrl()`; `GitHubService` (PR #41) for managing org teams, template repos, and workflow dispatches.
-- **Repos**: `AdminApplicationRepository`, `AdminReviewRepository`, `DashboardRepository`; review assignment, leaderboard, stats, reviewer scores; question CRUD with VP scope filtering (PR #41).
-- **Endpoints**: `GET /api/admin/dashboard`, `/admin/applications`, `/admin/applications/[id]`, `/api/applications/random`, `GET /api/applications/resumes` (resume status, PR #48), `POST /api/review/submit`, `GET /api/users/emails`; `POST /api/applications/resumes` (replace), `PATCH /api/applications` (better errors); `GET /api/github/teams`, `GET /api/github/templates`, `POST /api/github/foundry/launch` (PR #41); `GET /api/applications/review/questions`, `POST /api/applications/review/questions`, `PATCH /api/applications/review/questions/[id]`, `DELETE /api/applications/review/questions/[id]` (PR #41).
-- **Auth**: `/admin/**` requires admin; superadmin-only: `/admin/assign`, `/admin/dashboard`, `/admin/leaderboard`; `/start` in protected auth routes; VP-only: `/applications/questions` with subteam-based question scope (PR #41).
+- **Services**: `AdminApplicationService`, `AdminReviewService`, `HiringService` (PR #51); `DashboardService`/`DashboardRepository`; `ApplicationService.getAllUserEmails()`; `ResumeService` (upload replace, getUserResume, getSignedResumeUrl); `FileService.createSignedUrl()`; `GitHubService` (PR #41) for managing org teams, template repos, and workflow dispatches.
+- **Repos**: `AdminApplicationRepository`, `AdminReviewRepository`, `HiringRepository` (PR #51), `DashboardRepository`; review assignment, leaderboard, stats, reviewer scores; question CRUD with VP scope filtering (PR #41).
+- **Endpoints**: `GET /api/admin/dashboard`, `/admin/applications`, `/admin/applications/[id]`, `/api/applications/random`, `GET /api/applications/resumes` (resume status, PR #48), `POST /api/review/submit`, `GET /api/users/emails`; `POST /api/applications/resumes` (replace), `PATCH /api/applications` (better errors); `GET /api/applications/review`, `PATCH /api/applications/review/[id]` (VP-scoped review, PR #51); `GET /api/applications/hiring`, `PATCH /api/applications/hiring/selections/[id]`, `GET /api/applications/hiring/team`, `POST /api/applications/hiring/finalize` (President-only hiring, PR #51); `GET /api/github/teams`, `GET /api/github/templates`, `POST /api/github/foundry/launch` (PR #41); `GET /api/applications/review/questions`, `POST /api/applications/review/questions`, `PATCH /api/applications/review/questions/[id]`, `DELETE /api/applications/review/questions/[id]` (PR #41).
+- **Auth**: `/admin/**` requires admin; superadmin-only: `/admin/assign`, `/admin/dashboard`, `/admin/leaderboard`; President-only: `/admin/applications/hiring`, `/api/applications/hiring/**` (PR #51); VP-only: `/admin/applications/review`, `/api/applications/review/**`, `/applications/questions` with subteam-based question scope (PR #41).
 
 ### Onboarding (PR #42)
 
@@ -83,9 +90,8 @@ Builds on Fall 2025 with new features across the main site and CxC.
 - **DB**: `reviews` table (id, application_id, reviewer_id, basic_info_score, q1_score, q2_score, reviewed_at); `team_members` comma-separated; app queries include team display names; `questions` and `position_questions` tables (PR #41) for dynamic application forms.
 - **Storage**: Private resume bucket; signed URLs (e.g. 1 hr); old resume cleanup on new upload.
 - **DB (PR #35)**: `memberships` table now requires a `term_id` foreign key referencing `public.terms`, scoping each membership record to a specific term.
-- **Gmail webhook (PR #38)**: New `POST /api/webhooks/gmail` endpoint receives Gmail push notifications via Google Cloud Pub/Sub, laying the groundwork for automated membership payment verification.
 - **GitHub API integration (PR #41)**: GitHubService with org team listing, template repository discovery, and workflow dispatch for automated project provisioning.
-- **Gmail watch state (PR #45)**: Added `gmail_watch_state` table to persist the last processed Gmail history ID, enabling reliable incremental processing of Gmail notifications and preventing duplicate event handling.
+- **Membership webhook (PR #59)**: `POST /api/webhooks/membership` endpoint verifies WUSA receipt emails via Resend inbound webhooks; automatically parses transaction details and updates membership status with email notifications.
 
 ---
 

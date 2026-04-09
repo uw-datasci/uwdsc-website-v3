@@ -1,11 +1,10 @@
 import { ProfileRepository } from "../repositories/profileRepository";
 import {
   ApiError,
-  MarkAsPaidData,
   Member,
-  MembershipStats,
   UpdateMemberData,
   Profile,
+  UserRole,
 } from "@uwdsc/common/types";
 import { filterPartialUpdate } from "@uwdsc/common/utils";
 
@@ -43,6 +42,34 @@ class ProfileService {
   }
 
   /**
+   * Emails for users matching any of the given roles (distinct).
+   */
+  async getEmailsByRoles(roles: UserRole[]): Promise<string[]> {
+    try {
+      return await this.repository.getEmailsByRoles(roles);
+    } catch (error) {
+      throw new ApiError(
+        `Failed to get emails by roles: ${(error as Error).message}`,
+        500,
+      );
+    }
+  }
+
+  /**
+   * Get profile by login email (case-insensitive).
+   */
+  async getProfileByEmail(email: string): Promise<Profile | null> {
+    try {
+      return await this.repository.getProfileByEmail(email);
+    } catch (error) {
+      throw new ApiError(
+        `Failed to get profile by email: ${(error as Error).message}`,
+        500,
+      );
+    }
+  }
+
+  /**
    * Get the profile by profile ID
    */
   async getProfileById(profileId: string): Promise<Profile | null> {
@@ -51,46 +78,6 @@ class ProfileService {
     } catch (error) {
       throw new ApiError(
         `Failed to get profile by ID: ${(error as Error).message}`,
-        500,
-      );
-    }
-  }
-
-  /**
-   * Get membership statistics
-   */
-  async getMembershipStats(): Promise<MembershipStats> {
-    try {
-      return await this.repository.getMembershipStats();
-    } catch (error) {
-      throw new ApiError(
-        `Failed to get membership stats: ${(error as Error).message}`,
-        500,
-      );
-    }
-  }
-
-  /**
-   * Mark a member as paid
-   */
-  async markMemberAsPaid(
-    profileId: string,
-    data: MarkAsPaidData,
-  ): Promise<{ success: boolean; error?: string }> {
-    try {
-      const result = await this.repository.markAsPaid(profileId, data);
-
-      if (!result) {
-        return {
-          success: false,
-          error: "Failed to create membership record",
-        };
-      }
-
-      return { success: true };
-    } catch (error) {
-      throw new ApiError(
-        `Failed to mark member as paid: ${(error as Error).message}`,
         500,
       );
     }

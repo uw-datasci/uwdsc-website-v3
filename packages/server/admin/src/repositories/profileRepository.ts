@@ -1,10 +1,5 @@
 import { BaseRepository } from "@uwdsc/db/baseRepository";
-import {
-  MarkAsPaidData,
-  Member,
-  MembershipStats,
-  Profile,
-} from "@uwdsc/common/types";
+import { Member, Profile, UserRole } from "@uwdsc/common/types";
 
 export class ProfileRepository extends BaseRepository {
   /**
@@ -30,9 +25,7 @@ export class ProfileRepository extends BaseRepository {
         `;
       }
 
-      const limitCondition = options?.searchQuery
-        ? this.sql`LIMIT 10`
-        : this.sql``;
+      const limitCondition = options?.searchQuery ? this.sql`LIMIT 10` : this.sql``;
 
       const result = await this.sql<Member[]>`
       SELECT
@@ -71,6 +64,59 @@ export class ProfileRepository extends BaseRepository {
   }
 
   /**
+   * Distinct login emails for users whose role is one of the given roles.
+   */
+  async getEmailsByRoles(roles: UserRole[]): Promise<string[]> {
+    if (roles.length === 0) return [];
+
+    try {
+      const rows = await this.sql<{ email: string }[]>`
+        SELECT DISTINCT au.email
+        FROM profiles p
+        JOIN auth.users au ON p.id = au.id
+        JOIN user_roles r ON p.id = r.id
+        WHERE r.role IN ${this.sql(roles)}
+      `;
+      return rows.map((row) => row.email).filter(Boolean);
+    } catch (error: unknown) {
+      console.error("Error fetching emails by roles:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get profile by login email (auth.users), case-insensitive.
+   */
+  async getProfileByEmail(email: string): Promise<Profile | null> {
+    const normalized = email.trim().toLowerCase();
+
+    try {
+      const result = await this.sql<Profile[]>`
+        SELECT
+          p.id,
+          p.first_name,
+          p.last_name,
+          au.email,
+          p.wat_iam,
+          p.faculty,
+          p.term,
+          p.is_math_soc_member,
+          r.role AS role
+        FROM profiles p
+        JOIN auth.users au ON p.id = au.id
+        JOIN user_roles r ON p.id = r.id
+        WHERE lower(trim(au.email)) = ${normalized}
+        LIMIT 1
+      `;
+
+      return result[0] ?? null;
+    } catch (error: unknown) {
+      console.error("Error fetching profile by email:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Get the profile by profile ID
    */
   async getProfileById(profileId: string): Promise<Profile | null> {
@@ -91,60 +137,6 @@ export class ProfileRepository extends BaseRepository {
       return result[0] ?? null;
     } catch (error: unknown) {
       console.error("Error fetching profile by ID:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get membership statistics
-   */
-  async getMembershipStats(): Promise<MembershipStats> {
-    try {
-      const result = await this.sql<MembershipStats[]>`
-        SELECT 
-          COUNT(*) as total_users,
-          COUNT(*) FILTER (WHERE m.profile_id IS NOT NULL) as paid_users,
-          COUNT(*) FILTER (WHERE m.profile_id IS NOT NULL AND p.is_math_soc_member = true) as math_soc_members
-        FROM profiles p
-        LEFT JOIN memberships m ON p.id = m.profile_id
-      `;
-
-      return (
-        result[0] ?? {
-          total_users: 0,
-          paid_users: 0,
-          math_soc_members: 0,
-        }
-      );
-    } catch (error: unknown) {
-      console.error("Error fetching membership stats:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Mark a member as paid by profile ID
-   * @param profileId - The profile ID (UUID)
-   * @param data - Payment data (method, location, verifier)
-   */
-  async markAsPaid(profileId: string, data: MarkAsPaidData): Promise<boolean> {
-    try {
-      const result = await this.sql`
-        INSERT INTO memberships (profile_id, payment_method, payment_location, verifier_id, verified_at, updated_at)
-        VALUES (${profileId}, ${data.payment_method}::payment_method_enum, ${data.payment_location}, ${data.verifier}::uuid, NOW(), NOW())
-        ON CONFLICT (profile_id) 
-        DO UPDATE SET
-          payment_method = ${data.payment_method}::payment_method_enum,
-          payment_location = ${data.payment_location},
-          verifier_id = ${data.verifier}::uuid,
-          verified_at = NOW(),
-          updated_at = NOW()
-        RETURNING *
-      `;
-
-      return result.length > 0;
-    } catch (error: unknown) {
-      console.error("Error marking member as paid:", error);
       throw error;
     }
   }

@@ -14,6 +14,20 @@ class ProfileService {
   }
 
   /**
+   * Total number of registered profiles (community size).
+   */
+  async getProfileCount(): Promise<number> {
+    try {
+      return await this.repository.getProfileCount();
+    } catch (error) {
+      throw new ApiError(
+        `Failed to count profiles: ${(error as Error).message}`,
+        500,
+      );
+    }
+  }
+
+  /**
    * Get profile by user ID
    */
   async getProfileByUserId(userId: string): Promise<Profile | null> {

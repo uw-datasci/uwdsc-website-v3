@@ -22,6 +22,21 @@ export type GetEventsByTimeRangeOptions = {
 
 export class EventRepository extends BaseRepository {
   /**
+   * Total number of events (all rows).
+   */
+  async getEventCount(): Promise<number> {
+    try {
+      const result = await this.sql<{ count: number }[]>`
+        SELECT COUNT(*)::int AS count FROM events
+      `;
+      return result[0]?.count ?? 0;
+    } catch (error: unknown) {
+      console.error("Error counting events:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Get all events ordered by start_time descending
    */
   async getAllEvents(): Promise<Event[]> {

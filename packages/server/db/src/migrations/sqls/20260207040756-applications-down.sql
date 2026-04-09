@@ -65,4 +65,5 @@ DROP TABLE IF EXISTS position_questions CASCADE;
 -- Drop independent tables
 DROP TABLE IF EXISTS application_positions_available CASCADE;
 DROP TABLE IF EXISTS questions CASCADE;
+ALTER TABLE public.memberships DROP CONSTRAINT IF EXISTS memberships_term_id_fkey;
 DROP TABLE IF EXISTS terms CASCADE;

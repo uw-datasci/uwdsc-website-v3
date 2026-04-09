@@ -1,7 +1,7 @@
 // Shared enums and constants
 // User roles, faculties, payment methods, etc.
 
-export type UserRole = "member" | "admin" | "exec";
+export type UserRole = "member" | "exec" | "admin";
 
 export type Faculty =
   | "math"

@@ -1,6 +1,7 @@
 "use client";
 
 import { signOut } from "@/lib/api";
+import { getPublicStats } from "@/lib/api/stats";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -18,11 +19,23 @@ export default function Hero({ user, mutate }: Readonly<HeroProps>) {
   const [eventCount, setEventCount] = useState(0);
   const router = useRouter();
 
-  // Simulate API call for stats; replace with real fetch when backend is ready
   useEffect(() => {
-    // TODO: fetch from API
-    setMemberCount(350);
-    setEventCount(20);
+    let cancelled = false;
+    (async () => {
+      try {
+        const { members, events } = await getPublicStats();
+
+        if (!cancelled) {
+          setMemberCount(members);
+          setEventCount(events);
+        }
+      } catch (error) {
+        console.error("Failed to load hero stats:", error);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleSignOut = async () => {

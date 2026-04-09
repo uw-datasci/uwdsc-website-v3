@@ -290,7 +290,7 @@ export class AuthService {
    * Presidents see all positions; other VPs see roles in their subteam(s) (all APA rows whose
    * exec position shares a subteam with any VP role they hold).
    */
-  async getQuestionScopeForUser(userId: string): Promise<QuestionScope> {
+  async getScopeForUser(userId: string): Promise<QuestionScope> {
     const [roles, vpPositionIds] = await Promise.all([
       this.repository.getExecTeamVpRolesForProfile(userId),
       this.repository.getVpApplicationPositionIdsForProfile(userId),

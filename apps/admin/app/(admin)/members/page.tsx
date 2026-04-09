@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   MembershipStatsCards,
   MembershipsTable,
@@ -9,11 +10,40 @@ import { getAllProfiles, getMembershipStats } from "@/lib/api";
 import { Member, MembershipFilter, MembershipStats } from "@uwdsc/common/types";
 
 export default function MembersPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
   const [profiles, setProfiles] = useState<Member[]>([]);
   const [stats, setStats] = useState<MembershipStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<MembershipFilter>("all");
+
+  const initialAction = useMemo(() => {
+    const id = searchParams.get("id");
+    const action = searchParams.get("action");
+    if (!id || !action) return null;
+
+    if (action === "edit") {
+      return { type: "edit" as const, memberId: id };
+    }
+
+    if (action === "markPaid" || action === "payment") {
+      return { type: "markPaid" as const, memberId: id };
+    }
+
+    return null;
+  }, [searchParams]);
+
+  const clearActionFromUrl = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("id");
+    params.delete("action");
+
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname);
+  };
 
   const fetchData = async () => {
     try {
@@ -84,6 +114,8 @@ export default function MembersPage() {
         profiles={profiles}
         activeFilter={activeFilter}
         onRefresh={fetchData}
+        initialAction={initialAction}
+        onRequestClearInitialAction={initialAction ? clearActionFromUrl : undefined}
       />
     </div>
   );

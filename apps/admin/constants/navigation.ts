@@ -8,8 +8,9 @@ import {
   FileText,
   LayoutDashboard,
   Library,
-  Settings,
+  Mail,
   Shield,
+  UserCheck,
   Users,
 } from "lucide-react";
 
@@ -21,11 +22,13 @@ export const ADMIN_NAVIGATION = [
     href: "/applications",
     icon: FileText,
     subItems: [
-      { name: "Review", href: "/applications/review", icon: ClipboardCheck },
       { name: "Questions", href: "/applications/questions", icon: CircleHelp },
+      { name: "Review", href: "/applications/review", icon: ClipboardCheck },
+      { name: "Hiring", href: "/applications/hiring", icon: UserCheck },
     ],
   },
   { name: "Events", href: "/events", icon: Calendar },
+  { name: "Campaigns", href: "/campaigns", icon: Mail },
   { name: "Onboarding", href: "/onboarding", icon: Shield },
   {
     name: "Nexus",
@@ -34,8 +37,7 @@ export const ADMIN_NAVIGATION = [
     subItems: [
       { name: "Foundry", href: "/nexus/foundry", icon: Anvil },
       { name: "Optics", href: "/nexus/optics", icon: Activity },
-      { name: "Archive", href: "/nexus/archive", icon: Library },
+      { name: "Archives", href: "/nexus/archives", icon: Library },
     ],
   },
-  { name: "Settings", href: "/settings", icon: Settings },
 ];

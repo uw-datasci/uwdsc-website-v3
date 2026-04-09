@@ -48,6 +48,10 @@ interface MembershipsTableProps {
   readonly profiles: Member[];
   readonly activeFilter: MembershipFilter;
   readonly onRefresh?: () => void;
+  readonly initialAction?:
+    | { readonly type: MembershipActionType; readonly memberId: string }
+    | null;
+  readonly onRequestClearInitialAction?: () => void;
 }
 
 const MEMBERSHIP_CSV_HEADERS = [
@@ -101,6 +105,8 @@ export function MembershipsTable({
   profiles,
   activeFilter,
   onRefresh,
+  initialAction,
+  onRequestClearInitialAction,
 }: MembershipsTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -109,6 +115,7 @@ export function MembershipsTable({
     type: MembershipActionType;
     member: Member;
   } | null>(null);
+  const [autoOpenedKey, setAutoOpenedKey] = useState<string | null>(null);
 
   // Sync column filters with activeFilter from stats cards
   useEffect(() => {
@@ -133,6 +140,25 @@ export function MembershipsTable({
       }
     });
   }, [activeFilter]);
+
+  // If the URL includes `?id=...&action=edit|payment`, auto-open the
+  // corresponding modal once the member data is available.
+  useEffect(() => {
+    if (!initialAction) {
+      setAutoOpenedKey(null);
+      return;
+    }
+
+    const key = `${initialAction.type}:${initialAction.memberId}`;
+    if (autoOpenedKey === key) return;
+    if (actionModal) return;
+
+    const member = profiles.find((m) => m.id === initialAction.memberId);
+    if (!member) return;
+
+    setAutoOpenedKey(key);
+    setActionModal({ type: initialAction.type, member });
+  }, [initialAction, autoOpenedKey, actionModal, profiles]);
 
   const table = useReactTable({
     data: profiles,
@@ -166,7 +192,10 @@ export function MembershipsTable({
   const renderActionModal = () => {
     if (!actionModal) return null;
     const { type, member } = actionModal;
-    const onClose = () => setActionModal(null);
+    const onClose = () => {
+      setActionModal(null);
+      onRequestClearInitialAction?.();
+    };
     switch (type) {
       case "edit":
         return (

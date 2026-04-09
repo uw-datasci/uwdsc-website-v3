@@ -5,13 +5,14 @@ import { createResumeService } from "@/lib/services";
 
 /**
  * GET /api/applications
- * Get all submitted applications with full details
+ * Non-draft applications with full details, plus draft/submitted counts (all applications).
  * Admin/exec only
  */
 export const GET = withAuth(async () => {
   try {
-    const [applications, resumeService] = await Promise.all([
+    const [applications, statusCounts, resumeService] = await Promise.all([
       applicationService.getAllApplications(),
+      applicationService.getDraftAndSubmittedCounts(),
       createResumeService(),
     ]);
 
@@ -23,7 +24,10 @@ export const GET = withAuth(async () => {
       })),
     );
 
-    return ApiResponse.ok(applicationsWithResumes);
+    return ApiResponse.ok({
+      applications: applicationsWithResumes,
+      statusCounts,
+    });
   } catch (error: unknown) {
     console.error("Error fetching applications:", error);
     return ApiResponse.serverError(error, "Failed to fetch applications");

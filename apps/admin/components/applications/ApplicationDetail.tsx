@@ -1,6 +1,16 @@
 "use client";
 
-import { Badge, Card, Separator, ScrollArea } from "@uwdsc/ui";
+import {
+  Badge,
+  Card,
+  Separator,
+  ScrollArea,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@uwdsc/ui";
 import {
   ExternalLink,
   User,
@@ -9,7 +19,12 @@ import {
   Mail,
   Briefcase,
 } from "lucide-react";
-import type { ApplicationListItem } from "@uwdsc/common/types";
+import type {
+  ApplicationListItem,
+  ApplicationReviewStatus,
+  ApplicationStatus,
+} from "@uwdsc/common/types";
+import { sortPositionSelectionsByPriority } from "@uwdsc/common/utils";
 
 function getStatusLabel(status: string): string {
   return status
@@ -25,9 +40,24 @@ function getClubExperienceLabel(clubExperience: boolean | null): string {
 
 interface ApplicationDetailProps {
   readonly application: ApplicationListItem | null;
+  readonly statusOptions?: readonly (
+    | ApplicationStatus
+    | ApplicationReviewStatus
+  )[];
+  readonly selectedStatus?: ApplicationStatus | ApplicationReviewStatus | null;
+  readonly statusUpdating?: boolean;
+  readonly onStatusChange?: (
+    status: ApplicationStatus | ApplicationReviewStatus,
+  ) => void;
 }
 
-export function ApplicationDetail({ application }: ApplicationDetailProps) {
+export function ApplicationDetail({
+  application,
+  statusOptions,
+  selectedStatus,
+  statusUpdating = false,
+  onStatusChange,
+}: ApplicationDetailProps) {
   if (!application) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -44,6 +74,8 @@ export function ApplicationDetail({ application }: ApplicationDetailProps) {
   const clubExperienceLabel = getClubExperienceLabel(
     application.club_experience,
   );
+  const showStatusSelect =
+    !!statusOptions && statusOptions.length > 0 && !!onStatusChange;
 
   return (
     <ScrollArea className="h-full">
@@ -54,9 +86,28 @@ export function ApplicationDetail({ application }: ApplicationDetailProps) {
             <h2 className="text-xl md:text-2xl font-bold">
               {application.full_name}
             </h2>
-            <Badge variant="secondary" className="shrink-0">
-              {getStatusLabel(application.status)}
-            </Badge>
+            {showStatusSelect ? (
+              <Select
+                value={selectedStatus ?? application.status}
+                onValueChange={onStatusChange}
+                disabled={statusUpdating}
+              >
+                <SelectTrigger className="h-8 w-44">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {statusOptions.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {getStatusLabel(status)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Badge variant="secondary" className="shrink-0">
+                {getStatusLabel(application.status)}
+              </Badge>
+            )}
           </div>
           {application.submitted_at && (
             <p className="text-xs text-muted-foreground mt-1">
@@ -167,24 +218,67 @@ export function ApplicationDetail({ application }: ApplicationDetailProps) {
               No responses submitted.
             </p>
           ) : (
-            <div className="space-y-4">
-              {application.answers.map((answer) => (
-                <div key={answer.id}>
-                  <p className="text-sm font-medium mb-1">
-                    {answer.question_text}
-                  </p>
-                  <div className="rounded-md bg-muted/50 p-3">
-                    <p className="text-sm whitespace-pre-wrap leading-relaxed">
-                      {answer.answer_text}
-                    </p>
-                  </div>
-                </div>
-              ))}
+            <div className="space-y-6">
+              <AnswerSection
+                heading="General"
+                answers={application.answers.filter(
+                  (answer) => answer.position_names.length === 0,
+                )}
+              />
+              {sortPositionSelectionsByPriority(
+                application.position_selections,
+              ).map((selection) => (
+                  <AnswerSection
+                    key={selection.id}
+                    heading={selection.position_name}
+                    answers={application.answers.filter((answer) =>
+                      answer.position_names.includes(selection.position_name),
+                    )}
+                    numbered
+                  />
+                ))}
             </div>
           )}
         </div>
       </div>
     </ScrollArea>
+  );
+}
+
+interface AnswerSectionProps {
+  heading: string;
+  answers: ApplicationListItem["answers"];
+  numbered?: boolean;
+}
+
+function AnswerSection({
+  heading,
+  answers,
+  numbered = false,
+}: Readonly<AnswerSectionProps>) {
+  if (answers.length === 0) return null;
+
+  return (
+    <div>
+      <h4 className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-3">
+        {heading}
+      </h4>
+      <div className="space-y-4">
+        {answers.map((answer, index) => (
+          <div key={answer.id}>
+            <p className="text-sm font-medium mb-1">
+              {numbered ? `${index + 1}. ` : ""}
+              {answer.question_text}
+            </p>
+            <div className="rounded-md bg-muted/50 p-3">
+              <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                {answer.answer_text}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 

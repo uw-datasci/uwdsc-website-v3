@@ -16,12 +16,12 @@ on:
 
 env:
   NODE_VERSION: 24
-  PNPM_VERSION: 10.31.0
+  PNPM_VERSION: 10.33.0
   INFISICAL_PROJECT_SLUG: uwdsc-54e-y
 
 jobs:
   setup:
-    name: Setup & Install Dependencies
+    name: Setup
     # Only run if manually confirmed or if changes are in main branch
     if: github.event_name == 'push' || github.event.inputs.confirm == 'migrate'
     runs-on: ubuntu-latest

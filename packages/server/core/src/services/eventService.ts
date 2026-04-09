@@ -20,6 +20,20 @@ class EventService {
   }
 
   /**
+   * Total number of events in the database.
+   */
+  async getEventCount(): Promise<number> {
+    try {
+      return await this.repository.getEventCount();
+    } catch (error) {
+      throw new ApiError(
+        `Failed to count events: ${(error as Error).message}`,
+        500,
+      );
+    }
+  }
+
+  /**
    * Get all events
    */
   async getAllEvents(): Promise<Event[]> {

@@ -1,4 +1,4 @@
-export default function ArchivePage() {
+export default function ArchivesPage() {
   return (
     <div className="space-y-6 p-4">
       <div>

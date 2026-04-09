@@ -22,6 +22,8 @@ export interface Term {
   application_release_date: string;
   application_soft_deadline: string;
   application_hard_deadline: string;
+  start_date: string | null;
+  onboarding_due_date: string | null;
   created_at: string;
 }
 
@@ -115,6 +117,8 @@ export interface PositionSelectionWithName extends ApplicationPositionSelection 
 /** Answer with question text (for admin review) */
 export interface AnswerWithQuestion extends Answer {
   question_text: string;
+  /** Position names this question is scoped to; empty for general questions. */
+  position_names: string[];
 }
 
 /** Full application data for admin list/detail view */

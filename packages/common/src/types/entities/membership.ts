@@ -4,12 +4,10 @@ import { CompleteProfileData } from "./profile";
 export interface MarkAsPaidData {
   payment_method: PaymentMethod;
   payment_location: string;
-  verifier: string;
+  verifier: string | null;
 }
 
-export type UpdateMemberData = Partial<
-  Omit<CompleteProfileData, "heard_from_where">
->;
+export type UpdateMemberData = Partial<Omit<CompleteProfileData, "heard_from_where">>;
 
 export interface Member {
   id: string;

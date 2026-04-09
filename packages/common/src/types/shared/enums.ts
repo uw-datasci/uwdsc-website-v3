@@ -33,3 +33,5 @@ export type ApplicationReviewStatus =
   | "Rejection Sent";
 
 export type MembershipFilter = "all" | "paid" | "paid-mathsoc";
+
+export type TermType = "study" | "coop" ; 

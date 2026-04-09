@@ -1,16 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import * as QRCode from "qrcode";
-import { Button, Sheet, SheetContent, SheetTitle, SheetTrigger } from "@uwdsc/ui";
-import { QrCode as QrCodeIcon } from "lucide-react";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@uwdsc/ui";
 import Image from "next/image";
 
-export type MembershipPaymentDrawerProps = {
+type MembershipPaymentDrawerProps = {
   profileId: string | null;
+  trigger: ReactNode;
 };
 
-export function MembershipPaymentDrawer({ profileId }: Readonly<MembershipPaymentDrawerProps>) {
+export function MembershipPaymentDrawer({
+  profileId,
+  trigger,
+}: Readonly<MembershipPaymentDrawerProps>) {
   const [open, setOpen] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
 
@@ -46,18 +49,7 @@ export function MembershipPaymentDrawer({ profileId }: Readonly<MembershipPaymen
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      {open ? null : (
-        <SheetTrigger asChild>
-          <Button
-            variant="outline"
-            size="lg"
-            className="fixed bottom-4 left-1/2 z-200 -translate-x-1/2 backdrop-blur supports-backdrop-filter:bg-background/70"
-          >
-            <QrCodeIcon className="size-5" />
-            Show Payment QR
-          </Button>
-        </SheetTrigger>
-      )}
+      {open ? null : <SheetTrigger asChild>{trigger}</SheetTrigger>}
 
       <SheetContent side="bottom" className="p-0 z-200">
         <SheetTitle className="sr-only">Payment QR code</SheetTitle>

@@ -67,10 +67,13 @@ export function General({ form }: GeneralProps) {
                     renderTextField({
                       placeholder: "Instagram username",
                       label: "Instagram Handle",
-                    })({ field })
-                  }
-                />
-              )}
+                    })({
+                      field: {
+                        ...field,
+                        value: field.value ?? "",
+                      },
+                    })}
+              />)}
             </CardContent>
           </Card>
 
@@ -119,11 +122,18 @@ export function General({ form }: GeneralProps) {
             <FormField
               control={form.control}
               name="anything_else"
-              render={renderTextField({
+              render={({ field }) =>
+                renderTextField({
                 placeholder: "",
                 label: "Anything else we should know?",
-              })}
-            />
+              })({
+                    field: {
+                       ...field,
+                        value: field.value ?? "",
+                    },
+                  })
+                }
+              />
           </CardContent>
         </Card>
       </Form>

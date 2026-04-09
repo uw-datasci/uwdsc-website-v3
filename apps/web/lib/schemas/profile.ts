@@ -27,3 +27,22 @@ export const completeProfileDefaultValues: Partial<CompleteProfileFormValues> =
     term: "",
     heard_from_where: "",
   };
+
+/** Passport profile edit (same base fields as complete profile, no heard_from_where) */
+export const passportProfileEditSchema = completeProfileSchema.pick({
+  first_name: true,
+  last_name: true,
+  wat_iam: true,
+  faculty: true,
+  term: true,
+});
+
+export type PassportProfileEditValues = z.infer<typeof passportProfileEditSchema>;
+
+export const passportProfileEditDefaultValues: PassportProfileEditValues = {
+  first_name: "",
+  last_name: "",
+  wat_iam: "",
+  faculty: "",
+  term: "",
+};

@@ -73,8 +73,8 @@ export function MembershipPaymentDrawer({
           </div>
 
           <p className="text-sm text-muted-foreground sm:text-center">
-            Once you have paid, please show this QR code to a DSC exec, along with proof of
-            purchase.
+            Once you have paid, please show this QR code to a DSC exec with your proof of
+            payment.
           </p>
         </div>
       </SheetContent>

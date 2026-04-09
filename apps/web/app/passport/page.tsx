@@ -99,6 +99,7 @@ export default function PassportPage() {
           email={user?.email}
           membershipLoading={membershipLoading}
           isMember={!!isMember}
+          execPositionLabel={user?.exec_position_name}
         />
 
         <PassportProfile

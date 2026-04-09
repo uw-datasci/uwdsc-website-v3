@@ -7,6 +7,8 @@ interface PassportHeaderProps {
   readonly email: string | null | undefined;
   readonly membershipLoading: boolean;
   readonly isMember: boolean;
+  /** Exec title from exec_team (e.g. position name); omit or null to hide. */
+  readonly execPositionLabel?: string | null;
 }
 
 export function PassportHeader({
@@ -15,6 +17,7 @@ export function PassportHeader({
   email,
   membershipLoading,
   isMember,
+  execPositionLabel,
 }: PassportHeaderProps) {
   let membershipBadge: ReactNode;
 
@@ -53,7 +56,17 @@ export function PassportHeader({
               <h1 className="text-xl font-bold truncate">{displayName}</h1>
               <p className="text-sm text-muted-foreground mt-0.5 truncate">{email}</p>
             </div>
-            <div className="shrink-0 pt-0.5">{membershipBadge}</div>
+            <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 pt-0.5">
+              {execPositionLabel ? (
+                <Badge
+                  className="max-w-[min(100%,16rem)] truncate rounded-full px-3 text-sm font-medium shadow-sm"
+                  title={execPositionLabel}
+                >
+                  {execPositionLabel}
+                </Badge>
+              ) : null}
+              {membershipBadge}
+            </div>
           </div>
         </div>
       </CardContent>

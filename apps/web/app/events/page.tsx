@@ -12,7 +12,8 @@ import {
   NextEventSection,
 } from "@/components/events";
 import { motion } from "framer-motion";
-import { Badge, Card, CardContent, CardHeader, Spinner } from "@uwdsc/ui";
+import { Badge, Button, Card, CardContent, CardHeader, Spinner } from "@uwdsc/ui";
+import { QrCode as QrCodeIcon } from "lucide-react";
 import Image from "next/image";
 
 export default function EventsPage() {
@@ -160,7 +161,21 @@ export default function EventsPage() {
         </Card>
       </motion.div>
 
-      {shouldShowPaymentQr ? <MembershipPaymentDrawer profileId={user?.id ?? null} /> : null}
+      {shouldShowPaymentQr ? (
+        <MembershipPaymentDrawer
+          profileId={user?.id ?? null}
+          trigger={
+            <Button
+              variant="outline"
+              size="lg"
+              className="fixed bottom-4 left-1/2 z-200 -translate-x-1/2 backdrop-blur supports-backdrop-filter:bg-background/70"
+            >
+              <QrCodeIcon className="size-5" />
+              Show Payment QR
+            </Button>
+          }
+        />
+      ) : null}
     </div>
   );
 }

@@ -33,13 +33,8 @@ export async function PUT(request: NextRequest): Promise<Response> {
     const validationError = validateBaseProfileFields(body);
     if (validationError) return ApiResponse.badRequest(validationError.error);
 
-    if (
-      typeof body.heard_from_where !== "string" ||
-      !body.heard_from_where.trim()
-    ) {
-      return ApiResponse.badRequest(
-        "heard_from_where is required and must be non-empty",
-      );
+    if (typeof body.heard_from_where !== "string" || !body.heard_from_where.trim()) {
+      return ApiResponse.badRequest("heard_from_where is required and must be non-empty");
     }
 
     const base = trimBaseProfilePayload(body);
@@ -59,7 +54,7 @@ export async function PUT(request: NextRequest): Promise<Response> {
   }
 }
 
-// PATCH - update profile (e.g. settings/dashboard); no heard_from_where
+// PATCH - update profile; no heard_from_where
 export async function PATCH(request: NextRequest): Promise<Response> {
   try {
     const { user, isUnauthorized } = await tryGetCurrentUser();

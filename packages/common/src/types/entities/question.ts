@@ -9,19 +9,19 @@
  */
 export interface QuestionScope {
   /** True if the user holds any exec role with `exec_positions.is_vp` (via exec_team). */
-  readonly hasVpExecRole: boolean;
+  hasVpExecRole: boolean;
   /** VP on Presidents subteam (exec + subteam name). */
-  readonly isPresident: boolean;
+  isPresident: boolean;
   /** VP subteam names resolved from exec roles (excluding Presidents). */
-  readonly vpSubteamNames: string[];
+  vpSubteamNames: string[];
   /** `application_positions_available.id` scoped to the user’s VP subteam(s) (see auth repository). */
-  readonly vpPositionIds: number[];
+  vpPositionIds: number[];
 }
 
 /** Open role option for assigning a question to a position. */
 export interface QuestionPositionOption {
-  readonly id: number;
-  readonly name: string;
+  id: number;
+  name: string;
 }
 
 /**
@@ -29,38 +29,38 @@ export interface QuestionPositionOption {
  * (matches admin zod schema and repository insert/update).
  */
 export interface QuestionUpsertInput {
-  readonly question_text: string;
-  readonly type: "text" | "textarea";
-  readonly max_length?: number | null;
-  readonly placeholder?: string | null;
-  readonly help_text?: string | null;
-  readonly sort_order: number;
-  readonly position_id: number | null;
+  question_text: string;
+  type: "text" | "textarea";
+  max_length?: number | null;
+  placeholder?: string | null;
+  help_text?: string | null;
+  sort_order: number;
+  position_id: number | null;
 }
 
 /** Joined row: position_questions + questions + exec role label. */
 export interface AppQuestion {
-  readonly relation_id: number;
-  readonly question_id: number;
-  readonly position_id: number | null;
-  readonly position_name: string | null;
-  readonly can_edit?: boolean;
-  readonly question_text: string;
-  readonly type: "text" | "textarea";
-  readonly max_length: number | null;
-  readonly placeholder: string | null;
-  readonly help_text: string | null;
-  readonly sort_order: number;
-  readonly created_at: string;
+  position_question_id: number;
+  question_id: number;
+  position_id: number | null;
+  position_name: string | null;
+  can_edit?: boolean;
+  question_text: string;
+  type: "text" | "textarea";
+  max_length: number | null;
+  placeholder: string | null;
+  help_text: string | null;
+  sort_order: number;
+  created_at: string;
 }
 
-/** GET /api/applications/review/questions */
+/** GET /api/applications/questions */
 export interface QuestionsListResponse {
-  readonly questions: AppQuestion[];
-  readonly positions: QuestionPositionOption[];
-  readonly scope: {
-    readonly isPresident: boolean;
-    readonly hasVpExecRole: boolean;
-    readonly vpSubteamNames: string[];
+  questions: AppQuestion[];
+  positions: QuestionPositionOption[];
+  scope: {
+    isPresident: boolean;
+    hasVpExecRole: boolean;
+    vpSubteamNames: string[];
   };
 }

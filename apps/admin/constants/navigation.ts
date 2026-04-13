@@ -3,7 +3,6 @@ import {
   Anvil,
   Calendar,
   CircleHelp,
-  ClipboardCheck,
   Code2,
   FileText,
   LayoutDashboard,
@@ -23,7 +22,6 @@ export const ADMIN_NAVIGATION = [
     icon: FileText,
     subItems: [
       { name: "Questions", href: "/applications/questions", icon: CircleHelp },
-      { name: "Review", href: "/applications/review", icon: ClipboardCheck },
       { name: "Hiring", href: "/applications/hiring", icon: UserCheck },
     ],
   },

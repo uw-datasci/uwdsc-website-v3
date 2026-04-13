@@ -17,6 +17,7 @@ import type {
   HiringApplicant,
 } from "@uwdsc/common/types";
 import { flattenApplicantsToSelectionRows } from "@uwdsc/common/utils";
+import { reviewStatusBadgeClassName } from "@/lib/reviewStatusBadge";
 import { SelectionOutcomeEdit } from "./SelectionOutcomeEdit";
 import { SendOfferButton, type SendOfferPhase } from "./SendOfferButton";
 
@@ -67,25 +68,6 @@ export function ApplicantTable({
       });
     }
   }, []);
-
-  const statusBadgeClassName = (status: ApplicationReviewStatus): string => {
-    switch (status) {
-      case "Wanted":
-        return "border-emerald-300 bg-emerald-100 text-emerald-900 border-emerald-800 bg-emerald-950/60 text-emerald-100";
-      case "Accepted Offer":
-        return "border-emerald-600 bg-emerald-600 text-white border-emerald-500 bg-emerald-500";
-      case "Not Wanted":
-        return "border-red-300 bg-red-100 text-red-900 border-red-800 bg-red-950/60 text-red-100";
-      case "Rejection Sent":
-        return "border-red-600 bg-red-600 text-white border-red-500 bg-red-500";
-      case "Offer Sent":
-        return "border-sky-300 bg-sky-100 text-sky-900 border-sky-800 bg-sky-950/60 text-sky-100";
-      case "Declined Offer":
-        return "border-blue-600 bg-blue-600 text-white border-blue-500 bg-blue-500";
-      default:
-        return "border-border bg-muted/60 text-muted-foreground";
-    }
-  };
 
   if (rows.length === 0) {
     return (
@@ -151,7 +133,7 @@ export function ApplicantTable({
                       variant="outline"
                       className={cn(
                         "text-xs font-medium",
-                        statusBadgeClassName(selection.status),
+                        reviewStatusBadgeClassName(selection.status),
                       )}
                     >
                       {selection.status}

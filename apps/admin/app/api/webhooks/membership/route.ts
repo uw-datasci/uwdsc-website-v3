@@ -48,8 +48,12 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     if (evt.type !== "email.received") return ApiResponse.badRequest("Invalid webhook event");
 
-    const contents = await webhookService.getReceivedEmail(evt.data.email_id);
+    const contents = await webhookService.getReceivedEmail(evt.data.email_id, evt.data.to);
     if (!contents.ok) {
+      if (contents.reason === "wrong_recipient") {
+        return ApiResponse.badRequest(contents.message);
+      }
+
       console.error("[Membership Webhook]", contents.message);
       return ApiResponse.serverError(
         contents.message,

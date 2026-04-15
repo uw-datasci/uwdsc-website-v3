@@ -35,15 +35,4 @@ export const facultyLabelToValue: Record<string, Faculty> = {
 /** Map API enum value -> form label */
 export const facultyValueToLabel: Record<Faculty, string> = FACULTY_LABELS;
 
-export const TERM_OPTIONS = [
-  "1A",
-  "1B",
-  "2A",
-  "2B",
-  "3A",
-  "3B",
-  "4A",
-  "4B",
-  "5A",
-  "5B",
-];
+export const TERM_OPTIONS = ["1A", "1B", "2A", "2B", "3A", "3B", "4A", "4B", "5A", "5B"];

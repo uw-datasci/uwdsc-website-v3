@@ -47,9 +47,7 @@ export class HiringRepository extends BaseRepository {
 
     const applicationIds = applications.map((a) => a.id);
 
-    const selections = await this.sql<
-      (HiringPositionSelection & { application_id: string })[]
-    >`
+    const selections = await this.sql<(HiringPositionSelection & { application_id: string })[]>`
       SELECT
         aps.id,
         aps.application_id,
@@ -79,6 +77,27 @@ export class HiringRepository extends BaseRepository {
       ...app,
       position_selections: selectionsMap.get(app.id) ?? [],
     }));
+  }
+
+  /**
+   * True if the same application already has a different position selection in
+   * "Accepted Offer" (excluding {@link selectionId}).
+   */
+  async hasAcceptedAnotherOffer(selectionId: string): Promise<boolean> {
+    const rows = await this.sql<{ exists: boolean }[]>`
+      SELECT EXISTS (
+        SELECT 1
+        FROM application_position_selections other
+        WHERE other.application_id = (
+          SELECT application_id
+          FROM application_position_selections
+          WHERE id = ${selectionId}
+        )
+          AND other.id != ${selectionId}
+          AND other.status = 'Accepted Offer'
+      ) AS "exists"
+    `;
+    return rows[0]?.exists === true;
   }
 
   async updatePositionSelectionStatus(

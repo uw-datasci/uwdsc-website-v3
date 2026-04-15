@@ -1,6 +1,5 @@
 export * from "./HiringHeader";
 export * from "./ApplicantTable";
-export * from "./SelectionOutcomeEdit";
-export * from "./SendOfferButton";
+export * from "./RowActionsMenu";
 export * from "./NewExecTeamPanel";
 export * from "./FinalizeRolesDialog";

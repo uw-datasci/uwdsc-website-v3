@@ -20,12 +20,8 @@ import type {
 } from "@uwdsc/common/types";
 import { sortPositionSelectionsByPriority } from "@uwdsc/common/utils";
 import type { PositionReviewScopeDto } from "@/lib/api";
-import {
-  REVIEW_STATUS_LIST,
-  VP_REVIEW_STATUS_LIST,
-  VP_REVIEW_STATUS_SET,
-} from "@/constants/applications";
-import { reviewStatusBadgeClassName } from "@/lib/reviewStatusBadge";
+import { VP_REVIEW_STATUS_LIST, VP_REVIEW_STATUS_SET } from "@/constants/applications";
+import { reviewStatusBadgeClassName } from "@/lib/utils/applications";
 
 interface ApplicationDetailProps {
   application: ApplicationListItem | null;
@@ -82,9 +78,7 @@ export function ApplicationDetail({
   const showStatusSelect = !!statusOptions && statusOptions.length > 0 && !!onStatusChange;
 
   const vpApaIds = new Set(positionReview?.vpPositionIds ?? []);
-  const editableReviewOptions = positionReview?.isPresident
-    ? REVIEW_STATUS_LIST
-    : VP_REVIEW_STATUS_LIST;
+  const editableReviewOptions = VP_REVIEW_STATUS_LIST;
 
   return (
     <ScrollArea className="h-full">

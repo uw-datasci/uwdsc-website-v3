@@ -3,7 +3,7 @@
 import { ScrollArea, Badge, cn } from "@uwdsc/ui";
 
 import type { ApplicationListItem } from "@uwdsc/common/types";
-import { reviewStatusBadgeClassName } from "@/lib/reviewStatusBadge";
+import { reviewStatusBadgeClassName } from "@/lib/utils/applications";
 
 // Status -> badge variant mapping
 function getStatusVariant(

@@ -26,10 +26,7 @@ class HiringService {
     try {
       return await this.repository.getHiringApplicants();
     } catch (error) {
-      throw new ApiError(
-        `Failed to get hiring applicants: ${(error as Error).message}`,
-        500,
-      );
+      throw new ApiError(`Failed to get hiring applicants: ${(error as Error).message}`, 500);
     }
   }
 
@@ -38,24 +35,33 @@ class HiringService {
     status: ApplicationReviewStatus,
   ): Promise<void> {
     if (!PRESIDENT_ONLY_STATUSES.has(status)) {
-      throw new ApiError(
-        "Only president-level statuses are allowed on the hiring page",
-        400,
-      );
+      throw new ApiError("Only president-level statuses are allowed on the hiring page", 400);
     }
 
     try {
-      const updated = await this.repository.updatePositionSelectionStatus(
-        selectionId,
-        status,
-      );
+      if (status === "Accepted Offer") {
+        const hasOtherAccepted = await this.repository.hasAcceptedAnotherOffer(selectionId);
+        if (hasOtherAccepted) {
+          throw new ApiError(
+            "This applicant already has an accepted offer for another position.",
+            400,
+          );
+        }
+      }
+
+      const updated = await this.repository.updatePositionSelectionStatus(selectionId, status);
       if (!updated) throw new ApiError("Position selection not found", 404);
+
+      if (status === "Offer Sent") {
+        // TODO: Send offer email to the applicant (after status is persisted).
+      }
+
+      if (status === "Rejection Sent") {
+        // TODO: Send rejection email to the applicant (after status is persisted).
+      }
     } catch (error) {
       if (error instanceof ApiError) throw error;
-      throw new ApiError(
-        `Failed to update selection status: ${(error as Error).message}`,
-        500,
-      );
+      throw new ApiError(`Failed to update selection status: ${(error as Error).message}`, 500);
     }
   }
 
@@ -68,10 +74,7 @@ class HiringService {
         return { ...row, computed_role };
       });
     } catch (error) {
-      throw new ApiError(
-        `Failed to get new exec team: ${(error as Error).message}`,
-        500,
-      );
+      throw new ApiError(`Failed to get new exec team: ${(error as Error).message}`, 500);
     }
   }
 
@@ -86,12 +89,8 @@ class HiringService {
 
       const { demoted } = await this.repository.finalizeRoles(newTeamRoles);
 
-      const promoted_to_admin = team.filter(
-        (m) => m.computed_role === "admin",
-      ).length;
-      const promoted_to_exec = team.filter(
-        (m) => m.computed_role === "exec",
-      ).length;
+      const promoted_to_admin = team.filter((m) => m.computed_role === "admin").length;
+      const promoted_to_exec = team.filter((m) => m.computed_role === "exec").length;
 
       return {
         promoted_to_admin,
@@ -100,10 +99,7 @@ class HiringService {
       };
     } catch (error) {
       if (error instanceof ApiError) throw error;
-      throw new ApiError(
-        `Failed to finalize roles: ${(error as Error).message}`,
-        500,
-      );
+      throw new ApiError(`Failed to finalize roles: ${(error as Error).message}`, 500);
     }
   }
 }

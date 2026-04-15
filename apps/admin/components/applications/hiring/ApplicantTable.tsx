@@ -1,6 +1,5 @@
 "use client";
 
-import { useCallback, useState } from "react";
 import {
   Badge,
   ScrollArea,
@@ -12,62 +11,26 @@ import {
   TableRow,
 } from "@uwdsc/ui";
 import { cn } from "@uwdsc/ui/lib/utils";
-import type {
-  ApplicationReviewStatus,
-  HiringApplicant,
-} from "@uwdsc/common/types";
+import type { ApplicationReviewStatus, HiringApplicant } from "@uwdsc/common/types";
 import { flattenApplicantsToSelectionRows } from "@uwdsc/common/utils";
-import { reviewStatusBadgeClassName } from "@/lib/reviewStatusBadge";
-import { SelectionOutcomeEdit } from "./SelectionOutcomeEdit";
-import { SendOfferButton, type SendOfferPhase } from "./SendOfferButton";
+import { reviewStatusBadgeClassName } from "@/lib/utils/applications";
+import { ApplicantRowActionsMenu } from "./RowActionsMenu";
 
 interface ApplicantTableProps {
-  readonly applicants: HiringApplicant[];
-  readonly updatingSelectionId: string | null;
-  readonly onSelectionStatusChange: (
+  applicants: HiringApplicant[];
+  updatingSelectionId: string | null;
+  onSelectionStatusChange: (
     selectionId: string,
     status: ApplicationReviewStatus,
-  ) => void;
+  ) => Promise<void>;
 }
 
 export function ApplicantTable({
   applicants,
   updatingSelectionId,
   onSelectionStatusChange,
-}: ApplicantTableProps) {
+}: Readonly<ApplicantTableProps>) {
   const rows = flattenApplicantsToSelectionRows(applicants);
-  const [sendingOfferSelectionIds, setSendingOfferSelectionIds] = useState(
-    () => new Set<string>(),
-  );
-  const [sentOfferSelectionIds, setSentOfferSelectionIds] = useState(
-    () => new Set<string>(),
-  );
-
-  const sendOfferPhase = useCallback(
-    (selectionId: string): SendOfferPhase => {
-      if (sentOfferSelectionIds.has(selectionId)) return "success";
-      if (sendingOfferSelectionIds.has(selectionId)) return "loading";
-      return "idle";
-    },
-    [sentOfferSelectionIds, sendingOfferSelectionIds],
-  );
-
-  const handleSendOffer = useCallback(async (selectionId: string) => {
-    setSendingOfferSelectionIds((prev) => new Set(prev).add(selectionId));
-    try {
-      // TODO: replace timeout with send-offer API call
-      await new Promise<void>((resolve) => setTimeout(resolve, 1000));
-      setSentOfferSelectionIds((prev) => new Set(prev).add(selectionId));
-    } catch (error) {
-      console.error("Error sending offer:", error);
-    } finally {
-      setSendingOfferSelectionIds((prev) => {
-        const next = new Set(prev);
-        next.delete(selectionId);
-        return next;
-      });
-    }
-  }, []);
 
   if (rows.length === 0) {
     return (
@@ -89,28 +52,24 @@ export function ApplicantTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className={`min-w-[240px] ${headCell}`}>
-                Applicant
-              </TableHead>
-              <TableHead className={`min-w-[180px] ${headCell}`}>
-                Role
-              </TableHead>
+              <TableHead className={`min-w-[240px] ${headCell}`}>Applicant</TableHead>
+              <TableHead className={`min-w-[180px] ${headCell}`}>Role</TableHead>
               <TableHead className={`w-[140px] ${headCell}`}>Status</TableHead>
-              <TableHead className={`min-w-[240px] ${headCell}`}>
-                <div className="flex w-full justify-end">Actions</div>
+              <TableHead className={`w-14 ${headCell}`}>
+                <span className="sr-only">Row actions</span>
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {rows.map(({ applicant, selection }) => {
-              const showSendOffer = selection.status === "Wanted";
+              const roleLabel = selection.subteam_name
+                ? `${selection.position_name} (${selection.subteam_name})`
+                : selection.position_name;
               return (
                 <TableRow key={selection.id}>
                   <TableCell className={bodyCell}>
                     <div className="flex max-w-[320px] flex-col gap-0.5">
-                      <span className="font-medium leading-tight">
-                        {applicant.full_name}
-                      </span>
+                      <span className="font-medium leading-tight">{applicant.full_name}</span>
                       <span className="break-all text-sm leading-snug text-muted-foreground">
                         {applicant.personal_email ?? "N/A"}
                       </span>
@@ -140,20 +99,14 @@ export function ApplicantTable({
                     </Badge>
                   </TableCell>
                   <TableCell className={`text-right ${bodyCell}`}>
-                    <div className="flex flex-wrap items-center justify-end gap-2">
-                      {showSendOffer ? (
-                        <SendOfferButton
-                          phase={sendOfferPhase(selection.id)}
-                          onSendOffer={() => handleSendOffer(selection.id)}
-                        />
-                      ) : null}
-                      <SelectionOutcomeEdit
-                        disabled={updatingSelectionId === selection.id}
-                        onSelect={(status) =>
-                          onSelectionStatusChange(selection.id, status)
-                        }
-                      />
-                    </div>
+                    <ApplicantRowActionsMenu
+                      selectionId={selection.id}
+                      selectionStatus={selection.status}
+                      applicantName={applicant.full_name}
+                      roleLabel={roleLabel}
+                      disabled={updatingSelectionId === selection.id}
+                      onConfirmStatus={onSelectionStatusChange}
+                    />
                   </TableCell>
                 </TableRow>
               );

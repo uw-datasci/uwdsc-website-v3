@@ -139,7 +139,7 @@ export function ExecProfile({ form, execPositions }: ExecProfileProps) {
               {/* Personal Email */}
               <FormField
                 control={form.control}
-                name="gmail"
+                name="email"
                 render={renderTextField({
                   placeholder: "johndoe@gmail.com",
                   label: "Personal Email Address",
@@ -197,8 +197,9 @@ export function ExecProfile({ form, execPositions }: ExecProfileProps) {
             {/* Position */}
             <FormField
               control={form.control}
-              name="role"
-              render={renderSelectField({
+              name="role_id"
+              render={({ field }) =>
+              renderSelectField({
                 placeholder: "Select your executive position",
                 options: execPositions.map((pos) => ({
                   value: String(pos.id),
@@ -211,7 +212,14 @@ export function ExecProfile({ form, execPositions }: ExecProfileProps) {
                 contentPosition: "popper",
                 itemClassName:
                   "text-slate-200 focus:bg-[var(--grey3)] focus:text-white hover:bg-[var(--grey3)] hover:text-white transition-colors",
-              })}
+              })({
+                field: {
+                  ...field,
+                  value: String(field.value),                    // number → string for display
+                  onChange: (v: string) => field.onChange(Number(v)), // string → number for storage
+                },
+              })
+            }
             />
           </CardContent>
         </Card>

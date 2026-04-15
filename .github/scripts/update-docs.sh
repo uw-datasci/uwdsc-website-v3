@@ -13,7 +13,12 @@ if [ -z "$PR_SHA" ]; then
 fi
 
 # Generate diff file
-git diff --name-only origin/main...$PR_SHA > changes.diff
+EXCLUDE_ARGS=()
+while IFS= read -r pattern; do
+  EXCLUDE_ARGS+=(":!$pattern")
+done < "$(dirname "$0")/.diffignore"
+
+git diff $PR_SHA^1 $PR_SHA -- "${EXCLUDE_ARGS[@]}" > changes.diff
 
 # Determine changelog file based on semester tag
 CHANGELOG_FILE=""

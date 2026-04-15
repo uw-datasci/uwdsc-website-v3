@@ -7,7 +7,7 @@ import {
   completeProfileSchema,
   completeProfileDefaultValues,
   type CompleteProfileFormValues,
-} from "@/lib/schemas/complete-profile";
+} from "@/lib/schemas/profile";
 import { completeProfile } from "@/lib/api/profile";
 import {
   renderTextField,

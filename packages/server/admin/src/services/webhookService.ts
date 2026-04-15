@@ -4,11 +4,13 @@ type GetReceivedEmailContentsResult =
   | { ok: true; email: GetReceivingEmailResponseSuccess }
   | {
       ok: false;
-      reason: "missing_api_key" | "resend_error";
+      reason: "missing_api_key" | "resend_error" | "wrong_recipient";
       message: string;
     };
 
 class WebhookService {
+  /** Inbound address for membership receipt processing (Resend receiving / MX). */
+  private readonly membershipInboundEmail = "membership@contact.uwdatascience.ca";
   private readonly resend: Resend | null;
 
   constructor() {
@@ -16,11 +18,31 @@ class WebhookService {
     this.resend = key ? new Resend(key) : null;
   }
 
+  private verifyRecipient(to: string[], recipient: string): boolean {
+    const want = recipient.trim().toLowerCase();
+    return to.some((raw) => {
+      const t = raw.trim();
+      const match = /<([^>]+)>/.exec(t);
+      return (match?.[1]?.trim() ?? t).toLowerCase() === want;
+    });
+  }
+
   /**
    * Loads full inbound email content (html, text, headers, etc.) for an `email.received` webhook.
-   * `receivingEmailId` is `data.email_id` from the verified Resend webhook payload.
+   * `receivingEmailId` is `data.email_id`; `webhookTo` is `data.to` from the verified payload.
    */
-  async getReceivedEmail(receivingEmailId: string): Promise<GetReceivedEmailContentsResult> {
+  async getReceivedEmail(
+    receivingEmailId: string,
+    webhookTo: string[],
+  ): Promise<GetReceivedEmailContentsResult> {
+    if (!this.verifyRecipient(webhookTo, this.membershipInboundEmail)) {
+      return {
+        ok: false,
+        reason: "wrong_recipient",
+        message: `Email is not addressed to ${this.membershipInboundEmail}`,
+      };
+    }
+
     if (!this.resend) {
       return {
         ok: false,

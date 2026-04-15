@@ -15,6 +15,7 @@ export interface Profile {
   term: string | null;
   is_math_soc_member: boolean;
   role: UserRole;
+  exec_position_name: string | null;
 }
 
 export interface CompleteProfileData {

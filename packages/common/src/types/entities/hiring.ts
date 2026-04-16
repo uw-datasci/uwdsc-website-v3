@@ -17,6 +17,7 @@ export interface HiringApplicant {
   readonly id: string;
   readonly profile_id: string;
   readonly full_name: string;
+  readonly email: string | null;
   readonly personal_email: string | null;
   readonly submitted_at: string;
   readonly position_selections: HiringPositionSelection[];

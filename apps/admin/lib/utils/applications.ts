@@ -76,7 +76,7 @@ export function buildHiringSubteamOptions(
   return options;
 }
 
-/** Keep applicants that have at least one selection in the subteam filter; trim other selections. */
+/** Keep applicants that have at least one selection in the subteam filter, preserving all their selections. */
 export function filterApplicantsBySubteam(
   applicants: readonly HiringApplicant[],
   filter: string,
@@ -84,15 +84,11 @@ export function filterApplicantsBySubteam(
   if (filter === HIRING_SUBTEAM_ALL) {
     return [...applicants];
   }
-  return applicants
-    .map((app) => ({
-      ...app,
-      position_selections: app.position_selections.filter((s) => {
-        if (filter === HIRING_SUBTEAM_NONE) {
-          return s.subteam_name == null || s.subteam_name === "";
-        }
-        return s.subteam_name === filter;
-      }),
-    }))
-    .filter((app) => app.position_selections.length > 0);
+  const matchesFilter = (s: HiringApplicant["position_selections"][number]) => {
+    if (filter === HIRING_SUBTEAM_NONE) {
+      return s.subteam_name == null || s.subteam_name === "";
+    }
+    return s.subteam_name === filter;
+  };
+  return applicants.filter((app) => app.position_selections.some(matchesFilter));
 }

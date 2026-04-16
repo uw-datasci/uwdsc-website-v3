@@ -7,6 +7,8 @@ import {
   type UserRole,
 } from "@uwdsc/common/types";
 import { HiringRepository } from "../repositories/hiringRepository";
+import { emailService } from "./emailService";
+import { formatTermCode } from "@uwdsc/common/utils";
 
 const PRESIDENT_ONLY_STATUSES = new Set<ApplicationReviewStatus>([
   "Offer Sent",
@@ -52,12 +54,17 @@ class HiringService {
       const updated = await this.repository.updatePositionSelectionStatus(selectionId, status);
       if (!updated) throw new ApiError("Position selection not found", 404);
 
-      if (status === "Offer Sent") {
-        // TODO: Send offer email to the applicant (after status is persisted).
-      }
+      if (status === "Offer Sent" || status === "Rejection Sent") {
+        const recipient = await this.repository.getSelectionRecipient(selectionId);
+        if (!recipient) throw new ApiError("Selection recipient not found", 404);
 
-      if (status === "Rejection Sent") {
-        // TODO: Send rejection email to the applicant (after status is persisted).
+        const type = status === "Offer Sent" ? "offer" : "rejection";
+        await emailService.sendHiringDecisionEmail(recipient.email, {
+          type,
+          applicantName: recipient.full_name,
+          positionName: recipient.position_name,
+          offerTermLabel: recipient.term_code ? formatTermCode(recipient.term_code) : undefined,
+        });
       }
     } catch (error) {
       if (error instanceof ApiError) throw error;

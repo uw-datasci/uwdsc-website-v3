@@ -4,6 +4,10 @@ import { Resend } from "resend";
 import { ApiError } from "@uwdsc/common/types";
 import { CampaignEmail } from "../email-templates/campaign";
 import {
+  HiringDecisionEmail,
+  getHiringDecisionSubject,
+} from "../email-templates/hiringDecision";
+import {
   MembershipReceipt,
   getMembershipReceiptSubject,
 } from "../email-templates/membershipReceiptWebhook";
@@ -192,6 +196,35 @@ class EmailService {
       await this.removeRecipientsFromSegment(recipientEmails);
       throw err;
     }
+  }
+
+  /**
+   * Hiring: send an offer or rejection email to an applicant for a specific role.
+   */
+  async sendHiringDecisionEmail(
+    recipientEmail: string,
+    options: {
+      type: "offer" | "rejection";
+      applicantName: string;
+      positionName: string;
+      offerTermLabel?: string;
+      offerAcceptByDateLabel?: string;
+    },
+  ): Promise<void> {
+    const { type, applicantName, positionName, offerTermLabel, offerAcceptByDateLabel } =
+      options;
+    const subject = getHiringDecisionSubject(type);
+    const html = await render(
+      createElement(HiringDecisionEmail, {
+        type,
+        applicantName,
+        positionName,
+        offerTermLabel,
+        offerAcceptByDateLabel,
+      }),
+    );
+
+    await this.sendTransactionalEmail({ to: [recipientEmail], subject, html });
   }
 
   /**

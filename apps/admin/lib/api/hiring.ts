@@ -56,9 +56,13 @@ export interface FinalizeRolesResponse {
   summary: FinalizeRolesSummary;
 }
 
-export async function finalizeRoles(): Promise<FinalizeRolesResponse> {
+export async function finalizeRoles(input: {
+  when2MeetLink: string;
+}): Promise<FinalizeRolesResponse> {
   const response = await fetch("/api/applications/hiring/finalize", {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ when2MeetLink: input.when2MeetLink }),
   });
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);

@@ -2,7 +2,7 @@ const MARKETING_UNSUBSCRIBE_FOOTER = `<p style="margin:24px 0 0;font-size:12px;c
 <a href="{{{RESEND_UNSUBSCRIBE_URL}}}" style="color:#6366f1;">Unsubscribe</a> from UWDSC marketing emails.
 </p>`;
 
-export function appendMarketingUnsubscribeFooter(html: string): string {
+export function appendUnsubscribeFooter(html: string): string {
   if (html.includes("{{{RESEND_UNSUBSCRIBE_URL}}}")) {
     return html;
   }

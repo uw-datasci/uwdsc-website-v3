@@ -5,7 +5,7 @@ import { withVpAccess } from "@/guards/withVpAccess";
 import { questionSchema } from "@/lib/schemas/questions";
 
 /**
- * GET /api/applications/review/questions
+ * GET /api/applications/questions
  * List all questions within the VP's allowed scope.
  */
 export const GET = withVpAccess(async (_request, _context, _user, scope) => {
@@ -30,7 +30,7 @@ export const GET = withVpAccess(async (_request, _context, _user, scope) => {
 });
 
 /**
- * POST /api/applications/review/questions
+ * POST /api/applications/questions
  * Create a new question mapped to an allowed position.
  */
 export const POST = withVpAccess(async (request, _context, _user, scope) => {

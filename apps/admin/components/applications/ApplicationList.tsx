@@ -3,6 +3,7 @@
 import { ScrollArea, Badge, cn } from "@uwdsc/ui";
 
 import type { ApplicationListItem } from "@uwdsc/common/types";
+import { reviewStatusBadgeClassName } from "@/lib/utils/applications";
 
 // Status -> badge variant mapping
 function getStatusVariant(
@@ -89,9 +90,13 @@ export function ApplicationList({
                   <Badge
                     key={sel.id}
                     variant="outline"
-                    className="text-[10px] px-1.5 py-0"
+                    className={cn(
+                      "max-w-full truncate px-1.5 py-0 text-[10px] font-medium",
+                      reviewStatusBadgeClassName(sel.status),
+                    )}
+                    title={`${sel.position_name}: ${sel.status}`}
                   >
-                    {sel.position_name}
+                    {sel.position_name}: {sel.status}
                   </Badge>
                 ))}
               </div>

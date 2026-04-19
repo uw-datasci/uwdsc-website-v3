@@ -10,45 +10,31 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  cn,
 } from "@uwdsc/ui";
-import {
-  ExternalLink,
-  User,
-  MapPin,
-  GraduationCap,
-  Mail,
-  Briefcase,
-} from "lucide-react";
+import { ExternalLink, User, MapPin, GraduationCap, Mail, Briefcase } from "lucide-react";
 import type {
   ApplicationListItem,
   ApplicationReviewStatus,
   ApplicationStatus,
 } from "@uwdsc/common/types";
 import { sortPositionSelectionsByPriority } from "@uwdsc/common/utils";
-
-function getStatusLabel(status: string): string {
-  return status
-    .split("_")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
-}
-
-function getClubExperienceLabel(clubExperience: boolean | null): string {
-  if (clubExperience === null) return "—";
-  return clubExperience ? "Yes" : "No";
-}
+import type { PositionReviewScopeDto } from "@/lib/api";
+import { VP_REVIEW_STATUS_LIST, VP_REVIEW_STATUS_SET } from "@/constants/applications";
+import { reviewStatusBadgeClassName } from "@/lib/utils/applications";
 
 interface ApplicationDetailProps {
-  readonly application: ApplicationListItem | null;
-  readonly statusOptions?: readonly (
-    | ApplicationStatus
-    | ApplicationReviewStatus
-  )[];
-  readonly selectedStatus?: ApplicationStatus | ApplicationReviewStatus | null;
-  readonly statusUpdating?: boolean;
-  readonly onStatusChange?: (
-    status: ApplicationStatus | ApplicationReviewStatus,
-  ) => void;
+  application: ApplicationListItem | null;
+  statusOptions?: (ApplicationStatus | ApplicationReviewStatus)[];
+  selectedStatus?: ApplicationStatus | ApplicationReviewStatus | null;
+  statusUpdating?: boolean;
+  onStatusChange?: (status: ApplicationStatus | ApplicationReviewStatus) => void;
+  positionReview?: PositionReviewScopeDto | null;
+  onPositionReviewStatusChange?: (
+    selectionId: string,
+    status: ApplicationReviewStatus,
+  ) => void | Promise<void>;
+  positionReviewUpdatingId?: string | null;
 }
 
 export function ApplicationDetail({
@@ -57,25 +43,42 @@ export function ApplicationDetail({
   selectedStatus,
   statusUpdating = false,
   onStatusChange,
-}: ApplicationDetailProps) {
+  positionReview = null,
+  onPositionReviewStatusChange,
+  positionReviewUpdatingId = null,
+}: Readonly<ApplicationDetailProps>) {
+  const getStatusLabel = (status: string): string => {
+    return status
+      .split("_")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
+  };
+
+  const getClubExperienceLabel = (clubExperience: boolean | null): string => {
+    if (clubExperience === null) return "—";
+    return clubExperience ? "Yes" : "No";
+  };
+
+  const selectionApaId = (sel: ApplicationListItem["position_selections"][number]): number => {
+    return typeof sel.position_id === "number" ? sel.position_id : Number(sel.position_id);
+  };
+
   if (!application) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center space-y-2">
           <User className="h-12 w-12 mx-auto text-muted-foreground/40" />
-          <p className="text-muted-foreground text-sm">
-            Select an application to view details
-          </p>
+          <p className="text-muted-foreground text-sm">Select an application to view details</p>
         </div>
       </div>
     );
   }
 
-  const clubExperienceLabel = getClubExperienceLabel(
-    application.club_experience,
-  );
-  const showStatusSelect =
-    !!statusOptions && statusOptions.length > 0 && !!onStatusChange;
+  const clubExperienceLabel = getClubExperienceLabel(application.club_experience);
+  const showStatusSelect = !!statusOptions && statusOptions.length > 0 && !!onStatusChange;
+
+  const vpApaIds = new Set(positionReview?.vpPositionIds ?? []);
+  const editableReviewOptions = VP_REVIEW_STATUS_LIST;
 
   return (
     <ScrollArea className="h-full">
@@ -83,9 +86,7 @@ export function ApplicationDetail({
         {/* Header */}
         <div>
           <div className="flex items-start justify-between gap-3 flex-wrap pr-8 md:pr-0">
-            <h2 className="text-xl md:text-2xl font-bold">
-              {application.full_name}
-            </h2>
+            <h2 className="text-xl md:text-2xl font-bold">{application.full_name}</h2>
             {showStatusSelect ? (
               <Select
                 value={selectedStatus ?? application.status}
@@ -187,23 +188,82 @@ export function ApplicationDetail({
         <div>
           <h3 className="text-sm font-semibold mb-3">Position Selections</h3>
           {application.position_selections.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No positions selected.
-            </p>
+            <p className="text-sm text-muted-foreground">No positions selected.</p>
           ) : (
             <div className="space-y-2">
-              {application.position_selections.map((sel) => (
-                <Card key={sel.id} className="p-3 gap-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium text-muted-foreground w-5">
-                      #{sel.priority}
-                    </span>
-                    <span className="font-medium text-sm">
-                      {sel.position_name}
-                    </span>
-                  </div>
-                </Card>
-              ))}
+              {application.position_selections.map((sel) => {
+                const apaId = selectionApaId(sel);
+                const statusAllowsVpReviewEdit = VP_REVIEW_STATUS_SET.has(
+                  sel.status,
+                );
+                const canEditSelection =
+                  !!positionReview?.canUse &&
+                  !!onPositionReviewStatusChange &&
+                  (positionReview.isPresident || vpApaIds.has(apaId)) &&
+                  statusAllowsVpReviewEdit;
+                const showReadOnlyReviewStatus = !!positionReview?.canUse && !canEditSelection;
+
+                let statusControl: React.ReactNode = null;
+                if (canEditSelection) {
+                  statusControl = (
+                    <Select
+                      value={sel.status}
+                      onValueChange={(value) => {
+                        onPositionReviewStatusChange?.(
+                          sel.id,
+                          value as ApplicationReviewStatus,
+                        );
+                      }}
+                      disabled={positionReviewUpdatingId === sel.id}
+                    >
+                      <SelectTrigger
+                        className={cn(
+                          "h-8 w-[11.5rem] shrink-0 text-xs font-medium",
+                          reviewStatusBadgeClassName(sel.status),
+                        )}
+                      >
+                        <SelectValue placeholder="Update review status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {editableReviewOptions.map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {status}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  );
+                } else if (showReadOnlyReviewStatus) {
+                  statusControl = (
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "shrink-0 text-xs font-medium max-w-[11.5rem] truncate",
+                        reviewStatusBadgeClassName(sel.status),
+                      )}
+                      title={sel.status}
+                    >
+                      {sel.status}
+                    </Badge>
+                  );
+                }
+
+                return (
+                  <Card key={sel.id} className="p-3 gap-0">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-xs font-medium text-muted-foreground w-5 shrink-0">
+                          #{sel.priority}
+                        </span>
+                        <span className="font-medium text-sm truncate">
+                          {sel.position_name}
+                        </span>
+                      </div>
+                      {statusControl}
+                    </div>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </div>
@@ -214,9 +274,7 @@ export function ApplicationDetail({
         <div>
           <h3 className="text-sm font-semibold mb-3">Application Responses</h3>
           {application.answers.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No responses submitted.
-            </p>
+            <p className="text-sm text-muted-foreground">No responses submitted.</p>
           ) : (
             <div className="space-y-6">
               <AnswerSection
@@ -225,9 +283,8 @@ export function ApplicationDetail({
                   (answer) => answer.position_names.length === 0,
                 )}
               />
-              {sortPositionSelectionsByPriority(
-                application.position_selections,
-              ).map((selection) => (
+              {sortPositionSelectionsByPriority(application.position_selections).map(
+                (selection) => (
                   <AnswerSection
                     key={selection.id}
                     heading={selection.position_name}
@@ -236,7 +293,8 @@ export function ApplicationDetail({
                     )}
                     numbered
                   />
-                ))}
+                ),
+              )}
             </div>
           )}
         </div>
@@ -251,11 +309,7 @@ interface AnswerSectionProps {
   numbered?: boolean;
 }
 
-function AnswerSection({
-  heading,
-  answers,
-  numbered = false,
-}: Readonly<AnswerSectionProps>) {
+function AnswerSection({ heading, answers, numbered = false }: Readonly<AnswerSectionProps>) {
   if (answers.length === 0) return null;
 
   return (

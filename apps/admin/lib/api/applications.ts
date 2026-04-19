@@ -5,10 +5,13 @@
  */
 
 import { createApiError } from "./error";
-import type {
-  ApplicationListItem,
-  ApplicationReviewStatus,
-} from "@uwdsc/common/types";
+import type { ApplicationListItem, ApplicationReviewStatus } from "@uwdsc/common/types";
+
+export interface PositionReviewScopeDto {
+  canUse: boolean;
+  isPresident: boolean;
+  vpPositionIds: number[];
+}
 
 export interface ApplicationsListResponse {
   applications: ApplicationListItem[];
@@ -16,6 +19,7 @@ export interface ApplicationsListResponse {
     draft: number;
     submitted: number;
   };
+  positionReview: PositionReviewScopeDto;
 }
 
 /**
@@ -33,28 +37,11 @@ export async function getAllApplications(): Promise<ApplicationsListResponse> {
   return data as ApplicationsListResponse;
 }
 
-interface ReviewApplicationsResponse {
-  applications: ApplicationListItem[];
-  scope: {
-    isPresident: boolean;
-    vpSubteamNames: string[];
-  };
-}
-
-export async function getReviewApplications(): Promise<ReviewApplicationsResponse> {
-  const response = await fetch("/api/applications/review");
-  const data = await response.json();
-
-  if (!response.ok) throw createApiError(data, response.status);
-
-  return data;
-}
-
-export async function updateApplicationReviewStatus(
-  applicationId: string,
+export async function updatePositionSelectionReviewStatus(
+  selectionId: string,
   status: ApplicationReviewStatus,
 ): Promise<void> {
-  const response = await fetch(`/api/applications/review/${applicationId}`, {
+  const response = await fetch(`/api/applications/review/${selectionId}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status }),

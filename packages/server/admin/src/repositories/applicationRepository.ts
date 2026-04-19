@@ -39,7 +39,7 @@ export class ApplicationRepository extends BaseRepository {
   }
 
   /** Headline counts for admin dashboard (includes drafts not returned by getAllApplicationsWithDetails). */
-  async countDraftAndSubmittedApplications(): Promise<{
+  async countApplications(): Promise<{
     draft: number;
     submitted: number;
   }> {
@@ -56,7 +56,7 @@ export class ApplicationRepository extends BaseRepository {
    * Get all submitted applications with position selections (incl. names) and answers (incl. question text).
    * Excludes draft applications.
    */
-  async getAllApplicationsWithDetails(): Promise<ApplicationListItem[]> {
+  async getAllApplicationsDetails(): Promise<ApplicationListItem[]> {
     // 1. Get all submitted applications
     const applications = await this.sql<Application[]>`
       SELECT
@@ -99,9 +99,7 @@ export class ApplicationRepository extends BaseRepository {
     `;
 
     // 3. Get all answers with question text
-    const answers = await this.sql<
-      (AnswerWithQuestion & { application_id: string })[]
-    >`
+    const answers = await this.sql<(AnswerWithQuestion & { application_id: string })[]>`
       SELECT
         a.id,
         a.application_id,
@@ -132,97 +130,6 @@ export class ApplicationRepository extends BaseRepository {
     return this.mapApplicationsWithDetails(applications, selections, answers);
   }
 
-  async getApplicationsByPositionIdsWithDetails(
-    positionIds: readonly number[],
-  ): Promise<ApplicationListItem[]> {
-    if (positionIds.length === 0) return [];
-
-    const applications = await this.sql<Application[]>`
-      SELECT DISTINCT
-        a.id,
-        a.profile_id,
-        a.term_id,
-        a.full_name,
-        a.major,
-        a.year_of_study,
-        a.personal_email,
-        a.location,
-        a.club_experience,
-        a.status,
-        a.submitted_at
-      FROM applications a
-      JOIN application_position_selections aps ON aps.application_id = a.id
-      WHERE a.status != 'draft'
-        AND aps.position_id IN ${this.sql(positionIds)}
-      ORDER BY a.submitted_at DESC
-    `;
-
-    if (applications.length === 0) return [];
-
-    const applicationIds = applications.map((a) => a.id);
-    const selections = await this.sql<
-      (PositionSelectionWithName & { application_id: string })[]
-    >`
-      SELECT
-        aps.id,
-        aps.application_id,
-        aps.position_id,
-        aps.priority,
-        aps.status,
-        ep.name AS position_name
-      FROM application_position_selections aps
-      JOIN application_positions_available apa ON aps.position_id = apa.id
-      JOIN exec_positions ep ON apa.position_id = ep.id
-      WHERE aps.application_id IN ${this.sql(applicationIds)}
-        AND aps.position_id IN ${this.sql(positionIds)}
-      ORDER BY aps.priority
-    `;
-
-    const answers = await this.sql<
-      (AnswerWithQuestion & { application_id: string })[]
-    >`
-      SELECT
-        a.id,
-        a.application_id,
-        a.question_id,
-        a.answer_text,
-        q.question_text,
-        COALESCE(
-          ARRAY_AGG(DISTINCT ep.name) FILTER (
-            WHERE pq.position_id IS NOT NULL
-              AND pq.position_id IN ${this.sql(positionIds)}
-          ),
-          '{}'::text[]
-        ) AS position_names
-      FROM answers a
-      JOIN questions q ON a.question_id = q.id
-      LEFT JOIN position_questions pq ON pq.question_id = a.question_id
-      LEFT JOIN application_position_selections aps
-        ON aps.application_id = a.application_id
-       AND aps.position_id = pq.position_id
-      LEFT JOIN application_positions_available apa ON apa.id = aps.position_id
-      LEFT JOIN exec_positions ep ON ep.id = apa.position_id
-      WHERE a.application_id IN ${this.sql(applicationIds)}
-        AND EXISTS (
-          SELECT 1
-          FROM position_questions pq
-          WHERE pq.question_id = a.question_id
-            AND (
-              pq.position_id IS NULL OR
-              pq.position_id IN ${this.sql(positionIds)}
-            )
-        )
-      GROUP BY
-        a.id,
-        a.application_id,
-        a.question_id,
-        a.answer_text,
-        q.question_text
-    `;
-
-    return this.mapApplicationsWithDetails(applications, selections, answers);
-  }
-
   async canAccessApplicationByPositionIds(
     applicationId: string,
     positionIds: readonly number[],
@@ -240,22 +147,39 @@ export class ApplicationRepository extends BaseRepository {
     return rows.length > 0;
   }
 
-  async updateApplicationReviewStatus(
-    applicationId: string,
+  async getPositionSelectionRow(selectionId: string): Promise<{
+    application_id: string;
+    position_id: number;
+    status: ApplicationReviewStatus;
+  } | null> {
+    const [row] = await this.sql<
+      {
+        application_id: string;
+        position_id: number;
+        status: ApplicationReviewStatus;
+      }[]
+    >`
+      SELECT application_id, position_id, status
+      FROM application_position_selections
+      WHERE id = ${selectionId}
+    `;
+    return row ?? null;
+  }
+
+  async updatePositionSelectionStatus(
+    selectionId: string,
     status: ApplicationReviewStatus,
   ): Promise<boolean> {
     const updated = await this.sql<{ id: string }[]>`
       UPDATE application_position_selections
       SET status = ${status}
-      WHERE application_id = ${applicationId}
+      WHERE id = ${selectionId}
       RETURNING id
     `;
     return updated.length > 0;
   }
 
-  async getPositionOptions(
-    scope: QuestionScope,
-  ): Promise<QuestionPositionOption[]> {
+  async getPositionOptions(scope: QuestionScope): Promise<QuestionPositionOption[]> {
     if (scope.isPresident) {
       return this.sql<QuestionPositionOption[]>`
         SELECT
@@ -284,58 +208,10 @@ export class ApplicationRepository extends BaseRepository {
     `;
   }
 
-  async getScopedQuestions(scope: QuestionScope): Promise<AppQuestion[]> {
-    if (scope.isPresident) {
-      return this.sql<AppQuestion[]>`
-        SELECT
-          pq.id AS relation_id,
-          q.id AS question_id,
-          pq.position_id,
-          ep.name AS position_name,
-          q.question_text,
-          q.type,
-          q.max_length,
-          q.placeholder,
-          q.help_text,
-          pq.sort_order,
-          q.created_at
-        FROM position_questions pq
-        JOIN questions q ON q.id = pq.question_id
-        LEFT JOIN application_positions_available apa ON apa.id = pq.position_id
-        LEFT JOIN exec_positions ep ON ep.id = apa.position_id
-        ORDER BY ep.name NULLS LAST, pq.sort_order ASC, q.created_at ASC
-      `;
-    }
-
-    if (scope.vpPositionIds.length === 0) return [];
-
-    return this.sql<AppQuestion[]>`
-      SELECT
-        pq.id AS relation_id,
-        q.id AS question_id,
-        pq.position_id,
-        ep.name AS position_name,
-        true AS can_edit,
-        q.question_text,
-        q.type,
-        q.max_length,
-        q.placeholder,
-        q.help_text,
-        pq.sort_order,
-        q.created_at
-      FROM position_questions pq
-      JOIN questions q ON q.id = pq.question_id
-      JOIN application_positions_available apa ON apa.id = pq.position_id
-      JOIN exec_positions ep ON ep.id = apa.position_id
-      WHERE pq.position_id IN ${this.sql(scope.vpPositionIds)}
-      ORDER BY ep.name ASC, pq.sort_order ASC, q.created_at ASC
-    `;
-  }
-
   async getAllQuestions(): Promise<AppQuestion[]> {
     return this.sql<AppQuestion[]>`
       SELECT
-        pq.id AS relation_id,
+        pq.id AS position_question_id,
         q.id AS question_id,
         pq.position_id,
         ep.name AS position_name,
@@ -355,20 +231,20 @@ export class ApplicationRepository extends BaseRepository {
     `;
   }
 
-  async getRelationPositionId(relationId: number): Promise<number | null> {
+  async getPositionQuestionPositionId(
+    positionQuestionId: number,
+  ): Promise<number | null> {
     const rows = await this.sql<{ position_id: number | null }[]>`
       SELECT position_id
       FROM position_questions
-      WHERE id = ${relationId}
+      WHERE id = ${positionQuestionId}
       LIMIT 1
     `;
     return rows[0]?.position_id ?? null;
   }
 
   async createQuestion(data: QuestionUpsertInput): Promise<AppQuestion> {
-    const createdQuestion = await this.sql<
-      { id: number; created_at: string }[]
-    >`
+    const createdQuestion = await this.sql<{ id: number; created_at: string }[]>`
       INSERT INTO questions (
         question_text,
         type,
@@ -387,18 +263,19 @@ export class ApplicationRepository extends BaseRepository {
     const question = createdQuestion[0];
     if (!question) throw new Error("Failed to create question");
 
-    const relation = await this.sql<{ id: number }[]>`
+    const insertedPq = await this.sql<{ id: number }[]>`
       INSERT INTO position_questions (position_id, question_id, sort_order)
       VALUES (${data.position_id}, ${question.id}, ${data.sort_order})
       RETURNING id
     `;
-    const relationId = relation[0]?.id;
-    if (!relationId)
-      throw new Error("Failed to create position question relation");
+    const positionQuestionId = insertedPq[0]?.id;
+    if (!positionQuestionId) {
+      throw new Error("Failed to create position_questions row");
+    }
 
     const full = await this.sql<AppQuestion[]>`
       SELECT
-        pq.id AS relation_id,
+        pq.id AS position_question_id,
         q.id AS question_id,
         pq.position_id,
         ep.name AS position_name,
@@ -413,7 +290,7 @@ export class ApplicationRepository extends BaseRepository {
       JOIN questions q ON q.id = pq.question_id
       LEFT JOIN application_positions_available apa ON apa.id = pq.position_id
       LEFT JOIN exec_positions ep ON ep.id = apa.position_id
-      WHERE pq.id = ${relationId}
+      WHERE pq.id = ${positionQuestionId}
       LIMIT 1
     `;
     const record = full[0];
@@ -422,17 +299,17 @@ export class ApplicationRepository extends BaseRepository {
   }
 
   async updateQuestion(
-    relationId: number,
+    positionQuestionId: number,
     data: QuestionUpsertInput,
   ): Promise<AppQuestion | null> {
-    const relationRows = await this.sql<{ question_id: number }[]>`
+    const pqRows = await this.sql<{ question_id: number }[]>`
       SELECT question_id
       FROM position_questions
-      WHERE id = ${relationId}
+      WHERE id = ${positionQuestionId}
       LIMIT 1
     `;
-    const relation = relationRows[0];
-    if (!relation) return null;
+    const pqRow = pqRows[0];
+    if (!pqRow) return null;
 
     await this.sql`
       UPDATE questions
@@ -442,7 +319,7 @@ export class ApplicationRepository extends BaseRepository {
         max_length = ${data.max_length ?? null},
         placeholder = ${data.placeholder ?? null},
         help_text = ${data.help_text ?? null}
-      WHERE id = ${relation.question_id}
+      WHERE id = ${pqRow.question_id}
     `;
 
     await this.sql`
@@ -450,12 +327,12 @@ export class ApplicationRepository extends BaseRepository {
       SET
         position_id = ${data.position_id},
         sort_order = ${data.sort_order}
-      WHERE id = ${relationId}
+      WHERE id = ${positionQuestionId}
     `;
 
     const full = await this.sql<AppQuestion[]>`
       SELECT
-        pq.id AS relation_id,
+        pq.id AS position_question_id,
         q.id AS question_id,
         pq.position_id,
         ep.name AS position_name,
@@ -470,25 +347,25 @@ export class ApplicationRepository extends BaseRepository {
       JOIN questions q ON q.id = pq.question_id
       LEFT JOIN application_positions_available apa ON apa.id = pq.position_id
       LEFT JOIN exec_positions ep ON ep.id = apa.position_id
-      WHERE pq.id = ${relationId}
+      WHERE pq.id = ${positionQuestionId}
       LIMIT 1
     `;
     return full[0] ?? null;
   }
 
-  async deleteQuestion(relationId: number): Promise<boolean> {
-    const relationRows = await this.sql<{ question_id: number }[]>`
+  async deleteQuestion(positionQuestionId: number): Promise<boolean> {
+    const pqRows = await this.sql<{ question_id: number }[]>`
       SELECT question_id
       FROM position_questions
-      WHERE id = ${relationId}
+      WHERE id = ${positionQuestionId}
       LIMIT 1
     `;
-    const relation = relationRows[0];
-    if (!relation) return false;
+    const pqRow = pqRows[0];
+    if (!pqRow) return false;
 
     const deleted = await this.sql`
       DELETE FROM questions
-      WHERE id = ${relation.question_id}
+      WHERE id = ${pqRow.question_id}
       RETURNING id
     `;
     return deleted.length > 0;

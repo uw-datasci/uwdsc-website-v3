@@ -14,7 +14,7 @@ export function Intro({ onStartOnboarding, isLoading }: IntroProps) {
         <h2 className="text-2xl font-bold">
           Welcome to the Executive Onboarding
         </h2>
-        <CardDescription className="text-base text-gray-300 leading-relaxed">
+        <CardDescription className="text-base leading-relaxed text-muted-foreground">
           New execs: We&apos;re so excited to have you! We&apos;re sure
           you&apos;ll have a great time and make a huge impact to the club!
           Returning execs: We&apos;re so glad to have you back! We&apos;re
@@ -28,7 +28,7 @@ export function Intro({ onStartOnboarding, isLoading }: IntroProps) {
           onClick={onStartOnboarding}
           disabled={isLoading}
           size="lg"
-          className="bg-primary text-white hover:bg-slate-800 transform scale-105"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 transform scale-105"
         >
           Start Onboarding →
         </Button>

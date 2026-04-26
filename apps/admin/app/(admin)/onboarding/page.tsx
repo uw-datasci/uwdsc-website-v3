@@ -1,19 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { Loader2, MoveLeft, MoveRight, User } from "lucide-react";
-import { Button, Card, CardHeader, CardTitle, CardContent } from "@uwdsc/ui";
+import { Loader2, Save } from "lucide-react";
+import { Button, Card, CardContent, CardDescription } from "@uwdsc/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import {getAllExecPositions, getActiveTerm, submitOnboardingForm} from "@/lib/api/onboarding";
-import { getCurrentUser } from "@/lib/api/auth";
 import {
-  Intro,
-  ExecProfile,
-  General,
-  Submitted,
-} from "@/components/onboarding/steps";
+  getAllExecPositions,
+  getActiveTerm,
+  submitOnboardingForm,
+} from "@/lib/api/onboarding";
+import { getCurrentUser } from "@/lib/api/auth";
+import { ExecProfile, General, Submitted } from "@/components/onboarding/steps";
 import {
   OnboardingFormValues,
   OnboardingDefaultValues,
@@ -22,46 +20,14 @@ import {
 import { useForm } from "react-hook-form";
 import { ExecPosition, Term } from "@uwdsc/common/types";
 
-const STEP_FIELDS: Record<number, (keyof OnboardingFormValues)[]> = {
-  1: [
-    "fullname",
-    "email",
-    "term_type",
-    "in_waterloo",
-    "role_id",
-    "consent_website",
-  ],
-  2: ["discord", "consent_instagram", "datasci_competency"],
-};
-
-const STEP_NAMES = [
-  "Exec Onboarding",
-  "Exec Profile",
-  "Socials & Background",
-] as const;
-
-const slideVariants = {
-  enter: (direction: number) => ({
-    x: direction > 0 ? 1000 : -1000,
-    opacity: 0,
-  }),
-  center: {
-    x: 0,
-    opacity: 1,
-  },
-  exit: (direction: number) => ({
-    x: direction > 0 ? -1000 : 1000,
-    opacity: 0,
-  }),
-};
-
 export default function OnboardingPage() {
   const [currentTerm, setCurrentTerm] = useState<Term | null>(null);
-  const [currentStep, setCurrentStep] = useState<number>(0);
-  const [direction, setDirection] = useState<number>(1);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submittedName, setSubmittedName] = useState<string | null>(null);
+  const [headshotFile, setHeadshotFile] = useState<File | null>(null);
   const [positions, setPositions] = useState<ExecPosition[]>([]);
 
   const form = useForm<OnboardingFormValues>({
@@ -114,7 +80,6 @@ export default function OnboardingPage() {
         setCurrentTerm(term);
         setPositions(positionsData);
         prefillFromUser(currentUser);
-        setCurrentStep(0);
       } catch (err) {
         console.error("Failed to fetch application data:", err);
         setFetchError(
@@ -127,107 +92,45 @@ export default function OnboardingPage() {
     fetchInitialData();
   }, [prefillFromUser]);
 
-
-
-  const goToStep = useCallback(
-    (step: number) => {
-      setDirection(step > currentStep ? 1 : -1);
-      setCurrentStep(step);
-    },
-    [currentStep],
-  );
-
-  const handleNext = useCallback(async () => {
-    const fieldsToValidate = STEP_FIELDS[currentStep];
-    if (fieldsToValidate) {
-      const valid = await form.trigger(fieldsToValidate);
-      if (!valid) return;
-    }
-    setIsLoading(true);
-    try {
-      if (currentStep === 2) {
-        if (!currentTerm) {
-          throw new Error("No active term found");
-        }
-        const values = form.getValues();
-        await submitOnboardingForm({
-          ...values,
-          term_id: currentTerm.id,
-          instagram: values.instagram ?? null,
-          headshot_url: values.headshot_url ?? null,
-          anything_else: values.anything_else ?? null,
-        });
-        goToStep(currentStep + 1); // go to confirmation page
-      } else {
-        goToStep(currentStep + 1); // just move forward, no API call
+  const onSubmit = useCallback(
+    async (values: OnboardingFormValues) => {
+      if (!currentTerm) {
+        setSubmitError("No active term found");
+        return;
       }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentStep, goToStep, form, currentTerm]);
 
-  const handlePrevious = () => {
-    goToStep(currentStep - 1);
-  };
+      setIsSubmitting(true);
+      setSubmitError(null);
 
-  const renderButton = () => {
-    const isLastStep = currentStep === 2;
-
-    let buttonClassName = "hover:scale-105 ";
-    if (isLastStep) {
-      buttonClassName +=
-        "bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:opacity-90 ";
-    } else {
-      buttonClassName +=
-        "bg-secondary-foreground text-slate-800 hover:bg-secondary-foreground/80";
-    }
-
-    return (
-      <Button
-        size="lg"
-        onClick={handleNext}
-        disabled={isLoading}
-        className={buttonClassName}
-      >
-        {isLoading ? (
-          <>
-            <Loader2 className="size-4 animate-spin" />
-            {isLastStep ? "Submitting..." : "Saving..."}
-          </>
-        ) : (
-          <>
-            {isLastStep ? "Submit" : "Next"}
-            <MoveRight className="size-4" />
-          </>
-        )}
-      </Button>
-    );
-  };
-
-  const renderStep = () => {
-    switch (currentStep) {
-      case 0:
-        return (
-          <Intro
-            onStartOnboarding={handleNext}
-            isLoading={isLoading}
-          />
+      try {
+        await submitOnboardingForm(
+          {
+            ...values,
+            term_id: currentTerm.id,
+            instagram: values.instagram ?? null,
+            headshot_url: values.headshot_url ?? null,
+            anything_else: values.anything_else ?? null,
+          },
+          headshotFile,
+          values.fullname,
         );
-      case 1:
-        return <ExecProfile form={form} execPositions={positions} />;
-      case 2:
-        return <General form={form} />;
-      default:
-        return null;
-    }
-  };
+        setSubmittedName(values.fullname);
+      } catch (err) {
+        console.error(err);
+        setSubmitError(
+          err instanceof Error ? err.message : "Failed to save onboarding",
+        );
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [currentTerm, headshotFile],
+  );
 
   if (isFetching) {
     return (
       <div className="container mx-auto flex min-h-[50vh] items-center justify-center px-4">
-        <Loader2 className="size-8 animate-spin text-blue-400" />
+        <Loader2 className="size-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -235,86 +138,77 @@ export default function OnboardingPage() {
   if (fetchError) {
     return (
       <div className="container mx-auto flex min-h-[50vh] flex-col items-center justify-center px-4 text-center">
-        <p className="text-lg text-red-400">
+        <p className="text-lg text-destructive">
           {fetchError ?? "No active application period"}
         </p>
       </div>
     );
   }
 
-  if (currentStep === 3) {
-    return <Submitted name={form.getValues("fullname")} />;
+  if (submittedName) {
+    return <Submitted name={submittedName} />;
   }
 
   return (
-    <div className="mt-8 px-4 h-[calc(100vh-130px)] ">
-      {/* Header */}
-      <div className="mb-4 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-bold mb-1">W26 Onboarding Form</h1>
+    <div className="min-h-[calc(100vh-130px)] bg-background px-4 py-8">
+      <div className="mx-auto max-w-5xl space-y-6">
+        <div className="space-y-2">
+          <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            Onboarding
+          </p>
+          <h1 className="text-3xl font-bold tracking-tight">
+            W26 Onboarding Form
+          </h1>
+          <CardDescription>
+            Complete the form below and save once at the bottom. Your headshot
+            will be uploaded once you have <b>submitted</b> and <b>paid</b>!
+          </CardDescription>
         </div>
-      </div>
 
-      {/* Application Cards */}
-      <Card
-        className={`mx-auto min-h-[calc(100vh-300px)] max-w-4xl shadow-md backdrop-blur-md border border-white/10 ${currentStep === 0 ? "bg-gradient-to-r from-[rgba(80,0,120,0.85)] to-[rgba(8,88,150,0.85)]" : ""}`}
-      >
-        <CardHeader
-          className={`${currentStep === 0 ? "" : "bg-gradient-to-r from-[rgba(80,0,120,0.85)] to-[rgba(59,130,246,0.75)]"} rounded-t-xl -mt-6 py-4}`}
-        >
-          {/* Step Title with Icon */}
-          {currentStep > 0 && STEP_NAMES[currentStep] && (
-            <div className="flex justify-between items-center">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <ExecProfile
+            form={form}
+            execPositions={positions}
+            headshotFile={headshotFile}
+            onHeadshotFileChange={setHeadshotFile}
+          />
+
+          <General form={form} />
+
+          <Card className="border-border bg-card shadow-sm">
+            <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <CardTitle className="flex items-center gap-2 pt-2 text-2xl">
-                  <div className="mr-2 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--grey4)]">
-                    <User className="h-5 w-5" fill="currentColor" />
-                  </div>
-                  {STEP_NAMES[currentStep]}
-                </CardTitle>
+                <p className="font-medium">Ready to save your onboarding?</p>
               </div>
-            </div>
-          )}
-        </CardHeader>
 
-        <CardContent>
-          <div className="space-y-6 overflow-visible">
-            <AnimatePresence mode="wait" custom={direction}>
-              <motion.div
-                key={currentStep}
-                custom={direction}
-                variants={slideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{
-                  x: { type: "spring", stiffness: 300, damping: 30 },
-                  opacity: { duration: 0.2 },
-                }}
-              >
-                {renderStep()}
-              </motion.div>
-            </AnimatePresence>
+              <div className="flex flex-col items-start gap-3 sm:items-end">
+                {submitError && (
+                  <p className="text-sm text-destructive">{submitError}</p>
+                )}
 
-            {currentStep !== 0 && currentStep !== 3 && (
-              <div className="flex justify-between pt-4">
                 <Button
+                  type="submit"
                   size="lg"
-                  variant="outline"
-                  onClick={handlePrevious}
-                  disabled={currentStep === -1}
-                  className="hover:scale-105"
+                  disabled={isSubmitting}
+                  className="gap-2"
                 >
-                  <MoveLeft className="size-4" />
-                  Previous
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="size-4" />
+                      Save
+                    </>
+                  )}
                 </Button>
-
-                {renderButton()}
               </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </form>
+      </div>
     </div>
   );
 }

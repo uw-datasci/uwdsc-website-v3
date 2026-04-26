@@ -2,7 +2,6 @@ import { ApiResponse } from "@uwdsc/common/utils";
 import { onboardingService } from "@uwdsc/admin";
 import { withAuth } from "@/guards/withAuth";
 
-
 export const POST = withAuth(async (request, _context, user) => {
   try {
     const body = await request.json();

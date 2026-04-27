@@ -42,15 +42,16 @@ export function parseMembershipReceipt(body: string): MembershipReceiptParse {
   const isApproved = /Transaction Approved/i.test(body);
 
   const toWithAngle =
-    /To:\s*.+?<([a-z0-9._%+-]+@uwaterloo\.ca)>/i.exec(body)?.[1] ?? null;
+    /To:\s*[^<\r\n]*<([a-z0-9._%+-]+@uwaterloo\.ca)>/i.exec(body)?.[1] ?? null;
   const toPlain =
     /To:\s*([a-z0-9._%+-]+@uwaterloo\.ca)\b/i.exec(body)?.[1] ?? null;
   const toRecipientEmail = (toWithAngle ?? toPlain)?.toLowerCase() ?? null;
 
   const custIdLine = /Cust ID:[^\n]*/i.exec(body)?.[0] ?? "";
-  const receiptEmailAfterPlus = /\+([a-z0-9._%+-]+@uwaterloo\.ca)/i.exec(
-    custIdLine,
-  )?.[1];
+  const receiptEmailAfterPlus =
+    /\+([a-z0-9._%-]+(?:\+[a-z0-9._%-]+)*@uwaterloo\.ca)/i.exec(
+      custIdLine,
+    )?.[1];
   const receiptEmailPlain =
     /Cust ID:\s*([a-z][a-z0-9._%+-]*@uwaterloo\.ca)/i.exec(body)?.[1] ?? null;
   const receiptEmail =

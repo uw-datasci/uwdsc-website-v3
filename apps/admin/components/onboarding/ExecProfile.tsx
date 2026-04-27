@@ -71,6 +71,7 @@ export function ExecProfile({
                   label: "Full Name",
                   required: true,
                 })}
+                disabled={true}
               />
 
               <FormField
@@ -141,7 +142,7 @@ export function ExecProfile({
                 })),
                 label: "What is your Executive Position for this term?",
                 required: true,
-                disabled: isLocked,
+                disabled: true,
                 triggerClassName: "w-full",
                 contentClassName:
                   "h-48 overflow-y-auto bg-popover text-popover-foreground",

@@ -9,6 +9,10 @@ import { createApiError } from "./error";
 import { LoginData, Profile } from "@uwdsc/common/types";
 import { Session, User } from "@supabase/supabase-js";
 
+export type CurrentAdminUser = Profile & {
+  current_role_id?: number | null;
+};
+
 interface LoginResponse {
   success: boolean;
   user?: User;
@@ -80,5 +84,5 @@ export async function getCurrentUser(): Promise<Profile | null> {
 
   if (!response.ok) throw createApiError(data, response.status);
 
-  return data;
+  return data as CurrentAdminUser | null;
 }

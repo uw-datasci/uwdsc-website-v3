@@ -11,7 +11,7 @@ import {
   getOnboardingSubmission,
   submitOnboardingForm,
 } from "@/lib/api/onboarding";
-import { getCurrentUser } from "@/lib/api/auth";
+import { CurrentAdminUser, getCurrentUser } from "@/lib/api/auth";
 import { ExecProfile, General } from "@/components/onboarding";
 import {
   OnboardingFormValues,
@@ -44,6 +44,7 @@ export default function OnboardingPage() {
         first_name?: string | null;
         last_name?: string | null;
         email?: string | null;
+        current_role_id?: number | null;
       } | null,
     ) => {
       if (!user) return;
@@ -55,6 +56,10 @@ export default function OnboardingPage() {
 
       if (!form.getValues("fullname") && fullName) {
         form.setValue("fullname", fullName, { shouldDirty: false });
+      }
+
+      if ((form.getValues("role_id") ?? 0) === 0 && user.current_role_id) {
+        form.setValue("role_id", user.current_role_id, { shouldDirty: false });
       }
 
       // Keep personal email requirement: don't autofill Waterloo email into gmail field.
@@ -109,19 +114,21 @@ export default function OnboardingPage() {
           getActiveTerm(),
         ]);
 
+        const typedCurrentUser = currentUser as CurrentAdminUser | null;
+
         setCurrentTerm(term);
         setPositions(positionsData);
 
         const existingSubmission = await getOnboardingSubmission(term.id);
 
         if (existingSubmission) {
-          form.reset(mapSubmissionToForm(existingSubmission, currentUser), {
+          form.reset(mapSubmissionToForm(existingSubmission, typedCurrentUser), {
             keepDirty: false,
           });
           setHasSubmission(true);
           setIsEditing(false);
         } else {
-          prefillFromUser(currentUser);
+          prefillFromUser(typedCurrentUser);
           setHasSubmission(false);
           setIsEditing(true);
         }

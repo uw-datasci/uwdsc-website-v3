@@ -1,6 +1,7 @@
 import { ApiResponse } from "@uwdsc/common/utils";
 import { withAuth } from "@/guards/withAuth";
 import { profileService } from "@uwdsc/core";
+import { onboardingService } from "@uwdsc/admin";
 
 /**
  * GET /api/auth/user
@@ -9,7 +10,10 @@ import { profileService } from "@uwdsc/core";
 export const GET = withAuth(async (_request, _context, user) => {
   try {
     const role = user.app_metadata?.role ?? null;
-    const profile = await profileService.getProfileByUserId(user.id);
+    const [profile, currentRoleId] = await Promise.all([
+      profileService.getProfileByUserId(user.id),
+      onboardingService.getCurrentExecRoleId(user.id),
+    ]);
 
     const data = {
       id: user.id,
@@ -19,6 +23,7 @@ export const GET = withAuth(async (_request, _context, user) => {
       last_name: profile?.last_name,
       wat_iam: profile?.wat_iam,
       faculty: profile?.faculty,
+      current_role_id: currentRoleId,
     };
     return ApiResponse.ok(data);
   } catch (error) {

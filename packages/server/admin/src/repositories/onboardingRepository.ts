@@ -8,6 +8,18 @@ import type {
 
 
 export class OnboardingRepository extends BaseRepository {
+  async getCurrentExecRoleId(profile_id: string): Promise<number | null> {
+    const result = await this.sql<{ position_id: number }[]>`
+      SELECT position_id
+      FROM public.exec_team
+      WHERE profile_id = ${profile_id}
+      ORDER BY updated_at DESC, created_at DESC
+      LIMIT 1
+    `;
+
+    return result[0]?.position_id ?? null;
+  }
+
   /* Get all exec positions for onboarding application form dropdown */
   async getExecPositions(): Promise<ExecPosition[]> {
     const result = await this.sql<ExecPosition[]>`

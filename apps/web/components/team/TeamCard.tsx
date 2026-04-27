@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { ExecMember } from "@uwdsc/common/types";
+import { Card, CardHeader, CardTitle, CardDescription } from "@uwdsc/ui";
 
 interface TeamCardProps {
   readonly member: ExecMember;
@@ -7,20 +8,33 @@ interface TeamCardProps {
 
 export default function TeamCard({ member }: TeamCardProps) {
   return (
-    <div className="w-full rounded-2xl border border-gray-500/50 bg-background px-6 pb-8 pt-7 text-center transition-all duration-300 hover:border-muted-foreground/80 sm:w-60 xl:w-70 xl:rounded-3xl">
-      <Image
-        src={`${member.photo_url}?v=${member.updated_at}`}
-        alt={member.name}
-        width={160}
-        height={160}
-        className="mb-6 inline-block aspect-square w-32 rounded-lg object-cover xl:w-40"
-      />
-      <h4 className="mb-2.5 text-xl font-semibold text-foreground xl:text-2xl">
-        {member.name}
-      </h4>
-      <p className="font-medium text-muted-foreground xl:text-lg">
-        {member.position}
-      </p>
-    </div>
+     <Card
+      className="group relative w-full max-w-xs overflow-hidden border-0 bg-linear-to-br from-gray-900
+      to-black p-0 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20"
+    >
+      {/* Member Image */}
+      <div className="relative h-80 w-full overflow-hidden">
+        <Image
+          src={member.photo_url}
+          alt={member.name}
+          fill
+          priority
+          className="object-cover transition-transform duration-300 group-hover:scale-110"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        />
+        {/* Overlay gradient */}
+        <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent" />
+      </div>
+
+      {/* Member Info */}
+      <CardHeader className="relative z-10 -mt-16 bg-linear-to-t from-black to-transparent px-6 pb-4 pt-16">
+        <CardTitle className="text-xl font-bold text-white">
+          {member.name}
+        </CardTitle>
+        <CardDescription className="text-sm font-medium text-gray-300">
+          {member.position}
+        </CardDescription>
+      </CardHeader>
+    </Card>
   );
 }

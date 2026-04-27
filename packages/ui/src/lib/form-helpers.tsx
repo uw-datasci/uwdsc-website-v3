@@ -53,6 +53,7 @@ interface SelectFieldOptions {
   options: SelectOption[];
   label?: string;
   required?: boolean;
+  disabled?: boolean;
   triggerClassName?: string;
   contentClassName?: string;
   itemClassName?: string;
@@ -160,6 +161,7 @@ export function renderSelectField(opts: SelectFieldOptions) {
     options,
     label,
     required = false,
+    disabled = false,
     triggerClassName,
     contentClassName,
     itemClassName,
@@ -177,6 +179,7 @@ export function renderSelectField(opts: SelectFieldOptions) {
         <Select
           onValueChange={field.onChange}
           value={field.value === "" ? undefined : field.value}
+          disabled={disabled}
         >
           <FormControl>
             <SelectTrigger className={triggerClassName}>

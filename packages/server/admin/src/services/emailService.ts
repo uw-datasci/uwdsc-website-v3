@@ -25,7 +25,7 @@ class EmailService {
     this.resend = key ? new Resend(key) : null;
     this.from =
       process.env.RESEND_FROM_EMAIL ??
-      "UW Data Science Club <noreply@contact.uwdatascience.ca>";
+      "UW Data Science Club <noreply@mail.uwdatascience.ca>";
 
     this.campaignSegmentId = process.env.RESEND_CAMPAIGN_SEGMENT_ID ?? "";
     if (!this.campaignSegmentId) {

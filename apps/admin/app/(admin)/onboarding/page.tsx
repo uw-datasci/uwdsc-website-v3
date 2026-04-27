@@ -1,24 +1,25 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Loader2, Save } from "lucide-react";
+import { Loader2, Lock, Pencil, Save } from "lucide-react";
 import { Button, Card, CardContent, CardDescription } from "@uwdsc/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import {
   getAllExecPositions,
   getActiveTerm,
+  getOnboardingSubmission,
   submitOnboardingForm,
 } from "@/lib/api/onboarding";
 import { getCurrentUser } from "@/lib/api/auth";
-import { ExecProfile, General, Submitted } from "@/components/onboarding/steps";
+import { ExecProfile, General } from "@/components/onboarding";
 import {
   OnboardingFormValues,
   OnboardingDefaultValues,
   onboardingSchema,
 } from "@/lib/schemas/onboarding";
 import { useForm } from "react-hook-form";
-import { ExecPosition, Term } from "@uwdsc/common/types";
+import { ExecPosition, Onboarding, Term } from "@uwdsc/common/types";
 
 export default function OnboardingPage() {
   const [currentTerm, setCurrentTerm] = useState<Term | null>(null);
@@ -26,7 +27,8 @@ export default function OnboardingPage() {
   const [isFetching, setIsFetching] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submittedName, setSubmittedName] = useState<string | null>(null);
+  const [hasSubmission, setHasSubmission] = useState(false);
+  const [isEditing, setIsEditing] = useState(true);
   const [headshotFile, setHeadshotFile] = useState<File | null>(null);
   const [positions, setPositions] = useState<ExecPosition[]>([]);
 
@@ -67,6 +69,36 @@ export default function OnboardingPage() {
     [form],
   );
 
+  const mapSubmissionToForm = useCallback(
+    (
+      submission: Onboarding,
+      user: {
+        first_name?: string | null;
+        last_name?: string | null;
+      } | null,
+    ): OnboardingFormValues => {
+      const firstName = user?.first_name?.trim() ?? "";
+      const lastName = user?.last_name?.trim() ?? "";
+      const fallbackName = `${firstName} ${lastName}`.trim();
+
+      return {
+        fullname: fallbackName,
+        email: submission.email,
+        role_id: submission.role_id,
+        in_waterloo: submission.in_waterloo,
+        term_type: submission.term_type,
+        instagram: submission.instagram ?? "",
+        headshot_url: submission.headshot_url ?? "",
+        consent_website: submission.consent_website,
+        consent_instagram: submission.consent_instagram,
+        discord: submission.discord,
+        datasci_competency: submission.datasci_competency,
+        anything_else: submission.anything_else ?? "",
+      };
+    },
+    [],
+  );
+
   useEffect(() => {
     async function fetchInitialData() {
       setIsFetching(true);
@@ -79,7 +111,20 @@ export default function OnboardingPage() {
 
         setCurrentTerm(term);
         setPositions(positionsData);
-        prefillFromUser(currentUser);
+
+        const existingSubmission = await getOnboardingSubmission(term.id);
+
+        if (existingSubmission) {
+          form.reset(mapSubmissionToForm(existingSubmission, currentUser), {
+            keepDirty: false,
+          });
+          setHasSubmission(true);
+          setIsEditing(false);
+        } else {
+          prefillFromUser(currentUser);
+          setHasSubmission(false);
+          setIsEditing(true);
+        }
       } catch (err) {
         console.error("Failed to fetch application data:", err);
         setFetchError(
@@ -90,7 +135,7 @@ export default function OnboardingPage() {
       }
     }
     fetchInitialData();
-  }, [prefillFromUser]);
+  }, [form, mapSubmissionToForm, prefillFromUser]);
 
   const onSubmit = useCallback(
     async (values: OnboardingFormValues) => {
@@ -114,7 +159,9 @@ export default function OnboardingPage() {
           headshotFile,
           values.fullname,
         );
-        setSubmittedName(values.fullname);
+        setHasSubmission(true);
+        setIsEditing(false);
+        setHeadshotFile(null);
       } catch (err) {
         console.error(err);
         setSubmitError(
@@ -126,6 +173,8 @@ export default function OnboardingPage() {
     },
     [currentTerm, headshotFile],
   );
+
+  const isFormLocked = hasSubmission && !isEditing;
 
   if (isFetching) {
     return (
@@ -145,10 +194,6 @@ export default function OnboardingPage() {
     );
   }
 
-  if (submittedName) {
-    return <Submitted name={submittedName} />;
-  }
-
   return (
     <div className="min-h-[calc(100vh-130px)] bg-background px-4 py-8">
       <div className="mx-auto max-w-5xl space-y-6">
@@ -156,29 +201,61 @@ export default function OnboardingPage() {
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
             Onboarding
           </p>
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight">
             W26 Onboarding Form
+            {isFormLocked && (
+              <Lock
+                className="size-6 text-muted-foreground"
+                aria-label="Form is locked"
+              />
+            )}
+            {!isFormLocked && hasSubmission && isEditing && (
+              <span className="text-lg sm:text-xl font-medium text-primary">
+                (editing)
+              </span>
+            )}
           </h1>
           <CardDescription>
             Complete the form below and save once at the bottom. Your headshot
-            will be uploaded once you have <b>submitted</b> and <b>paid</b>!
+            will be uploaded once you have <b>saved</b> and <b>paid</b>!
           </CardDescription>
         </div>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <ExecProfile
-            form={form}
-            execPositions={positions}
-            headshotFile={headshotFile}
-            onHeadshotFileChange={setHeadshotFile}
-          />
+          <fieldset
+            key={isFormLocked ? "locked" : "editing"}
+            disabled={isFormLocked}
+            className="space-y-6 disabled:opacity-90"
+          >
+            <ExecProfile
+              key={isFormLocked ? "exec-profile-locked" : "exec-profile-editing"}
+              form={form}
+              execPositions={positions}
+              headshotFile={headshotFile}
+              onHeadshotFileChange={setHeadshotFile}
+              isLocked={isFormLocked}
+            />
 
-          <General form={form} />
+            <General form={form} />
+          </fieldset>
 
           <Card className="border-border bg-card shadow-sm">
             <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="font-medium">Ready to save your onboarding?</p>
+                <p className="font-medium">
+                  {isFormLocked
+                    ? "Your onboarding has been saved"
+                    : "Ready to save your onboarding?"}
+                </p>
+                {!isFormLocked && hasSubmission && (
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                    You are in{" "}
+                    <span className="font-semibold text-primary">
+                      editing mode
+                    </span>
+                    . Remember to click Save to update your info.
+                  </p>
+                )}
               </div>
 
               <div className="flex flex-col items-start gap-3 sm:items-end">
@@ -186,24 +263,41 @@ export default function OnboardingPage() {
                   <p className="text-sm text-destructive">{submitError}</p>
                 )}
 
-                <Button
-                  type="submit"
-                  size="lg"
-                  disabled={isSubmitting}
-                  className="gap-2"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="size-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="size-4" />
-                      Save
-                    </>
-                  )}
-                </Button>
+                {isFormLocked ? (
+                  <Button
+                    type="button"
+                    size="lg"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                      setIsEditing(true);
+                    }}
+                    className="gap-2 border border-primary text-primary bg-background dark:bg-card hover:bg-primary/20 dark:hover:bg-primary/20"
+                  >
+                    <Pencil className="size-4" />
+                    Edit
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    size="lg"
+                    disabled={isSubmitting}
+                    className="gap-2"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="size-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="size-4" />
+                        Save
+                      </>
+                    )}
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>

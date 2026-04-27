@@ -31,6 +31,19 @@ export async function getActiveTerm(): Promise<Term> {
   return data;
 }
 
+export async function getOnboardingSubmission(
+  termId: string,
+): Promise<Onboarding | null> {
+  const response = await fetch(
+    `/api/onboarding/submission?termId=${encodeURIComponent(termId)}`,
+  );
+  const data = await response.json();
+
+  if (!response.ok) throw createApiError(data, response.status);
+
+  return data;
+}
+
 export async function submitOnboardingForm(
   payload: OnboardingData,
   headshotFile: File | null,
@@ -39,12 +52,14 @@ export async function submitOnboardingForm(
   let headshotUrl = payload.headshot_url ?? null;
 
   if (payload.consent_website) {
-    if (!headshotFile) {
+    if (!headshotFile && !headshotUrl) {
       throw new Error("Headshot file is required when consent_website is true");
     }
 
-    const uploadResult = await uploadHeadshot(headshotFile, fullName);
-    headshotUrl = uploadResult.url;
+    if (headshotFile) {
+      const uploadResult = await uploadHeadshot(headshotFile, fullName);
+      headshotUrl = uploadResult.url;
+    }
   } else {
     headshotUrl = null;
   }

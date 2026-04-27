@@ -37,6 +37,23 @@ class OnboardingService {
   }
 
   /**
+   * Get onboarding application with form values
+   */
+  async getSubmission(
+    profile_id: string,
+    term_id: string,
+  ): Promise<Onboarding | null> {
+    try {
+      return await this.repository.getSubmission(profile_id, term_id);
+    } catch (error) {
+      throw new ApiError(
+        `Failed to get onboarding submission: ${(error as Error).message}`,
+        500,
+      );
+    }
+  }
+
+  /**
    * Create onboarding application with form values
    */
   async saveSubmission(

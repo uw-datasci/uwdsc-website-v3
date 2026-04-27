@@ -36,6 +36,21 @@ export class OnboardingRepository extends BaseRepository {
         return result[0] ?? null;
     }
 
+    async getSubmission(
+      profile_id: string,
+      term_id: string,
+    ): Promise<Onboarding | null> {
+      const result = await this.sql<Onboarding[]>`
+        SELECT *
+        FROM public.exec_form_submissions
+        WHERE profile_id = ${profile_id}
+          AND term_id = ${term_id}
+        LIMIT 1
+      `;
+
+      return result[0] ?? null;
+    }
+
     async saveSubmission(
       data: OnboardingData,
       profile_id: string,

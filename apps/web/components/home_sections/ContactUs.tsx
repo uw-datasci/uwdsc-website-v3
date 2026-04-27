@@ -42,17 +42,28 @@ export default function ContactUs() {
         </p>
       </div>
 
-      <div className="flex flex-col justify-center items-center gap-4">
+      <div className="flex flex-col justify-center items-center gap-6">
         {CONTACT_BUTTONS.map((button) => (
-          <Button
+          <div
             key={button.id}
-            variant="default"
-            size="lg"
-            className="text-sm px-3 py-1"
+            className="rounded-full bg-linear-to-tr from-pink-500 to-indigo-700 p-px"
           >
-            {button.icon}
-            {button.label}
-          </Button>
+            <Button
+              asChild
+              variant="ghost"
+              size="lg"
+              className="bg-background px-4 py-6 text-sm"
+            >
+              <a
+                href={button.href}
+                target={button.id !== "email" ? "_blank" : undefined}
+                rel={button.id !== "email" ? "noreferrer" : undefined}
+              >
+                {button.icon}
+                {button.label}
+              </a>
+            </Button>
+          </div>
         ))}
       </div>
     </SectionWrapper>

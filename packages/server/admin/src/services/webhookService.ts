@@ -10,7 +10,7 @@ type GetReceivedEmailContentsResult =
 
 class WebhookService {
   /** Inbound address for membership receipt processing (Resend receiving / MX). */
-  private readonly membershipInboundEmail = "membership@contact.uwdatascience.ca";
+  private readonly membershipInboundEmail = "membership@mail.uwdatascience.ca";
   private readonly resend: Resend | null;
 
   constructor() {

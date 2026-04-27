@@ -228,15 +228,15 @@ export function ApplicationDetail({
               {sortPositionSelectionsByPriority(
                 application.position_selections,
               ).map((selection) => (
-                  <AnswerSection
-                    key={selection.id}
-                    heading={selection.position_name}
-                    answers={application.answers.filter((answer) =>
-                      answer.position_names.includes(selection.position_name),
-                    )}
-                    numbered
-                  />
-                ))}
+                <AnswerSection
+                  key={selection.id}
+                  heading={selection.position_name}
+                  answers={application.answers.filter((answer) =>
+                    answer.position_names.includes(selection.position_name),
+                  )}
+                  numbered
+                />
+              ))}
             </div>
           )}
         </div>

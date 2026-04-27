@@ -173,15 +173,15 @@ export function ReviewDetail({
               {sortPositionSelectionsByPriority(
                 application.position_selections,
               ).map((selection) => (
-                  <AnswersGroup
-                    key={selection.id}
-                    title={selection.position_name}
-                    answers={application.answers.filter((answer) =>
-                      answer.position_names.includes(selection.position_name),
-                    )}
-                    numbered
-                  />
-                ))}
+                <AnswersGroup
+                  key={selection.id}
+                  title={selection.position_name}
+                  answers={application.answers.filter((answer) =>
+                    answer.position_names.includes(selection.position_name),
+                  )}
+                  numbered
+                />
+              ))}
             </div>
           )}
         </div>

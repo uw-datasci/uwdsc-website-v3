@@ -73,8 +73,10 @@ export function General({ form }: GeneralProps) {
                         ...field,
                         value: field.value ?? "",
                       },
-                    })}
-              />)}
+                    })
+                  }
+                />
+              )}
             </CardContent>
           </Card>
 
@@ -125,16 +127,16 @@ export function General({ form }: GeneralProps) {
               name="anything_else"
               render={({ field }) =>
                 renderTextAreaField({
-                placeholder: "",
-                label: "Anything else we should know?",
-              })({
-                    field: {
-                       ...field,
-                        value: field.value ?? "",
-                    },
-                  })
-                }
-              />
+                  placeholder: "",
+                  label: "Anything else we should know?",
+                })({
+                  field: {
+                    ...field,
+                    value: field.value ?? "",
+                  },
+                })
+              }
+            />
           </CardContent>
         </Card>
       </Form>

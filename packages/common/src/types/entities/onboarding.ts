@@ -1,4 +1,4 @@
-import { TermType } from "../shared"; 
+import { TermType } from "../shared";
 // ==========================================
 //  Row-level types (1:1 with DB tables)
 // ==========================================
@@ -27,4 +27,4 @@ export interface Onboarding {
 export type OnboardingData = Omit<
   Onboarding,
   "id" | "profile_id" | "submitted_at" | "created_at" | "updated_at"
->
+>;

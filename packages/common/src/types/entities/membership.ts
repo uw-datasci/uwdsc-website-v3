@@ -7,7 +7,9 @@ export interface MarkAsPaidData {
   verifier: string | null;
 }
 
-export type UpdateMemberData = Partial<Omit<CompleteProfileData, "heard_from_where">>;
+export type UpdateMemberData = Partial<
+  Omit<CompleteProfileData, "heard_from_where">
+>;
 
 export interface Member {
   id: string;

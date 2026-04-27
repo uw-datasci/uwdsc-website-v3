@@ -1,6 +1,22 @@
 import type { PassportProfileEditValues } from "@/lib/schemas/profile";
-import { Button, Card, CardContent, CardHeader, CardTitle, Spinner } from "@uwdsc/ui";
-import { Calendar, Check, GraduationCap, Hash, Mail, Pencil, User, X } from "lucide-react";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Spinner,
+} from "@uwdsc/ui";
+import {
+  Calendar,
+  Check,
+  GraduationCap,
+  Hash,
+  Mail,
+  Pencil,
+  User,
+  X,
+} from "lucide-react";
 import type { UseFormReturn } from "react-hook-form";
 import { ProfileEditForm } from "./ProfileEditForm";
 
@@ -89,7 +105,10 @@ export function PassportProfile({
         ) : (
           <div className="divide-y divide-border/60">
             {readRows.map(({ label, Icon, value }) => (
-              <div key={label} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+              <div
+                key={label}
+                className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
+              >
                 <div className="size-8 rounded-md bg-muted flex items-center justify-center text-muted-foreground shrink-0">
                   <Icon className="size-4" />
                 </div>

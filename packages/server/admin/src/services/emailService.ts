@@ -48,7 +48,9 @@ class EmailService {
     if (params.to.length === 0) return;
 
     if (!this.resend) {
-      console.warn("[EmailService] Transactional send skipped: RESEND_API_KEY not set");
+      console.warn(
+        "[EmailService] Transactional send skipped: RESEND_API_KEY not set",
+      );
       return;
     }
 
@@ -76,7 +78,8 @@ class EmailService {
     subject: string;
     html: string;
   }): Promise<{ id?: string }> {
-    if (!this.resend) throw new ApiError("Email service is not configured", 500);
+    if (!this.resend)
+      throw new ApiError("Email service is not configured", 500);
 
     const { data, error } = await this.resend.broadcasts.create({
       segmentId: params.segmentId,
@@ -89,7 +92,8 @@ class EmailService {
 
     if (error) {
       console.error("Resend broadcast error:", error);
-      const message = this.resendErrorMessage(error) ?? "Failed to send campaign broadcast";
+      const message =
+        this.resendErrorMessage(error) ?? "Failed to send campaign broadcast";
       throw new ApiError(message, 500, "Failed to send campaign");
     }
 
@@ -111,7 +115,10 @@ class EmailService {
   /**
    * Ensures each address exists as a Resend contact and is in the campaign segment.
    */
-  private async ensureRecipientsInSegment(emails: string[], segmentId: string): Promise<void> {
+  private async ensureRecipientsInSegment(
+    emails: string[],
+    segmentId: string,
+  ): Promise<void> {
     if (!this.resend) {
       throw new ApiError("Email service is not configured", 500);
     }
@@ -175,12 +182,18 @@ class EmailService {
       );
     }
 
-    if (!this.resend) throw new ApiError("Email service is not configured", 500);
+    if (!this.resend)
+      throw new ApiError("Email service is not configured", 500);
 
-    const baseHtml = await render(createElement(CampaignEmail, { subject, body }));
+    const baseHtml = await render(
+      createElement(CampaignEmail, { subject, body }),
+    );
     const html = appendMarketingUnsubscribeFooter(baseHtml);
 
-    await this.ensureRecipientsInSegment(recipientEmails, this.campaignSegmentId);
+    await this.ensureRecipientsInSegment(
+      recipientEmails,
+      this.campaignSegmentId,
+    );
     try {
       const { id } = await this.sendMarketingBroadcast({
         segmentId: this.campaignSegmentId,

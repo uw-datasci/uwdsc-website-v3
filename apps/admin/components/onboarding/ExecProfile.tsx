@@ -134,29 +134,29 @@ export function ExecProfile({
               control={form.control}
               name="role_id"
               render={({ field }) =>
-              renderSelectField({
-                placeholder: "Select your executive position",
-                options: execPositions.map((pos) => ({
-                  value: String(pos.id),
-                  label: pos.name,
-                })),
-                label: "What is your Executive Position for this term?",
-                required: true,
-                disabled: true,
-                triggerClassName: "w-full",
-                contentClassName:
-                  "h-48 overflow-y-auto bg-popover text-popover-foreground",
-                contentPosition: "popper",
-                itemClassName:
-                  "transition-colors hover:bg-accent/70 focus:bg-accent focus:text-accent-foreground",
-              })({
-                field: {
-                  ...field,
-                  value: String(field.value),
-                  onChange: (v: string) => field.onChange(Number(v)),
-                },
-              })
-            }
+                renderSelectField({
+                  placeholder: "Select your executive position",
+                  options: execPositions.map((pos) => ({
+                    value: String(pos.id),
+                    label: pos.name,
+                  })),
+                  label: "What is your Executive Position for this term?",
+                  required: true,
+                  disabled: true,
+                  triggerClassName: "w-full",
+                  contentClassName:
+                    "h-48 overflow-y-auto bg-popover text-popover-foreground",
+                  contentPosition: "popper",
+                  itemClassName:
+                    "transition-colors hover:bg-accent/70 focus:bg-accent focus:text-accent-foreground",
+                })({
+                  field: {
+                    ...field,
+                    value: String(field.value),
+                    onChange: (v: string) => field.onChange(Number(v)),
+                  },
+                })
+              }
             />
           </CardContent>
         </Card>
@@ -183,7 +183,9 @@ export function ExecProfile({
               <div className="space-y-3">
                 <label
                   className={`flex h-40 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/40 transition-colors ${
-                    isLocked ? "cursor-not-allowed opacity-70" : "cursor-pointer hover:bg-muted/80"
+                    isLocked
+                      ? "cursor-not-allowed opacity-70"
+                      : "cursor-pointer hover:bg-muted/80"
                   }`}
                 >
                   <input

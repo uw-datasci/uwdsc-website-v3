@@ -15,7 +15,10 @@ export const GET = withAuth(async (request, _context, user) => {
     return ApiResponse.ok(submission);
   } catch (error: unknown) {
     console.error("Error fetching onboarding submission:", error);
-    return ApiResponse.serverError(error, "Failed to fetch onboarding submission");
+    return ApiResponse.serverError(
+      error,
+      "Failed to fetch onboarding submission",
+    );
   }
 });
 

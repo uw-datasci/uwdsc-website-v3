@@ -2,7 +2,6 @@ import { ApiResponse } from "@uwdsc/common/utils";
 import { withAuth } from "@/guards/withAuth";
 import { onboardingService } from "@uwdsc/admin";
 
-
 export const GET = withAuth(async () => {
   try {
     const data = await onboardingService.getActiveTerm();

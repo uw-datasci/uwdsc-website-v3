@@ -37,7 +37,9 @@ export const passportProfileEditSchema = completeProfileSchema.pick({
   term: true,
 });
 
-export type PassportProfileEditValues = z.infer<typeof passportProfileEditSchema>;
+export type PassportProfileEditValues = z.infer<
+  typeof passportProfileEditSchema
+>;
 
 export const passportProfileEditDefaultValues: PassportProfileEditValues = {
   first_name: "",

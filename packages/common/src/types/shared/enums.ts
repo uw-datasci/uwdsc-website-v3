@@ -34,4 +34,4 @@ export type ApplicationReviewStatus =
 
 export type MembershipFilter = "all" | "paid" | "paid-mathsoc";
 
-export type TermType = "study" | "coop" ; 
+export type TermType = "study" | "coop";

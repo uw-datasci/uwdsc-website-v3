@@ -37,10 +37,7 @@ export function SelectionOutcomeEdit({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
         {PRESIDENT_REVIEW_ONLY_STATUS_LIST.map((status) => (
-          <DropdownMenuItem
-            key={status}
-            onClick={() => onSelect(status)}
-          >
+          <DropdownMenuItem key={status} onClick={() => onSelect(status)}>
             {status}
           </DropdownMenuItem>
         ))}

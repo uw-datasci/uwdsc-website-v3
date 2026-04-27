@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createSupabaseMiddlewareClient } from "@uwdsc/db";
-import { isProfileComplete, withAuth, withAnon, withProtected } from "./lib/middleware";
+import {
+  isProfileComplete,
+  withAuth,
+  withAnon,
+  withProtected,
+} from "./lib/middleware";
 
 const AUTH_ROUTES = new Set(["/login", "/register"]);
 const PROTECTED_ROUTES = new Set(["/events", "/passport"]);

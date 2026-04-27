@@ -22,7 +22,9 @@ interface MembershipReceiptProps {
   success: boolean;
 }
 
-export function MembershipReceipt({ success }: Readonly<MembershipReceiptProps>): ReactElement {
+export function MembershipReceipt({
+  success,
+}: Readonly<MembershipReceiptProps>): ReactElement {
   const subject = getMembershipReceiptSubject(success);
 
   const bodyTextStyle = {
@@ -39,7 +41,8 @@ export function MembershipReceipt({ success }: Readonly<MembershipReceiptProps>)
       <Body
         style={{
           backgroundColor: "#f6f9fc",
-          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+          fontFamily:
+            "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         }}
       >
         <Container
@@ -80,24 +83,28 @@ export function MembershipReceipt({ success }: Readonly<MembershipReceiptProps>)
             {success ? (
               <>
                 <Text style={bodyTextStyle}>
-                  <strong>Welcome to the club!</strong> We've received your WUSA payment and
-                  your <strong>UW Data Science Club</strong> membership is now active for this
-                  term.
+                  <strong>Welcome to the club!</strong> We've received your WUSA
+                  payment and your <strong>UW Data Science Club</strong>{" "}
+                  membership is now active for this term.
                 </Text>
                 <Text style={{ ...bodyTextStyle, marginBottom: 0 }}>
-                  Thanks for joining us — we're glad you're here. Keep an eye on our events and
-                  Discord; we'll see you soon.
+                  Thanks for joining us — we're glad you're here. Keep an eye on
+                  our events and Discord; we'll see you soon.
                 </Text>
               </>
             ) : (
               <>
                 <Text style={bodyTextStyle}>
-                  We weren't able to confirm your membership from this message automatically.
+                  We weren't able to confirm your membership from this message
+                  automatically.
                 </Text>
                 <Text style={{ ...bodyTextStyle, marginBottom: 0 }}>
-                  Please <strong>try forwarding your receipt again</strong> in a little while,
-                  or email us at{" "}
-                  <Link href="mailto:contact@uwdatascience.ca" style={{ color: "#6366f1" }}>
+                  Please <strong>try forwarding your receipt again</strong> in a
+                  little while, or email us at{" "}
+                  <Link
+                    href="mailto:contact@uwdatascience.ca"
+                    style={{ color: "#6366f1" }}
+                  >
                     contact@uwdatascience.ca
                   </Link>{" "}
                   and we'll help you sort it out.

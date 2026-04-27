@@ -122,9 +122,12 @@ export default function OnboardingPage() {
         const existingSubmission = await getOnboardingSubmission(term.id);
 
         if (existingSubmission) {
-          form.reset(mapSubmissionToForm(existingSubmission, typedCurrentUser), {
-            keepDirty: false,
-          });
+          form.reset(
+            mapSubmissionToForm(existingSubmission, typedCurrentUser),
+            {
+              keepDirty: false,
+            },
+          );
           setHasSubmission(true);
           setIsEditing(false);
         } else {
@@ -235,7 +238,9 @@ export default function OnboardingPage() {
             className="space-y-6 disabled:opacity-90"
           >
             <ExecProfile
-              key={isFormLocked ? "exec-profile-locked" : "exec-profile-editing"}
+              key={
+                isFormLocked ? "exec-profile-locked" : "exec-profile-editing"
+              }
               form={form}
               execPositions={positions}
               headshotFile={headshotFile}

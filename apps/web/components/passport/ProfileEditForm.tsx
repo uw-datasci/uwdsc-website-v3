@@ -19,19 +19,28 @@ export function ProfileEditForm({ form, onSubmit }: ProfileEditFormProps) {
         <FormField
           control={form.control}
           name="first_name"
-          render={renderTextField({ label: "First Name", placeholder: "First name" })}
+          render={renderTextField({
+            label: "First Name",
+            placeholder: "First name",
+          })}
         />
 
         <FormField
           control={form.control}
           name="last_name"
-          render={renderTextField({ label: "Last Name", placeholder: "Last name" })}
+          render={renderTextField({
+            label: "Last Name",
+            placeholder: "Last name",
+          })}
         />
 
         <FormField
           control={form.control}
           name="wat_iam"
-          render={renderTextField({ label: "WatIAM Username", placeholder: "e.g. j3smith" })}
+          render={renderTextField({
+            label: "WatIAM Username",
+            placeholder: "e.g. j3smith",
+          })}
         />
 
         <FormField

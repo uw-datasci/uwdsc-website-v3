@@ -29,8 +29,14 @@ import { cn } from "./utils";
 // ---------------------------------------------------------------------------
 
 // Allow optional field values so helpers work with forms that have optional fields (e.g. member_ideas?: string)
-type StringFieldProps = ControllerRenderProps<Record<string, string | undefined>, string>;
-type BooleanFieldProps = ControllerRenderProps<Record<string, boolean | undefined>, string>;
+type StringFieldProps = ControllerRenderProps<
+  Record<string, string | undefined>,
+  string
+>;
+type BooleanFieldProps = ControllerRenderProps<
+  Record<string, boolean | undefined>,
+  string
+>;
 
 type StringArrayFieldProps = ControllerRenderProps<
   Record<string, string[] | undefined>,
@@ -118,7 +124,11 @@ interface StringArrayFieldRenderProps {
   readonly field: StringArrayFieldProps;
 }
 
-function toggleStringInArray(list: string[], item: string, selected: boolean): string[] {
+function toggleStringInArray(
+  list: string[],
+  item: string,
+  selected: boolean,
+): string[] {
   if (selected) {
     return list.includes(item) ? list : [...list, item];
   }
@@ -144,9 +154,16 @@ export function renderTextField(opts: TextFieldOptions) {
           </FormLabel>
         )}
         <FormControl>
-          <Input {...field} {...inputProps} placeholder={placeholder} className={className} />
+          <Input
+            {...field}
+            {...inputProps}
+            placeholder={placeholder}
+            className={className}
+          />
         </FormControl>
-        {description != null && <FormDescription>{description}</FormDescription>}
+        {description != null && (
+          <FormDescription>{description}</FormDescription>
+        )}
         <FormMessage />
       </FormItem>
     );
@@ -186,7 +203,10 @@ export function renderSelectField(opts: SelectFieldOptions) {
               <SelectValue placeholder={placeholder} />
             </SelectTrigger>
           </FormControl>
-          <SelectContent className={contentClassName} position={contentPosition}>
+          <SelectContent
+            className={contentClassName}
+            position={contentPosition}
+          >
             {options.map((option) => {
               const value = typeof option === "string" ? option : option.value;
               const label = typeof option === "string" ? option : option.label;
@@ -218,7 +238,9 @@ export function renderTextAreaField(opts: TextAreaFieldOptions) {
 
   function TextAreaFieldRender({ field }: StringFieldRenderProps) {
     const desc =
-      typeof description === "function" ? description(field.value ?? "") : description;
+      typeof description === "function"
+        ? description(field.value ?? "")
+        : description;
     return (
       <FormItem>
         {label != null && (
@@ -304,7 +326,10 @@ export function renderScaleField(opts: ScaleFieldOptions) {
             className="flex items-center gap-4"
           >
             {labels.map((scaleLabel, index) => (
-              <FormItem key={index} className="flex flex-col items-center space-y-1 space-x-0">
+              <FormItem
+                key={index}
+                className="flex flex-col items-center space-y-1 space-x-0"
+              >
                 <FormControl>
                   <RadioGroupItem value={String(index)} />
                 </FormControl>
@@ -336,7 +361,8 @@ export function renderCheckboxField(opts: CheckboxFieldOptions) {
 
   function CheckboxFieldRender({ field }: BooleanFieldRenderProps) {
     const checked = field.value ?? false;
-    const desc = typeof description === "function" ? description(checked) : description;
+    const desc =
+      typeof description === "function" ? description(checked) : description;
 
     return (
       <FormItem className={containerClassName}>
@@ -355,7 +381,9 @@ export function renderCheckboxField(opts: CheckboxFieldOptions) {
             </FormLabel>
           )}
           {desc != null && (
-            <FormDescription className={descriptionClassName}>{desc}</FormDescription>
+            <FormDescription className={descriptionClassName}>
+              {desc}
+            </FormDescription>
           )}
         </div>
         <FormMessage />
@@ -366,7 +394,9 @@ export function renderCheckboxField(opts: CheckboxFieldOptions) {
   return CheckboxFieldRender;
 }
 
-export function renderMultiSelectDropdownField(opts: MultiSelectDropdownFieldOptions) {
+export function renderMultiSelectDropdownField(
+  opts: MultiSelectDropdownFieldOptions,
+) {
   const {
     label,
     required = false,
@@ -377,7 +407,9 @@ export function renderMultiSelectDropdownField(opts: MultiSelectDropdownFieldOpt
     contentClassName,
   } = opts;
 
-  function MultiSelectDropdownFieldRender({ field }: StringArrayFieldRenderProps) {
+  function MultiSelectDropdownFieldRender({
+    field,
+  }: StringArrayFieldRenderProps) {
     const value = field.value ?? [];
     return (
       <FormItem>
@@ -405,7 +437,9 @@ export function renderMultiSelectDropdownField(opts: MultiSelectDropdownFieldOpt
                 )}
               >
                 <span className="min-w-0 flex-1 truncate">
-                  {value.length ? value.map(formatOption).join(", ") : emptyPlaceholder}
+                  {value.length
+                    ? value.map(formatOption).join(", ")
+                    : emptyPlaceholder}
                 </span>
                 <ChevronDown className="size-4 shrink-0 opacity-50" />
               </Button>
@@ -431,7 +465,9 @@ export function renderMultiSelectDropdownField(opts: MultiSelectDropdownFieldOpt
                   <Checkbox
                     checked={value.includes(option)}
                     onCheckedChange={(v) =>
-                      field.onChange(toggleStringInArray(value, option, v === true))
+                      field.onChange(
+                        toggleStringInArray(value, option, v === true),
+                      )
                     }
                     className="shrink-0"
                   />

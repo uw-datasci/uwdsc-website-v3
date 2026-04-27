@@ -1,5 +1,11 @@
 import { OnboardingRepository } from "../repositories/onboardingRepository";
-import { ApiError, ExecPosition, Term, Onboarding, OnboardingData} from "@uwdsc/common/types";
+import {
+  ApiError,
+  ExecPosition,
+  Term,
+  Onboarding,
+  OnboardingData,
+} from "@uwdsc/common/types";
 
 class OnboardingService {
   private readonly repository: OnboardingRepository;
@@ -39,7 +45,7 @@ class OnboardingService {
   /**
    * Get active term for onboarding application form
    */
-  async getActiveTerm() : Promise<Term | null> {  
+  async getActiveTerm(): Promise<Term | null> {
     try {
       return await this.repository.getActiveTerm();
     } catch (error) {
@@ -73,7 +79,7 @@ class OnboardingService {
   async saveSubmission(
     data: OnboardingData,
     profile_id: string,
-  ): Promise<Onboarding|null> {
+  ): Promise<Onboarding | null> {
     try {
       return await this.repository.saveSubmission(data, profile_id);
     } catch (error) {

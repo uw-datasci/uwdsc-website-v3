@@ -24,7 +24,10 @@ class MembershipService {
     try {
       return await this.repository.getMembershipStats();
     } catch (error) {
-      throw new ApiError(`Failed to get membership stats: ${(error as Error).message}`, 500);
+      throw new ApiError(
+        `Failed to get membership stats: ${(error as Error).message}`,
+        500,
+      );
     }
   }
 
@@ -38,11 +41,15 @@ class MembershipService {
     try {
       const result = await this.repository.markAsPaid(profileId, data);
 
-      if (!result) return { success: false, error: "Failed to create membership record" };
+      if (!result)
+        return { success: false, error: "Failed to create membership record" };
 
       return { success: true };
     } catch (error) {
-      throw new ApiError(`Failed to mark member as paid: ${(error as Error).message}`, 500);
+      throw new ApiError(
+        `Failed to mark member as paid: ${(error as Error).message}`,
+        500,
+      );
     }
   }
 
@@ -60,7 +67,10 @@ class MembershipService {
       if (!body) throw new ApiError("Email body is missing", 400);
 
       const parsed = parseMembershipReceipt(body);
-      recipientEmails = dedupeRecipients(parsed.toRecipientEmail, parsed.receiptEmail);
+      recipientEmails = dedupeRecipients(
+        parsed.toRecipientEmail,
+        parsed.receiptEmail,
+      );
       throwIfParseFailed(parsed);
 
       const { receiptEmail, transactionDateText } = parsed;
@@ -68,7 +78,8 @@ class MembershipService {
       assertReceiptWithinActiveTerm(transactionDateText, termStartDate);
 
       const profile = await profileService.getProfileByEmail(receiptEmail);
-      if (!profile) throw new ApiError("No profile found for receipt email", 404);
+      if (!profile)
+        throw new ApiError("No profile found for receipt email", 404);
 
       const markResult = await this.markMemberAsPaid(profile.id, {
         payment_method: "online",
@@ -78,19 +89,32 @@ class MembershipService {
 
       if (!markResult.success) {
         console.error("Failed to mark member as paid");
-        throw new ApiError(markResult.error ?? "Failed to mark member as paid", 400);
+        throw new ApiError(
+          markResult.error ?? "Failed to mark member as paid",
+          400,
+        );
       }
 
       if (recipientEmails.length > 0) {
         await emailService
           .sendMembershipReceiptNotice(recipientEmails, { success: true })
-          .catch((e) => console.error("[MembershipService] Success notice email failed:", e));
+          .catch((e) =>
+            console.error(
+              "[MembershipService] Success notice email failed:",
+              e,
+            ),
+          );
       }
     } catch (error) {
       if (recipientEmails.length > 0) {
         await emailService
           .sendMembershipReceiptNotice(recipientEmails, { success: false })
-          .catch((e) => console.error("[MembershipService] Failure notice email failed:", e));
+          .catch((e) =>
+            console.error(
+              "[MembershipService] Failure notice email failed:",
+              e,
+            ),
+          );
       }
 
       if (error instanceof ApiError) throw error;

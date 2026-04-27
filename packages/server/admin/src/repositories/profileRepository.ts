@@ -25,7 +25,9 @@ export class ProfileRepository extends BaseRepository {
         `;
       }
 
-      const limitCondition = options?.searchQuery ? this.sql`LIMIT 10` : this.sql``;
+      const limitCondition = options?.searchQuery
+        ? this.sql`LIMIT 10`
+        : this.sql``;
 
       const result = await this.sql<Member[]>`
       SELECT

@@ -8,7 +8,6 @@ import type {
 //  Row-level types (1:1 with DB tables)
 // ==========================================
 
-
 /** Mirrors application_positions_available table */
 export interface ApplicationPositionAvailable {
   id: string;

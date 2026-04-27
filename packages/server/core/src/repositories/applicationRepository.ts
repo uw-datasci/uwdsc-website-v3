@@ -183,7 +183,10 @@ export class ApplicationRepository extends BaseRepository {
     }
   }
 
-  async upsertAnswers(applicationId: string, answers: AnswerInput[]): Promise<void> {
+  async upsertAnswers(
+    applicationId: string,
+    answers: AnswerInput[],
+  ): Promise<void> {
     await this.sql`
       DELETE FROM answers
       WHERE application_id = ${applicationId}

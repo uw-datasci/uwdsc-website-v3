@@ -67,7 +67,9 @@ export function NewExecTeamPanel({ team, loading }: NewExecTeamPanelProps) {
                 <TableCell className={`font-medium ${bodyCell}`}>
                   {member.full_name}
                 </TableCell>
-                <TableCell className={bodyCell}>{member.position_name}</TableCell>
+                <TableCell className={bodyCell}>
+                  {member.position_name}
+                </TableCell>
                 <TableCell className={`text-muted-foreground ${bodyCell}`}>
                   {member.subteam_name ?? "N/A"}
                 </TableCell>

@@ -35,9 +35,7 @@ export class MembershipRepository extends BaseRepository {
    * @param data - Payment data (method, location, verifier)
    */
   async markAsPaid(profileId: string, data: MarkAsPaidData): Promise<boolean> {
-    const verifiedAtSql = data.verifier
-      ? this.sql`NOW()`
-      : this.sql`NULL`;
+    const verifiedAtSql = data.verifier ? this.sql`NOW()` : this.sql`NULL`;
 
     try {
       const result = await this.sql`

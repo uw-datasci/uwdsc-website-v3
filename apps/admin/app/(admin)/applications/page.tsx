@@ -1,13 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import {
-  Card,
-  Sheet,
-  SheetContent,
-  SheetTitle,
-  useIsMobile,
-} from "@uwdsc/ui";
+import { Card, Sheet, SheetContent, SheetTitle, useIsMobile } from "@uwdsc/ui";
 
 import {
   ApplicationList,

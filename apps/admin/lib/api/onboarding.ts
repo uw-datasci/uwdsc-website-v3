@@ -6,7 +6,12 @@
 
 import { createApiError } from "./error";
 import { uploadHeadshot } from "./headshot";
-import type {ExecPosition, Term, Onboarding, OnboardingData} from "@uwdsc/common/types";
+import type {
+  ExecPosition,
+  Term,
+  Onboarding,
+  OnboardingData,
+} from "@uwdsc/common/types";
 
 /**
  * Get all submitted applications with full details

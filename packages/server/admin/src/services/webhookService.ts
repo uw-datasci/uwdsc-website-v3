@@ -51,7 +51,8 @@ class WebhookService {
       };
     }
 
-    const { data, error } = await this.resend.emails.receiving.get(receivingEmailId);
+    const { data, error } =
+      await this.resend.emails.receiving.get(receivingEmailId);
 
     if (error || !data) {
       const message =

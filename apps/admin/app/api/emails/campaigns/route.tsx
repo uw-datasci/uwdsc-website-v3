@@ -23,7 +23,8 @@ export const POST = withAuth(async (request) => {
     }
 
     const { subject, recipientRoles, body: emailBody } = validationResult.data;
-    const resolvedEmails = await profileService.getEmailsByRoles(recipientRoles);
+    const resolvedEmails =
+      await profileService.getEmailsByRoles(recipientRoles);
     if (resolvedEmails.length === 0) {
       return ApiResponse.badRequest(
         "No recipients found for the selected audiences",
@@ -48,7 +49,10 @@ export const POST = withAuth(async (request) => {
   } catch (error: unknown) {
     if (error instanceof ApiError) {
       if (error.statusCode === 400) {
-        return ApiResponse.badRequest(error.message, error.code ?? "Validation error");
+        return ApiResponse.badRequest(
+          error.message,
+          error.code ?? "Validation error",
+        );
       }
       return ApiResponse.json(
         { error: error.code ?? "Error", message: error.message },

@@ -6,7 +6,6 @@ import type {
   OnboardingData,
 } from "@uwdsc/common/types";
 
-
 export class OnboardingRepository extends BaseRepository {
   async getCurrentExecRoleId(profile_id: string): Promise<number | null> {
     const result = await this.sql<{ position_id: number }[]>`
@@ -30,10 +29,10 @@ export class OnboardingRepository extends BaseRepository {
         ORDER BY name
     `;
     return result;
-    }
+  }
 
-    async getActiveTerm() : Promise<Term | null> {
-        const result = await this.sql<Term[]>`
+  async getActiveTerm(): Promise<Term | null> {
+    const result = await this.sql<Term[]>`
         SELECT
             id,
             code,
@@ -45,14 +44,14 @@ export class OnboardingRepository extends BaseRepository {
         ORDER BY created_at DESC
         LIMIT 1
         `;
-        return result[0] ?? null;
-    }
+    return result[0] ?? null;
+  }
 
-    async getSubmission(
-      profile_id: string,
-      term_id: string,
-    ): Promise<Onboarding | null> {
-      const result = await this.sql<Onboarding[]>`
+  async getSubmission(
+    profile_id: string,
+    term_id: string,
+  ): Promise<Onboarding | null> {
+    const result = await this.sql<Onboarding[]>`
         SELECT *
         FROM public.exec_form_submissions
         WHERE profile_id = ${profile_id}
@@ -60,14 +59,14 @@ export class OnboardingRepository extends BaseRepository {
         LIMIT 1
       `;
 
-      return result[0] ?? null;
-    }
+    return result[0] ?? null;
+  }
 
-    async saveSubmission(
-      data: OnboardingData,
-      profile_id: string,
-    ): Promise<Onboarding | null> {
-        const result = await this.sql<Onboarding[]>`
+  async saveSubmission(
+    data: OnboardingData,
+    profile_id: string,
+  ): Promise<Onboarding | null> {
+    const result = await this.sql<Onboarding[]>`
         INSERT INTO public.exec_form_submissions (
         profile_id,
         term_id,
@@ -122,8 +121,8 @@ export class OnboardingRepository extends BaseRepository {
         updated_at = NOW()
       WHERE profile_id = ${profile_id}::uuid
     `;
-      return result[0] ?? null;
-    }
+    return result[0] ?? null;
+  }
 }
 
 export const onboardingService = new OnboardingRepository();

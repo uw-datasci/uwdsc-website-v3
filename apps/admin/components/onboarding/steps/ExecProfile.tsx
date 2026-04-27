@@ -30,16 +30,16 @@ interface ExecProfileProps {
   readonly execPositions: ExecPosition[];
   readonly headshotFile: File | null;
   readonly onHeadshotFileChange: (file: File | null) => void;
-}
   readonly isLocked?: boolean;
+}
 
 export function ExecProfile({
   form,
   execPositions,
   headshotFile,
   onHeadshotFileChange,
-}: ExecProfileProps) {
   isLocked = false,
+}: ExecProfileProps) {
   const consentWebsite = useWatch({
     control: form.control,
     name: "consent_website",
@@ -133,29 +133,29 @@ export function ExecProfile({
               control={form.control}
               name="role_id"
               render={({ field }) =>
-              renderSelectField({
-                placeholder: "Select your executive position",
-                options: execPositions.map((pos) => ({
-                  value: String(pos.id),
-                  label: pos.name,
-                })),
-                label: "What is your Executive Position for this term?",
-                required: true,
-                disabled: isLocked,
-                triggerClassName: "w-full",
-                contentClassName:
-                  "h-48 overflow-y-auto bg-popover text-popover-foreground",
-                contentPosition: "popper",
-                itemClassName:
-                  "transition-colors hover:bg-accent/70 focus:bg-accent focus:text-accent-foreground",
-              })({
-                field: {
-                  ...field,
-                  value: String(field.value),
-                  onChange: (v: string) => field.onChange(Number(v)),
-                },
-              })
-            }
+                renderSelectField({
+                  placeholder: "Select your executive position",
+                  options: execPositions.map((pos) => ({
+                    value: String(pos.id),
+                    label: pos.name,
+                  })),
+                  label: "What is your Executive Position for this term?",
+                  required: true,
+                  disabled: isLocked,
+                  triggerClassName: "w-full",
+                  contentClassName:
+                    "h-48 overflow-y-auto bg-popover text-popover-foreground",
+                  contentPosition: "popper",
+                  itemClassName:
+                    "transition-colors hover:bg-accent/70 focus:bg-accent focus:text-accent-foreground",
+                })({
+                  field: {
+                    ...field,
+                    value: String(field.value),
+                    onChange: (v: string) => field.onChange(Number(v)),
+                  },
+                })
+              }
             />
           </CardContent>
         </Card>

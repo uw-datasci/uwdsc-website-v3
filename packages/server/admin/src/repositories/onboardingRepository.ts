@@ -6,6 +6,8 @@ import type {
   OnboardingData,
 } from "@uwdsc/common/types";
 
+const TEAM_DEFAULT_HEADSHOT_URL = "team.png";
+
 export class OnboardingRepository extends BaseRepository {
   async getCurrentExecRoleId(profile_id: string): Promise<number | null> {
     const result = await this.sql<{ position_id: number }[]>`
@@ -66,6 +68,10 @@ export class OnboardingRepository extends BaseRepository {
     data: OnboardingData,
     profile_id: string,
   ): Promise<Onboarding | null> {
+    const resolvedHeadshotUrl = data.consent_website
+      ? (data.headshot_url ?? null)
+      : TEAM_DEFAULT_HEADSHOT_URL;
+
     const result = await this.sql<Onboarding[]>`
         INSERT INTO public.exec_form_submissions (
         profile_id,
@@ -89,7 +95,7 @@ export class OnboardingRepository extends BaseRepository {
         ${data.in_waterloo ?? null},
         ${data.term_type}::term_type_enum,
         ${data.instagram ?? null},
-        ${data.headshot_url ?? null},
+        ${resolvedHeadshotUrl},
         ${data.consent_website},
         ${data.consent_instagram},
         ${data.discord},
@@ -116,7 +122,7 @@ export class OnboardingRepository extends BaseRepository {
     await this.sql`
       UPDATE public.exec_team
       SET
-        photo_url = COALESCE(NULLIF(${data.headshot_url ?? null}::text, ''), photo_url),
+        photo_url = COALESCE(NULLIF(${resolvedHeadshotUrl}::text, ''), photo_url),
         instagram = ${data.instagram}::text,
         updated_at = NOW()
       WHERE profile_id = ${profile_id}::uuid

@@ -86,6 +86,15 @@ export class OnboardingRepository extends BaseRepository {
         updated_at = NOW()
         RETURNING *
     `;
+
+    await this.sql`
+      UPDATE public.exec_team
+      SET
+        photo_url = COALESCE(NULLIF(${data.headshot_url ?? null}::text, ''), photo_url),
+        instagram = ${data.instagram}::text,
+        updated_at = NOW()
+      WHERE profile_id = ${profile_id}::uuid
+    `;
       return result[0] ?? null;
     }
 }

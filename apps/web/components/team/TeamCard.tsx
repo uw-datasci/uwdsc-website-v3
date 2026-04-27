@@ -15,7 +15,7 @@ export default function TeamCard({ member }: TeamCardProps) {
       {/* Member Image */}
       <div className="relative h-80 w-full overflow-hidden">
         <Image
-          src={member.photo_url}
+          src={`${member.photo_url}?v=${member.updated_at}`}
           alt={member.name}
           fill
           priority

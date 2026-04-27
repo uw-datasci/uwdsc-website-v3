@@ -4,6 +4,7 @@ export type ExecMember = {
   position: string;
   photo_url: string;
   instagram: string | null;
+  updated_at: string | null;
 };
 
 export type Subteam = {

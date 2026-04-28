@@ -31,6 +31,7 @@ Builds on Fall 2025 with new features across the main site and CxC.
 - **Applications table (`/admin/applications`)**: Sortable, filterable (email search), pagination (10–50 rows); columns: name, email, university, gender, reviews, date; row click → details modal (basic info, education, links, questions, team, resume, MLH).
 - **Review system (`/admin/applications/review`, PR #51)**: VPs and Presidents can review applications within their scope (Presidents see all, VPs see their subteam positions); set status (In Review, Interviewing, Wanted, Not Wanted for VPs; Presidents can also set Offer Sent, Accepted/Declined Offer, Rejection Sent); mobile-responsive with side panel for details.
 - **Hiring dashboard (`/admin/applications/hiring`, PR #51)**: Presidents can view all applicants and their position selections with current status; update offer/rejection status; preview new exec team composition; finalize roles to promote accepted applicants to admin/exec and demote previous execs to member.
+- **Hiring finalization communications (PR #64)**: Presidents now provide an all-hands When2Meet link during team finalization, and new execs automatically receive a welcome email with onboarding and Discord next steps.
 - **Nav**: Admin dropdown (Applications, Review, Hiring) for admins; mobile support.
 
 ### Membership management (PR #43, #59)
@@ -93,6 +94,7 @@ Builds on Fall 2025 with new features across the main site and CxC.
 - **DB (PR #35)**: `memberships` table now requires a `term_id` foreign key referencing `public.terms`, scoping each membership record to a specific term.
 - **GitHub API integration (PR #41)**: GitHubService with org team listing, template repository discovery, and workflow dispatch for automated project provisioning.
 - **Membership webhook (PR #59)**: `POST /api/webhooks/membership` endpoint verifies WUSA receipt emails via Resend inbound webhooks; automatically parses transaction details and updates membership status with email notifications.
+- **Broadcast audience cleanup (PR #64)**: Recipient lists used for admin email broadcasts are now automatically cleaned up after sends, helping keep campaign segments accurate for future outreach.
 
 ---
 

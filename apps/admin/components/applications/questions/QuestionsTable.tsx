@@ -52,7 +52,7 @@ export function QuestionsTable({
         </TableHeader>
         <TableBody>
           {questions.map((q) => (
-            <TableRow key={q.relation_id}>
+            <TableRow key={q.position_question_id}>
               <TableCell className="align-top pl-4 text-sm font-medium">
                 {q.position_name ?? (
                   <span className="text-muted-foreground">General</span>

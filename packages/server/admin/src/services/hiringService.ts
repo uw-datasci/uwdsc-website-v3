@@ -29,7 +29,10 @@ class HiringService {
     try {
       return await this.repository.getHiringApplicants();
     } catch (error) {
-      throw new ApiError(`Failed to get hiring applicants: ${(error as Error).message}`, 500);
+      throw new ApiError(
+        `Failed to get hiring applicants: ${(error as Error).message}`,
+        500,
+      );
     }
   }
 
@@ -38,12 +41,16 @@ class HiringService {
     status: ApplicationReviewStatus,
   ): Promise<void> {
     if (!PRESIDENT_ONLY_STATUSES.has(status)) {
-      throw new ApiError("Only president-level statuses are allowed on the hiring page", 400);
+      throw new ApiError(
+        "Only president-level statuses are allowed on the hiring page",
+        400,
+      );
     }
 
     try {
       if (status === "Accepted Offer") {
-        const hasOtherAccepted = await this.repository.hasAcceptedAnotherOffer(selectionId);
+        const hasOtherAccepted =
+          await this.repository.hasAcceptedAnotherOffer(selectionId);
         if (hasOtherAccepted) {
           throw new ApiError(
             "This applicant already has an accepted offer for another position.",
@@ -52,24 +59,34 @@ class HiringService {
         }
       }
 
-      const updated = await this.repository.updatePositionSelectionStatus(selectionId, status);
+      const updated = await this.repository.updatePositionSelectionStatus(
+        selectionId,
+        status,
+      );
       if (!updated) throw new ApiError("Position selection not found", 404);
 
       if (status === "Offer Sent" || status === "Rejection Sent") {
-        const recipient = await this.repository.getSelectionRecipient(selectionId);
-        if (!recipient) throw new ApiError("Selection recipient not found", 404);
+        const recipient =
+          await this.repository.getSelectionRecipient(selectionId);
+        if (!recipient)
+          throw new ApiError("Selection recipient not found", 404);
 
         const type = status === "Offer Sent" ? "offer" : "rejection";
         await emailService.sendHiringDecisionEmail(recipient.email, {
           type,
           applicantName: recipient.full_name,
           positionName: recipient.position_name,
-          offerTermLabel: recipient.term_code ? formatTermCode(recipient.term_code) : undefined,
+          offerTermLabel: recipient.term_code
+            ? formatTermCode(recipient.term_code)
+            : undefined,
         });
       }
     } catch (error) {
       if (error instanceof ApiError) throw error;
-      throw new ApiError(`Failed to update selection status: ${(error as Error).message}`, 500);
+      throw new ApiError(
+        `Failed to update selection status: ${(error as Error).message}`,
+        500,
+      );
     }
   }
 
@@ -82,15 +99,23 @@ class HiringService {
         return { ...row, computed_role };
       });
     } catch (error) {
-      throw new ApiError(`Failed to get new exec team: ${(error as Error).message}`, 500);
+      throw new ApiError(
+        `Failed to get new exec team: ${(error as Error).message}`,
+        500,
+      );
     }
   }
 
-  async finalizeRoles(params: { when2MeetLink: string }): Promise<FinalizeRolesSummary> {
+  async finalizeRoles(params: {
+    when2MeetLink: string;
+  }): Promise<FinalizeRolesSummary> {
     try {
       const when2MeetLink = params.when2MeetLink.trim();
       if (when2MeetLink.startsWith("https://")) {
-        throw new ApiError("A When2Meet link starting with https:// is required.", 400);
+        throw new ApiError(
+          "A When2Meet link starting with https:// is required.",
+          400,
+        );
       }
 
       const activeTerm = await applicationService.getActiveTerm();
@@ -112,8 +137,12 @@ class HiringService {
 
       const { demoted } = await this.repository.finalizeRoles(newTeamRoles);
 
-      const promoted_to_admin = team.filter((m) => m.computed_role === "admin").length;
-      const promoted_to_exec = team.filter((m) => m.computed_role === "exec").length;
+      const promoted_to_admin = team.filter(
+        (m) => m.computed_role === "admin",
+      ).length;
+      const promoted_to_exec = team.filter(
+        (m) => m.computed_role === "exec",
+      ).length;
 
       const summary: FinalizeRolesSummary = {
         promoted_to_admin,
@@ -125,11 +154,14 @@ class HiringService {
         .map((m) => m.email?.trim())
         .filter((e): e is string => Boolean(e));
       try {
-        const broadcast = await emailService.sendNewExecWelcomeBroadcast(welcomeEmails, {
-          when2MeetLink,
-          termLabel,
-          discordLink,
-        });
+        const broadcast = await emailService.sendNewExecWelcomeBroadcast(
+          welcomeEmails,
+          {
+            when2MeetLink,
+            termLabel,
+            discordLink,
+          },
+        );
         if (broadcast) {
           return {
             ...summary,
@@ -140,13 +172,19 @@ class HiringService {
           };
         }
       } catch (err) {
-        console.error("[HiringService] New exec welcome broadcast failed:", err);
+        console.error(
+          "[HiringService] New exec welcome broadcast failed:",
+          err,
+        );
       }
 
       return summary;
     } catch (error) {
       if (error instanceof ApiError) throw error;
-      throw new ApiError(`Failed to finalize roles: ${(error as Error).message}`, 500);
+      throw new ApiError(
+        `Failed to finalize roles: ${(error as Error).message}`,
+        500,
+      );
     }
   }
 }

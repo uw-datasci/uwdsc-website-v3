@@ -1,6 +1,6 @@
 import Image from "next/image";
-import { Card, CardHeader, CardTitle, CardDescription } from "@uwdsc/ui";
 import { ExecMember } from "@uwdsc/common/types";
+import { Card, CardHeader, CardTitle, CardDescription } from "@uwdsc/ui";
 
 interface TeamCardProps {
   readonly member: ExecMember;

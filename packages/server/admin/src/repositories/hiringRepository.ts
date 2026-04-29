@@ -51,7 +51,9 @@ export class HiringRepository extends BaseRepository {
 
     const applicationIds = applications.map((a) => a.id);
 
-    const selections = await this.sql<(HiringPositionSelection & { application_id: string })[]>`
+    const selections = await this.sql<
+      (HiringPositionSelection & { application_id: string })[]
+    >`
       SELECT
         aps.id,
         aps.application_id,

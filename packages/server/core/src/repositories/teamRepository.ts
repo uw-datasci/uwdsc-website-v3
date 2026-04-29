@@ -8,6 +8,7 @@ interface ExecTeamRow {
   subteam_name: string;
   photo_url: string;
   instagram: string | null;
+  updated_at: string | null;
 }
 
 export class TeamRepository extends BaseRepository {
@@ -22,6 +23,7 @@ export class TeamRepository extends BaseRepository {
         TRIM(p.first_name || ' ' || p.last_name) AS name,
         et.photo_url,
         et.instagram,
+        et.updated_at,
         ep.name AS position_name,
         s.id AS subteam_id,
         s.name AS subteam_name

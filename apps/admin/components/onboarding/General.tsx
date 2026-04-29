@@ -9,6 +9,7 @@ import {
   Form,
   FormField,
   renderTextField,
+  renderTextAreaField,
   renderRadioField,
   renderScaleField,
 } from "@uwdsc/ui";
@@ -31,7 +32,7 @@ export function General({ form }: GeneralProps) {
       <Form {...form}>
         <div className="grid grid-cols-1 gap-6">
           {/* Socials + consent card */}
-          <Card className="border-white/20 bg-[var(--grey4)] h-full">
+          <Card className="h-full border-border bg-card">
             <CardHeader>
               <CardTitle className="flex items-center text-xl">
                 Socials
@@ -67,7 +68,12 @@ export function General({ form }: GeneralProps) {
                     renderTextField({
                       placeholder: "Instagram username",
                       label: "Instagram Handle",
-                    })({ field })
+                    })({
+                      field: {
+                        ...field,
+                        value: field.value ?? "",
+                      },
+                    })
                   }
                 />
               )}
@@ -75,7 +81,7 @@ export function General({ form }: GeneralProps) {
           </Card>
 
           {/* Technical Background*/}
-          <Card className="border-white/20 bg-[var(--grey4)]">
+          <Card className="border-border bg-card">
             <CardHeader>
               <CardTitle className="flex items-center text-xl">
                 Technical Background
@@ -109,7 +115,7 @@ export function General({ form }: GeneralProps) {
           </Card>
         </div>
         {/* Additional Comments */}
-        <Card className="border-white/20 bg-[var(--grey4)]">
+        <Card className="border-border bg-card">
           <CardHeader>
             <CardTitle className="flex items-center text-xl">
               Additional Comments
@@ -119,10 +125,17 @@ export function General({ form }: GeneralProps) {
             <FormField
               control={form.control}
               name="anything_else"
-              render={renderTextField({
-                placeholder: "",
-                label: "Anything else we should know?",
-              })}
+              render={({ field }) =>
+                renderTextAreaField({
+                  placeholder: "",
+                  label: "Anything else we should know?",
+                })({
+                  field: {
+                    ...field,
+                    value: field.value ?? "",
+                  },
+                })
+              }
             />
           </CardContent>
         </Card>

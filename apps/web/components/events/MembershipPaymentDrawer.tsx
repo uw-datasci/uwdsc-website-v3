@@ -17,7 +17,8 @@ export function MembershipPaymentDrawer({
   const [open, setOpen] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
 
-  const adminBaseUrl = process.env.NEXT_PUBLIC_ADMIN_URL ?? "https://admin.uwdatascience.ca";
+  const adminBaseUrl =
+    process.env.NEXT_PUBLIC_ADMIN_URL ?? "https://admin.uwdatascience.ca";
 
   useEffect(() => {
     let cancelled = false;
@@ -73,8 +74,8 @@ export function MembershipPaymentDrawer({
           </div>
 
           <p className="text-sm text-muted-foreground sm:text-center">
-            Once you have paid, please show this QR code to a DSC exec with your proof of
-            payment.
+            Once you have paid, please show this QR code to a DSC exec with your
+            proof of payment.
           </p>
         </div>
       </SheetContent>

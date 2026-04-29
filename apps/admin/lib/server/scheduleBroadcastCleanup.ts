@@ -8,9 +8,7 @@ import { after } from "next/server";
  * Call this with `recipientEmails` from any `emailService` segment broadcast (e.g.
  * `sendCampaignEmail`, `sendNewExecWelcomeBroadcast`) after a successful send from an admin route.
  */
-export function scheduleBroadcastCleanup(
-  recipientEmails: string[],
-): void {
+export function scheduleBroadcastCleanup(recipientEmails: string[]): void {
   if (recipientEmails.length === 0) return;
 
   after(async () => {

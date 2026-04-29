@@ -71,6 +71,7 @@ export function ExecProfile({
                   label: "Full Name",
                   required: true,
                 })}
+                disabled={true}
               />
 
               <FormField
@@ -101,8 +102,8 @@ export function ExecProfile({
                   options: termtypeOptions,
                   label: "Academic/Work Term",
                   required: true,
-                  triggerClassName: "w-full",
                   disabled: isLocked,
+                  triggerClassName: "w-full",
                   contentClassName: "bg-popover text-popover-foreground",
                   itemClassName:
                     "transition-colors hover:bg-accent/70 focus:bg-accent focus:text-accent-foreground",
@@ -141,7 +142,7 @@ export function ExecProfile({
                   })),
                   label: "What is your Executive Position for this term?",
                   required: true,
-                  disabled: isLocked,
+                  disabled: true,
                   triggerClassName: "w-full",
                   contentClassName:
                     "h-48 overflow-y-auto bg-popover text-popover-foreground",
@@ -180,14 +181,22 @@ export function ExecProfile({
 
             {consentWebsite && (
               <div className="space-y-3">
-                <label className="flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/40 transition-colors hover:bg-muted/60">
+                <label
+                  className={`flex h-40 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/40 transition-colors ${
+                    isLocked
+                      ? "cursor-not-allowed opacity-70"
+                      : "cursor-pointer hover:bg-muted/80"
+                  }`}
+                >
                   <input
                     type="file"
                     className="hidden"
                     accept={IMAGE_ACCEPT}
-                    onChange={(event) =>
-                      onHeadshotFileChange(event.target.files?.[0] ?? null)
-                    }
+                    disabled={isLocked}
+                    onChange={(event) => {
+                      if (isLocked) return;
+                      onHeadshotFileChange(event.target.files?.[0] ?? null);
+                    }}
                   />
                   <FileUp className="h-10 w-10 text-muted-foreground" />
                   <span className="mt-2 text-sm text-muted-foreground">

@@ -60,6 +60,7 @@ class TeamService {
         position: row.position_name,
         photo_url: `${this.BUCKET_URL}/${row.photo_url}`,
         instagram: row.instagram ?? null,
+        updated_at: row.updated_at ?? null,
       });
     }
 

@@ -17,20 +17,24 @@ class ApplicationService {
     "Not Wanted",
   ]);
 
-  private readonly PRESIDENT_REVIEW_STATUS_SET = new Set<ApplicationReviewStatus>([
-    ...this.VP_REVIEW_STATUS_SET,
-    "Offer Sent",
-    "Accepted Offer",
-    "Declined Offer",
-    "Rejection Sent",
-  ]);
+  private readonly PRESIDENT_REVIEW_STATUS_SET =
+    new Set<ApplicationReviewStatus>([
+      ...this.VP_REVIEW_STATUS_SET,
+      "Offer Sent",
+      "Accepted Offer",
+      "Declined Offer",
+      "Rejection Sent",
+    ]);
   private readonly repository: ApplicationRepository;
 
   constructor() {
     this.repository = new ApplicationRepository();
   }
 
-  private canAccessPosition(scope: QuestionScope, positionId: number | null): boolean {
+  private canAccessPosition(
+    scope: QuestionScope,
+    positionId: number | null,
+  ): boolean {
     if (scope.isPresident) return true;
     if (positionId === null) return false;
     return scope.vpPositionIds.includes(positionId);
@@ -43,7 +47,10 @@ class ApplicationService {
     try {
       return await this.repository.getAllApplicationsDetails();
     } catch (error) {
-      throw new ApiError(`Failed to get all applications: ${(error as Error).message}`, 500);
+      throw new ApiError(
+        `Failed to get all applications: ${(error as Error).message}`,
+        500,
+      );
     }
   }
 
@@ -54,11 +61,17 @@ class ApplicationService {
     try {
       return await this.repository.countApplications();
     } catch (error) {
-      throw new ApiError(`Failed to get application counts: ${(error as Error).message}`, 500);
+      throw new ApiError(
+        `Failed to get application counts: ${(error as Error).message}`,
+        500,
+      );
     }
   }
 
-  private async canAccessApplication(scope: QuestionScope, applicationId: string) {
+  private async canAccessApplication(
+    scope: QuestionScope,
+    applicationId: string,
+  ) {
     if (scope.isPresident) return true;
     return this.repository.canAccessApplicationByPositionIds(
       applicationId,
@@ -76,8 +89,12 @@ class ApplicationService {
       throw new ApiError("Position selection not found", 404);
     }
 
-    const canAccess = await this.canAccessApplication(scope, row.application_id);
-    if (!canAccess) throw new ApiError("You do not have access to this application", 403);
+    const canAccess = await this.canAccessApplication(
+      scope,
+      row.application_id,
+    );
+    if (!canAccess)
+      throw new ApiError("You do not have access to this application", 403);
 
     const allowedStatuses = scope.isPresident
       ? this.PRESIDENT_REVIEW_STATUS_SET
@@ -97,7 +114,10 @@ class ApplicationService {
     }
 
     try {
-      const updated = await this.repository.updatePositionSelectionStatus(selectionId, status);
+      const updated = await this.repository.updatePositionSelectionStatus(
+        selectionId,
+        status,
+      );
       if (!updated) throw new ApiError("Position selection not found", 404);
     } catch (error) {
       if (error instanceof ApiError) throw error;
@@ -110,21 +130,31 @@ class ApplicationService {
 
   async getQuestionsForScope(scope: QuestionScope): Promise<AppQuestion[]> {
     const allQuestions = await this.repository.getAllQuestions();
-    if (scope.isPresident) return allQuestions.map((q) => ({ ...q, can_edit: true }));
+    if (scope.isPresident)
+      return allQuestions.map((q) => ({ ...q, can_edit: true }));
 
     return allQuestions.map((q) => ({
       ...q,
-      can_edit: q.position_id !== null && scope.vpPositionIds.includes(q.position_id),
+      can_edit:
+        q.position_id !== null && scope.vpPositionIds.includes(q.position_id),
     }));
   }
 
-  async getPositionOptionsForScope(scope: QuestionScope): Promise<QuestionPositionOption[]> {
+  async getPositionOptionsForScope(
+    scope: QuestionScope,
+  ): Promise<QuestionPositionOption[]> {
     return this.repository.getPositionOptions(scope);
   }
 
-  async createQuestion(scope: QuestionScope, data: QuestionUpsertInput): Promise<AppQuestion> {
+  async createQuestion(
+    scope: QuestionScope,
+    data: QuestionUpsertInput,
+  ): Promise<AppQuestion> {
     if (!this.canAccessPosition(scope, data.position_id)) {
-      throw new ApiError("You can only create questions for your VP position scope", 403);
+      throw new ApiError(
+        "You can only create questions for your VP position scope",
+        403,
+      );
     }
     try {
       return await this.repository.createQuestion(data);
@@ -143,12 +173,18 @@ class ApplicationService {
   ): Promise<AppQuestion | null> {
     const linkedPositionId =
       await this.repository.getPositionQuestionPositionId(positionQuestionId);
-    if (linkedPositionId === null || !this.canAccessPosition(scope, linkedPositionId)) {
+    if (
+      linkedPositionId === null ||
+      !this.canAccessPosition(scope, linkedPositionId)
+    ) {
       throw new ApiError("You do not have access to this question", 403);
     }
 
     if (!this.canAccessPosition(scope, data.position_id)) {
-      throw new ApiError("You can only assign questions to your VP position scope", 403);
+      throw new ApiError(
+        "You can only assign questions to your VP position scope",
+        403,
+      );
     }
 
     try {
@@ -167,7 +203,10 @@ class ApplicationService {
   ): Promise<boolean> {
     const linkedPositionId =
       await this.repository.getPositionQuestionPositionId(positionQuestionId);
-    if (linkedPositionId === null || !this.canAccessPosition(scope, linkedPositionId)) {
+    if (
+      linkedPositionId === null ||
+      !this.canAccessPosition(scope, linkedPositionId)
+    ) {
       throw new ApiError("You do not have access to this question", 403);
     }
 

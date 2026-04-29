@@ -16,7 +16,9 @@ export default async function Team() {
       <div className="grid gap-32">
         {team.map((subteam) => (
           <div key={subteam.id}>
-            <SectionTitle mb="mb-12">{subteam.name}</SectionTitle>
+            <SectionTitle mb="mb-12" className="text-xl!">
+              {subteam.name}
+            </SectionTitle>
             <div className="flex flex-wrap justify-center gap-12 lg:gap-20">
               {subteam.members.map((member) => (
                 <TeamCard key={member.id} member={member} />

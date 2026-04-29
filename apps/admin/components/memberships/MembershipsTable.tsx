@@ -48,9 +48,10 @@ interface MembershipsTableProps {
   readonly profiles: Member[];
   readonly activeFilter: MembershipFilter;
   readonly onRefresh?: () => void;
-  readonly initialAction?:
-    | { readonly type: MembershipActionType; readonly memberId: string }
-    | null;
+  readonly initialAction?: {
+    readonly type: MembershipActionType;
+    readonly memberId: string;
+  } | null;
   readonly onRequestClearInitialAction?: () => void;
 }
 

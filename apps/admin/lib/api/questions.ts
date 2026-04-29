@@ -39,7 +39,9 @@ export async function updateQuestion(
   return data.question;
 }
 
-export async function deleteQuestion(positionQuestionId: number): Promise<void> {
+export async function deleteQuestion(
+  positionQuestionId: number,
+): Promise<void> {
   const response = await fetch(
     `/api/applications/questions/${positionQuestionId}`,
     {

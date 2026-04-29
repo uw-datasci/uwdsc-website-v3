@@ -1,67 +1,35 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { Loader2, MoveLeft, MoveRight, User } from "lucide-react";
-import { Button, Card, CardHeader, CardTitle, CardContent } from "@uwdsc/ui";
+import { Loader2, Lock, Pencil, Save } from "lucide-react";
+import { Button, Card, CardContent, CardDescription } from "@uwdsc/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { getAllExecPositions } from "@/lib/api/onboarding";
-import { getCurrentUser } from "@/lib/api/auth";
 import {
-  Intro,
-  ExecProfile,
-  General,
-  Submitted,
-} from "@/components/onboarding/steps";
+  getAllExecPositions,
+  getActiveTerm,
+  getOnboardingSubmission,
+  submitOnboardingForm,
+} from "@/lib/api/onboarding";
+import { CurrentAdminUser, getCurrentUser } from "@/lib/api/auth";
+import { ExecProfile, General } from "@/components/onboarding";
 import {
   OnboardingFormValues,
   OnboardingDefaultValues,
   onboardingSchema,
 } from "@/lib/schemas/onboarding";
 import { useForm } from "react-hook-form";
-import { ExecPosition } from "@uwdsc/common/types";
-
-const STEP_FIELDS: Record<number, (keyof OnboardingFormValues)[]> = {
-  1: [
-    "fullname",
-    "gmail",
-    "term_type",
-    "in_waterloo",
-    "role",
-    "consent_website",
-  ],
-  2: ["discord", "consent_instagram", "datasci_competency"],
-};
-
-const STEP_NAMES = [
-  "Exec Onboarding",
-  "Exec Profile",
-  "Socials & Background",
-] as const;
-
-const slideVariants = {
-  enter: (direction: number) => ({
-    x: direction > 0 ? 1000 : -1000,
-    opacity: 0,
-  }),
-  center: {
-    x: 0,
-    opacity: 1,
-  },
-  exit: (direction: number) => ({
-    x: direction > 0 ? -1000 : 1000,
-    opacity: 0,
-  }),
-};
+import { ExecPosition, Onboarding, Term } from "@uwdsc/common/types";
 
 export default function OnboardingPage() {
-  const [currentStep, setCurrentStep] = useState<number>(0);
-  const [direction, setDirection] = useState<number>(1);
-  const [isLoading, setIsLoading] = useState(false);
+  const [currentTerm, setCurrentTerm] = useState<Term | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  //const [currentTerm, setCurrentTerm] = useState<Term | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [hasSubmission, setHasSubmission] = useState(false);
+  const [isEditing, setIsEditing] = useState(true);
+  const [headshotFile, setHeadshotFile] = useState<File | null>(null);
   const [positions, setPositions] = useState<ExecPosition[]>([]);
 
   const form = useForm<OnboardingFormValues>({
@@ -76,6 +44,7 @@ export default function OnboardingPage() {
         first_name?: string | null;
         last_name?: string | null;
         email?: string | null;
+        current_role_id?: number | null;
       } | null,
     ) => {
       if (!user) return;
@@ -89,30 +58,83 @@ export default function OnboardingPage() {
         form.setValue("fullname", fullName, { shouldDirty: false });
       }
 
+      if ((form.getValues("role_id") ?? 0) === 0 && user.current_role_id) {
+        form.setValue("role_id", user.current_role_id, { shouldDirty: false });
+      }
+
       // Keep personal email requirement: don't autofill Waterloo email into gmail field.
       if (
-        !form.getValues("gmail") &&
+        !form.getValues("email") &&
         email &&
         !email.toLowerCase().endsWith("@uwaterloo.ca")
       ) {
-        form.setValue("gmail", email, { shouldDirty: false });
+        form.setValue("email", email, { shouldDirty: false });
       }
     },
     [form],
+  );
+
+  const mapSubmissionToForm = useCallback(
+    (
+      submission: Onboarding,
+      user: {
+        first_name?: string | null;
+        last_name?: string | null;
+      } | null,
+    ): OnboardingFormValues => {
+      const firstName = user?.first_name?.trim() ?? "";
+      const lastName = user?.last_name?.trim() ?? "";
+      const fallbackName = `${firstName} ${lastName}`.trim();
+
+      return {
+        fullname: fallbackName,
+        email: submission.email,
+        role_id: submission.role_id,
+        in_waterloo: submission.in_waterloo,
+        term_type: submission.term_type,
+        instagram: submission.instagram ?? "",
+        headshot_url: submission.headshot_url ?? "",
+        consent_website: submission.consent_website,
+        consent_instagram: submission.consent_instagram,
+        discord: submission.discord,
+        datasci_competency: submission.datasci_competency,
+        anything_else: submission.anything_else ?? "",
+      };
+    },
+    [],
   );
 
   useEffect(() => {
     async function fetchInitialData() {
       setIsFetching(true);
       try {
-        const [positionsData, currentUser] = await Promise.all([
+        const [positionsData, currentUser, term] = await Promise.all([
           getAllExecPositions(),
           getCurrentUser(),
+          getActiveTerm(),
         ]);
 
+        const typedCurrentUser = currentUser as CurrentAdminUser | null;
+
+        setCurrentTerm(term);
         setPositions(positionsData);
-        prefillFromUser(currentUser);
-        setCurrentStep(1);
+
+        const existingSubmission = await getOnboardingSubmission(term.id);
+
+        if (existingSubmission) {
+          form.reset(
+            mapSubmissionToForm(existingSubmission, typedCurrentUser),
+            {
+              keepDirty: false,
+            },
+          );
+          setHasSubmission(true);
+          setIsEditing(false);
+        } else {
+          prefillFromUser(typedCurrentUser);
+          setHasSubmission(false);
+          setIsEditing(true);
+        }
       } catch (err) {
         console.error("Failed to fetch application data:", err);
         setFetchError(
@@ -123,111 +145,51 @@ export default function OnboardingPage() {
       }
     }
     fetchInitialData();
-  }, [prefillFromUser]);
+  }, [form, mapSubmissionToForm, prefillFromUser]);
 
-  const handleStartOnboarding = useCallback(() => {
-    setIsLoading(true);
-    try {
-      setDirection(1);
-      setCurrentStep(1);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const onSubmit = useCallback(
+    async (values: OnboardingFormValues) => {
+      if (!currentTerm) {
+        setSubmitError("No active term found");
+        return;
+      }
 
-  const goToStep = useCallback(
-    (step: number) => {
-      setDirection(step > currentStep ? 1 : -1);
-      setCurrentStep(step);
+      setIsSubmitting(true);
+      setSubmitError(null);
+
+      try {
+        await submitOnboardingForm(
+          {
+            ...values,
+            term_id: currentTerm.id,
+            instagram: values.instagram ?? null,
+            headshot_url: values.headshot_url ?? null,
+            anything_else: values.anything_else ?? null,
+          },
+          headshotFile,
+          values.fullname,
+        );
+        setHasSubmission(true);
+        setIsEditing(false);
+        setHeadshotFile(null);
+      } catch (err) {
+        console.error(err);
+        setSubmitError(
+          err instanceof Error ? err.message : "Failed to save onboarding",
+        );
+      } finally {
+        setIsSubmitting(false);
+      }
     },
-    [currentStep],
+    [currentTerm, headshotFile],
   );
 
-  const handleNext = useCallback(async () => {
-    const fieldsToValidate = STEP_FIELDS[currentStep];
-    if (fieldsToValidate) {
-      const valid = await form.trigger(fieldsToValidate);
-      if (!valid) return;
-    }
-
-    setIsLoading(true);
-    try {
-      // TODO: Add API call to save form data
-      if (currentStep === 2) {
-        // Submission logic
-        goToStep(3);
-      } else {
-        goToStep(currentStep + 1);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentStep, goToStep, form]);
-
-  const handlePrevious = () => {
-    goToStep(currentStep - 1);
-  };
-
-  const renderButton = () => {
-    const isLastStep = currentStep === 2;
-
-    let buttonClassName = "hover:scale-105 ";
-    if (isLastStep) {
-      buttonClassName +=
-        "bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:opacity-90 ";
-    } else {
-      buttonClassName +=
-        "bg-secondary-foreground text-slate-800 hover:bg-secondary-foreground/80";
-    }
-
-    return (
-      <Button
-        size="lg"
-        onClick={handleNext}
-        disabled={isLoading}
-        className={buttonClassName}
-      >
-        {isLoading ? (
-          <>
-            <Loader2 className="size-4 animate-spin" />
-            {isLastStep ? "Submitting..." : "Saving..."}
-          </>
-        ) : (
-          <>
-            {isLastStep ? "Submit" : "Next"}
-            <MoveRight className="size-4" />
-          </>
-        )}
-      </Button>
-    );
-  };
-
-  const renderStep = () => {
-    switch (currentStep) {
-      case 0:
-        return (
-          <Intro
-            onStartOnboarding={handleStartOnboarding}
-            isLoading={isLoading}
-          />
-        );
-      case 1:
-        return <ExecProfile form={form} execPositions={positions} />;
-      case 2:
-        return <General form={form} />;
-      default:
-        return null;
-    }
-  };
+  const isFormLocked = hasSubmission && !isEditing;
 
   if (isFetching) {
     return (
       <div className="container mx-auto flex min-h-[50vh] items-center justify-center px-4">
-        <Loader2 className="size-8 animate-spin text-blue-400" />
+        <Loader2 className="size-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -235,86 +197,124 @@ export default function OnboardingPage() {
   if (fetchError) {
     return (
       <div className="container mx-auto flex min-h-[50vh] flex-col items-center justify-center px-4 text-center">
-        <p className="text-lg text-red-400">
+        <p className="text-lg text-destructive">
           {fetchError ?? "No active application period"}
         </p>
       </div>
     );
   }
 
-  if (currentStep === 3) {
-    return <Submitted name={form.getValues("fullname")} />;
-  }
-
   return (
-    <div className="mt-8 px-4 h-[calc(100vh-130px)] ">
-      {/* Header */}
-      <div className="mb-4 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-bold mb-1">W26 Onboarding Form</h1>
-        </div>
-      </div>
-
-      {/* Application Cards */}
-      <Card
-        className={`mx-auto min-h-[calc(100vh-300px)] max-w-4xl shadow-md backdrop-blur-md border border-white/10 ${currentStep === 0 ? "bg-gradient-to-r from-[rgba(80,0,120,0.85)] to-[rgba(8,88,150,0.85)]" : ""}`}
-      >
-        <CardHeader
-          className={`${currentStep === 0 ? "" : "bg-gradient-to-r from-[rgba(80,0,120,0.85)] to-[rgba(59,130,246,0.75)]"} rounded-t-xl -mt-6 py-4}`}
-        >
-          {/* Step Title with Icon */}
-          {currentStep > 0 && STEP_NAMES[currentStep] && (
-            <div className="flex justify-between items-center">
-              <div>
-                <CardTitle className="flex items-center gap-2 pt-2 text-2xl">
-                  <div className="mr-2 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--grey4)]">
-                    <User className="h-5 w-5" fill="currentColor" />
-                  </div>
-                  {STEP_NAMES[currentStep]}
-                </CardTitle>
-              </div>
-            </div>
-          )}
-        </CardHeader>
-
-        <CardContent>
-          <div className="space-y-6 overflow-visible">
-            <AnimatePresence mode="wait" custom={direction}>
-              <motion.div
-                key={currentStep}
-                custom={direction}
-                variants={slideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{
-                  x: { type: "spring", stiffness: 300, damping: 30 },
-                  opacity: { duration: 0.2 },
-                }}
-              >
-                {renderStep()}
-              </motion.div>
-            </AnimatePresence>
-
-            {currentStep !== 0 && currentStep !== 3 && (
-              <div className="flex justify-between pt-4">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  onClick={handlePrevious}
-                  disabled={currentStep === -1}
-                  className="hover:scale-105"
-                >
-                  <MoveLeft className="size-4" />
-                  Previous
-                </Button>
-
-                {renderButton()}
-              </div>
+    <div className="min-h-[calc(100vh-130px)] bg-background px-4 py-8">
+      <div className="mx-auto max-w-5xl space-y-6">
+        <div className="space-y-2">
+          <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            Onboarding
+          </p>
+          <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight">
+            W26 Onboarding Form
+            {isFormLocked && (
+              <Lock
+                className="size-6 text-muted-foreground"
+                aria-label="Form is locked"
+              />
             )}
-          </div>
-        </CardContent>
-      </Card>
+            {!isFormLocked && hasSubmission && isEditing && (
+              <span className="text-lg sm:text-xl font-medium text-primary">
+                (editing)
+              </span>
+            )}
+          </h1>
+          <CardDescription>
+            Complete the form below and save once at the bottom. Your headshot
+            will be uploaded once you have <b>saved</b> and <b>paid</b>!
+          </CardDescription>
+        </div>
+
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <fieldset
+            key={isFormLocked ? "locked" : "editing"}
+            disabled={isFormLocked}
+            className="space-y-6 disabled:opacity-90"
+          >
+            <ExecProfile
+              key={
+                isFormLocked ? "exec-profile-locked" : "exec-profile-editing"
+              }
+              form={form}
+              execPositions={positions}
+              headshotFile={headshotFile}
+              onHeadshotFileChange={setHeadshotFile}
+              isLocked={isFormLocked}
+            />
+
+            <General form={form} />
+          </fieldset>
+
+          <Card className="border-border bg-card shadow-sm">
+            <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="font-medium">
+                  {isFormLocked
+                    ? "Your onboarding has been saved"
+                    : "Ready to save your onboarding?"}
+                </p>
+                {!isFormLocked && hasSubmission && (
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                    You are in{" "}
+                    <span className="font-semibold text-primary">
+                      editing mode
+                    </span>
+                    . Remember to click Save to update your info.
+                  </p>
+                )}
+              </div>
+
+              <div className="flex flex-col items-start gap-3 sm:items-end">
+                {submitError && (
+                  <p className="text-sm text-destructive">{submitError}</p>
+                )}
+
+                {isFormLocked ? (
+                  <Button
+                    type="button"
+                    size="lg"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                      setIsEditing(true);
+                    }}
+                    className="gap-2 border border-primary text-primary bg-background dark:bg-card hover:bg-primary/20 dark:hover:bg-primary/20"
+                  >
+                    <Pencil className="size-4" />
+                    Edit
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    size="lg"
+                    disabled={isSubmitting}
+                    className="gap-2"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="size-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="size-4" />
+                        Save
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </form>
+      </div>
     </div>
   );
 }

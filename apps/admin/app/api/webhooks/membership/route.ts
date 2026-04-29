@@ -46,9 +46,13 @@ export async function POST(request: NextRequest): Promise<Response> {
       return ApiResponse.badRequest("Error verifying webhook");
     }
 
-    if (evt.type !== "email.received") return ApiResponse.badRequest("Invalid webhook event");
+    if (evt.type !== "email.received")
+      return ApiResponse.badRequest("Invalid webhook event");
 
-    const contents = await webhookService.getReceivedEmail(evt.data.email_id, evt.data.to);
+    const contents = await webhookService.getReceivedEmail(
+      evt.data.email_id,
+      evt.data.to,
+    );
     if (!contents.ok) {
       if (contents.reason === "wrong_recipient") {
         return ApiResponse.badRequest(contents.message);
@@ -67,7 +71,10 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     if (!activeTerm) throw new ApiError("No active term is configured", 400);
 
-    await membershipService.processEmailReceipt(contents.email, activeTerm.start_date);
+    await membershipService.processEmailReceipt(
+      contents.email,
+      activeTerm.start_date,
+    );
 
     return ApiResponse.ok({
       success: true,

@@ -10,18 +10,21 @@ import { createAuthService, createResumeService } from "@/lib/services";
  */
 export const GET = withAuth(async (_request, _context, user) => {
   try {
-    const [applications, statusCounts, resumeService, authService] = await Promise.all([
-      applicationService.getAllApplications(),
-      applicationService.getApplicationCounts(),
-      createResumeService(),
-      createAuthService(),
-    ]);
+    const [applications, statusCounts, resumeService, authService] =
+      await Promise.all([
+        applicationService.getAllApplications(),
+        applicationService.getApplicationCounts(),
+        createResumeService(),
+        createAuthService(),
+      ]);
 
     const scope = await authService.getScopeForUser(user.id);
     const portalRole = user.app_metadata?.role as string | undefined;
     const canUsePositionReview =
       portalRole === "admin" &&
-      (scope.isPresident || scope.hasVpExecRole || scope.vpPositionIds.length > 0);
+      (scope.isPresident ||
+        scope.hasVpExecRole ||
+        scope.vpPositionIds.length > 0);
 
     // Hydrate resume_url with signed URLs from private storage bucket
     const applicationsWithResumes = await Promise.all(

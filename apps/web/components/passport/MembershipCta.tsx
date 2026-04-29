@@ -23,7 +23,8 @@ export function MembershipCta({ profileId }: PassportMembershipCtaProps) {
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold">Pay for DSC Membership</p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Tap to show your payment QR code to an exec with your proof of payment
+                Tap to show your payment QR code to an exec with your proof of
+                payment
               </p>
             </div>
             <ChevronRight className="size-4 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0" />

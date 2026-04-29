@@ -115,7 +115,9 @@ export default function MembersPage() {
         activeFilter={activeFilter}
         onRefresh={fetchData}
         initialAction={initialAction}
-        onRequestClearInitialAction={initialAction ? clearActionFromUrl : undefined}
+        onRequestClearInitialAction={
+          initialAction ? clearActionFromUrl : undefined
+        }
       />
     </div>
   );

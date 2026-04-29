@@ -1,6 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 import { ApiResponse } from "@uwdsc/common/utils";
-import { membershipService, profileService } from "@uwdsc/core";
+import { membershipService } from "@uwdsc/core";
 import { createAuthService } from "@/lib/services";
 import { ADMIN_ROLES } from "@/constants/roles";
 

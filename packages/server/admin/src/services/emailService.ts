@@ -282,7 +282,9 @@ class EmailService {
     body: string,
     recipientEmails: string[],
   ): Promise<MarketingSegmentBroadcastResult> {
-    const emailHtml = await render(createElement(CampaignEmail, { subject, body }));
+    const emailHtml = await render(
+      createElement(CampaignEmail, { subject, body }),
+    );
     const result = await this.sendMarketingSegmentBroadcast({
       subject,
       emailHtml,
@@ -312,8 +314,13 @@ class EmailService {
       offerAcceptByDateLabel?: string;
     },
   ): Promise<void> {
-    const { type, applicantName, positionName, offerTermLabel, offerAcceptByDateLabel } =
-      options;
+    const {
+      type,
+      applicantName,
+      positionName,
+      offerTermLabel,
+      offerAcceptByDateLabel,
+    } = options;
     const subject = getHiringDecisionSubject(type);
     const html = await render(
       createElement(HiringDecisionEmail, {

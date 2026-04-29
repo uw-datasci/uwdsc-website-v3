@@ -47,7 +47,10 @@ interface ApplicantRowActionsMenuProps {
   applicantName: string;
   roleLabel: string;
   disabled?: boolean;
-  onConfirmStatus: (selectionId: string, status: ApplicationReviewStatus) => Promise<void>;
+  onConfirmStatus: (
+    selectionId: string,
+    status: ApplicationReviewStatus,
+  ) => Promise<void>;
 }
 
 export function ApplicantRowActionsMenu({
@@ -127,12 +130,17 @@ export function ApplicantRowActionsMenu({
             <MoreVertical className="size-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className={HIRING_ROW_ACTION_DROPDOWN_CONTENT_CLASS}>
+        <DropdownMenuContent
+          align="end"
+          className={HIRING_ROW_ACTION_DROPDOWN_CONTENT_CLASS}
+        >
           {visibleMenuItems.map(({ status, label, Icon }) => (
             <DropdownMenuItem
               key={status}
               variant={
-                HIRING_ROW_ACTION_CONFIRM_COPY[status].destructive ? "destructive" : "default"
+                HIRING_ROW_ACTION_CONFIRM_COPY[status].destructive
+                  ? "destructive"
+                  : "default"
               }
               onSelect={() => openConfirm(status)}
             >
@@ -171,7 +179,9 @@ export function ApplicantRowActionsMenu({
                   disabled={submitting}
                   onClick={() => void handleConfirm()}
                 >
-                  {submitting ? HIRING_ROW_ACTION_WORKING_LABEL : copy.confirmLabel}
+                  {submitting
+                    ? HIRING_ROW_ACTION_WORKING_LABEL
+                    : copy.confirmLabel}
                 </Button>
               </DialogFooter>
             </>

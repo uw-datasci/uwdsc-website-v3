@@ -7,7 +7,7 @@
 
 import type { EditMemberFormValues } from "@/lib/schemas/membership";
 import { createApiError } from "./error";
-import { Member, MembershipStats } from "@uwdsc/common/types";
+import { Member, MembershipStats, MembershipStatus } from "@uwdsc/common/types";
 
 /**
  * Get all user profiles
@@ -53,6 +53,21 @@ export async function getMembershipStats(): Promise<MembershipStats> {
   }
 
   return data.stats;
+}
+
+/**
+ * Get the user's membership status
+ *
+ * @returns Promise with membership status
+ * @throws Error if fetch fails
+ */
+export async function getMembershipStatus(): Promise<MembershipStatus> {
+  const response = await fetch("/api/profile/membership");
+  const data = await response.json();
+
+  if (!response.ok) throw createApiError(data, response.status);
+
+  return data;
 }
 
 /**

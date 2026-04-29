@@ -3,7 +3,7 @@ import { createAuthService } from "@/lib/services";
 import { AdminLayout } from "@/components/AdminLayout";
 import { AccessDenied } from "@/components/AccessDenied";
 import { ADMIN_ROLES } from "@/constants/roles";
-import { profileService, membershipService } from "@uwdsc/admin";
+import { membershipService } from "@uwdsc/core";
 
 interface AdminLayoutProps {
   readonly children: ReactNode;
@@ -19,12 +19,11 @@ export default async function AdminPagesLayout({ children }: AdminLayoutProps) {
 
   // For exec users, ensure they have a paid membership row before showing admin pages.
   if (role === "exec") {
-    const profile = await profileService.getProfileById(user.id);
-    const hasPaid = profile
-      ? await membershipService.hasPaidMember(profile.id)
-      : false;
-
-    if (!profile || !hasPaid) return <AccessDenied execUnpaid={true} />;
+    const membershipStatus = await membershipService.getMembershipStatus(
+      user.id,
+    );
+    if (!membershipStatus.has_membership)
+      return <AccessDenied execUnpaid={true} />;
   }
 
   return <AdminLayout>{children}</AdminLayout>;

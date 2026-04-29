@@ -99,7 +99,9 @@ export class ApplicationRepository extends BaseRepository {
     `;
 
     // 3. Get all answers with question text
-    const answers = await this.sql<(AnswerWithQuestion & { application_id: string })[]>`
+    const answers = await this.sql<
+      (AnswerWithQuestion & { application_id: string })[]
+    >`
       SELECT
         a.id,
         a.application_id,
@@ -179,7 +181,9 @@ export class ApplicationRepository extends BaseRepository {
     return updated.length > 0;
   }
 
-  async getPositionOptions(scope: QuestionScope): Promise<QuestionPositionOption[]> {
+  async getPositionOptions(
+    scope: QuestionScope,
+  ): Promise<QuestionPositionOption[]> {
     if (scope.isPresident) {
       return this.sql<QuestionPositionOption[]>`
         SELECT
@@ -244,7 +248,9 @@ export class ApplicationRepository extends BaseRepository {
   }
 
   async createQuestion(data: QuestionUpsertInput): Promise<AppQuestion> {
-    const createdQuestion = await this.sql<{ id: number; created_at: string }[]>`
+    const createdQuestion = await this.sql<
+      { id: number; created_at: string }[]
+    >`
       INSERT INTO questions (
         question_text,
         type,

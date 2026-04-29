@@ -5,7 +5,10 @@
  */
 
 import { createApiError } from "./error";
-import type { ApplicationListItem, ApplicationReviewStatus } from "@uwdsc/common/types";
+import type {
+  ApplicationListItem,
+  ApplicationReviewStatus,
+} from "@uwdsc/common/types";
 
 export interface PositionReviewScopeDto {
   canUse: boolean;

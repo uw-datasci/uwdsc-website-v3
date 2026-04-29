@@ -1,4 +1,7 @@
-import type { ApplicationReviewStatus, HiringApplicant } from "@uwdsc/common/types";
+import type {
+  ApplicationReviewStatus,
+  HiringApplicant,
+} from "@uwdsc/common/types";
 
 // --- Review status badge (applications / hiring tables) ---
 
@@ -6,7 +9,9 @@ import type { ApplicationReviewStatus, HiringApplicant } from "@uwdsc/common/typ
  * Tailwind classes for `Badge variant="outline"` by application review status.
  * Matches hiring applicant status styling (admin applications flow).
  */
-export function reviewStatusBadgeClassName(status: ApplicationReviewStatus): string {
+export function reviewStatusBadgeClassName(
+  status: ApplicationReviewStatus,
+): string {
   switch (status) {
     case "In Review":
       return "border-border bg-muted/60 text-muted-foreground";
@@ -66,7 +71,9 @@ export function buildHiringSubteamOptions(
   applicants: readonly HiringApplicant[],
 ): HiringSubteamOption[] {
   const { names, hasNone } = collectSubteamNames(applicants);
-  const options: HiringSubteamOption[] = [{ value: HIRING_SUBTEAM_ALL, label: "All subteams" }];
+  const options: HiringSubteamOption[] = [
+    { value: HIRING_SUBTEAM_ALL, label: "All subteams" },
+  ];
   if (hasNone) {
     options.push({ value: HIRING_SUBTEAM_NONE, label: "No subteam" });
   }
@@ -90,5 +97,7 @@ export function filterApplicantsBySubteam(
     }
     return s.subteam_name === filter;
   };
-  return applicants.filter((app) => app.position_selections.some(matchesFilter));
+  return applicants.filter((app) =>
+    app.position_selections.some(matchesFilter),
+  );
 }

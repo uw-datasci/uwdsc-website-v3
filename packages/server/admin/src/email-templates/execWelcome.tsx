@@ -58,7 +58,8 @@ export function ExecWelcomeEmail({
       <Body
         style={{
           backgroundColor: "#f6f9fc",
-          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+          fontFamily:
+            "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         }}
       >
         <Container
@@ -77,13 +78,16 @@ export function ExecWelcomeEmail({
             </Text>
 
             <Text style={bodyTextStyle}>
-              Here are the <strong>mandatory action items</strong> to complete within the
-              next 24-48 hours:
+              Here are the <strong>mandatory action items</strong> to complete
+              within the next 24-48 hours:
             </Text>
 
             <Text style={listItemStyle}>
               •{" "}
-              <Link href={"https://admin.uwdatascience.ca/onboarding"} style={linkStyle}>
+              <Link
+                href={"https://admin.uwdatascience.ca/onboarding"}
+                style={linkStyle}
+              >
                 Exec Onboarding Form
               </Link>
             </Text>
@@ -101,22 +105,26 @@ export function ExecWelcomeEmail({
             </Text>
 
             <Text style={{ ...bodyTextStyle, marginTop: "24px" }}>
-              Please also complete the following action items as soon as possible:
+              Please also complete the following action items as soon as
+              possible:
             </Text>
 
             <Text style={listItemStyle}>• Membership Sign-Ups</Text>
             <Text style={nestedListItemStyle}>
-              ◦ To sign-up, please make sure you have an account and are able to log in on{" "}
+              ◦ To sign-up, please make sure you have an account and are able to
+              log in on{" "}
               <Link href={"https://www.uwdatascience.ca"} style={linkStyle}>
                 https://www.uwdatascience.ca
               </Link>
             </Text>
             <Text style={nestedListItemStyle}>
-              ◦ Please pay the $4 DSC membership fee - you must pay the fee to be an exec
+              ◦ Please pay the $4 DSC membership fee - you must pay the fee to
+              be an exec
             </Text>
 
             <Text style={{ ...bodyTextStyle, marginTop: "24px" }}>
-              Let us know if you have any questions! Can&apos;t wait for an amazing term 😁
+              Let us know if you have any questions! Can&apos;t wait for an
+              amazing term 😁
             </Text>
 
             <Text style={bodyTextStyle}>Best,</Text>
@@ -125,7 +133,9 @@ export function ExecWelcomeEmail({
                 <em>Co-Presidents</em>
               </strong>
             </Text>
-            <Text style={{ ...bodyTextStyle, marginTop: "0" }}>UW Data Science Club</Text>
+            <Text style={{ ...bodyTextStyle, marginTop: "0" }}>
+              UW Data Science Club
+            </Text>
           </Section>
         </Container>
       </Body>

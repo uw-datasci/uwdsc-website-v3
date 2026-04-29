@@ -32,20 +32,6 @@ class MembershipService {
   }
 
   /**
-   * Check whether a profile has a paid membership.
-   */
-  async hasPaidMember(profileId: string): Promise<boolean> {
-    try {
-      return await this.repository.hasPaidMember(profileId);
-    } catch (error) {
-      throw new ApiError(
-        `Failed to check paid membership: ${(error as Error).message}`,
-        500,
-      );
-    }
-  }
-
-  /**
    * Mark a member as paid
    */
   async markMemberAsPaid(

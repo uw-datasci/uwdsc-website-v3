@@ -1,6 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 import { ApiResponse } from "@uwdsc/common/utils";
-import { membershipService, profileService } from "@uwdsc/admin";
+import { membershipService, profileService } from "@uwdsc/core";
 import { createAuthService } from "@/lib/services";
 import { ADMIN_ROLES } from "@/constants/roles";
 
@@ -58,12 +58,11 @@ export function withAuth<C extends WithAuthContext = WithAuthContext>(
     }
 
     if (role === "exec") {
-      const profile = await profileService.getProfileById(user.id);
-      const hasPaid = profile
-        ? await membershipService.hasPaidMember(profile.id)
-        : false;
+      const membershipStatus = await membershipService.getMembershipStatus(
+        user.id,
+      );
 
-      if (!profile || !hasPaid) {
+      if (!membershipStatus.has_membership) {
         return ApiResponse.json(
           {
             error: "Exec access requires a paid membership",

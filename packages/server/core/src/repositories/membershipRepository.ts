@@ -19,7 +19,6 @@ export class MembershipRepository extends BaseRepository {
         WHERE profile_id = ${profileId}
         LIMIT 1
       `;
-
       return result[0] ?? null;
     } catch (error: unknown) {
       console.error("Error fetching membership:", error);

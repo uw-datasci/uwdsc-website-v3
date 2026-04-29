@@ -33,12 +33,10 @@ export function AccessDenied({ execUnpaid }: { execUnpaid?: boolean }) {
             {execUnpaid ? (
               <>
                 <p className="text-muted-foreground">
-                  You have not paid your membership. Executive access requires
-                  an active paid membership.
+                  You have not paid your membership.
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Pay your membership to access the admin site, or return to the
-                  main site.
+                  Pay your membership to access the admin site.
                 </p>
               </>
             ) : (

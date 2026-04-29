@@ -30,26 +30,6 @@ export class MembershipRepository extends BaseRepository {
   }
 
   /**
-   * Check whether a profile has an active paid membership record.
-   */
-  async hasPaidMember(profileId: string): Promise<boolean> {
-    try {
-      const result = await this.sql<{ has_paid: boolean }[]>`
-        SELECT EXISTS(
-          SELECT 1
-          FROM memberships
-          WHERE profile_id = ${profileId}
-        ) AS has_paid
-      `;
-
-      return result[0]?.has_paid ?? false;
-    } catch (error: unknown) {
-      console.error("Error checking paid membership:", error);
-      throw error;
-    }
-  }
-
-  /**
    * Mark a member as paid by profile ID
    * @param profileId - The profile ID (UUID)
    * @param data - Payment data (method, location, verifier)

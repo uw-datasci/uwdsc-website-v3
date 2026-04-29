@@ -7,27 +7,29 @@ export const VP_REVIEW_STATUS_LIST: readonly ApplicationReviewStatus[] = [
   "Not Wanted",
 ];
 
-export const PRESIDENT_REVIEW_STATUS_LIST: readonly ApplicationReviewStatus[] = [
-  "Offer Sent",
-  "Accepted Offer",
-  "Declined Offer",
-  "Rejection Sent",
-];
+export const PRESIDENT_REVIEW_STATUS_LIST: readonly ApplicationReviewStatus[] =
+  ["Offer Sent", "Accepted Offer", "Declined Offer", "Rejection Sent"];
 
 export const REVIEW_STATUS_LIST: readonly ApplicationReviewStatus[] = [
   ...VP_REVIEW_STATUS_LIST,
   ...PRESIDENT_REVIEW_STATUS_LIST,
 ];
 
-export const VP_REVIEW_STATUS_SET = new Set<ApplicationReviewStatus>(VP_REVIEW_STATUS_LIST);
+export const VP_REVIEW_STATUS_SET = new Set<ApplicationReviewStatus>(
+  VP_REVIEW_STATUS_LIST,
+);
 
-export const PRESIDENT_REVIEW_STATUS_SET = new Set<ApplicationReviewStatus>(REVIEW_STATUS_LIST);
+export const PRESIDENT_REVIEW_STATUS_SET = new Set<ApplicationReviewStatus>(
+  REVIEW_STATUS_LIST,
+);
 
 export const REVIEW_STATUS_SET = PRESIDENT_REVIEW_STATUS_SET;
 
 export const ALL_STATUS_FILTER = "all" as const;
 
-export type ApplicationReviewStatusFilter = ApplicationReviewStatus | typeof ALL_STATUS_FILTER;
+export type ApplicationReviewStatusFilter =
+  | ApplicationReviewStatus
+  | typeof ALL_STATUS_FILTER;
 
 // --- Hiring: president row actions (menu order + labels + confirm dialog copy) ---
 
@@ -60,7 +62,10 @@ export function getHiringStatusOptions(
   }
 }
 
-export const HIRING_ROW_ACTION_MENU_LABEL: Record<HiringRowActionStatus, string> = {
+export const HIRING_ROW_ACTION_MENU_LABEL: Record<
+  HiringRowActionStatus,
+  string
+> = {
   "Offer Sent": "Send offer",
   "Rejection Sent": "Send rejection",
   "Accepted Offer": "Update to accepted offer",
@@ -92,13 +97,15 @@ export const HIRING_ROW_ACTION_CONFIRM_COPY: Record<
   },
   "Accepted Offer": {
     title: "Mark as accepted offer?",
-    description: "This updates the applicant's status for this role to accepted offer.",
+    description:
+      "This updates the applicant's status for this role to accepted offer.",
     confirmLabel: "Mark accepted",
     destructive: false,
   },
   "Declined Offer": {
     title: "Mark as declined offer?",
-    description: "This updates the applicant's status for this role to declined offer.",
+    description:
+      "This updates the applicant's status for this role to declined offer.",
     confirmLabel: "Mark declined",
     destructive: true,
   },

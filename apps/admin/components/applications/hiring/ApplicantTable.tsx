@@ -88,8 +88,12 @@ export function ApplicantTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className={`min-w-[240px] ${headCell}`}>Applicant</TableHead>
-              <TableHead className={`min-w-[280px] ${headCell}`}>Positions</TableHead>
+              <TableHead className={`min-w-[240px] ${headCell}`}>
+                Applicant
+              </TableHead>
+              <TableHead className={`min-w-[280px] ${headCell}`}>
+                Positions
+              </TableHead>
               <TableHead className={`w-[140px] ${headCell}`}>Status</TableHead>
               <TableHead className={`w-14 ${headCell}`}>
                 <span className="sr-only">Actions</span>
@@ -105,7 +109,9 @@ export function ApplicantTable({
                 <TableRow key={applicant.id}>
                   <TableCell className={bodyCell}>
                     <div className="flex max-w-[320px] flex-col gap-0.5">
-                      <span className="font-medium leading-tight">{applicant.full_name}</span>
+                      <span className="font-medium leading-tight">
+                        {applicant.full_name}
+                      </span>
                       <span className="break-all text-xs leading-snug text-muted-foreground">
                         {applicant.email ?? "N/A"}
                       </span>
@@ -114,7 +120,10 @@ export function ApplicantTable({
                   <TableCell className={bodyCell}>
                     <div className={cn("flex flex-col", SELECTION_STACK_GAP)}>
                       {sortedSelections.map((selection) => (
-                        <SelectionRow key={selection.id} selection={selection} />
+                        <SelectionRow
+                          key={selection.id}
+                          selection={selection}
+                        />
                       ))}
                     </div>
                   </TableCell>

@@ -3,14 +3,21 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card, Tabs, TabsContent, TabsList, TabsTrigger } from "@uwdsc/ui";
 import { toast } from "sonner";
-import { ApplicationsError, ApplicationsLoading } from "@/components/applications";
+import {
+  ApplicationsError,
+  ApplicationsLoading,
+} from "@/components/applications";
 import {
   ApplicantTable,
   FinalizeRolesDialog,
   HiringHeader,
   NewExecTeamPanel,
 } from "@/components/applications/hiring";
-import { getHiringApplicants, getNewExecTeam, updateSelectionStatus } from "@/lib/api";
+import {
+  getHiringApplicants,
+  getNewExecTeam,
+  updateSelectionStatus,
+} from "@/lib/api";
 import {
   buildHiringSubteamOptions,
   filterApplicantsBySubteam,
@@ -30,7 +37,9 @@ export default function HiringPage() {
   const [error, setError] = useState<string | null>(null);
   const [nameSearch, setNameSearch] = useState("");
   const [subteamFilter, setSubteamFilter] = useState(HIRING_SUBTEAM_ALL);
-  const [updatingSelectionId, setUpdatingSelectionId] = useState<string | null>(null);
+  const [updatingSelectionId, setUpdatingSelectionId] = useState<string | null>(
+    null,
+  );
 
   const fetchApplicants = useCallback(async () => {
     try {
@@ -40,7 +49,9 @@ export default function HiringPage() {
       setApplicants(data.applicants);
     } catch (err) {
       console.error("Error fetching hiring applicants:", err);
-      setError(err instanceof Error ? err.message : "Failed to load applicants");
+      setError(
+        err instanceof Error ? err.message : "Failed to load applicants",
+      );
     } finally {
       setLoading(false);
     }
@@ -63,12 +74,17 @@ export default function HiringPage() {
     fetchTeam();
   }, [fetchApplicants, fetchTeam]);
 
-  const subteamOptions = useMemo(() => buildHiringSubteamOptions(applicants), [applicants]);
+  const subteamOptions = useMemo(
+    () => buildHiringSubteamOptions(applicants),
+    [applicants],
+  );
 
   const applicantsMatchingName = useMemo(() => {
     const query = nameSearch.trim().toLowerCase();
     if (!query) return applicants;
-    return applicants.filter((app) => app.full_name.toLowerCase().includes(query));
+    return applicants.filter((app) =>
+      app.full_name.toLowerCase().includes(query),
+    );
   }, [applicants, nameSearch]);
 
   const filteredApplicants = useMemo(
@@ -95,7 +111,9 @@ export default function HiringPage() {
       fetchTeam();
     } catch (err) {
       console.error("Error updating selection status:", err);
-      toast.error(err instanceof Error ? err.message : "Failed to update status");
+      toast.error(
+        err instanceof Error ? err.message : "Failed to update status",
+      );
     } finally {
       setUpdatingSelectionId(null);
     }
@@ -141,7 +159,8 @@ export default function HiringPage() {
             <div>
               <h1 className="mb-1 text-3xl font-bold">New Exec Team</h1>
               <p className="text-sm text-muted-foreground">
-                {team.length} member{team.length === 1 ? "" : "s"} with accepted offers
+                {team.length} member{team.length === 1 ? "" : "s"} with accepted
+                offers
               </p>
             </div>
             <FinalizeRolesDialog

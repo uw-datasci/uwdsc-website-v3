@@ -12,7 +12,14 @@ import {
   SelectValue,
   cn,
 } from "@uwdsc/ui";
-import { ExternalLink, User, MapPin, GraduationCap, Mail, Briefcase } from "lucide-react";
+import {
+  ExternalLink,
+  User,
+  MapPin,
+  GraduationCap,
+  Mail,
+  Briefcase,
+} from "lucide-react";
 import type {
   ApplicationListItem,
   ApplicationReviewStatus,
@@ -20,7 +27,10 @@ import type {
 } from "@uwdsc/common/types";
 import { sortPositionSelectionsByPriority } from "@uwdsc/common/utils";
 import type { PositionReviewScopeDto } from "@/lib/api";
-import { VP_REVIEW_STATUS_LIST, VP_REVIEW_STATUS_SET } from "@/constants/applications";
+import {
+  VP_REVIEW_STATUS_LIST,
+  VP_REVIEW_STATUS_SET,
+} from "@/constants/applications";
 import { reviewStatusBadgeClassName } from "@/lib/utils/applications";
 
 interface ApplicationDetailProps {
@@ -28,7 +38,9 @@ interface ApplicationDetailProps {
   statusOptions?: (ApplicationStatus | ApplicationReviewStatus)[];
   selectedStatus?: ApplicationStatus | ApplicationReviewStatus | null;
   statusUpdating?: boolean;
-  onStatusChange?: (status: ApplicationStatus | ApplicationReviewStatus) => void;
+  onStatusChange?: (
+    status: ApplicationStatus | ApplicationReviewStatus,
+  ) => void;
   positionReview?: PositionReviewScopeDto | null;
   onPositionReviewStatusChange?: (
     selectionId: string,
@@ -59,8 +71,12 @@ export function ApplicationDetail({
     return clubExperience ? "Yes" : "No";
   };
 
-  const selectionApaId = (sel: ApplicationListItem["position_selections"][number]): number => {
-    return typeof sel.position_id === "number" ? sel.position_id : Number(sel.position_id);
+  const selectionApaId = (
+    sel: ApplicationListItem["position_selections"][number],
+  ): number => {
+    return typeof sel.position_id === "number"
+      ? sel.position_id
+      : Number(sel.position_id);
   };
 
   if (!application) {
@@ -68,14 +84,19 @@ export function ApplicationDetail({
       <div className="flex items-center justify-center h-full">
         <div className="text-center space-y-2">
           <User className="h-12 w-12 mx-auto text-muted-foreground/40" />
-          <p className="text-muted-foreground text-sm">Select an application to view details</p>
+          <p className="text-muted-foreground text-sm">
+            Select an application to view details
+          </p>
         </div>
       </div>
     );
   }
 
-  const clubExperienceLabel = getClubExperienceLabel(application.club_experience);
-  const showStatusSelect = !!statusOptions && statusOptions.length > 0 && !!onStatusChange;
+  const clubExperienceLabel = getClubExperienceLabel(
+    application.club_experience,
+  );
+  const showStatusSelect =
+    !!statusOptions && statusOptions.length > 0 && !!onStatusChange;
 
   const vpApaIds = new Set(positionReview?.vpPositionIds ?? []);
   const editableReviewOptions = VP_REVIEW_STATUS_LIST;
@@ -86,7 +107,9 @@ export function ApplicationDetail({
         {/* Header */}
         <div>
           <div className="flex items-start justify-between gap-3 flex-wrap pr-8 md:pr-0">
-            <h2 className="text-xl md:text-2xl font-bold">{application.full_name}</h2>
+            <h2 className="text-xl md:text-2xl font-bold">
+              {application.full_name}
+            </h2>
             {showStatusSelect ? (
               <Select
                 value={selectedStatus ?? application.status}
@@ -188,7 +211,9 @@ export function ApplicationDetail({
         <div>
           <h3 className="text-sm font-semibold mb-3">Position Selections</h3>
           {application.position_selections.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No positions selected.</p>
+            <p className="text-sm text-muted-foreground">
+              No positions selected.
+            </p>
           ) : (
             <div className="space-y-2">
               {application.position_selections.map((sel) => {
@@ -201,7 +226,8 @@ export function ApplicationDetail({
                   !!onPositionReviewStatusChange &&
                   (positionReview.isPresident || vpApaIds.has(apaId)) &&
                   statusAllowsVpReviewEdit;
-                const showReadOnlyReviewStatus = !!positionReview?.canUse && !canEditSelection;
+                const showReadOnlyReviewStatus =
+                  !!positionReview?.canUse && !canEditSelection;
 
                 let statusControl: React.ReactNode = null;
                 if (canEditSelection) {
@@ -274,7 +300,9 @@ export function ApplicationDetail({
         <div>
           <h3 className="text-sm font-semibold mb-3">Application Responses</h3>
           {application.answers.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No responses submitted.</p>
+            <p className="text-sm text-muted-foreground">
+              No responses submitted.
+            </p>
           ) : (
             <div className="space-y-6">
               <AnswerSection
@@ -283,18 +311,18 @@ export function ApplicationDetail({
                   (answer) => answer.position_names.length === 0,
                 )}
               />
-              {sortPositionSelectionsByPriority(application.position_selections).map(
-                (selection) => (
-                  <AnswerSection
-                    key={selection.id}
-                    heading={selection.position_name}
-                    answers={application.answers.filter((answer) =>
-                      answer.position_names.includes(selection.position_name),
-                    )}
-                    numbered
-                  />
-                ),
-              )}
+              {sortPositionSelectionsByPriority(
+                application.position_selections,
+              ).map((selection) => (
+                <AnswerSection
+                  key={selection.id}
+                  heading={selection.position_name}
+                  answers={application.answers.filter((answer) =>
+                    answer.position_names.includes(selection.position_name),
+                  )}
+                  numbered
+                />
+              ))}
             </div>
           )}
         </div>
@@ -309,7 +337,11 @@ interface AnswerSectionProps {
   numbered?: boolean;
 }
 
-function AnswerSection({ heading, answers, numbered = false }: Readonly<AnswerSectionProps>) {
+function AnswerSection({
+  heading,
+  answers,
+  numbered = false,
+}: Readonly<AnswerSectionProps>) {
   if (answers.length === 0) return null;
 
   return (

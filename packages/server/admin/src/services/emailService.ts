@@ -4,10 +4,31 @@ import { Resend } from "resend";
 import { ApiError } from "@uwdsc/common/types";
 import { CampaignEmail } from "../email-templates/campaign";
 import {
+  ExecWelcomeEmail,
+  getExecWelcomeSubject,
+} from "../email-templates/execWelcome";
+import {
+  HiringDecisionEmail,
+  getHiringDecisionSubject,
+} from "../email-templates/hiringDecision";
+import {
   MembershipReceipt,
   getMembershipReceiptSubject,
-} from "../email-templates/membershipReceiptWebhook";
-import { appendMarketingUnsubscribeFooter } from "../utils/marketingEmail";
+} from "../email-templates/membershipReceipt";
+import { appendUnsubscribeFooter } from "../utils/marketingEmail";
+
+type MarketingSegmentBroadcastResult = {
+  id?: string;
+  recipientEmails: string[];
+};
+
+type SendMarketingSegmentBroadcastParams = {
+  subject: string;
+  emailHtml: string;
+  recipientEmails: string[];
+  onEmptyRecipients: "throw" | "skip";
+  emptyRecipientsMessage?: string;
+};
 
 class EmailService {
   private readonly resend: Resend | null;
@@ -166,45 +187,145 @@ class EmailService {
     );
   }
 
-  /** Sends a marketing broadcast via Resend; returns `recipientEmails`
-   * for delayed {@link removeRecipientsFromSegment}.
+  /**
+   * Dedupe addresses (case-insensitive) while preserving first-seen casing.
    */
-  async sendCampaignEmail(
-    subject: string,
-    body: string,
-    recipientEmails: string[],
-  ): Promise<{ id?: string; recipientEmails: string[] }> {
-    if (recipientEmails.length === 0) {
-      throw new ApiError(
-        "No recipients found for the selected audiences",
-        400,
-        "Validation error",
-      );
+  private dedupeRecipientEmails(emails: readonly string[]): string[] {
+    const seen = new Set<string>();
+    const out: string[] = [];
+    for (const raw of emails) {
+      const trimmed = raw.trim();
+      if (!trimmed) continue;
+      const key = trimmed.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(trimmed);
+    }
+    return out;
+  }
+
+  /**
+   * Resend scratch-segment broadcast pipeline: dedupe → segment → footer → send → rollback on failure.
+   * Add new broadcast types as public wrappers that render HTML and call this method.
+   */
+  private async sendMarketingSegmentBroadcast(
+    params: SendMarketingSegmentBroadcastParams,
+  ): Promise<MarketingSegmentBroadcastResult | null> {
+    const {
+      subject,
+      emailHtml,
+      recipientEmails,
+      onEmptyRecipients,
+      emptyRecipientsMessage = "No recipients found for the selected audiences",
+    } = params;
+
+    const unique = this.dedupeRecipientEmails(recipientEmails);
+    if (unique.length === 0) {
+      if (onEmptyRecipients === "throw") {
+        throw new ApiError(emptyRecipientsMessage, 400, "Validation error");
+      }
+      return null;
     }
 
     if (!this.resend)
       throw new ApiError("Email service is not configured", 500);
 
-    const baseHtml = await render(
-      createElement(CampaignEmail, { subject, body }),
-    );
-    const html = appendMarketingUnsubscribeFooter(baseHtml);
+    const html = appendUnsubscribeFooter(emailHtml);
 
-    await this.ensureRecipientsInSegment(
-      recipientEmails,
-      this.campaignSegmentId,
-    );
+    await this.ensureRecipientsInSegment(unique, this.campaignSegmentId);
     try {
       const { id } = await this.sendMarketingBroadcast({
         segmentId: this.campaignSegmentId,
         subject,
         html,
       });
-      return { id, recipientEmails };
+      return { id, recipientEmails: unique };
     } catch (err) {
-      await this.removeRecipientsFromSegment(recipientEmails);
+      await this.removeRecipientsFromSegment(unique);
       throw err;
     }
+  }
+
+  /**
+   * Welcome broadcast to finalized exec team.
+   * Returns null when there are no valid recipient addresses.
+   */
+  async sendNewExecWelcomeBroadcast(
+    recipientEmails: string[],
+    options: {
+      when2MeetLink: string;
+      termLabel: string;
+      discordLink: string;
+    },
+  ): Promise<MarketingSegmentBroadcastResult | null> {
+    const { when2MeetLink, termLabel, discordLink } = options;
+    const emailHtml = await render(
+      createElement(ExecWelcomeEmail, {
+        termLabel,
+        when2MeetLink,
+        discordLink,
+      }),
+    );
+    return this.sendMarketingSegmentBroadcast({
+      subject: getExecWelcomeSubject(termLabel),
+      emailHtml,
+      recipientEmails,
+      onEmptyRecipients: "skip",
+    });
+  }
+
+  /**
+   * Markdown body campaign (admin UI). Recipients are deduped before send.
+   */
+  async sendCampaignEmail(
+    subject: string,
+    body: string,
+    recipientEmails: string[],
+  ): Promise<MarketingSegmentBroadcastResult> {
+    const emailHtml = await render(createElement(CampaignEmail, { subject, body }));
+    const result = await this.sendMarketingSegmentBroadcast({
+      subject,
+      emailHtml,
+      recipientEmails,
+      onEmptyRecipients: "throw",
+    });
+    if (!result) {
+      throw new ApiError(
+        "No recipients found for the selected audiences",
+        400,
+        "Validation error",
+      );
+    }
+    return result;
+  }
+
+  /**
+   * Hiring: send an offer or rejection email to an applicant for a specific role.
+   */
+  async sendHiringDecisionEmail(
+    recipientEmail: string,
+    options: {
+      type: "offer" | "rejection";
+      applicantName: string;
+      positionName: string;
+      offerTermLabel?: string;
+      offerAcceptByDateLabel?: string;
+    },
+  ): Promise<void> {
+    const { type, applicantName, positionName, offerTermLabel, offerAcceptByDateLabel } =
+      options;
+    const subject = getHiringDecisionSubject(type);
+    const html = await render(
+      createElement(HiringDecisionEmail, {
+        type,
+        applicantName,
+        positionName,
+        offerTermLabel,
+        offerAcceptByDateLabel,
+      }),
+    );
+
+    await this.sendTransactionalEmail({ to: [recipientEmail], subject, html });
   }
 
   /**

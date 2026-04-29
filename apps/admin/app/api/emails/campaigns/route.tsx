@@ -1,7 +1,7 @@
 import { ApiError } from "@uwdsc/common/types";
 import { ApiResponse } from "@uwdsc/common/utils";
 import { emailService, profileService } from "@uwdsc/admin";
-import { after } from "next/server";
+import { scheduleBroadcastCleanup } from "@/lib/server/scheduleBroadcastCleanup";
 import { withAuth } from "@/guards/withAuth";
 import { sendCampaignSchema } from "@/lib/schemas/emails";
 
@@ -38,12 +38,7 @@ export const POST = withAuth(async (request) => {
       resolvedEmails,
     );
 
-    const { recipientEmails } = result;
-    after(async () => {
-      const delayMs = emailService.campaignSegmentCleanupDelayMs;
-      if (delayMs > 0) await new Promise((r) => setTimeout(r, delayMs));
-      await emailService.removeRecipientsFromSegment(recipientEmails);
-    });
+    scheduleBroadcastCleanup(result.recipientEmails);
 
     return ApiResponse.ok({ success: true, id: result.id });
   } catch (error: unknown) {

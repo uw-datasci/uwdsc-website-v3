@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { Card, Sheet, SheetContent, SheetTitle, useIsMobile } from "@uwdsc/ui";
+import { toast } from "sonner";
 
 import {
   ApplicationList,
@@ -10,8 +11,31 @@ import {
   ApplicationsError,
   ApplicationsHeader,
 } from "@/components/applications";
-import { getAllApplications } from "@/lib/api";
-import type { ApplicationListItem } from "@uwdsc/common/types";
+import {
+  getAllApplications,
+  updatePositionSelectionReviewStatus,
+  type PositionReviewScopeDto,
+} from "@/lib/api";
+import type { ApplicationListItem, ApplicationReviewStatus } from "@uwdsc/common/types";
+
+function withUpdatedPositionSelection(
+  apps: ApplicationListItem[],
+  applicationId: string,
+  selectionId: string,
+  status: ApplicationReviewStatus,
+): ApplicationListItem[] {
+  return apps.map((app) => {
+    if (app.id === applicationId) {
+      return {
+        ...app,
+        position_selections: app.position_selections.map((s) =>
+          s.id === selectionId ? { ...s, status } : s,
+        ),
+      };
+    }
+    return app;
+  });
+}
 
 export default function ApplicationsPage() {
   const [applications, setApplications] = useState<ApplicationListItem[]>([]);
@@ -19,29 +43,32 @@ export default function ApplicationsPage() {
     draft: 0,
     submitted: 0,
   });
-  const [filteredApplications, setFilteredApplications] = useState<
-    ApplicationListItem[]
-  >([]);
+  const [filteredApplications, setFilteredApplications] = useState<ApplicationListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const isMobile = useIsMobile();
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
+  const [positionReview, setPositionReview] = useState<PositionReviewScopeDto | null>(null);
+  const [positionReviewUpdatingId, setPositionReviewUpdatingId] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchData() {
       try {
         setLoading(true);
         setError(null);
-        const { applications: list, statusCounts } = await getAllApplications();
+        const {
+          applications: list,
+          statusCounts,
+          positionReview: pr,
+        } = await getAllApplications();
         setApplications(list);
         setStatusCounts(statusCounts);
         setFilteredApplications(list);
+        setPositionReview(pr);
       } catch (err) {
         console.error("Error fetching applications:", err);
-        setError(
-          err instanceof Error ? err.message : "Failed to load applications",
-        );
+        setError(err instanceof Error ? err.message : "Failed to load applications");
       } finally {
         setLoading(false);
       }
@@ -59,6 +86,29 @@ export default function ApplicationsPage() {
   const handleSelect = (id: string) => {
     setSelectedId(id);
     if (isMobile) setMobileDetailOpen(true);
+  };
+
+  const handlePositionReviewStatusChange = async (
+    selectionId: string,
+    status: ApplicationReviewStatus,
+  ) => {
+    if (!selectedApplication) return;
+    const selection = selectedApplication.position_selections.find((s) => s.id === selectionId);
+    if (!selection || selection.status === status) return;
+
+    try {
+      setPositionReviewUpdatingId(selectionId);
+      await updatePositionSelectionReviewStatus(selectionId, status);
+      setApplications((prev) =>
+        withUpdatedPositionSelection(prev, selectedApplication.id, selectionId, status),
+      );
+      toast.success("Position status updated");
+    } catch (err) {
+      console.error("Error updating position status:", err);
+      toast.error(err instanceof Error ? err.message : "Failed to update position status");
+    } finally {
+      setPositionReviewUpdatingId(null);
+    }
   };
 
   if (loading) return <ApplicationsLoading />;
@@ -85,17 +135,24 @@ export default function ApplicationsPage() {
 
         {/* Right panel – detail (desktop only) */}
         <Card className="hidden md:flex flex-1 overflow-hidden p-0">
-          <ApplicationDetail application={selectedApplication} />
+          <ApplicationDetail
+            application={selectedApplication}
+            positionReview={positionReview}
+            onPositionReviewStatusChange={handlePositionReviewStatusChange}
+            positionReviewUpdatingId={positionReviewUpdatingId}
+          />
         </Card>
 
         {/* Mobile detail – Sheet drawer */}
         <Sheet open={mobileDetailOpen} onOpenChange={setMobileDetailOpen}>
-          <SheetContent
-            side="bottom"
-            className="md:hidden h-[85vh] p-0 rounded-t-xl"
-          >
+          <SheetContent side="bottom" className="md:hidden h-[85vh] p-0 rounded-t-xl">
             <SheetTitle className="sr-only">Application Details</SheetTitle>
-            <ApplicationDetail application={selectedApplication} />
+            <ApplicationDetail
+              application={selectedApplication}
+              positionReview={positionReview}
+              onPositionReviewStatusChange={handlePositionReviewStatusChange}
+              positionReviewUpdatingId={positionReviewUpdatingId}
+            />
           </SheetContent>
         </Sheet>
       </div>

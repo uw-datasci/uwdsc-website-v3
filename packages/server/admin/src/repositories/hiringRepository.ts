@@ -13,6 +13,7 @@ interface AcceptedOfferRow {
   position_name: string;
   is_vp: boolean;
   subteam_name: string | null;
+  email: string | null;
 }
 
 export class HiringRepository extends BaseRepository {
@@ -22,6 +23,7 @@ export class HiringRepository extends BaseRepository {
         id: string;
         profile_id: string;
         full_name: string;
+        email: string | null;
         personal_email: string | null;
         submitted_at: string;
       }[]
@@ -30,9 +32,11 @@ export class HiringRepository extends BaseRepository {
         a.id,
         a.profile_id,
         a.full_name,
+        u.email,
         a.personal_email,
         a.submitted_at
       FROM applications a
+      LEFT JOIN auth.users u ON u.id = a.profile_id
       WHERE a.status != 'draft'
         AND EXISTS (
           SELECT 1
@@ -47,9 +51,7 @@ export class HiringRepository extends BaseRepository {
 
     const applicationIds = applications.map((a) => a.id);
 
-    const selections = await this.sql<
-      (HiringPositionSelection & { application_id: string })[]
-    >`
+    const selections = await this.sql<(HiringPositionSelection & { application_id: string })[]>`
       SELECT
         aps.id,
         aps.application_id,
@@ -81,6 +83,57 @@ export class HiringRepository extends BaseRepository {
     }));
   }
 
+  /**
+   * True if the same application already has a different position selection in
+   * "Accepted Offer" (excluding {@link selectionId}).
+   */
+  async hasAcceptedAnotherOffer(selectionId: string): Promise<boolean> {
+    const rows = await this.sql<{ exists: boolean }[]>`
+      SELECT EXISTS (
+        SELECT 1
+        FROM application_position_selections other
+        WHERE other.application_id = (
+          SELECT application_id
+          FROM application_position_selections
+          WHERE id = ${selectionId}
+        )
+          AND other.id != ${selectionId}
+          AND other.status = 'Accepted Offer'
+      ) AS "exists"
+    `;
+    return rows[0]?.exists === true;
+  }
+
+  async getSelectionRecipient(selectionId: string): Promise<{
+    email: string;
+    full_name: string;
+    position_name: string;
+    term_code: string | null;
+  } | null> {
+    const rows = await this.sql<
+      {
+        email: string;
+        full_name: string;
+        position_name: string;
+        term_code: string | null;
+      }[]
+    >`
+      SELECT
+        u.email,
+        a.full_name,
+        ep.name AS position_name,
+        t.code AS term_code
+      FROM application_position_selections aps
+      JOIN applications a ON aps.application_id = a.id
+      LEFT JOIN terms t ON t.id = a.term_id
+      JOIN application_positions_available apa ON aps.position_id = apa.id
+      JOIN exec_positions ep ON apa.position_id = ep.id
+      JOIN auth.users u ON u.id = a.profile_id
+      WHERE aps.id = ${selectionId}
+    `;
+    return rows[0] ?? null;
+  }
+
   async updatePositionSelectionStatus(
     selectionId: string,
     status: ApplicationReviewStatus,
@@ -101,9 +154,11 @@ export class HiringRepository extends BaseRepository {
         a.full_name,
         ep.name AS position_name,
         ep.is_vp,
-        st.name AS subteam_name
+        st.name AS subteam_name,
+        u.email
       FROM application_position_selections aps
       JOIN applications a ON aps.application_id = a.id
+      LEFT JOIN auth.users u ON u.id = a.profile_id
       JOIN application_positions_available apa ON aps.position_id = apa.id
       JOIN exec_positions ep ON apa.position_id = ep.id
       LEFT JOIN subteams st ON st.id = ep.subteam_id
@@ -120,13 +175,12 @@ export class HiringRepository extends BaseRepository {
     return this.sql.begin(async (txRaw) => {
       const tx = txRaw as unknown as Sql;
 
-      // Upsert new team members' roles
+      // Promote new team members (every account already has a user_roles row)
       for (const { profileId, role } of newTeamRoles) {
         await tx`
-          INSERT INTO user_roles (id, role)
-          VALUES (${profileId}, ${role})
-          ON CONFLICT (id)
-          DO UPDATE SET role = ${role}
+          UPDATE user_roles
+          SET role = ${role}
+          WHERE id = ${profileId}
         `;
       }
 

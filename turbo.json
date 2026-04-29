@@ -1,5 +1,5 @@
 {
-  "$schema": "https://turbo.build/schema.json",
+  "$schema": "https://v2-9-6.turborepo.dev/schema.json",
   "ui": "tui",
   "tasks": {
     "build": {
@@ -18,7 +18,8 @@
         "RESEND_API_KEY",
         "RESEND_FROM_EMAIL",
         "RESEND_CAMPAIGN_SEGMENT_ID",
-        "RESEND_WEBHOOK_SECRET"
+        "RESEND_WEBHOOK_SECRET",
+        "DISCORD_INVITE_URL"
       ]
     },
     "lint": { "dependsOn": ["^lint"] },

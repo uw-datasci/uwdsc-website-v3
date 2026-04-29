@@ -150,7 +150,7 @@ export function useQuestionsDashboard() {
       setSaving(true);
       try {
         if (dialogMode === "edit" && editing) {
-          await updateQuestion(editing.relation_id, values);
+          await updateQuestion(editing.position_question_id, values);
           toast.success("Question updated");
         } else {
           await createQuestion(values);
@@ -174,7 +174,7 @@ export function useQuestionsDashboard() {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      await deleteQuestion(deleteTarget.relation_id);
+      await deleteQuestion(deleteTarget.position_question_id);
       toast.success("Question removed");
       setDeleteTarget(null);
       await load();

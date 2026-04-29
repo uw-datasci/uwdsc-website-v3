@@ -6,7 +6,7 @@ import { ShieldAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export function AccessDenied() {
+export function AccessDenied({ execUnpaid }: { execUnpaid?: boolean }) {
   const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
@@ -30,12 +30,27 @@ export function AccessDenied() {
 
           <div className="space-y-2">
             <h1 className="text-3xl font-bold">Access Denied</h1>
-            <p className="text-muted-foreground">
-              You don&apos;t have permission to access the admin panel.
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Only users with admin or executive roles can access this area.
-            </p>
+            {execUnpaid ? (
+              <>
+                <p className="text-muted-foreground">
+                  You have not paid your membership. Executive access requires
+                  an active paid membership.
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Pay your membership to access the admin site, or return to the
+                  main site.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-muted-foreground">
+                  You don&apos;t have permission to access the admin panel.
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Only users with admin or executive roles can access this area.
+                </p>
+              </>
+            )}
           </div>
 
           <div className="flex gap-3 pt-4">

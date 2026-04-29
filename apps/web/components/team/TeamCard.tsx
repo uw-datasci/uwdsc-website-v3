@@ -8,7 +8,7 @@ interface TeamCardProps {
 
 export default function TeamCard({ member }: TeamCardProps) {
   return (
-     <Card
+    <Card
       className="group relative w-full max-w-xs overflow-hidden border-0 bg-linear-to-br from-gray-900
       to-black p-0 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20"
     >

@@ -5,6 +5,7 @@ import {
   Term,
   Onboarding,
   OnboardingData,
+  OnboardingAdminRow,
 } from "@uwdsc/common/types";
 
 class OnboardingService {
@@ -85,6 +86,20 @@ class OnboardingService {
     } catch (error) {
       throw new ApiError(
         `Failed to save onboarding submission: ${(error as Error).message}`,
+        500,
+      );
+    }
+  }
+
+  /**
+   * Get onboarding submissions for all exec/admin users in a term.
+   */
+  async getTeamSubmissions(term_id: string): Promise<OnboardingAdminRow[]> {
+    try {
+      return await this.repository.getTeamSubmissions(term_id);
+    } catch (error) {
+      throw new ApiError(
+        `Failed to get onboarding submissions: ${(error as Error).message}`,
         500,
       );
     }

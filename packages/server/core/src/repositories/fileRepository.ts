@@ -65,6 +65,23 @@ export class FileRepository {
   }
 
   /**
+   * Download a file from the bucket and return it as a Buffer.
+   */
+  async downloadFile(path: string): Promise<Buffer | null> {
+    const { data, error } = await this.supabase.storage
+      .from(this.bucketName)
+      .download(path);
+
+    if (error) {
+      console.error(`Failed to download file ${path}:`, error.message);
+      return null;
+    }
+
+    const arrayBuffer = await data.arrayBuffer();
+    return Buffer.from(arrayBuffer);
+  }
+
+  /**
    * Generate a signed URL for a file in the private bucket.
    * @param path - The file path within the bucket
    * @param expiresIn - URL expiry in seconds (default: 1 hour)

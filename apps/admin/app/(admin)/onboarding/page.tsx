@@ -31,6 +31,7 @@ export default function OnboardingPage() {
   const [isEditing, setIsEditing] = useState(true);
   const [headshotFile, setHeadshotFile] = useState<File | null>(null);
   const [positions, setPositions] = useState<ExecPosition[]>([]);
+  const [currentUserFullName, setCurrentUserFullName] = useState("");
 
   const form = useForm<OnboardingFormValues>({
     resolver: zodResolver(onboardingSchema),
@@ -118,6 +119,11 @@ export default function OnboardingPage() {
 
         setCurrentTerm(term);
         setPositions(positionsData);
+        if (typedCurrentUser) {
+          const firstName = typedCurrentUser.first_name?.trim() ?? "";
+          const lastName = typedCurrentUser.last_name?.trim() ?? "";
+          setCurrentUserFullName(`${firstName} ${lastName}`.trim());
+        }
 
         const existingSubmission = await getOnboardingSubmission(term.id);
 
@@ -158,6 +164,7 @@ export default function OnboardingPage() {
       setSubmitError(null);
 
       try {
+        const fullName = currentUserFullName;
         await submitOnboardingForm(
           {
             ...values,
@@ -167,7 +174,7 @@ export default function OnboardingPage() {
             anything_else: values.anything_else ?? null,
           },
           headshotFile,
-          values.fullname,
+          fullName,
         );
         setHasSubmission(true);
         setIsEditing(false);
@@ -181,7 +188,7 @@ export default function OnboardingPage() {
         setIsSubmitting(false);
       }
     },
-    [currentTerm, headshotFile],
+    [currentTerm, headshotFile, currentUserFullName],
   );
 
   const isFormLocked = hasSubmission && !isEditing;

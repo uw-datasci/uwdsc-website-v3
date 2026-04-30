@@ -27,7 +27,15 @@ export const ADMIN_NAVIGATION = [
   },
   { name: "Events", href: "/events", icon: Calendar },
   { name: "Campaigns", href: "/campaigns", icon: Mail },
-  { name: "Onboarding", href: "/onboarding", icon: Shield },
+  {
+    name: "Onboarding",
+    href: "/onboarding",
+    icon: Shield,
+    subItems: [
+      { name: "My Form", href: "/onboarding", icon: Shield },
+      { name: "Team Forms", href: "/onboarding/team", icon: Shield },
+    ],
+  },
   {
     name: "Nexus",
     href: "/nexus",

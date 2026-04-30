@@ -47,4 +47,19 @@ export class HeadshotService extends FileService {
       return { success: false, error: (error as Error).message };
     }
   }
+
+  /**
+   * Get a signed URL for a headshot key in storage.
+   */
+  async getHeadshotUrl(key: string | null): Promise<string | null> {
+    if (!key) return null;
+    return this.repository.getSignedUrl(key);
+  }
+
+  /**
+   * Download a headshot from storage.
+   */
+  async downloadHeadshot(key: string): Promise<Buffer | null> {
+    return this.repository.downloadFile(key);
+  }
 }

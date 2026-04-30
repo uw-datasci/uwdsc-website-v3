@@ -11,6 +11,7 @@ import type {
   Term,
   Onboarding,
   OnboardingData,
+  OnboardingAdminRow,
 } from "@uwdsc/common/types";
 
 /**
@@ -83,4 +84,30 @@ export async function submitOnboardingForm(
   console.log("API response:", response.status, data);
   if (!response.ok) throw createApiError(data, response.status);
   return data;
+}
+
+export async function getTeamOnboarding(
+  termId: string,
+): Promise<OnboardingAdminRow[]> {
+  const response = await fetch(
+    `/api/onboarding/team?termId=${encodeURIComponent(termId)}`,
+  );
+  const data = await response.json();
+
+  if (!response.ok) throw createApiError(data, response.status);
+
+  return data.rows as OnboardingAdminRow[];
+}
+
+export async function downloadTeamHeadshots(termId: string): Promise<Blob> {
+  const response = await fetch(
+    `/api/onboarding/headshots/export?termId=${encodeURIComponent(termId)}`,
+  );
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw createApiError(data, response.status);
+  }
+
+  return response.blob();
 }

@@ -233,8 +233,8 @@ export default function OnboardingPage() {
             )}
           </h1>
           <CardDescription>
-            Complete the form below and save once at the bottom. Your headshot
-            will be uploaded once you have <b>saved</b> and <b>paid</b>!
+            Complete the form below and save at the bottom. Your headshot will
+            be uploaded only when you have <b>saved</b>!
           </CardDescription>
         </div>
 

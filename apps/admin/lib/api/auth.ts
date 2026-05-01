@@ -74,7 +74,7 @@ export async function signOut(): Promise<{ message: string }> {
  * @returns Promise with user data
  * @throws Error if fetching user fails
  */
-export async function getCurrentUser(): Promise<Profile | null> {
+export async function getCurrentUser(): Promise<CurrentAdminUser | null> {
   const response = await fetch("/api/auth/user", {
     method: "GET",
     headers: { "Content-Type": "application/json" },

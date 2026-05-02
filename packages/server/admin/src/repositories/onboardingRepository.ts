@@ -48,7 +48,7 @@ export class OnboardingRepository extends BaseRepository {
     };
   }
 
-  async getCurrentExecRoleId(profile_id: string): Promise<number | null> {
+  async getExecRoleId(profile_id: string): Promise<number | null> {
     const result = await this.sql<{ position_id: number }[]>`
       SELECT position_id
       FROM public.exec_team

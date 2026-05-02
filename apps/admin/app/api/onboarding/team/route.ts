@@ -1,9 +1,9 @@
 import { ApiResponse } from "@uwdsc/common/utils";
 import { onboardingService } from "@uwdsc/admin";
-import { withPresAccess } from "@/guards/withPresAccess";
 import { createHeadshotService } from "@/lib/services";
+import { withVpAccess } from "@/guards/withVpAccess";
 
-export const GET = withPresAccess(async (request) => {
+export const GET = withVpAccess(async (request) => {
   try {
     const termId = new URL(request.url).searchParams.get("termId");
 

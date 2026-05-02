@@ -12,7 +12,7 @@ export const GET = withAuth(async (_request, _context, user) => {
     const role = user.app_metadata?.role ?? null;
     const [profile, currentRoleId] = await Promise.all([
       profileService.getProfileByUserId(user.id),
-      onboardingService.getCurrentExecRoleId(user.id),
+      onboardingService.getExecRoleId(user.id),
     ]);
 
     const data = {

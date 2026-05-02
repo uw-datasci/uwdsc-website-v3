@@ -2,11 +2,11 @@
 
 import { createContext, useContext, ReactNode, useMemo } from "react";
 import useSWR from "swr";
-import { CurrentAdminUser, getCurrentUser } from "@/lib/api";
+import { ExecUser, getCurrentUser } from "@/lib/api";
 import type { Profile } from "@uwdsc/common/types";
 
 interface AuthContextType {
-  user: CurrentAdminUser | null;
+  user: ExecUser | null;
   isLoading: boolean;
   isError: boolean;
   mutate: () => Promise<void>;

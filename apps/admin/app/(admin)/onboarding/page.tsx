@@ -11,7 +11,7 @@ import {
   getOnboardingSubmission,
   submitOnboardingForm,
 } from "@/lib/api/onboarding";
-import { CurrentAdminUser, getCurrentUser } from "@/lib/api/auth";
+import { ExecUser, getCurrentUser } from "@/lib/api/auth";
 import { ExecProfile, General } from "@/components/onboarding";
 import {
   OnboardingFormValues,
@@ -115,7 +115,7 @@ export default function OnboardingPage() {
           getActiveTerm(),
         ]);
 
-        const typedCurrentUser = currentUser as CurrentAdminUser | null;
+        const typedCurrentUser = currentUser as ExecUser | null;
 
         setCurrentTerm(term);
         setPositions(positionsData);

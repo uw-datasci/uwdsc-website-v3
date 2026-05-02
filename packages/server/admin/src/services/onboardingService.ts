@@ -18,9 +18,9 @@ class OnboardingService {
   /**
    * Get current exec role id for the authenticated user
    */
-  async getCurrentExecRoleId(profile_id: string): Promise<number | null> {
+  async getExecRoleId(profile_id: string): Promise<number | null> {
     try {
-      return await this.repository.getCurrentExecRoleId(profile_id);
+      return await this.repository.getExecRoleId(profile_id);
     } catch (error) {
       throw new ApiError(
         `Failed to get current exec role: ${(error as Error).message}`,

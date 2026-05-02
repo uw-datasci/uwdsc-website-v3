@@ -5,4 +5,5 @@
 export interface ExecTeamVpRoleRow {
   readonly is_vp: boolean;
   readonly subteam_name: string | null;
+  readonly subteam_id: number | null;
 }

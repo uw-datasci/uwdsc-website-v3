@@ -48,7 +48,7 @@ export class OnboardingRepository extends BaseRepository {
     };
   }
 
-  async getExecRoleId(profile_id: string): Promise<number | null> {
+  async getExecPosId(profile_id: string): Promise<number | null> {
     const result = await this.sql<{ position_id: number }[]>`
       SELECT position_id
       FROM public.exec_team
@@ -58,6 +58,18 @@ export class OnboardingRepository extends BaseRepository {
     `;
 
     return result[0]?.position_id ?? null;
+  }
+
+  async getExecSubteamId(profile_id: string): Promise<number | null> {
+    const result = await this.sql<{ subteam_id: number }[]>`
+      SELECT subteam_id
+      FROM public.exec_team
+      WHERE profile_id = ${profile_id}
+      ORDER BY updated_at DESC, created_at DESC
+      LIMIT 1
+    `;
+
+    return result[0]?.subteam_id ?? null;
   }
 
   /* Get all exec positions for onboarding application form dropdown */
@@ -72,7 +84,10 @@ export class OnboardingRepository extends BaseRepository {
     return result;
   }
 
-  async getTeamSubmissions(term_id: string): Promise<OnboardingAdminRow[]> {
+  async getTeamSubmissions(
+    term_id: string,
+    subteam_id?: number,
+  ): Promise<OnboardingAdminRow[]> {
     const rows = await this.sql<OnboardingAdminRowDb[]>`
       SELECT
         p.id AS profile_id,
@@ -103,18 +118,19 @@ export class OnboardingRepository extends BaseRepository {
       JOIN auth.users au ON p.id = au.id
       JOIN user_roles r ON p.id = r.id
       LEFT JOIN LATERAL (
-        SELECT position_id
-        FROM exec_team et
-        WHERE et.profile_id = p.id
-        ORDER BY et.updated_at DESC, et.created_at DESC
+        SELECT position_id, subteam_id
+        FROM exec_team
+        WHERE profile_id = p.id
+        ORDER BY updated_at DESC, created_at DESC
         LIMIT 1
       ) et ON true
       LEFT JOIN exec_positions ep_current ON ep_current.id = et.position_id
       LEFT JOIN exec_form_submissions s
         ON s.profile_id = p.id
-       AND s.term_id = ${term_id}
+      AND s.term_id = ${term_id}
       LEFT JOIN exec_positions ep_submission ON ep_submission.id = s.role_id
       WHERE r.role IN ('exec', 'admin')
+      ${subteam_id ? this.sql`AND COALESCE(ep_current.subteam_id, et.subteam_id) = ${subteam_id}` : this.sql``}
       ORDER BY r.role DESC, p.first_name NULLS LAST, p.last_name NULLS LAST
     `;
 

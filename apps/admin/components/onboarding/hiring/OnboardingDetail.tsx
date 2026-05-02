@@ -80,7 +80,7 @@ export function OnboardingDetail({ row }: OnboardingDetailProps) {
                 <Field label="Academic Term" value={sub.term_type || "—"} />
                 <Field label="Location" value={sub.in_waterloo || "—"} />
                 <Field
-                  label="Data Sci Competency"
+                  label="Data Science Competency"
                   value={String(sub.datasci_competency ?? "—")}
                 />
                 {sub && sub.consent_instagram && (

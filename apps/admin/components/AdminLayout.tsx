@@ -34,10 +34,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   useEffect(() => {
     const loadPosition = async () => {
-      if (!user?.current_role_id || isLoading) return;
+      if (!user?.position_id || isLoading) return;
       try {
         const positions = await getAllExecPositions();
-        const pos = positions.find((p) => p.id === user.current_role_id);
+        const pos = positions.find((p) => p.id === user.position_id);
         setPositionName(pos?.name ?? null);
       } catch {
         setPositionName(null);
@@ -45,7 +45,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     };
 
     loadPosition();
-  }, [user?.current_role_id, isLoading]);
+  }, [user?.position_id, isLoading]);
 
   const navigationList = getAdminNavigation(positionName);
 

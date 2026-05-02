@@ -314,10 +314,24 @@ export class AuthService {
       ),
     );
 
+    const vpSubteamIds = Array.from(
+      new Set(
+        roles
+          .filter(
+            (r) =>
+              r.is_vp &&
+              r.subteam_id !== null &&
+              r.subteam_name !== "Presidents",
+          )
+          .map((r) => r.subteam_id as number),
+      ),
+    );
+
     return {
       hasVpExecRole,
       isPresident,
       vpSubteamNames,
+      vpSubteamIds,
       vpPositionIds,
     };
   }

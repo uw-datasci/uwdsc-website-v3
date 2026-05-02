@@ -10,7 +10,8 @@ import { LoginData, Profile } from "@uwdsc/common/types";
 import { Session, User } from "@supabase/supabase-js";
 
 export type ExecUser = Profile & {
-  current_role_id?: number | null;
+  position_id?: number | null;
+  subteam_id?: number | null;
 };
 
 interface LoginResponse {

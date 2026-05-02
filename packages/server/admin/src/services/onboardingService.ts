@@ -18,9 +18,20 @@ class OnboardingService {
   /**
    * Get current exec role id for the authenticated user
    */
-  async getExecRoleId(profile_id: string): Promise<number | null> {
+  async getExecPosId(profile_id: string): Promise<number | null> {
     try {
-      return await this.repository.getExecRoleId(profile_id);
+      return await this.repository.getExecPosId(profile_id);
+    } catch (error) {
+      throw new ApiError(
+        `Failed to get current exec role: ${(error as Error).message}`,
+        500,
+      );
+    }
+  }
+
+  async getExecSubteamId(profile_id: string): Promise<number | null> {
+    try {
+      return await this.repository.getExecSubteamId(profile_id);
     } catch (error) {
       throw new ApiError(
         `Failed to get current exec role: ${(error as Error).message}`,
@@ -94,9 +105,12 @@ class OnboardingService {
   /**
    * Get onboarding submissions for all exec/admin users in a term.
    */
-  async getTeamSubmissions(term_id: string): Promise<OnboardingAdminRow[]> {
+  async getTeamSubmissions(
+    term_id: string,
+    subteam_id?: number,
+  ): Promise<OnboardingAdminRow[]> {
     try {
-      return await this.repository.getTeamSubmissions(term_id);
+      return await this.repository.getTeamSubmissions(term_id, subteam_id);
     } catch (error) {
       throw new ApiError(
         `Failed to get onboarding submissions: ${(error as Error).message}`,

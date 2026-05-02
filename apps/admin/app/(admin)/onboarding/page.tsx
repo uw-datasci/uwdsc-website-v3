@@ -45,7 +45,7 @@ export default function OnboardingPage() {
         first_name?: string | null;
         last_name?: string | null;
         email?: string | null;
-        current_role_id?: number | null;
+        position_id?: number | null;
       } | null,
     ) => {
       if (!user) return;
@@ -59,8 +59,8 @@ export default function OnboardingPage() {
         form.setValue("fullname", fullName, { shouldDirty: false });
       }
 
-      if ((form.getValues("role_id") ?? 0) === 0 && user.current_role_id) {
-        form.setValue("role_id", user.current_role_id, { shouldDirty: false });
+      if ((form.getValues("role_id") ?? 0) === 0 && user.position_id) {
+        form.setValue("role_id", user.position_id, { shouldDirty: false });
       }
 
       // Keep personal email requirement: don't autofill Waterloo email into gmail field.

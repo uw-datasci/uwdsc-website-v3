@@ -10,9 +10,10 @@ import { onboardingService } from "@uwdsc/admin";
 export const GET = withAuth(async (_request, _context, user) => {
   try {
     const role = user.app_metadata?.role ?? null;
-    const [profile, currentRoleId] = await Promise.all([
+    const [profile, positionId, subteamId] = await Promise.all([
       profileService.getProfileByUserId(user.id),
-      onboardingService.getCurrentExecRoleId(user.id),
+      onboardingService.getExecPosId(user.id),
+      onboardingService.getExecSubteamId(user.id),
     ]);
 
     const data = {
@@ -23,7 +24,8 @@ export const GET = withAuth(async (_request, _context, user) => {
       last_name: profile?.last_name,
       wat_iam: profile?.wat_iam,
       faculty: profile?.faculty,
-      current_role_id: currentRoleId,
+      position_id: positionId,
+      subteam_id: subteamId,
     };
     return ApiResponse.ok(data);
   } catch (error) {

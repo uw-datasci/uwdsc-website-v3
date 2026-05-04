@@ -8,7 +8,7 @@ export interface MembershipStatus {
 
 /** Mirrors exec_positions table (from profiles migration) */
 export interface ExecPosition {
-  id: string;
+  id: number;
   name: string;
 }
 

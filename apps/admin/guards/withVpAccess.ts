@@ -26,7 +26,7 @@ export function withVpAccess<C extends WithAuthContext = WithAuthContext>(
 
     if (!hasVpAccess) {
       return ApiResponse.unauthorized(
-        "Only VPs can access the application questions dashboard",
+        "Only VPs and Presidents can access the application questions dashboard",
       );
     }
     return handler(request, context, user, scope);

@@ -1,27 +1,38 @@
 import { z } from "zod";
 
 // Schema matching the `exec_form_submissions` table
-export const onboardingSchema = z.object({
-  fullname: z.string().min(2, "Full name is required"),
-  email: z
-    .email("A valid gmail is required")
-    .refine(
-      (email) => email.toLowerCase().endsWith("@gmail.com"),
-      "Please use a personal gmail address",
-    ),
-  role_id: z.int({ message: "Please select a role" }),
-  in_waterloo: z.string().min(1, "Please indicate your location next term"),
-  term_type: z.enum(["study", "coop"], {
-    message: "Please select study or co-op term",
-  }),
-  instagram: z.string().max(30).optional().nullable(),
-  headshot_url: z.string().optional().nullable(),
-  consent_website: z.boolean(),
-  consent_instagram: z.boolean(),
-  discord: z.string().max(32),
-  datasci_competency: z.number().int().min(0).max(4),
-  anything_else: z.string().optional().nullable(),
-});
+export const onboardingSchema = z
+  .object({
+    fullname: z.string().min(2, "Full name is required"),
+    email: z
+      .string()
+      .email("A valid gmail is required")
+      .refine(
+        (email) => email.toLowerCase().endsWith("@gmail.com"),
+        "Please use a personal gmail address",
+      ),
+    role_id: z.number().int({ message: "Please select a role" }),
+    in_waterloo: z.string().min(1, "Please indicate your location next term"),
+    term_type: z.enum(["study", "coop"], {
+      message: "Please select study or co-op term",
+    }),
+    instagram: z.string().max(30).optional().nullable(),
+    headshot_url: z.string().optional().nullable(),
+    consent_website: z.boolean(),
+    consent_instagram: z.boolean(),
+    discord: z.string().min(1).max(32),
+    datasci_competency: z.number().int().min(0).max(4),
+    anything_else: z.string().optional().nullable(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.consent_instagram && !data.instagram?.trim()) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Instagram handle is required when you consent to Instagram",
+        path: ["instagram"],
+      });
+    }
+  });
 
 export type OnboardingFormValues = z.infer<typeof onboardingSchema>;
 

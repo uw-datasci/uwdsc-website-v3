@@ -16,9 +16,12 @@ import {
 } from "@uwdsc/ui";
 import { Shield } from "lucide-react";
 import { signOut as signOutApi } from "@/lib/api/auth";
-import { ADMIN_NAVIGATION } from "@/constants/navigation";
 import { NavUser } from "./nav/NavUser";
 import { NavMain } from "./nav/NavMain";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { getAllExecPositions } from "@/lib/api/onboarding";
+import { getAdminNavigation } from "@/constants/navigation";
 
 interface AdminLayoutProps {
   readonly children: React.ReactNode;
@@ -26,6 +29,25 @@ interface AdminLayoutProps {
 
 export function AdminLayout({ children }: AdminLayoutProps) {
   const router = useRouter();
+  const { user, isLoading } = useAuth();
+  const [positionName, setPositionName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadPosition = async () => {
+      if (!user?.position_id || isLoading) return;
+      try {
+        const positions = await getAllExecPositions();
+        const pos = positions.find((p) => p.id === user.position_id);
+        setPositionName(pos?.name ?? null);
+      } catch {
+        setPositionName(null);
+      }
+    };
+
+    loadPosition();
+  }, [user?.position_id, isLoading]);
+
+  const navigationList = getAdminNavigation(positionName);
 
   const handleSignOut = async () => {
     try {
@@ -57,7 +79,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           </SidebarMenu>
         </SidebarHeader>
         <SidebarContent>
-          <NavMain items={ADMIN_NAVIGATION} />
+          <NavMain items={navigationList} />
         </SidebarContent>
         <SidebarFooter>
           <NavUser onSignOut={handleSignOut} />

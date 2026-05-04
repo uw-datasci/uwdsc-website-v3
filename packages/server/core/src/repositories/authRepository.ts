@@ -117,7 +117,8 @@ export class AuthRepository extends BaseRepository {
     return this.sql<ExecTeamVpRoleRow[]>`
       SELECT DISTINCT
         ep.is_vp,
-        st.name AS subteam_name
+        st.name AS subteam_name,
+        st.id as subteam_id
       FROM exec_team et
       JOIN exec_positions ep ON et.position_id = ep.id
       JOIN subteams st ON st.id = COALESCE(ep.subteam_id, et.subteam_id)

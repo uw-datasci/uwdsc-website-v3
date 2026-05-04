@@ -11,7 +11,7 @@ import {
   getOnboardingSubmission,
   submitOnboardingForm,
 } from "@/lib/api/onboarding";
-import { CurrentAdminUser, getCurrentUser } from "@/lib/api/auth";
+import { ExecUser, getCurrentUser } from "@/lib/api/auth";
 import { ExecProfile, General } from "@/components/onboarding";
 import {
   OnboardingFormValues,
@@ -31,6 +31,7 @@ export default function OnboardingPage() {
   const [isEditing, setIsEditing] = useState(true);
   const [headshotFile, setHeadshotFile] = useState<File | null>(null);
   const [positions, setPositions] = useState<ExecPosition[]>([]);
+  const [currentUserFullName, setCurrentUserFullName] = useState("");
 
   const form = useForm<OnboardingFormValues>({
     resolver: zodResolver(onboardingSchema),
@@ -44,7 +45,7 @@ export default function OnboardingPage() {
         first_name?: string | null;
         last_name?: string | null;
         email?: string | null;
-        current_role_id?: number | null;
+        position_id?: number | null;
       } | null,
     ) => {
       if (!user) return;
@@ -58,8 +59,8 @@ export default function OnboardingPage() {
         form.setValue("fullname", fullName, { shouldDirty: false });
       }
 
-      if ((form.getValues("role_id") ?? 0) === 0 && user.current_role_id) {
-        form.setValue("role_id", user.current_role_id, { shouldDirty: false });
+      if ((form.getValues("role_id") ?? 0) === 0 && user.position_id) {
+        form.setValue("role_id", user.position_id, { shouldDirty: false });
       }
 
       // Keep personal email requirement: don't autofill Waterloo email into gmail field.
@@ -114,10 +115,15 @@ export default function OnboardingPage() {
           getActiveTerm(),
         ]);
 
-        const typedCurrentUser = currentUser as CurrentAdminUser | null;
+        const typedCurrentUser = currentUser as ExecUser | null;
 
         setCurrentTerm(term);
         setPositions(positionsData);
+        if (typedCurrentUser) {
+          const firstName = typedCurrentUser.first_name?.trim() ?? "";
+          const lastName = typedCurrentUser.last_name?.trim() ?? "";
+          setCurrentUserFullName(`${firstName} ${lastName}`.trim());
+        }
 
         const existingSubmission = await getOnboardingSubmission(term.id);
 
@@ -158,6 +164,7 @@ export default function OnboardingPage() {
       setSubmitError(null);
 
       try {
+        const fullName = currentUserFullName;
         await submitOnboardingForm(
           {
             ...values,
@@ -167,7 +174,7 @@ export default function OnboardingPage() {
             anything_else: values.anything_else ?? null,
           },
           headshotFile,
-          values.fullname,
+          fullName,
         );
         setHasSubmission(true);
         setIsEditing(false);
@@ -181,7 +188,7 @@ export default function OnboardingPage() {
         setIsSubmitting(false);
       }
     },
-    [currentTerm, headshotFile],
+    [currentTerm, headshotFile, currentUserFullName],
   );
 
   const isFormLocked = hasSubmission && !isEditing;
@@ -226,8 +233,8 @@ export default function OnboardingPage() {
             )}
           </h1>
           <CardDescription>
-            Complete the form below and save once at the bottom. Your headshot
-            will be uploaded once you have <b>saved</b> and <b>paid</b>!
+            Complete the form below and save at the bottom. Your headshot will
+            be uploaded only when you have <b>saved</b>!
           </CardDescription>
         </div>
 

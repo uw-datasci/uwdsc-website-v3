@@ -14,6 +14,8 @@ export interface QuestionScope {
   isPresident: boolean;
   /** VP subteam names resolved from exec roles (excluding Presidents). */
   vpSubteamNames: string[];
+  /** VP subteam ids resolved from exec roles (excluding Presidents). */
+  vpSubteamIds: number[];
   /** `application_positions_available.id` scoped to the user’s VP subteam(s) (see auth repository). */
   vpPositionIds: number[];
 }

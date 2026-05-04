@@ -1,4 +1,4 @@
-import { TermType } from "../shared";
+import { TermType, UserRole } from "../shared";
 // ==========================================
 //  Row-level types (1:1 with DB tables)
 // ==========================================
@@ -28,3 +28,20 @@ export type OnboardingData = Omit<
   Onboarding,
   "id" | "profile_id" | "submitted_at" | "created_at" | "updated_at"
 >;
+
+// ==========================================
+//  Composite types
+// ==========================================
+
+export interface OnboardingAdminRow {
+  profile_id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  user_role: UserRole;
+  exec_position_id: number | null;
+  exec_position_name: string | null;
+  submission_role_id: number | null;
+  submission_role_name: string | null;
+  submission: Onboarding | null;
+}

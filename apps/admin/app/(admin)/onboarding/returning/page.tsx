@@ -37,6 +37,9 @@ import {
   type AvailablePosition,
 } from "@/lib/api/returningExecs";
 
+/** Radix Select forbids `SelectItem value=""`; map this sentinel to cleared optional choices in form state. */
+const NO_POSITION_SELECT_VALUE = "__none__";
+
 const returningExecSchema = z
   .object({
     email: z.string().email("Invalid email address"),
@@ -410,7 +413,7 @@ export default function ReturningExecFormPage() {
                           <span className="text-destructive">*</span>
                         </FormLabel>
                         <Select
-                          value={field.value}
+                          value={field.value || undefined}
                           onValueChange={field.onChange}
                         >
                           <FormControl>
@@ -441,8 +444,16 @@ export default function ReturningExecFormPage() {
                           <span className="text-muted-foreground">(Optional)</span>
                         </FormLabel>
                         <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
+                          value={
+                            field.value
+                              ? field.value
+                              : NO_POSITION_SELECT_VALUE
+                          }
+                          onValueChange={(v) =>
+                            field.onChange(
+                              v === NO_POSITION_SELECT_VALUE ? "" : v,
+                            )
+                          }
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -450,7 +461,9 @@ export default function ReturningExecFormPage() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="">None</SelectItem>
+                            <SelectItem value={NO_POSITION_SELECT_VALUE}>
+                              None
+                            </SelectItem>
                             {positionOptions.map((p) => (
                               <SelectItem key={p.value} value={p.value}>
                                 {p.label}
@@ -473,8 +486,16 @@ export default function ReturningExecFormPage() {
                           <span className="text-muted-foreground">(Optional)</span>
                         </FormLabel>
                         <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
+                          value={
+                            field.value
+                              ? field.value
+                              : NO_POSITION_SELECT_VALUE
+                          }
+                          onValueChange={(v) =>
+                            field.onChange(
+                              v === NO_POSITION_SELECT_VALUE ? "" : v,
+                            )
+                          }
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -482,7 +503,9 @@ export default function ReturningExecFormPage() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="">None</SelectItem>
+                            <SelectItem value={NO_POSITION_SELECT_VALUE}>
+                              None
+                            </SelectItem>
                             {positionOptions.map((p) => (
                               <SelectItem key={p.value} value={p.value}>
                                 {p.label}

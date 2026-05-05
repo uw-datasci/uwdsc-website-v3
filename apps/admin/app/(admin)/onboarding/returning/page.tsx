@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { toast } from "sonner";
 import {
   Button,
@@ -12,21 +11,12 @@ import {
   CardHeader,
   CardTitle,
   Form,
-  FormControl,
   FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  Input,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Textarea,
   Separator,
-  RadioGroup,
-  RadioGroupItem,
+  renderSelectField,
+  renderStringRadioGroupField,
+  renderTextAreaField,
+  renderTextField,
 } from "@uwdsc/ui";
 import { Loader2, RotateCcw } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -36,64 +26,29 @@ import {
   upsertReturningExecSubmission,
   type AvailablePosition,
 } from "@/lib/api/returningExecs";
+import {
+  ReturningExecDefaultValues,
+  ReturningExecFormValues,
+  returningExecSchema,
+} from "@/lib/schemas/returningExec";
 
 /** Radix Select forbids `SelectItem value=""`; map this sentinel to cleared optional choices in form state. */
 const NO_POSITION_SELECT_VALUE = "__none__";
 
-const returningExecSchema = z
-  .object({
-    email: z.string().email("Invalid email address"),
-    full_name: z.string().min(1, "Full name is required"),
-    discord: z.string().min(1, "Discord handle is required").max(64),
-    past_positions: z
-      .string()
-      .min(1, "Please list your past positions and terms"),
-    interested_in_returning: z.enum(["true", "false"]),
-    not_returning_reason: z.string().optional(),
-    first_choice_position: z.string().optional(),
-    second_choice_position: z.string().optional(),
-    third_choice_position: z.string().optional(),
-    in_person_next_term: z.enum(["true", "false"]).optional(),
-    qualifications: z.string().optional(),
-    additional_notes: z.string().optional(),
-  })
-  .superRefine((data, ctx) => {
-    const isReturning = data.interested_in_returning === "true";
-    if (!isReturning) {
-      if (!data.not_returning_reason?.trim()) {
-        ctx.addIssue({
-          path: ["not_returning_reason"],
-          code: z.ZodIssueCode.custom,
-          message:
-            "Please provide a brief explanation for not returning (optional but encouraged)",
-        });
-      }
-    } else {
-      if (!data.first_choice_position) {
-        ctx.addIssue({
-          path: ["first_choice_position"],
-          code: z.ZodIssueCode.custom,
-          message: "Please select at least a first choice position",
-        });
-      }
-      if (!data.in_person_next_term) {
-        ctx.addIssue({
-          path: ["in_person_next_term"],
-          code: z.ZodIssueCode.custom,
-          message: "Please indicate whether you will be in person",
-        });
-      }
-      if (!data.qualifications?.trim()) {
-        ctx.addIssue({
-          path: ["qualifications"],
-          code: z.ZodIssueCode.custom,
-          message: "Please describe why you are interested/qualified",
-        });
-      }
-    }
-  });
+const YES_NO_RADIO_OPTIONS = [
+  { value: "true", label: "Yes" },
+  { value: "false", label: "No" },
+] as const;
 
-type ReturningExecFormValues = z.infer<typeof returningExecSchema>;
+function positionIdStringForPriority(
+  selections: readonly { priority: number; position_id: number }[],
+  priority: 1 | 2 | 3,
+): string {
+  const row = selections.find((s) => s.priority === priority);
+  if (row) return String(row.position_id);
+
+  return "";
+}
 
 export default function ReturningExecFormPage() {
   const { user } = useAuth();
@@ -104,20 +59,7 @@ export default function ReturningExecFormPage() {
 
   const form = useForm<ReturningExecFormValues>({
     resolver: zodResolver(returningExecSchema),
-    defaultValues: {
-      email: "",
-      full_name: "",
-      discord: "",
-      past_positions: "",
-      interested_in_returning: "true",
-      not_returning_reason: "",
-      first_choice_position: "",
-      second_choice_position: "",
-      third_choice_position: "",
-      in_person_next_term: undefined,
-      qualifications: "",
-      additional_notes: "",
-    },
+    defaultValues: ReturningExecDefaultValues,
   });
 
   const interestedInReturning = form.watch("interested_in_returning");
@@ -137,22 +79,16 @@ export default function ReturningExecFormPage() {
         if (sub) {
           setSubmitted(true);
           const sel = sub.position_selections ?? [];
-          const pick = (p: 1 | 2 | 3) =>
-            String(
-              sel.find((s) => s.priority === p)?.position_id ?? "",
-            );
           form.reset({
             email: sub.email,
             full_name: sub.full_name,
             discord: sub.discord,
             past_positions: sub.past_positions,
-            interested_in_returning: sub.interested_in_returning
-              ? "true"
-              : "false",
+            interested_in_returning: sub.interested_in_returning ? "true" : "false",
             not_returning_reason: sub.not_returning_reason ?? "",
-            first_choice_position: pick(1),
-            second_choice_position: pick(2),
-            third_choice_position: pick(3),
+            first_choice_position: positionIdStringForPriority(sel, 1),
+            second_choice_position: positionIdStringForPriority(sel, 2),
+            third_choice_position: positionIdStringForPriority(sel, 3),
             in_person_next_term: sub.in_person_next_term ? "true" : "false",
             qualifications: sub.qualifications,
             additional_notes: sub.additional_notes ?? "",
@@ -165,9 +101,7 @@ export default function ReturningExecFormPage() {
           form.setValue("email", user.email ?? "");
         }
       } catch (err) {
-        toast.error(
-          err instanceof Error ? err.message : "Failed to load form data",
-        );
+        toast.error(err instanceof Error ? err.message : "Failed to load form data");
       } finally {
         setLoading(false);
       }
@@ -179,8 +113,7 @@ export default function ReturningExecFormPage() {
     setSubmitting(true);
     try {
       const isRet = values.interested_in_returning === "true";
-      const positionSelections: { position_id: number; priority: 1 | 2 | 3 }[] =
-        [];
+      const positionSelections: { position_id: number; priority: 1 | 2 | 3 }[] = [];
       if (isRet) {
         if (values.first_choice_position)
           positionSelections.push({
@@ -206,9 +139,7 @@ export default function ReturningExecFormPage() {
         discord: values.discord,
         past_positions: values.past_positions,
         interested_in_returning: isRet,
-        not_returning_reason: isRet
-          ? null
-          : (values.not_returning_reason ?? null),
+        not_returning_reason: isRet ? null : (values.not_returning_reason ?? null),
         in_person_next_term: values.in_person_next_term === "true",
         qualifications: values.qualifications ?? "",
         additional_notes: values.additional_notes ?? null,
@@ -216,13 +147,9 @@ export default function ReturningExecFormPage() {
       });
 
       setSubmitted(true);
-      toast.success(
-        submitted ? "Response updated successfully" : "Response submitted",
-      );
+      toast.success(submitted ? "Response updated successfully" : "Response submitted");
     } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Failed to submit response",
-      );
+      toast.error(err instanceof Error ? err.message : "Failed to submit response");
     } finally {
       setSubmitting(false);
     }
@@ -240,6 +167,14 @@ export default function ReturningExecFormPage() {
     value: String(p.position_id),
     label: p.name,
   }));
+
+  const optionalPositionSelectOptions = [
+    { value: NO_POSITION_SELECT_VALUE, label: "None" },
+    ...positionOptions,
+  ];
+
+  const submitButtonLoadingText = submitted ? "Updating..." : "Submitting...";
+  const submitButtonIdleText = submitted ? "Update Response" : "Submit";
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 py-8">
@@ -262,71 +197,43 @@ export default function ReturningExecFormPage() {
                 <FormField
                   control={form.control}
                   name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Email address <span className="text-destructive">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input placeholder="you@example.com" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={renderTextField({
+                    label: "Email address",
+                    placeholder: "you@example.com",
+                    required: true,
+                  })}
                 />
                 <FormField
                   control={form.control}
                   name="full_name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Full name <span className="text-destructive">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input placeholder="Jane Smith" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={renderTextField({
+                    label: "Full name",
+                    placeholder: "Jane Smith",
+                    required: true,
+                  })}
                 />
               </div>
 
               <FormField
                 control={form.control}
                 name="discord"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Discord handle <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder="username#0000 or username" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={renderTextField({
+                  label: "Discord handle",
+                  placeholder: "username#0000 or username",
+                  required: true,
+                })}
               />
 
               <FormField
                 control={form.control}
                 name="past_positions"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      List all positions &amp; terms you&apos;ve been on at UWDSC{" "}
-                      <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="e.g. VP Marketing (W25), Events Lead (F24)"
-                        className="resize-none"
-                        rows={3}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={renderTextAreaField({
+                  label: "List all positions & terms you've been on at UWDSC",
+                  placeholder: "e.g. VP Marketing (W25), Events Lead (F24)",
+                  required: true,
+                  className: "resize-none",
+                  textareaProps: { rows: 3 },
+                })}
               />
             </CardContent>
           </Card>
@@ -339,58 +246,26 @@ export default function ReturningExecFormPage() {
               <FormField
                 control={form.control}
                 name="interested_in_returning"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Are you interested in returning and building on your
-                      impact? <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <RadioGroup
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        className="flex gap-6 pt-1"
-                      >
-                        <div className="flex items-center gap-2">
-                          <RadioGroupItem value="true" id="ret-yes" />
-                          <label htmlFor="ret-yes" className="text-sm">
-                            Yes
-                          </label>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <RadioGroupItem value="false" id="ret-no" />
-                          <label htmlFor="ret-no" className="text-sm">
-                            No
-                          </label>
-                        </div>
-                      </RadioGroup>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={renderStringRadioGroupField({
+                  label: "Are you interested in returning and building on your impact?",
+                  required: true,
+                  idPrefix: "returning-exec-interest",
+                  groupClassName: "flex gap-6 pt-1",
+                  options: YES_NO_RADIO_OPTIONS,
+                })}
               />
 
               {!isReturning && (
                 <FormField
                   control={form.control}
                   name="not_returning_reason"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Please provide a brief explanation{" "}
-                        <span className="text-muted-foreground">(Optional)</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Share any context you'd like us to know"
-                          className="resize-none"
-                          rows={3}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={renderTextAreaField({
+                    label: "Please provide a brief explanation (Optional)",
+                    placeholder: "Share any context you'd like us to know",
+                    required: false,
+                    className: "resize-none",
+                    textareaProps: { rows: 3 },
+                  })}
                 />
               )}
             </CardContent>
@@ -406,116 +281,36 @@ export default function ReturningExecFormPage() {
                   <FormField
                     control={form.control}
                     name="first_choice_position"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          First choice role{" "}
-                          <span className="text-destructive">*</span>
-                        </FormLabel>
-                        <Select
-                          value={field.value || undefined}
-                          onValueChange={field.onChange}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a position" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {positionOptions.map((p) => (
-                              <SelectItem key={p.value} value={p.value}>
-                                {p.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    render={renderSelectField({
+                      label: "First choice role",
+                      placeholder: "Select a position",
+                      required: true,
+                      options: positionOptions,
+                    })}
                   />
 
                   <FormField
                     control={form.control}
                     name="second_choice_position"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Second choice role{" "}
-                          <span className="text-muted-foreground">(Optional)</span>
-                        </FormLabel>
-                        <Select
-                          value={
-                            field.value
-                              ? field.value
-                              : NO_POSITION_SELECT_VALUE
-                          }
-                          onValueChange={(v) =>
-                            field.onChange(
-                              v === NO_POSITION_SELECT_VALUE ? "" : v,
-                            )
-                          }
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a position" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value={NO_POSITION_SELECT_VALUE}>
-                              None
-                            </SelectItem>
-                            {positionOptions.map((p) => (
-                              <SelectItem key={p.value} value={p.value}>
-                                {p.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    render={renderSelectField({
+                      label: "Second choice role (Optional)",
+                      placeholder: "Select a position",
+                      required: false,
+                      clearValueSentinel: NO_POSITION_SELECT_VALUE,
+                      options: optionalPositionSelectOptions,
+                    })}
                   />
 
                   <FormField
                     control={form.control}
                     name="third_choice_position"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Third choice role{" "}
-                          <span className="text-muted-foreground">(Optional)</span>
-                        </FormLabel>
-                        <Select
-                          value={
-                            field.value
-                              ? field.value
-                              : NO_POSITION_SELECT_VALUE
-                          }
-                          onValueChange={(v) =>
-                            field.onChange(
-                              v === NO_POSITION_SELECT_VALUE ? "" : v,
-                            )
-                          }
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a position" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value={NO_POSITION_SELECT_VALUE}>
-                              None
-                            </SelectItem>
-                            {positionOptions.map((p) => (
-                              <SelectItem key={p.value} value={p.value}>
-                                {p.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    render={renderSelectField({
+                      label: "Third choice role (Optional)",
+                      placeholder: "Select a position",
+                      required: false,
+                      clearValueSentinel: NO_POSITION_SELECT_VALUE,
+                      options: optionalPositionSelectOptions,
+                    })}
                   />
                 </CardContent>
               </Card>
@@ -528,81 +323,37 @@ export default function ReturningExecFormPage() {
                   <FormField
                     control={form.control}
                     name="in_person_next_term"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Will you be in person next term?{" "}
-                          <span className="text-destructive">*</span>
-                        </FormLabel>
-                        <FormControl>
-                          <RadioGroup
-                            value={field.value}
-                            onValueChange={field.onChange}
-                            className="flex gap-6 pt-1"
-                          >
-                            <div className="flex items-center gap-2">
-                              <RadioGroupItem value="true" id="ip-yes" />
-                              <label htmlFor="ip-yes" className="text-sm">
-                                Yes
-                              </label>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <RadioGroupItem value="false" id="ip-no" />
-                              <label htmlFor="ip-no" className="text-sm">
-                                No
-                              </label>
-                            </div>
-                          </RadioGroup>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    render={renderStringRadioGroupField({
+                      label: "Will you be in person next term?",
+                      required: true,
+                      idPrefix: "returning-exec-in-person",
+                      groupClassName: "flex gap-6 pt-1",
+                      options: YES_NO_RADIO_OPTIONS,
+                    })}
                   />
 
                   <FormField
                     control={form.control}
                     name="qualifications"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Why are you interested/qualified for the role?{" "}
-                          <span className="text-destructive">*</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder={
-                              "• Led events team for two terms\n• Grew workshop attendance by 40%\n• Strong relationships with sponsors"
-                            }
-                            className="resize-none font-mono text-sm"
-                            rows={5}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    render={renderTextAreaField({
+                      label: "Why are you interested/qualified for the role?",
+                      placeholder: "Enter your answer here...",
+                      required: true,
+                      className: "resize-none text-sm",
+                      textareaProps: { rows: 6 },
+                    })}
                   />
 
                   <FormField
                     control={form.control}
                     name="additional_notes"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Anything you would like us to know?{" "}
-                          <span className="text-muted-foreground">(Optional)</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Any additional context..."
-                            className="resize-none"
-                            rows={3}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    render={renderTextAreaField({
+                      label: "Anything you would like us to know? (Optional)",
+                      placeholder: "Any additional context...",
+                      required: false,
+                      className: "resize-none",
+                      textareaProps: { rows: 3 },
+                    })}
                   />
                 </CardContent>
               </Card>
@@ -627,12 +378,10 @@ export default function ReturningExecFormPage() {
               {submitting ? (
                 <>
                   <Loader2 className="size-4 animate-spin" />
-                  {submitted ? "Updating..." : "Submitting..."}
+                  {submitButtonLoadingText}
                 </>
-              ) : submitted ? (
-                "Update Response"
               ) : (
-                "Submit"
+                submitButtonIdleText
               )}
             </Button>
           </div>

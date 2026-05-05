@@ -65,6 +65,11 @@ interface SelectFieldOptions {
   itemClassName?: string;
   /** Use "popper" for stable dropdown positioning (avoids content shifting on hover). */
   contentPosition?: "item-aligned" | "popper";
+  /**
+   * When the field value is "" (or undefined), the select displays this option value.
+   * Choosing that option writes "" to the field (for optional clears / "None" rows).
+   */
+  clearValueSentinel?: string;
 }
 
 interface TextAreaFieldOptions {
@@ -79,6 +84,15 @@ interface TextAreaFieldOptions {
 interface RadioFieldOptions {
   label: string;
   required?: boolean;
+}
+
+interface StringRadioGroupFieldOptions {
+  label: string;
+  required?: boolean;
+  options: readonly { value: string; label: string }[];
+  groupClassName?: string;
+  /** Unique prefix for `id` / `htmlFor` (e.g. `returning-interest`). */
+  idPrefix: string;
 }
 
 interface ScaleFieldOptions {
@@ -183,9 +197,21 @@ export function renderSelectField(opts: SelectFieldOptions) {
     contentClassName,
     itemClassName,
     contentPosition,
+    clearValueSentinel,
   } = opts;
 
   function SelectFieldRender({ field }: StringFieldRenderProps) {
+    const raw = field.value ?? "";
+    const resolvedValue = raw === "" ? clearValueSentinel : raw;
+
+    function handleChange(v: string) {
+      if (clearValueSentinel === undefined || v !== clearValueSentinel) {
+        field.onChange(v);
+      } else {
+        field.onChange("");
+      }
+    }
+
     return (
       <FormItem>
         {label != null && (
@@ -194,8 +220,8 @@ export function renderSelectField(opts: SelectFieldOptions) {
           </FormLabel>
         )}
         <Select
-          onValueChange={field.onChange}
-          value={field.value === "" ? undefined : field.value}
+          onValueChange={handleChange}
+          value={resolvedValue}
           disabled={disabled}
         >
           <FormControl>
@@ -224,6 +250,48 @@ export function renderSelectField(opts: SelectFieldOptions) {
   }
   SelectFieldRender.displayName = `SelectField(${placeholder})`;
   return SelectFieldRender;
+}
+
+export function renderStringRadioGroupField(opts: StringRadioGroupFieldOptions) {
+  const {
+    label,
+    required = true,
+    options: radioOptions,
+    groupClassName = "flex flex-col space-y-1",
+    idPrefix,
+  } = opts;
+
+  function StringRadioGroupFieldRender({ field }: StringFieldRenderProps) {
+    return (
+      <FormItem className="space-y-3">
+        <FormLabel>
+          {label} {required && <span className="text-red-500">*</span>}
+        </FormLabel>
+        <FormControl>
+          <RadioGroup
+            value={field.value}
+            onValueChange={field.onChange}
+            className={groupClassName}
+          >
+            {radioOptions.map((opt) => {
+              const inputId = `${idPrefix}-${opt.value}`;
+              return (
+                <div key={opt.value} className="flex items-center gap-2">
+                  <RadioGroupItem value={opt.value} id={inputId} />
+                  <label htmlFor={inputId} className="text-sm">
+                    {opt.label}
+                  </label>
+                </div>
+              );
+            })}
+          </RadioGroup>
+        </FormControl>
+        <FormMessage />
+      </FormItem>
+    );
+  }
+  StringRadioGroupFieldRender.displayName = `StringRadioGroupField(${label})`;
+  return StringRadioGroupFieldRender;
 }
 
 export function renderTextAreaField(opts: TextAreaFieldOptions) {

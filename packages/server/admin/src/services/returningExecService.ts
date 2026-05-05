@@ -30,9 +30,7 @@ class ReturningExecService {
     this.repository = new ReturningExecRepository();
   }
 
-  async getOwnSubmission(
-    profile_id: string,
-  ): Promise<ReturningExecOwnSubmission | null> {
+  async getOwnSubmission(profile_id: string): Promise<ReturningExecOwnSubmission | null> {
     const term = await this.repository.getActiveTerm();
     if (!term) return null;
     return this.repository.getSubmission(profile_id, term.id);
@@ -43,9 +41,7 @@ class ReturningExecService {
     data: ReturningExecSubmissionData,
   ): Promise<ReturningExecOwnSubmission> {
     const term = await this.repository.getActiveTerm();
-    if (!term) {
-      throw new ApiError("No active term found", 400);
-    }
+    if (!term) throw new ApiError("No active term found", 400);
 
     if (data.position_selections.length > 3) {
       throw new ApiError("Cannot select more than 3 positions", 400);
@@ -57,10 +53,7 @@ class ReturningExecService {
       throw new ApiError("Duplicate priorities in position selections", 400);
     }
 
-    return this.repository.upsertSubmission(profile_id, {
-      ...data,
-      term_id: term.id,
-    });
+    return this.repository.upsertSubmission(profile_id, { ...data, term_id: term.id });
   }
 
   async getAllSubmissionsForActiveTerm(): Promise<{
@@ -86,29 +79,19 @@ class ReturningExecService {
     status: ApplicationReviewStatus,
   ): Promise<void> {
     const selection = await this.repository.getSelectionById(selectionId);
-    if (!selection) {
-      throw new ApiError("Selection not found", 404);
-    }
+    if (!selection) throw new ApiError("Selection not found", 404);
 
     const allowedStatuses = scope.isPresident
       ? PRESIDENT_REVIEW_STATUS_SET
       : VP_REVIEW_STATUS_SET;
 
     if (!allowedStatuses.has(status)) {
-      throw new ApiError(
-        `Status "${status}" is not allowed for your role`,
-        403,
-      );
+      throw new ApiError(`Status "${status}" is not allowed for your role`, 403);
     }
 
     if (!scope.isPresident) {
       const allowed = scope.vpPositionIds.includes(selection.position_id);
-      if (!allowed) {
-        throw new ApiError(
-          "You can only update selections for positions in your subteam",
-          403,
-        );
-      }
+      if (!allowed) throw new ApiError("You can only update selections in your subteam", 403);
     }
 
     await this.repository.updateSelectionStatus(selectionId, status);

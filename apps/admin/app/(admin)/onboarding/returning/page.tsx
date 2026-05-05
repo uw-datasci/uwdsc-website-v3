@@ -570,7 +570,9 @@ export default function ReturningExecFormPage() {
                         </FormLabel>
                         <FormControl>
                           <Textarea
-                            placeholder="• Led events team for two terms&#10;• Grew workshop attendance by 40%&#10;• Strong relationships with sponsors"
+                            placeholder={
+                              "• Led events team for two terms\n• Grew workshop attendance by 40%\n• Strong relationships with sponsors"
+                            }
                             className="resize-none font-mono text-sm"
                             rows={5}
                             {...field}

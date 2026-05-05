@@ -29,6 +29,7 @@ interface ApplicantTableProps {
   onSelectionStatusChange: (
     selectionId: string,
     status: ApplicationReviewStatus,
+    source?: "application" | "returning_exec",
   ) => Promise<void>;
 }
 
@@ -109,9 +110,16 @@ export function ApplicantTable({
                 <TableRow key={applicant.id}>
                   <TableCell className={bodyCell}>
                     <div className="flex max-w-[320px] flex-col gap-0.5">
-                      <span className="font-medium leading-tight">
-                        {applicant.full_name}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium leading-tight">
+                          {applicant.full_name}
+                        </span>
+                        {applicant.source === "returning_exec" && (
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0">
+                            Returning
+                          </Badge>
+                        )}
+                      </div>
                       <span className="break-all text-xs leading-snug text-muted-foreground">
                         {applicant.email ?? "N/A"}
                       </span>
@@ -161,6 +169,7 @@ export function ApplicantTable({
                               applicantName={applicant.full_name}
                               roleLabel={roleLabel}
                               disabled={updatingSelectionId === selection.id}
+                              source={applicant.source}
                               onConfirmStatus={onSelectionStatusChange}
                             />
                           </div>

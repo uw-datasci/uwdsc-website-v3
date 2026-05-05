@@ -12,6 +12,7 @@ import { Session, User } from "@supabase/supabase-js";
 export type ExecUser = Profile & {
   position_id?: number | null;
   subteam_id?: number | null;
+  role?: string | null;
 };
 
 interface LoginResponse {

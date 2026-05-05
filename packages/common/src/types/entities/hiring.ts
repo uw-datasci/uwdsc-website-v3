@@ -1,5 +1,7 @@
 import type { ApplicationReviewStatus, UserRole } from "../shared/enums";
 
+export type HiringSource = "application" | "returning_exec";
+
 /** A position selection enriched with VP/subteam info for the hiring dashboard */
 export interface HiringPositionSelection {
   id: string;
@@ -10,6 +12,7 @@ export interface HiringPositionSelection {
   position_name: string;
   is_vp: boolean;
   subteam_name: string | null;
+  source: HiringSource;
 }
 
 /** An applicant row for the hiring dashboard */
@@ -21,6 +24,7 @@ export interface HiringApplicant {
   personal_email: string | null;
   submitted_at: string;
   position_selections: HiringPositionSelection[];
+  source: HiringSource;
 }
 
 /** A member of the new exec team derived from Accepted Offer selections */

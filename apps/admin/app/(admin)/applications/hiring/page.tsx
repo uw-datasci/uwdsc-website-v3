@@ -101,11 +101,12 @@ export default function HiringPage() {
   const handleSelectionStatusChange = async (
     selectionId: string,
     nextStatus: ApplicationReviewStatus,
+    source?: "application" | "returning_exec",
   ) => {
     setUpdatingSelectionId(selectionId);
 
     try {
-      await updateSelectionStatus(selectionId, nextStatus);
+      await updateSelectionStatus(selectionId, nextStatus, source);
       toast.success("Status updated");
       await fetchApplicants();
       fetchTeam();

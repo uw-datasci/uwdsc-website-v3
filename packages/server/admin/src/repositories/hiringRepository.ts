@@ -18,6 +18,15 @@ interface AcceptedOfferRow {
 
 export class HiringRepository extends BaseRepository {
   async getHiringApplicants(): Promise<HiringApplicant[]> {
+    const HIRING_STATUSES = [
+      "Wanted",
+      "Not Wanted",
+      "Offer Sent",
+      "Accepted Offer",
+      "Declined Offer",
+      "Rejection Sent",
+    ] as const;
+
     const applications = await this.sql<
       {
         id: string;
@@ -42,47 +51,112 @@ export class HiringRepository extends BaseRepository {
           SELECT 1
           FROM application_position_selections aps
           WHERE aps.application_id = a.id
-            AND aps.status in ('Wanted', 'Not Wanted', 'Offer Sent', 'Accepted Offer', 'Declined Offer', 'Rejection Sent')
+            AND aps.status IN ${this.sql(HIRING_STATUSES)}
         )
       ORDER BY a.submitted_at DESC
     `;
 
-    if (applications.length === 0) return [];
-
     const applicationIds = applications.map((a) => a.id);
 
-    const selections = await this.sql<
-      (HiringPositionSelection & { application_id: string })[]
-    >`
-      SELECT
-        aps.id,
-        aps.application_id,
-        aps.position_id,
-        aps.priority,
-        aps.status,
-        ep.name AS position_name,
-        ep.is_vp,
-        st.name AS subteam_name
-      FROM application_position_selections aps
-      JOIN application_positions_available apa ON aps.position_id = apa.id
-      JOIN exec_positions ep ON apa.position_id = ep.id
-      LEFT JOIN subteams st ON st.id = ep.subteam_id
-      WHERE aps.application_id IN ${this.sql(applicationIds)}
-        AND aps.status in ('Wanted', 'Not Wanted', 'Offer Sent', 'Accepted Offer', 'Declined Offer', 'Rejection Sent')
-      ORDER BY aps.priority
-    `;
+    const selections = applicationIds.length > 0
+      ? await this.sql<(HiringPositionSelection & { application_id: string })[]>`
+          SELECT
+            aps.id,
+            aps.application_id,
+            aps.position_id,
+            aps.priority,
+            aps.status,
+            ep.name AS position_name,
+            ep.is_vp,
+            st.name AS subteam_name
+          FROM application_position_selections aps
+          JOIN application_positions_available apa ON aps.position_id = apa.id
+          JOIN exec_positions ep ON apa.position_id = ep.id
+          LEFT JOIN subteams st ON st.id = ep.subteam_id
+          WHERE aps.application_id IN ${this.sql(applicationIds)}
+            AND aps.status IN ${this.sql(HIRING_STATUSES)}
+          ORDER BY aps.priority
+        `
+      : [];
 
     const selectionsMap = new Map<string, HiringPositionSelection[]>();
     for (const sel of selections) {
       const list = selectionsMap.get(sel.application_id) ?? [];
-      list.push(sel);
+      list.push({ ...sel, source: "application" as const });
       selectionsMap.set(sel.application_id, list);
     }
 
-    return applications.map((app) => ({
+    const regularApplicants: HiringApplicant[] = applications.map((app) => ({
       ...app,
+      source: "application" as const,
       position_selections: selectionsMap.get(app.id) ?? [],
     }));
+
+    // Fetch returning-exec hiring rows for the active term
+    const activeTermRows = await this.sql<{ id: string }[]>`
+      SELECT id FROM public.terms WHERE is_active = true ORDER BY created_at DESC LIMIT 1
+    `;
+    const activeTerm = activeTermRows[0];
+    if (!activeTerm) return regularApplicants;
+
+    const returningSubmissions = await this.sql<
+      { id: string; profile_id: string; full_name: string; email: string; submitted_at: string }[]
+    >`
+      SELECT s.id, s.profile_id, s.full_name, s.email, s.submitted_at
+      FROM public.returning_exec_submissions s
+      WHERE s.term_id = ${activeTerm.id}
+        AND EXISTS (
+          SELECT 1 FROM public.returning_exec_position_selections reps
+          WHERE reps.submission_id = s.id
+            AND reps.status IN ${this.sql(HIRING_STATUSES)}
+        )
+      ORDER BY s.submitted_at DESC
+    `;
+
+    if (returningSubmissions.length === 0) return regularApplicants;
+
+    const returningIds = returningSubmissions.map((s) => s.id);
+    const returningSelections = await this.sql<
+      (HiringPositionSelection & { submission_id: string })[]
+    >`
+      SELECT
+        reps.id,
+        reps.submission_id AS application_id,
+        reps.submission_id,
+        reps.position_id,
+        reps.priority,
+        reps.status,
+        ep.name AS position_name,
+        ep.is_vp,
+        st.name AS subteam_name
+      FROM public.returning_exec_position_selections reps
+      JOIN public.application_positions_available apa ON apa.id = reps.position_id
+      JOIN public.exec_positions ep ON ep.id = apa.position_id
+      LEFT JOIN public.subteams st ON st.id = ep.subteam_id
+      WHERE reps.submission_id IN ${this.sql(returningIds)}
+        AND reps.status IN ${this.sql(HIRING_STATUSES)}
+      ORDER BY reps.priority
+    `;
+
+    const returningSelectionsMap = new Map<string, HiringPositionSelection[]>();
+    for (const sel of returningSelections) {
+      const list = returningSelectionsMap.get(sel.submission_id) ?? [];
+      list.push({ ...sel, source: "returning_exec" as const });
+      returningSelectionsMap.set(sel.submission_id, list);
+    }
+
+    const returningApplicants: HiringApplicant[] = returningSubmissions.map((s) => ({
+      id: s.id,
+      profile_id: s.profile_id,
+      full_name: s.full_name,
+      email: s.email,
+      personal_email: null,
+      submitted_at: s.submitted_at,
+      source: "returning_exec" as const,
+      position_selections: returningSelectionsMap.get(s.id) ?? [],
+    }));
+
+    return [...regularApplicants, ...returningApplicants];
   }
 
   /**

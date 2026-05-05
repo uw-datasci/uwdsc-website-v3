@@ -47,7 +47,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     loadPosition();
   }, [user?.position_id, isLoading]);
 
-  const navigationList = getAdminNavigation(positionName);
+  const navigationList = getAdminNavigation(positionName, user?.role);
 
   const handleSignOut = async () => {
     try {

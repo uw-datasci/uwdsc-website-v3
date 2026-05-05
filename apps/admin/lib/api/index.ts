@@ -11,3 +11,4 @@ export * from "./events";
 export * from "./foundry";
 export * from "./profile";
 export * from "./hiring";
+export * from "./returningExecs";

@@ -85,7 +85,7 @@ export function ExecWelcomeEmail({
             <Text style={listItemStyle}>
               •{" "}
               <Link
-                href={"https://admin.uwdatascience.ca/onboarding"}
+                href={"https://admin.uwdatascience.ca/logistics/onboarding"}
                 style={linkStyle}
               >
                 Exec Onboarding Form

@@ -14,17 +14,14 @@ export function OnboardingDetail({ row }: OnboardingDetailProps) {
       <div className="flex items-center justify-center h-full">
         <div className="text-center space-y-2">
           <User className="h-12 w-12 mx-auto text-muted-foreground/40" />
-          <p className="text-muted-foreground text-sm">
-            Select a record to view details
-          </p>
+          <p className="text-muted-foreground text-sm">Select a record to view details</p>
         </div>
       </div>
     );
   }
 
   const name = [row.first_name, row.last_name].filter(Boolean).join(" ") || "—";
-  const position =
-    row.submission_role_name || row.exec_position_name || row.user_role;
+  const position = row.submission_role_name || row.exec_position_name || row.user_role;
   const sub = row.submission;
 
   return (
@@ -83,7 +80,7 @@ export function OnboardingDetail({ row }: OnboardingDetailProps) {
                   label="Data Science Competency"
                   value={String(sub.datasci_competency ?? "—")}
                 />
-                {sub && sub.consent_instagram && (
+                {sub?.consent_instagram && (
                   <Field label="Instagram" value={sub.instagram || "—"} />
                 )}
               </div>
@@ -112,9 +109,7 @@ export function OnboardingDetail({ row }: OnboardingDetailProps) {
               <>
                 <Separator />
                 <div>
-                  <h3 className="text-sm font-semibold mb-3">
-                    Additional Comments
-                  </h3>
+                  <h3 className="text-sm font-semibold mb-3">Additional Comments</h3>
                   <div className="rounded-md bg-muted/50 p-3">
                     <p className="text-sm whitespace-pre-wrap leading-relaxed">
                       {sub.anything_else}
@@ -139,12 +134,10 @@ export function OnboardingDetail({ row }: OnboardingDetailProps) {
   );
 }
 
-function Field({ label, value }: { label: string; value: string }) {
+function Field({ label, value }: Readonly<{ label: string; value: string }>) {
   return (
     <div>
-      <p className="text-xs text-muted-foreground uppercase tracking-wide">
-        {label}
-      </p>
+      <p className="text-xs text-muted-foreground uppercase tracking-wide">{label}</p>
       <p className="text-sm font-medium mt-0.5">{value}</p>
     </div>
   );

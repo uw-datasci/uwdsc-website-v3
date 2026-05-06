@@ -3,10 +3,11 @@ import {
   Anvil,
   Calendar,
   CircleHelp,
+  ClipboardCheck,
   Code2,
   FileText,
-  Handshake,
   LayoutDashboard,
+  Package,
   Library,
   Mail,
   UserCheck,
@@ -31,12 +32,12 @@ export const getAdminNavigation = (
     { name: "Hiring", href: "/applications/hiring", icon: UserCheck },
     ...(isAdmin
       ? [
-          {
-            name: "Returning Execs",
-            href: "/applications/returning-execs",
-            icon: UserCheck,
-          },
-        ]
+        {
+          name: "Returning Execs",
+          href: "/applications/returning-execs",
+          icon: UserCheck,
+        },
+      ]
       : []),
   ];
 
@@ -52,18 +53,29 @@ export const getAdminNavigation = (
     { name: "Events", href: "/events", icon: Calendar },
     { name: "Campaigns", href: "/campaigns", icon: Mail },
     {
-      name: "Onboarding",
-      href: "/onboarding",
-      icon: Handshake,
+      name: "Logistics",
+      href: "/logistics",
+      icon: Package,
       subItems: [
         {
-          name: "Returning",
-          href: "/onboarding/returning",
-          icon: UserCheck,
+          name: "Onboarding",
+          href: "/logistics/onboarding",
+          icon: FileText,
         },
         ...(isExec
-          ? [{ name: "Review", href: "/onboarding/review", icon: UserCheck }]
+          ? [
+            {
+              name: "Onboarding review",
+              href: "/logistics/onboarding-review",
+              icon: ClipboardCheck,
+            },
+          ]
           : []),
+        {
+          name: "Returning execs",
+          href: "/logistics/returning",
+          icon: UserCheck,
+        },
       ],
     },
     {

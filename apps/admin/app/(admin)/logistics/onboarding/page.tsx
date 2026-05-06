@@ -11,8 +11,8 @@ import {
   getOnboardingSubmission,
   submitOnboardingForm,
 } from "@/lib/api/onboarding";
-import { ExecUser, getCurrentUser } from "@/lib/api/auth";
-import { ExecProfile, General } from "@/components/onboarding";
+import { getCurrentUser } from "@/lib/api/auth";
+import { ExecProfile, General } from "@/components/logistics/onboarding";
 import {
   OnboardingFormValues,
   OnboardingDefaultValues,
@@ -21,7 +21,7 @@ import {
 import { useForm } from "react-hook-form";
 import { ExecPosition, Onboarding, Term } from "@uwdsc/common/types";
 
-export default function OnboardingPage() {
+export default function LogisticsOnboardingPage() {
   const [currentTerm, setCurrentTerm] = useState<Term | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
@@ -64,11 +64,7 @@ export default function OnboardingPage() {
       }
 
       // Keep personal email requirement: don't autofill Waterloo email into gmail field.
-      if (
-        !form.getValues("email") &&
-        email &&
-        !email.toLowerCase().endsWith("@uwaterloo.ca")
-      ) {
+      if (!form.getValues("email") && email && !email.toLowerCase().endsWith("@uwaterloo.ca")) {
         form.setValue("email", email, { shouldDirty: false });
       }
     },
@@ -115,7 +111,7 @@ export default function OnboardingPage() {
           getActiveTerm(),
         ]);
 
-        const typedCurrentUser = currentUser as ExecUser | null;
+        const typedCurrentUser = currentUser;
 
         setCurrentTerm(term);
         setPositions(positionsData);
@@ -128,12 +124,9 @@ export default function OnboardingPage() {
         const existingSubmission = await getOnboardingSubmission(term.id);
 
         if (existingSubmission) {
-          form.reset(
-            mapSubmissionToForm(existingSubmission, typedCurrentUser),
-            {
-              keepDirty: false,
-            },
-          );
+          form.reset(mapSubmissionToForm(existingSubmission, typedCurrentUser), {
+            keepDirty: false,
+          });
           setHasSubmission(true);
           setIsEditing(false);
         } else {
@@ -143,9 +136,7 @@ export default function OnboardingPage() {
         }
       } catch (err) {
         console.error("Failed to fetch application data:", err);
-        setFetchError(
-          err instanceof Error ? err.message : "Failed to load application",
-        );
+        setFetchError(err instanceof Error ? err.message : "Failed to load application");
       } finally {
         setIsFetching(false);
       }
@@ -181,9 +172,7 @@ export default function OnboardingPage() {
         setHeadshotFile(null);
       } catch (err) {
         console.error(err);
-        setSubmitError(
-          err instanceof Error ? err.message : "Failed to save onboarding",
-        );
+        setSubmitError(err instanceof Error ? err.message : "Failed to save onboarding");
       } finally {
         setIsSubmitting(false);
       }
@@ -216,25 +205,20 @@ export default function OnboardingPage() {
       <div className="mx-auto max-w-5xl space-y-6">
         <div className="space-y-2">
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            Onboarding
+            Logistics
           </p>
           <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight">
             W26 Onboarding Form
             {isFormLocked && (
-              <Lock
-                className="size-6 text-muted-foreground"
-                aria-label="Form is locked"
-              />
+              <Lock className="size-6 text-muted-foreground" aria-label="Form is locked" />
             )}
             {!isFormLocked && hasSubmission && isEditing && (
-              <span className="text-lg sm:text-xl font-medium text-primary">
-                (editing)
-              </span>
+              <span className="text-lg sm:text-xl font-medium text-primary">(editing)</span>
             )}
           </h1>
           <CardDescription>
-            Complete the form below and save at the bottom. Your headshot will
-            be uploaded only when you have <b>saved</b>!
+            Complete the form below and save at the bottom. Your headshot will be uploaded only
+            when you have <b>saved</b>!
           </CardDescription>
         </div>
 
@@ -245,9 +229,7 @@ export default function OnboardingPage() {
             className="space-y-6 disabled:opacity-90"
           >
             <ExecProfile
-              key={
-                isFormLocked ? "exec-profile-locked" : "exec-profile-editing"
-              }
+              key={isFormLocked ? "exec-profile-locked" : "exec-profile-editing"}
               form={form}
               execPositions={positions}
               headshotFile={headshotFile}
@@ -268,19 +250,14 @@ export default function OnboardingPage() {
                 </p>
                 {!isFormLocked && hasSubmission && (
                   <p className="mt-1 text-xs leading-relaxed text-muted-foreground sm:text-sm">
-                    You are in{" "}
-                    <span className="font-semibold text-primary">
-                      editing mode
-                    </span>
-                    . Remember to click Save to update your info.
+                    You are in <span className="font-semibold text-primary">editing mode</span>.
+                    Remember to click Save to update your info.
                   </p>
                 )}
               </div>
 
               <div className="flex flex-col items-start gap-3 sm:items-end">
-                {submitError && (
-                  <p className="text-sm text-destructive">{submitError}</p>
-                )}
+                {submitError && <p className="text-sm text-destructive">{submitError}</p>}
 
                 {isFormLocked ? (
                   <Button
@@ -298,12 +275,7 @@ export default function OnboardingPage() {
                     Edit
                   </Button>
                 ) : (
-                  <Button
-                    type="submit"
-                    size="lg"
-                    disabled={isSubmitting}
-                    className="gap-2"
-                  >
+                  <Button type="submit" size="lg" disabled={isSubmitting} className="gap-2">
                     {isSubmitting ? (
                       <>
                         <Loader2 className="size-4 animate-spin" />

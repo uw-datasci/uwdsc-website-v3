@@ -46,6 +46,7 @@ export default function LogisticsReturningExecPage() {
 
   const interestedInReturning = form.watch("interested_in_returning");
   const isReturning = interestedInReturning === "true";
+  const isNotReturning = interestedInReturning === "false";
 
   useEffect(() => {
     async function load() {
@@ -160,7 +161,7 @@ export default function LogisticsReturningExecPage() {
   const submitButtonIdleText = submitted ? "Update Response" : "Submit";
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 py-8">
+    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
       <ReturningExecLogisticsHeader submitted={submitted} />
 
       <Form {...form}>
@@ -168,6 +169,7 @@ export default function LogisticsReturningExecPage() {
           <ReturningExecFormFields
             form={form}
             isReturning={isReturning}
+            isNotReturning={isNotReturning}
             positionOptions={positionOptions}
             optionalPositionSelectOptions={optionalPositionSelectOptions}
             submitted={submitted}

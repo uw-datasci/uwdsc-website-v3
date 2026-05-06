@@ -9,7 +9,7 @@ export const returningExecSchema = z
     past_positions: z
       .string()
       .min(1, "Please list your past positions and terms"),
-    interested_in_returning: z.enum(["true", "false"]),
+    interested_in_returning: z.enum(["true", "false"]).optional(),
     not_returning_reason: z.string().optional(),
     first_choice_position: z.string().optional(),
     second_choice_position: z.string().optional(),
@@ -19,6 +19,14 @@ export const returningExecSchema = z
     additional_notes: z.string().optional(),
   })
   .superRefine((data, ctx) => {
+    if (data.interested_in_returning === undefined) {
+      ctx.addIssue({
+        path: ["interested_in_returning"],
+        code: "custom",
+        message: "Please select Yes or No",
+      });
+      return;
+    }
     const isReturning = data.interested_in_returning === "true";
     if (isReturning) {
       if (!data.first_choice_position) {
@@ -59,7 +67,7 @@ export const ReturningExecDefaultValues: ReturningExecFormValues = {
   full_name: "",
   discord: "",
   past_positions: "",
-  interested_in_returning: "true",
+  interested_in_returning: undefined,
   not_returning_reason: "",
   first_choice_position: "",
   second_choice_position: "",

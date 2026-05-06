@@ -172,9 +172,6 @@ export function OnboardingHeader({
       {/* Title row */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div className="space-y-2">
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            Logistics
-          </p>
           <h1 className="text-3xl font-bold">Onboarding review</h1>
           <p className="text-sm text-muted-foreground">
             {term ? `Viewing ${term.code} submissions.` : ""}

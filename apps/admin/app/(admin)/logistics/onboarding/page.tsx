@@ -204,9 +204,6 @@ export default function LogisticsOnboardingPage() {
     <div className="min-h-[calc(100vh-130px)] bg-background px-4 py-8">
       <div className="mx-auto max-w-5xl space-y-6">
         <div className="space-y-2">
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            Logistics
-          </p>
           <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight">
             W26 Onboarding Form
             {isFormLocked && (

@@ -79,6 +79,7 @@ interface TextAreaFieldOptions {
   description?: string | ((value: string) => React.ReactNode);
   className?: string;
   textareaProps?: Partial<ComponentProps<typeof Textarea>>;
+  stretchToParent?: boolean;
 }
 
 interface RadioFieldOptions {
@@ -219,31 +220,33 @@ export function renderSelectField(opts: SelectFieldOptions) {
             {label} {required && <span className="text-red-500">*</span>}
           </FormLabel>
         )}
-        <Select
-          onValueChange={handleChange}
-          value={resolvedValue}
-          disabled={disabled}
-        >
-          <FormControl>
-            <SelectTrigger className={triggerClassName}>
-              <SelectValue placeholder={placeholder} />
-            </SelectTrigger>
-          </FormControl>
-          <SelectContent
-            className={contentClassName}
-            position={contentPosition}
+        <div className="block w-full min-w-0">
+          <Select
+            onValueChange={handleChange}
+            value={resolvedValue}
+            disabled={disabled}
           >
-            {options.map((option) => {
-              const value = typeof option === "string" ? option : option.value;
-              const label = typeof option === "string" ? option : option.label;
-              return (
-                <SelectItem key={value} value={value} className={itemClassName}>
-                  {label}
-                </SelectItem>
-              );
-            })}
-          </SelectContent>
-        </Select>
+            <FormControl>
+              <SelectTrigger className={cn("w-full min-w-0", triggerClassName)}>
+                <SelectValue placeholder={placeholder} />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent
+              className={contentClassName}
+              position={contentPosition}
+            >
+              {options.map((option) => {
+                const value = typeof option === "string" ? option : option.value;
+                const label = typeof option === "string" ? option : option.label;
+                return (
+                  <SelectItem key={value} value={value} className={itemClassName}>
+                    {label}
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+        </div>
         <FormMessage />
       </FormItem>
     );
@@ -269,7 +272,7 @@ export function renderStringRadioGroupField(opts: StringRadioGroupFieldOptions) 
         </FormLabel>
         <FormControl>
           <RadioGroup
-            value={field.value}
+            value={field.value ?? ""}
             onValueChange={field.onChange}
             className={groupClassName}
           >
@@ -302,6 +305,7 @@ export function renderTextAreaField(opts: TextAreaFieldOptions) {
     description,
     className,
     textareaProps = {},
+    stretchToParent = false,
   } = opts;
 
   function TextAreaFieldRender({ field }: StringFieldRenderProps) {
@@ -309,23 +313,39 @@ export function renderTextAreaField(opts: TextAreaFieldOptions) {
       typeof description === "function"
         ? description(field.value ?? "")
         : description;
+    const textarea = (
+      <Textarea
+        {...field}
+        {...textareaProps}
+        placeholder={placeholder}
+        className={cn(
+          className,
+          stretchToParent &&
+          "max-h-36 min-h-20 flex-1 basis-0 self-stretch field-sizing-fixed",
+        )}
+      />
+    );
     return (
-      <FormItem>
+      <FormItem
+        className={cn(
+          stretchToParent && "flex min-h-0 flex-1 flex-col gap-2",
+        )}
+      >
         {label != null && (
-          <FormLabel className="mb-1 leading-relaxed">
+          <FormLabel
+            className={cn(
+              "leading-relaxed",
+              stretchToParent ? "mb-0 shrink-0" : "mb-1",
+            )}
+          >
             {label} {required && <span className="text-red-500">*</span>}
           </FormLabel>
         )}
-        <FormControl>
-          <Textarea
-            {...field}
-            {...textareaProps}
-            placeholder={placeholder}
-            className={className}
-          />
+        <FormControl className={stretchToParent ? "min-h-0 flex-1" : undefined}>
+          {textarea}
         </FormControl>
         {desc != null && <FormDescription>{desc}</FormDescription>}
-        <FormMessage />
+        <FormMessage className={stretchToParent ? "shrink-0" : undefined} />
       </FormItem>
     );
   }

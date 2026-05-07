@@ -79,6 +79,7 @@ export function ReturningExecFormFields({
                       label: "Email address",
                       placeholder: "you@example.com",
                       required: true,
+                      inputProps: { disabled: true },
                     })}
                   />
                   <FormField
@@ -88,6 +89,7 @@ export function ReturningExecFormFields({
                       label: "Full name",
                       placeholder: "Jane Smith",
                       required: true,
+                      inputProps: { disabled: true },
                     })}
                   />
                 </div>

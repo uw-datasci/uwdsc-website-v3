@@ -1,4 +1,74 @@
 -- ============================================================================
+-- 0. terms: adjust column nullability
+-- ============================================================================
+ALTER TABLE public.terms
+  ALTER COLUMN is_active SET NOT NULL,
+  ALTER COLUMN is_active SET DEFAULT false,
+  ALTER COLUMN start_date SET NOT NULL,
+  ALTER COLUMN application_release_date DROP NOT NULL,
+  ALTER COLUMN application_soft_deadline DROP NOT NULL,
+  ALTER COLUMN application_hard_deadline DROP NOT NULL,
+  ADD COLUMN end_date TIMESTAMPTZ NOT NULL;
+
+UPDATE public.terms
+SET end_date = CASE
+  WHEN start_date IS NOT NULL THEN start_date + interval '4 months'
+  ELSE COALESCE(created_at, now()) + interval '4 months'
+END
+WHERE end_date IS NULL;
+
+UPDATE public.terms t
+SET is_active = true
+FROM (
+  SELECT id
+  FROM public.terms
+  WHERE start_date <= now()
+    AND now() <= end_date
+  ORDER BY created_at DESC
+  LIMIT 1
+) cur
+WHERE t.id = cur.id;
+
+CREATE UNIQUE INDEX terms_at_most_one_active
+  ON public.terms ((1))
+  WHERE is_active = true;
+
+ALTER TABLE public.terms
+  ADD CONSTRAINT terms_is_active_implies_current_interval
+  CHECK (
+    is_active = (start_date <= now() AND now() <= end_date)
+  );
+
+-- is_active must follow [start_date, end_date] vs now(); column DEFAULT cannot reference other columns,
+-- so we keep DEFAULT false and sync the real value on every INSERT/UPDATE.
+CREATE OR REPLACE FUNCTION public.terms_sync_is_active_from_window()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.is_active := (NEW.start_date <= now() AND now() <= NEW.end_date);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER terms_sync_is_active_from_window
+  BEFORE INSERT OR UPDATE ON public.terms
+  FOR EACH ROW
+  EXECUTE FUNCTION public.terms_sync_is_active_from_window();
+
+-- Keep epoch default on application_hard_deadline when soft_deadline is absent on INSERT;
+-- when application_soft_deadline is set, application_hard_deadline = soft + 15 minutes.
+CREATE OR REPLACE FUNCTION public.sync_terms_hard_deadline()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.application_soft_deadline IS NOT NULL THEN
+    NEW.application_hard_deadline := NEW.application_soft_deadline + interval '15 minutes';
+  ELSIF TG_OP = 'UPDATE' THEN
+    NEW.application_hard_deadline := NULL;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- ============================================================================
 -- 1. returning_exec_submissions table
 -- ============================================================================
 CREATE TABLE public.returning_exec_submissions (

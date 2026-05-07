@@ -25,6 +25,7 @@ export class ApplicationRepository extends BaseRepository {
         application_soft_deadline,
         application_hard_deadline,
         start_date,
+        end_date,
         onboarding_due_date,
         created_at
       FROM terms

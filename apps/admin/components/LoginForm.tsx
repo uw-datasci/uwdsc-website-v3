@@ -19,7 +19,7 @@ export function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const redirect = searchParams.get("redirect") || "/dashboard";
+  const redirect = searchParams.get("redirect") || "/members";
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),

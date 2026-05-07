@@ -271,7 +271,7 @@ export function ReturningExecFormFields({
 
       <Separator />
 
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
         {submitted && (
           <Button
             type="button"

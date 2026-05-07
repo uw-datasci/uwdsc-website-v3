@@ -6,7 +6,6 @@ import {
   ClipboardCheck,
   Code2,
   FileText,
-  LayoutDashboard,
   Package,
   Library,
   Mail,
@@ -42,7 +41,6 @@ export const getAdminNavigation = (
   ];
 
   return [
-    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Members", href: "/members", icon: Users },
     {
       name: "Applications",

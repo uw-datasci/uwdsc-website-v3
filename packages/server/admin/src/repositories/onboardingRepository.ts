@@ -144,7 +144,8 @@ export class OnboardingRepository extends BaseRepository {
             code,
             is_active,
             created_at,
-            onboarding_due_date
+            onboarding_due_date,
+            end_date
         FROM terms
         WHERE is_active = true
         ORDER BY created_at DESC

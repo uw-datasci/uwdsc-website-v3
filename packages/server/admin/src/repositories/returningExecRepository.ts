@@ -101,9 +101,7 @@ export class ReturningExecRepository extends BaseRepository {
 
     if (position_selections.length > 0) {
       await this.sql`
-        INSERT INTO public.returning_exec_position_selections
-          (submission_id, position_id, priority)
-        SELECT * FROM ${this.sql(
+        INSERT INTO public.returning_exec_position_selections ${this.sql(
           position_selections.map((s) => ({
             submission_id: row.id,
             position_id: s.position_id,

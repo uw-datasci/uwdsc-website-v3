@@ -9,7 +9,7 @@ const UNAUTHORIZED_ROUTE = "/unauthorized";
 /**
  * Proxy to protect all admin routes.
  * - Not signed in: only /login and /api are allowed; other paths redirect to /login.
- * - Signed in: all paths allowed except /login (redirect to /dashboard).
+ * - Signed in: all paths allowed except /login (redirect to /members).
  */
 export async function proxy(request: NextRequest) {
   const response = NextResponse.next({ request: { headers: request.headers } });
@@ -30,11 +30,11 @@ export async function proxy(request: NextRequest) {
     case !user && !isLoginRoute:
       return NextResponse.redirect(new URL("/login", request.url));
     case user && isLoginRoute:
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      return NextResponse.redirect(new URL("/members", request.url));
     case user && !isAdmin && !isUnauthorizedRoute:
       return NextResponse.redirect(new URL("/unauthorized", request.url));
     case user && isAdmin && isUnauthorizedRoute:
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      return NextResponse.redirect(new URL("/members", request.url));
   }
 
   return response;

@@ -9,7 +9,7 @@ import {
   Text,
 } from "@react-email/components";
 import type { ReactElement } from "react";
-import type { HiringDecisionEmailProps } from "@/types/email";
+import type { HiringDecisionEmailProps } from "../../../types/email";
 
 const SUBJECT_OFFER = "UWDSC - Congratulations!";
 const SUBJECT_REJECTION = "UWDSC - Application Update";

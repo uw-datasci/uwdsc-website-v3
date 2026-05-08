@@ -1,5 +1,5 @@
 import { BaseRepository } from "@uwdsc/db/base.repository";
-import type { ExecTeamRow } from "@/types/team";
+import type { ExecTeamRow } from "../../types/team";
 
 export class TeamRepository extends BaseRepository {
   /**

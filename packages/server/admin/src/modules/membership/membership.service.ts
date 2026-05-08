@@ -6,7 +6,7 @@ import {
   parseMembershipReceipt,
   dedupeRecipients,
   throwIfParseFailed,
-} from "@/utils/membershipReceipt";
+} from "../../utils/membershipReceipt";
 import { emailService } from "../email/email.service";
 import { profileService } from "./profile.service";
 

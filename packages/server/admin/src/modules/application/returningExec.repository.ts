@@ -7,7 +7,7 @@ import type {
   ReturningExecSubmissionData,
   Term,
 } from "@uwdsc/common/types";
-import type { ReturningExecRow, SelectionRow } from "@/types/application";
+import type { ReturningExecRow, SelectionRow } from "../../types/application";
 
 export class ReturningExecRepository extends BaseRepository {
   async getSubmission(

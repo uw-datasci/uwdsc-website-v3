@@ -6,7 +6,7 @@ import type {
   HiringPositionSelection,
   UserRole,
 } from "@uwdsc/common/types";
-import type { AcceptedOfferRow } from "@/types/hiring";
+import type { AcceptedOfferRow } from "../../types/hiring";
 
 export class HiringRepository extends BaseRepository {
   async getHiringApplicants(): Promise<HiringApplicant[]> {

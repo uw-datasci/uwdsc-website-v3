@@ -5,7 +5,7 @@ import type {
   UploadResult,
 } from "@uwdsc/common/types";
 import { FileService } from "@uwdsc/core";
-import { HEADSHOT_VALIDATION_CONFIG } from "@/utils/headshot";
+import { HEADSHOT_VALIDATION_CONFIG } from "../../utils/headshot";
 
 export class HeadshotService extends FileService {
   constructor(supabaseClient: SupabaseClient) {

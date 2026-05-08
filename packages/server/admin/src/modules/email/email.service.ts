@@ -11,11 +11,11 @@ import {
   MembershipReceipt,
   getMembershipReceiptSubject,
 } from "./templates";
-import { appendUnsubscribeFooter } from "@/utils/marketingEmail";
+import { appendUnsubscribeFooter } from "../../utils/marketingEmail";
 import type {
   MarketingSegmentBroadcastResult,
   SendMarketingSegmentBroadcastParams,
-} from "@/types/email";
+} from "../../types/email";
 
 class EmailService {
   private readonly resend: Resend;

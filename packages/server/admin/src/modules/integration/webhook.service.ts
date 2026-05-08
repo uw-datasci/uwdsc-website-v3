@@ -1,5 +1,5 @@
 import { Resend } from "resend";
-import type { GetReceivedEmailContentsResult } from "@/types/webhook";
+import type { GetReceivedEmailContentsResult } from "../../types/webhook";
 
 class WebhookService {
   /** Inbound address for membership receipt processing (Resend receiving / MX). */

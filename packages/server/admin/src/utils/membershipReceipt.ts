@@ -1,6 +1,6 @@
 import { ApiError } from "@uwdsc/common/types";
 import { DateTime } from "luxon";
-import type { MembershipReceiptParse } from "@/types/webhook";
+import type { MembershipReceiptParse } from "../types/webhook";
 
 const DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 

@@ -9,7 +9,7 @@ import {
   Text,
 } from "@react-email/components";
 import type { ReactElement } from "react";
-import type { ExecWelcomeEmailProps } from "@/types/email";
+import type { ExecWelcomeEmailProps } from "../../../types/email";
 
 export function getExecWelcomeSubject(termLabel: string): string {
   return `Welcome to the ${termLabel} DSC Exec Team!`;

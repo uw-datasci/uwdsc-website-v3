@@ -10,7 +10,7 @@ import {
 } from "@react-email/components";
 import { Markdown } from "@react-email/markdown";
 import type { ReactElement } from "react";
-import type { CampaignEmailProps } from "@/types/email";
+import type { CampaignEmailProps } from "../../../types/email";
 
 export function CampaignEmail({
   subject,

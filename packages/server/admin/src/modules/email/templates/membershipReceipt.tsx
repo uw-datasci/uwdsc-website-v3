@@ -10,7 +10,7 @@ import {
   Text,
 } from "@react-email/components";
 import type { ReactElement } from "react";
-import type { MembershipReceiptProps } from "@/types/email";
+import type { MembershipReceiptProps } from "../../../types/email";
 
 const SUBJECT_SUCCESS = "Welcome to UWDSC";
 const SUBJECT_FAILURE = "We couldn't confirm your membership yet";

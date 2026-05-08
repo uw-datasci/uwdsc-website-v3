@@ -2,7 +2,7 @@ import type {
   FoundryLaunchPayload,
   GitHubOrgTeam,
   GitHubOrgTemplateRepo,
-} from "@/types/github";
+} from "../../types/github";
 
 const githubToken = process.env.GITHUB_TOKEN;
 if (!githubToken) throw new Error("GITHUB_TOKEN is not set");

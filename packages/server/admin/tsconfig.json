@@ -4,8 +4,6 @@
     "noImplicitAny": false,
     "types": ["node"],
     "paths": {
-      "@/types/*": ["./src/types/*.ts"],
-      "@/utils/*": ["./src/utils/*.ts"],
       "@uwdsc/common/types": ["../../common/src/types/index.ts"],
       "@uwdsc/common/utils": ["../../common/src/utils/index.ts"],
       "@uwdsc/core": ["../core/src/index.ts"]

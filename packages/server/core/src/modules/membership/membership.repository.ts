@@ -1,5 +1,5 @@
 import { BaseRepository } from "@uwdsc/db/base.repository";
-import type { MembershipRow } from "@/types/membership";
+import type { MembershipRow } from "../../types/membership";
 
 export class MembershipRepository extends BaseRepository {
   /**

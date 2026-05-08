@@ -1,5 +1,6 @@
 import {
   ApiError,
+  Term,
   type ApplicationReviewStatus,
   type QuestionScope,
   type ReturningExecListItem,
@@ -31,8 +32,20 @@ class ReturningExecService {
     this.repository = new ReturningExecRepository();
   }
 
+  async getActiveTerm(): Promise<Term | null> {
+    try {
+      return await this.repository.getActiveTerm();
+    } catch (error) {
+      throw new ApiError(`Failed to get active term: ${(error as Error).message}`, 500);
+    }
+  }
+
+  async getAvailablePositions(): Promise<{ id: number; position_id: number; name: string }[]> {
+    return this.repository.getAvailablePositions();
+  }
+
   async getOwnSubmission(profile_id: string): Promise<ReturningExecOwnSubmission | null> {
-    const term = await this.repository.getActiveTerm();
+    const term = await this.getActiveTerm();
     if (!term) return null;
     if (!isReturningExecWindowOpen(term)) {
       throw new ApiError("Returning exec submissions are not open for the active term", 403);
@@ -44,7 +57,7 @@ class ReturningExecService {
     profile_id: string,
     data: ReturningExecSubmissionData,
   ): Promise<ReturningExecOwnSubmission> {
-    const term = await this.repository.getActiveTerm();
+    const term = await this.getActiveTerm();
     if (!term) throw new ApiError("No active term found", 400);
 
     if (!isReturningExecWindowOpen(term)) {
@@ -68,7 +81,7 @@ class ReturningExecService {
     submissions: ReturningExecListItem[];
     termId: string | null;
   }> {
-    const term = await this.repository.getActiveTerm();
+    const term = await this.getActiveTerm();
     if (!term) return { submissions: [], termId: null };
     try {
       const submissions = await this.repository.getAllSubmissions(term.id);

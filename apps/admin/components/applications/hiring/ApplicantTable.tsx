@@ -19,7 +19,7 @@ import type {
   HiringApplicant,
   HiringPositionSelection,
 } from "@uwdsc/common/types";
-import { sortPositionSelectionsByPriority } from "@uwdsc/common/utils";
+import { sortPositionsByPriority } from "@uwdsc/common/utils";
 import { reviewStatusBadgeClassName } from "@/lib/utils/applications";
 import { ApplicantRowActionsMenu } from "./RowActionsMenu";
 
@@ -103,7 +103,7 @@ export function ApplicantTable({
           </TableHeader>
           <TableBody>
             {applicants.map((applicant) => {
-              const sortedSelections = sortPositionSelectionsByPriority(
+              const sortedSelections = sortPositionsByPriority(
                 applicant.position_selections,
               );
               return (

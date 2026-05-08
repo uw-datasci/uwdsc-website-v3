@@ -1,6 +1,6 @@
 import { BaseRepository } from "@uwdsc/db/base.repository";
 import { Event } from "@uwdsc/common/types";
-import type { EventTimeFilter } from "../../types/events";
+import type { EventTimeFilter } from "./events.types";
 
 export class EventRepository extends BaseRepository {
   /**

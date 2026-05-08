@@ -65,6 +65,11 @@ interface SelectFieldOptions {
   itemClassName?: string;
   /** Use "popper" for stable dropdown positioning (avoids content shifting on hover). */
   contentPosition?: "item-aligned" | "popper";
+  /**
+   * When the field value is "" (or undefined), the select displays this option value.
+   * Choosing that option writes "" to the field (for optional clears / "None" rows).
+   */
+  clearValueSentinel?: string;
 }
 
 interface TextAreaFieldOptions {
@@ -74,11 +79,21 @@ interface TextAreaFieldOptions {
   description?: string | ((value: string) => React.ReactNode);
   className?: string;
   textareaProps?: Partial<ComponentProps<typeof Textarea>>;
+  stretchToParent?: boolean;
 }
 
 interface RadioFieldOptions {
   label: string;
   required?: boolean;
+}
+
+interface StringRadioGroupFieldOptions {
+  label: string;
+  required?: boolean;
+  options: readonly { value: string; label: string }[];
+  groupClassName?: string;
+  /** Unique prefix for `id` / `htmlFor` (e.g. `returning-interest`). */
+  idPrefix: string;
 }
 
 interface ScaleFieldOptions {
@@ -183,9 +198,21 @@ export function renderSelectField(opts: SelectFieldOptions) {
     contentClassName,
     itemClassName,
     contentPosition,
+    clearValueSentinel,
   } = opts;
 
   function SelectFieldRender({ field }: StringFieldRenderProps) {
+    const raw = field.value ?? "";
+    const resolvedValue = raw === "" ? clearValueSentinel : raw;
+
+    function handleChange(v: string) {
+      if (clearValueSentinel === undefined || v !== clearValueSentinel) {
+        field.onChange(v);
+      } else {
+        field.onChange("");
+      }
+    }
+
     return (
       <FormItem>
         {label != null && (
@@ -193,37 +220,81 @@ export function renderSelectField(opts: SelectFieldOptions) {
             {label} {required && <span className="text-red-500">*</span>}
           </FormLabel>
         )}
-        <Select
-          onValueChange={field.onChange}
-          value={field.value === "" ? undefined : field.value}
-          disabled={disabled}
-        >
-          <FormControl>
-            <SelectTrigger className={triggerClassName}>
-              <SelectValue placeholder={placeholder} />
-            </SelectTrigger>
-          </FormControl>
-          <SelectContent
-            className={contentClassName}
-            position={contentPosition}
+        <div className="block w-full min-w-0">
+          <Select
+            onValueChange={handleChange}
+            value={resolvedValue}
+            disabled={disabled}
           >
-            {options.map((option) => {
-              const value = typeof option === "string" ? option : option.value;
-              const label = typeof option === "string" ? option : option.label;
-              return (
-                <SelectItem key={value} value={value} className={itemClassName}>
-                  {label}
-                </SelectItem>
-              );
-            })}
-          </SelectContent>
-        </Select>
+            <FormControl>
+              <SelectTrigger className={cn("w-full min-w-0", triggerClassName)}>
+                <SelectValue placeholder={placeholder} />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent
+              className={contentClassName}
+              position={contentPosition}
+            >
+              {options.map((option) => {
+                const value = typeof option === "string" ? option : option.value;
+                const label = typeof option === "string" ? option : option.label;
+                return (
+                  <SelectItem key={value} value={value} className={itemClassName}>
+                    {label}
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+        </div>
         <FormMessage />
       </FormItem>
     );
   }
   SelectFieldRender.displayName = `SelectField(${placeholder})`;
   return SelectFieldRender;
+}
+
+export function renderStringRadioGroupField(opts: StringRadioGroupFieldOptions) {
+  const {
+    label,
+    required = true,
+    options: radioOptions,
+    groupClassName = "flex flex-col space-y-1",
+    idPrefix,
+  } = opts;
+
+  function StringRadioGroupFieldRender({ field }: StringFieldRenderProps) {
+    return (
+      <FormItem className="space-y-3">
+        <FormLabel>
+          {label} {required && <span className="text-red-500">*</span>}
+        </FormLabel>
+        <FormControl>
+          <RadioGroup
+            value={field.value ?? ""}
+            onValueChange={field.onChange}
+            className={groupClassName}
+          >
+            {radioOptions.map((opt) => {
+              const inputId = `${idPrefix}-${opt.value}`;
+              return (
+                <div key={opt.value} className="flex items-center gap-2">
+                  <RadioGroupItem value={opt.value} id={inputId} />
+                  <label htmlFor={inputId} className="text-sm">
+                    {opt.label}
+                  </label>
+                </div>
+              );
+            })}
+          </RadioGroup>
+        </FormControl>
+        <FormMessage />
+      </FormItem>
+    );
+  }
+  StringRadioGroupFieldRender.displayName = `StringRadioGroupField(${label})`;
+  return StringRadioGroupFieldRender;
 }
 
 export function renderTextAreaField(opts: TextAreaFieldOptions) {
@@ -234,6 +305,7 @@ export function renderTextAreaField(opts: TextAreaFieldOptions) {
     description,
     className,
     textareaProps = {},
+    stretchToParent = false,
   } = opts;
 
   function TextAreaFieldRender({ field }: StringFieldRenderProps) {
@@ -241,23 +313,39 @@ export function renderTextAreaField(opts: TextAreaFieldOptions) {
       typeof description === "function"
         ? description(field.value ?? "")
         : description;
+    const textarea = (
+      <Textarea
+        {...field}
+        {...textareaProps}
+        placeholder={placeholder}
+        className={cn(
+          className,
+          stretchToParent &&
+          "max-h-36 min-h-20 flex-1 basis-0 self-stretch field-sizing-fixed",
+        )}
+      />
+    );
     return (
-      <FormItem>
+      <FormItem
+        className={cn(
+          stretchToParent && "flex min-h-0 flex-1 flex-col gap-2",
+        )}
+      >
         {label != null && (
-          <FormLabel className="mb-1 leading-relaxed">
+          <FormLabel
+            className={cn(
+              "leading-relaxed",
+              stretchToParent ? "mb-0 shrink-0" : "mb-1",
+            )}
+          >
             {label} {required && <span className="text-red-500">*</span>}
           </FormLabel>
         )}
-        <FormControl>
-          <Textarea
-            {...field}
-            {...textareaProps}
-            placeholder={placeholder}
-            className={className}
-          />
+        <FormControl className={stretchToParent ? "min-h-0 flex-1" : undefined}>
+          {textarea}
         </FormControl>
         {desc != null && <FormDescription>{desc}</FormDescription>}
-        <FormMessage />
+        <FormMessage className={stretchToParent ? "shrink-0" : undefined} />
       </FormItem>
     );
   }

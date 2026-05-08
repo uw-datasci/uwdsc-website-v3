@@ -9,9 +9,9 @@ import {
   OnboardingHeader,
   OnboardingList,
   OnboardingDetail,
-} from "@/components/onboarding";
+} from "@/components/logistics/onboarding-review";
 
-export default function TeamOnboardingPage() {
+export default function LogisticsOnboardingReviewPage() {
   const [term, setTerm] = useState<Term | null>(null);
   const [rows, setRows] = useState<OnboardingAdminRow[]>([]);
   const [filteredRows, setFilteredRows] = useState<OnboardingAdminRow[]>([]);
@@ -63,7 +63,10 @@ export default function TeamOnboardingPage() {
   if (error) {
     return (
       <div className="space-y-4 mt-16 w-full">
-        <h1 className="text-3xl font-bold">Team Onboarding</h1>
+        <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
+          Logistics
+        </p>
+        <h1 className="text-3xl font-bold">Onboarding review</h1>
         <div className="rounded-lg border border-destructive bg-destructive/10 p-4">
           <p className="text-sm text-destructive">Error: {error}</p>
         </div>
@@ -81,7 +84,6 @@ export default function TeamOnboardingPage() {
       />
 
       <div className="flex gap-4 flex-1 min-h-0">
-        {/* Left panel – list */}
         <Card className="w-full md:w-[350px] md:min-w-[350px] shrink-0 overflow-hidden p-0">
           <OnboardingList
             rows={filteredRows}
@@ -90,12 +92,10 @@ export default function TeamOnboardingPage() {
           />
         </Card>
 
-        {/* Right panel – detail (desktop) */}
         <Card className="hidden md:flex flex-1 overflow-hidden p-0">
           <OnboardingDetail row={selectedRow} />
         </Card>
 
-        {/* Mobile – Sheet */}
         <Sheet open={mobileDetailOpen} onOpenChange={setMobileDetailOpen}>
           <SheetContent
             side="bottom"

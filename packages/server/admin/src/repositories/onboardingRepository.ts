@@ -139,17 +139,24 @@ export class OnboardingRepository extends BaseRepository {
 
   async getActiveTerm(): Promise<Term | null> {
     const result = await this.sql<Term[]>`
-        SELECT
-            id,
-            code,
-            is_active,
-            created_at,
-            onboarding_due_date
-        FROM terms
-        WHERE is_active = true
-        ORDER BY created_at DESC
-        LIMIT 1
-        `;
+      SELECT
+        id,
+        code,
+        is_active,
+        application_release_date,
+        application_soft_deadline,
+        application_hard_deadline,
+        start_date,
+        end_date,
+        onboarding_due_date,
+        returning_exec_release_date,
+        returning_exec_deadline,
+        created_at
+      FROM terms
+      WHERE is_active = true
+      ORDER BY created_at DESC
+      LIMIT 1
+    `;
     return result[0] ?? null;
   }
 

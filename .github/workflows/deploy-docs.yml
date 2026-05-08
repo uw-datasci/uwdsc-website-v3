@@ -2,7 +2,7 @@ name: Deploy Documentation
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
     paths:
       - "apps/docs/**"
       - ".github/workflows/deploy-docs.yml"
@@ -18,7 +18,7 @@ concurrency:
 
 env:
   NODE_VERSION: 24
-  PNPM_VERSION: 10.33.0
+  PNPM_VERSION: 10.33.3
 
 jobs:
   build:

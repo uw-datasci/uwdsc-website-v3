@@ -47,9 +47,11 @@ interface ApplicantRowActionsMenuProps {
   applicantName: string;
   roleLabel: string;
   disabled?: boolean;
+  source?: "application" | "returning_exec";
   onConfirmStatus: (
     selectionId: string,
     status: ApplicationReviewStatus,
+    source?: "application" | "returning_exec",
   ) => Promise<void>;
 }
 
@@ -59,6 +61,7 @@ export function ApplicantRowActionsMenu({
   applicantName,
   roleLabel,
   disabled,
+  source,
   onConfirmStatus,
 }: Readonly<ApplicantRowActionsMenuProps>) {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -92,13 +95,13 @@ export function ApplicantRowActionsMenu({
     if (!pending) return;
     setSubmitting(true);
     try {
-      await onConfirmStatus(selectionId, pending);
+      await onConfirmStatus(selectionId, pending, source);
       setDialogOpen(false);
       setPending(null);
     } finally {
       setSubmitting(false);
     }
-  }, [onConfirmStatus, pending, selectionId]);
+  }, [onConfirmStatus, pending, selectionId, source]);
 
   if (visibleMenuItems.length === 0) {
     return (

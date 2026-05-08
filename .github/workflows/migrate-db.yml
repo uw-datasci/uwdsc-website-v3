@@ -1,10 +1,11 @@
 name: Run Production Database Migrations
 
 on:
-  workflow_dispatch: # Allows manual trigger from GitHub UI
+  workflow_dispatch:
+    # Allows manual trigger from GitHub UI
     inputs:
       confirm:
-        description: 'Type "migrate" to confirm running migrations'
+        description: "Type \"migrate\" to confirm running migrations"
         required: true
   push:
     branches:
@@ -16,7 +17,7 @@ on:
 
 env:
   NODE_VERSION: 24
-  PNPM_VERSION: 10.33.0
+  PNPM_VERSION: 10.33.3
   INFISICAL_PROJECT_SLUG: uwdsc-54e-y
 
 jobs:

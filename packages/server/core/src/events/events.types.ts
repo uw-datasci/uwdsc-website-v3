@@ -1,5 +1,5 @@
 /** Reference time for time-based filters. Defaults to now when omitted. */
-export type TimeRef = { asOf?: Date };
+type TimeRef = { asOf?: Date };
 
 /**
  * Generic event time filter: describes how to filter events by time.

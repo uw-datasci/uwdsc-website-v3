@@ -62,6 +62,11 @@ Builds on Fall 2025 with new features across the main site and CxC.
 - **Onboarding review dashboard (PR #70)**: VPs and Presidents can open `/onboarding/review` to browse team submissions, filter/search records, and inspect each profile in a detail panel.
 - **Onboarding exports (PR #70)**: Leadership can export onboarding records to CSV and download custom team headshots as a ZIP for the selected term.
 
+### Logistics scheduling (PR #72)
+
+- **Window-based form access**: Onboarding and returning-exec forms now only appear during their configured term windows, so users only see actions that are currently open.
+- **Automatic access control**: Users are redirected out of closed logistics forms, and blocked requests return clear availability messages instead of failing silently.
+
 ### Nexus (PR #41)
 
 - **Nexus navigation**: New admin section for developer tools with three modules: Foundry (project generator), Optics (project monitoring), and Archive (project history).
@@ -98,6 +103,7 @@ Builds on Fall 2025 with new features across the main site and CxC.
 - **GitHub API integration (PR #41)**: GitHubService with org team listing, template repository discovery, and workflow dispatch for automated project provisioning.
 - **Membership webhook (PR #59)**: `POST /api/webhooks/membership` endpoint verifies WUSA receipt emails via Resend inbound webhooks; automatically parses transaction details and updates membership status with email notifications.
 - **Broadcast audience cleanup (PR #64)**: Recipient lists used for admin email broadcasts are now automatically cleaned up after sends, helping keep campaign segments accurate for future outreach.
+- **Returning exec scheduling fields (PR #72)**: Terms now store release and deadline dates for returning-exec submissions, so leadership can open and close the form on a set timeline.
 
 ---
 

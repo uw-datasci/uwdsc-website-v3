@@ -18,9 +18,15 @@ const EXEC_POS = ["president", "vp"];
 export const getAdminNavigation = (
   position: string | null,
   role?: string | null,
+  logisticsWindows?: {
+    onboardingOpen: boolean;
+    returningExecOpen: boolean;
+  },
 ) => {
   const isExec = EXEC_POS.some((r) => position?.toLowerCase().includes(r));
   const isAdmin = role === "admin";
+  const onboardingOpen = logisticsWindows?.onboardingOpen ?? false;
+  const returningExecOpen = logisticsWindows?.returningExecOpen ?? false;
 
   const applicationSubItems = [
     {
@@ -55,11 +61,15 @@ export const getAdminNavigation = (
       href: "/logistics",
       icon: Package,
       subItems: [
-        {
-          name: "Onboarding",
-          href: "/logistics/onboarding",
-          icon: FileText,
-        },
+        ...(onboardingOpen
+          ? [
+            {
+              name: "Onboarding",
+              href: "/logistics/onboarding",
+              icon: FileText,
+            },
+          ]
+          : []),
         ...(isExec
           ? [
             {
@@ -69,11 +79,15 @@ export const getAdminNavigation = (
             },
           ]
           : []),
-        {
-          name: "Returning execs",
-          href: "/logistics/returning",
-          icon: UserCheck,
-        },
+        ...(returningExecOpen
+          ? [
+            {
+              name: "Returning execs",
+              href: "/logistics/returning",
+              icon: UserCheck,
+            },
+          ]
+          : []),
       ],
     },
     {

@@ -8,7 +8,9 @@ ALTER TABLE public.terms
   ALTER COLUMN application_release_date DROP NOT NULL,
   ALTER COLUMN application_soft_deadline DROP NOT NULL,
   ALTER COLUMN application_hard_deadline DROP NOT NULL,
-  ADD COLUMN end_date TIMESTAMPTZ NOT NULL;
+  ADD COLUMN end_date TIMESTAMPTZ NOT NULL,
+  ADD COLUMN returning_exec_release_date TIMESTAMPTZ,
+  ADD COLUMN returning_exec_deadline TIMESTAMPTZ;
 
 UPDATE public.terms
 SET end_date = CASE

@@ -1,29 +1,44 @@
 import Link from "next/link";
+import { onboardingService } from "@uwdsc/admin";
+import { isOnboardingWindowOpen, isReturningExecWindowOpen } from "@uwdsc/common/utils";
 import { Card, CardDescription, CardHeader, CardTitle } from "@uwdsc/ui";
 import { ChevronRight, ClipboardCheck, ClipboardList, UserCheck } from "lucide-react";
 
-const links = [
-  {
-    href: "/logistics/onboarding",
-    title: "Exec onboarding",
-    description: "Submit your profile, headshot, and preferences for the current term.",
-    icon: ClipboardList,
-  },
-  {
-    href: "/logistics/returning",
-    title: "Returning exec form",
-    description: "Let us know if you plan to return next term and share role preferences.",
-    icon: UserCheck,
-  },
-  {
-    href: "/logistics/onboarding-review",
-    title: "Onboarding review",
-    description: "Presidents and VPs: review team submissions and export headshots.",
-    icon: ClipboardCheck,
-  },
-] as const;
+export default async function LogisticsPage() {
+  const term = await onboardingService.getActiveTerm();
+  const showOnboarding = isOnboardingWindowOpen(term);
+  const showReturning = isReturningExecWindowOpen(term);
 
-export default function LogisticsPage() {
+  const links = [
+    ...(showOnboarding
+      ? [
+        {
+          href: "/logistics/onboarding" as const,
+          title: "Exec onboarding",
+          description: "Submit your profile, headshot, and preferences for the current term.",
+          icon: ClipboardList,
+        },
+      ]
+      : []),
+    ...(showReturning
+      ? [
+        {
+          href: "/logistics/returning" as const,
+          title: "Returning exec form",
+          description:
+            "Let us know if you plan to return next term and share role preferences.",
+          icon: UserCheck,
+        },
+      ]
+      : []),
+    {
+      href: "/logistics/onboarding-review" as const,
+      title: "Onboarding review",
+      description: "Presidents and VPs: review team submissions and export headshots.",
+      icon: ClipboardCheck,
+    },
+  ];
+
   return (
     <div className="mx-auto mt-8 flex w-full max-w-3xl flex-col gap-6 px-4 pb-12">
       <div>

@@ -20,8 +20,9 @@ import { NavUser } from "./nav/NavUser";
 import { NavMain } from "./nav/NavMain";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { getAllExecPositions } from "@/lib/api/onboarding";
+import { getAllExecPositions, getActiveTerm } from "@/lib/api/onboarding";
 import { getAdminNavigation } from "@/constants/navigation";
+import { isOnboardingWindowOpen, isReturningExecWindowOpen } from "@uwdsc/common/utils";
 
 interface AdminLayoutProps {
   readonly children: React.ReactNode;
@@ -31,6 +32,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const router = useRouter();
   const { user, isLoading } = useAuth();
   const [positionName, setPositionName] = useState<string | null>(null);
+  const [logisticsWindows, setLogisticsWindows] = useState({
+    onboardingOpen: false,
+    returningExecOpen: false,
+  });
 
   useEffect(() => {
     const loadPosition = async () => {
@@ -47,7 +52,31 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     loadPosition();
   }, [user?.position_id, isLoading]);
 
-  const navigationList = getAdminNavigation(positionName, user?.role);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const term = await getActiveTerm();
+        if (cancelled) return;
+        setLogisticsWindows({
+          onboardingOpen: isOnboardingWindowOpen(term),
+          returningExecOpen: isReturningExecWindowOpen(term),
+        });
+      } catch {
+        if (!cancelled) {
+          setLogisticsWindows({
+            onboardingOpen: false,
+            returningExecOpen: false,
+          });
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const navigationList = getAdminNavigation(positionName, user?.role, logisticsWindows);
 
   const handleSignOut = async () => {
     try {
@@ -69,9 +98,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                   <Shield className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold text-base">
-                    Admin Panel
-                  </span>
+                  <span className="truncate font-semibold text-base">Admin Panel</span>
                   <span className="truncate text-xs">UWDSC</span>
                 </div>
               </SidebarMenuButton>

@@ -1,14 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Form } from "@uwdsc/ui";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { NO_POSITION_SELECT_VALUE, ReturningExecFormFields, ReturningExecLogisticsHeader } from "@/components/logistics/returning";
+import {
+  NO_POSITION_SELECT_VALUE,
+  ReturningExecFormFields,
+  ReturningExecLogisticsHeader,
+} from "@/components/logistics/returning";
 
+import { getActiveTerm } from "@/lib/api/onboarding";
 import {
   getAvailablePositionsForReturningExec,
   getOwnReturningExecSubmission,
@@ -19,6 +25,7 @@ import {
   ReturningExecFormValues,
   returningExecSchema,
 } from "@/lib/schemas/returningExec";
+import { isReturningExecWindowOpen } from "@uwdsc/common/utils";
 
 function positionIdStringForPriority(
   selections: readonly { priority: number; position_id: number }[],
@@ -31,10 +38,11 @@ function positionIdStringForPriority(
 }
 
 export default function LogisticsReturningExecPage() {
+  const router = useRouter();
   const { user } = useAuth();
-  const [positions, setPositions] = useState<Awaited<
-    ReturnType<typeof getAvailablePositionsForReturningExec>
-  >>([]);
+  const [positions, setPositions] = useState<
+    Awaited<ReturnType<typeof getAvailablePositionsForReturningExec>>
+  >([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -52,6 +60,12 @@ export default function LogisticsReturningExecPage() {
     async function load() {
       setLoading(true);
       try {
+        const term = await getActiveTerm();
+        if (!isReturningExecWindowOpen(term)) {
+          router.replace("/logistics");
+          return;
+        }
+
         const [positionsData, submissionData] = await Promise.all([
           getAvailablePositionsForReturningExec(),
           getOwnReturningExecSubmission(),
@@ -90,7 +104,7 @@ export default function LogisticsReturningExecPage() {
       }
     }
     load();
-  }, [user, form]);
+  }, [user, form, router]);
 
   async function onSubmit(values: ReturningExecFormValues) {
     setSubmitting(true);
@@ -131,7 +145,9 @@ export default function LogisticsReturningExecPage() {
 
       const wasAlreadySubmitted = submitted;
       setSubmitted(true);
-      toast.success(wasAlreadySubmitted ? "Response updated successfully" : "Response submitted");
+      toast.success(
+        wasAlreadySubmitted ? "Response updated successfully" : "Response submitted",
+      );
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to submit response");
     } finally {

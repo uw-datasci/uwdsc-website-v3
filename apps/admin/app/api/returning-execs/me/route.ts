@@ -1,7 +1,7 @@
+import { ApiError, type ReturningExecSubmissionData } from "@uwdsc/common/types";
 import { ApiResponse } from "@uwdsc/common/utils";
 import { returningExecService } from "@uwdsc/admin";
 import { withAuth } from "@/guards/withAuth";
-import type { ReturningExecSubmissionData } from "@uwdsc/common/types";
 
 /**
  * GET /api/returning-execs/me
@@ -12,6 +12,12 @@ export const GET = withAuth(async (_request, _context, user) => {
     const submission = await returningExecService.getOwnSubmission(user.id);
     return ApiResponse.ok({ submission });
   } catch (error) {
+    if (error instanceof ApiError) {
+      return ApiResponse.json(
+        { error: error.message, message: error.message },
+        error.statusCode,
+      );
+    }
     console.error("Error fetching returning exec submission:", error);
     return ApiResponse.serverError(error, "Failed to fetch submission");
   }
@@ -24,12 +30,15 @@ export const GET = withAuth(async (_request, _context, user) => {
 export const PUT = withAuth(async (request, _context, user) => {
   try {
     const body = (await request.json()) as ReturningExecSubmissionData;
-    const submission = await returningExecService.upsertSubmission(
-      user.id,
-      body,
-    );
+    const submission = await returningExecService.upsertSubmission(user.id, body);
     return ApiResponse.ok({ submission });
   } catch (error) {
+    if (error instanceof ApiError) {
+      return ApiResponse.json(
+        { error: error.message, message: error.message },
+        error.statusCode,
+      );
+    }
     console.error("Error saving returning exec submission:", error);
     return ApiResponse.serverError(error, "Failed to save submission");
   }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Loader2, Lock, Pencil, Save } from "lucide-react";
 import { Button, Card, CardContent, CardDescription } from "@uwdsc/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,8 +21,10 @@ import {
 } from "@/lib/schemas/onboarding";
 import { useForm } from "react-hook-form";
 import { ExecPosition, Onboarding, Term } from "@uwdsc/common/types";
+import { isOnboardingWindowOpen } from "@uwdsc/common/utils";
 
 export default function LogisticsOnboardingPage() {
+  const router = useRouter();
   const [currentTerm, setCurrentTerm] = useState<Term | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
@@ -113,6 +116,11 @@ export default function LogisticsOnboardingPage() {
 
         const typedCurrentUser = currentUser;
 
+        if (!isOnboardingWindowOpen(term)) {
+          router.replace("/logistics");
+          return;
+        }
+
         setCurrentTerm(term);
         setPositions(positionsData);
         if (typedCurrentUser) {
@@ -142,7 +150,7 @@ export default function LogisticsOnboardingPage() {
       }
     }
     fetchInitialData();
-  }, [form, mapSubmissionToForm, prefillFromUser]);
+  }, [form, mapSubmissionToForm, prefillFromUser, router]);
 
   const onSubmit = useCallback(
     async (values: OnboardingFormValues) => {

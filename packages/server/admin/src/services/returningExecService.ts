@@ -6,6 +6,7 @@ import {
   type ReturningExecOwnSubmission,
   type ReturningExecSubmissionData,
 } from "@uwdsc/common/types";
+import { isReturningExecWindowOpen } from "@uwdsc/common/utils";
 import { ReturningExecRepository } from "../repositories/returningExecRepository";
 
 const VP_REVIEW_STATUS_SET = new Set<ApplicationReviewStatus>([
@@ -33,6 +34,9 @@ class ReturningExecService {
   async getOwnSubmission(profile_id: string): Promise<ReturningExecOwnSubmission | null> {
     const term = await this.repository.getActiveTerm();
     if (!term) return null;
+    if (!isReturningExecWindowOpen(term)) {
+      throw new ApiError("Returning exec submissions are not open for the active term", 403);
+    }
     return this.repository.getSubmission(profile_id, term.id);
   }
 
@@ -42,6 +46,10 @@ class ReturningExecService {
   ): Promise<ReturningExecOwnSubmission> {
     const term = await this.repository.getActiveTerm();
     if (!term) throw new ApiError("No active term found", 400);
+
+    if (!isReturningExecWindowOpen(term)) {
+      throw new ApiError("Returning exec submissions are not open for the active term", 403);
+    }
 
     if (data.position_selections.length > 3) {
       throw new ApiError("Cannot select more than 3 positions", 400);

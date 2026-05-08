@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { FileUploadData } from "@uwdsc/common/types";
 import { FileService } from "./file.service";
-import { RESUME_VALIDATION_CONFIG } from "./resume.utils";
+import { RESUME_VALIDATION_CONFIG } from "../../utils/resume";
 
 export class ResumeService extends FileService {
   constructor(supabaseClient: SupabaseClient) {

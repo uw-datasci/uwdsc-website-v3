@@ -1,5 +1,5 @@
 import { EventRepository } from "./events.repository";
-import type { EventTimeFilter, GetEventsByTimeRangeOptions } from "./events.types";
+import type { EventTimeFilter, GetEventsByTimeRangeOptions } from "../../types/events";
 import { ApiError, Event } from "@uwdsc/common/types";
 
 function toTimeFilter(options: GetEventsByTimeRangeOptions): EventTimeFilter {

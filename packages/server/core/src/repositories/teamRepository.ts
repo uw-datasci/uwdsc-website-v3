@@ -22,7 +22,7 @@ export class TeamRepository extends BaseRepository {
         et.id,
         COALESCE(
           NULLIF(TRIM(CONCAT_WS(' ', p.first_name, p.last_name)), ''),
-          'Member'
+          'Unknown'
         ) AS name,
         et.photo_url,
         et.instagram,

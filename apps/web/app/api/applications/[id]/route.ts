@@ -1,5 +1,5 @@
 import { ApiError } from "@uwdsc/common/types";
-import { ApiResponse } from "@uwdsc/common/utils";
+import { ApiResponse, isApplicationApiWindowOpen } from "@uwdsc/common/utils";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 import { applicationService } from "@uwdsc/core";
 import { NextRequest } from "next/server";
@@ -11,6 +11,18 @@ export async function PATCH(
   try {
     const { user, isUnauthorized } = await tryGetCurrentUser();
     if (!user) return isUnauthorized;
+
+    const term = await applicationService.getActiveTerm();
+    if (!term) return ApiResponse.notFound("No active application period");
+    if (!isApplicationApiWindowOpen(term)) {
+      return ApiResponse.json(
+        {
+          error: "The application period is closed.",
+          message: "The application period is closed.",
+        },
+        403,
+      );
+    }
 
     const { id } = await params;
     if (!id) return ApiResponse.badRequest("Application ID is required");

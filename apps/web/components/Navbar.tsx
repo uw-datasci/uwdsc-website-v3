@@ -8,12 +8,31 @@ import { useAuth } from "@/contexts/AuthContext";
 import Image from "next/image";
 import Link from "next/link";
 import { GlassSurface, NavigationMenu, NavigationMenuList } from "@uwdsc/ui";
+import { useEffect, useState } from "react";
 
 const hideNavbarPaths = new Set(["/login", "/register", "/complete-profile"]);
 
 export function Navbar() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const [applyInNav, setApplyInNav] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/applications/apply-open");
+        if (!res.ok) return;
+        const data = (await res.json()) as { open?: boolean };
+        if (!cancelled) setApplyInNav(Boolean(data.open));
+      } catch {
+        /* keep hidden */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const hideNavbar = hideNavbarPaths.has(pathname);
 
@@ -22,7 +41,7 @@ export function Navbar() {
     { href: "/", label: "Home" },
     { href: "/events", label: "Check-in" },
     { href: "/team", label: "Team" },
-    { href: "/apply", label: "Apply" },
+    ...(applyInNav ? [{ href: "/apply", label: "Apply" }] : []),
     { href: "/calendar", label: "Calendar" },
     // Add Admin link if user is an admin
     ...(user?.role === "admin"

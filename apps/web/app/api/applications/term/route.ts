@@ -1,4 +1,4 @@
-import { ApiResponse } from "@uwdsc/common/utils";
+import { ApiResponse, isApplicationPageWindowOpen } from "@uwdsc/common/utils";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 import { applicationService } from "@uwdsc/core";
 
@@ -8,7 +8,9 @@ export async function GET(): Promise<Response> {
     if (!user) return isUnauthorized;
 
     const term = await applicationService.getActiveTerm();
-    if (!term) return ApiResponse.notFound("No active application period");
+    if (!term || !isApplicationPageWindowOpen(term)) {
+      return ApiResponse.notFound("No active application period");
+    }
 
     return ApiResponse.ok(term);
   } catch (error) {

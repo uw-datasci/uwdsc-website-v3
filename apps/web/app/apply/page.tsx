@@ -97,12 +97,13 @@ export default function ApplyPage() {
     async function fetchInitialData() {
       setIsFetching(true);
       try {
-        const [term, positionsData, autofill] = await Promise.all([
-          getActiveTerm(),
+        const term = await getActiveTerm();
+        setCurrentTerm(term);
+
+        const [positionsData, autofill] = await Promise.all([
           getPositionsWithQuestions(),
           getProfileAutofill(),
         ]);
-        setCurrentTerm(term);
         setPositions(positionsData.positions);
         setGeneralQuestionIds(positionsData.generalQuestions.map((q) => q.id));
         setGeneralQuestions(positionsData.generalQuestions);
@@ -303,18 +304,10 @@ export default function ApplyPage() {
     switch (currentStep) {
       case 0: {
         if (!currentTerm) return null;
-        const softDeadline = new Date(currentTerm.application_soft_deadline);
-        const isPastSoftDeadline = new Date() > softDeadline;
         return (
           <Intro
             onStartApplication={handleStartApplication}
             isLoading={isLoading}
-            isStartDisabled={isPastSoftDeadline}
-            disabledMessage={
-              isPastSoftDeadline
-                ? "New applications cannot be created after the application deadline."
-                : undefined
-            }
           />
         );
       }

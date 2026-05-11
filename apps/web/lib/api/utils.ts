@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { createAuthService } from "@/lib/services";
 import type { User } from "@supabase/supabase-js";
 import { ApiResponse } from "@uwdsc/common/utils";
-import { BASE_PROFILE_FIELDS } from "@/constants/profile";
 import type { ProfileUpdateData } from "@uwdsc/common/types";
+import { BASE_PROFILE_FIELDS } from "@/constants/profile";
 
 // ==========================================
 //  Auth Utils

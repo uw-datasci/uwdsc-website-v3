@@ -1,5 +1,6 @@
-import { ApiResponse } from "@uwdsc/common/utils";
+import { ApiResponse, isApplicationApiWindowOpen } from "@uwdsc/common/utils";
 import { tryGetCurrentUser } from "@/lib/api/utils";
+import { applicationService } from "@uwdsc/core";
 import { createResumeService } from "@/lib/services";
 import { NextRequest } from "next/server";
 
@@ -7,6 +8,18 @@ export async function GET(): Promise<Response> {
   try {
     const { user, isUnauthorized } = await tryGetCurrentUser();
     if (!user) return isUnauthorized;
+
+    const term = await applicationService.getActiveTerm();
+    if (!term) return ApiResponse.notFound("No active application period");
+    if (!isApplicationApiWindowOpen(term)) {
+      return ApiResponse.json(
+        {
+          error: "The application period is closed.",
+          message: "The application period is closed.",
+        },
+        403,
+      );
+    }
 
     const resumeService = await createResumeService();
     const url = await resumeService.getResumeUrl(user.id);
@@ -25,6 +38,18 @@ export async function POST(request: NextRequest): Promise<Response> {
   try {
     const { user, isUnauthorized } = await tryGetCurrentUser();
     if (!user) return isUnauthorized;
+
+    const term = await applicationService.getActiveTerm();
+    if (!term) return ApiResponse.notFound("No active application period");
+    if (!isApplicationApiWindowOpen(term)) {
+      return ApiResponse.json(
+        {
+          error: "The application period is closed.",
+          message: "The application period is closed.",
+        },
+        403,
+      );
+    }
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;

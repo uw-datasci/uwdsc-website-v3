@@ -26,12 +26,12 @@ class TeamService {
     if (b.name === this.ADVISORS_SUBTEAM_NAME) return -1;
     if (a.name === this.CXC_SUBTEAM_NAME) return -1;
     if (b.name === this.CXC_SUBTEAM_NAME) return 1;
-    return a.name.localeCompare(b.name);
+    return (a.name ?? "").localeCompare(b.name ?? "");
   }
 
   /** True if the member is a VP (should appear first in the subteam list). */
   private isVp(member: ExecMember): boolean {
-    return member.position.startsWith("VP");
+    return (member.position ?? "").startsWith("VP");
   }
 
   /**
@@ -77,7 +77,7 @@ class TeamService {
         const bRank = this.isVp(b) ? 0 : 1;
         const order = aRank - bRank;
         if (order !== 0) return order;
-        return a.name.localeCompare(b.name);
+        return (a.name ?? "").localeCompare(b.name ?? "");
       });
     }
 

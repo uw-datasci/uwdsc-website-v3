@@ -20,7 +20,10 @@ export class TeamRepository extends BaseRepository {
     const result = await this.sql<ExecTeamRow[]>`
       SELECT
         et.id,
-        TRIM(p.first_name || ' ' || p.last_name) AS name,
+        COALESCE(
+          NULLIF(TRIM(CONCAT_WS(' ', p.first_name, p.last_name)), ''),
+          'Member'
+        ) AS name,
         et.photo_url,
         et.instagram,
         et.updated_at,

@@ -24,8 +24,7 @@ export default function CompleteProfilePage() {
         setProfile(p);
       })
       .catch((err) => {
-        if (!cancelled)
-          console.error("Failed to load profile for prefill:", err);
+        if (!cancelled) console.error("Failed to load profile for prefill:", err);
         setProfile(null);
       });
 
@@ -73,8 +72,8 @@ export default function CompleteProfilePage() {
               <h2 className="text-7xl font-bold my-10">Almost There!</h2>
               <div className="flex flex-col gap-8 leading-loose text-xl">
                 <p>
-                  Your email has been verified! Now let&apos;s complete your
-                  profile to finish setting up your account.
+                  Your email has been verified! Now let&apos;s complete your profile to finish
+                  setting up your account.
                 </p>
                 <p>
                   And after all that hard work ... <br /> Welcome to the club!
@@ -88,9 +87,9 @@ export default function CompleteProfilePage() {
           <div className="w-full h-full flex-1">
             <CompleteProfileForm
               prefill={profile ?? null}
-              onSuccess={() => {
-                mutate();
-                router.push("/");
+              onSuccess={async () => {
+                await mutate();
+                globalThis.location.assign("/");
               }}
             />
           </div>

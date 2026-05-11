@@ -1,8 +1,4 @@
-import {
-  CompleteProfileData,
-  Profile,
-  ProfileUpdateData,
-} from "@uwdsc/common/types";
+import { CompleteProfileData, Profile, ProfileUpdateData } from "@uwdsc/common/types";
 import { BaseRepository } from "@uwdsc/db/baseRepository";
 
 export class ProfileRepository extends BaseRepository {
@@ -27,10 +23,7 @@ export class ProfileRepository extends BaseRepository {
    * @param userId - The auth.users.id (UUID)
    * @param data - Profile data to update
    */
-  async completeProfile(
-    userId: string,
-    data: CompleteProfileData,
-  ): Promise<boolean> {
+  async completeProfile(userId: string, data: CompleteProfileData): Promise<boolean> {
     try {
       const result = await this.sql`
         UPDATE profiles
@@ -59,10 +52,7 @@ export class ProfileRepository extends BaseRepository {
    * @param userId - The auth.users.id (UUID)
    * @param data - Profile data to update (first_name, last_name, wat_iam, faculty, term only)
    */
-  async updateProfileByUser(
-    userId: string,
-    data: ProfileUpdateData,
-  ): Promise<boolean> {
+  async updateProfileByUser(userId: string, data: ProfileUpdateData): Promise<boolean> {
     try {
       const result = await this.sql`
         UPDATE profiles

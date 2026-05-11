@@ -1,3 +1,5 @@
+export const EXEC_TEAM_PHOTO_PLACEHOLDER = "/placeholder/team.png" as const;
+
 export type ExecMember = {
   id: number;
   name: string;

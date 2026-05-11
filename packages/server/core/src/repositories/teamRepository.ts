@@ -6,7 +6,7 @@ interface ExecTeamRow {
   position_name: string;
   subteam_id: number;
   subteam_name: string;
-  photo_url: string;
+  photo_url: string | null;
   instagram: string | null;
   updated_at: string | null;
 }

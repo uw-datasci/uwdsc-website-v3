@@ -1,9 +1,4 @@
-import {
-  ApiError,
-  CompleteProfileData,
-  Profile,
-  ProfileUpdateData,
-} from "@uwdsc/common/types";
+import { ApiError, CompleteProfileData, Profile, ProfileUpdateData } from "@uwdsc/common/types";
 import { ProfileRepository } from "../repositories/profileRepository";
 
 class ProfileService {
@@ -20,10 +15,7 @@ class ProfileService {
     try {
       return await this.repository.getProfileCount();
     } catch (error) {
-      throw new ApiError(
-        `Failed to count profiles: ${(error as Error).message}`,
-        500,
-      );
+      throw new ApiError(`Failed to count profiles: ${(error as Error).message}`, 500);
     }
   }
 
@@ -34,10 +26,7 @@ class ProfileService {
     try {
       return await this.repository.getProfileByUserId(userId);
     } catch (error) {
-      throw new ApiError(
-        `Failed to get profile: ${(error as Error).message}`,
-        500,
-      );
+      throw new ApiError(`Failed to get profile: ${(error as Error).message}`, 500);
     }
   }
 
@@ -60,10 +49,7 @@ class ProfileService {
 
       return { success: true };
     } catch (error) {
-      throw new ApiError(
-        `Failed to update profile: ${(error as Error).message}`,
-        500,
-      );
+      throw new ApiError(`Failed to update profile: ${(error as Error).message}`, 500);
     }
   }
 
@@ -85,10 +71,7 @@ class ProfileService {
 
       return { success: true };
     } catch (error) {
-      throw new ApiError(
-        `Failed to update profile: ${(error as Error).message}`,
-        500,
-      );
+      throw new ApiError(`Failed to update profile: ${(error as Error).message}`, 500);
     }
   }
 
@@ -102,12 +85,7 @@ class ProfileService {
       if (!profile) return false;
 
       // Profile is complete if required fields are filled
-      return !!(
-        profile.first_name &&
-        profile.last_name &&
-        profile.faculty &&
-        profile.term
-      );
+      return !!(profile.first_name && profile.last_name && profile.faculty && profile.term);
     } catch (error) {
       console.error("Error checking profile completion:", error);
       return false;

@@ -1,12 +1,18 @@
 import Image from "next/image";
-import { ExecMember } from "@uwdsc/common/types";
+import { EXEC_TEAM_PHOTO_PLACEHOLDER, type ExecMember } from "@uwdsc/common/types";
 import { Card, CardHeader, CardTitle, CardDescription } from "@uwdsc/ui";
+import teamPhotoPlaceholder from "@/public/placeholder/team.png";
 
 interface TeamCardProps {
   readonly member: ExecMember;
 }
 
 export default function TeamCard({ member }: TeamCardProps) {
+  const imageSrc =
+    member.photo_url === EXEC_TEAM_PHOTO_PLACEHOLDER
+      ? teamPhotoPlaceholder
+      : member.photo_url;
+
   return (
     <Card
       className="group relative w-full max-w-xs overflow-hidden border-0 bg-linear-to-br from-gray-900
@@ -15,7 +21,7 @@ export default function TeamCard({ member }: TeamCardProps) {
       {/* Member Image */}
       <div className="relative h-80 w-full overflow-hidden">
         <Image
-          src={member.photo_url}
+          src={imageSrc}
           alt={member.name}
           fill
           priority

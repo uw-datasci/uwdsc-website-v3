@@ -27,7 +27,7 @@ import type { Profile } from "@uwdsc/common/types";
 
 interface CompleteProfileFormProps {
   readonly prefill?: Profile | null;
-  readonly onSuccess: () => void;
+  readonly onSuccess: () => void | Promise<void>;
 }
 
 export function CompleteProfileForm({
@@ -69,7 +69,7 @@ export function CompleteProfileForm({
       };
 
       await completeProfile(profileData);
-      onSuccess();
+      await onSuccess();
     } catch (error: unknown) {
       const err = error as { error?: string; message?: string };
       console.error(error);

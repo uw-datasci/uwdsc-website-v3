@@ -1,4 +1,8 @@
-import type { ExecMember, Subteam } from "@uwdsc/common/types";
+import {
+  EXEC_TEAM_PHOTO_PLACEHOLDER,
+  type ExecMember,
+  type Subteam,
+} from "@uwdsc/common/types";
 import { TeamRepository } from "../repositories/teamRepository";
 
 class TeamService {
@@ -54,11 +58,14 @@ class TeamService {
         };
         subteamMap.set(subteamId, subteam);
       }
+      const storageKey = row.photo_url?.trim();
       subteam.members.push({
         id: row.id,
         name: row.name,
         position: row.position_name,
-        photo_url: `${this.BUCKET_URL}/${row.photo_url}`,
+        photo_url: storageKey
+          ? `${this.BUCKET_URL}/${storageKey}`
+          : EXEC_TEAM_PHOTO_PLACEHOLDER,
         instagram: row.instagram ?? null,
         updated_at: row.updated_at ?? null,
       });

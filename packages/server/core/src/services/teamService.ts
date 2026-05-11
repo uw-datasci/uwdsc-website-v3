@@ -42,10 +42,7 @@ class TeamService {
   async getTeam(): Promise<Subteam[]> {
     const rows = await this.repository.getExecTeam();
 
-    const subteamMap = new Map<
-      number,
-      { id: number; name: string; members: ExecMember[] }
-    >();
+    const subteamMap = new Map<number, { id: number; name: string; members: ExecMember[] }>();
 
     for (const row of rows) {
       const subteamId = row.subteam_id;

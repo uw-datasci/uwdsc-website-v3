@@ -7,19 +7,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { getMembershipStatus } from "@/lib/api/profile";
 import type { MembershipStatus } from "@uwdsc/common/types";
 import { toast } from "sonner";
+import { MEMBERSHIP_PAYMENT_URL } from "@/constants/membership";
 
-const HIDE_ON_PATHS = new Set([
-  "/login",
-  "/register",
-  "/complete-profile",
-  "/events",
-]);
+const HIDE_ON_PATHS = new Set(["/login", "/register", "/complete-profile", "/events"]);
 
 export function MembershipWarningBanner() {
   const { user, isAuthenticated } = useAuth();
   const pathname = usePathname();
-  const [membershipStatus, setMembershipStatus] =
-    useState<MembershipStatus | null>(null);
+  const [membershipStatus, setMembershipStatus] = useState<MembershipStatus | null>(null);
   const [isOpen, setIsOpen] = useState(true);
 
   useEffect(() => {
@@ -64,7 +59,23 @@ export function MembershipWarningBanner() {
     const description = messages.join(" and ");
 
     toast.warning("Membership incomplete", {
-      description: `Please ${description} to access all member benefits.`,
+      description: (
+        <div className="flex flex-col gap-2">
+          <p>Please {description} to access all member benefits.</p>
+          {!hasMembership ? (
+            <p>
+              <a
+                href={MEMBERSHIP_PAYMENT_URL}
+                className="font-semibold underline underline-offset-2 transition-colors hover:text-blue-700"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Pay DSC membership
+              </a>
+            </p>
+          ) : null}
+        </div>
+      ),
       duration: 10000,
       icon: <AlertTriangle className="h-4 w-4" aria-hidden />,
     });

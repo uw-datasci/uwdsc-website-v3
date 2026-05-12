@@ -23,8 +23,7 @@ import Techyon from "@/public/logos/techyon.png";
 export const WHAT_WE_DO_CARDS = [
   {
     title: "Workshops",
-    description:
-      "Join us for workshops, where we teach a variety of Data Science topics.",
+    description: "Join us for workshops, where we teach a variety of Data Science topics.",
     graphic: rocket,
   },
   {
@@ -34,26 +33,22 @@ export const WHAT_WE_DO_CARDS = [
   },
   {
     title: "Project Program",
-    description:
-      "Collaborate with fellow students on any project of your choice.",
+    description: "Collaborate with fellow students on any project of your choice.",
     graphic: folder,
   },
   {
     title: "E-Leetcoding",
-    description:
-      "Prepare for technical interviews with our weekly Leetcoding sessions.",
+    description: "Prepare for technical interviews with our weekly Leetcoding sessions.",
     graphic: computer,
   },
   {
     title: "Reading Groups",
-    description:
-      "Learn about the latest developments in Data Science and Machine Learning.",
+    description: "Learn about the latest developments in Data Science and Machine Learning.",
     graphic: documents,
   },
   {
     title: "Social Events",
-    description:
-      "Come hang out with us and meet other students interested in Data Science!",
+    description: "Come hang out with us and meet other students interested in Data Science!",
     graphic: chat,
   },
 ];
@@ -138,7 +133,14 @@ export const CURRENT_SPONSORS = [
   { name: "Techyon", logo: Techyon, link: "https://techyon.org/" },
 ];
 
-export const GENERAL_FAQ = [
+export type GeneralFaqItem = {
+  id: string;
+  question: string;
+  answer: string;
+  showMembershipPayLink?: boolean;
+};
+
+export const GENERAL_FAQ: GeneralFaqItem[] = [
   {
     id: "1",
     question: "What is DSC?",
@@ -169,5 +171,6 @@ export const GENERAL_FAQ = [
     id: "6",
     question: "How to sign up?",
     answer: `Click the “Join Us” button to create an account on our website. You can pay the $4 membership fee through one of the following methods:\n- Online through WUSA (navigate to Shop → Memberships → DSC)\n- In-person at our office/events with cash\n- In-person at the MathSoc office with credit/debit (keep receipt)`,
+    showMembershipPayLink: true,
   },
 ];

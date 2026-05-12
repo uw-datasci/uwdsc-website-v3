@@ -10,7 +10,7 @@ export default async function Team() {
 
   return (
     <SectionWrapper className="pt-14 lg:pt-20">
-      <h1 className="mb-14 text-center text-5xl font-bold text-white sm:text-6xl lg:text-7xl">
+      <h1 className="my-14 text-center text-5xl font-bold text-white sm:text-6xl lg:text-7xl">
         Team
       </h1>
       <div className="grid gap-32">

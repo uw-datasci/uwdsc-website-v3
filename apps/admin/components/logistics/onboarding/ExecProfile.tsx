@@ -58,9 +58,7 @@ export function ExecProfile({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
           <Card className="h-full border-border bg-card">
             <CardHeader>
-              <CardTitle className="flex items-center text-xl">
-                Personal Information
-              </CardTitle>
+              <CardTitle className="flex items-center text-xl">Personal Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <FormField
@@ -89,9 +87,7 @@ export function ExecProfile({
 
           <Card className="h-full border-border bg-card">
             <CardHeader>
-              <CardTitle className="flex items-center text-xl">
-                Term Information
-              </CardTitle>
+              <CardTitle className="flex items-center text-xl">Term Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <FormField
@@ -114,8 +110,8 @@ export function ExecProfile({
                 control={form.control}
                 name="in_waterloo"
                 render={renderTextField({
-                  placeholder: "Will you be located in Waterloo next term?",
-                  label: "Location Next Term",
+                  placeholder: "Will you be located in Waterloo this term?",
+                  label: "Location",
                   required: true,
                 })}
               />
@@ -125,9 +121,7 @@ export function ExecProfile({
 
         <Card className="border-border bg-card">
           <CardHeader>
-            <CardTitle className="flex items-center text-xl">
-              Exec Role
-            </CardTitle>
+            <CardTitle className="flex items-center text-xl">Exec Role</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <FormField
@@ -144,8 +138,7 @@ export function ExecProfile({
                   required: true,
                   disabled: true,
                   triggerClassName: "w-full",
-                  contentClassName:
-                    "h-48 overflow-y-auto bg-popover text-popover-foreground",
+                  contentClassName: "h-48 overflow-y-auto bg-popover text-popover-foreground",
                   contentPosition: "popper",
                   itemClassName:
                     "transition-colors hover:bg-accent/70 focus:bg-accent focus:text-accent-foreground",
@@ -163,9 +156,7 @@ export function ExecProfile({
 
         <Card className="border-border bg-card">
           <CardHeader>
-            <CardTitle className="flex items-center text-xl">
-              Public Profile
-            </CardTitle>
+            <CardTitle className="flex items-center text-xl">Public Profile</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <FormField

@@ -213,7 +213,7 @@ export default function LogisticsOnboardingPage() {
       <div className="mx-auto max-w-5xl space-y-6">
         <div className="space-y-2">
           <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight">
-            W26 Onboarding Form
+            {currentTerm?.code} Onboarding Form
             {isFormLocked && (
               <Lock className="size-6 text-muted-foreground" aria-label="Form is locked" />
             )}

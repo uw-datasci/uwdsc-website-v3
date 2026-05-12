@@ -38,11 +38,11 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
 
-      - name: Install dependencies
-        run: pnpm install
+      - name: Install docs dependencies
+        run: pnpm install --filter docs... --frozen-lockfile
 
       - name: Build docs
-        run: pnpm build:docs
+        run: pnpm --filter docs run build
 
       - name: Add .nojekyll
         run: touch apps/docs/out/.nojekyll

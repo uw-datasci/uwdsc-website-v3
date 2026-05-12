@@ -8,7 +8,6 @@
     "dev:web": "turbo dev --filter=web...",
     "dev:admin": "turbo dev --filter=admin...",
     "dev:docs": "turbo dev --filter=docs...",
-    "build:docs": "turbo build --filter=docs",
     "lint": "turbo lint",
     "check-types": "turbo check-types",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",

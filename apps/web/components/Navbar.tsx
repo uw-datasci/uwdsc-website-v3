@@ -5,8 +5,10 @@ import { UserAvatar } from "./navbar/UserAvatar";
 import { MobileMenu } from "./navbar/MobileMenu";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { getApplyWindowOpen } from "@/lib/api";
 import Image from "next/image";
 import Link from "next/link";
+import { ADMIN_ROLES } from "@uwdsc/common/constants";
 import { GlassSurface, NavigationMenu, NavigationMenuList } from "@uwdsc/ui";
 import { useEffect, useState } from "react";
 
@@ -21,9 +23,7 @@ export function Navbar() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch("/api/applications/apply-open");
-        if (!res.ok) return;
-        const data = (await res.json()) as { open?: boolean };
+        const data = await getApplyWindowOpen();
         if (!cancelled) setApplyInNav(Boolean(data.open));
       } catch {
         /* keep hidden */
@@ -44,12 +44,10 @@ export function Navbar() {
     ...(applyInNav ? [{ href: "/apply", label: "Apply" }] : []),
     { href: "/calendar", label: "Calendar" },
     // Add Admin link if user is an admin
-    ...(user?.role === "admin"
+    ...(user?.role && ADMIN_ROLES.has(user.role)
       ? [
           {
-            href:
-              process.env.NEXT_PUBLIC_ADMIN_URL ||
-              "https://admin.uwdatascience.ca/",
+            href: process.env.NEXT_PUBLIC_ADMIN_URL || "https://admin.uwdatascience.ca/",
             label: "Admin",
             target: "_blank",
           },
@@ -63,10 +61,7 @@ export function Navbar() {
     <div className="fixed left-0 right-0 z-50 px-6 py-6 lg:px-12 lg:py-8">
       <div className="relative flex items-center justify-between mx-auto">
         {/* DSC Logo */}
-        <Link
-          href="/"
-          className="relative w-12 h-12 lg:w-14 lg:h-14 hover:cursor-pointer"
-        >
+        <Link href="/" className="relative w-12 h-12 lg:w-14 lg:h-14 hover:cursor-pointer">
           <Image
             src="/logos/dsc.svg"
             alt="uwdsc logo"

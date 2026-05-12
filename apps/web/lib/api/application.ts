@@ -20,6 +20,17 @@ export interface PositionsWithQuestionsResponse {
   positions: PositionWithQuestions[];
 }
 
+interface ApplyWindowOpenResponse {
+  open: boolean;
+}
+
+export async function getApplyWindowOpen(): Promise<ApplyWindowOpenResponse> {
+  const response = await fetch("/api/applications/apply-open");
+  const data = await response.json();
+  if (!response.ok) throw createApiError(data, response.status);
+  return data as ApplyWindowOpenResponse;
+}
+
 export async function getActiveTerm(): Promise<Term> {
   const response = await fetch("/api/applications/term");
   const data = await response.json();
@@ -41,20 +52,14 @@ export async function getProfileAutofill(): Promise<ProfileAutofill> {
   return data;
 }
 
-export async function getApplication(
-  termId: string,
-): Promise<ApplicationWithDetails | null> {
-  const response = await fetch(
-    `/api/applications?termId=${encodeURIComponent(termId)}`,
-  );
+export async function getApplication(termId: string): Promise<ApplicationWithDetails | null> {
+  const response = await fetch(`/api/applications?termId=${encodeURIComponent(termId)}`);
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);
   return data;
 }
 
-export async function createApplication(
-  termId: string,
-): Promise<ApplicationWithDetails> {
+export async function createApplication(termId: string): Promise<ApplicationWithDetails> {
   const response = await fetch("/api/applications", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

@@ -3,7 +3,7 @@ import { ApiResponse } from "@uwdsc/common/utils";
 import { membershipService } from "@uwdsc/core";
 import { graceDuringOnboarding } from "@/lib/graceDuringOnboarding";
 import { createAuthService } from "@/lib/services";
-import { ADMIN_ROLES } from "@/constants/roles";
+import { ADMIN_ROLES } from "@uwdsc/common/constants";
 
 /**
  * Context shape passed to route handlers (e.g. { params: Promise<{ id: string }> }).

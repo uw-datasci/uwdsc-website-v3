@@ -1,5 +1,5 @@
 import { GENERAL_FAQ } from "@/constants/home";
-import { MEMBERSHIP_PAYMENT_URL } from "@/constants/membership";
+import { MEMBERSHIP_PAYMENT_URL } from "@uwdsc/common/constants";
 import {
   Accordion,
   AccordionContent,

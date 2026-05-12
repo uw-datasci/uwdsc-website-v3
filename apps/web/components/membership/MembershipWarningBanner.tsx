@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { getMembershipStatus } from "@/lib/api/profile";
 import type { MembershipStatus } from "@uwdsc/common/types";
 import { toast } from "sonner";
-import { MEMBERSHIP_PAYMENT_URL } from "@/constants/membership";
+import { MEMBERSHIP_PAYMENT_URL } from "@uwdsc/common/constants";
 
 const HIDE_ON_PATHS = new Set(["/login", "/register", "/complete-profile", "/events"]);
 

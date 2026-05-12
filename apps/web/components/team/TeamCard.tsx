@@ -9,15 +9,10 @@ interface TeamCardProps {
 
 export default function TeamCard({ member }: TeamCardProps) {
   const imageSrc =
-    member.photo_url === EXEC_TEAM_PHOTO_PLACEHOLDER
-      ? teamPhotoPlaceholder
-      : member.photo_url;
+    member.photo_url === EXEC_TEAM_PHOTO_PLACEHOLDER ? teamPhotoPlaceholder : member.photo_url;
 
   return (
-    <Card
-      className="group relative w-full max-w-xs overflow-hidden border-0 bg-linear-to-br from-gray-900
-      to-black p-0 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20"
-    >
+    <Card className="relative w-full max-w-xs overflow-hidden border-0 bg-linear-to-br from-gray-900 to-black p-0 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/20">
       {/* Member Image */}
       <div className="relative h-80 w-full overflow-hidden">
         <Image
@@ -25,7 +20,7 @@ export default function TeamCard({ member }: TeamCardProps) {
           alt={member.name}
           fill
           priority
-          className="object-cover transition-transform duration-300 group-hover:scale-110"
+          className="object-cover"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         {/* Overlay gradient */}
@@ -34,9 +29,7 @@ export default function TeamCard({ member }: TeamCardProps) {
 
       {/* Member Info */}
       <CardHeader className="relative z-10 -mt-16 bg-linear-to-t from-black to-transparent px-6 pb-4 pt-16">
-        <CardTitle className="text-xl font-bold text-white">
-          {member.name}
-        </CardTitle>
+        <CardTitle className="text-xl font-bold text-white">{member.name}</CardTitle>
         <CardDescription className="text-sm font-medium text-gray-300">
           {member.position}
         </CardDescription>

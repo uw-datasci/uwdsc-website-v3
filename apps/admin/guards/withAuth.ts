@@ -47,9 +47,7 @@ export function withAuth<C extends WithAuthContext = WithAuthContext>(
     const authService = await createAuthService();
     const { user, error } = await authService.getCurrentUser();
 
-    if (error || !user) {
-      return ApiResponse.unauthorized("Authentication required");
-    }
+    if (error || !user) return ApiResponse.unauthorized("Authentication required");
 
     const role = user.app_metadata?.role as string | undefined;
     if (!role || !ADMIN_ROLES.has(role)) {
@@ -61,6 +59,7 @@ export function withAuth<C extends WithAuthContext = WithAuthContext>(
 
       if (!membershipStatus.has_membership) {
         const grace = await graceDuringOnboarding();
+
         if (!grace) {
           return ApiResponse.forbidden(
             "Exec accounts must have a paid membership before accessing admin APIs.",

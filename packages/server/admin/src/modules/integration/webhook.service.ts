@@ -2,7 +2,6 @@ import { Resend } from "resend";
 import type { GetReceivedEmailContentsResult } from "../../types/webhook";
 
 class WebhookService {
-  /** Inbound address for membership receipt processing (Resend receiving / MX). */
   private readonly membershipInboundEmail = "membership@mail.uwdatascience.ca";
   private readonly resend: Resend | null;
 
@@ -44,15 +43,14 @@ class WebhookService {
       };
     }
 
-    const { data, error } =
-      await this.resend.emails.receiving.get(receivingEmailId);
+    const { data, error } = await this.resend.emails.receiving.get(receivingEmailId);
 
     if (error || !data) {
       const message =
         typeof error === "object" &&
-          error !== null &&
-          "message" in error &&
-          typeof (error as { message: unknown }).message === "string"
+        error !== null &&
+        "message" in error &&
+        typeof (error as { message: unknown }).message === "string"
           ? (error as { message: string }).message
           : "Failed to fetch received email from Resend";
       return { ok: false, reason: "resend_error", message };

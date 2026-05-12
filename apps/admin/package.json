@@ -23,6 +23,7 @@
     "@uwdsc/core": "workspace:*",
     "@uwdsc/db": "workspace:*",
     "@uwdsc/ui": "workspace:*",
+    "@vercel/analytics": "^1.6.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.29.2",
     "html5-qrcode": "^2.3.8",

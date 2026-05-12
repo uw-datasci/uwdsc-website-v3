@@ -4,6 +4,7 @@ import type { Metadata, Viewport } from "next";
 import "@uwdsc/ui/globals.css";
 import { baseMetadata, baseViewport } from "@/lib/metadata";
 import { Providers } from "@/providers/providers";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   ...baseMetadata,
@@ -31,6 +32,7 @@ export default function RootLayout({
     <html lang="en" className="dark" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
         <Providers>{children}</Providers>
+        <Analytics />
       </body>
     </html>
   );

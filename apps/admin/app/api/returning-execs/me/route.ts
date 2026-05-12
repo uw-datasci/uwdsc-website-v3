@@ -13,6 +13,9 @@ export const GET = withAuth(async (_request, _context, user) => {
     return ApiResponse.ok({ submission });
   } catch (error) {
     if (error instanceof ApiError) {
+      if (error.statusCode === 403) {
+        return ApiResponse.forbidden(error.message, error.code ?? error.message);
+      }
       return ApiResponse.json(
         { error: error.message, message: error.message },
         error.statusCode,
@@ -34,6 +37,9 @@ export const PUT = withAuth(async (request, _context, user) => {
     return ApiResponse.ok({ submission });
   } catch (error) {
     if (error instanceof ApiError) {
+      if (error.statusCode === 403) {
+        return ApiResponse.forbidden(error.message, error.code ?? error.message);
+      }
       return ApiResponse.json(
         { error: error.message, message: error.message },
         error.statusCode,

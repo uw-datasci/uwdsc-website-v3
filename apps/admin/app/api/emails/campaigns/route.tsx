@@ -2,7 +2,7 @@ import { ApiError } from "@uwdsc/common/types";
 import { ApiResponse } from "@uwdsc/common/utils";
 import { emailService, profileService } from "@uwdsc/admin";
 import { scheduleBroadcastCleanup } from "@/lib/server/scheduleBroadcastCleanup";
-import { withAdmin } from "@/guards/withAdminPortalRole";
+import { withAdmin } from "@/guards/withAdmin";
 import { sendCampaignSchema } from "@/lib/schemas/emails";
 
 /**
@@ -40,6 +40,9 @@ export const POST = withAdmin(async (request) => {
     if (error instanceof ApiError) {
       if (error.statusCode === 400) {
         return ApiResponse.badRequest(error.message, error.code ?? "Validation error");
+      }
+      if (error.statusCode === 403) {
+        return ApiResponse.forbidden(error.message, error.code ?? "Error");
       }
       return ApiResponse.json(
         { error: error.code ?? "Error", message: error.message },

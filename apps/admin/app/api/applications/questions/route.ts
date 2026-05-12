@@ -47,6 +47,9 @@ export const POST = withVpAccess(async (request, _context, _user, scope) => {
     return ApiResponse.ok({ success: true, question: created });
   } catch (error: unknown) {
     if (error instanceof ApiError) {
+      if (error.statusCode === 403) {
+        return ApiResponse.forbidden(error.message, error.code ?? error.message);
+      }
       return ApiResponse.json(
         { error: error.message, message: error.message },
         error.statusCode,

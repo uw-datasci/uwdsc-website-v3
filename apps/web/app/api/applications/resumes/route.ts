@@ -12,12 +12,9 @@ export async function GET(): Promise<Response> {
     const term = await applicationService.getActiveTerm();
     if (!term) return ApiResponse.notFound("No active application period");
     if (!isApplicationApiWindowOpen(term)) {
-      return ApiResponse.json(
-        {
-          error: "The application period is closed.",
-          message: "The application period is closed.",
-        },
-        403,
+      return ApiResponse.forbidden(
+        "The application period is closed.",
+        "The application period is closed.",
       );
     }
 
@@ -42,12 +39,9 @@ export async function POST(request: NextRequest): Promise<Response> {
     const term = await applicationService.getActiveTerm();
     if (!term) return ApiResponse.notFound("No active application period");
     if (!isApplicationApiWindowOpen(term)) {
-      return ApiResponse.json(
-        {
-          error: "The application period is closed.",
-          message: "The application period is closed.",
-        },
-        403,
+      return ApiResponse.forbidden(
+        "The application period is closed.",
+        "The application period is closed.",
       );
     }
 

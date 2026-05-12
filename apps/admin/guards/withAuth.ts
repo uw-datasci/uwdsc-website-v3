@@ -41,10 +41,7 @@ export type WithAuthHandler<C = WithAuthContext> = (
 export function withAuth<C extends WithAuthContext = WithAuthContext>(
   handler: WithAuthHandler<C>,
 ): (request: Request, context?: C) => Promise<Response> {
-  return async function wrapped(
-    request: Request,
-    context?: C,
-  ): Promise<Response> {
+  return async function wrapped(request: Request, context?: C): Promise<Response> {
     const authService = await createAuthService();
     const { user, error } = await authService.getCurrentUser();
 
@@ -58,18 +55,12 @@ export function withAuth<C extends WithAuthContext = WithAuthContext>(
     }
 
     if (role === "exec") {
-      const membershipStatus = await membershipService.getMembershipStatus(
-        user.id,
-      );
+      const membershipStatus = await membershipService.getMembershipStatus(user.id);
 
       if (!membershipStatus.has_membership) {
-        return ApiResponse.json(
-          {
-            error: "Exec access requires a paid membership",
-            message:
-              "Exec accounts must have a paid membership before accessing admin APIs.",
-          },
-          403,
+        return ApiResponse.forbidden(
+          "Exec accounts must have a paid membership before accessing admin APIs.",
+          "Exec access requires a paid membership",
         );
       }
     }

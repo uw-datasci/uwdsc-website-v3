@@ -10,13 +10,9 @@ export const GET = withAuth(async () => {
   try {
     const term = await returningExecService.getActiveTerm();
     if (!term || !isReturningExecWindowOpen(term)) {
-      return ApiResponse.json(
-        {
-          error: "Returning exec form is not open",
-          message:
-            "The returning exec form is only available during the configured submission window.",
-        },
-        403,
+      return ApiResponse.forbidden(
+        "The returning exec form is only available during the configured submission window.",
+        "Returning exec form is not open",
       );
     }
     const positions = await returningExecService.getAvailablePositions();

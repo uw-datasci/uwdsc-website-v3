@@ -12,13 +12,7 @@ export function withAdmin<C extends WithAuthContext = WithAuthContext>(
   return withAuth<C>(async (request, context, user) => {
     const role = user.app_metadata?.role as string | undefined;
     if (role !== "admin") {
-      return ApiResponse.json(
-        {
-          error: "Forbidden",
-          message: "Only admin users can access this resource.",
-        },
-        403,
-      );
+      return ApiResponse.forbidden("Only admin users can access this resource.");
     }
     return handler(request, context, user);
   });

@@ -13,6 +13,9 @@ export const GET = withPresAccess(async () => {
     return ApiResponse.ok({ team });
   } catch (error: unknown) {
     if (error instanceof ApiError) {
+      if (error.statusCode === 403) {
+        return ApiResponse.forbidden(error.message, error.code ?? error.message);
+      }
       return ApiResponse.json(
         { error: error.message, message: error.message },
         error.statusCode,

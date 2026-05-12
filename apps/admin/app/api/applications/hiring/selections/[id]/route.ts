@@ -1,8 +1,11 @@
-import { ApiError, type ApplicationReviewStatus } from "@uwdsc/common/types";
+import {
+  ApiError,
+  type ApplicationReviewStatus,
+  type QuestionScope,
+} from "@uwdsc/common/types";
 import { ApiResponse } from "@uwdsc/common/utils";
 import { hiringService, returningExecService } from "@uwdsc/admin";
 import { withPresAccess } from "@/guards/withPresAccess";
-import type { QuestionScope } from "@uwdsc/common/types";
 
 interface ParamsContext {
   params: Promise<{ id: string }>;
@@ -28,11 +31,7 @@ export const PATCH = withPresAccess<ParamsContext>(
       }
 
       if (body.source === "returning_exec") {
-        await returningExecService.updateSelectionReviewStatus(
-          scope,
-          id,
-          body.status,
-        );
+        await returningExecService.updateSelectionReviewStatus(scope, id, body.status);
       } else {
         await hiringService.updateSelectionStatus(id, body.status);
       }
@@ -40,16 +39,16 @@ export const PATCH = withPresAccess<ParamsContext>(
       return ApiResponse.ok({ success: true });
     } catch (error: unknown) {
       if (error instanceof ApiError) {
+        if (error.statusCode === 403) {
+          return ApiResponse.forbidden(error.message, error.code ?? error.message);
+        }
         return ApiResponse.json(
           { error: error.message, message: error.message },
           error.statusCode,
         );
       }
       console.error("Error updating selection status:", error);
-      return ApiResponse.serverError(
-        error,
-        "Failed to update selection status",
-      );
+      return ApiResponse.serverError(error, "Failed to update selection status");
     }
   },
 );

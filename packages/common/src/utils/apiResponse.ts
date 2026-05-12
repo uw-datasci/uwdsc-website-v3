@@ -29,6 +29,16 @@ export class ApiResponse {
   }
 
   /**
+   * Returns a 403 Forbidden response.
+   * @param message - Optional detail shown as `message` in the JSON body.
+   * @param error - Short title shown as `error`; defaults to `"Forbidden"`.
+   */
+  static forbidden(message?: string, error = "Forbidden"): NextResponse {
+    const body = message ? { error, message } : { error };
+    return NextResponse.json(body, { status: 403 });
+  }
+
+  /**
    * Returns a 404 Not Found response.
    */
   static notFound(error = "Not found"): NextResponse {

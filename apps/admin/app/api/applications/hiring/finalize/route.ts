@@ -27,6 +27,9 @@ export const POST = withPresAccess(async (request) => {
     return ApiResponse.ok({ summary });
   } catch (error: unknown) {
     if (error instanceof ApiError) {
+      if (error.statusCode === 403) {
+        return ApiResponse.forbidden(error.message, error.code ?? error.message);
+      }
       return ApiResponse.json(
         { error: error.message, message: error.message },
         error.statusCode,

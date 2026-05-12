@@ -1,4 +1,8 @@
-import { ApiError, type ApplicationReviewStatus, type QuestionScope } from "@uwdsc/common/types";
+import {
+  ApiError,
+  type ApplicationReviewStatus,
+  type QuestionScope,
+} from "@uwdsc/common/types";
 import { ApiResponse } from "@uwdsc/common/utils";
 import { returningExecService } from "@uwdsc/admin";
 import { withVpAccess } from "@/guards/withVpAccess";
@@ -28,14 +32,13 @@ export const PATCH = withVpAccess<ParamsContext>(
         return ApiResponse.badRequest("Missing status");
       }
 
-      await returningExecService.updateSelectionReviewStatus(
-        scope,
-        selectionId,
-        body.status,
-      );
+      await returningExecService.updateSelectionReviewStatus(scope, selectionId, body.status);
       return ApiResponse.ok({ success: true });
     } catch (error: unknown) {
       if (error instanceof ApiError) {
+        if (error.statusCode === 403) {
+          return ApiResponse.forbidden(error.message, error.code ?? error.message);
+        }
         return ApiResponse.json(
           { error: error.message, message: error.message },
           error.statusCode,

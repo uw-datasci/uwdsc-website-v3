@@ -15,22 +15,16 @@ export async function GET(request: NextRequest): Promise<Response> {
     const activeTerm = await applicationService.getActiveTerm();
     if (!activeTerm) return ApiResponse.notFound("No active application period");
     if (!isApplicationApiWindowOpen(activeTerm)) {
-      return ApiResponse.json(
-        {
-          error: "The application period is closed.",
-          message: "The application period is closed.",
-        },
-        403,
+      return ApiResponse.forbidden(
+        "The application period is closed.",
+        "The application period is closed.",
       );
     }
     if (termId !== activeTerm.id) {
       return ApiResponse.badRequest("termId does not match active term");
     }
 
-    const application = await applicationService.getApplicationForUser(
-      user.id,
-      termId,
-    );
+    const application = await applicationService.getApplicationForUser(user.id, termId);
     return ApiResponse.ok(application);
   } catch (error) {
     console.error("Error fetching application:", error);
@@ -46,12 +40,9 @@ export async function POST(request: NextRequest): Promise<Response> {
     const activeTerm = await applicationService.getActiveTerm();
     if (!activeTerm) return ApiResponse.notFound("No active application period");
     if (!isApplicationApiWindowOpen(activeTerm)) {
-      return ApiResponse.json(
-        {
-          error: "The application period is closed.",
-          message: "The application period is closed.",
-        },
-        403,
+      return ApiResponse.forbidden(
+        "The application period is closed.",
+        "The application period is closed.",
       );
     }
 
@@ -64,10 +55,7 @@ export async function POST(request: NextRequest): Promise<Response> {
       return ApiResponse.badRequest("termId does not match active term");
     }
 
-    const application = await applicationService.createApplication(
-      user.id,
-      termId,
-    );
+    const application = await applicationService.createApplication(user.id, termId);
     return ApiResponse.ok(application);
   } catch (error) {
     console.error("Error creating application:", error);

@@ -86,6 +86,52 @@ export async function resendVerificationEmail(request: {
 }
 
 /**
+ * Send a password reset email to the user
+ *
+ * @param email - Email address to send the reset link to
+ * @returns Promise with success message
+ * @throws Error if request fails
+ */
+export async function forgotPassword(
+  email: string,
+): Promise<{ message: string }> {
+  const response = await fetch("/api/auth/forgot-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) throw createApiError(data, response.status);
+
+  return data;
+}
+
+/**
+ * Set a new password for the currently authenticated (recovery) session
+ *
+ * @param password - The new password
+ * @returns Promise with success message
+ * @throws Error if request fails
+ */
+export async function resetPassword(
+  password: string,
+): Promise<{ message: string }> {
+  const response = await fetch("/api/auth/reset-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) throw createApiError(data, response.status);
+
+  return data;
+}
+
+/**
  * Sign out the current user
  *
  * @returns Promise with signout response

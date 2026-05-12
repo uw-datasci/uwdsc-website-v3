@@ -115,11 +115,10 @@ export function LoginForm() {
               <Button
                 variant="link"
                 size="sm"
-                onClick={() => {}} // TODO: implement logic for forgot password
+                asChild
                 className="text-gray-400/60 hover:text-gray-200 transition-colors text-sm font-medium p-0"
-                type="button"
               >
-                Forgot password?
+                <Link href="/forgot-password">Forgot password?</Link>
               </Button>
               <Button
                 variant="link"

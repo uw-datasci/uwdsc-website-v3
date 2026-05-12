@@ -210,7 +210,10 @@ export class AuthService {
   /**
    * Verify OTP (implicit flow - when redirect has token_hash; auth.resend() does not use PKCE)
    */
-  async verifyOtp(params: { token_hash: string; type: "signup" | "email" }) {
+  async verifyOtp(params: {
+    token_hash: string;
+    type: "signup" | "email" | "recovery";
+  }) {
     try {
       const { error } = await this.repository.verifyOtp(params);
 

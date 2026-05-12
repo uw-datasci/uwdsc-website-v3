@@ -7,9 +7,7 @@ import { z } from "zod";
 export const registerSchema = z
   .object({
     email: z.email("Please enter a valid email address"),
-    password: z
-      .string()
-      .min(8, "Your password needs to be at least 8 characters long"),
+    password: z.string().min(8, "Your password needs to be at least 8 characters long"),
     confirmPassword: z.string(),
   })
   .refine((data) => data.email.toLowerCase().endsWith("@uwaterloo.ca"), {
@@ -39,16 +37,11 @@ export const registrationSchema = z
     last_name: z.string().trim().nonempty("Last name is required"),
     wat_iam: z.string().optional(),
     email: z.email("Please enter a valid email address"),
-    password: z
-      .string()
-      .min(8, "Your password needs to be at least 8 characters long"),
+    password: z.string().min(8, "Your password needs to be at least 8 characters long"),
     confirmPassword: z.string(),
     faculty: z.string().nonempty("Faculty is required"),
     term: z.string().nonempty("Term is required"),
-    heard_from_where: z
-      .string()
-      .trim()
-      .nonempty("Please enter where you heard about us"),
+    heard_from_where: z.string().trim().nonempty("Please enter where you heard about us"),
     member_ideas: z.string().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {

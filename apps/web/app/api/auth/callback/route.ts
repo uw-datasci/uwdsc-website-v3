@@ -24,7 +24,11 @@ export async function GET(request: NextRequest): Promise<Response> {
         new URL(`/login?error=${encodeURIComponent(error)}`, requestUrl.origin),
       );
     }
-  } else if (token_hash && type && (type === "signup" || type === "email")) {
+  } else if (
+    token_hash &&
+    type &&
+    (type === "signup" || type === "email" || type === "recovery")
+  ) {
     const { error } = await authService.verifyOtp({ token_hash, type: type });
     if (error) {
       console.error("Error verifying OTP:", error);

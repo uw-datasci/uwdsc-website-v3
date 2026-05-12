@@ -79,7 +79,10 @@ export class AuthRepository extends BaseRepository {
   /**
    * Verify OTP/token (implicit flow - used when redirect has token_hash; resend() does not use PKCE)
    */
-  async verifyOtp(params: { token_hash: string; type: "signup" | "email" }) {
+  async verifyOtp(params: {
+    token_hash: string;
+    type: "signup" | "email" | "recovery";
+  }) {
     const { data, error } = await this.supabase.auth.verifyOtp(params);
     return { data, error };
   }

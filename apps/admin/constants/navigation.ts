@@ -55,7 +55,9 @@ export const getAdminNavigation = (
       subItems: applicationSubItems,
     },
     { name: "Events", href: "/events", icon: Calendar },
-    { name: "Campaigns", href: "/campaigns", icon: Mail },
+    ...(isAdmin
+      ? [{ name: "Campaigns", href: "/campaigns", icon: Mail }]
+      : []),
     {
       name: "Logistics",
       href: "/logistics",

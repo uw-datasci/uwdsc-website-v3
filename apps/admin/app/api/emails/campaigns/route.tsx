@@ -2,15 +2,15 @@ import { ApiError } from "@uwdsc/common/types";
 import { ApiResponse } from "@uwdsc/common/utils";
 import { emailService, profileService } from "@uwdsc/admin";
 import { scheduleBroadcastCleanup } from "@/lib/server/scheduleBroadcastCleanup";
-import { withAuth } from "@/guards/withAuth";
+import { withAdmin } from "@/guards/withAdminPortalRole";
 import { sendCampaignSchema } from "@/lib/schemas/emails";
 
 /**
  * POST /api/emails/campaigns
  * Send an email campaign to users in the selected role audiences.
- * Admin/exec only.
+ * Portal admin role only.
  */
-export const POST = withAuth(async (request) => {
+export const POST = withAdmin(async (request) => {
   try {
     const body = await request.json();
     const validationResult = sendCampaignSchema.safeParse(body);
@@ -23,8 +23,7 @@ export const POST = withAuth(async (request) => {
     }
 
     const { subject, recipientRoles, body: emailBody } = validationResult.data;
-    const resolvedEmails =
-      await profileService.getEmailsByRoles(recipientRoles);
+    const resolvedEmails = await profileService.getEmailsByRoles(recipientRoles);
     if (resolvedEmails.length === 0) {
       return ApiResponse.badRequest(
         "No recipients found for the selected audiences",
@@ -32,11 +31,7 @@ export const POST = withAuth(async (request) => {
       );
     }
 
-    const result = await emailService.sendCampaignEmail(
-      subject,
-      emailBody,
-      resolvedEmails,
-    );
+    const result = await emailService.sendCampaignEmail(subject, emailBody, resolvedEmails);
 
     scheduleBroadcastCleanup(result.recipientEmails);
 
@@ -44,10 +39,7 @@ export const POST = withAuth(async (request) => {
   } catch (error: unknown) {
     if (error instanceof ApiError) {
       if (error.statusCode === 400) {
-        return ApiResponse.badRequest(
-          error.message,
-          error.code ?? "Validation error",
-        );
+        return ApiResponse.badRequest(error.message, error.code ?? "Validation error");
       }
       return ApiResponse.json(
         { error: error.code ?? "Error", message: error.message },

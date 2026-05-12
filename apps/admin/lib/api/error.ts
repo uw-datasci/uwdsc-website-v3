@@ -11,13 +11,11 @@
  * @returns Error object with error, message, details, and status properties
  */
 export function createApiError(data: any, status: number) {
-  return Object.assign(
-    new Error(data.message || data.error || "Request failed"),
-    {
-      error: data.error || data.message || "Request failed",
-      message: data.message,
-      details: data,
-      status,
-    },
-  );
+  const message = data.message ?? data.error ?? "Request failed";
+  return Object.assign(new Error(message), {
+    error: data.error ?? data.message ?? "Request failed",
+    message,
+    details: data,
+    status,
+  });
 }

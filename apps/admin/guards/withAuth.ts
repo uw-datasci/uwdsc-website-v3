@@ -1,6 +1,7 @@
 import type { User } from "@supabase/supabase-js";
 import { ApiResponse } from "@uwdsc/common/utils";
 import { membershipService } from "@uwdsc/core";
+import { graceDuringOnboarding } from "@/lib/graceDuringOnboarding";
 import { createAuthService } from "@/lib/services";
 import { ADMIN_ROLES } from "@/constants/roles";
 
@@ -21,7 +22,8 @@ export type WithAuthHandler<C = WithAuthContext> = (
 
 /**
  * Wraps an API route handler to require an authenticated user with admin or exec role.
- * Exec users must also have a paid membership record.
+ * Exec users must also have a paid membership record, except while the active term's
+ * exec onboarding window is open (same rule as the admin pages layout).
  * Returns 401 if not signed in or if the user's role is not in ADMIN_ROLES.
  *
  * @example
@@ -58,10 +60,13 @@ export function withAuth<C extends WithAuthContext = WithAuthContext>(
       const membershipStatus = await membershipService.getMembershipStatus(user.id);
 
       if (!membershipStatus.has_membership) {
-        return ApiResponse.forbidden(
-          "Exec accounts must have a paid membership before accessing admin APIs.",
-          "Exec access requires a paid membership",
-        );
+        const grace = await graceDuringOnboarding();
+        if (!grace) {
+          return ApiResponse.forbidden(
+            "Exec accounts must have a paid membership before accessing admin APIs.",
+            "Exec access requires a paid membership",
+          );
+        }
       }
     }
 

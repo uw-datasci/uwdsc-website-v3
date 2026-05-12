@@ -4,6 +4,7 @@ import { AdminLayout } from "@/components/AdminLayout";
 import { AccessDenied } from "@/components/AccessDenied";
 import { ADMIN_ROLES } from "@/constants/roles";
 import { membershipService } from "@uwdsc/core";
+import { graceDuringOnboarding } from "@/lib/graceDuringOnboarding";
 
 interface AdminLayoutProps {
   readonly children: ReactNode;
@@ -17,13 +18,14 @@ export default async function AdminPagesLayout({ children }: AdminLayoutProps) {
   if (error || !role || !ADMIN_ROLES.has(role) || !user)
     return <AccessDenied execUnpaid={false} />;
 
-  // For exec users, ensure they have a paid membership row before showing admin pages.
+  // For exec users, ensure they have a paid membership row before showing admin pages,
+  // except during the active term's onboarding window (unpaid new execs need site access).
   if (role === "exec") {
-    const membershipStatus = await membershipService.getMembershipStatus(
-      user.id,
-    );
-    if (!membershipStatus.has_membership)
-      return <AccessDenied execUnpaid={true} />;
+    const membershipStatus = await membershipService.getMembershipStatus(user.id);
+    if (!membershipStatus.has_membership) {
+      const grace = await graceDuringOnboarding();
+      if (!grace) return <AccessDenied execUnpaid={true} />;
+    }
   }
 
   return <AdminLayout>{children}</AdminLayout>;

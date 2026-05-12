@@ -7,7 +7,7 @@
 
 import { createApiError } from "./errors";
 import { LoginData, Profile } from "@uwdsc/common/types";
-import type { LoginResponse } from "@/lib/types/auth";
+import type { LoginResponse } from "@/types/auth";
 
 // ============================================================================
 // Authentication API Functions
@@ -85,9 +85,7 @@ export async function resendVerificationEmail(request: {
  * @returns Promise with success message
  * @throws Error if request fails
  */
-export async function forgotPassword(
-  email: string,
-): Promise<{ message: string }> {
+export async function forgotPassword(email: string): Promise<{ message: string }> {
   const response = await fetch("/api/auth/forgot-password", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -108,9 +106,7 @@ export async function forgotPassword(
  * @returns Promise with success message
  * @throws Error if request fails
  */
-export async function resetPassword(
-  password: string,
-): Promise<{ message: string }> {
+export async function resetPassword(password: string): Promise<{ message: string }> {
   const response = await fetch("/api/auth/reset-password", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

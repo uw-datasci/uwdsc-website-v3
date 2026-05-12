@@ -5,7 +5,7 @@
  * Components should use these functions instead of making direct fetch calls.
  */
 
-import type { ResumeStatusResponse, UploadResumeResponse } from "@/lib/types/resume";
+import type { ResumeStatusResponse, UploadResumeResponse } from "@/types/resume";
 import { createApiError } from "./errors";
 
 /**

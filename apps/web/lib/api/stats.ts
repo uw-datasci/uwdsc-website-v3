@@ -1,4 +1,4 @@
-import type { PublicStats } from "@/lib/types/stats";
+import type { PublicStats } from "@/types/stats";
 import { createApiError } from "./errors";
 
 export async function getPublicStats(): Promise<PublicStats> {

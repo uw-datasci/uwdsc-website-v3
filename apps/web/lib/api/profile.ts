@@ -7,7 +7,7 @@
 
 import { createApiError } from "./errors";
 import { Profile, ProfileUpdateData, MembershipStatus } from "@uwdsc/common/types";
-import type { CompleteProfilePayload } from "@/lib/types/profile";
+import type { CompleteProfilePayload } from "@/types/profile";
 
 /**
  * Get the current user's profile

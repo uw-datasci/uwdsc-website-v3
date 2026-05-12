@@ -14,7 +14,7 @@ import type {
 import type {
   ApplyWindowOpenResponse,
   PositionsWithQuestionsResponse,
-} from "@/lib/types/application";
+} from "@/types/application";
 import { createApiError } from "./errors";
 
 export async function getApplyWindowOpen(): Promise<ApplyWindowOpenResponse> {

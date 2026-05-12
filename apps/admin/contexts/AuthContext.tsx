@@ -27,24 +27,20 @@ const fetcher = async () => {
 };
 
 export function AuthProvider({ children }: { readonly children: ReactNode }) {
-  const { data, error, isLoading, mutate } = useSWR<Profile | null>(
-    "/api/auth/user",
-    fetcher,
-    {
-      // Revalidate on window focus
-      revalidateOnFocus: false,
-      // Revalidate on reconnect
-      revalidateOnReconnect: true,
-      // Revalidate every 5 minutes in the background
-      refreshInterval: 5 * 60 * 1000,
-      // Keep data fresh for 1 minute before considering it stale
-      dedupingInterval: 60000,
-      // Don't retry on error (for 401s)
-      shouldRetryOnError: false,
-      // Show cached data while revalidating
-      revalidateIfStale: true,
-    },
-  );
+  const { data, error, isLoading, mutate } = useSWR<Profile | null>("/api/auth/user", fetcher, {
+    // Revalidate on window focus
+    revalidateOnFocus: false,
+    // Revalidate on reconnect
+    revalidateOnReconnect: true,
+    // Revalidate every 5 minutes in the background
+    refreshInterval: 5 * 60 * 1000,
+    // Keep data fresh for 1 minute before considering it stale
+    dedupingInterval: 60000,
+    // Don't retry on error (for 401s)
+    shouldRetryOnError: false,
+    // Show cached data while revalidating
+    revalidateIfStale: true,
+  });
 
   const value: AuthContextType = useMemo(
     () => ({

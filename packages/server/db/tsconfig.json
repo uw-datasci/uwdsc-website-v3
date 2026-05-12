@@ -3,7 +3,9 @@
   "compilerOptions": {
     "types": ["node"],
     "paths": {
-      "@uwdsc/db/*": ["./src/*"]
+      "@uwdsc/db/*": ["./src/*"],
+      "@uwdsc/common/types": ["../../common/src/types/index.ts"],
+      "@uwdsc/common/utils": ["../../common/src/utils/index.ts"]
     }
   },
   "include": ["."],

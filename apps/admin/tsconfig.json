@@ -6,6 +6,7 @@
       "@uwdsc/ui": ["../../packages/ui/src/index.ts"],
       "@uwdsc/core": ["../../packages/server/core/src/index.ts"],
       "@uwdsc/admin": ["../../packages/server/admin/src/index.ts"],
+      "@uwdsc/db/supabase/profile": ["../../packages/server/db/src/supabase/profile.ts"],
       "@uwdsc/db": ["../../packages/server/db/src/config/supabase.ts"],
       "@uwdsc/common/types": ["../../packages/common/src/types/index.ts"],
       "@uwdsc/common/utils": ["../../packages/common/src/utils/index.ts"]

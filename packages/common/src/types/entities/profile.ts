@@ -13,6 +13,7 @@ export interface Profile {
   wat_iam: string | null;
   faculty: Faculty | null;
   term: string | null;
+  heard_from_where: string | null;
   is_math_soc_member: boolean;
   role: UserRole;
   exec_position_name: string | null;

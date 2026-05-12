@@ -21,6 +21,6 @@
     "typescript": "^5"
   },
   "exports": {
-    ".": "./src/services/index.ts"
+    ".": "./src/index.ts"
   }
 }

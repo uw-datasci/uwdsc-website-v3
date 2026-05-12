@@ -4,10 +4,12 @@
     "noImplicitAny": false,
     "types": ["node"],
     "paths": {
+      "@/types/*": ["./src/types/*.ts"],
+      "@/utils/*": ["./src/utils/*.ts"],
       "@uwdsc/common/types": ["../../common/src/types/index.ts"],
-      "@uwdsc/common/utils": ["../../common/src/utils/index.ts"]
+      "@uwdsc/common/utils": ["../../common/src/utils/index.ts"],
     }
   },
-  "include": ["src", "../db/src/config/baseRepository.ts"],
+  "include": ["src", "../db/src/config/base.repository.tss"],
   "exclude": ["node_modules", "dist"]
 }

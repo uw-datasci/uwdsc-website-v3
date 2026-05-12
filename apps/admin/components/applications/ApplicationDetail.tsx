@@ -25,7 +25,7 @@ import type {
   ApplicationReviewStatus,
   ApplicationStatus,
 } from "@uwdsc/common/types";
-import { sortPositionSelectionsByPriority } from "@uwdsc/common/utils";
+import { sortPositionsByPriority } from "@uwdsc/common/utils";
 import type { PositionReviewScopeDto } from "@/lib/api";
 import {
   VP_REVIEW_STATUS_LIST,
@@ -311,7 +311,7 @@ export function ApplicationDetail({
                   (answer) => answer.position_names.length === 0,
                 )}
               />
-              {sortPositionSelectionsByPriority(
+              {sortPositionsByPriority(
                 application.position_selections,
               ).map((selection) => (
                 <AnswerSection

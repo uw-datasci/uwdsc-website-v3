@@ -1,5 +1,5 @@
 import { ApiResponse, isReturningExecWindowOpen } from "@uwdsc/common/utils";
-import { returningExecRepository } from "@uwdsc/admin";
+import { returningExecService } from "@uwdsc/admin";
 import { withAuth } from "@/guards/withAuth";
 
 /**
@@ -8,7 +8,7 @@ import { withAuth } from "@/guards/withAuth";
  */
 export const GET = withAuth(async () => {
   try {
-    const term = await returningExecRepository.getActiveTerm();
+    const term = await returningExecService.getActiveTerm();
     if (!term || !isReturningExecWindowOpen(term)) {
       return ApiResponse.json(
         {
@@ -19,7 +19,7 @@ export const GET = withAuth(async () => {
         403,
       );
     }
-    const positions = await returningExecRepository.getAvailablePositions();
+    const positions = await returningExecService.getAvailablePositions();
     return ApiResponse.ok(positions);
   } catch (error) {
     console.error("Error fetching available positions:", error);

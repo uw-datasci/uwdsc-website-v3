@@ -1,5 +1,6 @@
 import { ApiError } from "@uwdsc/common/types";
 import { DateTime } from "luxon";
+import type { MembershipReceiptParse } from "../types/webhook";
 
 const DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
@@ -16,20 +17,6 @@ function parseTransactionDate(text: string): Date {
 
   return dt.toJSDate();
 }
-
-type MembershipReceiptParse =
-  | {
-      ok: true;
-      toRecipientEmail: string;
-      receiptEmail: string;
-      transactionDateText: string;
-    }
-  | {
-      ok: false;
-      kind: "invalid_structure" | "email_mismatch";
-      toRecipientEmail: string | null;
-      receiptEmail: string | null;
-    };
 
 /**
  * Parse and structurally validate a WUSA receipt body forwarded into the membership webhook.

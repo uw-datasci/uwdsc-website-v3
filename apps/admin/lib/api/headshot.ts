@@ -5,21 +5,8 @@
  * Components should use these functions instead of making direct fetch calls.
  */
 
+import type { UploadHeadshotResponse } from "@/types/headshot";
 import { createApiError } from "./error";
-
-// ============================================================================
-// Types
-// ============================================================================
-
-export interface UploadHeadshotResponse {
-  message: string;
-  key: string;
-  url: string;
-}
-
-// ============================================================================
-// File Upload API Functions
-// ============================================================================
 
 /**
  * Upload a headshot file for the current user

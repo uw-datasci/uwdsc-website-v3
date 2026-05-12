@@ -4,26 +4,9 @@
  * Client-side API calls for the applications admin portal.
  */
 
+import type { ApplicationReviewStatus } from "@uwdsc/common/types";
+import type { ApplicationsListResponse } from "@/types/applications";
 import { createApiError } from "./error";
-import type {
-  ApplicationListItem,
-  ApplicationReviewStatus,
-} from "@uwdsc/common/types";
-
-export interface PositionReviewScopeDto {
-  canUse: boolean;
-  isPresident: boolean;
-  vpPositionIds: number[];
-}
-
-export interface ApplicationsListResponse {
-  applications: ApplicationListItem[];
-  statusCounts: {
-    draft: number;
-    submitted: number;
-  };
-  positionReview: PositionReviewScopeDto;
-}
 
 /**
  * Get all non-draft applications with full details plus draft/submitted counts (all rows).

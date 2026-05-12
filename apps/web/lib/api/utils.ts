@@ -1,18 +1,12 @@
-import { NextResponse } from "next/server";
 import { createAuthService } from "@/lib/services";
-import type { User } from "@supabase/supabase-js";
 import { ApiResponse } from "@uwdsc/common/utils";
 import type { ProfileUpdateData } from "@uwdsc/common/types";
 import { BASE_PROFILE_FIELDS } from "@/constants/profile";
+import type { AuthResult, ProfileValidationError } from "@/types/route-utils";
 
 // ==========================================
 //  Auth Utils
 // ==========================================
-
-interface AuthResult {
-  user: User | null;
-  isUnauthorized: NextResponse;
-}
 
 /**
  * Gets the current authenticated user or returns an unauthorized response.
@@ -46,11 +40,6 @@ export async function tryGetCurrentUser(): Promise<AuthResult> {
 //  Profile Utils
 // ==========================================
 
-interface ProfileValidationError {
-  error: string;
-  field: string;
-}
-
 /**
  * Validates that body contains all base profile fields and that string/number fields are non-empty.
  * Returns an error object if validation fails, null otherwise.
@@ -77,9 +66,7 @@ export function validateBaseProfileFields(
  * Builds a trimmed base profile payload from the request body.
  * Call after validateBaseProfileFields has passed.
  */
-export function trimBaseProfilePayload(
-  body: Record<string, unknown>,
-): ProfileUpdateData {
+export function trimBaseProfilePayload(body: Record<string, unknown>): ProfileUpdateData {
   return {
     first_name: String(body.first_name).trim(),
     last_name: String(body.last_name).trim(),

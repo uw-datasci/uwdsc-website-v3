@@ -1,9 +1,5 @@
+import type { PublicStats } from "@/lib/types/stats";
 import { createApiError } from "./errors";
-
-export type PublicStats = {
-  members: number;
-  events: number;
-};
 
 export async function getPublicStats(): Promise<PublicStats> {
   const response = await fetch("/api/stats");

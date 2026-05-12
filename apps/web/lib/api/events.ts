@@ -3,6 +3,7 @@
  */
 
 import type { Event } from "@uwdsc/common/types";
+import type { EventsRange } from "@/lib/types/events";
 import { createApiError } from "./errors";
 
 export async function getEvents(): Promise<Event[]> {
@@ -11,8 +12,6 @@ export async function getEvents(): Promise<Event[]> {
   if (!response.ok) throw createApiError(data, response.status);
   return data;
 }
-
-export type EventsRange = "active" | "next";
 
 export async function getEventsByRange(range: "active"): Promise<Event[]>;
 export async function getEventsByRange(range: "next"): Promise<Event | null>;

@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import {
   Badge,
   Card,
@@ -16,10 +17,11 @@ import { Mail, MessageSquare, User } from "lucide-react";
 import type {
   ApplicationReviewStatus,
   ReturningExecListItem,
+  ReturningExecPositionSelection,
 } from "@uwdsc/common/types";
 import { VP_REVIEW_STATUS_LIST, VP_REVIEW_STATUS_SET } from "@/constants/applications";
 import { reviewStatusBadgeClassName } from "@/lib/utils/applications";
-import type { PositionReviewScopeDto } from "@/lib/api";
+import type { PositionReviewScopeDto } from "@/types/applications";
 
 interface ReturningExecDetailProps {
   submission: ReturningExecListItem | null;
@@ -42,15 +44,13 @@ export function ReturningExecDetail({
       <div className="flex items-center justify-center h-full">
         <div className="text-center space-y-2">
           <User className="h-12 w-12 mx-auto text-muted-foreground/40" />
-          <p className="text-muted-foreground text-sm">
-            Select a submission to view details
-          </p>
+          <p className="text-muted-foreground text-sm">Select a submission to view details</p>
         </div>
       </div>
     );
   }
 
-  const vpApaIds = new Set(positionReview?.vpPositionIds ?? []);
+  const vpTeamPositionIds = new Set(positionReview?.vpPositionIds ?? []);
 
   return (
     <ScrollArea className="h-full">
@@ -74,8 +74,16 @@ export function ReturningExecDetail({
         <div>
           <h3 className="text-sm font-semibold mb-3">Contact</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <InfoItem icon={<Mail className="h-4 w-4" />} label="Email" value={submission.email} />
-            <InfoItem icon={<MessageSquare className="h-4 w-4" />} label="Discord" value={submission.discord} />
+            <InfoItem
+              icon={<Mail className="h-4 w-4" />}
+              label="Email"
+              value={submission.email}
+            />
+            <InfoItem
+              icon={<MessageSquare className="h-4 w-4" />}
+              label="Discord"
+              value={submission.discord}
+            />
           </div>
         </div>
 
@@ -119,66 +127,16 @@ export function ReturningExecDetail({
                 <p className="text-sm text-muted-foreground">No positions selected.</p>
               ) : (
                 <div className="space-y-2">
-                  {submission.position_selections.map((sel) => {
-                    const statusAllowsVpEdit = VP_REVIEW_STATUS_SET.has(sel.status);
-                    const canEdit =
-                      !!positionReview?.canUse &&
-                      !!onSelectionStatusChange &&
-                      (positionReview.isPresident || vpApaIds.has(sel.position_id)) &&
-                      statusAllowsVpEdit;
-                    const showReadOnly = !!positionReview?.canUse && !canEdit;
-
-                    return (
-                      <Card key={sel.id} className="p-3 gap-0">
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className="text-xs font-medium text-muted-foreground w-5 shrink-0">
-                              #{sel.priority}
-                            </span>
-                            <span className="font-medium text-sm truncate">
-                              {sel.position_name}
-                            </span>
-                          </div>
-                          {canEdit ? (
-                            <Select
-                              value={sel.status}
-                              onValueChange={(v) =>
-                                onSelectionStatusChange?.(sel.id, v as ApplicationReviewStatus)
-                              }
-                              disabled={updatingSelectionId === sel.id}
-                            >
-                              <SelectTrigger
-                                className={cn(
-                                  "h-8 w-[11.5rem] shrink-0 text-xs font-medium",
-                                  reviewStatusBadgeClassName(sel.status),
-                                )}
-                              >
-                                <SelectValue placeholder="Update status" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {VP_REVIEW_STATUS_LIST.map((s) => (
-                                  <SelectItem key={s} value={s}>
-                                    {s}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          ) : showReadOnly ? (
-                            <Badge
-                              variant="outline"
-                              className={cn(
-                                "shrink-0 text-xs font-medium max-w-[11.5rem] truncate",
-                                reviewStatusBadgeClassName(sel.status),
-                              )}
-                              title={sel.status}
-                            >
-                              {sel.status}
-                            </Badge>
-                          ) : null}
-                        </div>
-                      </Card>
-                    );
-                  })}
+                  {submission.position_selections.map((sel) => (
+                    <ReturningExecPositionSelectionCard
+                      key={sel.id}
+                      sel={sel}
+                      vpApaIds={vpTeamPositionIds}
+                      positionReview={positionReview}
+                      onSelectionStatusChange={onSelectionStatusChange}
+                      updatingSelectionId={updatingSelectionId}
+                    />
+                  ))}
                 </div>
               )}
             </div>
@@ -222,6 +180,87 @@ export function ReturningExecDetail({
         )}
       </div>
     </ScrollArea>
+  );
+}
+
+interface ReturningExecPositionSelectionCardProps {
+  readonly sel: ReturningExecPositionSelection;
+  readonly vpApaIds: ReadonlySet<number>;
+  readonly positionReview: PositionReviewScopeDto | null | undefined;
+  readonly onSelectionStatusChange?: (
+    selectionId: string,
+    status: ApplicationReviewStatus,
+  ) => void | Promise<void>;
+  readonly updatingSelectionId: string | null | undefined;
+}
+
+function ReturningExecPositionSelectionCard({
+  sel,
+  vpApaIds,
+  positionReview,
+  onSelectionStatusChange,
+  updatingSelectionId,
+}: ReturningExecPositionSelectionCardProps) {
+  const statusAllowsVpEdit = VP_REVIEW_STATUS_SET.has(sel.status);
+  const canEdit =
+    !!positionReview?.canUse &&
+    !!onSelectionStatusChange &&
+    (positionReview.isPresident || vpApaIds.has(sel.position_id)) &&
+    statusAllowsVpEdit;
+  const showReadOnly = !!positionReview?.canUse && !canEdit;
+
+  let statusControl: ReactNode = null;
+  if (canEdit) {
+    statusControl = (
+      <Select
+        value={sel.status}
+        onValueChange={(v) => onSelectionStatusChange?.(sel.id, v as ApplicationReviewStatus)}
+        disabled={updatingSelectionId === sel.id}
+      >
+        <SelectTrigger
+          className={cn(
+            "h-8 w-[11.5rem] shrink-0 text-xs font-medium",
+            reviewStatusBadgeClassName(sel.status),
+          )}
+        >
+          <SelectValue placeholder="Update status" />
+        </SelectTrigger>
+        <SelectContent>
+          {VP_REVIEW_STATUS_LIST.map((s) => (
+            <SelectItem key={s} value={s}>
+              {s}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    );
+  } else if (showReadOnly) {
+    statusControl = (
+      <Badge
+        variant="outline"
+        className={cn(
+          "shrink-0 text-xs font-medium max-w-[11.5rem] truncate",
+          reviewStatusBadgeClassName(sel.status),
+        )}
+        title={sel.status}
+      >
+        {sel.status}
+      </Badge>
+    );
+  }
+
+  return (
+    <Card className="p-3 gap-0">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-xs font-medium text-muted-foreground w-5 shrink-0">
+            #{sel.priority}
+          </span>
+          <span className="font-medium text-sm truncate">{sel.position_name}</span>
+        </div>
+        {statusControl}
+      </div>
+    </Card>
   );
 }
 

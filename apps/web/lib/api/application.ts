@@ -8,21 +8,14 @@
 import type {
   ApplicationUpdatePayload,
   ApplicationWithDetails,
-  GeneralQuestion,
-  PositionWithQuestions,
   ProfileAutofill,
   Term,
 } from "@uwdsc/common/types";
+import type {
+  ApplyWindowOpenResponse,
+  PositionsWithQuestionsResponse,
+} from "@/lib/types/application";
 import { createApiError } from "./errors";
-
-export interface PositionsWithQuestionsResponse {
-  generalQuestions: GeneralQuestion[];
-  positions: PositionWithQuestions[];
-}
-
-interface ApplyWindowOpenResponse {
-  open: boolean;
-}
 
 export async function getApplyWindowOpen(): Promise<ApplyWindowOpenResponse> {
   const response = await fetch("/api/applications/apply-open");

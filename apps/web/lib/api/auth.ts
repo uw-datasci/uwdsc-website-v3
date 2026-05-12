@@ -7,14 +7,7 @@
 
 import { createApiError } from "./errors";
 import { LoginData, Profile } from "@uwdsc/common/types";
-import { User, Session } from "@supabase/supabase-js";
-
-interface LoginResponse {
-  success: boolean;
-  user?: User;
-  session?: Session;
-  error?: string;
-}
+import type { LoginResponse } from "@/lib/types/auth";
 
 // ============================================================================
 // Authentication API Functions

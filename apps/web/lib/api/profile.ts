@@ -6,18 +6,8 @@
  */
 
 import { createApiError } from "./errors";
-import {
-  Profile,
-  ProfileUpdateData,
-  CompleteProfileData,
-  MembershipStatus,
-} from "@uwdsc/common/types";
-
-/** Payload for completing profile (after email verification). Server sets is_math_soc_member from faculty. */
-export type CompleteProfilePayload = Omit<
-  CompleteProfileData,
-  "is_math_soc_member"
->;
+import { Profile, ProfileUpdateData, MembershipStatus } from "@uwdsc/common/types";
+import type { CompleteProfilePayload } from "@/lib/types/profile";
 
 /**
  * Get the current user's profile

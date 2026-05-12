@@ -5,16 +5,12 @@
  */
 
 import { createApiError } from "./error";
+import type { ApplicationReviewStatus } from "@uwdsc/common/types";
 import type {
-  ApplicationReviewStatus,
-  FinalizeRolesSummary,
-  HiringApplicant,
-  NewExecTeamMember,
-} from "@uwdsc/common/types";
-
-export interface HiringApplicantsResponse {
-  applicants: HiringApplicant[];
-}
+  FinalizeRolesResponse,
+  HiringApplicantsResponse,
+  NewExecTeamResponse,
+} from "@/types/hiring";
 
 export async function getHiringApplicants(): Promise<HiringApplicantsResponse> {
   const response = await fetch("/api/applications/hiring");
@@ -28,22 +24,15 @@ export async function updateSelectionStatus(
   status: ApplicationReviewStatus,
   source?: "application" | "returning_exec",
 ): Promise<void> {
-  const response = await fetch(
-    `/api/applications/hiring/selections/${selectionId}`,
-    {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status, source }),
-    },
-  );
+  const response = await fetch(`/api/applications/hiring/selections/${selectionId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status, source }),
+  });
   if (!response.ok) {
     const data = await response.json();
     throw createApiError(data, response.status);
   }
-}
-
-export interface NewExecTeamResponse {
-  team: NewExecTeamMember[];
 }
 
 export async function getNewExecTeam(): Promise<NewExecTeamResponse> {
@@ -51,10 +40,6 @@ export async function getNewExecTeam(): Promise<NewExecTeamResponse> {
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);
   return data as NewExecTeamResponse;
-}
-
-export interface FinalizeRolesResponse {
-  summary: FinalizeRolesSummary;
 }
 
 export async function finalizeRoles(input: {

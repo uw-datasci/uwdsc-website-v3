@@ -8,7 +8,7 @@ const LOGIN_ROUTE = "/login";
 const UNAUTHORIZED_ROUTE = "/unauthorized";
 
 function webCompleteProfileAbsoluteUrl(): string {
-  const base = process.env.NEXT_PUBLIC_WEB_APP_URL?.trim() || "http://localhost:3000";
+  const base = process.env.NEXT_PUBLIC_APP_URL || "https://uwdatascience.ca/";
   return new URL(WEB_COMPLETE_PROFILE_PATH, base).toString();
 }
 

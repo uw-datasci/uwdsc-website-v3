@@ -1,14 +1,14 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { verifyPasswordRecovery } from "@/lib/api";
 import { Button } from "@uwdsc/ui";
 import { Loader2 } from "lucide-react";
 import { Typing } from "@/components/login/Typing";
 import Image from "next/image";
 
-export default function ResetPasswordConfirmPage() {
+function ResetPasswordConfirmContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token_hash = searchParams.get("token_hash");
@@ -97,5 +97,21 @@ export default function ResetPasswordConfirmPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function ResetPasswordConfirmFallback() {
+  return (
+    <div className="bg-black w-full min-h-screen flex flex-col items-center justify-center px-12 py-8">
+      <Loader2 className="h-10 w-10 animate-spin text-white" strokeWidth={2} aria-label="Loading" />
+    </div>
+  );
+}
+
+export default function ResetPasswordConfirmPage() {
+  return (
+    <Suspense fallback={<ResetPasswordConfirmFallback />}>
+      <ResetPasswordConfirmContent />
+    </Suspense>
   );
 }

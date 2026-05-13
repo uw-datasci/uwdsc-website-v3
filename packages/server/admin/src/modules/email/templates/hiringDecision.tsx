@@ -26,7 +26,7 @@ const SOCIAL_LINKS = [
     href: "https://www.linkedin.com/company/waterloo-data-science-club/",
   },
   { label: "Discord", href: "https://discord.gg/VFVkyP5mgm" },
-  { label: "Website", href: "https://uwdsc.ca" },
+  { label: "Website", href: "https://uwdatascience.ca" },
 ] as const;
 
 export function getHiringDecisionSubject(type: "offer" | "rejection"): string {
@@ -68,8 +68,7 @@ export function HiringDecisionEmail({
       <Body
         style={{
           backgroundColor: "#f6f9fc",
-          fontFamily:
-            "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         }}
       >
         <Container
@@ -102,18 +101,15 @@ export function HiringDecisionEmail({
                   <strong>{positionName}</strong> for {offerTermLabel}!
                 </Text>
                 <Text style={bodyTextStyle}>
-                  Please <strong>reply</strong> to this email if you would like
-                  to accept this offer by the end of day{" "}
-                  <strong>{offerAcceptByDateLabel}</strong>. If you choose to
-                  accept, we will be sending the next steps shortly after
-                  receiving your response.
+                  Please <strong>reply</strong> to this email if you would like to accept this
+                  offer by the end of day <strong>{offerAcceptByDateLabel}</strong>. If you
+                  choose to accept, we will be sending the next steps shortly after receiving
+                  your response.
                 </Text>
                 <Text style={{ ...bodyTextStyle, marginBottom: "24px" }}>
                   Excited for you to be part of {teamClosing}!
                 </Text>
-                <Text style={{ ...bodyTextStyle, marginBottom: "4px" }}>
-                  Best,
-                </Text>
+                <Text style={{ ...bodyTextStyle, marginBottom: "4px" }}>Best,</Text>
                 <Text
                   style={{
                     ...bodyTextStyle,
@@ -146,15 +142,13 @@ export function HiringDecisionEmail({
             ) : (
               <>
                 <Text style={bodyTextStyle}>
-                  Thank you for your interest in the{" "}
-                  <strong>{positionName}</strong> position with the UW Data
-                  Science Club. After careful consideration, we've decided to
+                  Thank you for your interest in the <strong>{positionName}</strong> position
+                  with the UW Data Science Club. After careful consideration, we've decided to
                   move forward with other candidates for this role.
                 </Text>
                 <Text style={{ ...bodyTextStyle, marginBottom: "24px" }}>
-                  We truly appreciate the time you put into your application and
-                  encourage you to apply again in the future. We wish you all
-                  the best!
+                  We truly appreciate the time you put into your application and encourage you
+                  to apply again in the future. We wish you all the best!
                 </Text>
                 <Text
                   style={{
@@ -167,10 +161,10 @@ export function HiringDecisionEmail({
                 >
                   UW Data Science Club &mdash;{" "}
                   <Link
-                    href="https://uwdsc.ca"
+                    href="https://uwdatascience.ca"
                     style={{ ...linkStyle, color: "#6b7280" }}
                   >
-                    uwdsc.ca
+                    uwdatascience.ca
                   </Link>
                 </Text>
               </>

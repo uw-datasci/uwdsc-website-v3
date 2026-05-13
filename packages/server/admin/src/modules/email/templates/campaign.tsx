@@ -12,10 +12,7 @@ import { Markdown } from "@react-email/markdown";
 import type { ReactElement } from "react";
 import type { CampaignEmailProps } from "../../../types/email";
 
-export function CampaignEmail({
-  subject,
-  body,
-}: Readonly<CampaignEmailProps>): ReactElement {
+export function CampaignEmail({ subject, body }: Readonly<CampaignEmailProps>): ReactElement {
   return (
     <Html>
       <Head />
@@ -23,8 +20,7 @@ export function CampaignEmail({
       <Body
         style={{
           backgroundColor: "#f6f9fc",
-          fontFamily:
-            "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         }}
       >
         <Container
@@ -102,7 +98,7 @@ export function CampaignEmail({
                 margin: "0",
               }}
             >
-              University of Waterloo Data Science Club &mdash; uwdsc.ca
+              University of Waterloo Data Science Club &mdash; uwdatascience.ca
             </Text>
           </Section>
         </Container>

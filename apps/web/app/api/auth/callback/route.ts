@@ -6,6 +6,10 @@ import { createAuthService } from "@/lib/services";
  * - PKCE (initial signup): Supabase redirects with ?code=... → exchangeCodeForSession(code)
  * - Implicit (resend verification): auth.resend() does not use PKCE; Supabase may redirect
  *   with ?token_hash=...&type=... → verifyOtp({ token_hash, type })
+ *
+ * Password recovery is intentionally NOT handled here — recovery links go directly
+ * to a client-side buffer page so enterprise email scanners can't consume the
+ * single-use token before the user opens the email.
  */
 export async function GET(request: NextRequest): Promise<Response> {
   const requestUrl = new URL(request.url);
@@ -27,7 +31,7 @@ export async function GET(request: NextRequest): Promise<Response> {
   } else if (
     token_hash &&
     type &&
-    (type === "signup" || type === "email" || type === "recovery")
+    (type === "signup" || type === "email")
   ) {
     const { error } = await authService.verifyOtp({ token_hash, type: type });
     if (error) {

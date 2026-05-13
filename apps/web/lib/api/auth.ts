@@ -100,6 +100,29 @@ export async function forgotPassword(email: string): Promise<{ message: string }
 }
 
 /**
+ * Exchange a password-reset email `token_hash` for a recovery session (sets auth cookies).
+ *
+ * @param token_hash - From the reset link query string
+ * @throws Error if verification fails
+ */
+export async function verifyPasswordRecovery(token_hash: string): Promise<{
+  success: boolean;
+  message: string;
+}> {
+  const response = await fetch("/api/auth/verify-recovery", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token_hash }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) throw createApiError(data, response.status);
+
+  return data;
+}
+
+/**
  * Set a new password for the currently authenticated (recovery) session
  *
  * @param password - The new password

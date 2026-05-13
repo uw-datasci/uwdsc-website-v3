@@ -10,7 +10,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     if (!email) return ApiResponse.badRequest("Email is required");
 
     const authService = await createAuthService();
-    const emailRedirectTo = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback?next=/reset-password`;
+    const emailRedirectTo = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password-confirm`;
     const result = await authService.forgotPassword(email, emailRedirectTo);
 
     if (!result.success) {

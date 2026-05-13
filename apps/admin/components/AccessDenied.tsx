@@ -2,7 +2,11 @@
 
 import { signOut } from "@/lib/api/auth";
 import { Button } from "@uwdsc/ui";
-import { MEMBERSHIP_INBOUND_EMAIL, MEMBERSHIP_PAYMENT_URL } from "@uwdsc/common/constants";
+import {
+  MEMBERSHIP_INBOUND_EMAIL,
+  MEMBERSHIP_MONERIS_RECEIPT_FROM,
+  MEMBERSHIP_PAYMENT_URL,
+} from "@uwdsc/common/constants";
 import { ShieldAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -55,8 +59,12 @@ export function AccessDenied({ execUnpaid }: AccessDeniedProps) {
                     (WUSA Shop → Memberships → DSC).
                   </li>
                   <li>
-                    If you used WUSA online, forward your receipt email to{" "}
-                    <span className="font-mono text-xs font-bold text-foreground">
+                    If you used WUSA online, forward the Moneris payment receipt (from{" "}
+                    <span className="font-mono text-xs font-bold text-foreground break-all">
+                      {MEMBERSHIP_MONERIS_RECEIPT_FROM}
+                    </span>
+                    , not the generic WUSA order email) to{" "}
+                    <span className="font-mono text-xs font-bold text-foreground break-all">
                       {MEMBERSHIP_INBOUND_EMAIL}
                     </span>{" "}
                     from the same address as your club account.

@@ -9,6 +9,7 @@ import {
   Section,
   Text,
 } from "@react-email/components";
+import { MEMBERSHIP_MONERIS_RECEIPT_FROM } from "@uwdsc/common/constants";
 import type { ReactElement } from "react";
 import type { MembershipReceiptProps } from "../../../types/email";
 
@@ -90,6 +91,11 @@ export function MembershipReceipt({ success }: Readonly<MembershipReceiptProps>)
               <>
                 <Text style={bodyTextStyle}>
                   We weren't able to confirm your membership from this message automatically.
+                </Text>
+                <Text style={bodyTextStyle}>
+                  Make sure you're forwarding the <strong>payment receipt email</strong> from{" "}
+                  <strong>{MEMBERSHIP_MONERIS_RECEIPT_FROM}</strong>, not the order summary from
+                  WUSA.
                 </Text>
                 <Text style={{ ...bodyTextStyle, marginBottom: 0 }}>
                   Please <strong>try forwarding your receipt again</strong> in a little while,

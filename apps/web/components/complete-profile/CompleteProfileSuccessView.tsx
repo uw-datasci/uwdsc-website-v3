@@ -3,7 +3,11 @@
 import Link from "next/link";
 import { PartyPopper } from "lucide-react";
 import { Button } from "@uwdsc/ui";
-import { MEMBERSHIP_INBOUND_EMAIL, MEMBERSHIP_PAYMENT_URL } from "@uwdsc/common/constants";
+import {
+  MEMBERSHIP_INBOUND_EMAIL,
+  MEMBERSHIP_MONERIS_RECEIPT_FROM,
+  MEMBERSHIP_PAYMENT_URL,
+} from "@uwdsc/common/constants";
 
 export function CompleteProfileSuccessView() {
   return (
@@ -30,7 +34,11 @@ export function CompleteProfileSuccessView() {
           <li>
             <strong className="text-gray-200">WUSA online</strong> — Shop → Memberships → DSC.
             After you pay,{" "}
-            <strong className="text-gray-200">forward your WUSA receipt email</strong> to{" "}
+            <strong className="text-gray-200">forward the Moneris payment receipt</strong> (from{" "}
+            <span className="font-mono font-bold text-purple-200 break-all">
+              {MEMBERSHIP_MONERIS_RECEIPT_FROM}
+            </span>
+            , not the generic WUSA order email) to{" "}
             <span className="font-mono font-bold text-purple-200 break-all">
               {MEMBERSHIP_INBOUND_EMAIL}
             </span>{" "}

@@ -31,7 +31,7 @@ export function CompleteProfileSuccessView() {
             <strong className="text-gray-200">WUSA online</strong> — Shop → Memberships → DSC.
             After you pay,{" "}
             <strong className="text-gray-200">forward your WUSA receipt email</strong> to{" "}
-            <span className="font-mono text-purple-200 break-all">
+            <span className="font-mono font-bold text-purple-200 break-all">
               {MEMBERSHIP_INBOUND_EMAIL}
             </span>{" "}
             from the <strong className="text-gray-200">same email address</strong> you use for

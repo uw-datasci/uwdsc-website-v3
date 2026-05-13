@@ -3,7 +3,6 @@ import { Resend } from "resend";
 import type { GetReceivedEmailContentsResult } from "../../types/webhook";
 
 class WebhookService {
-  private readonly membershipInboundEmail = MEMBERSHIP_INBOUND_EMAIL;
   private readonly resend: Resend | null;
 
   constructor() {
@@ -28,11 +27,11 @@ class WebhookService {
     receivingEmailId: string,
     webhookTo: string[],
   ): Promise<GetReceivedEmailContentsResult> {
-    if (!this.verifyRecipient(webhookTo, this.membershipInboundEmail)) {
+    if (!this.verifyRecipient(webhookTo, MEMBERSHIP_INBOUND_EMAIL)) {
       return {
         ok: false,
         reason: "wrong_recipient",
-        message: `Email is not addressed to ${this.membershipInboundEmail}`,
+        message: `Email is not addressed to ${MEMBERSHIP_INBOUND_EMAIL}`,
       };
     }
 

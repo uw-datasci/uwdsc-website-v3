@@ -56,7 +56,7 @@ export function AccessDenied({ execUnpaid }: AccessDeniedProps) {
                   </li>
                   <li>
                     If you used WUSA online, forward your receipt email to{" "}
-                    <span className="font-mono text-xs text-foreground">
+                    <span className="font-mono text-xs font-bold text-foreground">
                       {MEMBERSHIP_INBOUND_EMAIL}
                     </span>{" "}
                     from the same address as your club account.

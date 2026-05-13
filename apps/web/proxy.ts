@@ -1,16 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createSupabaseMiddlewareClient } from "@uwdsc/db";
-import {
-  isProfileComplete,
-  withAuth,
-  withAnon,
-  withProtected,
-} from "./lib/middleware";
+import { WEB_COMPLETE_PROFILE_PATH } from "@uwdsc/common/constants";
+import { isProfileComplete, withAuth, withAnon, withProtected } from "./lib/middleware";
 
 const AUTH_ROUTES = new Set(["/login", "/register"]);
 const PROTECTED_ROUTES = new Set(["/events", "/passport"]);
-const COMPLETE_PROFILE_ROUTE = "/complete-profile";
 
 export async function proxy(request: NextRequest) {
   const response = NextResponse.next({ request: { headers: request.headers } });
@@ -24,7 +19,7 @@ export async function proxy(request: NextRequest) {
 
   const isComplete = await isProfileComplete(supabase, user?.id);
   const completeProfileResponse = NextResponse.redirect(
-    new URL(COMPLETE_PROFILE_ROUTE, request.url),
+    new URL(WEB_COMPLETE_PROFILE_PATH, request.url),
   );
 
   switch (true) {
@@ -35,7 +30,7 @@ export async function proxy(request: NextRequest) {
     case PROTECTED_ROUTES.has(pathname):
       return withProtected(request, response, user);
     // 3. complete profile route
-    case pathname === COMPLETE_PROFILE_ROUTE:
+    case pathname === WEB_COMPLETE_PROFILE_PATH:
       return await withAnon(request, response, isComplete, user?.id);
     case user && !isComplete:
       return completeProfileResponse;

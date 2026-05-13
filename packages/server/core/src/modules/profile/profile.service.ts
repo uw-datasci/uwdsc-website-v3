@@ -40,12 +40,7 @@ class ProfileService {
     try {
       data.is_math_soc_member = data.faculty === "math";
       const result = await this.repository.completeProfile(userId, data);
-      if (!result) {
-        return {
-          success: false,
-          error: "Profile not found",
-        };
-      }
+      if (!result) return { success: false, error: "Profile not found" };
 
       return { success: true };
     } catch (error) {
@@ -62,33 +57,11 @@ class ProfileService {
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const result = await this.repository.updateProfileByUser(userId, data);
-      if (!result) {
-        return {
-          success: false,
-          error: "Profile not found",
-        };
-      }
+      if (!result) return { success: false, error: "Profile not found" };
 
       return { success: true };
     } catch (error) {
       throw new ApiError(`Failed to update profile: ${(error as Error).message}`, 500);
-    }
-  }
-
-  /**
-   * Check if a user's profile is complete
-   */
-  async isProfileComplete(userId: string): Promise<boolean> {
-    try {
-      const profile = await this.repository.getProfileByUserId(userId);
-
-      if (!profile) return false;
-
-      // Profile is complete if required fields are filled
-      return !!(profile.first_name && profile.last_name && profile.faculty && profile.term);
-    } catch (error) {
-      console.error("Error checking profile completion:", error);
-      return false;
     }
   }
 }

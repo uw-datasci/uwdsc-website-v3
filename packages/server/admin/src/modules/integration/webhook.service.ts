@@ -1,8 +1,9 @@
+import { MEMBERSHIP_INBOUND_EMAIL } from "@uwdsc/common/constants";
 import { Resend } from "resend";
 import type { GetReceivedEmailContentsResult } from "../../types/webhook";
 
 class WebhookService {
-  private readonly membershipInboundEmail = "membership@mail.uwdatascience.ca";
+  private readonly membershipInboundEmail = MEMBERSHIP_INBOUND_EMAIL;
   private readonly resend: Resend | null;
 
   constructor() {

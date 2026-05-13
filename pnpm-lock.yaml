@@ -466,6 +466,9 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.39.7
         version: 2.105.3
+      '@uwdsc/common':
+        specifier: workspace:*
+        version: link:../../common
       postgres:
         specifier: ^3.4.5
         version: 3.4.9

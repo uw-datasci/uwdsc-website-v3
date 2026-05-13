@@ -5,25 +5,8 @@
  * Components should use these functions instead of making direct fetch calls.
  */
 
+import type { ResumeStatusResponse, UploadResumeResponse } from "@/types/resume";
 import { createApiError } from "./errors";
-
-// ============================================================================
-// Types
-// ============================================================================
-
-export interface UploadResumeResponse {
-  message: string;
-  key: string;
-}
-
-export interface ResumeStatusResponse {
-  hasResume: boolean;
-  url: string | null;
-}
-
-// ============================================================================
-// File Upload API Functions
-// ============================================================================
 
 /**
  * Upload a resume file for the current user

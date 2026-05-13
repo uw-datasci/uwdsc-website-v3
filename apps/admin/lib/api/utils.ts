@@ -1,12 +1,6 @@
-import { NextResponse } from "next/server";
 import { createAuthService } from "@/lib/services";
-import type { User } from "@supabase/supabase-js";
 import { ApiResponse } from "@uwdsc/common/utils";
-
-interface AuthResult {
-  user: User | null;
-  isUnauthorized: NextResponse | null;
-}
+import type { AuthResult } from "@/types/route-utils";
 
 /**
  * Gets the current authenticated user or returns an unauthorized response.

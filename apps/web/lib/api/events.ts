@@ -3,6 +3,7 @@
  */
 
 import type { Event } from "@uwdsc/common/types";
+import type { EventsRange } from "@/types/events";
 import { createApiError } from "./errors";
 
 export async function getEvents(): Promise<Event[]> {
@@ -12,22 +13,16 @@ export async function getEvents(): Promise<Event[]> {
   return data;
 }
 
-export type EventsRange = "active" | "next";
-
 export async function getEventsByRange(range: "active"): Promise<Event[]>;
 export async function getEventsByRange(range: "next"): Promise<Event | null>;
-export async function getEventsByRange(
-  range: EventsRange,
-): Promise<Event[] | Event | null> {
+export async function getEventsByRange(range: EventsRange): Promise<Event[] | Event | null> {
   const response = await fetch(`/api/events?range=${range}`);
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);
   return data;
 }
 
-export async function getCheckInStatus(
-  eventId: string,
-): Promise<{ checkedIn: boolean }> {
+export async function getCheckInStatus(eventId: string): Promise<{ checkedIn: boolean }> {
   const response = await fetch(`/api/events/${eventId}/checkin`);
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);

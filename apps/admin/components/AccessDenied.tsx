@@ -2,11 +2,16 @@
 
 import { signOut } from "@/lib/api/auth";
 import { Button } from "@uwdsc/ui";
+import { MEMBERSHIP_INBOUND_EMAIL, MEMBERSHIP_PAYMENT_URL } from "@uwdsc/common/constants";
 import { ShieldAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export function AccessDenied({ execUnpaid }: { execUnpaid?: boolean }) {
+interface AccessDeniedProps {
+  readonly execUnpaid?: boolean;
+}
+
+export function AccessDenied({ execUnpaid }: AccessDeniedProps) {
   const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
@@ -32,12 +37,35 @@ export function AccessDenied({ execUnpaid }: { execUnpaid?: boolean }) {
             <h1 className="text-3xl font-bold">Access Denied</h1>
             {execUnpaid ? (
               <>
-                <p className="text-muted-foreground">
-                  You have not paid your membership.
-                </p>
+                <p className="text-muted-foreground">You have not paid your membership.</p>
                 <p className="text-sm text-muted-foreground">
                   Pay your membership to access the admin site.
                 </p>
+                <ol className="mt-4 max-w-sm list-decimal space-y-2 pl-5 text-left text-sm text-muted-foreground">
+                  <li>
+                    Pay the $4 fee online:{" "}
+                    <a
+                      href={MEMBERSHIP_PAYMENT_URL}
+                      className="font-medium text-foreground underline underline-offset-2 hover:text-primary"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      membership payment page
+                    </a>{" "}
+                    (WUSA Shop → Memberships → DSC).
+                  </li>
+                  <li>
+                    If you used WUSA online, forward your receipt email to{" "}
+                    <span className="font-mono text-xs text-foreground">
+                      {MEMBERSHIP_INBOUND_EMAIL}
+                    </span>{" "}
+                    from the same address as your club account.
+                  </li>
+                  <li>
+                    Or pay cash at DSC office/events, or by card at the MathSoc office (keep
+                    your receipt).
+                  </li>
+                </ol>
               </>
             ) : (
               <>

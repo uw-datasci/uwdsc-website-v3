@@ -18,6 +18,7 @@
     "typescript": "^5"
   },
   "exports": {
+    "./constants": "./src/constants/index.ts",
     "./types": "./src/types/index.ts",
     "./utils": "./src/utils/index.ts"
   }

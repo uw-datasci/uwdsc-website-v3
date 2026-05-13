@@ -2,7 +2,8 @@
 
 import { createContext, useContext, ReactNode, useMemo } from "react";
 import useSWR from "swr";
-import { ExecUser, getCurrentUser } from "@/lib/api";
+import { getCurrentUser } from "@/lib/api";
+import type { ExecUser } from "@/types/auth";
 import type { Profile } from "@uwdsc/common/types";
 
 interface AuthContextType {

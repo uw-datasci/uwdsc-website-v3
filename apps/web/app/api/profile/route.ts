@@ -4,7 +4,7 @@ import {
   trimBaseProfilePayload,
 } from "@/lib/api/utils";
 import { profileService } from "@uwdsc/core";
-import { ApiResponse } from "@uwdsc/common/utils";
+import { ApiResponse, isProfileComplete } from "@uwdsc/common/utils";
 import { NextRequest } from "next/server";
 
 export async function GET(): Promise<Response> {
@@ -15,7 +15,7 @@ export async function GET(): Promise<Response> {
     const profile = await profileService.getProfileByUserId(user.id);
     if (!profile) return ApiResponse.notFound("Profile not found");
 
-    const isComplete = await profileService.isProfileComplete(user.id);
+    const isComplete = isProfileComplete(profile);
     return ApiResponse.ok({ profile, isComplete });
   } catch (error) {
     console.error("Error fetching profile:", error);
@@ -33,13 +33,8 @@ export async function PUT(request: NextRequest): Promise<Response> {
     const validationError = validateBaseProfileFields(body);
     if (validationError) return ApiResponse.badRequest(validationError.error);
 
-    if (
-      typeof body.heard_from_where !== "string" ||
-      !body.heard_from_where.trim()
-    ) {
-      return ApiResponse.badRequest(
-        "heard_from_where is required and must be non-empty",
-      );
+    if (typeof body.heard_from_where !== "string" || !body.heard_from_where.trim()) {
+      return ApiResponse.badRequest("heard_from_where is required and must be non-empty");
     }
 
     const base = trimBaseProfilePayload(body);

@@ -1,4 +1,5 @@
 import { GENERAL_FAQ } from "@/constants/home";
+import { MEMBERSHIP_PAYMENT_URL } from "@uwdsc/common/constants";
 import {
   Accordion,
   AccordionContent,
@@ -36,6 +37,18 @@ export default function Faq() {
               </AccordionTrigger>
               <AccordionContent className="flex flex-col gap-4">
                 {lines}
+                {faq.showMembershipPayLink ? (
+                  <p className="leading-[1.75] text-grey1 text-sm md:text-base">
+                    <a
+                      href={MEMBERSHIP_PAYMENT_URL}
+                      className="font-semibold text-white underline underline-offset-2 hover:opacity-90"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Pay DSC membership online
+                    </a>
+                  </p>
+                ) : null}
               </AccordionContent>
             </AccordionItem>
           );

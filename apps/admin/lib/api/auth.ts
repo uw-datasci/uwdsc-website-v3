@@ -6,21 +6,8 @@
  */
 
 import { createApiError } from "./error";
-import { LoginData, Profile } from "@uwdsc/common/types";
-import { Session, User } from "@supabase/supabase-js";
-
-export type ExecUser = Profile & {
-  position_id?: number | null;
-  subteam_id?: number | null;
-  role?: string | null;
-};
-
-interface LoginResponse {
-  success: boolean;
-  user?: User;
-  session?: Session;
-  error?: string;
-}
+import { LoginData } from "@uwdsc/common/types";
+import type { ExecUser, LoginResponse } from "@/types/auth";
 
 // ============================================================================
 // Authentication API Functions

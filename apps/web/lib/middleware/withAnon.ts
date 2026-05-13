@@ -10,14 +10,10 @@ export async function withAnon(
   userId: string | undefined,
 ) {
   // 1. User is not authenticated
-  if (!userId) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
+  if (!userId) return NextResponse.redirect(new URL("/login", request.url));
 
   // 2. User is authenticated and profile is complete
-  if (isComplete) {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
+  if (isComplete) return NextResponse.redirect(new URL("/", request.url));
 
   // 3. User is authenticated and profile is incomplete
   return response;

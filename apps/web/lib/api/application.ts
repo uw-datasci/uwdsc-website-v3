@@ -8,16 +8,20 @@
 import type {
   ApplicationUpdatePayload,
   ApplicationWithDetails,
-  GeneralQuestion,
-  PositionWithQuestions,
   ProfileAutofill,
   Term,
 } from "@uwdsc/common/types";
+import type {
+  ApplyWindowOpenResponse,
+  PositionsWithQuestionsResponse,
+} from "@/types/application";
 import { createApiError } from "./errors";
 
-export interface PositionsWithQuestionsResponse {
-  generalQuestions: GeneralQuestion[];
-  positions: PositionWithQuestions[];
+export async function getApplyWindowOpen(): Promise<ApplyWindowOpenResponse> {
+  const response = await fetch("/api/applications/apply-open");
+  const data = await response.json();
+  if (!response.ok) throw createApiError(data, response.status);
+  return data as ApplyWindowOpenResponse;
 }
 
 export async function getActiveTerm(): Promise<Term> {
@@ -41,20 +45,14 @@ export async function getProfileAutofill(): Promise<ProfileAutofill> {
   return data;
 }
 
-export async function getApplication(
-  termId: string,
-): Promise<ApplicationWithDetails | null> {
-  const response = await fetch(
-    `/api/applications?termId=${encodeURIComponent(termId)}`,
-  );
+export async function getApplication(termId: string): Promise<ApplicationWithDetails | null> {
+  const response = await fetch(`/api/applications?termId=${encodeURIComponent(termId)}`);
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);
   return data;
 }
 
-export async function createApplication(
-  termId: string,
-): Promise<ApplicationWithDetails> {
+export async function createApplication(termId: string): Promise<ApplicationWithDetails> {
   const response = await fetch("/api/applications", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

@@ -5,6 +5,7 @@
     "paths": {
       "@/*": ["./*"],
       "@uwdsc/common/types": ["../../packages/common/src/types/index.ts"],
+      "@uwdsc/db/supabase/profile": ["../../packages/server/db/src/supabase/profile.ts"],
       "@uwdsc/ui": ["../../packages/ui/src/index.ts"],
       "@uwdsc/core": ["../../packages/server/core/src/index.ts"],
       "@uwdsc/db": ["../../packages/server/db/src/config/supabase.ts"]

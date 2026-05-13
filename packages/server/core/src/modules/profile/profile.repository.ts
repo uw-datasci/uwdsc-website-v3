@@ -82,12 +82,14 @@ export class ProfileRepository extends BaseRepository {
     try {
       const result = await this.sql<Profile[]>`
         SELECT
+          p.id,
           first_name,
           last_name,
           email,
           wat_iam,
           faculty,
           term,
+          heard_from_where,
           is_math_soc_member,
           ur.role AS role,
           (

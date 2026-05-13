@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { createAuthService } from "@/lib/services";
 import { AdminLayout } from "@/components/AdminLayout";
 import { AccessDenied } from "@/components/AccessDenied";
-import { ADMIN_ROLES } from "@/constants/roles";
+import { ADMIN_ROLES } from "@uwdsc/common/constants";
 import { membershipService } from "@uwdsc/core";
 import { graceDuringOnboarding } from "@/lib/graceDuringOnboarding";
 

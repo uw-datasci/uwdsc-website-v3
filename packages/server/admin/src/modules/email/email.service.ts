@@ -14,6 +14,7 @@ import {
 import { appendUnsubscribeFooter } from "../../utils/marketingEmail";
 import type {
   MarketingSegmentBroadcastResult,
+  MembershipReceiptNoticeKind,
   SendMarketingSegmentBroadcastParams,
 } from "../../types/email";
 
@@ -309,17 +310,17 @@ class EmailService {
   }
 
   /**
-   * Membership payment webhook: welcome or generic “try again / contact us” notice.
+   * Membership payment webhook: welcome, duplicate-receipt notice, or “try again / contact us”.
    */
   async sendMembershipReceiptNotice(
     recipientEmails: string[],
-    options: { success: boolean },
+    options: { kind: MembershipReceiptNoticeKind },
   ): Promise<void> {
     if (recipientEmails.length === 0) return;
 
-    const { success } = options;
-    const subject = getMembershipReceiptSubject(success);
-    const html = await render(createElement(MembershipReceipt, { success }));
+    const { kind } = options;
+    const subject = getMembershipReceiptSubject(kind);
+    const html = await render(createElement(MembershipReceipt, { kind }));
 
     await this.sendTransactionalEmail({ to: recipientEmails, subject, html });
   }

@@ -30,6 +30,40 @@ export class MembershipRepository extends BaseRepository {
   }
 
   /**
+   * Term id that `markAsPaid` would use for this profile (profile.term → terms, else active term).
+   */
+  async resolveTargetTermIdForProfile(profileId: string): Promise<string | null> {
+    const result = await this.sql<{ term_id: string }[]>`
+      SELECT COALESCE(
+        (
+          SELECT t.id
+          FROM terms t
+          INNER JOIN profiles pr ON pr.term = t.code
+          WHERE pr.id = ${profileId}
+          LIMIT 1
+        ),
+        (SELECT id FROM terms WHERE is_active = true LIMIT 1)
+      ) AS term_id
+    `;
+    return result[0]?.term_id ?? null;
+  }
+
+  /**
+   * Current membership term and payment method for the profile, if a row exists.
+   */
+  async getMembershipByProfile(
+    profileId: string,
+  ): Promise<{ term_id: string; payment_method: string | null } | null> {
+    const result = await this.sql<{ term_id: string; payment_method: string | null }[]>`
+      SELECT term_id, payment_method::text AS payment_method
+      FROM memberships
+      WHERE profile_id = ${profileId}
+      LIMIT 1
+    `;
+    return result[0] ?? null;
+  }
+
+  /**
    * Mark a member as paid by profile ID
    * @param profileId - The profile ID (UUID)
    * @param data - Payment data (method, location, verifier)

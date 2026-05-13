@@ -17,8 +17,10 @@ export interface HiringDecisionEmailProps {
   offerAcceptByDateLabel?: string;
 }
 
+export type MembershipReceiptNoticeKind = "welcome" | "failure" | "already_verified";
+
 export interface MembershipReceiptProps {
-  success: boolean;
+  kind: MembershipReceiptNoticeKind;
 }
 
 export type MarketingSegmentBroadcastResult = {

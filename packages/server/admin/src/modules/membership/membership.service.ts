@@ -70,6 +70,25 @@ class MembershipService {
       const profile = await profileService.getProfileByEmail(receiptEmail);
       if (!profile) throw new ApiError("No profile found for receipt email", 404);
 
+      const targetTermId = await this.repository.resolveTargetTermIdForProfile(profile.id);
+      if (!targetTermId) throw new ApiError("Could not resolve membership term", 400);
+
+      const existing = await this.repository.getMembershipByProfile(profile.id);
+      if (
+        existing !== null &&
+        existing.term_id === targetTermId &&
+        existing.payment_method === "online"
+      ) {
+        if (recipientEmails.length > 0) {
+          await emailService
+            .sendMembershipReceiptNotice(recipientEmails, { kind: "already_verified" })
+            .catch((e) =>
+              console.error("[MembershipService] Already-verified notice email failed:", e),
+            );
+        }
+        return;
+      }
+
       const markResult = await this.markMemberAsPaid(profile.id, {
         payment_method: "online",
         payment_location: "WUSA Online Shop",
@@ -83,13 +102,13 @@ class MembershipService {
 
       if (recipientEmails.length > 0) {
         await emailService
-          .sendMembershipReceiptNotice(recipientEmails, { success: true })
+          .sendMembershipReceiptNotice(recipientEmails, { kind: "welcome" })
           .catch((e) => console.error("[MembershipService] Success notice email failed:", e));
       }
     } catch (error) {
       if (recipientEmails.length > 0) {
         await emailService
-          .sendMembershipReceiptNotice(recipientEmails, { success: false })
+          .sendMembershipReceiptNotice(recipientEmails, { kind: "failure" })
           .catch((e) => console.error("[MembershipService] Failure notice email failed:", e));
       }
 

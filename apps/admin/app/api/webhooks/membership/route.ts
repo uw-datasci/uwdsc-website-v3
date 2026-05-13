@@ -10,12 +10,16 @@ import { WebhookEventPayload } from "resend";
 /**
  * POST /api/webhooks/membership
  * Resend inbound (`email.received`) webhook — verifies Svix signature, then loads email body via API.
+ *
+ * Always returns HTTP 200 so Resend does not retry (at-least-once delivery; non-2xx triggers backoff).
+ * Use `success` in the JSON body to distinguish handled failures from processed receipts.
  */
 export async function POST(request: NextRequest): Promise<Response> {
   const WEBHOOK_SECRET = process.env.RESEND_WEBHOOK_SECRET;
 
   if (!WEBHOOK_SECRET) {
-    return ApiResponse.badRequest("Missing webhook secret");
+    console.error("[Membership Webhook] Missing RESEND_WEBHOOK_SECRET");
+    return ApiResponse.ok({ success: false, reason: "missing_webhook_secret" });
   }
 
   try {
@@ -25,7 +29,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     const svix_signature = headerPayload.get("svix-signature");
 
     if (!svix_id || !svix_timestamp || !svix_signature) {
-      return ApiResponse.badRequest("Missing svix headers");
+      return ApiResponse.ok({ success: false, reason: "missing_svix_headers" });
     }
 
     const payload = await request.json();
@@ -43,24 +47,29 @@ export async function POST(request: NextRequest): Promise<Response> {
       }) as WebhookEventPayload;
     } catch (err) {
       console.error("[Membership Webhook] Error verifying webhook:", err);
-      return ApiResponse.badRequest("Error verifying webhook");
+      return ApiResponse.ok({ success: false, reason: "invalid_signature" });
     }
 
-    if (evt.type !== "email.received") return ApiResponse.badRequest("Invalid webhook event");
+    if (evt.type !== "email.received") {
+      return ApiResponse.ok({ success: false, reason: "invalid_event_type", event: evt.type });
+    }
 
     const contents = await webhookService.getReceivedEmail(evt.data.email_id, evt.data.to);
     if (!contents.ok) {
       if (contents.reason === "wrong_recipient") {
-        return ApiResponse.badRequest(contents.message);
+        return ApiResponse.ok({
+          success: false,
+          reason: "wrong_recipient",
+          message: contents.message,
+        });
       }
 
       console.error("[Membership Webhook]", contents.message);
-      return ApiResponse.serverError(
-        contents.message,
-        contents.reason === "missing_api_key"
-          ? "Email fetch is not configured"
-          : "Failed to load received email",
-      );
+      return ApiResponse.ok({
+        success: false,
+        reason: contents.reason,
+        message: contents.message,
+      });
     }
 
     const activeTerm = await applicationService.getActiveTerm();
@@ -76,15 +85,18 @@ export async function POST(request: NextRequest): Promise<Response> {
     });
   } catch (error) {
     if (error instanceof ApiError) {
-      if (error.statusCode === 403) {
-        return ApiResponse.forbidden(error.message, "Request failed");
-      }
-      return ApiResponse.json(
-        { error: "Request failed", message: error.message },
-        error.statusCode,
-      );
+      return ApiResponse.ok({
+        success: false,
+        reason: "processing_error",
+        message: error.message,
+        statusCode: error.statusCode,
+      });
     }
     console.error("[Membership Webhook] Failed to process request:", error);
-    return ApiResponse.badRequest("Invalid request body");
+    return ApiResponse.ok({
+      success: false,
+      reason: "unexpected_error",
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 }

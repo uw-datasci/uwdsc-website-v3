@@ -225,6 +225,20 @@ export default function LogisticsOnboardingPage() {
             Complete the form below and save at the bottom. Your headshot will be uploaded only
             when you have <b>saved</b>!
           </CardDescription>
+          {currentTerm?.onboarding_due_date ? (
+            <p className="text-sm text-muted-foreground">
+              <span className="font-medium text-foreground">Due:</span>{" "}
+              <time dateTime={currentTerm.onboarding_due_date}>
+                {new Date(currentTerm.onboarding_due_date).toLocaleString("en-US", {
+                  weekday: "long",
+                  month: "long",
+                  day: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                })}
+              </time>
+            </p>
+          ) : null}
         </div>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

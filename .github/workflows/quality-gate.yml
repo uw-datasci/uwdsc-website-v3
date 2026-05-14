@@ -85,7 +85,7 @@ jobs:
 
     steps:
       - name: Post Quality Gate Summary
-        uses: uw-datasci/nexus-quality-summary@v1
+        uses: uw-datasci/nexus-quality-summary@v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           code-quality-result: ${{ needs.code-quality.result }}

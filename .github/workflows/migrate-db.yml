@@ -17,7 +17,7 @@ on:
 
 env:
   NODE_VERSION: 24
-  PNPM_VERSION: 10.33.3
+  PNPM_VERSION: 11.1.2
   INFISICAL_PROJECT_SLUG: uwdsc-54e-y
 
 jobs:

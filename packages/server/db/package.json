@@ -8,7 +8,6 @@
   "dependencies": {
     "@uwdsc/common": "workspace:*",
     "@supabase/ssr": "^0.7.0",
-    "@supabase/storage-js": "^2.81.1",
     "@supabase/supabase-js": "^2.39.7",
     "postgres": "^3.4.5"
   },

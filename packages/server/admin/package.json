@@ -10,7 +10,6 @@
     "@react-email/components": "^1.0.10",
     "@react-email/markdown": "^0.0.18",
     "@react-email/render": "^2.0.4",
-    "@supabase/storage-js": "^2.94.0",
     "@supabase/supabase-js": "^2.94.0",
     "@uwdsc/common": "workspace:*",
     "@uwdsc/core": "workspace:*",

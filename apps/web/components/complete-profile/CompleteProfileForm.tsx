@@ -11,12 +11,12 @@ import {
 import { completeProfile } from "@/lib/api/profile";
 import { renderTextField, renderSelectField, Button, Form, FormField } from "@uwdsc/ui";
 import { Loader2 } from "lucide-react";
+import { TERM_OPTIONS } from "@/constants/profile";
 import {
-  FACULTY_OPTIONS,
-  TERM_OPTIONS,
-  facultyLabelToValue,
-  facultyValueToLabel,
-} from "@/constants/profile";
+  FACULTY_LABELS,
+  FACULTY_PROFILE_FORM_OPTIONS,
+  FACULTY_PROFILE_LABEL_TO_VALUE,
+} from "@uwdsc/common/constants";
 import type { Profile } from "@uwdsc/common/types";
 
 interface CompleteProfileFormProps {
@@ -40,7 +40,7 @@ export function CompleteProfileForm({ prefill, onSuccess }: CompleteProfileFormP
     if (prefill.last_name) form.setValue("last_name", prefill.last_name);
     if (prefill.wat_iam) form.setValue("wat_iam", prefill.wat_iam);
     if (prefill.faculty) {
-      const label = facultyValueToLabel[prefill.faculty];
+      const label = FACULTY_LABELS[prefill.faculty];
       if (label) form.setValue("faculty", label);
     }
     if (prefill.term) form.setValue("term", prefill.term);
@@ -54,7 +54,7 @@ export function CompleteProfileForm({ prefill, onSuccess }: CompleteProfileFormP
         first_name: formData.first_name,
         last_name: formData.last_name,
         wat_iam: formData.wat_iam,
-        faculty: facultyLabelToValue[formData.faculty] ?? "math",
+        faculty: FACULTY_PROFILE_LABEL_TO_VALUE[formData.faculty] ?? "math",
         term: formData.term,
         heard_from_where: formData.heard_from_where,
       };
@@ -110,7 +110,7 @@ export function CompleteProfileForm({ prefill, onSuccess }: CompleteProfileFormP
           name="faculty"
           render={renderSelectField({
             placeholder: "Faculty",
-            options: FACULTY_OPTIONS,
+            options: FACULTY_PROFILE_FORM_OPTIONS,
             triggerClassName:
               "w-full !h-auto !text-base border border-gray-100/80 !bg-black dark:!bg-black rounded-lg px-4.5 py-3.5 text-white xl:px-6 xl:py-4.5 hover:!bg-black dark:hover:!bg-black focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring [&_svg]:text-gray-400 [&[data-size=default]]:!h-auto",
             contentClassName:

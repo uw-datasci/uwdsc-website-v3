@@ -1,4 +1,5 @@
-import { FACULTY_OPTIONS, TERM_OPTIONS } from "@/constants/profile";
+import { TERM_OPTIONS } from "@/constants/profile";
+import { FACULTY_PROFILE_FORM_OPTIONS } from "@uwdsc/common/constants";
 import type { PassportProfileEditValues } from "@/lib/schemas/profile";
 import { Form, FormField, renderSelectField, renderTextField } from "@uwdsc/ui";
 import type { UseFormReturn } from "react-hook-form";
@@ -49,7 +50,7 @@ export function ProfileEditForm({ form, onSubmit }: ProfileEditFormProps) {
           render={renderSelectField({
             label: "Faculty",
             placeholder: "Select faculty",
-            options: FACULTY_OPTIONS,
+            options: FACULTY_PROFILE_FORM_OPTIONS,
             contentPosition: "popper",
             triggerClassName: "w-full",
             contentClassName: "w-full",

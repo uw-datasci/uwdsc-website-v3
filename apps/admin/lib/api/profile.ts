@@ -5,7 +5,7 @@
  * Components should use these functions instead of making direct fetch calls.
  */
 
-import type { EditMemberFormValues } from "@/lib/schemas/membership";
+import type { EditMemberFormValues, InviteMemberFormValues } from "@/lib/schemas/membership";
 import { createApiError } from "./error";
 import { Member, MembershipStats, MembershipStatus } from "@uwdsc/common/types";
 
@@ -53,6 +53,27 @@ export async function getMembershipStats(): Promise<MembershipStats> {
   }
 
   return data.stats;
+}
+
+/**
+ * Invite a new member by email (Supabase sends invite link to the public app).
+ */
+export async function inviteMember(payload: InviteMemberFormValues): Promise<{
+  success: boolean;
+  userId: string;
+  message: string;
+}> {
+  const response = await fetch("/api/members", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) throw createApiError(data, response.status);
+
+  return data;
 }
 
 /**

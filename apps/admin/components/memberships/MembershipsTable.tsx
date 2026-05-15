@@ -18,12 +18,15 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Download,
+  UserPlus,
 } from "lucide-react";
+import { membershipColumns, type MembershipActionType } from "./MembershipColumns";
 import {
-  membershipColumns,
-  type MembershipActionType,
-} from "./MembershipColumns";
-import { DeleteMemberModal, EditMemberModal, MarkAsPaidModal } from "./modals";
+  DeleteMemberModal,
+  EditMemberModal,
+  InviteMemberModal,
+  MarkAsPaidModal,
+} from "./modals";
 import {
   Card,
   Input,
@@ -43,6 +46,7 @@ import {
 import { exportToCsv } from "@/lib/utils/csv";
 import { globalMembershipFilter } from "@/lib/utils/table";
 import { Member, MembershipFilter } from "@uwdsc/common/types";
+import { FACULTY_FILTER_OPTIONS } from "@uwdsc/common/constants";
 
 interface MembershipsTableProps {
   readonly profiles: Member[];
@@ -83,16 +87,6 @@ const MATH_SOC_OPTIONS = [
   { value: "false", label: "No" },
 ] as const;
 
-const FACULTY_OPTIONS = [
-  { value: "all", label: "All Faculties" },
-  { value: "math", label: "Math" },
-  { value: "engineering", label: "Engineering" },
-  { value: "science", label: "Science" },
-  { value: "arts", label: "Arts" },
-  { value: "health", label: "Health" },
-  { value: "environment", label: "Environment" },
-] as const;
-
 function getMembershipCsvValue(row: Member, key: string): unknown {
   if (key === "name") {
     const first = row.first_name ?? "";
@@ -117,14 +111,13 @@ export function MembershipsTable({
     member: Member;
   } | null>(null);
   const [autoOpenedKey, setAutoOpenedKey] = useState<string | null>(null);
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   // Sync column filters with activeFilter from stats cards
   useEffect(() => {
     setColumnFilters((prev) => {
       // Remove existing has_paid and is_math_soc_member filters
-      const filtered = prev.filter(
-        (f) => f.id !== "has_paid" && f.id !== "is_math_soc_member",
-      );
+      const filtered = prev.filter((f) => f.id !== "has_paid" && f.id !== "is_math_soc_member");
 
       switch (activeFilter) {
         case "paid":
@@ -234,6 +227,8 @@ export function MembershipsTable({
     <>
       {renderActionModal()}
 
+      <InviteMemberModal open={inviteOpen} onOpenChange={setInviteOpen} onSuccess={onRefresh} />
+
       <Card className="p-6 w-full">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
           <div>
@@ -250,6 +245,10 @@ export function MembershipsTable({
               onChange={(e) => setGlobalFilter(e.target.value)}
               className="sm:w-96 h-9"
             />
+            <Button type="button" onClick={() => setInviteOpen(true)} size="sm">
+              <UserPlus className="mr-2 h-4 w-4" />
+              Add member
+            </Button>
             <Button onClick={onExportCsv} variant="outline" size="sm">
               <Download className="mr-2 h-4 w-4" />
               Export CSV
@@ -260,14 +259,9 @@ export function MembershipsTable({
         {/* Column Filters */}
         <div className="flex flex-wrap gap-4 mb-4">
           <div className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground">
-              Role
-            </span>
+            <span className="text-xs font-medium text-muted-foreground">Role</span>
             <Select
-              value={
-                (table.getColumn("user_role")?.getFilterValue() as string) ??
-                "all"
-              }
+              value={(table.getColumn("user_role")?.getFilterValue() as string) ?? "all"}
               onValueChange={(value) =>
                 table
                   .getColumn("user_role")
@@ -288,18 +282,11 @@ export function MembershipsTable({
           </div>
 
           <div className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground">
-              Paid
-            </span>
+            <span className="text-xs font-medium text-muted-foreground">Paid</span>
             <Select
-              value={
-                (table.getColumn("has_paid")?.getFilterValue() as string) ??
-                "all"
-              }
+              value={(table.getColumn("has_paid")?.getFilterValue() as string) ?? "all"}
               onValueChange={(value) =>
-                table
-                  .getColumn("has_paid")
-                  ?.setFilterValue(value === "all" ? undefined : value)
+                table.getColumn("has_paid")?.setFilterValue(value === "all" ? undefined : value)
               }
             >
               <SelectTrigger className="h-8 w-25">
@@ -316,14 +303,10 @@ export function MembershipsTable({
           </div>
 
           <div className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground">
-              MathSoc
-            </span>
+            <span className="text-xs font-medium text-muted-foreground">MathSoc</span>
             <Select
               value={
-                (table
-                  .getColumn("is_math_soc_member")
-                  ?.getFilterValue() as string) ?? "all"
+                (table.getColumn("is_math_soc_member")?.getFilterValue() as string) ?? "all"
               }
               onValueChange={(value) =>
                 table
@@ -345,25 +328,18 @@ export function MembershipsTable({
           </div>
 
           <div className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground">
-              Faculty
-            </span>
+            <span className="text-xs font-medium text-muted-foreground">Faculty</span>
             <Select
-              value={
-                (table.getColumn("faculty")?.getFilterValue() as string) ??
-                "all"
-              }
+              value={(table.getColumn("faculty")?.getFilterValue() as string) ?? "all"}
               onValueChange={(value) =>
-                table
-                  .getColumn("faculty")
-                  ?.setFilterValue(value === "all" ? undefined : value)
+                table.getColumn("faculty")?.setFilterValue(value === "all" ? undefined : value)
               }
             >
               <SelectTrigger className="h-8 w-37.5">
                 <SelectValue placeholder="Faculty" />
               </SelectTrigger>
               <SelectContent>
-                {FACULTY_OPTIONS.map((opt) => (
+                {FACULTY_FILTER_OPTIONS.map((opt) => (
                   <SelectItem key={opt.value} value={opt.value}>
                     {opt.label}
                   </SelectItem>
@@ -383,10 +359,7 @@ export function MembershipsTable({
                       <TableHead key={header.id}>
                         {header.isPlaceholder
                           ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext(),
-                            )}
+                          : flexRender(header.column.columnDef.header, header.getContext())}
                       </TableHead>
                     ))}
                   </TableRow>
@@ -398,20 +371,14 @@ export function MembershipsTable({
                     <TableRow key={row.id}>
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
                       ))}
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell
-                      colSpan={membershipColumns.length}
-                      className="h-24 text-center"
-                    >
+                    <TableCell colSpan={membershipColumns.length} className="h-24 text-center">
                       No members found.
                     </TableCell>
                   </TableRow>
@@ -427,9 +394,7 @@ export function MembershipsTable({
           </p>
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-medium whitespace-nowrap">
-                Rows per page
-              </span>
+              <span className="text-xs font-medium whitespace-nowrap">Rows per page</span>
               <Select
                 value={`${table.getState().pagination.pageSize}`}
                 onValueChange={(value) => table.setPageSize(Number(value))}
@@ -448,8 +413,7 @@ export function MembershipsTable({
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-medium whitespace-nowrap">
-                Page {table.getState().pagination.pageIndex + 1} of{" "}
-                {table.getPageCount() || 1}
+                Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount() || 1}
               </span>
               <div className="flex items-center gap-1">
                 <Button

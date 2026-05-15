@@ -3,14 +3,10 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  PassportHeader,
-  MembershipCta,
-  PassportProfile,
-} from "@/components/passport";
+import { PassportHeader, MembershipCta, PassportProfile } from "@/components/passport";
 import { useAuth } from "@/contexts/AuthContext";
 import { getMembershipStatus, updateUserProfile } from "@/lib/api/profile";
-import { facultyLabelToValue, facultyValueToLabel } from "@/constants/profile";
+import { FACULTY_LABELS, FACULTY_PROFILE_LABEL_TO_VALUE } from "@uwdsc/common/constants";
 import {
   passportProfileEditSchema,
   passportProfileEditDefaultValues,
@@ -21,8 +17,7 @@ import { Spinner } from "@uwdsc/ui";
 
 export default function PassportPage() {
   const { user, isLoading: authLoading, mutate } = useAuth();
-  const [membershipStatus, setMembershipStatus] =
-    useState<MembershipStatus | null>(null);
+  const [membershipStatus, setMembershipStatus] = useState<MembershipStatus | null>(null);
   const [membershipLoading, setMembershipLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -46,7 +41,7 @@ export default function PassportPage() {
       first_name: user.first_name ?? "",
       last_name: user.last_name ?? "",
       wat_iam: user.wat_iam ?? "",
-      faculty: user.faculty ? (facultyValueToLabel[user.faculty] ?? "") : "",
+      faculty: user.faculty ? (FACULTY_LABELS[user.faculty] ?? "") : "",
       term: user.term ?? "",
     });
   }, [user, reset]);
@@ -57,7 +52,7 @@ export default function PassportPage() {
         first_name: data.first_name,
         last_name: data.last_name,
         wat_iam: data.wat_iam,
-        faculty: facultyLabelToValue[data.faculty] ?? "math",
+        faculty: FACULTY_PROFILE_LABEL_TO_VALUE[data.faculty] ?? "math",
         term: data.term,
       });
       await mutate();
@@ -73,7 +68,7 @@ export default function PassportPage() {
         first_name: user.first_name ?? "",
         last_name: user.last_name ?? "",
         wat_iam: user.wat_iam ?? "",
-        faculty: user.faculty ? (facultyValueToLabel[user.faculty] ?? "") : "",
+        faculty: user.faculty ? (FACULTY_LABELS[user.faculty] ?? "") : "",
         term: user.term ?? "",
       });
     }
@@ -89,16 +84,11 @@ export default function PassportPage() {
   }
 
   const initials =
-    [user?.first_name?.[0], user?.last_name?.[0]]
-      .filter(Boolean)
-      .join("")
-      .toUpperCase() || "?";
+    [user?.first_name?.[0], user?.last_name?.[0]].filter(Boolean).join("").toUpperCase() || "?";
   const displayName =
-    [user?.first_name, user?.last_name].filter(Boolean).join(" ") ||
-    "Unknown Member";
+    [user?.first_name, user?.last_name].filter(Boolean).join(" ") || "Unknown Member";
   const isMember = membershipStatus?.has_membership && user?.is_math_soc_member;
-  const facultyLabel =
-    user?.faculty == null ? undefined : facultyValueToLabel[user.faculty];
+  const facultyLabel = user?.faculty == null ? undefined : FACULTY_LABELS[user.faculty];
 
   return (
     <main className="flex min-h-dvh flex-col items-center px-4 pb-16 pt-28 lg:pt-32">

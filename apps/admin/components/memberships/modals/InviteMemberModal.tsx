@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { updateMember } from "@/lib/api";
-import { editMemberSchema, type EditMemberFormValues } from "@/lib/schemas/membership";
+import { inviteMember } from "@/lib/api";
+import { inviteMemberSchema, type InviteMemberFormValues } from "@/lib/schemas/membership";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -24,59 +24,50 @@ import {
   renderSelectField,
 } from "@uwdsc/ui";
 import { FACULTY_VALUES } from "@uwdsc/common/constants";
-import { Member } from "@uwdsc/common/types";
 
-interface EditMemberModalProps {
+interface InviteMemberModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  member: Member;
   onSuccess?: () => void;
 }
 
-export function EditMemberModal({
+const EMPTY_VALUES: InviteMemberFormValues = {
+  email: "",
+  first_name: "",
+  last_name: "",
+  wat_iam: "",
+  faculty: undefined,
+  term: "",
+  is_math_soc_member: false,
+};
+
+export function InviteMemberModal({
   open,
   onOpenChange,
-  member,
   onSuccess,
-}: Readonly<EditMemberModalProps>) {
+}: Readonly<InviteMemberModalProps>) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<EditMemberFormValues>({
-    resolver: zodResolver(editMemberSchema),
-    defaultValues: {
-      first_name: member.first_name || "",
-      last_name: member.last_name || "",
-      wat_iam: member.wat_iam || "",
-      faculty: (member.faculty as EditMemberFormValues["faculty"]) || undefined,
-      term: member.term || "",
-      is_math_soc_member: member.is_math_soc_member || false,
-    },
+  const form = useForm<InviteMemberFormValues>({
+    resolver: zodResolver(inviteMemberSchema),
+    defaultValues: EMPTY_VALUES,
   });
 
-  // Reset form when member changes or modal opens
   useEffect(() => {
     if (open) {
-      form.reset({
-        first_name: member.first_name || "",
-        last_name: member.last_name || "",
-        wat_iam: member.wat_iam || "",
-        faculty: (member.faculty as EditMemberFormValues["faculty"]) || undefined,
-        term: member.term || "",
-        is_math_soc_member: member.is_math_soc_member || false,
-      });
+      form.reset(EMPTY_VALUES);
     }
-  }, [open, member, form]);
+  }, [open, form]);
 
-  const onSubmit = async (data: EditMemberFormValues) => {
+  const onSubmit = async (data: InviteMemberFormValues) => {
     setIsSubmitting(true);
     try {
-      await updateMember(member.id, data);
-      toast.success("Member updated successfully");
+      await inviteMember(data);
+      toast.success("Invitation sent. They’ll get an email to finish signup.");
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
-      onOpenChange(false);
-      const errorMessage = error instanceof Error ? error.message : "Failed to update member";
+      const errorMessage = error instanceof Error ? error.message : "Failed to send invitation";
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -84,37 +75,49 @@ export function EditMemberModal({
   };
 
   const handleCancel = () => {
-    form.reset();
+    form.reset(EMPTY_VALUES);
     onOpenChange(false);
   };
-
-  // Check if form has been modified
-  const isDirty = form.formState.isDirty;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="sm:max-w-150 max-h-[90vh] overflow-y-auto"
-        aria-describedby="edit-member-modal"
+        aria-describedby="invite-member-modal"
       >
         <DialogHeader>
-          <DialogTitle>Edit member</DialogTitle>
-          <p className="text-sm text-muted-foreground mt-1">{member.email}</p>
+          <DialogTitle>Add member</DialogTitle>
+          <p className="text-sm text-muted-foreground mt-1" id="invite-member-modal">
+            Send an invite email. After they accept, they can complete their profile on the main
+            site.
+          </p>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* First Name & Last Name */}
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) =>
+                renderTextField({
+                  label: "Email",
+                  placeholder: "member@uwaterloo.ca",
+                  required: true,
+                  description: "Must be a @uwaterloo.ca address (same as self-serve signup).",
+                  inputProps: { type: "email", autoComplete: "email" },
+                })({ field: { ...field, value: field.value ?? "" } })
+              }
+            />
+
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="first_name"
                 render={({ field }) =>
                   renderTextField({
-                    label: "First Name",
-                    placeholder: "Enter first name",
-                    required: true,
-                  })({ field })
+                    label: "First name",
+                    placeholder: "Optional",
+                  })({ field: { ...field, value: field.value ?? "" } })
                 }
               />
               <FormField
@@ -122,15 +125,13 @@ export function EditMemberModal({
                 name="last_name"
                 render={({ field }) =>
                   renderTextField({
-                    label: "Last Name",
-                    placeholder: "Enter last name",
-                    required: true,
-                  })({ field })
+                    label: "Last name",
+                    placeholder: "Optional",
+                  })({ field: { ...field, value: field.value ?? "" } })
                 }
               />
             </div>
 
-            {/* WatIAM & Term */}
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -138,7 +139,7 @@ export function EditMemberModal({
                 render={({ field }) =>
                   renderTextField({
                     label: "WatIAM",
-                    placeholder: "Enter WatIAM username",
+                    placeholder: "Optional",
                   })({ field: { ...field, value: field.value ?? "" } })
                 }
               />
@@ -148,27 +149,25 @@ export function EditMemberModal({
                 render={({ field }) =>
                   renderTextField({
                     label: "Term",
-                    placeholder: "e.g., 1A, 2B, 4A",
+                    placeholder: "e.g., 1A, 2B",
                   })({ field: { ...field, value: field.value ?? "" } })
                 }
               />
             </div>
 
-            {/* Faculty */}
             <FormField
               control={form.control}
               name="faculty"
               render={({ field }) =>
                 renderSelectField({
                   label: "Faculty",
-                  placeholder: "Select faculty",
+                  placeholder: "Optional",
                   options: [...FACULTY_VALUES],
                   triggerClassName: "w-full",
                 })({ field: { ...field, value: field.value ?? "" } })
               }
             />
 
-            {/* MathSoc Member */}
             <FormField
               control={form.control}
               name="is_math_soc_member"
@@ -178,9 +177,9 @@ export function EditMemberModal({
                     <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
                   <div className="space-y-1 leading-none">
-                    <FormLabel>MathSoc Member</FormLabel>
+                    <FormLabel>MathSoc member</FormLabel>
                     <p className="text-sm text-muted-foreground">
-                      Is this member part of MathSoc?
+                      Optional — prefilled on their profile after signup.
                     </p>
                   </div>
                 </FormItem>
@@ -196,14 +195,14 @@ export function EditMemberModal({
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting || !isDirty}>
+              <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
+                    Sending…
                   </>
                 ) : (
-                  "Save"
+                  "Send invite"
                 )}
               </Button>
             </DialogFooter>

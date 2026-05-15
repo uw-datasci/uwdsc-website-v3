@@ -87,7 +87,7 @@ export function CompleteProfileForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="w-full flex flex-col gap-4"
+        className="flex w-full min-w-0 flex-col gap-4"
       >
         <FormField
           control={form.control}
@@ -163,7 +163,7 @@ export function CompleteProfileForm({
             size="lg"
             disabled={isLoading || !form.formState.isValid}
             type="submit"
-            className="w-full rounded-md xl:rounded-lg bg-gradient-purple text-lg font-bold h-auto! py-2.5"
+            className="!h-auto w-full touch-manipulation rounded-md bg-gradient-purple py-2.5 text-base font-bold sm:text-lg xl:rounded-lg"
           >
             {isLoading ? (
               <>

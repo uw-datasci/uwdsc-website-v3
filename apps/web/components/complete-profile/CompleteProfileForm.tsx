@@ -9,13 +9,7 @@ import {
   type CompleteProfileFormValues,
 } from "@/lib/schemas/profile";
 import { completeProfile } from "@/lib/api/profile";
-import {
-  renderTextField,
-  renderSelectField,
-  Button,
-  Form,
-  FormField,
-} from "@uwdsc/ui";
+import { renderTextField, renderSelectField, Button, Form, FormField } from "@uwdsc/ui";
 import { Loader2 } from "lucide-react";
 import {
   FACULTY_OPTIONS,
@@ -30,10 +24,7 @@ interface CompleteProfileFormProps {
   readonly onSuccess: () => void | Promise<void>;
 }
 
-export function CompleteProfileForm({
-  prefill,
-  onSuccess,
-}: CompleteProfileFormProps) {
+export function CompleteProfileForm({ prefill, onSuccess }: CompleteProfileFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState("");
 
@@ -74,9 +65,7 @@ export function CompleteProfileForm({
       const err = error as { error?: string; message?: string };
       console.error(error);
       setAuthError(
-        err?.error ??
-          err?.message ??
-          "An unexpected error occurred. Please try again",
+        err?.error ?? err?.message ?? "An unexpected error occurred. Please try again",
       );
     } finally {
       setIsLoading(false);
@@ -155,15 +144,13 @@ export function CompleteProfileForm({
               "!h-auto !text-base border-gray-100/80 !bg-black px-4.5 py-3.5 placeholder:text-gray-100/80 rounded-lg xl:px-6 xl:py-4.5",
           })}
         />
-        {authError && (
-          <div className="text-red-400 text-base mt-3">{authError}</div>
-        )}
+        {authError && <div className="text-red-400 text-base mt-3">{authError}</div>}
         <div className="flex flex-col gap-1 items-start justify-between mt-6">
           <Button
             size="lg"
             disabled={isLoading || !form.formState.isValid}
             type="submit"
-            className="!h-auto w-full touch-manipulation rounded-md bg-gradient-purple py-2.5 text-base font-bold sm:text-lg xl:rounded-lg"
+            className="h-auto! w-full touch-manipulation rounded-md bg-gradient-purple py-2.5 text-base font-bold sm:text-lg xl:rounded-lg"
           >
             {isLoading ? (
               <>

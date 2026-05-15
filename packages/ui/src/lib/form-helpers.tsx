@@ -29,14 +29,8 @@ import { cn } from "./utils";
 // ---------------------------------------------------------------------------
 
 // Allow optional field values so helpers work with forms that have optional fields (e.g. member_ideas?: string)
-type StringFieldProps = ControllerRenderProps<
-  Record<string, string | undefined>,
-  string
->;
-type BooleanFieldProps = ControllerRenderProps<
-  Record<string, boolean | undefined>,
-  string
->;
+type StringFieldProps = ControllerRenderProps<Record<string, string | undefined>, string>;
+type BooleanFieldProps = ControllerRenderProps<Record<string, boolean | undefined>, string>;
 
 type StringArrayFieldProps = ControllerRenderProps<
   Record<string, string[] | undefined>,
@@ -139,11 +133,7 @@ interface StringArrayFieldRenderProps {
   readonly field: StringArrayFieldProps;
 }
 
-function toggleStringInArray(
-  list: string[],
-  item: string,
-  selected: boolean,
-): string[] {
+function toggleStringInArray(list: string[], item: string, selected: boolean): string[] {
   if (selected) {
     return list.includes(item) ? list : [...list, item];
   }
@@ -169,16 +159,9 @@ export function renderTextField(opts: TextFieldOptions) {
           </FormLabel>
         )}
         <FormControl>
-          <Input
-            {...field}
-            {...inputProps}
-            placeholder={placeholder}
-            className={className}
-          />
+          <Input {...field} {...inputProps} placeholder={placeholder} className={className} />
         </FormControl>
-        {description != null && (
-          <FormDescription>{description}</FormDescription>
-        )}
+        {description != null && <FormDescription>{description}</FormDescription>}
         <FormMessage />
       </FormItem>
     );
@@ -203,7 +186,7 @@ export function renderSelectField(opts: SelectFieldOptions) {
 
   function SelectFieldRender({ field }: StringFieldRenderProps) {
     const raw = field.value ?? "";
-    const resolvedValue = raw === "" ? clearValueSentinel : raw;
+    const resolvedValue = raw === "" ? (clearValueSentinel ?? "") : raw;
 
     function handleChange(v: string) {
       if (clearValueSentinel === undefined || v !== clearValueSentinel) {
@@ -221,20 +204,13 @@ export function renderSelectField(opts: SelectFieldOptions) {
           </FormLabel>
         )}
         <div className="block w-full min-w-0">
-          <Select
-            onValueChange={handleChange}
-            value={resolvedValue}
-            disabled={disabled}
-          >
+          <Select onValueChange={handleChange} value={resolvedValue} disabled={disabled}>
             <FormControl>
               <SelectTrigger className={cn("w-full min-w-0", triggerClassName)}>
                 <SelectValue placeholder={placeholder} />
               </SelectTrigger>
             </FormControl>
-            <SelectContent
-              className={contentClassName}
-              position={contentPosition}
-            >
+            <SelectContent className={contentClassName} position={contentPosition}>
               {options.map((option) => {
                 const value = typeof option === "string" ? option : option.value;
                 const label = typeof option === "string" ? option : option.label;
@@ -310,9 +286,7 @@ export function renderTextAreaField(opts: TextAreaFieldOptions) {
 
   function TextAreaFieldRender({ field }: StringFieldRenderProps) {
     const desc =
-      typeof description === "function"
-        ? description(field.value ?? "")
-        : description;
+      typeof description === "function" ? description(field.value ?? "") : description;
     const textarea = (
       <Textarea
         {...field}
@@ -320,23 +294,15 @@ export function renderTextAreaField(opts: TextAreaFieldOptions) {
         placeholder={placeholder}
         className={cn(
           className,
-          stretchToParent &&
-          "max-h-36 min-h-20 flex-1 basis-0 self-stretch field-sizing-fixed",
+          stretchToParent && "max-h-36 min-h-20 flex-1 basis-0 self-stretch field-sizing-fixed",
         )}
       />
     );
     return (
-      <FormItem
-        className={cn(
-          stretchToParent && "flex min-h-0 flex-1 flex-col gap-2",
-        )}
-      >
+      <FormItem className={cn(stretchToParent && "flex min-h-0 flex-1 flex-col gap-2")}>
         {label != null && (
           <FormLabel
-            className={cn(
-              "leading-relaxed",
-              stretchToParent ? "mb-0 shrink-0" : "mb-1",
-            )}
+            className={cn("leading-relaxed", stretchToParent ? "mb-0 shrink-0" : "mb-1")}
           >
             {label} {required && <span className="text-red-500">*</span>}
           </FormLabel>
@@ -414,10 +380,7 @@ export function renderScaleField(opts: ScaleFieldOptions) {
             className="flex items-center gap-4"
           >
             {labels.map((scaleLabel, index) => (
-              <FormItem
-                key={index}
-                className="flex flex-col items-center space-y-1 space-x-0"
-              >
+              <FormItem key={index} className="flex flex-col items-center space-y-1 space-x-0">
                 <FormControl>
                   <RadioGroupItem value={String(index)} />
                 </FormControl>
@@ -449,8 +412,7 @@ export function renderCheckboxField(opts: CheckboxFieldOptions) {
 
   function CheckboxFieldRender({ field }: BooleanFieldRenderProps) {
     const checked = field.value ?? false;
-    const desc =
-      typeof description === "function" ? description(checked) : description;
+    const desc = typeof description === "function" ? description(checked) : description;
 
     return (
       <FormItem className={containerClassName}>
@@ -469,9 +431,7 @@ export function renderCheckboxField(opts: CheckboxFieldOptions) {
             </FormLabel>
           )}
           {desc != null && (
-            <FormDescription className={descriptionClassName}>
-              {desc}
-            </FormDescription>
+            <FormDescription className={descriptionClassName}>{desc}</FormDescription>
           )}
         </div>
         <FormMessage />
@@ -482,9 +442,7 @@ export function renderCheckboxField(opts: CheckboxFieldOptions) {
   return CheckboxFieldRender;
 }
 
-export function renderMultiSelectDropdownField(
-  opts: MultiSelectDropdownFieldOptions,
-) {
+export function renderMultiSelectDropdownField(opts: MultiSelectDropdownFieldOptions) {
   const {
     label,
     required = false,
@@ -495,9 +453,7 @@ export function renderMultiSelectDropdownField(
     contentClassName,
   } = opts;
 
-  function MultiSelectDropdownFieldRender({
-    field,
-  }: StringArrayFieldRenderProps) {
+  function MultiSelectDropdownFieldRender({ field }: StringArrayFieldRenderProps) {
     const value = field.value ?? [];
     return (
       <FormItem>
@@ -525,9 +481,7 @@ export function renderMultiSelectDropdownField(
                 )}
               >
                 <span className="min-w-0 flex-1 truncate">
-                  {value.length
-                    ? value.map(formatOption).join(", ")
-                    : emptyPlaceholder}
+                  {value.length ? value.map(formatOption).join(", ") : emptyPlaceholder}
                 </span>
                 <ChevronDown className="size-4 shrink-0 opacity-50" />
               </Button>
@@ -553,9 +507,7 @@ export function renderMultiSelectDropdownField(
                   <Checkbox
                     checked={value.includes(option)}
                     onCheckedChange={(v) =>
-                      field.onChange(
-                        toggleStringInArray(value, option, v === true),
-                      )
+                      field.onChange(toggleStringInArray(value, option, v === true))
                     }
                     className="shrink-0"
                   />

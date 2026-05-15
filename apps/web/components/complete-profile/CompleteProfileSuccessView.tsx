@@ -20,7 +20,9 @@ export function CompleteProfileSuccessView() {
           aria-hidden
         />
       </div>
-      <h2 className="mb-3 text-3xl font-bold sm:mb-4 sm:text-4xl md:text-5xl">Profile complete</h2>
+      <h2 className="mb-3 text-3xl font-bold sm:mb-4 sm:text-4xl md:text-5xl">
+        Profile complete
+      </h2>
       <p className="mb-6 text-base text-gray-300 sm:mb-8 sm:text-lg">
         Your account is set up. One more step: pay the DSC membership fee so you can access all
         member benefits.
@@ -38,7 +40,7 @@ export function CompleteProfileSuccessView() {
             <span className="font-mono font-bold text-purple-200 break-all">
               {MEMBERSHIP_MONERIS_RECEIPT_FROM}
             </span>
-            , not the generic WUSA order email) to{" "}
+            , not the WUSA order summary email) to{" "}
             <span className="font-mono font-bold text-purple-200 break-all">
               {MEMBERSHIP_INBOUND_EMAIL}
             </span>{" "}

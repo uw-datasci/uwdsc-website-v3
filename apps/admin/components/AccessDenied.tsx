@@ -63,7 +63,7 @@ export function AccessDenied({ execUnpaid }: AccessDeniedProps) {
                     <span className="font-mono text-xs font-bold text-foreground break-all">
                       {MEMBERSHIP_MONERIS_RECEIPT_FROM}
                     </span>
-                    , not the generic WUSA order email) to{" "}
+                    , not the WUSA order summary email) to{" "}
                     <span className="font-mono text-xs font-bold text-foreground break-all">
                       {MEMBERSHIP_INBOUND_EMAIL}
                     </span>{" "}

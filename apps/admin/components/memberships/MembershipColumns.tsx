@@ -1,14 +1,7 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import {
-  ArrowUp,
-  ArrowDown,
-  Minus,
-  Pencil,
-  Banknote,
-  Trash2,
-} from "lucide-react";
+import { ArrowUp, ArrowDown, Minus, Pencil, Banknote, Trash2 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button, Tooltip, TooltipContent, TooltipTrigger } from "@uwdsc/ui";
 import { Member } from "@uwdsc/common/types";
@@ -25,17 +18,12 @@ const SORT_LABELS: Record<"asc" | "desc" | "false", string> = {
   false: "unsorted",
 };
 
-function SortIcon({
-  direction,
-}: Readonly<{ direction: false | "asc" | "desc" }>) {
+function SortIcon({ direction }: Readonly<{ direction: false | "asc" | "desc" }>) {
   const key = direction === false ? "false" : direction;
   const Icon = SORT_ICONS[key];
 
   return (
-    <span
-      className="ml-2 inline-flex h-4 w-4 shrink-0 items-center justify-center"
-      aria-hidden
-    >
+    <span className="ml-2 inline-flex h-4 w-4 shrink-0 items-center justify-center" aria-hidden>
       <AnimatePresence mode="wait" initial={false}>
         <motion.span
           key={key}
@@ -62,8 +50,7 @@ export interface MembershipTableMeta {
 export const membershipColumns: ColumnDef<Member>[] = [
   {
     id: "name",
-    accessorFn: (row) =>
-      [row.first_name, row.last_name].filter(Boolean).join(" ") || "—",
+    accessorFn: (row) => [row.first_name, row.last_name].filter(Boolean).join(" ") || "—",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -129,31 +116,26 @@ export const membershipColumns: ColumnDef<Member>[] = [
     ),
     cell: ({ row }) => {
       const v = row.getValue("has_paid") as boolean;
-      const verifier = row.original.verifier;
+      const verifier = row.original.verifier ?? "System";
 
       const content = (
-        <span
-          className={v ? "text-blue-400 font-medium" : "text-muted-foreground"}
-        >
+        <span className={v ? "text-blue-400 font-medium" : "text-muted-foreground"}>
           {v ? "Yes" : "No"}
         </span>
       );
 
-      // Only show tooltip if user has paid and there's a verifier
-      if (v && verifier) {
-        return (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="inline-block">{content}</div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p className="text-sm">Verified by: {verifier}</p>
-            </TooltipContent>
-          </Tooltip>
-        );
-      }
+      if (!v) return content;
 
-      return content;
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="inline-block">{content}</div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p className="text-sm">Verified by: {verifier}</p>
+          </TooltipContent>
+        </Tooltip>
+      );
     },
     filterFn: (row, columnId, filterValue) => {
       if (!filterValue) return true;
@@ -176,9 +158,7 @@ export const membershipColumns: ColumnDef<Member>[] = [
     cell: ({ row }) => {
       const v = row.getValue("is_math_soc_member") as boolean;
       return (
-        <span
-          className={v ? "text-blue-400 font-medium" : "text-muted-foreground"}
-        >
+        <span className={v ? "text-blue-400 font-medium" : "text-muted-foreground"}>
           {v ? "Yes" : "No"}
         </span>
       );

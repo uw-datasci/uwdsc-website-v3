@@ -7,28 +7,24 @@ Get your development environment up and running in minutes.
 Before you begin, ensure you have the following installed:
 
 - **Node.js** >= 24 (see `engines` in root `package.json`)
-- **pnpm** >= 10 (packageManager in root)
+- **pnpm** 11.x (pinned via `packageManager` in root `package.json`; install through Corepack below)
 
-### Installing pnpm
+### Installing pnpm (Corepack)
 
-If you don't have pnpm installed, you can install it using one of the following methods:
-
-**Windows (PowerShell):**
-
-```powershell
-Invoke-WebRequest https://get.pnpm.io/install.ps1 -UseBasicParsing | Invoke-Expression
-```
-
-**macOS/Linux (POSIX):**
+Use [Corepack](https://nodejs.org/api/corepack.html), which ships with Node.js, to enable the `pnpm` shim on your PATH. This matches the approach described in the Node.js documentation for managing package managers.
 
 ```bash
-curl -fsSL https://get.pnpm.io/install.sh | sh -
+corepack enable
 ```
 
-**Alternative (npm):**
+On Windows, run the same command in PowerShell or Command Prompt; you may need an elevated shell the first time.
+
+After Corepack is enabled, running `pnpm` inside this repository uses the exact version declared in the root `package.json` `packageManager` field (currently pnpm 11.x) without a separate global install.
+
+To install pnpm 11 globally (for example, before you clone the repo), run:
 
 ```bash
-npm install -g pnpm@10.26.0
+corepack install -g pnpm@11
 ```
 
 Or follow the [official pnpm installation guide](https://pnpm.io/installation).

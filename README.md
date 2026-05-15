@@ -8,8 +8,8 @@ Welcome to the UW Data Science Club website repository! This guide will help you
 
 ### Prerequisites
 
-- Node.js >= 20
-- pnpm >= 10.26.0
+- Node.js >= 24
+- pnpm 11.x (run `corepack enable` once; see [Getting Started](https://docs.uwdatascience.ca/getting-started) for details)
 
 ### Quick Start
 

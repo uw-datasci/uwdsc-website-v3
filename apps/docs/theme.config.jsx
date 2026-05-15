@@ -19,7 +19,7 @@ export default {
   head: (
     <>
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <meta property="og:title" content="UWDSC Monorepo Documentation" />
+      <meta property="og:title" content="UWDSC Website Documentation" />
       <meta
         property="og:description"
         content="Developer documentation for the UW Data Science Club monorepo"

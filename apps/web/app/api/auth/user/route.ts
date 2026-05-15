@@ -1,16 +1,19 @@
 import { ApiResponse } from "@uwdsc/common/utils";
-import { tryGetCurrentUser } from "@/lib/api/utils";
 import { profileService } from "@uwdsc/core";
+import { createAuthService } from "@/lib/services";
 
 /**
  * GET /api/auth/user
- * Get the currently authenticated user
+ * Get the currently authenticated user.
+ * Returns 200 with JSON `null` when there is no session (public pages, password-recovery
+ * before verify-recovery, etc.) so clients can bootstrap auth without surfacing 401s.
  */
 export async function GET(): Promise<Response> {
   try {
-    const { user, isUnauthorized } = await tryGetCurrentUser();
+    const authService = await createAuthService();
+    const { user } = await authService.getCurrentUser();
 
-    if (!user) return isUnauthorized;
+    if (!user) return ApiResponse.json(null, 200);
 
     // Extract role from app_metadata
     const role = user.app_metadata?.role ?? null;

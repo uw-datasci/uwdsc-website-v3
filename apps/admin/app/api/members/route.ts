@@ -47,6 +47,7 @@ export const GET = withAuth(async (request) => {
   }
 });
 
+/**
  * POST /api/members
  * Invite a new member by email (Supabase admin invite).
  * Admin/exec only

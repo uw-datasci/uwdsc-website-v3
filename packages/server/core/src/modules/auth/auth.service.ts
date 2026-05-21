@@ -1,11 +1,18 @@
 import { AuthRepository } from "./auth.repository";
-import type { SupabaseClient } from "@supabase/supabase-js";
-import {
-  ApiError,
-  type QuestionScope,
-  LoginData,
-  RegisterData,
-} from "@uwdsc/common/types";
+import type { SupabaseClient, User } from "@supabase/supabase-js";
+import { ApiError, type QuestionScope, LoginData, RegisterData } from "@uwdsc/common/types";
+
+const DUPLICATE_EMAIL_MESSAGE =
+  "An account with this email already exists. Please sign in instead.";
+
+function isDuplicateEmailAuthError(message: string): boolean {
+  return message.includes("already registered") || message.includes("already exists");
+}
+
+/** Supabase returns a user with no identities when the email is already taken (anti-enumeration). */
+function isExistingAccountSignUp(user: User | null): boolean {
+  return (user?.identities?.length ?? 0) === 0;
+}
 
 export class AuthService {
   private readonly repository: AuthRepository;
@@ -19,8 +26,7 @@ export class AuthService {
    */
   async login(credentials: LoginData) {
     try {
-      const { data, error } =
-        await this.repository.signInWithPassword(credentials);
+      const { data, error } = await this.repository.signInWithPassword(credentials);
 
       if (error) {
         // Check for specific error cases
@@ -59,8 +65,14 @@ export class AuthService {
       if (error) {
         return {
           success: false,
-          error: error.message,
+          error: isDuplicateEmailAuthError(error.message)
+            ? DUPLICATE_EMAIL_MESSAGE
+            : error.message,
         };
+      }
+
+      if (isExistingAccountSignUp(data.user)) {
+        return { success: false, error: DUPLICATE_EMAIL_MESSAGE };
       }
 
       // Check if email confirmation is required
@@ -76,10 +88,7 @@ export class AuthService {
           : "Registration successful",
       };
     } catch (error) {
-      throw new ApiError(
-        `Registration failed: ${(error as Error).message}`,
-        500,
-      );
+      throw new ApiError(`Registration failed: ${(error as Error).message}`, 500);
     }
   }
 
@@ -126,10 +135,7 @@ export class AuthService {
         user: data.user,
       };
     } catch (error) {
-      throw new ApiError(
-        `Failed to get user: ${(error as Error).message}`,
-        500,
-      );
+      throw new ApiError(`Failed to get user: ${(error as Error).message}`, 500);
     }
   }
 
@@ -210,10 +216,7 @@ export class AuthService {
   /**
    * Verify OTP (implicit flow - when redirect has token_hash; auth.resend() does not use PKCE)
    */
-  async verifyOtp(params: {
-    token_hash: string;
-    type: "signup" | "email" | "recovery";
-  }) {
+  async verifyOtp(params: { token_hash: string; type: "signup" | "email" | "recovery" }) {
     try {
       const { error } = await this.repository.verifyOtp(params);
 
@@ -226,10 +229,7 @@ export class AuthService {
 
       return { success: true, error: null };
     } catch (error) {
-      throw new ApiError(
-        `Failed to verify OTP: ${(error as Error).message}`,
-        500,
-      );
+      throw new ApiError(`Failed to verify OTP: ${(error as Error).message}`, 500);
     }
   }
 
@@ -238,10 +238,7 @@ export class AuthService {
    */
   async forgotPassword(email: string, emailRedirectTo: string) {
     try {
-      const { error } = await this.repository.resetPasswordForEmail(
-        email,
-        emailRedirectTo,
-      );
+      const { error } = await this.repository.resetPasswordForEmail(email, emailRedirectTo);
 
       if (error) {
         return {
@@ -281,10 +278,7 @@ export class AuthService {
         message: "Password reset successfully",
       };
     } catch (error) {
-      throw new ApiError(
-        `Failed to reset password: ${(error as Error).message}`,
-        500,
-      );
+      throw new ApiError(`Failed to reset password: ${(error as Error).message}`, 500);
     }
   }
 
@@ -300,9 +294,7 @@ export class AuthService {
     ]);
 
     const hasVpExecRole = roles.some((r) => r.is_vp);
-    const isPresident = roles.some(
-      (r) => r.is_vp && (r.subteam_name ?? "") === "Presidents",
-    );
+    const isPresident = roles.some((r) => r.is_vp && (r.subteam_name ?? "") === "Presidents");
     const vpSubteamNames = Array.from(
       new Set(
         roles
@@ -320,12 +312,7 @@ export class AuthService {
     const vpSubteamIds = Array.from(
       new Set(
         roles
-          .filter(
-            (r) =>
-              r.is_vp &&
-              r.subteam_id !== null &&
-              r.subteam_name !== "Presidents",
-          )
+          .filter((r) => r.is_vp && r.subteam_id !== null && r.subteam_name !== "Presidents")
           .map((r) => r.subteam_id as number),
       ),
     );

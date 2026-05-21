@@ -76,7 +76,11 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     if (!activeTerm) throw new ApiError("No active term is configured", 400);
 
-    await membershipService.processEmailReceipt(contents.email, activeTerm.start_date);
+    await membershipService.processEmailReceipt(
+      contents.email,
+      activeTerm.start_date,
+      evt.data.from,
+    );
 
     return ApiResponse.ok({
       success: true,

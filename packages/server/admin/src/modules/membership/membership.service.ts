@@ -2,8 +2,10 @@ import { GetReceivingEmailResponseSuccess } from "resend";
 import { MembershipRepository } from "./membership.repository";
 import { ApiError, MarkAsPaidData, MembershipStats } from "@uwdsc/common/types";
 import {
+  assertForwarderMatchesReceipt,
   assertReceiptWithinActiveTerm,
   parseMembershipReceipt,
+  parseUwaterlooEmailAddress,
   dedupeRecipients,
   throwIfParseFailed,
 } from "../../utils/membershipReceipt";
@@ -52,6 +54,7 @@ class MembershipService {
   async processEmailReceipt(
     email: GetReceivingEmailResponseSuccess,
     termStartDate: string | null,
+    forwarderFrom: string,
   ): Promise<void> {
     let recipientEmails: string[] = [];
 
@@ -59,11 +62,14 @@ class MembershipService {
       const body = email.text;
       if (!body) throw new ApiError("Email body is missing", 400);
 
+      const forwarderEmail = parseUwaterlooEmailAddress(forwarderFrom);
       const parsed = parseMembershipReceipt(body);
-      recipientEmails = dedupeRecipients(parsed.toRecipientEmail, parsed.receiptEmail);
+      recipientEmails = dedupeRecipients(forwarderEmail, parsed.receiptEmail);
       throwIfParseFailed(parsed);
 
       const { receiptEmail, transactionDateText } = parsed;
+
+      assertForwarderMatchesReceipt(forwarderFrom, receiptEmail);
 
       assertReceiptWithinActiveTerm(transactionDateText, termStartDate);
 

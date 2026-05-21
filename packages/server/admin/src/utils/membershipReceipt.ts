@@ -4,6 +4,18 @@ import type { MembershipReceiptParse } from "../types/webhook";
 
 const DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
+const UWATERLOO_EMAIL = /^[a-z0-9._%+-]+@uwaterloo\.ca$/;
+
+/**
+ * Extracts a normalized @uwaterloo.ca address from a Resend `from` / envelope field.
+ */
+export function parseUwaterlooEmailAddress(address: string): string | null {
+  const trimmed = address.trim();
+  const angle = /<([^>]+)>/.exec(trimmed)?.[1]?.trim() ?? trimmed;
+  const email = angle.toLowerCase();
+  return UWATERLOO_EMAIL.test(email) ? email : null;
+}
+
 /**
  * Parses the transaction datetime from the receipt body (local shop time, America/Toronto).
  */
@@ -12,95 +24,81 @@ function parseTransactionDate(text: string): Date {
     zone: "America/Toronto",
   });
 
-  if (!dt.isValid)
-    throw new ApiError("Could not parse transaction date from receipt", 400);
+  if (!dt.isValid) throw new ApiError("Could not parse transaction date from receipt", 400);
 
   return dt.toJSDate();
 }
 
 /**
  * Parse and structurally validate a WUSA receipt body forwarded into the membership webhook.
+ * Forwarder identity is validated separately via Resend webhook `from` (see assertForwarderMatchesReceipt).
  */
 export function parseMembershipReceipt(body: string): MembershipReceiptParse {
-  const isFromMoneris =
-    /From:\s*WUSA'S ONLINE SHOP\s*<receipt@moneris\.com>/i.test(body);
+  const isFromMoneris = /WUSA'S ONLINE SHOP/i.test(body) && /receipt@moneris\.com/i.test(body);
   const isCorrectTotal = /Total:\s*\$4\.00\b/i.test(body);
   const hasCorrectItem = /UW Data Science Club Membership/i.test(body);
   const isApproved = /Transaction Approved/i.test(body);
 
-  const toWithAngle =
-    /To:[^<\r\n]*<([a-z0-9._%+-]+@uwaterloo\.ca)>/i.exec(body)?.[1] ?? null;
-  const toPlain =
-    /To:\s*([a-z0-9._%+-]+@uwaterloo\.ca)\b/i.exec(body)?.[1] ?? null;
-  const toRecipientEmail = (toWithAngle ?? toPlain)?.toLowerCase() ?? null;
-
   const custIdLine = /Cust ID:[^\n]*/i.exec(body)?.[0] ?? "";
-  const receiptEmailAfterPlus =
-    /\+([a-z0-9][a-z0-9._+%-]*@uwaterloo\.ca)/i.exec(custIdLine)?.[1];
+  const receiptEmailAfterPlus = /\+([a-z0-9][a-z0-9._+%-]*@uwaterloo\.ca)/i.exec(
+    custIdLine,
+  )?.[1];
   const receiptEmailPlain =
     /Cust ID:\s*([a-z][a-z0-9._%+-]*@uwaterloo\.ca)/i.exec(body)?.[1] ?? null;
-  const receiptEmail =
-    (receiptEmailAfterPlus ?? receiptEmailPlain)?.toLowerCase() ?? null;
+  const receiptEmail = (receiptEmailAfterPlus ?? receiptEmailPlain)?.toLowerCase() ?? null;
 
-  const transactionDateText =
-    /(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})/.exec(body)?.[1] ?? null;
+  const transactionDateText = /(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})/.exec(body)?.[1] ?? null;
 
-  const structureOk =
-    isFromMoneris &&
-    isCorrectTotal &&
-    hasCorrectItem &&
-    isApproved &&
-    toRecipientEmail !== null &&
-    receiptEmail !== null &&
-    transactionDateText !== null;
-
-  if (!structureOk) {
+  if (
+    !isFromMoneris ||
+    !isCorrectTotal ||
+    !hasCorrectItem ||
+    !isApproved ||
+    receiptEmail === null ||
+    transactionDateText === null
+  ) {
     return {
       ok: false,
       kind: "invalid_structure",
-      toRecipientEmail,
-      receiptEmail,
-    };
-  }
-
-  if (toRecipientEmail !== receiptEmail) {
-    return {
-      ok: false,
-      kind: "email_mismatch",
-      toRecipientEmail,
       receiptEmail,
     };
   }
 
   return {
     ok: true,
-    toRecipientEmail,
     receiptEmail,
     transactionDateText,
   };
 }
 
-export function throwIfParseFailed(
-  parsed: MembershipReceiptParse,
-): asserts parsed is {
+export function throwIfParseFailed(parsed: MembershipReceiptParse): asserts parsed is {
   ok: true;
-  toRecipientEmail: string;
   receiptEmail: string;
   transactionDateText: string;
 } {
   if (parsed.ok) return;
 
-  switch (parsed.kind) {
-    case "email_mismatch":
-      console.error("To recipient does not match Cust ID contact email");
-      throw new ApiError("Receipt To and contact emails do not match", 400);
-    case "invalid_structure":
-      console.error("Invalid email receipt");
-      throw new ApiError("Invalid email receipt", 400);
-    default: {
-      const _exhaustive: never = parsed.kind;
-      throw new Error(`Unhandled MembershipReceiptParse kind: ${_exhaustive}`);
-    }
+  console.error("Invalid email receipt");
+  throw new ApiError("Invalid email receipt", 400);
+}
+
+/**
+ * Ensures the Resend inbound sender matches the WUSA Cust ID payer (same-inbox rule).
+ */
+export function assertForwarderMatchesReceipt(
+  forwarderFrom: string,
+  receiptEmail: string,
+): void {
+  const forwarderEmail = parseUwaterlooEmailAddress(forwarderFrom);
+
+  if (!forwarderEmail) {
+    console.error("Inbound sender is not a @uwaterloo.ca address:", forwarderFrom);
+    throw new ApiError("Forwarder must use a @uwaterloo.ca address", 400);
+  }
+
+  if (forwarderEmail !== receiptEmail.toLowerCase()) {
+    console.error("Forwarder does not match Cust ID contact email");
+    throw new ApiError("Forwarder and receipt contact emails do not match", 400);
   }
 }
 
@@ -126,19 +124,16 @@ export function assertReceiptWithinActiveTerm(
 
   if (inboundAt < termStartAt) {
     console.error("Transaction date is before the current term started");
-    throw new ApiError(
-      "Transaction date is before the current term started",
-      400,
-    );
+    throw new ApiError("Transaction date is before the current term started", 400);
   }
 }
 
 export function dedupeRecipients(
-  toRecipientEmail: string | null,
+  forwarderEmail: string | null,
   receiptEmail: string | null,
 ): string[] {
   const set = new Set<string>();
-  if (toRecipientEmail) set.add(toRecipientEmail.toLowerCase());
+  if (forwarderEmail) set.add(forwarderEmail.toLowerCase());
   if (receiptEmail) set.add(receiptEmail.toLowerCase());
   return [...set];
 }

@@ -7,7 +7,7 @@ import { createAuthService } from "@/lib/services";
  * - Implicit (resend verification): auth.resend() does not use PKCE; Supabase may redirect
  *   with ?token_hash=...&type=... → verifyOtp({ token_hash, type })
  *
- * Password recovery is intentionally NOT handled here — recovery links go directly
+ * Password recovery is intentionally NOT handled here - recovery links go directly
  * to a client-side buffer page so enterprise email scanners can't consume the
  * single-use token before the user opens the email.
  */
@@ -28,11 +28,7 @@ export async function GET(request: NextRequest): Promise<Response> {
         new URL(`/login?error=${encodeURIComponent(error)}`, requestUrl.origin),
       );
     }
-  } else if (
-    token_hash &&
-    type &&
-    (type === "signup" || type === "email")
-  ) {
+  } else if (token_hash && type && (type === "signup" || type === "email")) {
     const { error } = await authService.verifyOtp({ token_hash, type: type });
     if (error) {
       console.error("Error verifying OTP:", error);
@@ -43,8 +39,7 @@ export async function GET(request: NextRequest): Promise<Response> {
   } else {
     return NextResponse.redirect(
       new URL(
-        "/login?error=" +
-          encodeURIComponent("Missing verification code or token"),
+        "/login?error=" + encodeURIComponent("Missing verification code or token"),
         requestUrl.origin,
       ),
     );

@@ -55,7 +55,7 @@ export function ApplicationDetail({
   };
 
   const getClubExperienceLabel = (clubExperience: boolean | null): string => {
-    if (clubExperience === null) return "—";
+    if (clubExperience === null) return "-";
     return clubExperience ? "Yes" : "No";
   };
 

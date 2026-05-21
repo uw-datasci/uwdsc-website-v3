@@ -179,7 +179,7 @@ export function InviteMemberModal({
                   <div className="space-y-1 leading-none">
                     <FormLabel>MathSoc member</FormLabel>
                     <p className="text-sm text-muted-foreground">
-                      Optional — prefilled on their profile after signup.
+                      Optional - prefilled on their profile after signup.
                     </p>
                   </div>
                 </FormItem>

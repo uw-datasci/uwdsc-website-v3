@@ -79,7 +79,7 @@ export default function ApplicationsPage() {
     [applications, selectedId],
   );
 
-  // Handle selection — open sheet on mobile only
+  // Handle selection - open sheet on mobile only
   const handleSelect = (id: string) => {
     setSelectedId(id);
     if (isMobile) setMobileDetailOpen(true);

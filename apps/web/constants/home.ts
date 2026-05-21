@@ -174,7 +174,7 @@ export const GENERAL_FAQ: GeneralFaqItem[] = [
   {
     id: "6",
     question: "How to sign up?",
-    answer: `Click the **“Join Us”** button to create an account on our website. You can pay the $4 membership fee through one of the following methods:\n- Online through WUSA (navigate to **Shop → Memberships → DSC**). If you pay online, forward the **Moneris payment receipt** (from **${MEMBERSHIP_MONERIS_RECEIPT_FROM}** — not the WUSA order summary email) to **${MEMBERSHIP_INBOUND_EMAIL}** (from the same inbox as your club account) so we can mark your membership as paid.\n- In-person at our office/events with cash\n- In-person at the MathSoc office with credit/debit (keep receipt)`,
+    answer: `Click the **“Join Us”** button to create an account on our website. You can pay the $4 membership fee through one of the following methods:\n- Online through WUSA (navigate to **Shop → Memberships → DSC**). If you pay online, forward the **Moneris payment receipt** (from **${MEMBERSHIP_MONERIS_RECEIPT_FROM}** - not the WUSA order summary email) to **${MEMBERSHIP_INBOUND_EMAIL}** (from the same inbox as your club account) so we can mark your membership as paid.\n- In-person at our office/events with cash\n- In-person at the MathSoc office with credit/debit (keep receipt)`,
     showMembershipPayLink: true,
   },
 ];

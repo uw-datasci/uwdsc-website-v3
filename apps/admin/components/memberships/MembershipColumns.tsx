@@ -50,7 +50,7 @@ export interface MembershipTableMeta {
 export const membershipColumns: ColumnDef<Member>[] = [
   {
     id: "name",
-    accessorFn: (row) => [row.first_name, row.last_name].filter(Boolean).join(" ") || "—",
+    accessorFn: (row) => [row.first_name, row.last_name].filter(Boolean).join(" ") || "-",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -65,7 +65,7 @@ export const membershipColumns: ColumnDef<Member>[] = [
       const first = row.original.first_name ?? "";
       const last = row.original.last_name ?? "";
       const name = [first, last].filter(Boolean).join(" ");
-      return <div className="min-w-32 px-1">{name || "—"}</div>;
+      return <div className="min-w-32 px-1">{name || "-"}</div>;
     },
   },
   {
@@ -82,7 +82,7 @@ export const membershipColumns: ColumnDef<Member>[] = [
     ),
     cell: ({ row }) => {
       const v = row.getValue("wat_iam") as string | null;
-      return <span>{v ?? "—"}</span>;
+      return <span>{v ?? "-"}</span>;
     },
   },
   {
@@ -99,7 +99,7 @@ export const membershipColumns: ColumnDef<Member>[] = [
     ),
     cell: ({ row }) => {
       const v = row.getValue("user_role") as string | null;
-      return <span className="capitalize">{v ?? "—"}</span>;
+      return <span className="capitalize">{v ?? "-"}</span>;
     },
   },
   {
@@ -183,7 +183,7 @@ export const membershipColumns: ColumnDef<Member>[] = [
     ),
     cell: ({ row }) => {
       const v = row.getValue("faculty") as string | null;
-      return <span>{v ?? "—"}</span>;
+      return <span>{v ?? "-"}</span>;
     },
   },
   {

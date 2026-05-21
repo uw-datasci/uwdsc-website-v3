@@ -90,7 +90,7 @@ _Features documented from merged PRs tagged with \`${SEMESTER_TAG}\`..._
   - Only modify existing entries when the code changes clearly indicate updates, corrections, or removals
   - Ensure modifications accurately reflect the actual code changes - cross-reference with the codebase
 7. **One feature per bullet**: Each feature should be a separate bullet point
-8. **Be brief and concise**: Summaries must be short—one or two sentences max. No long paragraphs; focus only on user impact
+8. **Be brief and concise**: Summaries must be short-one or two sentences max. No long paragraphs; focus only on user impact
 
 ## Example Format
 
@@ -102,7 +102,7 @@ else
 
 Scan the '/apps/docs' folder and update the markdown files to reflect these code changes.
 
-Keep all documentation updates brief and concise—short summaries only, no long paragraphs.
+Keep all documentation updates brief and concise-short summaries only, no long paragraphs.
 
 IMPORTANT: When updating documentation:
 - Primary focus: Add new documentation for new features

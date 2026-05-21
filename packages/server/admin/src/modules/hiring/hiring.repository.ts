@@ -50,8 +50,9 @@ export class HiringRepository extends BaseRepository {
 
     const applicationIds = applications.map((a) => a.id);
 
-    const selections = applicationIds.length > 0
-      ? await this.sql<(HiringPositionSelection & { application_id: string })[]>`
+    const selections =
+      applicationIds.length > 0
+        ? await this.sql<(HiringPositionSelection & { application_id: string })[]>`
           SELECT
             aps.id,
             aps.application_id,
@@ -69,7 +70,7 @@ export class HiringRepository extends BaseRepository {
             AND aps.status IN ${this.sql(HIRING_STATUSES)}
           ORDER BY aps.priority
         `
-      : [];
+        : [];
 
     const selectionsMap = new Map<string, HiringPositionSelection[]>();
     for (const sel of selections) {
@@ -92,7 +93,13 @@ export class HiringRepository extends BaseRepository {
     if (!activeTerm) return regularApplicants;
 
     const returningSubmissions = await this.sql<
-      { id: string; profile_id: string; full_name: string; email: string; submitted_at: string }[]
+      {
+        id: string;
+        profile_id: string;
+        full_name: string;
+        email: string;
+        submitted_at: string;
+      }[]
     >`
       SELECT s.id, s.profile_id, s.full_name, s.email, s.submitted_at
       FROM public.returning_exec_submissions s
@@ -264,7 +271,7 @@ export class HiringRepository extends BaseRepository {
         `;
         demoted = result.length;
       } else {
-        // No new team — demote everyone
+        // No new team - demote everyone
         const result = await tx`
           UPDATE user_roles
           SET role = 'member'

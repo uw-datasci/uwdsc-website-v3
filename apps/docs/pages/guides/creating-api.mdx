@@ -46,7 +46,11 @@ export interface UpdateProfileResponse {
 Import in apps and API code from `@uwdsc/common/types`:
 
 ```typescript
-import type { UserProfile, UpdateProfileRequest, UpdateProfileResponse } from "@uwdsc/common/types";
+import type {
+  UserProfile,
+  UpdateProfileRequest,
+  UpdateProfileResponse,
+} from "@uwdsc/common/types";
 ```
 
 ## Step 2: Create Validation Schema
@@ -84,7 +88,7 @@ export class ProfileRepository extends BaseRepository {
   }
 
   async updateProfile(userId: string, data: { name?: string; bio?: string; avatar?: string }) {
-    // Build dynamic update with this.sql — see existing repos in core for patterns
+    // Build dynamic update with this.sql - see existing repos in core for patterns
     const updated = await this.sql`...`;
     return updated[0] ?? null;
   }
@@ -136,7 +140,7 @@ export class ProfileService {
       name?: string;
       bio?: string;
       avatar?: string;
-    }
+    },
   ) {
     // Check if profile exists
     const exists = await this.repository.profileExists(userId);
@@ -169,11 +173,7 @@ export class ProfileService {
         throw new Error("Invalid avatar URL");
       }
     } catch (error) {
-      throw new ApiError(
-        "Avatar URL is not accessible",
-        400,
-        "INVALID_AVATAR_URL"
-      );
+      throw new ApiError("Avatar URL is not accessible", 400, "INVALID_AVATAR_URL");
     }
   }
 }
@@ -187,14 +187,14 @@ Create Next.js API routes in `apps/web/app/api/profile/`. Use the **ApiResponse*
 
 `ApiResponse` is a static helper class in `@uwdsc/common/utils`. Use it in API routes instead of building `NextResponse.json()` by hand:
 
-| Method | Status | Use |
-|--------|--------|-----|
-| `ApiResponse.ok(data)` | 200 | Success with optional JSON body |
-| `ApiResponse.badRequest(message?, error?)` | 400 | Validation or client error |
-| `ApiResponse.unauthorized(message?, error?)` | 401 | Not authenticated |
-| `ApiResponse.notFound(error?)` | 404 | Resource not found |
-| `ApiResponse.serverError(message?, error?)` | 500 | Server/catch-all error; `message` can be `Error` or `unknown` |
-| `ApiResponse.json(data, status?, init?)` | custom | Custom status or body shape |
+| Method                                       | Status | Use                                                           |
+| -------------------------------------------- | ------ | ------------------------------------------------------------- |
+| `ApiResponse.ok(data)`                       | 200    | Success with optional JSON body                               |
+| `ApiResponse.badRequest(message?, error?)`   | 400    | Validation or client error                                    |
+| `ApiResponse.unauthorized(message?, error?)` | 401    | Not authenticated                                             |
+| `ApiResponse.notFound(error?)`               | 404    | Resource not found                                            |
+| `ApiResponse.serverError(message?, error?)`  | 500    | Server/catch-all error; `message` can be `Error` or `unknown` |
+| `ApiResponse.json(data, status?, init?)`     | custom | Custom status or body shape                                   |
 
 Response bodies follow a consistent shape: success uses the data you pass; errors use `{ error }` or `{ error, message }`. Client code can rely on `error` (and optionally `message`) when `!response.ok`.
 
@@ -263,7 +263,11 @@ Create client-side API wrappers in `apps/web/lib/api/profile.ts`:
 
 ```typescript
 // apps/web/lib/api/profile.ts
-import type { UserProfile, UpdateProfileRequest, UpdateProfileResponse } from "@uwdsc/common/types";
+import type {
+  UserProfile,
+  UpdateProfileRequest,
+  UpdateProfileResponse,
+} from "@uwdsc/common/types";
 
 /**
  * Get current user profile
@@ -283,7 +287,7 @@ export async function getProfile(): Promise<UserProfile> {
  * Update user profile
  */
 export async function updateProfile(
-  data: UpdateProfileRequest
+  data: UpdateProfileRequest,
 ): Promise<UpdateProfileResponse> {
   const response = await fetch("/api/profile", {
     method: "PATCH",
@@ -321,7 +325,11 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
     resolver: zodResolver(updateProfileSchema),
   });
 
@@ -350,11 +358,7 @@ export default function ProfilePage() {
     <form onSubmit={handleSubmit(onSubmit)}>
       <div>
         <label>Name</label>
-        <Input
-          {...register("name")}
-          defaultValue={profile.name}
-          placeholder="Your name"
-        />
+        <Input {...register("name")} defaultValue={profile.name} placeholder="Your name" />
         {errors.name && <p>{errors.name.message}</p>}
       </div>
 
@@ -411,4 +415,3 @@ For pagination, filtering, and file uploads, follow patterns in existing reposit
 
 - [Database Setup](/guides/database) - Migrations and postgres.js
 - [Development Tips](/guides/development) - Improve workflow
-

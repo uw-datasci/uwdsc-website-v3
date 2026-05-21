@@ -25,11 +25,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
 import { useIsMobile } from "../hooks/use-mobile";
-import {
-  GoogleCalendarIcon,
-  AppleCalendarIcon,
-  OutlookCalendarIcon,
-} from "../icons";
+import { GoogleCalendarIcon, AppleCalendarIcon, OutlookCalendarIcon } from "../icons";
 
 /**
  * Minimal event shape for the calendar. Compatible with @uwdsc/common Event.
@@ -70,10 +66,7 @@ interface EventLayout {
   lane: number;
 }
 
-function getWeekEventLayouts(
-  week: Date[],
-  events: CalendarEvent[],
-): EventLayout[] {
+function getWeekEventLayouts(week: Date[], events: CalendarEvent[]): EventLayout[] {
   const ws = startOfDay(week[0] as Date);
   const we = startOfDay(week[6] as Date);
 
@@ -198,9 +191,7 @@ function SubscribeCalendarDialog({
 
   const copySection = (
     <div className="flex flex-col gap-2 sm:flex-row sm:gap-2">
-      <code className="flex-1 truncate rounded border bg-muted p-2 text-xs">
-        {feedUrl}
-      </code>
+      <code className="flex-1 truncate rounded border bg-muted p-2 text-xs">{feedUrl}</code>
       <Button
         type="button"
         variant="outline"
@@ -244,17 +235,14 @@ function SubscribeCalendarDialog({
   if (isMobile) {
     return (
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent
-          side="bottom"
-          className="max-h-[90vh] overflow-y-auto rounded-t-xl"
-        >
+        <SheetContent side="bottom" className="max-h-[90vh] overflow-y-auto rounded-t-xl">
           <SheetHeader>
             <SheetTitle>Subscribe to calendar</SheetTitle>
           </SheetHeader>
           <div className="flex flex-col gap-4 px-4 pb-6">
             <p className="text-sm text-muted-foreground">
-              Copy the link below and add it to your calendar app to see events
-              and updates automatically.
+              Copy the link below and add it to your calendar app to see events and updates
+              automatically.
             </p>
             {copySection}
             {tabsContent}
@@ -271,8 +259,8 @@ function SubscribeCalendarDialog({
           <DialogTitle>Subscribe to calendar</DialogTitle>
         </DialogHeader>
         <p className="text-sm text-muted-foreground">
-          Copy the link below and add it to your calendar app to see events and
-          updates automatically.
+          Copy the link below and add it to your calendar app to see events and updates
+          automatically.
         </p>
         {copySection}
         {tabsContent}
@@ -322,12 +310,7 @@ export function MonthlyEventCalendar({
     <div className={cn("flex flex-col gap-4", className)}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={onTodayClick}
-          >
+          <Button type="button" variant="outline" size="sm" onClick={onTodayClick}>
             Today
           </Button>
           <Button
@@ -386,10 +369,7 @@ export function MonthlyEventCalendar({
           {weeks.map((week, weekIndex) => {
             const layouts = getWeekEventLayouts(week, events);
             return (
-              <div
-                key={weekIndex}
-                className="relative min-h-16 sm:min-h-24 md:min-h-32"
-              >
+              <div key={weekIndex} className="relative min-h-16 sm:min-h-24 md:min-h-32">
                 {/* Background blocks */}
                 <div className="absolute inset-0 grid grid-cols-7 divide-x pointer-events-none">
                   {week.map((date) => {
@@ -397,10 +377,7 @@ export function MonthlyEventCalendar({
                     return (
                       <div
                         key={date.toISOString()}
-                        className={cn(
-                          "bg-card",
-                          !isCurrentMonth && "bg-muted/30",
-                        )}
+                        className={cn("bg-card", !isCurrentMonth && "bg-muted/30")}
                       />
                     );
                   })}
@@ -424,8 +401,7 @@ export function MonthlyEventCalendar({
                         <div
                           className={cn(
                             "flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs",
-                            isToday &&
-                              "bg-primary text-primary-foreground font-medium",
+                            isToday && "bg-primary text-primary-foreground font-medium",
                           )}
                         >
                           {format(date, "d")}
@@ -462,7 +438,7 @@ export function MonthlyEventCalendar({
                             "w-full flex flex-col items-start overflow-hidden rounded border border-primary/20 bg-primary/10 px-1 sm:px-1.5 py-0.5 text-left transition-colors hover:bg-primary/20",
                             onEventClick ? "cursor-pointer" : "cursor-default",
                           )}
-                          title={`${event.name} — ${formatEventTime(event.start_time)} to ${formatEventTime(event.end_time)}`}
+                          title={`${event.name} - ${formatEventTime(event.start_time)} to ${formatEventTime(event.end_time)}`}
                         >
                           {renderEventContent ? (
                             renderEventContent(event)

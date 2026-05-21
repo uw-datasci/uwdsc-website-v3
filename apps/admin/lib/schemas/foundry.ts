@@ -16,13 +16,11 @@ const mongoClientEnum = z.enum(
   MONGO_CLIENT_OPTIONS.map((o) => o.value) as [string, ...string[]],
 );
 
-const databaseEnum = z.enum(
-  DATABASE_OPTIONS.map((d) => d.value) as [string, ...string[]],
-);
+const databaseEnum = z.enum(DATABASE_OPTIONS.map((d) => d.value) as [string, ...string[]]);
 
 export const FOUNDRY_SUBDOMAIN_MAX_LEN = 30;
 
-/** DNS label for *.uwdatascience.ca — empty means no custom subdomain. */
+/** DNS label for *.uwdatascience.ca - empty means no custom subdomain. */
 const subdomainLabelSchema = z
   .string()
   .trim()
@@ -77,22 +75,19 @@ export const foundryStep3Schema = z
   })
   .superRefine(refineDatabaseStack);
 
-/** Plain object shape — use this for `.pick()`; the full form adds refinements below. */
+/** Plain object shape - use this for `.pick()`; the full form adds refinements below. */
 export const foundryFormObjectSchema = z.object({
-  // Step 1 — Project Details
+  // Step 1 - Project Details
   projectName: z
     .string()
     .trim()
     .min(1, "Project name is required")
     .max(50, "Project name must be 50 characters or fewer")
-    .regex(
-      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-      "Must be lowercase kebab-case (e.g. my-cool-project)",
-    ),
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Must be lowercase kebab-case (e.g. my-cool-project)"),
   teamAccess: z.string().trim().min(1, "Select a GitHub team"),
   subdomain: subdomainLabelSchema,
 
-  // Step 2 — Tech Stack & Infrastructure
+  // Step 2 - Tech Stack & Infrastructure
   projectType: z.string().trim().min(1, "Select a project template"),
   database: databaseFieldSchema,
   postgresProvider: postgresProviderEnum.optional(),
@@ -102,15 +97,11 @@ export const foundryFormObjectSchema = z.object({
     s3: z.boolean(),
   }),
 
-  // Step 3 — Description (optional)
-  description: z
-    .string()
-    .trim()
-    .max(1000, "Description must be 1000 characters or fewer"),
+  // Step 3 - Description (optional)
+  description: z.string().trim().max(1000, "Description must be 1000 characters or fewer"),
 });
 
-export const foundryFormSchema =
-  foundryFormObjectSchema.superRefine(refineDatabaseStack);
+export const foundryFormSchema = foundryFormObjectSchema.superRefine(refineDatabaseStack);
 
 export type FoundryFormValues = z.infer<typeof foundryFormObjectSchema>;
 

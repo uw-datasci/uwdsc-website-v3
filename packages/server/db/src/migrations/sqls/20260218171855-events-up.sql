@@ -52,37 +52,37 @@ BEFORE INSERT OR UPDATE OF start_time, end_time ON public.events
 FOR EACH ROW EXECUTE FUNCTION public.sync_event_buffered_times();
 
 -- ============================================================================
--- RLS Policies — events
+-- RLS Policies - events
 -- ============================================================================
 ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
 
--- events: SELECT — public (anyone can read)
+-- events: SELECT - public (anyone can read)
 CREATE POLICY events_select_public ON public.events
   FOR SELECT
   USING (true);
 
--- events: INSERT — exec/admin only
+-- events: INSERT - exec/admin only
 CREATE POLICY events_insert_exec_admin ON public.events
   FOR INSERT
   WITH CHECK (public.is_exec_or_admin(auth.uid()));
 
--- events: UPDATE — exec/admin only
+-- events: UPDATE - exec/admin only
 CREATE POLICY events_update_exec_admin ON public.events
   FOR UPDATE
   USING (public.is_exec_or_admin(auth.uid()))
   WITH CHECK (public.is_exec_or_admin(auth.uid()));
 
--- events: DELETE — admin only
+-- events: DELETE - admin only
 CREATE POLICY events_delete_admin_only ON public.events
   FOR DELETE
   USING (public.is_admin(auth.uid()));
 
 -- ============================================================================
--- RLS Policies — attendance
+-- RLS Policies - attendance
 -- ============================================================================
 ALTER TABLE public.attendance ENABLE ROW LEVEL SECURITY;
 
--- attendance: SELECT — own rows OR exec/admin can see all
+-- attendance: SELECT - own rows OR exec/admin can see all
 CREATE POLICY attendance_select_own_or_elevated ON public.attendance
   FOR SELECT
   USING (
@@ -90,18 +90,18 @@ CREATE POLICY attendance_select_own_or_elevated ON public.attendance
     public.is_exec_or_admin(auth.uid())
   );
 
--- attendance: INSERT — exec/admin only
+-- attendance: INSERT - exec/admin only
 CREATE POLICY attendance_insert_exec_admin ON public.attendance
   FOR INSERT
   WITH CHECK (public.is_exec_or_admin(auth.uid()));
 
--- attendance: UPDATE — exec/admin only
+-- attendance: UPDATE - exec/admin only
 CREATE POLICY attendance_update_exec_admin ON public.attendance
   FOR UPDATE
   USING (public.is_exec_or_admin(auth.uid()))
   WITH CHECK (public.is_exec_or_admin(auth.uid()));
 
--- attendance: DELETE — exec/admin only
+-- attendance: DELETE - exec/admin only
 CREATE POLICY attendance_delete_exec_admin ON public.attendance
   FOR DELETE
   USING (public.is_exec_or_admin(auth.uid()));

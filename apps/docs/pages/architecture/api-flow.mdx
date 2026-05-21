@@ -229,7 +229,7 @@ export async function GET() {
   return NextResponse.json(profile);
 }
 
-// 4. Service (packages/server/core) — use profileService singleton from @uwdsc/core
+// 4. Service (packages/server/core) - use profileService singleton from @uwdsc/core
 // 5. Repository extends BaseRepository from @uwdsc/db/baseRepository, uses this.sql (postgres.js)
 ```
 
@@ -281,10 +281,7 @@ export async function POST(request: NextRequest) {
     const { email, password } = body;
 
     if (!email || !password) {
-      return NextResponse.json(
-        { error: "Email and password are required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
     }
 
     const authService = await createAuthService();
@@ -297,7 +294,7 @@ export async function POST(request: NextRequest) {
           needsVerification: result.needsVerification,
           email: result.email,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -308,14 +305,11 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Login error:", error);
-    return NextResponse.json(
-      { error: "An unexpected error occurred" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "An unexpected error occurred" }, { status: 500 });
   }
 }
 
-// 4. Service (packages/server/core) — AuthService and ResumeService take a Supabase client
+// 4. Service (packages/server/core) - AuthService and ResumeService take a Supabase client
 //    Create in app: const authService = await createAuthService(); (from lib/services.ts)
 export class AuthService {
   constructor(supabaseClient: SupabaseClient) {
@@ -351,7 +345,7 @@ export class AuthService {
   }
 }
 
-// 5. Repository (packages/server/core) — AuthRepository uses Supabase client for auth (no postgres.js)
+// 5. Repository (packages/server/core) - AuthRepository uses Supabase client for auth (no postgres.js)
 ```
 
 ## Error Handling
@@ -364,7 +358,7 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public statusCode: number = 500,
-    public code?: string
+    public code?: string,
   ) {
     super(message);
     this.name = "ApiError";

@@ -1,10 +1,10 @@
--- Drop RLS policies — attendance
+-- Drop RLS policies - attendance
 DROP POLICY IF EXISTS attendance_delete_exec_admin ON public.attendance;
 DROP POLICY IF EXISTS attendance_update_exec_admin ON public.attendance;
 DROP POLICY IF EXISTS attendance_insert_exec_admin ON public.attendance;
 DROP POLICY IF EXISTS attendance_select_own_or_elevated ON public.attendance;
 
--- Drop RLS policies — events
+-- Drop RLS policies - events
 DROP POLICY IF EXISTS events_delete_admin_only ON public.events;
 DROP POLICY IF EXISTS events_update_exec_admin ON public.events;
 DROP POLICY IF EXISTS events_insert_exec_admin ON public.events;

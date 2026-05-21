@@ -4,7 +4,7 @@
  */
 
 /**
- * VP / Presidents scope for CRUD — from exec_team, exec_positions (is_vp, subteam),
+ * VP / Presidents scope for CRUD - from exec_team, exec_positions (is_vp, subteam),
  * and application_positions_available ids for question assignment.
  */
 export interface QuestionScope {

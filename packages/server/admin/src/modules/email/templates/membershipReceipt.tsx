@@ -45,7 +45,7 @@ function membershipReceiptMainSection(
             <strong>UW Data Science Club</strong> membership is now active for this term.
           </Text>
           <Text style={{ ...bodyTextStyle, marginBottom: 0 }}>
-            Thanks for joining us — we're glad you're here. Keep an eye on our events and
+            Thanks for joining us! we're glad you're here. Keep an eye on our events and
             Discord; we'll see you soon.
           </Text>
         </>
@@ -55,7 +55,7 @@ function membershipReceiptMainSection(
         <>
           <Text style={bodyTextStyle}>
             <strong>You're all set.</strong> We already have your WUSA online payment on file
-            and your <strong>UW Data Science Club</strong> membership is active for this term —
+            and your <strong>UW Data Science Club</strong> membership is active for this term -
             there's nothing else you need to do.
           </Text>
           <Text style={{ ...bodyTextStyle, marginBottom: 0 }}>

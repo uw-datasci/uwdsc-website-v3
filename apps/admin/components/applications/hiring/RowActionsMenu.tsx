@@ -133,17 +133,12 @@ export function ApplicantRowActionsMenu({
             <MoreVertical className="size-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="end"
-          className={HIRING_ROW_ACTION_DROPDOWN_CONTENT_CLASS}
-        >
+        <DropdownMenuContent align="end" className={HIRING_ROW_ACTION_DROPDOWN_CONTENT_CLASS}>
           {visibleMenuItems.map(({ status, label, Icon }) => (
             <DropdownMenuItem
               key={status}
               variant={
-                HIRING_ROW_ACTION_CONFIRM_COPY[status].destructive
-                  ? "destructive"
-                  : "default"
+                HIRING_ROW_ACTION_CONFIRM_COPY[status].destructive ? "destructive" : "default"
               }
               onSelect={() => openConfirm(status)}
             >
@@ -163,7 +158,7 @@ export function ApplicantRowActionsMenu({
                 <DialogDescription>
                   {copy.description}
                   <span className="mt-2 block text-foreground">
-                    {applicantName} — {roleLabel}
+                    {applicantName} - {roleLabel}
                   </span>
                 </DialogDescription>
               </DialogHeader>
@@ -182,9 +177,7 @@ export function ApplicantRowActionsMenu({
                   disabled={submitting}
                   onClick={() => void handleConfirm()}
                 >
-                  {submitting
-                    ? HIRING_ROW_ACTION_WORKING_LABEL
-                    : copy.confirmLabel}
+                  {submitting ? HIRING_ROW_ACTION_WORKING_LABEL : copy.confirmLabel}
                 </Button>
               </DialogFooter>
             </>

@@ -34,7 +34,7 @@ export function CompleteProfileSuccessView() {
         </h3>
         <ul className="list-disc pl-5 space-y-3 text-gray-300 text-sm md:text-base leading-relaxed">
           <li>
-            <strong className="text-gray-200">WUSA online</strong> — Shop → Memberships → DSC.
+            <strong className="text-gray-200">WUSA online</strong> - Shop → Memberships → DSC.
             After you pay,{" "}
             <strong className="text-gray-200">forward the Moneris payment receipt</strong> (from{" "}
             <span className="font-mono font-bold text-purple-200 break-all">

@@ -20,7 +20,7 @@ export function OnboardingDetail({ row }: OnboardingDetailProps) {
     );
   }
 
-  const name = [row.first_name, row.last_name].filter(Boolean).join(" ") || "—";
+  const name = [row.first_name, row.last_name].filter(Boolean).join(" ") || "-";
   const position = row.submission_role_name || row.exec_position_name || row.user_role;
   const sub = row.submission;
 
@@ -60,9 +60,9 @@ export function OnboardingDetail({ row }: OnboardingDetailProps) {
         <div>
           <h3 className="text-sm font-semibold mb-3">Contact</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Field label="Waterloo Email" value={row.email || "—"} />
-            {sub && <Field label="Personal Email" value={sub.email || "—"} />}
-            {sub && <Field label="Discord" value={sub.discord || "—"} />}
+            <Field label="Waterloo Email" value={row.email || "-"} />
+            {sub && <Field label="Personal Email" value={sub.email || "-"} />}
+            {sub && <Field label="Discord" value={sub.discord || "-"} />}
           </div>
         </div>
 
@@ -74,14 +74,14 @@ export function OnboardingDetail({ row }: OnboardingDetailProps) {
             <div>
               <h3 className="text-sm font-semibold mb-3">Term Details</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Field label="Academic Term" value={sub.term_type || "—"} />
-                <Field label="Location" value={sub.in_waterloo || "—"} />
+                <Field label="Academic Term" value={sub.term_type || "-"} />
+                <Field label="Location" value={sub.in_waterloo || "-"} />
                 <Field
                   label="Data Science Competency"
-                  value={String(sub.datasci_competency ?? "—")}
+                  value={String(sub.datasci_competency ?? "-")}
                 />
                 {sub?.consent_instagram && (
-                  <Field label="Instagram" value={sub.instagram || "—"} />
+                  <Field label="Instagram" value={sub.instagram || "-"} />
                 )}
               </div>
             </div>

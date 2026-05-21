@@ -9,7 +9,7 @@ import { WebhookEventPayload } from "resend";
 
 /**
  * POST /api/webhooks/membership
- * Resend inbound (`email.received`) webhook — verifies Svix signature, then loads email body via API.
+ * Resend inbound (`email.received`) webhook - verifies Svix signature, then loads email body via API.
  *
  * Always returns HTTP 200 so Resend does not retry (at-least-once delivery; non-2xx triggers backoff).
  * Use `success` in the JSON body to distinguish handled failures from processed receipts.

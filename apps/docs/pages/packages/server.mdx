@@ -8,9 +8,9 @@ The `packages/server/` directory contains three sub-packages. There is **no Pris
 
 **Sub-packages**:
 
-- **@uwdsc/db** — Database connection, Supabase clients, BaseRepository, migrations
-- **@uwdsc/core** — Shared services and repositories used by web and admin apps
-- **@uwdsc/admin** — Admin-only services (e.g. member management for admin dashboard)
+- **@uwdsc/db** - Database connection, Supabase clients, BaseRepository, migrations
+- **@uwdsc/core** - Shared services and repositories used by web and admin apps
+- **@uwdsc/admin** - Admin-only services (e.g. member management for admin dashboard)
 
 ## Structure
 
@@ -35,9 +35,9 @@ packages/server/
 
 **Exports**:
 
-- `@uwdsc/db/connection` — Postgres `sql` (postgres.js)
-- `@uwdsc/db/supabase` — `createSupabaseBrowserClient`, `createSupabaseServerClient`, `createSupabaseMiddlewareClient`
-- `@uwdsc/db/baseRepository` — `BaseRepository` (abstract class with protected `this.sql`)
+- `@uwdsc/db/connection` - Postgres `sql` (postgres.js)
+- `@uwdsc/db/supabase` - `createSupabaseBrowserClient`, `createSupabaseServerClient`, `createSupabaseMiddlewareClient`
+- `@uwdsc/db/baseRepository` - `BaseRepository` (abstract class with protected `this.sql`)
 
 **Tech**: postgres.js (Supabase Transaction Pooler), Supabase JS/SSR, db-migrate. Run migrations from root: `pnpm migrate`, `pnpm migrate:down`, `pnpm migrate:create <name>`.
 
@@ -133,10 +133,10 @@ export class ProfileRepository extends BaseRepository {
 
 Migrations live in `packages/server/db`. From repo root:
 
-- `pnpm migrate` — apply
-- `pnpm migrate:down` — rollback last
-- `pnpm migrate:create <name>` — create new migration
-- `pnpm migrate:check` — status
+- `pnpm migrate` - apply
+- `pnpm migrate:down` - rollback last
+- `pnpm migrate:create <name>` - create new migration
+- `pnpm migrate:check` - status
 
 ## Best practices
 
@@ -150,13 +150,13 @@ Migrations live in `packages/server/db`. From repo root:
 
 ### Don’t
 
-- Import server packages in React components — use client API functions from `lib/api/`
+- Import server packages in React components - use client API functions from `lib/api/`
 - Put business logic in API routes or repositories
 - Access the database directly from API routes
-- Assume Prisma — the project uses postgres.js and Supabase
+- Assume Prisma - the project uses postgres.js and Supabase
 
 ## Next steps
 
-- [API Architecture](/architecture/api-flow) — Request flow and layers
-- [Creating API Endpoints](/guides/creating-api) — Step-by-step API guide
-- [Database Setup](/guides/database) — Migrations and postgres.js usage
+- [API Architecture](/architecture/api-flow) - Request flow and layers
+- [Creating API Endpoints](/guides/creating-api) - Step-by-step API guide
+- [Database Setup](/guides/database) - Migrations and postgres.js usage

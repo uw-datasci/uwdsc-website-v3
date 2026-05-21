@@ -9,7 +9,7 @@ import { Analytics } from "@vercel/analytics/next";
 export const metadata: Metadata = {
   ...baseMetadata,
   title: {
-    default: "UW Data Science Club — Admin",
+    default: "UW Data Science Club - Admin",
     template: "%s | UW DSC Admin",
   },
   description: "Internal tools for the University of Waterloo Data Science Club",

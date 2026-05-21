@@ -29,7 +29,7 @@ export class EventRepository extends BaseRepository {
   }
 
   /**
-   * Update an event by ID (partial update — only provided fields are changed)
+   * Update an event by ID (partial update - only provided fields are changed)
    * @param eventId - The event UUID
    * @param data - Fields to update
    * @param columns - Column names to update (must match keys in data)

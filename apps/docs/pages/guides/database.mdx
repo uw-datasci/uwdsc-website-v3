@@ -46,9 +46,9 @@ This creates or updates `.env.local` in each app (web, admin) and loads the valu
 
 Migrations are in `packages/server/db`. Run from repo root:
 
-- `pnpm migrate` — apply migrations
-- `pnpm migrate:down` — rollback last
-- `pnpm migrate:create <name>` — create new migration
+- `pnpm migrate` - apply migrations
+- `pnpm migrate:down` - rollback last
+- `pnpm migrate:create <name>` - create new migration
 
 **Example migration file** (in `packages/server/db/src/migrations/`):
 
@@ -96,7 +96,7 @@ pnpm migrate
 
 ```bash
 pnpm migrate:down    # Rollback last migration
-pnpm migrate:reset   # Reset (drops and reapplies) — warning: deletes data
+pnpm migrate:reset   # Reset (drops and reapplies) - warning: deletes data
 pnpm migrate:check   # Check migration status
 ```
 
@@ -144,7 +144,7 @@ export class UserRepository extends BaseRepository {
 ### Relations
 
 ```typescript
-// In a repository — include related data with this.sql
+// In a repository - include related data with this.sql
 async findUserWithProfile(userId: string) {
   const rows = await this.sql`
     SELECT u.*, p.bio as profile_bio
@@ -173,7 +173,7 @@ async createUserWithProfile(data: { email: string; name: string; bio: string }) 
 ### Filtering
 
 ```typescript
-// In a repository — use this.sql with tagged templates
+// In a repository - use this.sql with tagged templates
 async findActiveUsers() {
   return this.sql`
     SELECT * FROM users

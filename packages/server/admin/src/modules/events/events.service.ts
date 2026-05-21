@@ -1,10 +1,5 @@
 import { EventRepository } from "./events.repository";
-import {
-  ApiError,
-  CreateEventData,
-  Event,
-  UpdateEventData,
-} from "@uwdsc/common/types";
+import { ApiError, CreateEventData, Event, UpdateEventData } from "@uwdsc/common/types";
 import { filterPartialUpdate } from "@uwdsc/common/utils";
 
 const UPDATE_EVENT_COLUMNS = [
@@ -38,25 +33,19 @@ class EventService {
 
       return { success: true, event };
     } catch (error) {
-      throw new ApiError(
-        `Failed to create event: ${(error as Error).message}`,
-        500,
-      );
+      throw new ApiError(`Failed to create event: ${(error as Error).message}`, 500);
     }
   }
 
   /**
-   * Update an event (partial update — only provided fields are changed)
+   * Update an event (partial update - only provided fields are changed)
    */
   async updateEvent(
     eventId: string,
     data: UpdateEventData,
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      const { filteredData, columns } = filterPartialUpdate(
-        data,
-        UPDATE_EVENT_COLUMNS,
-      );
+      const { filteredData, columns } = filterPartialUpdate(data, UPDATE_EVENT_COLUMNS);
 
       if (columns.length === 0) return { success: true };
 
@@ -72,19 +61,14 @@ class EventService {
 
       return { success: true };
     } catch (error) {
-      throw new ApiError(
-        `Failed to update event: ${(error as Error).message}`,
-        500,
-      );
+      throw new ApiError(`Failed to update event: ${(error as Error).message}`, 500);
     }
   }
 
   /**
    * Delete an event
    */
-  async deleteEvent(
-    eventId: string,
-  ): Promise<{ success: boolean; error?: string }> {
+  async deleteEvent(eventId: string): Promise<{ success: boolean; error?: string }> {
     try {
       const result = await this.repository.deleteEventById(eventId);
 
@@ -94,10 +78,7 @@ class EventService {
 
       return { success: true };
     } catch (error) {
-      throw new ApiError(
-        `Failed to delete event: ${(error as Error).message}`,
-        500,
-      );
+      throw new ApiError(`Failed to delete event: ${(error as Error).message}`, 500);
     }
   }
 }

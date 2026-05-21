@@ -109,10 +109,10 @@ export default function PassportPage() {
           form={form}
           onSubmit={onSubmit}
           displayName={displayName}
-          email={user?.email ?? "—"}
-          watIam={user?.wat_iam ?? "—"}
-          facultyLabel={facultyLabel ?? "—"}
-          term={user?.term ?? "—"}
+          email={user?.email ?? "-"}
+          watIam={user?.wat_iam ?? "-"}
+          facultyLabel={facultyLabel ?? "-"}
+          term={user?.term ?? "-"}
         />
 
         {!membershipLoading && !isMember ? (

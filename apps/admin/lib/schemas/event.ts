@@ -21,7 +21,7 @@ export const createEventSchema = z
 export type CreateEventFormValues = z.infer<typeof createEventSchema>;
 
 /**
- * Schema for updating an event (all fields optional — PATCH semantics).
+ * Schema for updating an event (all fields optional - PATCH semantics).
  * Only validates the time ordering when both times are provided.
  */
 export const updateEventSchema = z

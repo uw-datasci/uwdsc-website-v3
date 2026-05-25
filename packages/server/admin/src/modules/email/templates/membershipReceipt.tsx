@@ -85,23 +85,23 @@ function membershipReceiptMainSection(
             receipt. We can only activate membership for existing profiles.
           </Text>
           <Text style={listItemStyle}>
-            <strong>2.</strong> At WUSA checkout, use the <strong>same @uwaterloo.ca address</strong>{" "}
-            as your club account. Personal emails such as Gmail on the receipt cannot be matched
-            automatically.
+            <strong>2.</strong> At WUSA checkout, use the{" "}
+            <strong>same @uwaterloo.ca address</strong> as your club account. Personal emails
+            such as Gmail on the receipt cannot be matched automatically.
           </Text>
           <Text style={listItemStyle}>
             <strong>3.</strong> Forward the <strong>payment receipt email</strong> from{" "}
             <strong>{MEMBERSHIP_MONERIS_RECEIPT_FROM}</strong> (not the WUSA order summary) from
-            that <strong>same @uwaterloo.ca inbox</strong>. The sender must match the contact email
-            on the receipt.
+            that <strong>same @uwaterloo.ca inbox</strong>. The sender must match the contact
+            email on the receipt.
           </Text>
           <Text style={{ ...listItemStyle, marginBottom: 0 }}>
             <strong>4.</strong> If you have already paid, email us at{" "}
             <Link href="mailto:contact@uwdatascience.ca" style={{ color: "#6366f1" }}>
               contact@uwdatascience.ca
             </Link>{" "}
-            or visit the <strong>DSC office</strong> (MC 3031) with your receipt and we can activate
-            your membership.
+            or visit the <strong>DSC office</strong> (MC 3031) with your receipt and we can
+            activate your membership.
           </Text>
         </>
       );

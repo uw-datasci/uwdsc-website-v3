@@ -73,9 +73,9 @@ function membershipReceiptMainSection(
       return (
         <>
           <Text style={bodyTextStyle}>
-            We weren't able to confirm your membership from this message automatically.
+            We weren't able to confirm your membership from this receipt.
           </Text>
-          <Text style={bodyTextStyle}>Please check the following:</Text>
+          <Text style={bodyTextStyle}>Please make sure you've done the following:</Text>
           <Text style={listItemStyle}>
             <strong>1.</strong> Create an account on our website (
             <Link href="https://uwdatascience.ca" style={{ color: "#6366f1" }}>
@@ -96,11 +96,12 @@ function membershipReceiptMainSection(
             email on the receipt.
           </Text>
           <Text style={{ ...listItemStyle, marginBottom: 0 }}>
-            <strong>4.</strong> If you have already paid, email us at{" "}
+            <strong>4.</strong> If you have already paid under a different email, send us an
+            email at{" "}
             <Link href="mailto:contact@uwdatascience.ca" style={{ color: "#6366f1" }}>
               contact@uwdatascience.ca
             </Link>{" "}
-            or visit the <strong>DSC office</strong> (MC 3031) with your receipt and we can
+            or visit the <strong>DSC office (MC 3031)</strong> with your receipt so we can
             activate your membership.
           </Text>
         </>

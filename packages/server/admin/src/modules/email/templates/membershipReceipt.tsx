@@ -75,9 +75,14 @@ function membershipReceiptMainSection(
           <Text style={bodyTextStyle}>
             We weren't able to confirm your membership from this message automatically.
           </Text>
-          <Text style={bodyTextStyle}>
-            Make sure you're forwarding the <strong>payment receipt email</strong> from{" "}
-            <strong>{MEMBERSHIP_MONERIS_RECEIPT_FROM}</strong>, not the order summary from WUSA.
+          <Text style={bodyTextStyle}>Please check the following:</Text>
+          <Text style={listItemStyle}>
+            <strong>1.</strong> Create an account on our website (
+            <Link href="https://uwdatascience.ca" style={{ color: "#6366f1" }}>
+              uwdatascience.ca
+            </Link>
+            ) with your <strong>@uwaterloo.ca email</strong> before you pay or forward your
+            receipt. We can only activate membership for existing profiles.
           </Text>
           <Text style={listItemStyle}>
             <strong>2.</strong> At WUSA checkout, use the <strong>same @uwaterloo.ca address</strong>{" "}

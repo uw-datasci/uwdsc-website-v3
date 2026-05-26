@@ -61,19 +61,19 @@ export const CLUB_STATS = [
   {
     id: "workshops-held",
     title: "Workshops Held",
-    stat: 100,
+    stat: 150,
     suffix: "+",
   },
   {
     id: "current-members",
     title: "Current Members",
-    stat: 300,
+    stat: 600,
     suffix: "+",
   },
   {
     id: "instagram-followers",
     title: "Instagram Followers",
-    stat: 4000,
+    stat: 5000,
     suffix: "+",
   },
 ];

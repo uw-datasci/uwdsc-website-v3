@@ -10,13 +10,11 @@ const __dirname = dirname(__filename);
 dotenv.config();
 
 const APPS = [
-  { name: "web", infisicalPath: "/web" },
-  { name: "admin", infisicalPath: "/admin" },
+  { name: "web", infisicalPath: "/website/web" },
+  { name: "admin", infisicalPath: "/website/admin" },
 ];
 
-const PACKAGES = [
-  { name: "server/db", infisicalPath: "/web-db" },
-];
+const PACKAGES = [{ name: "server/db", infisicalPath: "/website/db" }];
 
 try {
   // Extract environment variables
@@ -70,10 +68,7 @@ try {
       machineAuthSuccess = true;
       console.log("✅ Machine Login Successful.");
     } catch (error) {
-      console.warn(
-        "⚠️ Machine Authentication failed. Falling back to User Login...",
-        error,
-      );
+      console.warn("⚠️ Machine Authentication failed. Falling back to User Login...", error);
     }
   }
 
@@ -96,8 +91,7 @@ try {
     const targetDir = join(rootDir, "apps", name);
     const targetFile = join(targetDir, ".env.local");
 
-    if (!existsSync(targetDir))
-      return console.warn(`⚠️  Skipping ${name} (folder missing)`);
+    if (!existsSync(targetDir)) return console.warn(`⚠️  Skipping ${name} (folder missing)`);
 
     console.log(`⚡ Syncing ${name}...`);
     const secrets = execSync(
@@ -114,8 +108,7 @@ try {
     const targetDir = join(rootDir, "packages", name);
     const targetFile = join(targetDir, ".env.local");
 
-    if (!existsSync(targetDir))
-      return console.warn(`⚠️  Skipping ${name} (folder missing)`);
+    if (!existsSync(targetDir)) return console.warn(`⚠️  Skipping ${name} (folder missing)`);
 
     console.log(`⚡ Syncing ${name}...`);
     const secrets = execSync(

@@ -15,7 +15,7 @@ Welcome to the UW Data Science Club website repository! This guide will help you
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/uwdsc/uwdsc-website-v3.git
+git clone https://github.com/uw-datasci/uwdsc-website-v3.git
 cd uwdsc-website-v3
 
 # 2. Install dependencies

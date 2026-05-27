@@ -6,6 +6,7 @@
 
 import { createApiError } from "./error";
 import { uploadHeadshot } from "./headshot";
+import { parseJsonResponse } from "./parse-response";
 import type {
   ExecPosition,
   Term,
@@ -23,7 +24,7 @@ import type {
 export async function getAllExecPositions(): Promise<ExecPosition[]> {
   const response = await fetch("/api/onboarding/positions");
 
-  const data = await response.json();
+  const data = await parseJsonResponse<ExecPosition[]>(response);
 
   if (!response.ok) throw createApiError(data, response.status);
 
@@ -32,18 +33,16 @@ export async function getAllExecPositions(): Promise<ExecPosition[]> {
 
 export async function getActiveTerm(): Promise<Term> {
   const response = await fetch("/api/onboarding/term");
-  const data = await response.json();
+  const data = await parseJsonResponse<Term>(response);
   if (!response.ok) throw createApiError(data, response.status);
   return data;
 }
 
-export async function getOnboardingSubmission(
-  termId: string,
-): Promise<Onboarding | null> {
+export async function getOnboardingSubmission(termId: string): Promise<Onboarding | null> {
   const response = await fetch(
     `/api/onboarding/submission?termId=${encodeURIComponent(termId)}`,
   );
-  const data = await response.json();
+  const data = await parseJsonResponse<Onboarding | null>(response);
 
   if (!response.ok) throw createApiError(data, response.status);
 
@@ -80,23 +79,18 @@ export async function submitOnboardingForm(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(submissionPayload),
   });
-  const data = await response.json();
-  console.log("API response:", response.status, data);
+  const data = await parseJsonResponse<Onboarding>(response);
   if (!response.ok) throw createApiError(data, response.status);
   return data;
 }
 
-export async function getTeamOnboarding(
-  termId: string,
-): Promise<OnboardingAdminRow[]> {
-  const response = await fetch(
-    `/api/onboarding/team?termId=${encodeURIComponent(termId)}`,
-  );
-  const data = await response.json();
+export async function getTeamOnboarding(termId: string): Promise<OnboardingAdminRow[]> {
+  const response = await fetch(`/api/onboarding/team?termId=${encodeURIComponent(termId)}`);
+  const data = await parseJsonResponse<{ rows: OnboardingAdminRow[] }>(response);
 
   if (!response.ok) throw createApiError(data, response.status);
 
-  return data.rows as OnboardingAdminRow[];
+  return data.rows;
 }
 
 export async function downloadTeamHeadshots(termId: string): Promise<Blob> {
@@ -105,7 +99,7 @@ export async function downloadTeamHeadshots(termId: string): Promise<Blob> {
   );
 
   if (!response.ok) {
-    const data = await response.json();
+    const data = await parseJsonResponse(response);
     throw createApiError(data, response.status);
   }
 

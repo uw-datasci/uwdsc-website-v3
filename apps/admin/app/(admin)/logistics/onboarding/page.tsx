@@ -168,7 +168,10 @@ export default function LogisticsOnboardingPage() {
           {
             ...values,
             term_id: currentTerm.id,
-            instagram: values.instagram ?? null,
+            instagram:
+              values.consent_instagram && values.instagram?.trim()
+                ? values.instagram.trim()
+                : null,
             headshot_url: values.headshot_url ?? null,
             anything_else: values.anything_else ?? null,
           },

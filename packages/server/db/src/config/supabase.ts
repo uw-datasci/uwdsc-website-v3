@@ -1,13 +1,30 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createServerClient, createBrowserClient } from "@supabase/ssr";
-import type { CookieOptions } from "@supabase/ssr";
+import type { CookieOptions, CookieOptionsWithName } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
+
+// When set (e.g. `.uwdatascience.ca`), Supabase auth cookies are scoped to the
+// parent domain so sibling subdomains (estimathon, etc.) share the session.
+// Leave unset for localhost dev — the browser rejects `Domain` attributes on
+// hostnames without a public-suffix dot.
+
+const authCookieDomain = process.env.NEXT_PUBLIC_AUTH_COOKIE_DOMAIN;
+if (!authCookieDomain) throw new Error("NEXT_PUBLIC_AUTH_COOKIE_DOMAIN is not set");
+
+const sharedCookieOptions: CookieOptionsWithName = {
+  domain: authCookieDomain,
+  sameSite: "lax",
+  secure: true,
+  path: "/",
+};
 
 /**
  * Create a Supabase client for browser/client-side operations
  */
 export function createSupabaseBrowserClient() {
-  return createBrowserClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!);
+  return createBrowserClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+    cookieOptions: sharedCookieOptions,
+  });
 }
 
 /**
@@ -19,6 +36,7 @@ export function createSupabaseServerClient(cookieStore: {
   set: (name: string, value: string, options?: CookieOptions) => void;
 }) {
   return createServerClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+    cookieOptions: sharedCookieOptions,
     cookies: {
       getAll() {
         return cookieStore.getAll();
@@ -56,6 +74,7 @@ export function createSupabaseMiddlewareClient<NextRequest = any, NextResponse =
   },
 ) {
   return createServerClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+    cookieOptions: sharedCookieOptions,
     cookies: {
       getAll() {
         return request.cookies.getAll();

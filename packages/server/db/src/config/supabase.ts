@@ -9,14 +9,14 @@ import { createClient } from "@supabase/supabase-js";
 // hostnames without a public-suffix dot.
 
 const authCookieDomain = process.env.NEXT_PUBLIC_AUTH_COOKIE_DOMAIN;
-if (!authCookieDomain) throw new Error("NEXT_PUBLIC_AUTH_COOKIE_DOMAIN is not set");
-
-const sharedCookieOptions: CookieOptionsWithName = {
-  domain: authCookieDomain,
-  sameSite: "lax",
-  secure: true,
-  path: "/",
-};
+const sharedCookieOptions: CookieOptionsWithName | undefined = authCookieDomain
+  ? {
+      domain: authCookieDomain,
+      sameSite: "lax",
+      secure: true,
+      path: "/",
+    }
+  : undefined;
 
 /**
  * Create a Supabase client for browser/client-side operations

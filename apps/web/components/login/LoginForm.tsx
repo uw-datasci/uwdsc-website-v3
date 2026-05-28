@@ -12,7 +12,9 @@ import { Loader2 } from "lucide-react";
 import { VerifyEmailModal } from "./VerifyEmailModal";
 import { login } from "@/lib/api/auth";
 import { useAuth } from "@/contexts/AuthContext";
+import { safeRedirect } from "@/lib/auth/safeRedirect";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 export function LoginForm() {
   const [authError, setAuthError] = useState<string>("");
@@ -20,6 +22,8 @@ export function LoginForm() {
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [userEmail, setUserEmail] = useState<string>("");
   const { mutate } = useAuth();
+  const searchParams = useSearchParams();
+  const redirectTarget = safeRedirect(searchParams.get("redirect"));
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -42,7 +46,7 @@ export function LoginForm() {
         setUserEmail(responseData.user.email);
         setShowVerifyModal(true);
       } else {
-        globalThis.location.href = "/";
+        globalThis.location.href = redirectTarget;
       }
     } catch (error: unknown) {
       const err = error as Error & {

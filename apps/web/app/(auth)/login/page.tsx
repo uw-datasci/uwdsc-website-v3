@@ -1,6 +1,8 @@
 import { LoginForm } from "@/components/login/LoginForm";
 import { Typing } from "@/components/login/Typing";
+import { Loader2 } from "lucide-react";
 import Image from "next/image";
+import { Suspense } from "react";
 
 export default function LoginPage() {
   return (
@@ -26,20 +28,27 @@ export default function LoginPage() {
               />
             </div>
             <div className="">
-              <h2 className="text-7xl font-bold text-center md:text-start my-10">
-                Sign in
-              </h2>
+              <h2 className="text-7xl font-bold text-center md:text-start my-10">Sign in</h2>
               <div className="flex flex-col gap-8 leading-loose text-xl text-center md:text-start">
-                <p>
-                  Already a member? Sign in here to access your profile and
-                  membership.
-                </p>
+                <p>Already a member? Sign in here to access your profile and membership.</p>
               </div>
             </div>
           </div>
           <div className="hidden md:block w-px self-stretch bg-gray-500/60" />
           <div className="w-full h-full flex-1 my-auto">
-            <LoginForm />
+            <Suspense
+              fallback={
+                <div className="flex justify-center py-8">
+                  <Loader2
+                    className="h-8 w-8 animate-spin text-white"
+                    strokeWidth={2}
+                    aria-label="Loading"
+                  />
+                </div>
+              }
+            >
+              <LoginForm />
+            </Suspense>
           </div>
         </div>
       </div>

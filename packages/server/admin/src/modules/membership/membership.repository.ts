@@ -8,12 +8,14 @@ export class MembershipRepository extends BaseRepository {
   async getMembershipStats(): Promise<MembershipStats> {
     try {
       const result = await this.sql<MembershipStats[]>`
-        SELECT 
+        SELECT
           COUNT(*) as total_users,
           COUNT(*) FILTER (WHERE m.profile_id IS NOT NULL) as paid_users,
           COUNT(*) FILTER (WHERE m.profile_id IS NOT NULL AND p.is_math_soc_member = true) as math_soc_members
         FROM profiles p
-        LEFT JOIN memberships m ON p.id = m.profile_id
+        LEFT JOIN memberships m
+          ON p.id = m.profile_id
+         AND m.term_id = (SELECT id FROM terms WHERE is_active = true LIMIT 1)
       `;
 
       return (
@@ -58,6 +60,7 @@ export class MembershipRepository extends BaseRepository {
       SELECT term_id, payment_method::text AS payment_method
       FROM memberships
       WHERE profile_id = ${profileId}
+        AND term_id = (SELECT id FROM terms WHERE is_active = true LIMIT 1)
       LIMIT 1
     `;
     return result[0] ?? null;
@@ -100,11 +103,10 @@ export class MembershipRepository extends BaseRepository {
           ${verifiedAtSql},
           NOW()
         )
-        ON CONFLICT (profile_id)
+        ON CONFLICT (profile_id, term_id)
         DO UPDATE SET
           payment_method = EXCLUDED.payment_method,
           payment_location = EXCLUDED.payment_location,
-          term_id = EXCLUDED.term_id,
           verifier_id = EXCLUDED.verifier_id,
           verified_at = EXCLUDED.verified_at,
           updated_at = NOW()

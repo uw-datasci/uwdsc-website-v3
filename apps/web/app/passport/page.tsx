@@ -87,7 +87,7 @@ export default function PassportPage() {
     [user?.first_name?.[0], user?.last_name?.[0]].filter(Boolean).join("").toUpperCase() || "?";
   const displayName =
     [user?.first_name, user?.last_name].filter(Boolean).join(" ") || "Unknown Member";
-  const isMember = membershipStatus?.has_membership && user?.is_math_soc_member;
+  const isMember = membershipStatus?.has_membership;
   const facultyLabel = user?.faculty == null ? undefined : FACULTY_LABELS[user.faculty];
 
   return (

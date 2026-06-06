@@ -3,13 +3,14 @@
 import { NavLinks } from "./navbar/NavLinks";
 import { UserAvatar } from "./navbar/UserAvatar";
 import { MobileMenu } from "./navbar/MobileMenu";
+import { WrappedModal } from "./wrapped/WrappedModal"
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { getApplyWindowOpen } from "@/lib/api";
 import Image from "next/image";
 import Link from "next/link";
 import { ADMIN_ROLES } from "@uwdsc/common/constants";
-import { GlassSurface, NavigationMenu, NavigationMenuList } from "@uwdsc/ui";
+import { GlassSurface, NavigationMenu, NavigationMenuList, Button, NavigationMenuItem } from "@uwdsc/ui";
 import { useEffect, useState } from "react";
 
 const hideNavbarPaths = new Set(["/login", "/register", "/complete-profile"]);
@@ -18,6 +19,7 @@ export function Navbar() {
   const pathname = usePathname();
   const { user } = useAuth();
   const [applyInNav, setApplyInNav] = useState(false);
+  const [wrappedOpen, setWrappedOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -82,6 +84,14 @@ export function Navbar() {
             <NavigationMenu viewport={false}>
               <NavigationMenuList className="gap-4">
                 <NavLinks navLinks={navLinks} />
+                <NavigationMenuItem>
+                  <Button 
+                    variant="ghost"
+                    onClick={() => setWrappedOpen(true)}
+                    className="h-10 flex flex-row items-center gap-2 px-4 rounded-md hover:text-nav-hover-blue">
+                      <span className="text-sm font-medium">Wrapped</span>
+                    </Button>
+                </NavigationMenuItem>
                 <UserAvatar />
               </NavigationMenuList>
             </NavigationMenu>
@@ -89,8 +99,9 @@ export function Navbar() {
         </div>
 
         {/* Mobile Menu */}
-        <MobileMenu navLinks={navLinks} user={user} />
+        <MobileMenu navLinks={navLinks} user={user} onOpenWrapped={() => setWrappedOpen(true)}/>
       </div>
+      <WrappedModal open={wrappedOpen} onOpenChange={setWrappedOpen} />
     </div>
   );
 }

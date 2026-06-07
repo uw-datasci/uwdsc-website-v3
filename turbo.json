@@ -19,7 +19,8 @@
         "RESEND_FROM_EMAIL",
         "RESEND_CAMPAIGN_SEGMENT_ID",
         "RESEND_WEBHOOK_SECRET",
-        "DISCORD_INVITE_URL"
+        "DISCORD_INVITE_URL",
+        "NEXT_PUBLIC_AUTH_COOKIE_DOMAIN"
       ]
     },
     "lint": { "dependsOn": ["^lint"] },

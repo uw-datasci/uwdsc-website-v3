@@ -107,6 +107,29 @@ export class AuthRepository extends BaseRepository {
       password: newPassword,
     });
 
+    if (!error && data?.user?.id) {
+      const userId = data.user.id;
+      // Counter increments are best-effort — a failure here must not roll back
+      // the password change the user already completed in Supabase.
+      try {
+        await this.sql`
+          UPDATE public.profiles
+          SET password_reset_count = password_reset_count + 1,
+              updated_at = now()
+          WHERE id = ${userId}
+        `;
+        await this.sql`
+          UPDATE public.memberships
+          SET password_reset_count = password_reset_count + 1,
+              updated_at = now()
+          WHERE profile_id = ${userId}
+            AND term_id = (SELECT id FROM public.terms WHERE is_active = true LIMIT 1)
+        `;
+      } catch (incrementError) {
+        console.error("Failed to increment password reset counters:", incrementError);
+      }
+    }
+
     return { data, error };
   }
 

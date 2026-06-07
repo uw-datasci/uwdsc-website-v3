@@ -1,11 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  getEventsByRange,
-  getCheckInStatus,
-  checkInToEvent,
-} from "@/lib/api/events";
+import { getEventsByRange, getCheckInStatus, checkInToEvent } from "@/lib/api/events";
 import { getMembershipStatus } from "@/lib/api/profile";
 import type { Event, MembershipStatus } from "@uwdsc/common/types";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,14 +12,7 @@ import {
   NextEventSection,
 } from "@/components/events";
 import { motion } from "framer-motion";
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  Spinner,
-} from "@uwdsc/ui";
+import { Badge, Button, Card, CardContent, CardHeader, Spinner } from "@uwdsc/ui";
 import { QrCode as QrCodeIcon } from "lucide-react";
 import Image from "next/image";
 
@@ -32,8 +21,7 @@ export default function EventsPage() {
   const [activeEvents, setActiveEvents] = useState<Event[] | null>(null);
   const [nextEvent, setNextEvent] = useState<Event | null>(null);
   const [canCheckIn, setCanCheckIn] = useState(false);
-  const [membershipStatus, setMembershipStatus] =
-    useState<MembershipStatus | null>(null);
+  const [membershipStatus, setMembershipStatus] = useState<MembershipStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [checkingIn, setCheckingIn] = useState(false);
   const [checkInSuccess, setCheckInSuccess] = useState<boolean>(false);
@@ -46,8 +34,7 @@ export default function EventsPage() {
           getMembershipStatus(),
         ]);
 
-        const active =
-          activeResult.status === "fulfilled" ? activeResult.value : [];
+        const active = activeResult.status === "fulfilled" ? activeResult.value : [];
 
         const membership =
           membershipResult.status === "fulfilled"
@@ -56,11 +43,8 @@ export default function EventsPage() {
 
         setMembershipStatus(membership);
 
-        const isValidMember =
-          membership.has_membership && !!user?.is_math_soc_member;
-
         setActiveEvents(active);
-        setCanCheckIn(isValidMember);
+        setCanCheckIn(membership.has_membership);
 
         const firstActive = active[0];
         if (firstActive) {
@@ -78,12 +62,11 @@ export default function EventsPage() {
       }
     }
     fetchData();
-  }, [user?.is_math_soc_member]);
+  }, [user?.id]);
 
   const currentEvent =
     activeEvents && activeEvents.length > 0 ? (activeEvents[0] ?? null) : null;
-  const shouldShowPaymentQr =
-    membershipStatus !== null && !membershipStatus.has_membership;
+  const shouldShowPaymentQr = membershipStatus !== null && !membershipStatus.has_membership;
 
   const handleCheckIn = async () => {
     if (!currentEvent) return;

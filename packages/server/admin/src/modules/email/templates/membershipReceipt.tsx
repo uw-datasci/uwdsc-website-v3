@@ -68,26 +68,45 @@ function membershipReceiptMainSection(
           </Text>
         </>
       );
-    case "failure":
+    case "failure": {
+      const listItemStyle = { ...bodyTextStyle, margin: "0 0 12px 0" };
       return (
         <>
           <Text style={bodyTextStyle}>
-            We weren't able to confirm your membership from this message automatically.
+            We weren't able to confirm your membership from this receipt.
           </Text>
-          <Text style={bodyTextStyle}>
-            Make sure you're forwarding the <strong>payment receipt email</strong> from{" "}
-            <strong>{MEMBERSHIP_MONERIS_RECEIPT_FROM}</strong>, not the order summary from WUSA.
+          <Text style={bodyTextStyle}>Please make sure you've done the following:</Text>
+          <Text style={listItemStyle}>
+            <strong>1.</strong> Create an account on our website (
+            <Link href="https://uwdatascience.ca" style={{ color: "#6366f1" }}>
+              uwdatascience.ca
+            </Link>
+            ) with your <strong>@uwaterloo.ca email</strong> before you pay or forward your
+            receipt. We can only activate membership for existing profiles.
           </Text>
-          <Text style={{ ...bodyTextStyle, marginBottom: 0 }}>
-            Please <strong>try forwarding your receipt again</strong> in a little while, or
-            email us at{" "}
+          <Text style={listItemStyle}>
+            <strong>2.</strong> At WUSA checkout, use the{" "}
+            <strong>same @uwaterloo.ca address</strong> as your club account. Personal emails
+            such as Gmail on the receipt cannot be matched automatically.
+          </Text>
+          <Text style={listItemStyle}>
+            <strong>3.</strong> Forward the <strong>payment receipt email</strong> from{" "}
+            <strong>{MEMBERSHIP_MONERIS_RECEIPT_FROM}</strong> (not the WUSA order summary) from
+            that <strong>same @uwaterloo.ca inbox</strong>. The sender must match the contact
+            email on the receipt.
+          </Text>
+          <Text style={{ ...listItemStyle, marginBottom: 0 }}>
+            <strong>4.</strong> If you have already paid under a different email, send us an
+            email at{" "}
             <Link href="mailto:contact@uwdatascience.ca" style={{ color: "#6366f1" }}>
               contact@uwdatascience.ca
             </Link>{" "}
-            and we'll help you sort it out.
+            or visit the <strong>DSC office (MC 3031)</strong> with your receipt so we can
+            activate your membership.
           </Text>
         </>
       );
+    }
     default: {
       const _exhaustive: never = kind;
       return _exhaustive;

@@ -42,7 +42,7 @@ jobs:
       node-version: ${{ needs.setup.outputs.node-version }}
       pnpm-version: ${{ needs.setup.outputs.pnpm-version }}
       infisical-project-slug: ${{ needs.setup.outputs.infisical-project-slug }}
-      infisical-secret-path: "/web-db"
+      infisical-secret-path: "/website/db"
     secrets:
       INFISICAL_CLIENT_ID: ${{ secrets.INFISICAL_CLIENT_ID }}
       INFISICAL_CLIENT_SECRET: ${{ secrets.INFISICAL_CLIENT_SECRET }}

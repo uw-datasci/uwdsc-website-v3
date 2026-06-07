@@ -1,5 +1,6 @@
 import { format, parseISO } from "date-fns";
 import type { Event } from "@uwdsc/common/types";
+import { formatEventDescription } from "@uwdsc/common/utils";
 
 /**
  * Format an ISO date string for display (e.g. "MMM d, yyyy h:mm a").
@@ -49,7 +50,7 @@ export function buildICS(events: Event[]): string {
       `DTSTART:${start}`,
       `DTEND:${end}`,
       `SUMMARY:${escapeICSText(event.name)}`,
-      `DESCRIPTION:${escapeICSText(event.description || "")}`,
+      `DESCRIPTION:${escapeICSText(formatEventDescription(event.description || ""))}`,
       `LOCATION:${escapeICSText(event.location || "")}`,
       "END:VEVENT",
     ].join("\r\n");
@@ -73,7 +74,7 @@ export function getGoogleCalendarUrl(event: Event): string {
     action: "TEMPLATE",
     text: event.name,
     dates: `${toICSDate(event.start_time)}/${toICSDate(event.end_time)}`,
-    details: event.description || "",
+    details: formatEventDescription(event.description || ""),
     location: event.location || "",
   });
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
@@ -95,7 +96,7 @@ export function downloadICS(event: Event): void {
     `DTSTART:${start}`,
     `DTEND:${end}`,
     `SUMMARY:${escapeICSText(event.name)}`,
-    `DESCRIPTION:${escapeICSText(event.description || "")}`,
+    `DESCRIPTION:${escapeICSText(formatEventDescription(event.description || ""))}`,
     `LOCATION:${escapeICSText(event.location || "")}`,
     "END:VEVENT",
     "END:VCALENDAR",

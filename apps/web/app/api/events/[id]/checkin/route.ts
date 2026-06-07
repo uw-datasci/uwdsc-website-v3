@@ -1,5 +1,5 @@
 import { ApiResponse } from "@uwdsc/common/utils";
-import { eventService, membershipService, profileService } from "@uwdsc/core";
+import { eventService, membershipService } from "@uwdsc/core";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 
 export async function GET(
@@ -32,24 +32,12 @@ export async function POST(
     if (!user) return isUnauthorized;
 
     // 2. Check if user has membership
-    const { has_membership } = await membershipService.getMembershipStatus(
-      user.id,
-    );
+    const { has_membership } = await membershipService.getMembershipStatus(user.id);
     if (!has_membership) {
-      return ApiResponse.badRequest(
-        "You must have an active membership to check in.",
-      );
+      return ApiResponse.badRequest("You must have an active membership to check in.");
     }
 
-    // 3. Check if user is a MathSoc member
-    const profile = await profileService.getProfileByUserId(user.id);
-    if (!profile?.is_math_soc_member) {
-      return ApiResponse.badRequest(
-        "You must be a MathSoc member to check in.",
-      );
-    }
-
-    // 4. Check if event is active (valid time window)
+    // 3. Check if event is active (valid time window)
     const event = await eventService.getEventById(id);
     if (!event) {
       return ApiResponse.notFound("Event not found");
@@ -60,12 +48,10 @@ export async function POST(
     const bufferedEnd = new Date(event.buffered_end_time);
 
     if (now < bufferedStart || now > bufferedEnd) {
-      return ApiResponse.badRequest(
-        "Check-in is not currently open for this event.",
-      );
+      return ApiResponse.badRequest("Check-in is not currently open for this event.");
     }
 
-    // 5. Check in the user
+    // 4. Check in the user
     await eventService.checkInUser(id, user.id);
 
     return ApiResponse.ok({

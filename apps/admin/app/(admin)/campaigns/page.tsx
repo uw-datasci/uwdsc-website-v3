@@ -174,8 +174,8 @@ export default function CampaignsPage() {
               </>
             ) : (
               <>
-                Send Campaign
                 <Send className="size-4" />
+                Send Campaign
               </>
             )}
           </Button>

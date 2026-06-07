@@ -43,37 +43,30 @@ export function MembershipWarningBanner() {
   }, [isAuthenticated, user, pathname]);
 
   useEffect(() => {
-    if (!isAuthenticated || !user) return;
-    if (!membershipStatus) return;
-    if (!isOpen) return;
-    if (HIDE_ON_PATHS.has(pathname)) return;
+    const shouldShow =
+      !isAuthenticated ||
+      !user ||
+      !membershipStatus ||
+      !isOpen ||
+      HIDE_ON_PATHS.has(pathname) ||
+      membershipStatus.has_membership;
 
-    const hasMembership = membershipStatus.has_membership;
-    const isMathSocMember = user.is_math_soc_member;
-
-    if (hasMembership && isMathSocMember) return;
-
-    const messages: string[] = [];
-    if (!hasMembership) messages.push("pay the DSC membership fee");
-    if (!isMathSocMember) messages.push("make sure you're a MathSoc member");
-    const description = messages.join(" and ");
+    if (shouldShow) return;
 
     toast.warning("Membership incomplete", {
       description: (
         <div className="flex flex-col gap-2">
-          <p>Please {description} to access all member benefits.</p>
-          {!hasMembership ? (
-            <p>
-              <a
-                href={MEMBERSHIP_PAYMENT_URL}
-                className="font-semibold underline underline-offset-2 transition-colors hover:text-blue-700"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Pay DSC membership
-              </a>
-            </p>
-          ) : null}
+          <p>Please pay the DSC membership fee to access all member benefits.</p>
+          <p>
+            <a
+              href={MEMBERSHIP_PAYMENT_URL}
+              className="font-semibold underline underline-offset-2 transition-colors hover:text-blue-700"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Pay DSC membership
+            </a>
+          </p>
         </div>
       ),
       duration: 10000,

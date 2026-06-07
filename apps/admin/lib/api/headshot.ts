@@ -7,6 +7,7 @@
 
 import type { UploadHeadshotResponse } from "@/types/headshot";
 import { createApiError } from "./error";
+import { assertHeadshotWithinLimit, parseJsonResponse } from "./parse-response";
 
 /**
  * Upload a headshot file for the current user
@@ -21,6 +22,8 @@ export async function uploadHeadshot(
   file: File,
   fullName: string,
 ): Promise<UploadHeadshotResponse> {
+  assertHeadshotWithinLimit(file);
+
   const formData = new FormData();
   formData.append("file", file);
   formData.append("fullName", fullName);
@@ -30,7 +33,7 @@ export async function uploadHeadshot(
     body: formData,
   });
 
-  const data = await response.json();
+  const data = await parseJsonResponse<UploadHeadshotResponse>(response);
 
   if (!response.ok) throw createApiError(data, response.status);
 

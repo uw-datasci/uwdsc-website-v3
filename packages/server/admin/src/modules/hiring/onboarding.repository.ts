@@ -14,24 +14,24 @@ export class OnboardingRepository extends BaseRepository {
   private mapAdminRow(row: OnboardingAdminRowDb): OnboardingAdminRow {
     const submission = row.submission_id
       ? {
-        id: row.submission_id,
-        profile_id: row.profile_id,
-        term_id: row.submission_term_id ?? "",
-        email: row.submission_email ?? "",
-        role_id: row.submission_role_id ?? 0,
-        in_waterloo: row.submission_in_waterloo ?? "",
-        term_type: row.submission_term_type ?? "study",
-        instagram: row.submission_instagram ?? null,
-        headshot_url: row.submission_headshot_url ?? null,
-        consent_website: row.submission_consent_website ?? false,
-        consent_instagram: row.submission_consent_instagram ?? false,
-        discord: row.submission_discord ?? "",
-        datasci_competency: row.submission_datasci_competency ?? 0,
-        anything_else: row.submission_anything_else ?? null,
-        submitted_at: row.submission_submitted_at ?? "",
-        created_at: row.submission_created_at ?? "",
-        updated_at: row.submission_updated_at ?? "",
-      }
+          id: row.submission_id,
+          profile_id: row.profile_id,
+          term_id: row.submission_term_id ?? "",
+          email: row.submission_email ?? "",
+          role_id: row.submission_role_id ?? 0,
+          in_waterloo: row.submission_in_waterloo ?? "",
+          term_type: row.submission_term_type ?? "study",
+          instagram: row.submission_instagram ?? null,
+          headshot_url: row.submission_headshot_url ?? null,
+          consent_website: row.submission_consent_website ?? false,
+          consent_instagram: row.submission_consent_instagram ?? false,
+          discord: row.submission_discord ?? "",
+          datasci_competency: row.submission_datasci_competency ?? 0,
+          anything_else: row.submission_anything_else ?? null,
+          submitted_at: row.submission_submitted_at ?? "",
+          created_at: row.submission_created_at ?? "",
+          updated_at: row.submission_updated_at ?? "",
+        }
       : null;
 
     return {
@@ -160,10 +160,7 @@ export class OnboardingRepository extends BaseRepository {
     return result[0] ?? null;
   }
 
-  async getSubmission(
-    profile_id: string,
-    term_id: string,
-  ): Promise<Onboarding | null> {
+  async getSubmission(profile_id: string, term_id: string): Promise<Onboarding | null> {
     const result = await this.sql<Onboarding[]>`
         SELECT *
         FROM public.exec_form_submissions
@@ -175,10 +172,9 @@ export class OnboardingRepository extends BaseRepository {
     return result[0] ?? null;
   }
 
-  async saveSubmission(
-    data: OnboardingData,
-    profile_id: string,
-  ): Promise<Onboarding | null> {
+  async saveSubmission(data: OnboardingData, profile_id: string): Promise<Onboarding | null> {
+    const instagram =
+      data.consent_instagram && data.instagram?.trim() ? data.instagram.trim() : null;
     const resolvedHeadshotUrl = data.consent_website
       ? (data.headshot_url ?? null)
       : TEAM_DEFAULT_HEADSHOT_URL;
@@ -204,7 +200,7 @@ export class OnboardingRepository extends BaseRepository {
         ${data.role_id},
         ${data.in_waterloo ?? null},
         ${data.term_type}::term_type_enum,
-        ${data.instagram ?? null},
+        ${instagram},
         ${resolvedHeadshotUrl},
         ${data.consent_website},
         ${data.consent_instagram},
@@ -233,7 +229,7 @@ export class OnboardingRepository extends BaseRepository {
       UPDATE public.exec_team
       SET
         photo_url = COALESCE(NULLIF(${resolvedHeadshotUrl}::text, ''), photo_url),
-        instagram = ${data.instagram}::text,
+        instagram = ${instagram},
         updated_at = NOW()
       WHERE profile_id = ${profile_id}::uuid
     `;

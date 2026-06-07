@@ -10,6 +10,7 @@ import {
   DialogFooter,
 } from "@uwdsc/ui";
 import type { Event } from "@uwdsc/common/types";
+import { formatEventDescription } from "@uwdsc/common/utils";
 import { formatDateTime } from "@/lib/utils/events";
 import { DeleteEventDialog } from "./DeleteEventModal";
 
@@ -57,22 +58,15 @@ export function EventDetailsDialog({
             </span>
           </div>
           <div>
-            <span className="font-medium text-muted-foreground">
-              Description:
-            </span>
+            <span className="font-medium text-muted-foreground">Description:</span>
             <p className="whitespace-pre-wrap mt-1 text-muted-foreground">
-              {event.description}
+              {formatEventDescription(event.description)}
             </p>
           </div>
         </div>
 
         <DialogFooter>
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Edit event"
-            onClick={handleEdit}
-          >
+          <Button variant="ghost" size="icon" aria-label="Edit event" onClick={handleEdit}>
             <Pencil className="size-4" />
           </Button>
 

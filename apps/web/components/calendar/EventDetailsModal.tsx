@@ -2,19 +2,10 @@
 
 import Image from "next/image";
 import { CalendarPlus, Clock, MapPin, Timer } from "lucide-react";
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@uwdsc/ui";
+import { Button, Dialog, DialogContent, DialogHeader, DialogTitle } from "@uwdsc/ui";
 import type { Event } from "@uwdsc/common/types";
-import {
-  formatDateTime,
-  getGoogleCalendarUrl,
-  downloadICS,
-} from "@/lib/utils/events";
+import { formatEventDescription } from "@uwdsc/common/utils";
+import { formatDateTime, getGoogleCalendarUrl, downloadICS } from "@/lib/utils/events";
 
 interface EventDetailsDialogProps {
   readonly event: Event | null;
@@ -56,7 +47,7 @@ export function EventDetailsDialog({
           ) : null}
           {event.description ? (
             <p className="text-sm text-muted-foreground whitespace-pre-wrap pt-1">
-              {event.description}
+              {formatEventDescription(event.description)}
             </p>
           ) : null}
         </DialogHeader>

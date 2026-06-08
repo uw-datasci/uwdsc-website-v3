@@ -51,7 +51,7 @@ jobs:
       pnpm-version: ${{ needs.setup.outputs.pnpm-version }}
       build-command: pnpm exec turbo build --filter=web...
       infisical-project-slug: ${{ needs.setup.outputs.infisical-project-slug }}
-      infisical-secret-path: /web
+      infisical-secret-path: /website/web
     secrets:
       INFISICAL_CLIENT_ID: ${{ secrets.INFISICAL_CLIENT_ID }}
       INFISICAL_CLIENT_SECRET: ${{ secrets.INFISICAL_CLIENT_SECRET }}
@@ -67,7 +67,7 @@ jobs:
       pnpm-version: ${{ needs.setup.outputs.pnpm-version }}
       build-command: pnpm exec turbo build --filter=admin...
       infisical-project-slug: ${{ needs.setup.outputs.infisical-project-slug }}
-      infisical-secret-path: /admin
+      infisical-secret-path: /website/admin
     secrets:
       INFISICAL_CLIENT_ID: ${{ secrets.INFISICAL_CLIENT_ID }}
       INFISICAL_CLIENT_SECRET: ${{ secrets.INFISICAL_CLIENT_SECRET }}

@@ -84,6 +84,7 @@ export function Navbar() {
             <NavigationMenu viewport={false}>
               <NavigationMenuList className="gap-4">
                 <NavLinks navLinks={navLinks} />
+                {process.env.NODE_ENV === 'development' && (
                 <NavigationMenuItem>
                   <Button 
                     variant="ghost"
@@ -92,6 +93,7 @@ export function Navbar() {
                       <span className="text-sm font-medium">Wrapped</span>
                     </Button>
                 </NavigationMenuItem>
+                )}
                 <UserAvatar />
               </NavigationMenuList>
             </NavigationMenu>

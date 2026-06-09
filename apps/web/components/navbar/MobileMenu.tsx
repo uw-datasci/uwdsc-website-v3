@@ -110,12 +110,14 @@ export function MobileMenu({ navLinks, user, onOpenWrapped }: Readonly<MobileMen
             {/* Main Navigation Links */}
             <div className="px-6 py-2">
               <nav className="space-y-1">
+                {process.env.NODE_ENV === 'development' && (
                 <Button 
                     variant="ghost"
                     onClick={handleOpenWrapped}
                     className="w-full justify-start text-lg py-3 px-4 h-auto font-semibold hover:bg-accent/50 transition-colors rounded-lg gap-2">
                       <span className="text-sm font-medium">Wrapped</span>
                     </Button>
+                  )}
                 {navLinks.map((link) => {
                   const linkComponent = (
                     <Link

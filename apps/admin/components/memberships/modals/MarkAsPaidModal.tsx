@@ -5,13 +5,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { markMemberAsPaid } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
-import {
-  markAsPaidSchema,
-  type MarkAsPaidFormValues,
-} from "@/lib/schemas/membership";
-import { Loader2 } from "lucide-react";
+import { markAsPaidSchema, type MarkAsPaidFormValues } from "@/lib/schemas/membership";
+import { CalendarCheck, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { Member } from "@uwdsc/common/types";
+import { Event, Member } from "@uwdsc/common/types";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
   Button,
+  Checkbox,
   Form,
   FormField,
   FormItem,
@@ -34,6 +32,7 @@ interface MarkAsPaidModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   member: Member;
+  activeEvent?: Event | null;
   onSuccess?: () => void;
 }
 
@@ -48,9 +47,11 @@ export function MarkAsPaidModal({
   open,
   onOpenChange,
   member,
+  activeEvent,
   onSuccess,
 }: Readonly<MarkAsPaidModalProps>) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [checkIn, setCheckIn] = useState(true);
   const { user } = useAuth();
 
   // Get the verifier name from the current user's profile
@@ -61,10 +62,10 @@ export function MarkAsPaidModal({
 
   const form = useForm<MarkAsPaidFormValues>({
     resolver: zodResolver(markAsPaidSchema),
+    mode: "onChange",
     defaultValues: {
       payment_method: undefined,
-      payment_location: "",
-      // keep the form's `verifier` as the user id (sent to the API)
+      payment_location: activeEvent?.name ?? "",
       verifier: user?.id ?? "",
     },
   });
@@ -76,18 +77,31 @@ export function MarkAsPaidModal({
 
   const onSubmit = async (data: MarkAsPaidFormValues) => {
     setIsSubmitting(true);
+    // Only check in when there's an active event and the exec left it enabled.
+    const eventToCheckInto = checkIn ? activeEvent : null;
     try {
-      await markMemberAsPaid(member.id, data);
-      toast.success("Member marked as paid successfully");
+      const { checked_in, check_in_error } = await markMemberAsPaid(member.id, {
+        ...data,
+        event_id: eventToCheckInto?.id,
+      });
+
+      if (eventToCheckInto && checked_in) {
+        toast.success(`Marked as paid and checked in to ${eventToCheckInto.name}`);
+      } else if (eventToCheckInto) {
+        // Paid succeeded but the check-in didn't — make both clear.
+        toast.success("Member marked as paid");
+        toast.warning(check_in_error ?? "Couldn't check the member in");
+      } else {
+        toast.success("Member marked as paid successfully");
+      }
+
       onOpenChange(false);
       form.reset();
       onSuccess?.();
     } catch (error) {
       onOpenChange(false);
       const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Failed to mark member as paid";
+        error instanceof Error ? error.message : "Failed to mark member as paid";
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -101,15 +115,10 @@ export function MarkAsPaidModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="sm:max-w-125"
-        aria-describedby="mark-as-paid-modal"
-      >
+      <DialogContent className="sm:max-w-125" aria-describedby="mark-as-paid-modal">
         <DialogHeader>
           <DialogTitle>Mark as paid</DialogTitle>
-          <p className="text-sm text-muted-foreground mt-1">
-            {getMemberDisplayName(member)}
-          </p>
+          <p className="text-sm text-muted-foreground mt-1">{getMemberDisplayName(member)}</p>
         </DialogHeader>
 
         <Form {...form}>
@@ -142,23 +151,41 @@ export function MarkAsPaidModal({
               name="verifier"
               render={({ field }) => (
                 <>
-                  {/* keep the actual form value as the user id (hidden input) */}
                   <input type="hidden" {...field} />
                   <FormItem>
                     <FormLabel>Verified By</FormLabel>
                     <FormControl>
-                      {/* show the human-friendly name but don't bind it to the form */}
-                      <Input
-                        value={verifierName}
-                        disabled
-                        className="bg-muted"
-                      />
+                      <Input value={verifierName} disabled className="bg-muted" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 </>
               )}
             />
+
+            {activeEvent && (
+              <label
+                htmlFor="markpaid-checkin"
+                className="flex w-full cursor-pointer items-start gap-3 rounded-lg border border-primary/40 bg-primary/5 p-3 transition-colors hover:bg-primary/10"
+              >
+                <Checkbox
+                  id="markpaid-checkin"
+                  checked={checkIn}
+                  onCheckedChange={(value) => setCheckIn(value === true)}
+                  className="mt-0.5"
+                />
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-1.5 text-sm font-medium">
+                    <CalendarCheck className="h-4 w-4 text-primary" />
+                    Check in to active event
+                  </div>
+                  <p className="text-sm text-muted-foreground">{activeEvent.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    Leave unchecked if the member isn&apos;t at the event.
+                  </p>
+                </div>
+              </label>
+            )}
 
             <DialogFooter className="gap-2">
               <Button
@@ -169,7 +196,7 @@ export function MarkAsPaidModal({
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" disabled={isSubmitting || !form.formState.isValid}>
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

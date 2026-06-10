@@ -92,11 +92,11 @@ export async function getMembershipStatus(): Promise<MembershipStatus> {
 }
 
 /**
- * Mark a member as paid
+ * Mark a member as paid, optionally checking them into an active event.
  * @param memberId - The profile ID of the member
- * @param paymentData - Payment method, location, and verifier
- * @returns Promise indicating success
- * @throws Error if request fails or unauthorized
+ * @param paymentData - Payment method, location, verifier, and optional event_id
+ * @returns Whether the member was also checked in, plus any check-in error
+ * @throws Error if marking paid fails or the request is unauthorized
  */
 export async function markMemberAsPaid(
   memberId: string,
@@ -104,8 +104,9 @@ export async function markMemberAsPaid(
     payment_method: "cash" | "online" | "math_soc";
     payment_location: string;
     verifier: string;
+    event_id?: string;
   },
-): Promise<void> {
+): Promise<{ checked_in: boolean; check_in_error?: string }> {
   const response = await fetch(`/api/members/${memberId}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -117,6 +118,11 @@ export async function markMemberAsPaid(
   if (!response.ok) {
     throw createApiError(data, response.status);
   }
+
+  return {
+    checked_in: Boolean(data?.checked_in),
+    check_in_error: data?.check_in_error,
+  };
 }
 
 /**

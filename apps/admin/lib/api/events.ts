@@ -33,6 +33,18 @@ export async function getAllEvents(options?: {
 }
 
 /**
+ * Get the currently active event (now within its buffered window), if any.
+ * The app assumes at most one event is active at a time.
+ *
+ * @returns Promise with the active event, or null when none is active
+ * @throws Error if request fails or unauthorized
+ */
+export async function getActiveEvent(): Promise<Event | null> {
+  const events = await getAllEvents({ activeOnly: true });
+  return events[0] ?? null;
+}
+
+/**
  * Get a single event by ID
  *
  * @param eventId - The event UUID

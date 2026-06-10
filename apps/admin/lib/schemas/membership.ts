@@ -11,6 +11,8 @@ export const markAsPaidSchema = z.object({
   }),
   payment_location: z.string().trim().min(1, "Payment location is required"),
   verifier: z.string().trim().min(1, "Verifier is required"),
+  // Optional: when verifying at an active event, also check the member into it.
+  event_id: z.string().uuid().optional(),
 });
 
 export type MarkAsPaidFormValues = z.infer<typeof markAsPaidSchema>;

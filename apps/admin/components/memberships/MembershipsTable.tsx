@@ -45,12 +45,13 @@ import {
 } from "@uwdsc/ui";
 import { exportToCsv } from "@/lib/utils/csv";
 import { globalMembershipFilter } from "@/lib/utils/table";
-import { Member, MembershipFilter } from "@uwdsc/common/types";
+import { Event, Member, MembershipFilter } from "@uwdsc/common/types";
 import { FACULTY_FILTER_OPTIONS } from "@uwdsc/common/constants";
 
 interface MembershipsTableProps {
   readonly profiles: Member[];
   readonly activeFilter: MembershipFilter;
+  readonly activeEvent?: Event | null;
   readonly onRefresh?: () => void;
   readonly initialAction?: {
     readonly type: MembershipActionType;
@@ -99,6 +100,7 @@ function getMembershipCsvValue(row: Member, key: string): unknown {
 export function MembershipsTable({
   profiles,
   activeFilter,
+  activeEvent,
   onRefresh,
   initialAction,
   onRequestClearInitialAction,
@@ -206,6 +208,7 @@ export function MembershipsTable({
             open
             onOpenChange={(open) => !open && onClose()}
             member={member}
+            activeEvent={activeEvent}
             onSuccess={onRefresh}
           />
         );

@@ -29,6 +29,7 @@ interface NavLink {
 interface MobileMenuProps {
   navLinks: NavLink[];
   user: Profile | null;
+  onOpenWrapped?: () => void;
 }
 
 function HamburgerIcon() {
@@ -41,7 +42,7 @@ function HamburgerIcon() {
   );
 }
 
-export function MobileMenu({ navLinks, user }: Readonly<MobileMenuProps>) {
+export function MobileMenu({ navLinks, user, onOpenWrapped }: Readonly<MobileMenuProps>) {
   const router = useRouter();
   const { mutate } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -56,6 +57,11 @@ export function MobileMenu({ navLinks, user }: Readonly<MobileMenuProps>) {
     } catch (error) {
       console.error("Failed to sign out:", error);
     }
+  };
+
+  const handleOpenWrapped = () => {
+    setIsMobileMenuOpen(false);
+    onOpenWrapped?.();
   };
 
   return (
@@ -104,6 +110,14 @@ export function MobileMenu({ navLinks, user }: Readonly<MobileMenuProps>) {
             {/* Main Navigation Links */}
             <div className="px-6 py-2">
               <nav className="space-y-1">
+                {process.env.NODE_ENV === 'development' && (
+                <Button 
+                    variant="ghost"
+                    onClick={handleOpenWrapped}
+                    className="w-full justify-start text-lg py-3 px-4 h-auto font-semibold hover:bg-accent/50 transition-colors rounded-lg gap-2">
+                      <span className="text-sm font-medium">Wrapped</span>
+                    </Button>
+                  )}
                 {navLinks.map((link) => {
                   const linkComponent = (
                     <Link

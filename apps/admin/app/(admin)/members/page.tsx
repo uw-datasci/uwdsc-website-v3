@@ -6,8 +6,13 @@ import {
   MembershipStatsCards,
   MembershipsTable,
 } from "@/components/memberships";
-import { getAllProfiles, getMembershipStats } from "@/lib/api";
-import { Member, MembershipFilter, MembershipStats } from "@uwdsc/common/types";
+import { getActiveEvent, getAllProfiles, getMembershipStats } from "@/lib/api";
+import {
+  Event,
+  Member,
+  MembershipFilter,
+  MembershipStats,
+} from "@uwdsc/common/types";
 
 export default function MembersPage() {
   const searchParams = useSearchParams();
@@ -16,6 +21,7 @@ export default function MembersPage() {
 
   const [profiles, setProfiles] = useState<Member[]>([]);
   const [stats, setStats] = useState<MembershipStats | null>(null);
+  const [activeEvent, setActiveEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<MembershipFilter>("all");
@@ -50,14 +56,16 @@ export default function MembersPage() {
       setLoading(true);
       setError(null);
 
-      // Fetch profiles and stats in parallel
-      const [profilesData, statsData] = await Promise.all([
+      // Fetch profiles, stats, and the active event (if any) in parallel
+      const [profilesData, statsData, activeEventData] = await Promise.all([
         getAllProfiles(),
         getMembershipStats(),
+        getActiveEvent(),
       ]);
 
       setProfiles(profilesData);
       setStats(statsData);
+      setActiveEvent(activeEventData);
     } catch (err) {
       console.error("Error fetching membership data:", err);
       setError(
@@ -113,6 +121,7 @@ export default function MembersPage() {
       <MembershipsTable
         profiles={profiles}
         activeFilter={activeFilter}
+        activeEvent={activeEvent}
         onRefresh={fetchData}
         initialAction={initialAction}
         onRequestClearInitialAction={

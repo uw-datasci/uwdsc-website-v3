@@ -12,6 +12,7 @@ import { Event, Member } from "@uwdsc/common/types";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -115,10 +116,10 @@ export function MarkAsPaidModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-125" aria-describedby="mark-as-paid-modal">
+      <DialogContent className="sm:max-w-125">
         <DialogHeader>
           <DialogTitle>Mark as paid</DialogTitle>
-          <p className="text-sm text-muted-foreground mt-1">{getMemberDisplayName(member)}</p>
+          <DialogDescription>{getMemberDisplayName(member)}</DialogDescription>
         </DialogHeader>
 
         <Form {...form}>

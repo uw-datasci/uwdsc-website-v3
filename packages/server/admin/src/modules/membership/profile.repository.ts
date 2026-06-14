@@ -44,14 +44,14 @@ export class ProfileRepository extends BaseRepository {
         m.payment_method,
         m.payment_location,
         NULLIF(TRIM(CONCAT_WS(' ', pv.first_name, pv.last_name)), '') AS verifier
-      FROM profiles p
+      FROM identity.profiles p
       JOIN auth.users au ON p.id = au.id
-      JOIN user_roles r ON p.id = r.id
+      JOIN identity.user_roles r ON p.id = r.id
       ${options?.paidOnly
           ? this.sql`JOIN public.memberships m ON m.profile_id = p.id`
           : this.sql`LEFT JOIN public.memberships m ON m.profile_id = p.id`
         }
-      LEFT JOIN profiles pv ON pv.id = m.verifier_id
+      LEFT JOIN identity.profiles pv ON pv.id = m.verifier_id
       ${searchCondition}
       ORDER BY au.created_at DESC
       ${limitCondition}
@@ -73,9 +73,9 @@ export class ProfileRepository extends BaseRepository {
     try {
       const rows = await this.sql<{ email: string }[]>`
         SELECT DISTINCT au.email
-        FROM profiles p
+        FROM identity.profiles p
         JOIN auth.users au ON p.id = au.id
-        JOIN user_roles r ON p.id = r.id
+        JOIN identity.user_roles r ON p.id = r.id
         WHERE r.role IN ${this.sql(roles)}
       `;
       return rows.map((row) => row.email).filter(Boolean);
@@ -103,9 +103,9 @@ export class ProfileRepository extends BaseRepository {
           p.term,
           p.is_math_soc_member,
           r.role AS role
-        FROM profiles p
+        FROM identity.profiles p
         JOIN auth.users au ON p.id = au.id
-        JOIN user_roles r ON p.id = r.id
+        JOIN identity.user_roles r ON p.id = r.id
         WHERE lower(trim(au.email)) = ${normalized}
         LIMIT 1
       `;
@@ -131,7 +131,7 @@ export class ProfileRepository extends BaseRepository {
           p.faculty,
           p.term,
           p.is_math_soc_member
-        FROM profiles p
+        FROM identity.profiles p
         WHERE p.id = ${profileId}
         LIMIT 1
       `;
@@ -154,7 +154,7 @@ export class ProfileRepository extends BaseRepository {
   ): Promise<boolean> {
     try {
       const result = await this.sql`
-        UPDATE profiles
+        UPDATE identity.profiles
         SET ${this.sql(data, ...columns)}, updated_at = NOW()
         WHERE id = ${profileId}
         RETURNING *

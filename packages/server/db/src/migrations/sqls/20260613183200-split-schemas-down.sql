@@ -3,9 +3,10 @@
 -- ============================================================================
 
 -- Drop grants (optional cleanup; re-granted when tables return to public)
+REVOKE SELECT ON identity.profiles FROM authenticated;
 REVOKE SELECT ON org.subteams, org.exec_positions, org.exec_team FROM authenticated, anon;
 REVOKE SELECT ON events.events FROM authenticated, anon;
-REVOKE USAGE ON SCHEMA org, hiring, events FROM authenticated, anon, service_role;
+REVOKE USAGE ON SCHEMA identity, org, hiring, events FROM authenticated, anon, service_role;
 
 -- ----------------------------------------------------------------------------
 -- RLS policies: restore public-qualified references before moving tables
@@ -129,6 +130,9 @@ ALTER TABLE org.exec_team SET SCHEMA public;
 ALTER TABLE org.exec_positions SET SCHEMA public;
 ALTER TABLE org.subteams SET SCHEMA public;
 
+ALTER TABLE identity.profiles SET SCHEMA public;
+ALTER TABLE identity.user_roles SET SCHEMA public;
+
 -- ----------------------------------------------------------------------------
 -- Enums back to public
 -- ----------------------------------------------------------------------------
@@ -136,6 +140,8 @@ ALTER TYPE hiring.term_type_enum SET SCHEMA public;
 ALTER TYPE hiring.application_input_enum SET SCHEMA public;
 ALTER TYPE hiring.application_review_status_enum SET SCHEMA public;
 ALTER TYPE hiring.application_status_enum SET SCHEMA public;
+ALTER TYPE identity.faculty_enum SET SCHEMA public;
+ALTER TYPE identity.user_role_enum SET SCHEMA public;
 
 -- ----------------------------------------------------------------------------
 -- Restore functions in public
@@ -293,6 +299,7 @@ CREATE POLICY returning_exec_position_selections_insert ON public.returning_exec
 
 GRANT SELECT ON public.profiles TO authenticated;
 
+DROP SCHEMA IF EXISTS identity;
 DROP SCHEMA IF EXISTS org;
 DROP SCHEMA IF EXISTS hiring;
 DROP SCHEMA IF EXISTS events;

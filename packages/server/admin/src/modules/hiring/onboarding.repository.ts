@@ -114,9 +114,9 @@ export class OnboardingRepository extends BaseRepository {
         s.submitted_at AS submission_submitted_at,
         s.created_at AS submission_created_at,
         s.updated_at AS submission_updated_at
-      FROM profiles p
+      FROM identity.profiles p
       JOIN auth.users au ON p.id = au.id
-      JOIN user_roles r ON p.id = r.id
+      JOIN identity.user_roles r ON p.id = r.id
       LEFT JOIN LATERAL (
         SELECT position_id, subteam_id
         FROM org.exec_team

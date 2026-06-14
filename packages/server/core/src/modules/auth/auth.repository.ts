@@ -113,7 +113,7 @@ export class AuthRepository extends BaseRepository {
       // the password change the user already completed in Supabase.
       try {
         await this.sql`
-          UPDATE profiles
+          UPDATE identity.profiles
           SET password_reset_count = password_reset_count + 1,
               updated_at = now()
           WHERE id = ${userId}

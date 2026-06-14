@@ -1,4 +1,8 @@
-import { EXEC_TEAM_PHOTO_PLACEHOLDER, type ExecMember, type Subteam } from "@uwdsc/common/types";
+import {
+  EXEC_TEAM_PHOTO_PLACEHOLDER,
+  type ExecMember,
+  type Subteam,
+} from "@uwdsc/common/types";
 import { TeamRepository } from "./team.repository";
 
 class TeamService {

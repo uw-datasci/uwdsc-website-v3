@@ -12,7 +12,7 @@ export class MembershipRepository extends BaseRepository {
           COUNT(*) as total_users,
           COUNT(*) FILTER (WHERE m.profile_id IS NOT NULL) as paid_users,
           COUNT(*) FILTER (WHERE m.profile_id IS NOT NULL AND p.is_math_soc_member = true) as math_soc_members
-        FROM identity.profiles p
+        FROM profiles p
         LEFT JOIN public.memberships m
           ON p.id = m.profile_id
          AND m.term_id = (SELECT id FROM public.terms WHERE is_active = true LIMIT 1)
@@ -40,7 +40,7 @@ export class MembershipRepository extends BaseRepository {
         (
           SELECT t.id
           FROM public.terms t
-          INNER JOIN identity.profiles pr ON pr.term = t.code
+          INNER JOIN profiles pr ON pr.term = t.code
           WHERE pr.id = ${profileId}
           LIMIT 1
         ),
@@ -93,7 +93,7 @@ export class MembershipRepository extends BaseRepository {
             (
               SELECT t.id
               FROM public.terms t
-              INNER JOIN identity.profiles pr ON pr.term = t.code
+              INNER JOIN profiles pr ON pr.term = t.code
               WHERE pr.id = ${profileId}
               LIMIT 1
             ),

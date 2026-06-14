@@ -253,7 +253,7 @@ export class HiringRepository extends BaseRepository {
       // Promote new team members (every account already has a user_roles row)
       for (const { profileId, role } of newTeamRoles) {
         await tx`
-          UPDATE user_roles
+          UPDATE identity.user_roles
           SET role = ${role}
           WHERE id = ${profileId}
         `;
@@ -263,7 +263,7 @@ export class HiringRepository extends BaseRepository {
       let demoted = 0;
       if (profileIds.length > 0) {
         const result = await tx`
-          UPDATE user_roles
+          UPDATE identity.user_roles
           SET role = 'member'
           WHERE role IN ('exec', 'admin')
             AND id NOT IN ${tx(profileIds)}
@@ -273,7 +273,7 @@ export class HiringRepository extends BaseRepository {
       } else {
         // No new team - demote everyone
         const result = await tx`
-          UPDATE user_roles
+          UPDATE identity.user_roles
           SET role = 'member'
           WHERE role IN ('exec', 'admin')
           RETURNING id

@@ -8,7 +8,7 @@ export class ProfileRepository extends BaseRepository {
   async getProfileCount(): Promise<number> {
     try {
       const result = await this.sql<{ count: number }[]>`
-        SELECT COUNT(*)::int AS count FROM profiles
+        SELECT COUNT(*)::int AS count FROM identity.profiles
       `;
       return result[0]?.count ?? 0;
     } catch (error: unknown) {
@@ -26,7 +26,7 @@ export class ProfileRepository extends BaseRepository {
   async completeProfile(userId: string, data: CompleteProfileData): Promise<boolean> {
     try {
       const result = await this.sql`
-        UPDATE profiles
+        UPDATE identity.profiles
         SET 
           first_name = ${data.first_name},
           last_name = ${data.last_name},
@@ -55,7 +55,7 @@ export class ProfileRepository extends BaseRepository {
   async updateProfileByUser(userId: string, data: ProfileUpdateData): Promise<boolean> {
     try {
       const result = await this.sql`
-        UPDATE profiles
+        UPDATE identity.profiles
         SET 
           first_name = ${data.first_name},
           last_name = ${data.last_name},
@@ -94,13 +94,13 @@ export class ProfileRepository extends BaseRepository {
           ur.role AS role,
           (
             SELECT string_agg(ep.name, ' · ' ORDER BY et.id)
-            FROM exec_team et
-            JOIN exec_positions ep ON et.position_id = ep.id
+            FROM org.exec_team et
+            JOIN org.exec_positions ep ON et.position_id = ep.id
             WHERE et.profile_id = p.id
           ) AS exec_position_name
-        FROM profiles p
+        FROM identity.profiles p
         JOIN auth.users au ON p.id = au.id
-        JOIN user_roles ur ON p.id = ur.id
+        JOIN identity.user_roles ur ON p.id = ur.id
         WHERE p.id = ${userId}
         LIMIT 1
       `;

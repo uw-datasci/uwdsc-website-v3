@@ -30,7 +30,7 @@ export class ApplicationRepository extends BaseRepository {
         returning_exec_release_date,
         returning_exec_deadline,
         created_at
-      FROM public.terms
+      FROM terms
       WHERE is_active = true
       ORDER BY created_at DESC
       LIMIT 1
@@ -44,8 +44,8 @@ export class ApplicationRepository extends BaseRepository {
         apa.id,
         ep.id as position_id,
         ep.name
-      FROM hiring.application_positions_available apa
-      JOIN org.exec_positions ep ON apa.position_id = ep.id
+      FROM application_positions_available apa
+      JOIN exec_positions ep ON apa.position_id = ep.id
       ORDER BY ep.name
     `;
     return result;
@@ -63,8 +63,8 @@ export class ApplicationRepository extends BaseRepository {
         q.created_at,
         pq.position_id,
         pq.sort_order
-      FROM hiring.questions q
-      JOIN hiring.position_questions pq ON q.id = pq.question_id
+      FROM questions q
+      JOIN position_questions pq ON q.id = pq.question_id
       ORDER BY pq.sort_order ASC, q.created_at ASC
     `;
     return result;
@@ -87,7 +87,7 @@ export class ApplicationRepository extends BaseRepository {
         club_experience,
         status,
         submitted_at
-      FROM hiring.applications
+      FROM applications
       WHERE profile_id = ${profileId} AND term_id = ${termId}
       LIMIT 1
     `;
@@ -102,7 +102,7 @@ export class ApplicationRepository extends BaseRepository {
         position_id,
         priority,
         status
-      FROM hiring.application_position_selections
+      FROM application_position_selections
       WHERE application_id = ${app.id}
       ORDER BY priority
     `;
@@ -113,7 +113,7 @@ export class ApplicationRepository extends BaseRepository {
         application_id,
         question_id,
         answer_text
-      FROM hiring.answers
+      FROM answers
       WHERE application_id = ${app.id}
     `;
 
@@ -126,7 +126,7 @@ export class ApplicationRepository extends BaseRepository {
 
   async createApplication(data: CreateApplicationData): Promise<Application> {
     const result = await this.sql<Application[]>`
-      INSERT INTO hiring.applications (profile_id, term_id, full_name, status)
+      INSERT INTO applications (profile_id, term_id, full_name, status)
       VALUES (${data.profile_id}, ${data.term_id}, ${data.full_name}, 'draft')
       RETURNING
         id,
@@ -152,7 +152,7 @@ export class ApplicationRepository extends BaseRepository {
     data: UpdateApplicationData,
   ): Promise<Application | null> {
     const result = await this.sql<Application[]>`
-      UPDATE hiring.applications
+      UPDATE applications
       SET
         full_name = COALESCE(${data.full_name ?? null}, full_name),
         major = COALESCE(${data.major ?? null}, major),
@@ -173,14 +173,14 @@ export class ApplicationRepository extends BaseRepository {
     selections: PositionSelectionInput[],
   ): Promise<void> {
     await this.sql`
-      DELETE FROM hiring.application_position_selections
+      DELETE FROM application_position_selections
       WHERE application_id = ${applicationId}
     `;
 
     for (const sel of selections) {
       if (!sel.position_id) continue;
       await this.sql`
-        INSERT INTO hiring.application_position_selections (application_id, position_id, priority)
+        INSERT INTO application_position_selections (application_id, position_id, priority)
         VALUES (${applicationId}, ${sel.position_id}, ${sel.priority})
       `;
     }
@@ -191,14 +191,14 @@ export class ApplicationRepository extends BaseRepository {
     answers: AnswerInput[],
   ): Promise<void> {
     await this.sql`
-      DELETE FROM hiring.answers
+      DELETE FROM answers
       WHERE application_id = ${applicationId}
     `;
 
     for (const ans of answers) {
       if (!ans.question_id || ans.answer_text == null) continue;
       await this.sql`
-        INSERT INTO hiring.answers (application_id, question_id, answer_text)
+        INSERT INTO answers (application_id, question_id, answer_text)
         VALUES (${applicationId}, ${ans.question_id}, ${ans.answer_text})
       `;
     }
@@ -207,7 +207,7 @@ export class ApplicationRepository extends BaseRepository {
   async getProfileForAutofill(userId: string): Promise<ProfileAutofill | null> {
     const result = await this.sql<ProfileAutofill[]>`
       SELECT p.first_name, p.last_name, au.email, p.term
-      FROM identity.profiles p
+      FROM profiles p
       JOIN auth.users au ON p.id = au.id
       WHERE p.id = ${userId}
       LIMIT 1

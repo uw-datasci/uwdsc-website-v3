@@ -15,7 +15,7 @@ export class ReturningExecRepository extends BaseRepository {
     term_id: string,
   ): Promise<ReturningExecOwnSubmission | null> {
     const rows = await this.sql<ReturningExecRow[]>`
-      SELECT * FROM hiring.returning_exec_submissions
+      SELECT * FROM public.returning_exec_submissions
       WHERE profile_id = ${profile_id} AND term_id = ${term_id}
       LIMIT 1
     `;
@@ -40,7 +40,7 @@ export class ReturningExecRepository extends BaseRepository {
     } = data;
 
     const rows = await this.sql<ReturningExecRow[]>`
-      INSERT INTO hiring.returning_exec_submissions (
+      INSERT INTO public.returning_exec_submissions (
         profile_id, term_id, email, full_name, discord, past_positions,
         interested_in_returning, not_returning_reason,
         in_person_next_term, qualifications, additional_notes
@@ -68,13 +68,13 @@ export class ReturningExecRepository extends BaseRepository {
     if (!row) throw new Error("Upsert returned no row");
 
     await this.sql`
-      DELETE FROM hiring.returning_exec_position_selections
+      DELETE FROM public.returning_exec_position_selections
       WHERE submission_id = ${row.id}
     `;
 
     if (position_selections.length > 0) {
       await this.sql`
-        INSERT INTO hiring.returning_exec_position_selections ${this.sql(
+        INSERT INTO public.returning_exec_position_selections ${this.sql(
         position_selections.map((s) => ({
           submission_id: row.id,
           position_id: s.position_id,
@@ -91,7 +91,7 @@ export class ReturningExecRepository extends BaseRepository {
   async getAllSubmissions(term_id: string): Promise<ReturningExecListItem[]> {
     const rows = await this.sql<ReturningExecRow[]>`
       SELECT s.*
-      FROM hiring.returning_exec_submissions s
+      FROM public.returning_exec_submissions s
       WHERE s.term_id = ${term_id}
       ORDER BY s.submitted_at DESC
     `;
@@ -109,10 +109,10 @@ export class ReturningExecRepository extends BaseRepository {
         ep.name AS position_name,
         ep.is_vp,
         st.name AS subteam_name
-      FROM hiring.returning_exec_position_selections reps
-      JOIN hiring.application_positions_available apa ON apa.id = reps.position_id
-      JOIN org.exec_positions ep ON ep.id = apa.position_id
-      LEFT JOIN org.subteams st ON st.id = ep.subteam_id
+      FROM public.returning_exec_position_selections reps
+      JOIN public.application_positions_available apa ON apa.id = reps.position_id
+      JOIN public.exec_positions ep ON ep.id = apa.position_id
+      LEFT JOIN public.subteams st ON st.id = ep.subteam_id
       WHERE reps.submission_id IN ${this.sql(submissionIds)}
       ORDER BY reps.priority
     `;
@@ -164,10 +164,10 @@ export class ReturningExecRepository extends BaseRepository {
       { id: string; profile_id: string; full_name: string; email: string; submitted_at: string }[]
     >`
       SELECT s.id, s.profile_id, s.full_name, s.email, s.submitted_at
-      FROM hiring.returning_exec_submissions s
+      FROM public.returning_exec_submissions s
       WHERE s.term_id = ${term_id}
         AND EXISTS (
-          SELECT 1 FROM hiring.returning_exec_position_selections reps
+          SELECT 1 FROM public.returning_exec_position_selections reps
           WHERE reps.submission_id = s.id
             AND reps.status IN ${this.sql(HIRING_STATUSES)}
         )
@@ -187,10 +187,10 @@ export class ReturningExecRepository extends BaseRepository {
         ep.name AS position_name,
         ep.is_vp,
         st.name AS subteam_name
-      FROM hiring.returning_exec_position_selections reps
-      JOIN hiring.application_positions_available apa ON apa.id = reps.position_id
-      JOIN org.exec_positions ep ON ep.id = apa.position_id
-      LEFT JOIN org.subteams st ON st.id = ep.subteam_id
+      FROM public.returning_exec_position_selections reps
+      JOIN public.application_positions_available apa ON apa.id = reps.position_id
+      JOIN public.exec_positions ep ON ep.id = apa.position_id
+      LEFT JOIN public.subteams st ON st.id = ep.subteam_id
       WHERE reps.submission_id IN ${this.sql(submissionIds)}
         AND reps.status IN ${this.sql(HIRING_STATUSES)}
       ORDER BY reps.priority
@@ -214,7 +214,7 @@ export class ReturningExecRepository extends BaseRepository {
     status: ApplicationReviewStatus,
   ): Promise<void> {
     await this.sql`
-      UPDATE hiring.returning_exec_position_selections
+      UPDATE public.returning_exec_position_selections
       SET status = ${status}::application_review_status_enum
       WHERE id = ${selectionId}
     `;
@@ -227,8 +227,8 @@ export class ReturningExecRepository extends BaseRepository {
       { id: string; submission_id: string; position_id: number; status: ApplicationReviewStatus }[]
     >`
       SELECT reps.id, reps.submission_id, apa.position_id AS position_id, reps.status
-      FROM hiring.returning_exec_position_selections reps
-      JOIN hiring.application_positions_available apa ON apa.id = reps.position_id
+      FROM public.returning_exec_position_selections reps
+      JOIN public.application_positions_available apa ON apa.id = reps.position_id
       WHERE reps.id = ${selectionId}
       LIMIT 1
     `;
@@ -240,8 +240,8 @@ export class ReturningExecRepository extends BaseRepository {
   > {
     return this.sql<{ id: number; position_id: number; name: string }[]>`
       SELECT apa.id, ep.id AS position_id, ep.name
-      FROM hiring.application_positions_available apa
-      JOIN org.exec_positions ep ON ep.id = apa.position_id
+      FROM public.application_positions_available apa
+      JOIN public.exec_positions ep ON ep.id = apa.position_id
       ORDER BY ep.name
     `;
   }
@@ -282,10 +282,10 @@ export class ReturningExecRepository extends BaseRepository {
         ep.name AS position_name,
         ep.is_vp,
         st.name AS subteam_name
-      FROM hiring.returning_exec_position_selections reps
-      JOIN hiring.application_positions_available apa ON apa.id = reps.position_id
-      JOIN org.exec_positions ep ON ep.id = apa.position_id
-      LEFT JOIN org.subteams st ON st.id = ep.subteam_id
+      FROM public.returning_exec_position_selections reps
+      JOIN public.application_positions_available apa ON apa.id = reps.position_id
+      JOIN public.exec_positions ep ON ep.id = apa.position_id
+      LEFT JOIN public.subteams st ON st.id = ep.subteam_id
       WHERE reps.submission_id = ${submission_id}
       ORDER BY reps.priority
     `;

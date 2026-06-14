@@ -207,7 +207,7 @@ export class ApplicationRepository extends BaseRepository {
   async getProfileForAutofill(userId: string): Promise<ProfileAutofill | null> {
     const result = await this.sql<ProfileAutofill[]>`
       SELECT p.first_name, p.last_name, au.email, p.term
-      FROM identity.profiles p
+      FROM profiles p
       JOIN auth.users au ON p.id = au.id
       WHERE p.id = ${userId}
       LIMIT 1

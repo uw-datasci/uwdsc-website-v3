@@ -12,6 +12,7 @@ export async function isProfileCompleteForMiddleware(
   if (!userId) return false;
 
   const { data: row, error } = await supabase
+    .schema("identity")
     .from("profiles")
     .select("first_name, last_name, wat_iam, faculty, term, heard_from_where")
     .eq("id", userId)

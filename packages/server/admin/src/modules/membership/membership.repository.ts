@@ -12,10 +12,10 @@ export class MembershipRepository extends BaseRepository {
           COUNT(*) as total_users,
           COUNT(*) FILTER (WHERE m.profile_id IS NOT NULL) as paid_users,
           COUNT(*) FILTER (WHERE m.profile_id IS NOT NULL AND p.is_math_soc_member = true) as math_soc_members
-        FROM identity.profiles p
-        LEFT JOIN public.memberships m
+        FROM profiles p
+        LEFT JOIN memberships m
           ON p.id = m.profile_id
-         AND m.term_id = (SELECT id FROM public.terms WHERE is_active = true LIMIT 1)
+         AND m.term_id = (SELECT id FROM terms WHERE is_active = true LIMIT 1)
       `;
 
       return (
@@ -39,12 +39,12 @@ export class MembershipRepository extends BaseRepository {
       SELECT COALESCE(
         (
           SELECT t.id
-          FROM public.terms t
-          INNER JOIN identity.profiles pr ON pr.term = t.code
+          FROM terms t
+          INNER JOIN profiles pr ON pr.term = t.code
           WHERE pr.id = ${profileId}
           LIMIT 1
         ),
-        (SELECT id FROM public.terms WHERE is_active = true LIMIT 1)
+        (SELECT id FROM terms WHERE is_active = true LIMIT 1)
       ) AS term_id
     `;
     return result[0]?.term_id ?? null;
@@ -58,9 +58,9 @@ export class MembershipRepository extends BaseRepository {
   ): Promise<{ term_id: string; payment_method: string | null } | null> {
     const result = await this.sql<{ term_id: string; payment_method: string | null }[]>`
       SELECT term_id, payment_method::text AS payment_method
-      FROM public.memberships
+      FROM memberships
       WHERE profile_id = ${profileId}
-        AND term_id = (SELECT id FROM public.terms WHERE is_active = true LIMIT 1)
+        AND term_id = (SELECT id FROM terms WHERE is_active = true LIMIT 1)
       LIMIT 1
     `;
     return result[0] ?? null;
@@ -76,7 +76,7 @@ export class MembershipRepository extends BaseRepository {
 
     try {
       const result = await this.sql`
-        INSERT INTO public.memberships (
+        INSERT INTO memberships (
           profile_id,
           payment_method,
           payment_location,
@@ -92,12 +92,12 @@ export class MembershipRepository extends BaseRepository {
           COALESCE(
             (
               SELECT t.id
-              FROM public.terms t
-              INNER JOIN identity.profiles pr ON pr.term = t.code
+              FROM terms t
+              INNER JOIN profiles pr ON pr.term = t.code
               WHERE pr.id = ${profileId}
               LIMIT 1
             ),
-            (SELECT id FROM public.terms WHERE is_active = true LIMIT 1)
+            (SELECT id FROM terms WHERE is_active = true LIMIT 1)
           ),
           ${data.verifier},
           ${verifiedAtSql},

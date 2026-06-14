@@ -9,7 +9,7 @@ export class EventRepository extends BaseRepository {
   async getEventCount(): Promise<number> {
     try {
       const result = await this.sql<{ count: number }[]>`
-        SELECT COUNT(*)::int AS count FROM events.events
+        SELECT COUNT(*)::int AS count FROM events
       `;
       return result[0]?.count ?? 0;
     } catch (error: unknown) {
@@ -34,7 +34,7 @@ export class EventRepository extends BaseRepository {
           end_time,
           buffered_start_time,
           buffered_end_time
-        FROM events.events
+        FROM events
         ORDER BY start_time DESC
       `;
 
@@ -62,7 +62,7 @@ export class EventRepository extends BaseRepository {
           end_time,
           buffered_start_time,
           buffered_end_time
-        FROM events.events
+        FROM events
         WHERE id = ${eventId}
         LIMIT 1
       `;
@@ -103,7 +103,7 @@ export class EventRepository extends BaseRepository {
           end_time,
           buffered_start_time,
           buffered_end_time
-        FROM events.events
+        FROM events
         ${condition}
         ${orderAndLimit}
       `;
@@ -124,7 +124,7 @@ export class EventRepository extends BaseRepository {
     try {
       const result = await this.sql<{ exists: boolean }[]>`
         SELECT EXISTS(
-          SELECT 1 FROM events.attendance
+          SELECT 1 FROM attendance
           WHERE event_id = ${eventId} AND profile_id = ${profileId}
         ) AS exists
       `;
@@ -142,7 +142,7 @@ export class EventRepository extends BaseRepository {
   async checkInUser(eventId: string, profileId: string): Promise<boolean> {
     try {
       const result = await this.sql`
-        INSERT INTO events.attendance (event_id, profile_id)
+        INSERT INTO attendance (event_id, profile_id)
         VALUES (${eventId}, ${profileId})
         ON CONFLICT (event_id, profile_id) DO NOTHING
         RETURNING *

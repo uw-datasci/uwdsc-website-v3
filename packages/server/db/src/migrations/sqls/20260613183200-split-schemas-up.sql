@@ -1,29 +1,19 @@
 -- ============================================================================
--- Split tables into domain schemas (terms + memberships stay in public)
--- identity | org | hiring | events
+-- Split tables into domain schemas (public keeps profiles, user_roles, terms, memberships)
+-- org | hiring | events
 -- ============================================================================
 
-CREATE SCHEMA identity;
 CREATE SCHEMA org;
 CREATE SCHEMA hiring;
 CREATE SCHEMA events;
 
 -- ----------------------------------------------------------------------------
--- Enums
+-- Enums (user_role_enum, faculty_enum, payment_method_enum stay in public)
 -- ----------------------------------------------------------------------------
-ALTER TYPE public.user_role_enum SET SCHEMA identity;
-ALTER TYPE public.faculty_enum SET SCHEMA identity;
--- payment_method_enum stays in public (memberships)
 ALTER TYPE public.application_status_enum SET SCHEMA hiring;
 ALTER TYPE public.application_review_status_enum SET SCHEMA hiring;
 ALTER TYPE public.application_input_enum SET SCHEMA hiring;
 ALTER TYPE public.term_type_enum SET SCHEMA hiring;
-
--- ----------------------------------------------------------------------------
--- Tables: identity
--- ----------------------------------------------------------------------------
-ALTER TABLE public.user_roles SET SCHEMA identity;
-ALTER TABLE public.profiles SET SCHEMA identity;
 
 -- ----------------------------------------------------------------------------
 -- Tables: org
@@ -52,51 +42,12 @@ ALTER TABLE public.returning_exec_position_selections SET SCHEMA hiring;
 ALTER TABLE public.exec_form_submissions SET SCHEMA hiring;
 
 -- ----------------------------------------------------------------------------
--- Shared RLS helpers (stay in public; reference identity / hiring)
+-- Shared RLS helpers (stay in public)
 -- ----------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.get_user_role(user_id uuid)
-RETURNS identity.user_role_enum AS $$
-  SELECT role FROM identity.user_roles WHERE id = user_id;
-$$ LANGUAGE sql SECURITY DEFINER STABLE;
-
-CREATE OR REPLACE FUNCTION public.is_admin(user_id uuid)
-RETURNS boolean AS $$
-  SELECT COALESCE(public.get_user_role(user_id) = 'admin', false);
-$$ LANGUAGE sql SECURITY DEFINER STABLE;
-
-CREATE OR REPLACE FUNCTION public.is_exec_or_admin(user_id uuid)
-RETURNS boolean AS $$
-  SELECT COALESCE(public.get_user_role(user_id) IN ('exec', 'admin'), false);
-$$ LANGUAGE sql SECURITY DEFINER STABLE;
-
 CREATE OR REPLACE FUNCTION public.is_application_draft(app_id uuid)
 RETURNS boolean AS $$
   SELECT COALESCE((SELECT status = 'draft' FROM hiring.applications WHERE id = app_id), false);
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
-
--- ----------------------------------------------------------------------------
--- Auth signup + role sync triggers
--- ----------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
-BEGIN
-  INSERT INTO identity.profiles (id) VALUES (NEW.id);
-  INSERT INTO identity.user_roles (id, role) VALUES (NEW.id, 'member');
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
-CREATE OR REPLACE FUNCTION public.handle_update_user_role()
-RETURNS trigger AS $$
-BEGIN
-  UPDATE auth.users
-  SET raw_app_meta_data =
-    coalesce(raw_app_meta_data, '{}'::jsonb) ||
-    jsonb_build_object('role', new.role)
-  WHERE id = new.id;
-  RETURN new;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ----------------------------------------------------------------------------
 -- Domain trigger functions (stay in public; triggers reference by OID/name)
@@ -242,12 +193,10 @@ CREATE POLICY returning_exec_position_selections_insert ON hiring.returning_exec
 -- ----------------------------------------------------------------------------
 -- Grants (Supabase roles)
 -- ----------------------------------------------------------------------------
-GRANT USAGE ON SCHEMA identity TO authenticated, anon, service_role;
 GRANT USAGE ON SCHEMA org TO authenticated, anon, service_role;
 GRANT USAGE ON SCHEMA hiring TO authenticated, service_role;
 GRANT USAGE ON SCHEMA events TO authenticated, anon, service_role;
 
-GRANT SELECT ON identity.profiles TO authenticated;
 GRANT SELECT ON org.subteams TO authenticated, anon;
 GRANT SELECT ON org.exec_positions TO authenticated, anon;
 GRANT SELECT ON org.exec_team TO authenticated, anon;

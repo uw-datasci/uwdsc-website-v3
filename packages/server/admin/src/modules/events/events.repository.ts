@@ -9,7 +9,7 @@ export class EventRepository extends BaseRepository {
   async createEvent(data: CreateEventData): Promise<Event | null> {
     try {
       const result = await this.sql<Event[]>`
-        INSERT INTO events (name, description, location, image_url, start_time, end_time)
+        INSERT INTO events.events (name, description, location, image_url, start_time, end_time)
         VALUES (
           ${data.name},
           ${data.description},
@@ -41,7 +41,7 @@ export class EventRepository extends BaseRepository {
   ): Promise<boolean> {
     try {
       const result = await this.sql`
-        UPDATE events
+        UPDATE events.events
         SET ${this.sql(data, ...columns)}, updated_at = NOW()
         WHERE id = ${eventId}
         RETURNING id
@@ -61,7 +61,7 @@ export class EventRepository extends BaseRepository {
   async deleteEventById(eventId: string): Promise<boolean> {
     try {
       const result = await this.sql`
-        DELETE FROM events
+        DELETE FROM events.events
         WHERE id = ${eventId}
         RETURNING id
       `;

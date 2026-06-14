@@ -20,10 +20,10 @@ export class TeamRepository extends BaseRepository {
         ep.name AS position_name,
         s.id AS subteam_id,
         s.name AS subteam_name
-      FROM exec_team et
-      JOIN profiles p ON et.profile_id = p.id
-      JOIN exec_positions ep ON et.position_id = ep.id
-      JOIN subteams s ON et.subteam_id = s.id
+      FROM org.exec_team et
+      JOIN identity.profiles p ON et.profile_id = p.id
+      JOIN org.exec_positions ep ON et.position_id = ep.id
+      JOIN org.subteams s ON et.subteam_id = s.id
       ORDER BY s.id ASC, et.id ASC
     `;
     return result;

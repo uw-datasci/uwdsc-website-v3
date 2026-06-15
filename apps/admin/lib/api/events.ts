@@ -123,3 +123,19 @@ export async function deleteEvent(eventId: string): Promise<void> {
 
   if (!response.ok) throw createApiError(data, response.status);
 }
+
+/**
+ * Get the number of unique calendar feed subscribers seen in the last 30 days.
+ *
+ * @returns Promise with subscriber count
+ * @throws Error if request fails or unauthorized
+ */
+export async function getFeedSubscriberCount(): Promise<number> {
+  const response = await fetch("/api/events/subscribers");
+
+  const data = await response.json();
+
+  if (!response.ok) throw createApiError(data, response.status);
+
+  return data.count as number;
+}

@@ -154,4 +154,39 @@ export class EventRepository extends BaseRepository {
       throw error;
     }
   }
+
+  /**
+   * Upsert a feed subscriber keyed by (ip_hash, user_agent).
+   * On conflict, advances last_seen to now().
+   */
+  async recordFeedSubscriber(ipHash: string, userAgent: string | null): Promise<void> {
+    try {
+      await this.sql`
+        INSERT INTO events.feed_subscribers (ip_hash, user_agent)
+        VALUES (${ipHash}, ${userAgent})
+        ON CONFLICT (ip_hash, user_agent)
+        DO UPDATE SET last_seen = now()
+      `;
+    } catch (error: unknown) {
+      console.error("Error recording feed subscriber:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Count distinct IP hashes seen within the last `days` days.
+   */
+  async getFeedSubscriberCount(days: number): Promise<number> {
+    try {
+      const result = await this.sql<{ count: number }[]>`
+        SELECT COUNT(DISTINCT ip_hash)::int AS count
+        FROM events.feed_subscribers
+        WHERE last_seen > now() - (${days} || ' days')::interval
+      `;
+      return result[0]?.count ?? 0;
+    } catch (error: unknown) {
+      console.error("Error counting feed subscribers:", error);
+      throw error;
+    }
+  }
 }

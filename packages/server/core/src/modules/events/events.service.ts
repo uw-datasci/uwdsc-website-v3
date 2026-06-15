@@ -88,6 +88,29 @@ class EventService {
       throw new ApiError(`Failed to check in user: ${(error as Error).message}`, 500);
     }
   }
+
+  /**
+   * Record (or refresh) a calendar feed subscriber identified by a hashed IP + user agent.
+   */
+  async recordFeedSubscriber(ipHash: string, userAgent: string | null): Promise<void> {
+    try {
+      await this.repository.recordFeedSubscriber(ipHash, userAgent);
+    } catch (error) {
+      throw new ApiError(`Failed to record feed subscriber: ${(error as Error).message}`, 500);
+    }
+  }
+
+  /**
+   * Count unique feed subscribers (distinct hashed IPs) seen within the last `days` days.
+   * Defaults to 30 days.
+   */
+  async getFeedSubscriberCount(days = 30): Promise<number> {
+    try {
+      return await this.repository.getFeedSubscriberCount(days);
+    } catch (error) {
+      throw new ApiError(`Failed to count feed subscribers: ${(error as Error).message}`, 500);
+    }
+  }
 }
 
 export const eventService = new EventService();

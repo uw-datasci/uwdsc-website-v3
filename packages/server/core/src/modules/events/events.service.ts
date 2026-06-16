@@ -1,6 +1,6 @@
 import { EventRepository } from "./events.repository";
 import type { EventTimeFilter, GetEventsByTimeRangeOptions } from "../../types/events";
-import { ApiError, Event } from "@uwdsc/common/types";
+import { ApiError, Event, EventWithAttendanceCount } from "@uwdsc/common/types";
 
 function toTimeFilter(options: GetEventsByTimeRangeOptions): EventTimeFilter {
   const { range, limit, asOf } = options;
@@ -35,6 +35,17 @@ class EventService {
       return await this.repository.getAllEvents();
     } catch (error) {
       throw new ApiError(`Failed to get all events: ${(error as Error).message}`, 500);
+    }
+  }
+
+  /**
+   * Get all events with an attendance count per event.
+   */
+  async getAllEventsWithAttendanceCount(): Promise<EventWithAttendanceCount[]> {
+    try {
+      return await this.repository.getAllEventsWithAttendanceCount();
+    } catch (error) {
+      throw new ApiError(`Failed to get events with attendance: ${(error as Error).message}`, 500);
     }
   }
 

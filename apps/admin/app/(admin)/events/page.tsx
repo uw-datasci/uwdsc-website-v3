@@ -2,35 +2,77 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { List, Calendar as CalendarIcon, Plus } from "lucide-react";
-import { Button, MonthlyEventCalendar } from "@uwdsc/ui";
-import { getAllEvents } from "@/lib/api/events";
-import type { Event } from "@uwdsc/common/types";
+import { List, Calendar as CalendarIcon, Plus, Download } from "lucide-react";
+import {
+  MonthlyEventCalendar,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@uwdsc/ui";
+import { getAllEventsWithAttendance, getAllTerms } from "@/lib/api";
+import type { Event, EventWithAttendanceCount, Term } from "@uwdsc/common/types";
+import { formatTermCode } from "@uwdsc/common/utils";
 import {
   EventForm,
   EventsListView,
   EventDetailsDialog,
 } from "@/components/events";
+import { exportToCsv } from "@/lib/utils/csv";
+import {
+  getEventTerm,
+  getEventCsvValue,
+  EVENT_CSV_HEADERS,
+} from "@/lib/utils/events";
 
 type ViewMode = "list" | "calendar";
 
+/** Filter events to those whose start_time falls within the given term's window. */
+function filterEventsByTerm(
+  events: EventWithAttendanceCount[],
+  termId: string,
+  terms: Term[],
+): EventWithAttendanceCount[] {
+  if (termId === "all") return events;
+  if (termId === "other") {
+    return events.filter((e) => getEventTerm(e, terms) === null);
+  }
+  const term = terms.find((t) => t.id === termId);
+  if (!term) return events;
+  const start = term.start_date ? Date.parse(term.start_date) : null;
+  const end = Date.parse(term.end_date);
+  if (start === null || Number.isNaN(end)) return events;
+  return events.filter((e) => {
+    const ms = Date.parse(e.start_time);
+    return !Number.isNaN(ms) && ms >= start && ms <= end;
+  });
+}
+
 export default function EventsPage() {
-  const [events, setEvents] = useState<Event[]>([]);
+  const [events, setEvents] = useState<EventWithAttendanceCount[]>([]);
+  const [terms, setTerms] = useState<Term[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [currentMonth, setCurrentMonth] = useState(() => new Date());
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [selectedEvent, setSelectedEvent] =
+    useState<EventWithAttendanceCount | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [selectedTermId, setSelectedTermId] = useState<string>("all");
 
-  const fetchEvents = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await getAllEvents();
-      setEvents(data);
+      const [eventsData, termsData] = await Promise.all([
+        getAllEventsWithAttendance(),
+        getAllTerms(),
+      ]);
+      setEvents(eventsData);
+      setTerms(termsData);
     } catch (err) {
       console.error("Failed to fetch events:", err);
       setError(err instanceof Error ? err.message : "Failed to load events");
@@ -40,8 +82,10 @@ export default function EventsPage() {
   }, []);
 
   useEffect(() => {
-    fetchEvents();
-  }, [fetchEvents]);
+    fetchData();
+  }, [fetchData]);
+
+  const filteredEvents = filterEventsByTerm(events, selectedTermId, terms);
 
   const handleEventClick = (event: { id: string }) => {
     const full = events.find((e) => e.id === event.id) ?? null;
@@ -62,6 +106,17 @@ export default function EventsPage() {
   const handleTodayClick = () => {
     setCurrentMonth(new Date());
   };
+
+  const handleExportCsv = useCallback(() => {
+    exportToCsv(
+      filteredEvents,
+      {
+        headers: [...EVENT_CSV_HEADERS],
+        getValue: (row, key) => getEventCsvValue(row, key, terms),
+      },
+      `events-${new Date().toISOString().split("T")[0]}`,
+    );
+  }, [filteredEvents, terms]);
 
   if (loading) {
     return (
@@ -130,11 +185,46 @@ export default function EventsPage() {
         </div>
       </div>
 
+      {viewMode === "list" && (
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-medium text-muted-foreground">
+              Term
+            </span>
+            <Select value={selectedTermId} onValueChange={setSelectedTermId}>
+              <SelectTrigger className="h-8 w-44">
+                <SelectValue placeholder="Term" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Terms</SelectItem>
+                {terms.map((term) => (
+                  <SelectItem key={term.id} value={term.id}>
+                    {formatTermCode(term.code)}
+                  </SelectItem>
+                ))}
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-medium text-muted-foreground">
+              &nbsp;
+            </span>
+            <Button onClick={handleExportCsv} variant="outline" size="sm">
+              <Download className="mr-2 h-4 w-4" />
+              Export CSV
+            </Button>
+          </div>
+        </div>
+      )}
+
       {viewMode === "list" ? (
         <EventsListView
-          events={events}
+          events={filteredEvents}
+          terms={terms}
           onEdit={handleEdit}
-          onRefresh={fetchEvents}
+          onRefresh={fetchData}
         />
       ) : (
         <MonthlyEventCalendar
@@ -151,14 +241,14 @@ export default function EventsPage() {
         open={detailsOpen}
         onOpenChange={setDetailsOpen}
         onEdit={handleEdit}
-        onDelete={fetchEvents}
+        onDelete={fetchData}
       />
 
       <EventForm
         open={formOpen}
         onOpenChange={setFormOpen}
         event={editingEvent}
-        onSuccess={fetchEvents}
+        onSuccess={fetchData}
       />
     </div>
   );

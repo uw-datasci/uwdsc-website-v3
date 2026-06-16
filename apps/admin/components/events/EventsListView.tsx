@@ -13,23 +13,32 @@ import {
   TableHeader,
   TableRow,
 } from "@uwdsc/ui";
-import type { Event } from "@uwdsc/common/types";
-import { formatDateTime } from "@/lib/utils/events";
+import type { EventWithAttendanceCount, Term } from "@uwdsc/common/types";
+import { formatDateTime, getEventTerm } from "@/lib/utils/events";
 import { DeleteEventDialog } from "@/components/events";
 
 interface EventsListViewProps {
-  readonly events: Event[];
-  readonly onEdit: (event: Event) => void;
+  readonly events: EventWithAttendanceCount[];
+  readonly terms: Term[];
+  readonly onEdit: (event: EventWithAttendanceCount) => void;
   readonly onRefresh?: () => void;
+}
+
+function formatAttendance(event: EventWithAttendanceCount, terms: Term[]): string | number {
+  if (new Date(event.end_time) >= new Date()) return "—";
+  if (event.attendance_count === 0 && getEventTerm(event, terms) === null) return "N/A";
+  return event.attendance_count;
 }
 
 function EventCard({
   event,
+  terms,
   onEdit,
   onRefresh,
 }: Readonly<{
-  event: Event;
-  onEdit: (event: Event) => void;
+  event: EventWithAttendanceCount;
+  terms: Term[];
+  onEdit: (event: EventWithAttendanceCount) => void;
   onRefresh?: () => void;
 }>) {
   return (
@@ -60,9 +69,14 @@ function EventCard({
           {formatDateTime(event.end_time)}
         </p>
         <p>
-          <span className="font-medium text-foreground">Location:</span>{" "}
-          {event.location}
+          <span className="font-medium text-foreground">Location:</span> {event.location}
         </p>
+        {new Date(event.end_time) < new Date() && (
+          <p>
+            <span className="font-medium text-foreground">Attendance:</span>{" "}
+            {formatAttendance(event, terms)}
+          </p>
+        )}
       </CardContent>
     </Card>
   );
@@ -70,6 +84,7 @@ function EventCard({
 
 export function EventsListView({
   events,
+  terms,
   onEdit,
   onRefresh,
 }: Readonly<EventsListViewProps>) {
@@ -86,6 +101,7 @@ export function EventsListView({
             <EventCard
               key={event.id}
               event={event}
+              terms={terms}
               onEdit={onEdit}
               onRefresh={onRefresh}
             />
@@ -103,16 +119,14 @@ export function EventsListView({
                 <TableHead>Start Time</TableHead>
                 <TableHead>End Time</TableHead>
                 <TableHead>Location</TableHead>
+                <TableHead>Attendance</TableHead>
                 <TableHead className="w-[100px] text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {events.length === 0 ? (
                 <TableRow>
-                  <TableCell
-                    colSpan={5}
-                    className="text-center text-muted-foreground"
-                  >
+                  <TableCell colSpan={6} className="text-center text-muted-foreground">
                     No events yet. Create one to get started.
                   </TableCell>
                 </TableRow>
@@ -123,6 +137,9 @@ export function EventsListView({
                     <TableCell>{formatDateTime(event.start_time)}</TableCell>
                     <TableCell>{formatDateTime(event.end_time)}</TableCell>
                     <TableCell>{event.location}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {formatAttendance(event, terms)}
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button
@@ -133,10 +150,7 @@ export function EventsListView({
                         >
                           <Pencil className="size-4" />
                         </Button>
-                        <DeleteEventDialog
-                          event={event}
-                          onSuccess={onRefresh}
-                        />
+                        <DeleteEventDialog event={event} onSuccess={onRefresh} />
                       </div>
                     </TableCell>
                   </TableRow>

@@ -10,7 +10,7 @@ import type {
   UpdateEventFormValues,
 } from "@/lib/schemas/event";
 import { createApiError } from "./error";
-import { Event } from "@uwdsc/common/types";
+import { Event, EventWithAttendanceCount } from "@uwdsc/common/types";
 
 /**
  * Get all events
@@ -24,6 +24,24 @@ export async function getAllEvents(options?: {
 }): Promise<Event[]> {
   const url = options?.activeOnly ? "/api/events?active=true" : "/api/events";
   const response = await fetch(url);
+
+  const data = await response.json();
+
+  if (!response.ok) throw createApiError(data, response.status);
+
+  return data;
+}
+
+/**
+ * Get all events with an attendance count per event.
+ *
+ * @returns Promise with array of all events including attendance_count
+ * @throws Error if request fails or unauthorized
+ */
+export async function getAllEventsWithAttendance(): Promise<
+  EventWithAttendanceCount[]
+> {
+  const response = await fetch("/api/events?withAttendance=true");
 
   const data = await response.json();
 

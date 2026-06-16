@@ -13,10 +13,13 @@ export const GET = withAuth(async (request) => {
   try {
     const { searchParams } = new URL(request.url);
     const activeOnly = searchParams.get("active") === "true";
+    const withAttendance = searchParams.get("withAttendance") === "true";
 
     const events = activeOnly
       ? await coreEventService.getEventsByTimeRange({ range: "active" })
-      : await coreEventService.getAllEvents();
+      : withAttendance
+        ? await coreEventService.getAllEventsWithAttendanceCount()
+        : await coreEventService.getAllEvents();
     return ApiResponse.ok(events);
   } catch (error: unknown) {
     console.error("Error fetching events:", error);

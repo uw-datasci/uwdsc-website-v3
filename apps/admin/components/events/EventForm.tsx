@@ -18,7 +18,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
   Button,
   Input,
   Textarea,
@@ -106,10 +105,7 @@ export function EventForm({ open, onOpenChange, event, onSuccess }: Readonly<Eve
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEdit ? "Edit event" : "Create event"}</DialogTitle>
-          <DialogDescription>
-            {isEdit ? "Update" : "Add"} event details. All times are in{" "}
-            {EVENT_TIMEZONE_LABEL}, regardless of your location.
-          </DialogDescription>
+          <DialogDescription>{isEdit ? "Update" : "Add"} event details.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
@@ -172,6 +168,9 @@ export function EventForm({ open, onOpenChange, event, onSuccess }: Readonly<Eve
                 </FormItem>
               )}
             />
+            <p className="text-sm text-muted-foreground">
+              All times are in {EVENT_TIMEZONE_LABEL}.
+            </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -188,7 +187,6 @@ export function EventForm({ open, onOpenChange, event, onSuccess }: Readonly<Eve
                         placeholder="MM/DD/YYYY HH:MM"
                       />
                     </FormControl>
-                    <FormDescription>Enter the start time in Eastern Time.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -208,7 +206,6 @@ export function EventForm({ open, onOpenChange, event, onSuccess }: Readonly<Eve
                         placeholder="MM/DD/YYYY HH:MM"
                       />
                     </FormControl>
-                    <FormDescription>Enter the end time in Eastern Time.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

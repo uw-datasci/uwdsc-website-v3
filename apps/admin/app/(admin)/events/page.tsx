@@ -15,17 +15,9 @@ import {
 import { getAllEventsWithAttendance, getAllTerms } from "@/lib/api";
 import type { Event, EventWithAttendanceCount, Term } from "@uwdsc/common/types";
 import { formatTermCode } from "@uwdsc/common/utils";
-import {
-  EventForm,
-  EventsListView,
-  EventDetailsDialog,
-} from "@/components/events";
+import { EventForm, EventsListView, EventDetailsDialog } from "@/components/events";
 import { exportToCsv } from "@/lib/utils/csv";
-import {
-  getEventTerm,
-  getEventCsvValue,
-  EVENT_CSV_HEADERS,
-} from "@/lib/utils/events";
+import { getEventTerm, getEventCsvValue, EVENT_CSV_HEADERS } from "@/lib/utils/events";
 
 type ViewMode = "list" | "calendar";
 
@@ -57,8 +49,7 @@ export default function EventsPage() {
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [currentMonth, setCurrentMonth] = useState(() => new Date());
-  const [selectedEvent, setSelectedEvent] =
-    useState<EventWithAttendanceCount | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<EventWithAttendanceCount | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
@@ -146,9 +137,7 @@ export default function EventsPage() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="p-4">
           <h1 className="text-3xl font-bold">Events Portal</h1>
-          <p className="text-muted-foreground">
-            Create and manage club events.
-          </p>
+          <p className="text-muted-foreground">Create and manage club events.</p>
         </div>
         <div className="flex items-center gap-2 my-2">
           <Button variant="outline" size="icon" onClick={handleCreateClick}>
@@ -191,9 +180,7 @@ export default function EventsPage() {
       {viewMode === "list" && (
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground">
-              Term
-            </span>
+            <span className="text-xs font-medium text-muted-foreground">Term</span>
             <Select value={selectedTermId} onValueChange={setSelectedTermId}>
               <SelectTrigger className="h-8 w-44">
                 <SelectValue placeholder="Term" />
@@ -205,15 +192,13 @@ export default function EventsPage() {
                     {formatTermCode(term.code)}
                   </SelectItem>
                 ))}
-                <SelectItem value="other">Other</SelectItem>
+                <SelectItem value="other">Archived Terms</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground">
-              &nbsp;
-            </span>
+            <span className="text-xs font-medium text-muted-foreground">&nbsp;</span>
             <Button onClick={handleExportCsv} variant="outline" size="sm">
               <Download className="mr-2 h-4 w-4" />
               Export CSV

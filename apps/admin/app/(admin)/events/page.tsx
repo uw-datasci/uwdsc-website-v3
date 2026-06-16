@@ -74,6 +74,8 @@ export default function EventsPage() {
       ]);
       setEvents(eventsData);
       setTerms(termsData);
+      const activeTerm = termsData.find((t) => t.is_active);
+      if (activeTerm) setSelectedTermId(activeTerm.id);
     } catch (err) {
       console.error("Failed to fetch events:", err);
       setError(err instanceof Error ? err.message : "Failed to load events");

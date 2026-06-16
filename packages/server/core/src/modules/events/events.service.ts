@@ -1,6 +1,6 @@
 import { EventRepository } from "./events.repository";
 import type { EventTimeFilter, GetEventsByTimeRangeOptions } from "../../types/events";
-import { ApiError, Event } from "@uwdsc/common/types";
+import { ApiError, Event, EventWithAttendanceCount } from "@uwdsc/common/types";
 
 function toTimeFilter(options: GetEventsByTimeRangeOptions): EventTimeFilter {
   const { range, limit, asOf } = options;
@@ -35,6 +35,17 @@ class EventService {
       return await this.repository.getAllEvents();
     } catch (error) {
       throw new ApiError(`Failed to get all events: ${(error as Error).message}`, 500);
+    }
+  }
+
+  /**
+   * Get all events with an attendance count per event.
+   */
+  async getAllEventsWithAttendanceCount(): Promise<EventWithAttendanceCount[]> {
+    try {
+      return await this.repository.getAllEventsWithAttendanceCount();
+    } catch (error) {
+      throw new ApiError(`Failed to get events with attendance: ${(error as Error).message}`, 500);
     }
   }
 
@@ -86,6 +97,29 @@ class EventService {
       return await this.repository.checkInUser(eventId, profileId);
     } catch (error) {
       throw new ApiError(`Failed to check in user: ${(error as Error).message}`, 500);
+    }
+  }
+
+  /**
+   * Record (or refresh) a calendar feed subscriber identified by a hashed IP + user agent.
+   */
+  async recordFeedSubscriber(ipHash: string, userAgent: string | null): Promise<void> {
+    try {
+      await this.repository.recordFeedSubscriber(ipHash, userAgent);
+    } catch (error) {
+      throw new ApiError(`Failed to record feed subscriber: ${(error as Error).message}`, 500);
+    }
+  }
+
+  /**
+   * Count unique feed subscribers (distinct hashed IPs) seen within the last `days` days.
+   * Defaults to 30 days.
+   */
+  async getFeedSubscriberCount(days = 30): Promise<number> {
+    try {
+      return await this.repository.getFeedSubscriberCount(days);
+    } catch (error) {
+      throw new ApiError(`Failed to count feed subscribers: ${(error as Error).message}`, 500);
     }
   }
 }

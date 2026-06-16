@@ -113,7 +113,7 @@ export class AuthRepository extends BaseRepository {
       // the password change the user already completed in Supabase.
       try {
         await this.sql`
-          UPDATE public.profiles
+          UPDATE profiles
           SET password_reset_count = password_reset_count + 1,
               updated_at = now()
           WHERE id = ${userId}
@@ -145,9 +145,9 @@ export class AuthRepository extends BaseRepository {
         ep.is_vp,
         st.name AS subteam_name,
         st.id as subteam_id
-      FROM exec_team et
-      JOIN exec_positions ep ON et.position_id = ep.id
-      JOIN subteams st ON st.id = COALESCE(ep.subteam_id, et.subteam_id)
+      FROM org.exec_team et
+      JOIN org.exec_positions ep ON et.position_id = ep.id
+      JOIN org.subteams st ON st.id = COALESCE(ep.subteam_id, et.subteam_id)
       WHERE et.profile_id = ${profileId}
     `;
   }
@@ -163,13 +163,13 @@ export class AuthRepository extends BaseRepository {
     const rows = await this.sql<{ position_id: number }[]>`
       WITH vp_subteams AS (
         SELECT DISTINCT COALESCE(ep.subteam_id, et.subteam_id) AS sid
-        FROM exec_team et
-        JOIN exec_positions ep ON et.position_id = ep.id
+        FROM org.exec_team et
+        JOIN org.exec_positions ep ON et.position_id = ep.id
         WHERE et.profile_id = ${profileId} AND ep.is_vp = true
       )
       SELECT DISTINCT apa.id AS position_id
-      FROM application_positions_available apa
-      JOIN exec_positions ep ON apa.position_id = ep.id
+      FROM hiring.application_positions_available apa
+      JOIN org.exec_positions ep ON apa.position_id = ep.id
       WHERE ep.subteam_id IN (
         SELECT sid FROM vp_subteams WHERE sid IS NOT NULL
       )

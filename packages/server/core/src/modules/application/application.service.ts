@@ -27,6 +27,17 @@ class ApplicationService {
     }
   }
 
+  async getAllTerms(): Promise<Term[]> {
+    try {
+      return await this.repository.getAllTerms();
+    } catch (error) {
+      throw new ApiError(
+        `Failed to get all terms: ${(error as Error).message}`,
+        500,
+      );
+    }
+  }
+
   async getPositionsWithQuestions(): Promise<{
     generalQuestions: GeneralQuestion[];
     positions: PositionWithQuestions[];

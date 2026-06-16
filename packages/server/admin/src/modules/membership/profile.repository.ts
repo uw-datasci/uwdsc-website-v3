@@ -48,8 +48,8 @@ export class ProfileRepository extends BaseRepository {
       JOIN auth.users au ON p.id = au.id
       JOIN user_roles r ON p.id = r.id
       ${options?.paidOnly
-          ? this.sql`JOIN memberships m ON m.profile_id = p.id`
-          : this.sql`LEFT JOIN memberships m ON m.profile_id = p.id`
+          ? this.sql`JOIN public.memberships m ON m.profile_id = p.id`
+          : this.sql`LEFT JOIN public.memberships m ON m.profile_id = p.id`
         }
       LEFT JOIN profiles pv ON pv.id = m.verifier_id
       ${searchCondition}

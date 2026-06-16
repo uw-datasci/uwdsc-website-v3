@@ -47,7 +47,7 @@ export class ApplicationRepository extends BaseRepository {
       SELECT
         COUNT(*) FILTER (WHERE status = 'draft')::int AS draft,
         COUNT(*) FILTER (WHERE status = 'submitted')::int AS submitted
-      FROM applications
+      FROM hiring.applications
     `;
     return row ?? { draft: 0, submitted: 0 };
   }
@@ -71,7 +71,7 @@ export class ApplicationRepository extends BaseRepository {
         club_experience,
         status,
         submitted_at
-      FROM applications
+      FROM hiring.applications
       WHERE status != 'draft'
       ORDER BY submitted_at DESC
     `;
@@ -91,9 +91,9 @@ export class ApplicationRepository extends BaseRepository {
         aps.priority,
         aps.status,
         ep.name AS position_name
-      FROM application_position_selections aps
-      JOIN application_positions_available apa ON aps.position_id = apa.id
-      JOIN exec_positions ep ON apa.position_id = ep.id
+      FROM hiring.application_position_selections aps
+      JOIN hiring.application_positions_available apa ON aps.position_id = apa.id
+      JOIN org.exec_positions ep ON apa.position_id = ep.id
       WHERE aps.application_id IN ${this.sql(applicationIds)}
       ORDER BY aps.priority
     `;
@@ -112,14 +112,14 @@ export class ApplicationRepository extends BaseRepository {
           ARRAY_AGG(DISTINCT ep.name) FILTER (WHERE pq.position_id IS NOT NULL),
           '{}'::text[]
         ) AS position_names
-      FROM answers a
-      JOIN questions q ON a.question_id = q.id
-      LEFT JOIN position_questions pq ON pq.question_id = a.question_id
-      LEFT JOIN application_position_selections aps
+      FROM hiring.answers a
+      JOIN hiring.questions q ON a.question_id = q.id
+      LEFT JOIN hiring.position_questions pq ON pq.question_id = a.question_id
+      LEFT JOIN hiring.application_position_selections aps
         ON aps.application_id = a.application_id
        AND aps.position_id = pq.position_id
-      LEFT JOIN application_positions_available apa ON apa.id = aps.position_id
-      LEFT JOIN exec_positions ep ON ep.id = apa.position_id
+      LEFT JOIN hiring.application_positions_available apa ON apa.id = aps.position_id
+      LEFT JOIN org.exec_positions ep ON ep.id = apa.position_id
       WHERE a.application_id IN ${this.sql(applicationIds)}
       GROUP BY
         a.id,
@@ -140,8 +140,8 @@ export class ApplicationRepository extends BaseRepository {
 
     const rows = await this.sql<{ id: string }[]>`
       SELECT a.id
-      FROM applications a
-      JOIN application_position_selections aps ON aps.application_id = a.id
+      FROM hiring.applications a
+      JOIN hiring.application_position_selections aps ON aps.application_id = a.id
       WHERE a.id = ${applicationId}
         AND aps.position_id IN ${this.sql(positionIds)}
       LIMIT 1
@@ -162,7 +162,7 @@ export class ApplicationRepository extends BaseRepository {
       }[]
     >`
       SELECT application_id, position_id, status
-      FROM application_position_selections
+      FROM hiring.application_position_selections
       WHERE id = ${selectionId}
     `;
     return row ?? null;
@@ -173,7 +173,7 @@ export class ApplicationRepository extends BaseRepository {
     status: ApplicationReviewStatus,
   ): Promise<boolean> {
     const updated = await this.sql<{ id: string }[]>`
-      UPDATE application_position_selections
+      UPDATE hiring.application_position_selections
       SET status = ${status}
       WHERE id = ${selectionId}
       RETURNING id
@@ -189,9 +189,9 @@ export class ApplicationRepository extends BaseRepository {
         SELECT
           apa.id,
           ep.name
-        FROM application_positions_available apa
-        JOIN exec_positions ep ON apa.position_id = ep.id
-        LEFT JOIN subteams st ON st.id = ep.subteam_id
+        FROM hiring.application_positions_available apa
+        JOIN org.exec_positions ep ON apa.position_id = ep.id
+        LEFT JOIN org.subteams st ON st.id = ep.subteam_id
         WHERE st.name IS DISTINCT FROM 'Presidents'
         ORDER BY ep.name ASC
       `;
@@ -203,9 +203,9 @@ export class ApplicationRepository extends BaseRepository {
       SELECT
         apa.id,
         ep.name
-      FROM application_positions_available apa
-      JOIN exec_positions ep ON apa.position_id = ep.id
-      LEFT JOIN subteams st ON st.id = ep.subteam_id
+      FROM hiring.application_positions_available apa
+      JOIN org.exec_positions ep ON apa.position_id = ep.id
+      LEFT JOIN org.subteams st ON st.id = ep.subteam_id
       WHERE apa.id IN ${this.sql(scope.vpPositionIds)}
         AND st.name IS DISTINCT FROM 'Presidents'
       ORDER BY ep.name ASC
@@ -227,10 +227,10 @@ export class ApplicationRepository extends BaseRepository {
         q.help_text,
         pq.sort_order,
         q.created_at
-      FROM position_questions pq
-      JOIN questions q ON q.id = pq.question_id
-      LEFT JOIN application_positions_available apa ON apa.id = pq.position_id
-      LEFT JOIN exec_positions ep ON ep.id = apa.position_id
+      FROM hiring.position_questions pq
+      JOIN hiring.questions q ON q.id = pq.question_id
+      LEFT JOIN hiring.application_positions_available apa ON apa.id = pq.position_id
+      LEFT JOIN org.exec_positions ep ON ep.id = apa.position_id
       ORDER BY ep.name NULLS LAST, pq.sort_order ASC, q.created_at ASC
     `;
   }
@@ -240,7 +240,7 @@ export class ApplicationRepository extends BaseRepository {
   ): Promise<number | null> {
     const rows = await this.sql<{ position_id: number | null }[]>`
       SELECT position_id
-      FROM position_questions
+      FROM hiring.position_questions
       WHERE id = ${positionQuestionId}
       LIMIT 1
     `;
@@ -251,7 +251,7 @@ export class ApplicationRepository extends BaseRepository {
     const createdQuestion = await this.sql<
       { id: number; created_at: string }[]
     >`
-      INSERT INTO questions (
+      INSERT INTO hiring.questions (
         question_text,
         type,
         max_length,
@@ -270,7 +270,7 @@ export class ApplicationRepository extends BaseRepository {
     if (!question) throw new Error("Failed to create question");
 
     const insertedPq = await this.sql<{ id: number }[]>`
-      INSERT INTO position_questions (position_id, question_id, sort_order)
+      INSERT INTO hiring.position_questions (position_id, question_id, sort_order)
       VALUES (${data.position_id}, ${question.id}, ${data.sort_order})
       RETURNING id
     `;
@@ -292,10 +292,10 @@ export class ApplicationRepository extends BaseRepository {
         q.help_text,
         pq.sort_order,
         q.created_at
-      FROM position_questions pq
-      JOIN questions q ON q.id = pq.question_id
-      LEFT JOIN application_positions_available apa ON apa.id = pq.position_id
-      LEFT JOIN exec_positions ep ON ep.id = apa.position_id
+      FROM hiring.position_questions pq
+      JOIN hiring.questions q ON q.id = pq.question_id
+      LEFT JOIN hiring.application_positions_available apa ON apa.id = pq.position_id
+      LEFT JOIN org.exec_positions ep ON ep.id = apa.position_id
       WHERE pq.id = ${positionQuestionId}
       LIMIT 1
     `;
@@ -310,7 +310,7 @@ export class ApplicationRepository extends BaseRepository {
   ): Promise<AppQuestion | null> {
     const pqRows = await this.sql<{ question_id: number }[]>`
       SELECT question_id
-      FROM position_questions
+      FROM hiring.position_questions
       WHERE id = ${positionQuestionId}
       LIMIT 1
     `;
@@ -318,7 +318,7 @@ export class ApplicationRepository extends BaseRepository {
     if (!pqRow) return null;
 
     await this.sql`
-      UPDATE questions
+      UPDATE hiring.questions
       SET
         question_text = ${data.question_text},
         type = ${data.type},
@@ -329,7 +329,7 @@ export class ApplicationRepository extends BaseRepository {
     `;
 
     await this.sql`
-      UPDATE position_questions
+      UPDATE hiring.position_questions
       SET
         position_id = ${data.position_id},
         sort_order = ${data.sort_order}
@@ -349,10 +349,10 @@ export class ApplicationRepository extends BaseRepository {
         q.help_text,
         pq.sort_order,
         q.created_at
-      FROM position_questions pq
-      JOIN questions q ON q.id = pq.question_id
-      LEFT JOIN application_positions_available apa ON apa.id = pq.position_id
-      LEFT JOIN exec_positions ep ON ep.id = apa.position_id
+      FROM hiring.position_questions pq
+      JOIN hiring.questions q ON q.id = pq.question_id
+      LEFT JOIN hiring.application_positions_available apa ON apa.id = pq.position_id
+      LEFT JOIN org.exec_positions ep ON ep.id = apa.position_id
       WHERE pq.id = ${positionQuestionId}
       LIMIT 1
     `;
@@ -362,7 +362,7 @@ export class ApplicationRepository extends BaseRepository {
   async deleteQuestion(positionQuestionId: number): Promise<boolean> {
     const pqRows = await this.sql<{ question_id: number }[]>`
       SELECT question_id
-      FROM position_questions
+      FROM hiring.position_questions
       WHERE id = ${positionQuestionId}
       LIMIT 1
     `;
@@ -370,7 +370,7 @@ export class ApplicationRepository extends BaseRepository {
     if (!pqRow) return false;
 
     const deleted = await this.sql`
-      DELETE FROM questions
+      DELETE FROM hiring.questions
       WHERE id = ${pqRow.question_id}
       RETURNING id
     `;

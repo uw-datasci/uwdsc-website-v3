@@ -38,6 +38,27 @@ export class ApplicationRepository extends BaseRepository {
     return result[0] ?? null;
   }
 
+  async getAllTerms(): Promise<Term[]> {
+    const result = await this.sql<Term[]>`
+      SELECT
+        id,
+        code,
+        is_active,
+        application_release_date,
+        application_soft_deadline,
+        application_hard_deadline,
+        start_date,
+        end_date,
+        onboarding_due_date,
+        returning_exec_release_date,
+        returning_exec_deadline,
+        created_at
+      FROM public.terms
+      ORDER BY start_date DESC NULLS LAST
+    `;
+    return result;
+  }
+
   async getAvailablePositions(): Promise<ApplicationPositionRow[]> {
     const result = await this.sql<ApplicationPositionRow[]>`
       SELECT

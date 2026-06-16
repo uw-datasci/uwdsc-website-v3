@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PassportCard, MembershipCta, PassportProfile } from "@/components/passport";
+import { PassportHeader, MembershipCta, PassportProfile } from "@/components/passport";
 import { useAuth } from "@/contexts/AuthContext";
 import { getMembershipStatus, updateUserProfile } from "@/lib/api/profile";
 import { FACULTY_LABELS, FACULTY_PROFILE_LABEL_TO_VALUE } from "@uwdsc/common/constants";
@@ -93,15 +93,13 @@ export default function PassportPage() {
   return (
     <main className="flex min-h-dvh flex-col items-center px-4 pb-16 pt-28 lg:pt-32">
       <div className="w-full max-w-2xl space-y-4">
-        <PassportCard
+        <PassportHeader
           initials={initials}
           displayName={displayName}
           email={user?.email}
           membershipLoading={membershipLoading}
           isMember={!!isMember}
           execPositionLabel={user?.exec_position_name}
-          facultyLabel={facultyLabel}
-          term={user?.term ?? undefined}
         />
 
         <PassportProfile

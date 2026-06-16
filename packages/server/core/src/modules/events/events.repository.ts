@@ -1,5 +1,5 @@
 import { BaseRepository } from "@uwdsc/db/base.repository";
-import { Event } from "@uwdsc/common/types";
+import { Event, EventWithAttendanceCount } from "@uwdsc/common/types";
 import type { EventTimeFilter } from "../../types/events";
 
 export class EventRepository extends BaseRepository {
@@ -41,6 +41,33 @@ export class EventRepository extends BaseRepository {
       return result;
     } catch (error: unknown) {
       console.error("Error fetching all events:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get all events with an attendance count per event, ordered by start_time descending.
+   */
+  async getAllEventsWithAttendanceCount(): Promise<EventWithAttendanceCount[]> {
+    try {
+      const result = await this.sql<EventWithAttendanceCount[]>`
+        SELECT
+          e.id,
+          e.name,
+          e.description,
+          e.location,
+          e.image_url,
+          e.start_time,
+          e.end_time,
+          e.buffered_start_time,
+          e.buffered_end_time,
+          (SELECT COUNT(*)::int FROM events.attendance a WHERE a.event_id = e.id) AS attendance_count
+        FROM events.events e
+        ORDER BY e.start_time DESC
+      `;
+      return result;
+    } catch (error: unknown) {
+      console.error("Error fetching events with attendance count:", error);
       throw error;
     }
   }

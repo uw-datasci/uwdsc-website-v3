@@ -1,5 +1,5 @@
-import type { Event } from "@uwdsc/common/types";
-import { formatEventDescription } from "@uwdsc/common/utils";
+import type { Event, EventWithAttendanceCount, Term } from "@uwdsc/common/types";
+import { formatEventDescription, formatTermCode } from "@uwdsc/common/utils";
 
 /** IANA time zone used for all event times in the admin app. */
 export const EVENT_TIMEZONE = "America/Toronto";
@@ -256,3 +256,75 @@ export const endAfterStartError: { message: string; path: PropertyKey[] } = {
   message: "End date & time must be after start date & time",
   path: ["end_time"],
 };
+
+// ─── Term helpers ────────────────────────────────────────────────────────────
+
+function toMs(iso: string | null | undefined): number | null {
+  if (iso == null || iso === "") return null;
+  const t = Date.parse(iso);
+  return Number.isNaN(t) ? null : t;
+}
+
+/**
+ * Find the term whose [start_date, end_date] window contains the event's start_time.
+ * Returns null when no retained term covers the event.
+ */
+export function getEventTerm(event: Event, terms: Term[]): Term | null {
+  const eventMs = toMs(event.start_time);
+  if (eventMs === null) return null;
+
+  return (
+    terms.find((term) => {
+      const start = toMs(term.start_date);
+      const end = toMs(term.end_date);
+      if (start === null || end === null) return false;
+      return eventMs >= start && eventMs <= end;
+    }) ?? null
+  );
+}
+
+// ─── CSV export helpers ───────────────────────────────────────────────────────
+
+export const EVENT_CSV_HEADERS = [
+  "name",
+  "start_time",
+  "end_time",
+  "location",
+  "attendance",
+  "term",
+] as const;
+
+export type EventCsvHeader = (typeof EVENT_CSV_HEADERS)[number];
+
+/**
+ * Get the CSV value for an event row given a column key.
+ * Attendance is only shown for events that have already ended.
+ */
+export function getEventCsvValue(
+  row: EventWithAttendanceCount,
+  key: string,
+  terms: Term[],
+): unknown {
+  switch (key as EventCsvHeader) {
+    case "name":
+      return row.name;
+    case "start_time":
+      return formatDateTime(row.start_time);
+    case "end_time":
+      return formatDateTime(row.end_time);
+    case "location":
+      return row.location;
+    case "attendance": {
+      if (new Date(row.end_time) >= new Date()) return "";
+      if (row.attendance_count === 0 && getEventTerm(row, terms) === null)
+        return "N/A";
+      return row.attendance_count;
+    }
+    case "term": {
+      const term = getEventTerm(row, terms);
+      return term ? formatTermCode(term.code) : "Other";
+    }
+    default:
+      return "";
+  }
+}

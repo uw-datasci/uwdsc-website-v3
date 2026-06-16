@@ -8,7 +8,7 @@ import { Webhook } from "svix";
 import { WebhookEventPayload } from "resend";
 
 /**
- * POST /api/webhooks/membership
+ * POST /api/webhooks
  * Resend inbound (`email.received`) webhook - verifies Svix signature, then loads email body via API.
  *
  * Always returns HTTP 200 so Resend does not retry (at-least-once delivery; non-2xx triggers backoff).
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest): Promise<Response> {
   const WEBHOOK_SECRET = process.env.RESEND_WEBHOOK_SECRET;
 
   if (!WEBHOOK_SECRET) {
-    console.error("[Membership Webhook] Missing RESEND_WEBHOOK_SECRET");
+    console.error("[Webhook] Missing RESEND_WEBHOOK_SECRET");
     return ApiResponse.ok({ success: false, reason: "missing_webhook_secret" });
   }
 
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest): Promise<Response> {
         "svix-signature": svix_signature,
       }) as WebhookEventPayload;
     } catch (err) {
-      console.error("[Membership Webhook] Error verifying webhook:", err);
+      console.error("[Webhook] Error verifying webhook:", err);
       return ApiResponse.ok({ success: false, reason: "invalid_signature" });
     }
 
@@ -54,17 +54,12 @@ export async function POST(request: NextRequest): Promise<Response> {
       return ApiResponse.ok({ success: false, reason: "invalid_event_type", event: evt.type });
     }
 
-    const contents = await webhookService.getReceivedEmail(evt.data.email_id, evt.data.to);
-    if (!contents.ok) {
-      if (contents.reason === "wrong_recipient") {
-        return ApiResponse.ok({
-          success: false,
-          reason: "wrong_recipient",
-          message: contents.message,
-        });
-      }
+    const target = webhookService.resolveInboundTarget(evt.data.to);
+    if (!target) return ApiResponse.ok({ success: false, reason: "wrong_recipient" });
 
-      console.error("[Membership Webhook]", contents.message);
+    const contents = await webhookService.getReceivedEmail(evt.data.email_id);
+    if (!contents.ok) {
+      console.error("[Webhook]", contents.message);
       return ApiResponse.ok({
         success: false,
         reason: contents.reason,
@@ -72,15 +67,27 @@ export async function POST(request: NextRequest): Promise<Response> {
       });
     }
 
-    const activeTerm = await applicationService.getActiveTerm();
-
-    if (!activeTerm) throw new ApiError("No active term is configured", 400);
-
-    await membershipService.processEmailReceipt(
-      contents.email,
-      activeTerm.start_date,
-      evt.data.from,
-    );
+    switch (target) {
+      case "membership": {
+        const activeTerm = await applicationService.getActiveTerm();
+        if (!activeTerm) throw new ApiError("No active term is configured", 400);
+        await membershipService.processEmailReceipt(
+          contents.email,
+          activeTerm.start_date,
+          evt.data.from,
+        );
+        break;
+      }
+      case "support": {
+        // TODO: support@ inbound flow (to be implemented)
+        console.log("[Webhook] Received support email", evt.data.email_id);
+        break;
+      }
+      default: {
+        const _exhaustive: never = target;
+        return _exhaustive;
+      }
+    }
 
     return ApiResponse.ok({
       success: true,
@@ -96,7 +103,7 @@ export async function POST(request: NextRequest): Promise<Response> {
         statusCode: error.statusCode,
       });
     }
-    console.error("[Membership Webhook] Failed to process request:", error);
+    console.error("[Webhook] Failed to process request:", error);
     return ApiResponse.ok({
       success: false,
       reason: "unexpected_error",

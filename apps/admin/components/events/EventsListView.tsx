@@ -24,13 +24,9 @@ interface EventsListViewProps {
   readonly onRefresh?: () => void;
 }
 
-function formatAttendance(
-  event: EventWithAttendanceCount,
-  terms: Term[],
-): string | number {
+function formatAttendance(event: EventWithAttendanceCount, terms: Term[]): string | number {
   if (new Date(event.end_time) >= new Date()) return "—";
-  if (event.attendance_count === 0 && getEventTerm(event, terms) === null)
-    return "N/A";
+  if (event.attendance_count === 0 && getEventTerm(event, terms) === null) return "N/A";
   return event.attendance_count;
 }
 
@@ -73,8 +69,7 @@ function EventCard({
           {formatDateTime(event.end_time)}
         </p>
         <p>
-          <span className="font-medium text-foreground">Location:</span>{" "}
-          {event.location}
+          <span className="font-medium text-foreground">Location:</span> {event.location}
         </p>
         {new Date(event.end_time) < new Date() && (
           <p>
@@ -93,7 +88,6 @@ export function EventsListView({
   onEdit,
   onRefresh,
 }: Readonly<EventsListViewProps>) {
-  const now = new Date();
   return (
     <div className="space-y-4">
       {/* Mobile: card list */}
@@ -132,10 +126,7 @@ export function EventsListView({
             <TableBody>
               {events.length === 0 ? (
                 <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    className="text-center text-muted-foreground"
-                  >
+                  <TableCell colSpan={6} className="text-center text-muted-foreground">
                     No events yet. Create one to get started.
                   </TableCell>
                 </TableRow>
@@ -159,10 +150,7 @@ export function EventsListView({
                         >
                           <Pencil className="size-4" />
                         </Button>
-                        <DeleteEventDialog
-                          event={event}
-                          onSuccess={onRefresh}
-                        />
+                        <DeleteEventDialog event={event} onSuccess={onRefresh} />
                       </div>
                     </TableCell>
                   </TableRow>

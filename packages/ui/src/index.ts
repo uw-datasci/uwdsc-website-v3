@@ -37,3 +37,4 @@ export * from "./hooks/use-mobile";
 export * from "./components/dropdown-menu";
 
 export * from "./components/spinner";
+export * from "./components/blocks/galaxy-interactive-hero-section"

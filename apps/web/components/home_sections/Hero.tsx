@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CountingNumber, GlassSurface } from "@uwdsc/ui";
 import { Profile } from "@uwdsc/common/types";
+import { HeroSplineBackground } from "@uwdsc/ui";
 
 interface HeroProps {
   user: Profile | null;
@@ -52,7 +53,7 @@ export default function Hero({ user, mutate }: Readonly<HeroProps>) {
 
   return (
     <section className="relative w-full min-h-screen flex flex-col items-center justify-center">
-      <video
+      {/* <video
         autoPlay
         loop
         muted
@@ -60,7 +61,10 @@ export default function Hero({ user, mutate }: Readonly<HeroProps>) {
         className="absolute inset-0 w-full h-full object-cover"
       >
         <source src="/videos/spinning_globe.mp4" type="video/mp4" />
-      </video>
+      </video> */}
+      <div className="absolute inset-0 w-full h-full">
+        <HeroSplineBackground/>
+      </div>
 
       {/* Absolutely Positioned Info */}
       {/* Members Stat */}

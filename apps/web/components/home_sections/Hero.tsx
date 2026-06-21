@@ -6,9 +6,8 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { CountingNumber, GlassSurface } from "@uwdsc/ui";
+import { CountingNumber, GlassSurface, HeroSplineBackground } from "@uwdsc/ui";
 import { Profile } from "@uwdsc/common/types";
-import { HeroSplineBackground } from "@uwdsc/ui";
 
 interface HeroProps {
   user: Profile | null;
@@ -63,7 +62,7 @@ export default function Hero({ user, mutate }: Readonly<HeroProps>) {
         <source src="/videos/spinning_globe.mp4" type="video/mp4" />
       </video> */}
       <div className="absolute inset-0 w-full h-full">
-        <HeroSplineBackground/>
+        <HeroSplineBackground />
       </div>
 
       {/* Absolutely Positioned Info */}
@@ -90,9 +89,8 @@ export default function Hero({ user, mutate }: Readonly<HeroProps>) {
           University of Waterloo <br /> Data Science Club
         </h1>
         <p className="mx-auto max-w-md md:max-w-2xl text-sm sm:text-xl">
-          Inspiring the data science leaders of the future by building an
-          inclusive community to bridge the gap between academics and the
-          industry.
+          Inspiring the data science leaders of the future by building an inclusive community to
+          bridge the gap between academics and the industry.
         </p>
       </div>
       {user ? (
@@ -100,10 +98,7 @@ export default function Hero({ user, mutate }: Readonly<HeroProps>) {
           <p>
             Logged in as <b>{user?.first_name + " " + user?.last_name}</b>
           </p>
-          <button
-            onClick={handleSignOut}
-            className="hover:cursor-pointer hover:underline"
-          >
+          <button onClick={handleSignOut} className="hover:cursor-pointer hover:underline">
             ( Log Out )
           </button>
         </div>

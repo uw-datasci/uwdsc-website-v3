@@ -94,6 +94,7 @@ export default function PassportPage() {
     <main className="flex min-h-dvh flex-col items-center px-4 pb-16 pt-28 lg:pt-32">
       <div className="w-full max-w-2xl space-y-4">
         <PassportCard
+          userId={user?.id ?? ""}
           initials={initials}
           displayName={displayName}
           email={user?.email}

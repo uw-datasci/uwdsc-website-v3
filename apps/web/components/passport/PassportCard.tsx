@@ -9,8 +9,10 @@ import {
   useTransform,
   type MotionValue,
 } from "framer-motion";
+import { PassportQRCode } from "./PassportQRCode";
 
 interface PassportCardProps {
+  readonly userId: string;
   readonly initials: string;
   readonly displayName: string;
   readonly email: string | null | undefined;
@@ -74,6 +76,7 @@ function MemberBadge({
 }
 
 function BioPage({
+  userId,
   initials,
   displayName,
   email,
@@ -87,6 +90,7 @@ function BioPage({
   const nameParts = displayName.toUpperCase().split(" ");
   const surname = nameParts[nameParts.length - 1] ?? displayName.toUpperCase();
   const givenNames = nameParts.slice(0, -1).join(" ") || displayName.toUpperCase();
+  const [qrExpanded, setQrExpanded] = useState(false);
 
   return (
     <div
@@ -103,9 +107,28 @@ function BioPage({
         }}
       />
       <div className="absolute -top-8 -right-8 size-32 rounded-full bg-primary/20 blur-2xl pointer-events-none" />
+
+      {/* Expanded QR overlay */}
+      {qrExpanded && (
+        <div
+          className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 cursor-pointer"
+          style={CARD_BG}
+          onClick={(e) => { e.stopPropagation(); setQrExpanded(false); }}
+        >
+          <PassportQRCode userId={userId} size={180} />
+          <p className="text-white/30 font-mono text-[7px] tracking-widest uppercase">Tap to close</p>
+        </div>
+      )}
+
       <div className="relative z-10 flex items-center justify-between px-3 pt-3 pb-2">
         <span className="text-white font-mono font-bold text-[9px] tracking-[0.16em]">UWDSC</span>
-        <span className="text-white/25 font-mono text-[6px] tracking-[0.2em] uppercase">Data Science</span>
+        <button
+          className="p-0.5 rounded-sm hover:bg-white/10 transition-colors cursor-pointer"
+          onClick={(e) => { e.stopPropagation(); setQrExpanded(true); }}
+          aria-label="Show QR code"
+        >
+          <PassportQRCode userId={userId} size={24} />
+        </button>
       </div>
       <div className="mx-3 h-px bg-white/10" />
       <div className="relative z-10 flex gap-2 px-3 pt-2.5 flex-1">

@@ -2,7 +2,9 @@ name: CI Quality Gate
 
 on:
   pull_request:
-    branches: [ main, dev/my-passport ]
+    branches:
+      - main
+      - "dev/**"
     paths-ignore:
       - ".github/**"
   workflow_dispatch:

@@ -43,7 +43,49 @@ class WebhookService {
       };
     }
 
-    const { data, error } = await this.resend.emails.receiving.get(receivingEmailId);
+    const { data, error } =
+      await this.resend.emails.receiving.get(receivingEmailId);
+
+    if (error || !data) {
+      const message =
+        typeof error === "object" &&
+        error !== null &&
+        "message" in error &&
+        typeof (error as { message: unknown }).message === "string"
+          ? (error as { message: string }).message
+          : "Failed to fetch received email from Resend";
+      return { ok: false, reason: "resend_error", message };
+    }
+
+    return { ok: true, email: data };
+  }
+
+  /**
+   * Same as `getReceivedEmail` but verifies against an arbitrary recipient address.
+   */
+  async getReceivedEmailForRecipient(
+    receivingEmailId: string,
+    webhookTo: string[],
+    recipient: string,
+  ): Promise<GetReceivedEmailContentsResult> {
+    if (!this.verifyRecipient(webhookTo, recipient)) {
+      return {
+        ok: false,
+        reason: "wrong_recipient",
+        message: `Email is not addressed to ${recipient}`,
+      };
+    }
+
+    if (!this.resend) {
+      return {
+        ok: false,
+        reason: "missing_api_key",
+        message: "RESEND_API_KEY is not configured",
+      };
+    }
+
+    const { data, error } =
+      await this.resend.emails.receiving.get(receivingEmailId);
 
     if (error || !data) {
       const message =

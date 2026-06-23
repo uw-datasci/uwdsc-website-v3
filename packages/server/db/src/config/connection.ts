@@ -20,7 +20,7 @@ export const sql = postgres(databaseUrl, {
   max_lifetime: 60 * 30,
 
   // Connection options
-  connection: { search_path: "public,auth" },
+  connection: { search_path: "public,org,hiring,events,auth" },
 
   // Transform options for consistent behavior
   transform: { undefined: null },

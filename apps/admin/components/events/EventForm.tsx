@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -28,6 +29,11 @@ import {
   type UpdateEventFormValues,
 } from "@/lib/schemas/event";
 import { createEvent, updateEvent } from "@/lib/api/events";
+import {
+  EVENT_TIMEZONE_LABEL,
+  pickerValueToUtcIso,
+  utcIsoToPickerValue,
+} from "@/lib/utils/events";
 import type { Event } from "@uwdsc/common/types";
 
 interface EventFormProps {
@@ -37,12 +43,7 @@ interface EventFormProps {
   onSuccess?: () => void;
 }
 
-export function EventForm({
-  open,
-  onOpenChange,
-  event,
-  onSuccess,
-}: Readonly<EventFormProps>) {
+export function EventForm({ open, onOpenChange, event, onSuccess }: Readonly<EventFormProps>) {
   const isEdit = !!event;
 
   const form = useForm<CreateEventFormValues>({
@@ -94,8 +95,7 @@ export function EventForm({
       onOpenChange(false);
       onSuccess?.();
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Something went wrong";
+      const message = err instanceof Error ? err.message : "Something went wrong";
       toast.error(message);
     }
   };
@@ -105,12 +105,10 @@ export function EventForm({
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEdit ? "Edit event" : "Create event"}</DialogTitle>
+          <DialogDescription>{isEdit ? "Update" : "Add"} event details.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col gap-4"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -164,16 +162,15 @@ export function EventForm({
                 <FormItem>
                   <FormLabel>Image URL (optional)</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="https://..."
-                      {...field}
-                      value={field.value ?? ""}
-                    />
+                    <Input placeholder="https://..." {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            <p className="text-sm text-muted-foreground">
+              All times are in {EVENT_TIMEZONE_LABEL}.
+            </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -183,8 +180,10 @@ export function EventForm({
                     <FormLabel>Start</FormLabel>
                     <FormControl>
                       <DateTimePicker
-                        value={field.value}
-                        onChange={field.onChange}
+                        value={field.value ? utcIsoToPickerValue(field.value) : ""}
+                        onChange={(value) =>
+                          field.onChange(value ? pickerValueToUtcIso(value) : "")
+                        }
                         placeholder="MM/DD/YYYY HH:MM"
                       />
                     </FormControl>
@@ -200,11 +199,14 @@ export function EventForm({
                     <FormLabel>End</FormLabel>
                     <FormControl>
                       <DateTimePicker
-                        value={field.value}
-                        onChange={field.onChange}
+                        value={field.value ? utcIsoToPickerValue(field.value) : ""}
+                        onChange={(value) =>
+                          field.onChange(value ? pickerValueToUtcIso(value) : "")
+                        }
                         placeholder="MM/DD/YYYY HH:MM"
                       />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -226,9 +228,7 @@ export function EventForm({
               <Button
                 type="submit"
                 className="rounded-md"
-                disabled={
-                  !form.formState.isValid || form.formState.isSubmitting
-                }
+                disabled={!form.formState.isValid || form.formState.isSubmitting}
               >
                 {form.formState.isSubmitting && (
                   <Loader2 className="mr-2 size-4 animate-spin" />

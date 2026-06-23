@@ -20,7 +20,8 @@
         "RESEND_CAMPAIGN_SEGMENT_ID",
         "RESEND_WEBHOOK_SECRET",
         "DISCORD_INVITE_URL",
-        "NEXT_PUBLIC_AUTH_COOKIE_DOMAIN"
+        "NEXT_PUBLIC_AUTH_COOKIE_DOMAIN",
+        "FEED_HASH_SALT"
       ]
     },
     "lint": { "dependsOn": ["^lint"] },

@@ -1,5 +1,5 @@
 import { BaseRepository } from "@uwdsc/db/base.repository";
-import { Event } from "@uwdsc/common/types";
+import { Event, EventWithAttendanceCount } from "@uwdsc/common/types";
 import type { EventTimeFilter } from "../../types/events";
 
 export class EventRepository extends BaseRepository {
@@ -9,7 +9,7 @@ export class EventRepository extends BaseRepository {
   async getEventCount(): Promise<number> {
     try {
       const result = await this.sql<{ count: number }[]>`
-        SELECT COUNT(*)::int AS count FROM events
+        SELECT COUNT(*)::int AS count FROM events.events
       `;
       return result[0]?.count ?? 0;
     } catch (error: unknown) {
@@ -34,13 +34,40 @@ export class EventRepository extends BaseRepository {
           end_time,
           buffered_start_time,
           buffered_end_time
-        FROM events
+        FROM events.events
         ORDER BY start_time DESC
       `;
 
       return result;
     } catch (error: unknown) {
       console.error("Error fetching all events:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get all events with an attendance count per event, ordered by start_time descending.
+   */
+  async getAllEventsWithAttendanceCount(): Promise<EventWithAttendanceCount[]> {
+    try {
+      const result = await this.sql<EventWithAttendanceCount[]>`
+        SELECT
+          e.id,
+          e.name,
+          e.description,
+          e.location,
+          e.image_url,
+          e.start_time,
+          e.end_time,
+          e.buffered_start_time,
+          e.buffered_end_time,
+          (SELECT COUNT(*)::int FROM events.attendance a WHERE a.event_id = e.id) AS attendance_count
+        FROM events.events e
+        ORDER BY e.start_time DESC
+      `;
+      return result;
+    } catch (error: unknown) {
+      console.error("Error fetching events with attendance count:", error);
       throw error;
     }
   }
@@ -62,7 +89,7 @@ export class EventRepository extends BaseRepository {
           end_time,
           buffered_start_time,
           buffered_end_time
-        FROM events
+        FROM events.events
         WHERE id = ${eventId}
         LIMIT 1
       `;
@@ -103,7 +130,7 @@ export class EventRepository extends BaseRepository {
           end_time,
           buffered_start_time,
           buffered_end_time
-        FROM events
+        FROM events.events
         ${condition}
         ${orderAndLimit}
       `;
@@ -124,7 +151,7 @@ export class EventRepository extends BaseRepository {
     try {
       const result = await this.sql<{ exists: boolean }[]>`
         SELECT EXISTS(
-          SELECT 1 FROM attendance
+          SELECT 1 FROM events.attendance
           WHERE event_id = ${eventId} AND profile_id = ${profileId}
         ) AS exists
       `;
@@ -142,7 +169,7 @@ export class EventRepository extends BaseRepository {
   async checkInUser(eventId: string, profileId: string): Promise<boolean> {
     try {
       const result = await this.sql`
-        INSERT INTO attendance (event_id, profile_id)
+        INSERT INTO events.attendance (event_id, profile_id)
         VALUES (${eventId}, ${profileId})
         ON CONFLICT (event_id, profile_id) DO NOTHING
         RETURNING *
@@ -151,6 +178,41 @@ export class EventRepository extends BaseRepository {
       return result.length > 0;
     } catch (error: unknown) {
       console.error("Error checking in user:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Upsert a feed subscriber keyed by (ip_hash, user_agent).
+   * On conflict, advances last_seen to now().
+   */
+  async recordFeedSubscriber(ipHash: string, userAgent: string | null): Promise<void> {
+    try {
+      await this.sql`
+        INSERT INTO events.feed_subscribers (ip_hash, user_agent)
+        VALUES (${ipHash}, ${userAgent})
+        ON CONFLICT (ip_hash, user_agent)
+        DO UPDATE SET last_seen = now()
+      `;
+    } catch (error: unknown) {
+      console.error("Error recording feed subscriber:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Count distinct IP hashes seen within the last `days` days.
+   */
+  async getFeedSubscriberCount(days: number): Promise<number> {
+    try {
+      const result = await this.sql<{ count: number }[]>`
+        SELECT COUNT(DISTINCT ip_hash)::int AS count
+        FROM events.feed_subscribers
+        WHERE last_seen > now() - (${days} || ' days')::interval
+      `;
+      return result[0]?.count ?? 0;
+    } catch (error: unknown) {
+      console.error("Error counting feed subscribers:", error);
       throw error;
     }
   }

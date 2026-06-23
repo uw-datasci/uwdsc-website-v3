@@ -10,7 +10,7 @@ import type {
   UpdateEventFormValues,
 } from "@/lib/schemas/event";
 import { createApiError } from "./error";
-import { Event } from "@uwdsc/common/types";
+import { Event, EventWithAttendanceCount } from "@uwdsc/common/types";
 
 /**
  * Get all events
@@ -30,6 +30,36 @@ export async function getAllEvents(options?: {
   if (!response.ok) throw createApiError(data, response.status);
 
   return data;
+}
+
+/**
+ * Get all events with an attendance count per event.
+ *
+ * @returns Promise with array of all events including attendance_count
+ * @throws Error if request fails or unauthorized
+ */
+export async function getAllEventsWithAttendance(): Promise<
+  EventWithAttendanceCount[]
+> {
+  const response = await fetch("/api/events?withAttendance=true");
+
+  const data = await response.json();
+
+  if (!response.ok) throw createApiError(data, response.status);
+
+  return data;
+}
+
+/**
+ * Get the currently active event (now within its buffered window), if any.
+ * The app assumes at most one event is active at a time.
+ *
+ * @returns Promise with the active event, or null when none is active
+ * @throws Error if request fails or unauthorized
+ */
+export async function getActiveEvent(): Promise<Event | null> {
+  const events = await getAllEvents({ activeOnly: true });
+  return events[0] ?? null;
 }
 
 /**
@@ -110,4 +140,20 @@ export async function deleteEvent(eventId: string): Promise<void> {
   const data = await response.json();
 
   if (!response.ok) throw createApiError(data, response.status);
+}
+
+/**
+ * Get the number of unique calendar feed subscribers seen in the last 30 days.
+ *
+ * @returns Promise with subscriber count
+ * @throws Error if request fails or unauthorized
+ */
+export async function getFeedSubscriberCount(): Promise<number> {
+  const response = await fetch("/api/events/subscribers");
+
+  const data = await response.json();
+
+  if (!response.ok) throw createApiError(data, response.status);
+
+  return data.count as number;
 }

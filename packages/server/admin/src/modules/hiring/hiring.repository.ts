@@ -36,12 +36,12 @@ export class HiringRepository extends BaseRepository {
         u.email,
         a.personal_email,
         a.submitted_at
-      FROM applications a
+      FROM hiring.applications a
       LEFT JOIN auth.users u ON u.id = a.profile_id
       WHERE a.status != 'draft'
         AND EXISTS (
           SELECT 1
-          FROM application_position_selections aps
+          FROM hiring.application_position_selections aps
           WHERE aps.application_id = a.id
             AND aps.status IN ${this.sql(HIRING_STATUSES)}
         )
@@ -62,10 +62,10 @@ export class HiringRepository extends BaseRepository {
             ep.name AS position_name,
             ep.is_vp,
             st.name AS subteam_name
-          FROM application_position_selections aps
-          JOIN application_positions_available apa ON aps.position_id = apa.id
-          JOIN exec_positions ep ON apa.position_id = ep.id
-          LEFT JOIN subteams st ON st.id = ep.subteam_id
+          FROM hiring.application_position_selections aps
+          JOIN hiring.application_positions_available apa ON aps.position_id = apa.id
+          JOIN org.exec_positions ep ON apa.position_id = ep.id
+          LEFT JOIN org.subteams st ON st.id = ep.subteam_id
           WHERE aps.application_id IN ${this.sql(applicationIds)}
             AND aps.status IN ${this.sql(HIRING_STATUSES)}
           ORDER BY aps.priority
@@ -102,10 +102,10 @@ export class HiringRepository extends BaseRepository {
       }[]
     >`
       SELECT s.id, s.profile_id, s.full_name, s.email, s.submitted_at
-      FROM public.returning_exec_submissions s
+      FROM hiring.returning_exec_submissions s
       WHERE s.term_id = ${activeTerm.id}
         AND EXISTS (
-          SELECT 1 FROM public.returning_exec_position_selections reps
+          SELECT 1 FROM hiring.returning_exec_position_selections reps
           WHERE reps.submission_id = s.id
             AND reps.status IN ${this.sql(HIRING_STATUSES)}
         )
@@ -128,10 +128,10 @@ export class HiringRepository extends BaseRepository {
         ep.name AS position_name,
         ep.is_vp,
         st.name AS subteam_name
-      FROM public.returning_exec_position_selections reps
-      JOIN public.application_positions_available apa ON apa.id = reps.position_id
-      JOIN public.exec_positions ep ON ep.id = apa.position_id
-      LEFT JOIN public.subteams st ON st.id = ep.subteam_id
+      FROM hiring.returning_exec_position_selections reps
+      JOIN hiring.application_positions_available apa ON apa.id = reps.position_id
+      JOIN org.exec_positions ep ON ep.id = apa.position_id
+      LEFT JOIN org.subteams st ON st.id = ep.subteam_id
       WHERE reps.submission_id IN ${this.sql(returningIds)}
         AND reps.status IN ${this.sql(HIRING_STATUSES)}
       ORDER BY reps.priority
@@ -166,10 +166,10 @@ export class HiringRepository extends BaseRepository {
     const rows = await this.sql<{ exists: boolean }[]>`
       SELECT EXISTS (
         SELECT 1
-        FROM application_position_selections other
+        FROM hiring.application_position_selections other
         WHERE other.application_id = (
           SELECT application_id
-          FROM application_position_selections
+          FROM hiring.application_position_selections
           WHERE id = ${selectionId}
         )
           AND other.id != ${selectionId}
@@ -198,11 +198,11 @@ export class HiringRepository extends BaseRepository {
         a.full_name,
         ep.name AS position_name,
         t.code AS term_code
-      FROM application_position_selections aps
-      JOIN applications a ON aps.application_id = a.id
-      LEFT JOIN terms t ON t.id = a.term_id
-      JOIN application_positions_available apa ON aps.position_id = apa.id
-      JOIN exec_positions ep ON apa.position_id = ep.id
+      FROM hiring.application_position_selections aps
+      JOIN hiring.applications a ON aps.application_id = a.id
+      LEFT JOIN public.terms t ON t.id = a.term_id
+      JOIN hiring.application_positions_available apa ON aps.position_id = apa.id
+      JOIN org.exec_positions ep ON apa.position_id = ep.id
       JOIN auth.users u ON u.id = a.profile_id
       WHERE aps.id = ${selectionId}
     `;
@@ -214,7 +214,7 @@ export class HiringRepository extends BaseRepository {
     status: ApplicationReviewStatus,
   ): Promise<boolean> {
     const updated = await this.sql<{ id: string }[]>`
-      UPDATE application_position_selections
+      UPDATE hiring.application_position_selections
       SET status = ${status}
       WHERE id = ${selectionId}
       RETURNING id
@@ -231,12 +231,12 @@ export class HiringRepository extends BaseRepository {
         ep.is_vp,
         st.name AS subteam_name,
         u.email
-      FROM application_position_selections aps
-      JOIN applications a ON aps.application_id = a.id
+      FROM hiring.application_position_selections aps
+      JOIN hiring.applications a ON aps.application_id = a.id
       LEFT JOIN auth.users u ON u.id = a.profile_id
-      JOIN application_positions_available apa ON aps.position_id = apa.id
-      JOIN exec_positions ep ON apa.position_id = ep.id
-      LEFT JOIN subteams st ON st.id = ep.subteam_id
+      JOIN hiring.application_positions_available apa ON aps.position_id = apa.id
+      JOIN org.exec_positions ep ON apa.position_id = ep.id
+      LEFT JOIN org.subteams st ON st.id = ep.subteam_id
       WHERE aps.status = 'Accepted Offer'
       ORDER BY a.profile_id, aps.priority
     `;

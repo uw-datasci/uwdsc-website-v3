@@ -15,6 +15,10 @@ export interface Event {
   buffered_end_time: string;
 }
 
+export interface EventWithAttendanceCount extends Event {
+  attendance_count: number;
+}
+
 export interface CreateEventData {
   name: string;
   description: string;

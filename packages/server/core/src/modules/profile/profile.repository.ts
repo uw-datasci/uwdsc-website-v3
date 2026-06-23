@@ -94,8 +94,8 @@ export class ProfileRepository extends BaseRepository {
           ur.role AS role,
           (
             SELECT string_agg(ep.name, ' · ' ORDER BY et.id)
-            FROM exec_team et
-            JOIN exec_positions ep ON et.position_id = ep.id
+            FROM org.exec_team et
+            JOIN org.exec_positions ep ON et.position_id = ep.id
             WHERE et.profile_id = p.id
           ) AS exec_position_name
         FROM profiles p

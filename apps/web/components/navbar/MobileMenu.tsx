@@ -29,6 +29,7 @@ interface NavLink {
 interface MobileMenuProps {
   navLinks: NavLink[];
   user: Profile | null;
+  onOpenWrapped?: () => void;
 }
 
 function HamburgerIcon() {
@@ -41,7 +42,7 @@ function HamburgerIcon() {
   );
 }
 
-export function MobileMenu({ navLinks, user }: Readonly<MobileMenuProps>) {
+export function MobileMenu({ navLinks, user, onOpenWrapped }: Readonly<MobileMenuProps>) {
   const router = useRouter();
   const { mutate } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -58,15 +59,17 @@ export function MobileMenu({ navLinks, user }: Readonly<MobileMenuProps>) {
     }
   };
 
+  const handleOpenWrapped = () => {
+    setIsMobileMenuOpen(false);
+    onOpenWrapped?.();
+  };
+
   return (
     <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
       <SheetTrigger>
         <HamburgerIcon />
       </SheetTrigger>
-      <SheetContent
-        side="right"
-        className="w-full sm:max-w-sm p-0 [&>button]:hidden"
-      >
+      <SheetContent side="right" className="w-full sm:max-w-sm p-0 [&>button]:hidden">
         <div className="flex flex-col h-full">
           <SheetHeader className="text-left border-b bg-muted/30 px-6 py-4 relative">
             <SheetTitle className="flex items-center gap-3">
@@ -104,16 +107,21 @@ export function MobileMenu({ navLinks, user }: Readonly<MobileMenuProps>) {
             {/* Main Navigation Links */}
             <div className="px-6 py-2">
               <nav className="space-y-1">
+                {process.env.NODE_ENV !== "production" && (
+                  <Button
+                    variant="ghost"
+                    onClick={handleOpenWrapped}
+                    className="w-full justify-start text-lg py-3 px-4 h-auto font-semibold hover:bg-accent/50 transition-colors rounded-lg gap-2"
+                  >
+                    <span className="text-sm font-medium">Wrapped</span>
+                  </Button>
+                )}
                 {navLinks.map((link) => {
                   const linkComponent = (
                     <Link
                       href={link.href}
                       target={link.target}
-                      rel={
-                        link.target === "_blank"
-                          ? "noopener noreferrer"
-                          : undefined
-                      }
+                      rel={link.target === "_blank" ? "noopener noreferrer" : undefined}
                     >
                       {link.label}
                     </Link>
@@ -163,13 +171,9 @@ export function MobileMenu({ navLinks, user }: Readonly<MobileMenuProps>) {
                       </Badge>
                     </div>
 
-                    <p className="text-sm text-muted-foreground mb-1">
-                      {user?.email}
-                    </p>
+                    <p className="text-sm text-muted-foreground mb-1">{user?.email}</p>
 
-                    <p className="text-sm text-muted-foreground">
-                      WatIAM: {user.wat_iam}
-                    </p>
+                    <p className="text-sm text-muted-foreground">WatIAM: {user.wat_iam}</p>
                   </div>
 
                   <nav className="space-y-1">

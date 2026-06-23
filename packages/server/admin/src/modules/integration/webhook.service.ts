@@ -1,13 +1,19 @@
-import { MEMBERSHIP_INBOUND_EMAIL } from "@uwdsc/common/constants";
+import { MEMBERSHIP_INBOUND_EMAIL, SUPPORT_INBOUND_EMAIL } from "@uwdsc/common/constants";
 import { Resend } from "resend";
 import type { GetReceivedEmailContentsResult } from "../../types/webhook";
 
+export type InboundEmailTarget = "membership" | "support";
+
 class WebhookService {
   private readonly resend: Resend | null;
+  private readonly membershipEmail: string;
+  private readonly supportEmail: string;
 
   constructor() {
     const key = process.env.RESEND_API_KEY;
     this.resend = key ? new Resend(key) : null;
+    this.membershipEmail = MEMBERSHIP_INBOUND_EMAIL;
+    this.supportEmail = SUPPORT_INBOUND_EMAIL;
   }
 
   private verifyRecipient(to: string[], recipient: string): boolean {
@@ -19,22 +25,19 @@ class WebhookService {
     });
   }
 
+  resolveInboundTarget(to: string[]): InboundEmailTarget | null {
+    if (this.verifyRecipient(to, this.membershipEmail)) return "membership";
+
+    if (this.verifyRecipient(to, this.supportEmail)) return "support";
+
+    return null;
+  }
+
   /**
    * Loads full inbound email content (html, text, headers, etc.) for an `email.received` webhook.
-   * `receivingEmailId` is `data.email_id`; `webhookTo` is `data.to` from the verified payload.
+   * `receivingEmailId` is `data.email_id` from the verified payload.
    */
-  async getReceivedEmail(
-    receivingEmailId: string,
-    webhookTo: string[],
-  ): Promise<GetReceivedEmailContentsResult> {
-    if (!this.verifyRecipient(webhookTo, MEMBERSHIP_INBOUND_EMAIL)) {
-      return {
-        ok: false,
-        reason: "wrong_recipient",
-        message: `Email is not addressed to ${MEMBERSHIP_INBOUND_EMAIL}`,
-      };
-    }
-
+  async getReceivedEmail(receivingEmailId: string): Promise<GetReceivedEmailContentsResult> {
     if (!this.resend) {
       return {
         ok: false,

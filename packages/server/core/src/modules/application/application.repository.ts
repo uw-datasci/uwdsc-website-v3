@@ -30,12 +30,33 @@ export class ApplicationRepository extends BaseRepository {
         returning_exec_release_date,
         returning_exec_deadline,
         created_at
-      FROM terms
+      FROM public.terms
       WHERE is_active = true
       ORDER BY created_at DESC
       LIMIT 1
     `;
     return result[0] ?? null;
+  }
+
+  async getAllTerms(): Promise<Term[]> {
+    const result = await this.sql<Term[]>`
+      SELECT
+        id,
+        code,
+        is_active,
+        application_release_date,
+        application_soft_deadline,
+        application_hard_deadline,
+        start_date,
+        end_date,
+        onboarding_due_date,
+        returning_exec_release_date,
+        returning_exec_deadline,
+        created_at
+      FROM public.terms
+      ORDER BY start_date DESC NULLS LAST
+    `;
+    return result;
   }
 
   async getAvailablePositions(): Promise<ApplicationPositionRow[]> {
@@ -44,8 +65,8 @@ export class ApplicationRepository extends BaseRepository {
         apa.id,
         ep.id as position_id,
         ep.name
-      FROM application_positions_available apa
-      JOIN exec_positions ep ON apa.position_id = ep.id
+      FROM hiring.application_positions_available apa
+      JOIN org.exec_positions ep ON apa.position_id = ep.id
       ORDER BY ep.name
     `;
     return result;
@@ -63,8 +84,8 @@ export class ApplicationRepository extends BaseRepository {
         q.created_at,
         pq.position_id,
         pq.sort_order
-      FROM questions q
-      JOIN position_questions pq ON q.id = pq.question_id
+      FROM hiring.questions q
+      JOIN hiring.position_questions pq ON q.id = pq.question_id
       ORDER BY pq.sort_order ASC, q.created_at ASC
     `;
     return result;
@@ -87,7 +108,7 @@ export class ApplicationRepository extends BaseRepository {
         club_experience,
         status,
         submitted_at
-      FROM applications
+      FROM hiring.applications
       WHERE profile_id = ${profileId} AND term_id = ${termId}
       LIMIT 1
     `;
@@ -102,7 +123,7 @@ export class ApplicationRepository extends BaseRepository {
         position_id,
         priority,
         status
-      FROM application_position_selections
+      FROM hiring.application_position_selections
       WHERE application_id = ${app.id}
       ORDER BY priority
     `;
@@ -113,7 +134,7 @@ export class ApplicationRepository extends BaseRepository {
         application_id,
         question_id,
         answer_text
-      FROM answers
+      FROM hiring.answers
       WHERE application_id = ${app.id}
     `;
 
@@ -126,7 +147,7 @@ export class ApplicationRepository extends BaseRepository {
 
   async createApplication(data: CreateApplicationData): Promise<Application> {
     const result = await this.sql<Application[]>`
-      INSERT INTO applications (profile_id, term_id, full_name, status)
+      INSERT INTO hiring.applications (profile_id, term_id, full_name, status)
       VALUES (${data.profile_id}, ${data.term_id}, ${data.full_name}, 'draft')
       RETURNING
         id,
@@ -152,7 +173,7 @@ export class ApplicationRepository extends BaseRepository {
     data: UpdateApplicationData,
   ): Promise<Application | null> {
     const result = await this.sql<Application[]>`
-      UPDATE applications
+      UPDATE hiring.applications
       SET
         full_name = COALESCE(${data.full_name ?? null}, full_name),
         major = COALESCE(${data.major ?? null}, major),
@@ -173,14 +194,14 @@ export class ApplicationRepository extends BaseRepository {
     selections: PositionSelectionInput[],
   ): Promise<void> {
     await this.sql`
-      DELETE FROM application_position_selections
+      DELETE FROM hiring.application_position_selections
       WHERE application_id = ${applicationId}
     `;
 
     for (const sel of selections) {
       if (!sel.position_id) continue;
       await this.sql`
-        INSERT INTO application_position_selections (application_id, position_id, priority)
+        INSERT INTO hiring.application_position_selections (application_id, position_id, priority)
         VALUES (${applicationId}, ${sel.position_id}, ${sel.priority})
       `;
     }
@@ -191,14 +212,14 @@ export class ApplicationRepository extends BaseRepository {
     answers: AnswerInput[],
   ): Promise<void> {
     await this.sql`
-      DELETE FROM answers
+      DELETE FROM hiring.answers
       WHERE application_id = ${applicationId}
     `;
 
     for (const ans of answers) {
       if (!ans.question_id || ans.answer_text == null) continue;
       await this.sql`
-        INSERT INTO answers (application_id, question_id, answer_text)
+        INSERT INTO hiring.answers (application_id, question_id, answer_text)
         VALUES (${applicationId}, ${ans.question_id}, ${ans.answer_text})
       `;
     }

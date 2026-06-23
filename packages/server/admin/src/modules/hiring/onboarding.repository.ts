@@ -51,7 +51,7 @@ export class OnboardingRepository extends BaseRepository {
   async getExecPosId(profile_id: string): Promise<number | null> {
     const result = await this.sql<{ position_id: number }[]>`
       SELECT position_id
-      FROM public.exec_team
+      FROM org.exec_team
       WHERE profile_id = ${profile_id}
       ORDER BY updated_at DESC, created_at DESC
       LIMIT 1
@@ -63,7 +63,7 @@ export class OnboardingRepository extends BaseRepository {
   async getExecSubteamId(profile_id: string): Promise<number | null> {
     const result = await this.sql<{ subteam_id: number }[]>`
       SELECT subteam_id
-      FROM public.exec_team
+      FROM org.exec_team
       WHERE profile_id = ${profile_id}
       ORDER BY updated_at DESC, created_at DESC
       LIMIT 1
@@ -78,7 +78,7 @@ export class OnboardingRepository extends BaseRepository {
         SELECT
         id,
         name
-        FROM exec_positions
+        FROM org.exec_positions
         ORDER BY name
     `;
     return result;
@@ -119,16 +119,16 @@ export class OnboardingRepository extends BaseRepository {
       JOIN user_roles r ON p.id = r.id
       LEFT JOIN LATERAL (
         SELECT position_id, subteam_id
-        FROM exec_team
+        FROM org.exec_team
         WHERE profile_id = p.id
         ORDER BY updated_at DESC, created_at DESC
         LIMIT 1
       ) et ON true
-      LEFT JOIN exec_positions ep_current ON ep_current.id = et.position_id
-      LEFT JOIN exec_form_submissions s
+      LEFT JOIN org.exec_positions ep_current ON ep_current.id = et.position_id
+      LEFT JOIN hiring.exec_form_submissions s
         ON s.profile_id = p.id
       AND s.term_id = ${term_id}
-      LEFT JOIN exec_positions ep_submission ON ep_submission.id = s.role_id
+      LEFT JOIN org.exec_positions ep_submission ON ep_submission.id = s.role_id
       WHERE r.role IN ('exec', 'admin')
       ${subteam_id ? this.sql`AND COALESCE(ep_current.subteam_id, et.subteam_id) = ${subteam_id}` : this.sql``}
       ORDER BY r.role DESC, p.first_name NULLS LAST, p.last_name NULLS LAST
@@ -152,7 +152,7 @@ export class OnboardingRepository extends BaseRepository {
         returning_exec_release_date,
         returning_exec_deadline,
         created_at
-      FROM terms
+      FROM public.terms
       WHERE is_active = true
       ORDER BY created_at DESC
       LIMIT 1
@@ -163,7 +163,7 @@ export class OnboardingRepository extends BaseRepository {
   async getSubmission(profile_id: string, term_id: string): Promise<Onboarding | null> {
     const result = await this.sql<Onboarding[]>`
         SELECT *
-        FROM public.exec_form_submissions
+        FROM hiring.exec_form_submissions
         WHERE profile_id = ${profile_id}
           AND term_id = ${term_id}
         LIMIT 1
@@ -179,7 +179,7 @@ export class OnboardingRepository extends BaseRepository {
       ? (data.headshot_url ?? null)
       : TEAM_DEFAULT_HEADSHOT_URL;
     const result = await this.sql<Onboarding[]>`
-        INSERT INTO public.exec_form_submissions (
+        INSERT INTO hiring.exec_form_submissions (
         profile_id,
         term_id,
         email,
@@ -226,7 +226,7 @@ export class OnboardingRepository extends BaseRepository {
     `;
 
     await this.sql`
-      UPDATE public.exec_team
+      UPDATE org.exec_team
       SET
         photo_url = COALESCE(NULLIF(${resolvedHeadshotUrl}::text, ''), photo_url),
         instagram = ${instagram},

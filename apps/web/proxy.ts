@@ -10,14 +10,14 @@ const PROTECTED_ROUTES = new Set(["/events", "/passport"]);
 export async function proxy(request: NextRequest) {
   const response = NextResponse.next({ request: { headers: request.headers } });
 
-  // Validate session via JWT claims (local JWKS verify) instead of getUser(),
-  // which hits the Auth API on every request and quickly triggers 429 rate limits.
+  // Get user session
   const supabase = createSupabaseMiddlewareClient(request, response);
-  const { data: claimsData } = await supabase.auth.getClaims();
-  const userId = claimsData?.claims?.sub;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const { pathname } = request.nextUrl;
 
-  const isComplete = await isProfileComplete(supabase, userId);
+  const isComplete = await isProfileComplete(supabase, user?.id);
   const completeProfileResponse = NextResponse.redirect(
     new URL(WEB_COMPLETE_PROFILE_PATH, request.url),
   );
@@ -25,14 +25,14 @@ export async function proxy(request: NextRequest) {
   switch (true) {
     // 1. User is not authenticated and trying to access auth routes
     case AUTH_ROUTES.has(pathname):
-      return withAuth(request, response, userId);
+      return withAuth(request, response, user);
     // 2. Redirect anonymous users from protected pages to login page
     case PROTECTED_ROUTES.has(pathname):
-      return withProtected(request, response, userId);
+      return withProtected(request, response, user);
     // 3. complete profile route
     case pathname === WEB_COMPLETE_PROFILE_PATH:
-      return await withAnon(request, response, isComplete, userId);
-    case userId && !isComplete:
+      return await withAnon(request, response, isComplete, user?.id);
+    case user && !isComplete:
       return completeProfileResponse;
   }
 

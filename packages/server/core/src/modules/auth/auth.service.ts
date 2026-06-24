@@ -39,13 +39,6 @@ export class AuthService {
           };
         }
 
-        if (error.status === 429 || error.code === "over_request_rate_limit") {
-          return {
-            success: false,
-            error: "Too many sign-in attempts. Please wait a few minutes and try again.",
-          };
-        }
-
         return {
           success: false,
           error: error.message,

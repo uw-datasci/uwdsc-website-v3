@@ -25,30 +25,28 @@ export async function proxy(request: NextRequest) {
   // Create Supabase client for authentication check
   const supabase = createSupabaseMiddlewareClient(request, response);
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const claims = claimsData?.claims;
+  const userId = claims?.sub;
 
-  const isAdmin = ADMIN_ROLES.has(user?.app_metadata.role);
+  const isAdmin = ADMIN_ROLES.has(claims?.app_metadata?.role);
   const isLoginRoute = pathname == LOGIN_ROUTE;
   const isUnauthorizedRoute = pathname == UNAUTHORIZED_ROUTE;
 
   switch (true) {
-    case !user && !isLoginRoute:
+    case !userId && !isLoginRoute:
       return NextResponse.redirect(new URL("/login", request.url));
-    case user && isLoginRoute:
+    case userId && isLoginRoute:
       return NextResponse.redirect(new URL("/members", request.url));
-    case user && !isAdmin && !isUnauthorizedRoute:
+    case userId && !isAdmin && !isUnauthorizedRoute:
       return NextResponse.redirect(new URL("/unauthorized", request.url));
-    case user && isAdmin && isUnauthorizedRoute:
+    case userId && isAdmin && isUnauthorizedRoute:
       return NextResponse.redirect(new URL("/members", request.url));
   }
 
-  if (user && isAdmin) {
-    const profileComplete = await isProfileCompleteForMiddleware(supabase, user.id);
-    if (!profileComplete) {
-      return NextResponse.redirect(webCompleteProfileAbsoluteUrl());
-    }
+  if (userId && isAdmin) {
+    const profileComplete = await isProfileCompleteForMiddleware(supabase, userId);
+    if (!profileComplete) return NextResponse.redirect(webCompleteProfileAbsoluteUrl());
   }
 
   return response;

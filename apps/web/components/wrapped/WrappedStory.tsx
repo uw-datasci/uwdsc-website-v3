@@ -6,7 +6,7 @@ import { Pause, Play } from "lucide-react";
 import { cn } from "@uwdsc/ui/lib/utils";
 import { WRAPPED_SLIDES } from "./slides";
 import { WrappedSlide } from "./slides/WrappedSlide";
-import { useStoryTimer } from "./useStoryTimer";
+import { useStoryTimer } from "@/hooks/useStoryTimer";
 import { DEFAULT_SLIDE_DURATION_MS, type WrappedSlideData } from "./types";
 
 interface WrappedStoryProps {

@@ -509,7 +509,7 @@ const fillEl=document.getElementById('fill'),hintEl=document.getElementById('hin
       labelEl=document.getElementById('label'),againEl=document.getElementById('again'),
       flashEl=document.getElementById('flash'),impactEl=document.getElementById('impact'),
       speedEl=document.getElementById('speed'),glEl=document.getElementById('gl'),whiteEl=document.getElementById('white');
-const camTgt=new THREE.Vector3(0,0,0),camA=new THREE.Vector3(),tgtA=new THREE.Vector3(),pP0=new THREE.Vector3();
+const camTgt=new THREE.Vector3(0,0,0),camA=new THREE.Vector3(),tgtA=new THREE.Vector3();
 const editMode=location.search.includes('edit')&&!location.search.includes('editmoon');const editMoon=location.search.includes('editmoon');const ray=new THREE.Raycaster();const ndc=new THREE.Vector2();let dragObj=null,dragC=-1,selC=-1,selObj=null,dragProp=false,selProp=null;const dPlane=new THREE.Plane(),dHit=new THREE.Vector3();const editorEl=document.getElementById('editor');const copyBtn=document.getElementById('copyBtn');const addBtn=document.getElementById('addBtn');const addStarBtn=document.getElementById('addStarBtn');const sizeSlider=document.getElementById('sizeSlider');const objType=document.getElementById('objType');
 const ctrlEl=document.getElementById('ctrl'),hSlider=document.getElementById('hSlider'),rotX=document.getElementById('rotX'),rotY=document.getElementById('rotY'),rotZ=document.getElementById('rotZ');
 function syncCtrl(){if(!selProp)return;hSlider.value=selProp.position.y;rotX.value=selProp.rotation.x;rotY.value=selProp.rotation.y;rotZ.value=selProp.rotation.z;}

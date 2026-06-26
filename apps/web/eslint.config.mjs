@@ -10,6 +10,7 @@ export default [
       ".vercel/**",
       "node_modules/**",
       "next-env.d.ts",
+      "components/gacha/prototype/**",
     ],
   },
 ];

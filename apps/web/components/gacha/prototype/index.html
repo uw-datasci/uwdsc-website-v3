@@ -492,7 +492,6 @@ function syncCraters(){for(let i=0;i<MAXC;i++){const c=CRATERS[i];if(c)cratersUn
 syncCraters();
 const RELIC_POS=new THREE.Vector3(0,1.6,0);                 // relic on the moon ground
 const CAM_MOON=new THREE.Vector3(0,9,10), CAM_TGT_MOON=new THREE.Vector3(0,0,-3);   // SAME view as the ?editmoon editor
-const DROP=new THREE.Vector3(0,8,0);                        // payload descends from here onto the ground
 const RELIC_S=2.0;
 
 // ---------- FX canvas ----------
@@ -505,7 +504,7 @@ function drawFx(){fxc.clearRect(0,0,fx.width,fx.height);fxc.globalCompositeOpera
     fxc.strokeStyle=`rgba(255,255,255,${r.life})`;fxc.lineWidth=2;fxc.beginPath();fxc.arc(r.x,r.y,r.r,0,6.283);fxc.stroke();}}
 
 // ---------- state ----------
-const HITS=6;let state='charging',stt=0,charge=0,shake=0,invFx=0,invHold=0,burstFired=false,fxClear=false,pulseT=9,freeze=0,scalePop=0,kicked=false,shockT=9,mshake=0,invAmt=0;
+const HITS=6;let state='charging',stt=0,charge=0,shake=0,burstFired=false,fxClear=false,pulseT=9,freeze=0,scalePop=0,kicked=false,shockT=9,mshake=0;
 const fillEl=document.getElementById('fill'),hintEl=document.getElementById('hint'),
       labelEl=document.getElementById('label'),againEl=document.getElementById('again'),
       flashEl=document.getElementById('flash'),impactEl=document.getElementById('impact'),

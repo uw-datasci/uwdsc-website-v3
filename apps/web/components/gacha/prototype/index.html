@@ -17,13 +17,23 @@
   #flash{position:fixed;inset:0;z-index:3;pointer-events:none;opacity:0;mix-blend-mode:screen;
     background:radial-gradient(circle at 50% 50%, #ffffff 0%, #ffffff 22%, transparent 55%);}
   #white{position:fixed;inset:0;z-index:5;pointer-events:none;opacity:0;background:#fff;}
-  #editor{position:fixed;z-index:7;top:60px;left:18px;font:11px/1.5 ui-monospace,Menlo,monospace;white-space:pre;color:#0f0;background:rgba(0,0,0,.55);padding:8px 10px;border:1px solid #0f04;display:none;max-height:60vh;overflow:auto;}
+  #editor{position:fixed;z-index:7;bottom:14px;left:18px;font:10px/1.4 ui-monospace,Menlo,monospace;white-space:pre;color:#0a0;background:rgba(0,0,0,.4);padding:6px 9px;border:1px solid #0f03;display:none;max-width:46vw;pointer-events:none;}
   #copyBtn{position:fixed;z-index:8;top:18px;left:18px;display:none;font:12px ui-monospace,monospace;color:#0f0;background:#000a;border:1px solid #0f0;padding:7px 14px;cursor:pointer;}
   #copyBtn:hover{background:#0f0;color:#000;}
   #addBtn{position:fixed;z-index:8;top:18px;left:86px;display:none;font:12px ui-monospace,monospace;color:#0f0;background:#000a;border:1px solid #0f0;padding:7px 14px;cursor:pointer;}
+  #addStarBtn{position:fixed;z-index:8;top:54px;left:86px;display:none;font:12px ui-monospace,monospace;color:#0f0;background:#000a;border:1px solid #0f0;padding:7px 14px;cursor:pointer;}
+  #addStarBtn:hover{background:#0f0;color:#000;}
+  #loading{position:fixed;inset:0;z-index:30;background:#08080c;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .6s ease;color:#cfcfcf;font:14px ui-monospace,Menlo,monospace;letter-spacing:.18em;}
+  #loading.done{opacity:0;pointer-events:none;}
+  #loading .lspin{width:38px;height:38px;border:2px solid #333;border-top-color:#ddd;border-radius:50%;animation:lsp .8s linear infinite;}
+  @keyframes lsp{to{transform:rotate(360deg);}}
   #addBtn:hover{background:#0f0;color:#000;}
   #objType{position:fixed;z-index:8;top:18px;left:172px;display:none;font:12px ui-monospace,monospace;color:#0f0;background:#000a;border:1px solid #0f0;padding:6px;}
   #sizeSlider{position:fixed;z-index:8;top:22px;left:290px;width:150px;display:none;accent-color:#0f0;}
+  #ctrl{position:fixed;z-index:8;top:56px;left:290px;display:none;background:rgba(0,0,0,.5);padding:6px 8px;border:1px solid #0f04;}
+  #ctrl label{display:flex;align-items:center;gap:6px;color:#0f0;font:11px ui-monospace,monospace;margin:2px 0;}
+  #ctrl input{width:150px;accent-color:#0f0;}
+  #title,#shaderBtn,#bar,#again,#label{display:none!important;}   /* removed UI chrome: title, diamond toggle, charge bar, again, GET!! label */
   #speed{display:none;}
   #vig{position:fixed;inset:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse at center, transparent 38%, rgba(0,0,0,.5) 72%, rgba(0,0,0,.9) 100%);}
   #grain{display:none;}
@@ -66,14 +76,22 @@
 <div id="editor"></div>
 <button id="copyBtn">copy</button>
 <button id="addBtn">+ crater</button>
+<button id="addStarBtn">+ star</button>
 <select id="objType"><option>asteroid</option><option>planet</option><option>crystal</option><option>cube</option><option>diamond</option><option>dodeca</option><option>tetra</option><option>ring</option><option>knot</option><option>star</option><option>ringplanet</option></select>
-<input id="sizeSlider" type="range" min="0.4" max="5" step="0.1" value="1.8">
+<input id="sizeSlider" type="range" min="0.4" max="12" step="0.1" value="1.8">
+<div id="ctrl">
+  <label>Y&nbsp;<input id="hSlider" type="range" min="-8" max="18" step="0.1" value="3"></label>
+  <label>rX<input id="rotX" type="range" min="-3.15" max="3.15" step="0.01" value="0"></label>
+  <label>rY<input id="rotY" type="range" min="-3.15" max="3.15" step="0.01" value="0"></label>
+  <label>rZ<input id="rotZ" type="range" min="-3.15" max="3.15" step="0.01" value="0"></label>
+</div>
 <canvas id="fx"></canvas>
+<div id="loading"><div class="lspin"></div><div class="ltxt">loading…</div></div>
 <div id="grain"></div>
 <div id="impact"></div>
 <div id="title">DSC · Gacha Reveal — manga earth</div>
 <button id="shaderBtn">shader: manga ▸</button>
-<div id="label"><div class="n">GET!!</div><div class="r">★ rare relic</div></div>
+<div id="label"><div class="n">GET!!</div></div>
 <div id="hud"><div id="hint">slash &nbsp;/&nbsp; tap — feed data to the core</div>
   <div id="bar"><div id="fill"></div></div><button id="again">Again ▶</button></div>
 <div id="err"></div>
@@ -110,7 +128,7 @@ const sGeo=new THREE.BufferGeometry();sGeo.setAttribute('position',new THREE.Buf
 const stars=new THREE.Points(sGeo,new THREE.PointsMaterial({size:0.07,map:sprite,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,color:0xffffff}));scene.add(stars);
 
 // ---------- CARTOON/MANGA EARTH (colour) that SHATTERS into triangle shards ----------
-const tl=new THREE.TextureLoader();
+const manager=new THREE.LoadingManager();const tl=new THREE.TextureLoader(manager);
 const earthTex=tl.load('assets/textures/00_earthmap1k.jpg');earthTex.colorSpace=THREE.SRGBColorSpace;
 const specTex=tl.load('assets/textures/02_earthspec1k.jpg');specTex.colorSpace=THREE.NoColorSpace;
 const paperTex=tl.load('assets/textures/paper.png');paperTex.colorSpace=THREE.SRGBColorSpace;paperTex.wrapS=paperTex.wrapT=THREE.RepeatWrapping;
@@ -325,7 +343,7 @@ const outMat=new THREE.ShaderMaterial({side:THREE.BackSide,transparent:true,unif
 let rewardGeo=new THREE.IcosahedronGeometry(0.85,MOBILE?2:3);
 const reward=new THREE.Mesh(rewardGeo,rewMat);reward.visible=false;scene.add(reward);
 const rewOut=new THREE.Mesh(rewardGeo,outMat);rewOut.renderOrder=-1;reward.add(rewOut);
-new GLTFLoader().load('assets/models/reward.glb', gltf=>{ gltf.scene.updateMatrixWorld(true); const geos=[];
+new GLTFLoader(manager).load('assets/models/reward.glb', gltf=>{ gltf.scene.updateMatrixWorld(true); const geos=[];
   gltf.scene.traverse(o=>{ if(o.isMesh&&o.geometry){ let ge=o.geometry.clone();
     for(const k of Object.keys(ge.attributes)) if(k!=='position'&&k!=='normal') ge.deleteAttribute(k);
     if(ge.index) ge=ge.toNonIndexed(); if(!ge.attributes.normal) ge.computeVertexNormals();
@@ -379,14 +397,24 @@ function makeBody(type,r){var g;   // diverse object generator
 [[-3.38,-0.60,-2.10,0.22,2.90],[3.06,1.46,-2.50,0.16,2.70],[0.90,2.00,-2.70,0.13,1.00]].forEach(function(b,i){var m=new THREE.Mesh(starGeo(b[3]),bodyMat);m.position.set(b[0],b[1],b[2]);m.scale.setScalar(b[4]||1);m.userData.label='star'+i;m.userData.type='star';m.userData.rotZ=Math.atan2(-b[1],-b[0])+Math.PI/2;m.rotation.z=m.userData.rotZ;spaceStuff.add(m);});  // a spike points toward centre
 [['knot',-2.28,-1.82,-2.00,0.18,1.90],['ring',2.01,-2.23,-2.20,0.20,1.30],['dodeca',-4.00,1.60,-2.40,0.18,1.00],['tetra',4.00,-0.60,-2.00,0.16,1.00],['cube',-1.57,2.18,-2.30,0.14,1.00]].forEach(function(b,i){var m=makeBody(b[0],b[4]);m.position.set(b[1],b[2],b[3]);m.rotation.set(b[2],b[1],0.3);m.scale.setScalar(b[5]||1);m.userData.label=b[0]+'D'+i;spaceStuff.add(m);});
 [['planet',2.76,0.17,-1.50,2.40],['crystal',3.76,1.42,-1.50,2.30],['dodeca',-2.53,0.59,-1.50,0.70],['knot',3.95,-0.03,-1.50,0.70],['tetra',3.99,-1.94,-1.50,1.00],['ring',-4.19,-0.59,-1.50,1.00],['ringplanet',-4.16,1.45,-1.50,1.00]].forEach(function(b,i){var m=makeBody(b[0],0.18);m.position.set(b[1],b[2],b[3]);m.scale.setScalar(b[4]);m.rotation.set(b[2]*1.3,b[1]*1.1,0.2);m.userData.label=b[0]+'N'+i;spaceStuff.add(m);});  // your added objects
-new GLTFLoader().load('assets/models/sun.glb',g=>{g.scene.traverse(o=>{if(o.isMesh)o.material=bodyMat;});
+new GLTFLoader(manager).load('assets/models/sun.glb',g=>{g.scene.traverse(o=>{if(o.isMesh)o.material=bodyMat;});
   var box=new THREE.Box3().setFromObject(g.scene),ctr=box.getCenter(new THREE.Vector3());g.scene.position.sub(ctr);   // center geometry on origin so it spins in place (was flying across)
   var pivot=new THREE.Group();pivot.add(g.scene);pivot.scale.setScalar(0.3);pivot.position.set(-3.5,1.7,-3.2);pivot.userData.label='sun';pivot.userData.type='sun';spaceStuff.add(pivot);},undefined,()=>{});  // sun/star
 
 // ---------- beam + payload (launch) ----------
-const beamGeo=new THREE.CylinderGeometry(0.17,0.17,24,16);beamGeo.translate(0,12,0);   // base at origin so it grows UP from the ground
+const beamGeo=new THREE.CylinderGeometry(0.34,0.52,26,24);beamGeo.translate(0,13,0);   // thicker laser, base at origin, grows UP
 const beam=new THREE.Mesh(beamGeo,new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending}));
 beam.position.y=0;beam.visible=false;scene.add(beam);
+const shock=new THREE.Mesh(new THREE.RingGeometry(0.5,0.75,48),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));
+shock.rotation.x=-Math.PI/2;shock.visible=false;scene.add(shock);   // moon-impact shockwave ring (outer)
+const shock2=new THREE.Mesh(new THREE.RingGeometry(0.28,0.42,48),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));
+shock2.rotation.x=-Math.PI/2;shock2.visible=false;scene.add(shock2);   // inner fast ring
+const fsphere=new THREE.Mesh(new THREE.SphereGeometry(0.5,20,16),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending}));
+fsphere.visible=false;scene.add(fsphere);   // impact flash-burst core
+const shock3=new THREE.Mesh(new THREE.RingGeometry(0.7,1.0,56),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));
+shock3.rotation.x=-Math.PI/2;shock3.visible=false;scene.add(shock3);   // huge slow outer ring
+const plume=new THREE.Mesh(new THREE.IcosahedronGeometry(1,2),new THREE.MeshBasicMaterial({color:0xe2eaf2,transparent:true,opacity:0,depthWrite:false}));
+plume.visible=false;scene.add(plume);   // rising dust plume
 const payload=new THREE.Mesh(new THREE.SphereGeometry(0.26,16,12),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true}));
 payload.visible=false;scene.add(payload);
 
@@ -400,13 +428,13 @@ const moonMat=new THREE.ShaderMaterial({uniforms:{hatchTex:{value:hatchTex},pape
     float h(vec3 p){p=fract(p*0.3183+0.1);p*=17.0;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
     float n3(vec3 x){vec3 i=floor(x),f=fract(x);f=f*f*(3.0-2.0*f);return mix(mix(mix(h(i),h(i+vec3(1,0,0)),f.x),mix(h(i+vec3(0,1,0)),h(i+vec3(1,1,0)),f.x),f.y),mix(mix(h(i+vec3(0,0,1)),h(i+vec3(1,0,1)),f.x),mix(h(i+vec3(0,1,1)),h(i+vec3(1,1,1)),f.x),f.y),f.z);}
     float prof(float d,float R){return -0.5*(1.0-smoothstep(0.0,R,d))+0.5*exp(-pow((d-R)/(R*0.30),2.0));}  // bowl + raised rim (world units)
-    float hgt(vec2 p){return n3(vec3(p*0.16,0.0))+n3(vec3(p*0.45,4.0))*0.4;}
+    float hgt(vec2 p){return n3(vec3(p*0.16,0.0));}   // single octave (relief uses 4 hgt taps — keep it cheap)
     void main(){
       vec2 P=vWp.xz;float eh=0.3;                                     // rolling relief so the ground isn't flat
       vec3 Nu=normalize(vec3(-(hgt(P+vec2(eh,0.0))-hgt(P-vec2(eh,0.0)))/(2.0*eh)*0.7,1.0,-(hgt(P+vec2(0.0,eh))-hgt(P-vec2(0.0,eh)))/(2.0*eh)*0.7));
       vec2 gr=vec2(0.0);float aoc=0.0;                                // MANUALLY PLACED craters
-      for(int i=0;i<32;i++){ if(i>=uNumC) break; vec3 cr=uCraters[i]; vec2 rv=P-cr.xy; float dd=length(rv); float R=cr.z;
-        if(dd<R*1.7){ float ec=R*0.04; float dH=(prof(dd+ec,R)-prof(dd-ec,R))/(2.0*ec); gr+=dH*normalize(rv+vec2(1e-5)); aoc+=(1.0-smoothstep(0.0,R*0.7,dd))*0.3; } }
+      for(int i=0;i<32;i++){ if(i>=uNumC) break; vec3 cr=uCraters[i]; vec2 rv=P-cr.xy; float R=cr.z; float dd2=dot(rv,rv);
+        if(dd2<R*R*2.89){ float dd=sqrt(dd2); float ec=R*0.04; float dH=(prof(dd+ec,R)-prof(dd-ec,R))/(2.0*ec); gr+=dH*normalize(rv+vec2(1e-5)); aoc+=(1.0-smoothstep(0.0,R*0.7,dd))*0.3; } }   // squared-dist cull: sqrt only near a crater
       vec3 Nb=normalize(Nu+vec3(-gr.x*1.6,0.0,-gr.y*1.6));
       float ndl=max(dot(Nb,normalize(uL1)),0.0);
       float grain=n3(vWp*7.5)*0.10;
@@ -419,6 +447,47 @@ const moonMat=new THREE.ShaderMaterial({uniforms:{hatchTex:{value:hatchTex},pape
       vec3 paper=vec3(0.93)*mix(vec3(1.0),texture2D(paperTex,gl_FragCoord.xy/620.0).rgb,0.14);
       gl_FragColor=vec4(mix(vec3(0.05),paper,clamp(m2,0.0,1.0)),1.0);}`});
 const moon=new THREE.Mesh(new THREE.SphereGeometry(70,96,64),moonMat);moon.position.y=-70;moon.visible=false;scene.add(moon);   // previous flat-horizon hatch moon
+// props use the moon's sketchy HATCH look, lit by their own normals (cheap — no per-pixel 3D noise, so the moon scene stays smooth)
+const propMat=new THREE.ShaderMaterial({uniforms:moonMat.uniforms,
+  vertexShader:`varying vec3 vN;void main(){vN=normalize(mat3(modelMatrix)*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
+  fragmentShader:`precision highp float;uniform sampler2D hatchTex,paperTex;uniform vec3 uL1;uniform float uTime,uHscale;varying vec3 vN;
+    void main(){vec3 N=normalize(vN);float ndl=max(dot(N,normalize(uL1)),0.0);float shade=clamp(ndl*0.85+0.17,0.0,1.0);float t=1.0-shade;   // directional lighting like the moon
+      float fr=floor(uTime*8.0);float ja=fr*1.7;mat2 R=mat2(cos(ja),-sin(ja),sin(ja),cos(ja));vec2 off=vec2(fract(sin(fr*91.7)*4373.0),fract(sin(fr*47.3)*7919.0))*1200.0;
+      vec3 hx=texture2D(hatchTex,(R*gl_FragCoord.xy+off)/uHscale).rgb;
+      float i0=smoothstep(0.10,0.42,t),i1=smoothstep(0.32,0.66,t),i2=smoothstep(0.58,0.95,t);   // same sketchy hatch thresholds as the moon
+      float m0=mix(1.0,hx.r,i0);float m1=m0*mix(1.0,hx.g,i1);float m2=m1*mix(1.0,hx.b,i2);
+      vec3 paper=vec3(0.93)*mix(vec3(1.0),texture2D(paperTex,gl_FragCoord.xy/620.0).rgb,0.14);
+      gl_FragColor=vec4(mix(vec3(0.05),paper,clamp(m2,0.0,1.0)),1.0);}`});
+// landed spaceship sitting on the moon (manga hatch shader applied to match the scene)
+const props=[];   // editable 3D props sitting on the moon (each gets the manga hatch shader)
+function loadProp(file,name,scale,pos,rot){new GLTFLoader(manager).load(file,g=>{g.scene.traverse(o=>{if(o.isMesh){o.material=propMat;o.geometry.computeVertexNormals();}});   // brighter prop shader + clean normals
+  var box=new THREE.Box3().setFromObject(g.scene),sz=box.getSize(new THREE.Vector3()),ctr=box.getCenter(new THREE.Vector3());
+  g.scene.position.sub(ctr);   // center on origin
+  var grp=new THREE.Group();grp.add(g.scene);grp.scale.setScalar(scale);grp.userData.halfH=sz.y*0.5;grp.userData.name=name;
+  grp.position.set(pos[0],pos[1],pos[2]);grp.userData.lift=pos[1]-grp.userData.halfH*scale;grp.rotation.set(rot[0],rot[1],rot[2]);grp.userData.baseY=pos[1];
+  grp.visible=false;scene.add(grp);props.push(grp);},undefined,()=>{});}
+loadProp('assets/models/rocket.glb','SHIP',3.41,[6.00,3.25,-7.00],[-0.12,-0.60,0.10]);   // landed ship (baked)
+loadProp('assets/models/ufo.glb','UFO',3.01,[-6.23,3.10,-2.51],[0.12,0.73,-3.15]);        // UFO: baked orientation
+// ---- moon decor: a big planet "earthrise" in the sky + scattered boulders (fills the empty scene; cheap hatch shader) ----
+const moonDecor=new THREE.Group();moonDecor.visible=false;scene.add(moonDecor);
+function fragGeo(r){var g=new THREE.SphereGeometry(r,22,16).toNonIndexed();var p=g.attributes.position,n=p.count,cen=new Float32Array(n*3),rnd=new Float32Array(n);for(var i=0;i<n;i+=3){var cx=(p.getX(i)+p.getX(i+1)+p.getX(i+2))/3,cy=(p.getY(i)+p.getY(i+1)+p.getY(i+2))/3,cz=(p.getZ(i)+p.getZ(i+1)+p.getZ(i+2))/3,rr=Math.random();for(var k=0;k<3;k++){cen[(i+k)*3]=cx;cen[(i+k)*3+1]=cy;cen[(i+k)*3+2]=cz;rnd[i+k]=rr;}}g.setAttribute('aCen',new THREE.BufferAttribute(cen,3));g.setAttribute('aRnd',new THREE.BufferAttribute(rnd,1));return g;}
+const earthriseMat=new THREE.ShaderMaterial({uniforms:{spec:{value:specTex},uL1:{value:L1},uTime:moonMat.uniforms.uTime,uHscale:moonMat.uniforms.uHscale,hatchTex:{value:hatchTex},paperTex:{value:paperTex},uBreak:{value:4.5}},
+  vertexShader:`uniform float uBreak,uTime;attribute vec3 aCen;attribute float aRnd;varying vec3 vN;varying vec2 vUv;void main(){vUv=uv;vN=normalize(mat3(modelMatrix)*normal);
+    float drift=uBreak*(1.0+aRnd*1.5)+sin(uTime*0.6+aRnd*40.0)*0.7;vec3 sp=position+normalize(aCen)*drift;gl_Position=projectionMatrix*modelViewMatrix*vec4(sp,1.0);}`,   // pieces spread apart + breathe/drift
+  fragmentShader:`precision highp float;uniform sampler2D spec,hatchTex,paperTex;uniform vec3 uL1;uniform float uTime,uHscale;varying vec3 vN;varying vec2 vUv;
+    void main(){vec3 N=normalize(vN);float ndl=max(dot(N,normalize(uL1)),0.0);
+      float ocean=texture2D(spec,vUv).r;float base=mix(0.42,0.95,ocean);          // continents (dark) vs ocean (light)
+      float shade=clamp(ndl*0.85+0.17,0.0,1.0)*base;float t=1.0-shade;   // directional lighting like the moon
+      float fr=floor(uTime*8.0);float ja=fr*1.7;mat2 R=mat2(cos(ja),-sin(ja),sin(ja),cos(ja));vec2 off=vec2(fract(sin(fr*91.7)*4373.0),fract(sin(fr*47.3)*7919.0))*1200.0;
+      vec3 hx=texture2D(hatchTex,(R*gl_FragCoord.xy+off)/uHscale).rgb;
+      float i0=smoothstep(0.10,0.42,t),i1=smoothstep(0.32,0.66,t),i2=smoothstep(0.58,0.95,t);
+      float m0=mix(1.0,hx.r,i0),m1=m0*mix(1.0,hx.g,i1),m2=m1*mix(1.0,hx.b,i2);
+      vec3 paper=vec3(0.93)*mix(vec3(1.0),texture2D(paperTex,gl_FragCoord.xy/620.0).rgb,0.14);
+      gl_FragColor=vec4(mix(vec3(0.05),paper,clamp(m2,0.0,1.0)),1.0);}`,side:THREE.DoubleSide});
+const earthrise=new THREE.Mesh(fragGeo(8),earthriseMat);earthrise.position.set(0.82,-14.13,-40.14);earthrise.rotation.y=0.6;earthrise.userData.kind='earth';earthrise.userData.name='EARTH';props.push(earthrise);moonDecor.add(earthrise);   // Earth IN PIECES, editable (drag + separation)
+let starN=0;
+function makeMoonStar(size,x,y,z,rx,ry,rz){var m=new THREE.Mesh(starGeo(size),propMat);m.position.set(x,y,z);m.rotation.set(rx||0,ry||0,rz||0);m.userData.kind='star';m.userData.name='STAR'+(starN++);m.userData.by=y;m.userData.ph=x+z;m.visible=false;scene.add(m);props.push(m);return m;}   // editable floating star (drag/size/rotate/copy via the prop editor)
+[[0.7,6,2,-4,1.80,-0.80,2.00],[0.9,-7,3,-6,-2.10,-1.20,-13.00],[0.6,9,2.5,-9,2.70,-1.80,0.00],[0.7,-10,4,-3,-3.00,-0.60,-13.00],[0.8,4,3.5,-11,1.20,-2.20,-7.00],[0.6,-5,2.5,3,-1.50,0.60,-2.00],[0.7,12,3,-6,3.60,-1.20,6.00],[0.9,-14,4,-10,-4.20,-2.00,-24.00],[0.8,7,5,-14,2.10,-2.80,-7.00],[0.7,-9,5,-13,-2.70,-2.60,-22.00],[0.6,2,4,-12,0.60,-2.40,-10.00],[0.5,-3,3.5,-2,-0.90,-0.40,-5.00],[0.8,15,4,-12,4.50,-2.40,3.00],[0.6,-12,2,-2,-3.60,-0.40,-14.00],[0.8,12.26,3,-10.90,0,-0.60,-3.00],[0.8,8.26,3,-3.30,0,-0.60,-3.00],[0.8,4.60,3,-4.57,0,-0.60,-3.00],[0.8,5.02,3,4.14,-0.54,-0.16,-3.00],[0.8,-5.80,3,4.08,-0.53,-0.31,-3.00],[0.8,-6.88,3,0.99,-0.40,-1.53,-3.00],[0.8,-7.16,3,-11.85,0,-0.60,-3.00],[0.8,-11.18,3,-11.93,-2.18,-0.60,-3.00],[0.64,7.34,3,1.11,-3.15,-0.60,-3.00]].forEach(function(b){makeMoonStar(b[0],b[1],b[2],b[3],b[4],b[5],b[6]);});   // baked: [size,x,y,z,rx,ry,rz]
 function syncCraters(){for(let i=0;i<MAXC;i++){const c=CRATERS[i];if(c)cratersUniform[i].set(c[0],c[1],c[2]);else cratersUniform[i].set(0,0,0);}moonMat.uniforms.uNumC.value=Math.min(CRATERS.length,MAXC);}
 syncCraters();
 const RELIC_POS=new THREE.Vector3(0,1.6,0);                 // relic on the moon ground
@@ -436,27 +505,32 @@ function drawFx(){fxc.clearRect(0,0,fx.width,fx.height);fxc.globalCompositeOpera
     fxc.strokeStyle=`rgba(255,255,255,${r.life})`;fxc.lineWidth=2;fxc.beginPath();fxc.arc(r.x,r.y,r.r,0,6.283);fxc.stroke();}}
 
 // ---------- state ----------
-const HITS=6;let state='charging',stt=0,charge=0,shake=0,invFx=0,invHold=0,burstFired=false,fxClear=false,pulseT=9,freeze=0,scalePop=0,kicked=false;
+const HITS=6;let state='charging',stt=0,charge=0,shake=0,invFx=0,invHold=0,burstFired=false,fxClear=false,pulseT=9,freeze=0,scalePop=0,kicked=false,shockT=9,mshake=0,invAmt=0;
 const fillEl=document.getElementById('fill'),hintEl=document.getElementById('hint'),
       labelEl=document.getElementById('label'),againEl=document.getElementById('again'),
       flashEl=document.getElementById('flash'),impactEl=document.getElementById('impact'),
       speedEl=document.getElementById('speed'),glEl=document.getElementById('gl'),whiteEl=document.getElementById('white');
 const camTgt=new THREE.Vector3(0,0,0),camA=new THREE.Vector3(),tgtA=new THREE.Vector3(),pP0=new THREE.Vector3();
-const editMode=location.search.includes('edit')&&!location.search.includes('editmoon');const editMoon=location.search.includes('editmoon');const ray=new THREE.Raycaster();const ndc=new THREE.Vector2();let dragObj=null,dragC=-1,selC=-1,selObj=null;const dPlane=new THREE.Plane(),dHit=new THREE.Vector3();const editorEl=document.getElementById('editor');const copyBtn=document.getElementById('copyBtn');const addBtn=document.getElementById('addBtn');const sizeSlider=document.getElementById('sizeSlider');const objType=document.getElementById('objType');
-function reset(){state='charging';charge=0;burstFired=false;kicked=false;parts.length=0;dGeo.setDrawRange(0,0);sCount=0;settGeo.setDrawRange(0,0);
+const editMode=location.search.includes('edit')&&!location.search.includes('editmoon');const editMoon=location.search.includes('editmoon');const ray=new THREE.Raycaster();const ndc=new THREE.Vector2();let dragObj=null,dragC=-1,selC=-1,selObj=null,dragProp=false,selProp=null;const dPlane=new THREE.Plane(),dHit=new THREE.Vector3();const editorEl=document.getElementById('editor');const copyBtn=document.getElementById('copyBtn');const addBtn=document.getElementById('addBtn');const addStarBtn=document.getElementById('addStarBtn');const sizeSlider=document.getElementById('sizeSlider');const objType=document.getElementById('objType');
+const ctrlEl=document.getElementById('ctrl'),hSlider=document.getElementById('hSlider'),rotX=document.getElementById('rotX'),rotY=document.getElementById('rotY'),rotZ=document.getElementById('rotZ');
+function syncCtrl(){if(!selProp)return;hSlider.value=selProp.position.y;rotX.value=selProp.rotation.x;rotY.value=selProp.rotation.y;rotZ.value=selProp.rotation.z;}
+function reset(){state='charging';charge=0;burstFired=false;kicked=false;shock.visible=false;shock2.visible=false;shock3.visible=false;fsphere.visible=false;plume.visible=false;shockT=9;mshake=0;parts.length=0;dGeo.setDrawRange(0,0);sCount=0;settGeo.setDrawRange(0,0);
   reward.visible=false;reward.position.set(0,0,0);rewMat.uniforms.uReveal.value=0;outMat.uniforms.uReveal.value=0;
   globe.visible=true;globe.position.set(0,0,0);globe.scale.setScalar(scaleBase);activeEarth.uniforms.uFade.value=1;activeEarth.uniforms.uChg.value=0;activeEarth.uniforms.uBurst.value=0;pulseT=9;
   splat.visible=false;fillEl.style.width='0%';againEl.style.display='none';labelEl.classList.remove('on');hintEl.style.opacity=.6;
   freeze=0;speedEl.style.opacity=0;glEl.style.filter='url(#sketch)';whiteEl.style.opacity=0;
   beam.visible=false;payload.visible=false;moon.visible=false;spaceStuff.visible=true;dscGroup.visible=true;impactEl.style.opacity=0;flashEl.style.opacity=0;
   dscGroup.scale.setScalar(1);dscGroup.position.set(0,0,0);dscGroup.children.forEach(function(m){m.material.uniforms.uBurst.value=0;m.material.uniforms.uFade.value=1;});
+  spaceStuff.children.forEach(function(o){if(o.userData.base)o.position.copy(o.userData.base);if(o.userData.brot)o.rotation.copy(o.userData.brot);o.userData.bdir=null;});   // restore blasted deco to home transform
+  renderer.setPixelRatio(DPR);renderer.setSize(innerWidth,innerHeight,false);moonMat.uniforms.uHscale.value=300*DPR;   // back to full res for the earth scene
   camera.position.set(0,0,4);camTgt.set(0,0,0);hintEl.style.opacity=.6;}
 againEl.onclick=(e)=>{e.stopPropagation();reset();};
-function hit(x,y){ if(state==='settle'){reset();return;} if(state!=='charging')return;
+let ready=false;
+function hit(x,y){ if(!ready)return; if(state==='settle'){reset();return;} if(state!=='charging')return;
   charge=Math.min(1,charge+1/HITS);fillEl.style.width=(charge*100)+'%';
   shake+=0.06+charge*0.32;scalePop=0.14;pulseT=0;activeEarth.uniforms.uChg.value=charge;   // each click: a shake + a size pop (grows with charge)
   ripples.push({x,y,r:6,life:1});emitData(Math.round((MOBILE?45:80)*charge*charge));   // more data the more you've charged
-  if(charge>=1){state='burst';stt=0;burstFired=false;glEl.style.filter='none';} }   // drop the SVG filter for the explosion (perf)
+  if(charge>=1){state='burst';stt=0;burstFired=false;renderer.setPixelRatio(0.7);renderer.setSize(innerWidth,innerHeight,false);moonMat.uniforms.uHscale.value=210;} }   // wobble stays ON the whole time; burst+moon just render at reduced res for perf
 let downX=0,downY=0,downId=null;
 addEventListener('pointerdown',e=>{downX=e.clientX;downY=e.clientY;downId=e.pointerId;});
 addEventListener('pointerup',e=>{if(editMode)return;if(e.pointerId!==downId)return;
@@ -473,13 +547,22 @@ addEventListener('pointermove',e=>{if(!editMode||!dragObj)return;setNDC(e);ray.s
 addEventListener('pointerup',()=>{if(editMode)dragObj=null;});
 // ---- MOON CRATER editor (?editmoon): click to place, drag to move, 'x' removes last, wheel resizes ----
 addEventListener('pointerdown',e=>{if(!editMoon)return;if(e.target&&(e.target.id==='addBtn'||e.target.id==='copyBtn'||e.target.id==='sizeSlider'))return;
-  setNDC(e);ray.setFromCamera(ndc,camera);const hit=ray.intersectObject(moon,false);
+  setNDC(e);ray.setFromCamera(ndc,camera);
+  if(props.length){const rh=ray.intersectObjects(props,true);if(rh.length){let o=rh[0].object;while(o&&props.indexOf(o)<0)o=o.parent;if(o){selProp=o;dragProp=true;sizeSlider.value=(o.userData.kind==='earth')?earthriseMat.uniforms.uBreak.value:Math.min(12,o.scale.x);
+    if(o.userData.kind==='star'||o.userData.kind==='earth')dPlane.setFromNormalAndCoplanarPoint(new THREE.Vector3(0,1,0),o.position);   // horizontal plane: drag = X/Z, Y via slider
+    else{var nrm=new THREE.Vector3();camera.getWorldDirection(nrm);dPlane.setFromNormalAndCoplanarPoint(nrm,o.position);}
+    syncCtrl();return;}}}   // click a PROP to grab it; drag=2 axes, sliders=height+rotation(+size/sep)
+  const hit=ray.intersectObject(moon,false);
   if(hit.length){const p=hit[0].point;let bi=-1,bd=1e9;for(let i=0;i<CRATERS.length;i++){const dd=Math.hypot(p.x-CRATERS[i][0],p.z-CRATERS[i][1]);if(dd<CRATERS[i][2]*1.6&&dd<bd){bd=dd;bi=i;}}
-    dragC=bi;if(bi>=0){selC=bi;sizeSlider.value=CRATERS[bi][2];}}});   // click selects (drag to move); use the + button to add
-addEventListener('pointermove',e=>{if(!editMoon||dragC<0)return;setNDC(e);ray.setFromCamera(ndc,camera);const hit=ray.intersectObject(moon,false);if(hit.length){CRATERS[dragC][0]=+hit[0].point.x.toFixed(2);CRATERS[dragC][1]=+hit[0].point.z.toFixed(2);syncCraters();}});
-addEventListener('pointerup',()=>{if(editMoon)dragC=-1;});
+    dragC=bi;if(bi>=0){selC=bi;selProp=null;sizeSlider.value=CRATERS[bi][2];}}});   // else select a crater
+addEventListener('pointermove',e=>{if(!editMoon)return;if(!dragProp&&dragC<0)return;setNDC(e);ray.setFromCamera(ndc,camera);
+  if(dragProp&&selProp){
+    if(selProp.userData.kind==='star'||selProp.userData.kind==='earth'){if(ray.ray.intersectPlane(dPlane,dHit)){selProp.position.copy(dHit);if(selProp.userData.kind==='star')selProp.userData.by=dHit.y;}return;}   // stars + earth drag freely in screen space (sky too)
+    var h=ray.intersectObject(moon,false);if(h.length){selProp.position.x=+h[0].point.x.toFixed(2);selProp.position.z=+h[0].point.z.toFixed(2);}return;}   // ship/ufo slide on the surface
+  var hit=ray.intersectObject(moon,false);if(hit.length){CRATERS[dragC][0]=+hit[0].point.x.toFixed(2);CRATERS[dragC][1]=+hit[0].point.z.toFixed(2);syncCraters();}});
+addEventListener('pointerup',()=>{if(editMoon){dragC=-1;dragProp=false;}});
 addEventListener('keydown',e=>{if(!editMoon)return;if(e.key==='x'){CRATERS.pop();syncCraters();}});
-addEventListener('wheel',e=>{if(!editMoon||dragC<0)return;CRATERS[dragC][2]=Math.max(0.4,+(CRATERS[dragC][2]-Math.sign(e.deltaY)*0.2).toFixed(2));syncCraters();});
+addEventListener('wheel',e=>{if(!editMoon)return;if(selProp){var d=Math.sign(e.deltaY)*0.12;if(e.shiftKey)selProp.rotation.x-=d;else if(e.altKey)selProp.rotation.y-=d;else if(selProp.userData.kind==='star')selProp.rotation.z-=d;else selProp.rotation.y-=d;return;}if(dragC<0)return;CRATERS[dragC][2]=Math.max(0.4,+(CRATERS[dragC][2]-Math.sign(e.deltaY)*0.2).toFixed(2));syncCraters();});   // wheel rotates: shift=X · alt=Y · plain=Z(star)/Y(ship) — or resize crater
 
 // ---------- loop ----------
 const eBack=t=>{const c=1.70158,s=c+1;return 1+s*Math.pow(t-1,3)+c*Math.pow(t-1,2);};
@@ -494,35 +577,40 @@ function frame(now){now/=1000;const dt=Math.min(now-prev,0.05);prev=now;
   stt+=dt;
   if(FREEZE){const a=FREEZE.split(':');state=a[0];stt=parseFloat(a[1]||'0');if(state==='burst')burstFired=true;globe.visible=(state!=='reveal'&&state!=='settle');reward.visible=(state==='reveal'||state==='settle');}
   stars.rotation.y=now*0.01;updateData(dt);activeEarth.uniforms.uTime.value=now;
+  props.forEach(function(p){p.visible=moon.visible;if(!editMoon&&!editMode){if(p.userData.name==='UFO'){p.position.y=p.userData.baseY+Math.sin(now*1.3)*0.35;p.rotation.y+=0.006;}else if(p.userData.kind==='star'){p.position.y=p.userData.by+Math.sin(now*0.8+p.userData.ph)*0.5;}}});   // props in moon scene; UFO hovers, stars bob (keep their set orientation)
+  moonDecor.visible=moon.visible;   // earthrise + stars show with the moon
+  if(moon.visible&&!editMoon&&!editMode){earthrise.rotation.y+=0.0016;earthrise.rotation.x=Math.sin(now*0.3)*0.08;}   // earth pieces rotate (and breathe via the shader); still while editing
   halo.visible=false;   // replaced by the SVG feDisplacementMap edge-bleed on the canvas
   if(editMode){let s='EDIT — drag the objects · copy positions:\n';spaceStuff.children.forEach(function(o){s+=(o.userData.label||'?')+': ['+o.position.x.toFixed(2)+', '+o.position.y.toFixed(2)+', '+o.position.z.toFixed(2)+']\n';});editorEl.style.display='block';editorEl.textContent=s;}
-  if(editMoon){let s='MOON CRATERS — click=add · drag=move · wheel=resize · x=remove last\nCRATERS=[';CRATERS.forEach(function(c,i){s+=(i?',':'')+'['+c[0]+','+c[1]+','+c[2]+']';});s+=']';editorEl.style.display='block';editorEl.textContent=s;}
+  if(editMoon){editorEl.style.display='block';editorEl.textContent='MOON EDITOR · craters:'+CRATERS.length+' props:'+props.length+'\n+crater / +star · drag=move · slider=size (sep for earth) · wheel=rotate · right-click=del crater · x=del last\n→ hit COPY for the full data';}   // compact HUD (full data via copy)
   if(now-skT>0.11){skT=now;skS=(skS%37)+1;sketchNoise.setAttribute('seed',skS);}   // boil the ink-bleed edge
 
   if(state==='charging'){globe.rotation.y+=0.004+charge*0.02;
     if(parts.length<DMAX*0.7) emitData(Math.floor(charge*(MOBILE?2:4)));   // ambient inflow ramps with charge (none at start)
     globe.scale.setScalar(scaleBase*(1+charge*0.22+scalePop)+Math.sin(now*9)*0.01*charge);   // grows with each click (+ pop)
-    if(!editMode)spaceStuff.children.forEach(function(o,i){if(!o.userData.base)o.userData.base=o.position.clone();var b=o.userData.base;var ty=o.userData.type;   // movement matching the page
-      var ampY=(ty==='sun'||ty==='star')?0.11:0.045;
-      o.position.x=b.x+Math.sin(now*1.1+i)*0.04+(Math.random()-.5)*charge*0.13;
-      o.position.y=b.y+Math.sin(now*0.9+i*1.3)*ampY+(Math.random()-.5)*charge*0.13;     // up & down
-      if(ty==='star'){o.rotation.z=(o.userData.rotZ||0)+Math.sin(now*0.7+i)*0.10;}      // stars: point at centre + gentle sway, NO spin
-      else if(ty==='sun'){o.rotation.z=Math.sin(now*0.7+i)*0.18;}                        // sun: gentle sway + bob, NO spin
-      else{o.rotation.y+=0.006+0.001*i;}});}
+    if(!editMode)spaceStuff.children.forEach(function(o,i){if(!o.userData.base){o.userData.base=o.position.clone();o.userData.brot=o.rotation.clone();}var b=o.userData.base;var ty=o.userData.type;   // movement matching the page
+      var ampY=(ty==='sun'||ty==='star')?0.11:0.045;var ch=charge*charge;var sw=1.0+ch*6.0,jit=ch*ch*0.7;   // escalates HARD with each click (like the earth)
+      o.position.x=b.x+Math.sin(now*(1.1+ch*5.0)+i)*0.04*sw+(Math.random()-.5)*jit;
+      o.position.y=b.y+Math.sin(now*(0.9+ch*5.0)+i*1.3)*ampY*sw+(Math.random()-.5)*jit;     // wider sway + more jitter as charge climbs
+      if(ty==='star'){o.rotation.z=(o.userData.rotZ||0)+Math.sin(now*(0.7+ch*4.0)+i)*(0.10+ch*0.5);}      // stars: sway harder with charge
+      else if(ty==='sun'){o.rotation.z=Math.sin(now*(0.7+ch*4.0)+i)*(0.18+ch*0.5);}
+      else{o.rotation.y+=0.006+0.001*i+ch*0.12;}});}                                       // others spin faster with charge
   else if(state==='burst'){impactEl.style.opacity=1;   // the whole grow+burst is the INVERTED-colour beat
-    if(!burstFired){burstFired=true;freeze=0.3;splat.visible=false;
-      globe.scale.setScalar(scaleBase);activeEarth.uniforms.uBurst.value=0.0;spaceStuff.visible=false;}   // deco vanishes at impact
-    const q=Math.min(stt/1.05,1),GROW=0.45;
+    if(!burstFired){burstFired=true;splat.visible=false;
+      globe.scale.setScalar(scaleBase);activeEarth.uniforms.uBurst.value=0.0;
+      spaceStuff.children.forEach(function(o){o.userData.bpos=o.position.clone();var d=o.position.clone();if(d.length()<0.5)d.set(Math.random()-.5,Math.random()-.5,Math.random()-.5);o.userData.bdir=d.normalize();o.userData.bspin=new THREE.Vector3((Math.random()-.5)*0.5,(Math.random()-.5)*0.5,(Math.random()-.5)*0.5);});}   // capture blast vectors for the deco
+    const q=Math.min(stt/1.4,1),GROW=0.38;
+    {var bf=q*q*18.0;spaceStuff.children.forEach(function(o){if(!o.userData.bdir)return;o.position.copy(o.userData.bpos).addScaledVector(o.userData.bdir,bf);o.rotation.x+=o.userData.bspin.x*1.5;o.rotation.y+=o.userData.bspin.y*1.5;o.rotation.z+=o.userData.bspin.z*1.5;});}   // side objects visibly BLASTED outward (slow start, accelerating)
     if(q<GROW){var gq=q/GROW;globe.scale.setScalar(scaleBase*(1.0+eQuart(gq)*0.7));activeEarth.uniforms.uBurst.value=0.0;activeEarth.uniforms.uFade.value=1.0;globe.rotation.y+=0.015;}  // gradually GROW bigger (intact, inverted)
     else{var bq=(q-GROW)/(1.0-GROW),be=eQuart(bq);splat.visible=true;                                       // BANG -> BURST into shards (still inverted)
-      if(!kicked){kicked=true;shake+=1.1;freeze=0.06;flashEl.style.opacity=1.0;}                            // big kick + a micro hitstop SNAP
-      globe.scale.setScalar(scaleBase*(1.7*(1.0+eBack(Math.min(bq*1.5,1.0))*0.18)+be*0.2));                 // pop overshoot
-      activeEarth.uniforms.uBurst.value=be*2.4;activeEarth.uniforms.uFade.value=1.0-smoothstep(0.4,1.0,bq); // shatter harder
-      dscGroup.children.forEach(function(m){m.material.uniforms.uBurst.value=be*2.0;m.material.uniforms.uFade.value=1.0-smoothstep(0.35,0.85,bq);});  // letters shatter too
-      if(bq>0.55)dscGroup.visible=false;
-      for(let i=0;i<NP;i++){const v=pDir[i];pPos[i*3]=v.x*be*5.0;pPos[i*3+1]=v.y*be*5.0;pPos[i*3+2]=v.z*be*5.0;}   // shards fly FAST + far
-      pGeo.attributes.position.needsUpdate=true;pMat.opacity=1-bq*0.8;globe.rotation.y+=0.05;}
-    if(q>=1){globe.visible=false;splat.visible=false;dscGroup.visible=false;
+      if(!kicked){kicked=true;shake+=1.2;flashEl.style.opacity=0.35;}                                        // camera kick + a light flash (keeps the pieces readable)
+      globe.scale.setScalar(scaleBase*(1.7*(1.0+eBack(Math.min(bq*1.5,1.0))*0.18)+be*0.3));                 // pop overshoot
+      activeEarth.uniforms.uBurst.value=be*4.8;activeEarth.uniforms.uFade.value=1.0-smoothstep(0.66,1.0,bq); // pieces fly FAR + stay visible longer
+      dscGroup.children.forEach(function(m){m.material.uniforms.uBurst.value=be*3.6;m.material.uniforms.uFade.value=1.0-smoothstep(0.60,0.98,bq);});  // letters shatter wide too
+      if(bq>0.82)dscGroup.visible=false;
+      for(let i=0;i<NP;i++){const v=pDir[i];pPos[i*3]=v.x*be*7.5;pPos[i*3+1]=v.y*be*7.5;pPos[i*3+2]=v.z*be*7.5;}   // spark shards fly FAST + far
+      pGeo.attributes.position.needsUpdate=true;pMat.opacity=1-bq*0.7;globe.rotation.y+=0.05;}
+    if(q>=1){globe.visible=false;splat.visible=false;dscGroup.visible=false;spaceStuff.visible=false;
       camA.copy(camera.position);tgtA.copy(camTgt);state='flight';stt=0;hintEl.style.opacity=0;}}
   else if(state==='flight'){const t=Math.min(stt/0.8,1),e=eQuart(t);                 // the BEAM shoots UP (now white — invert has cleared)
     beam.visible=true;beam.position.set(0,0,0);beam.scale.y=Math.max(0.001,Math.min(1.0,t*2.0));
@@ -531,20 +619,36 @@ function frame(now){now/=1000;const dt=Math.min(now-prev,0.05);prev=now;
     if(t>0.55) whiteEl.style.opacity=smoothstep(0.55,1.0,t)*0.85;                    // whiteout at the apex (not fully blinding)
     if(t>=1){moon.visible=true;beam.visible=false;
       camera.position.set(0,5.2,6.2);camTgt.set(0,2.2,0);camA.copy(camera.position);tgtA.copy(camTgt);state='descend';stt=0;}}
-  else if(state==='descend'){const t=Math.min(stt/1.0,1),e=eQuart(t);               // camera tilts DOWN to the surface...
+  else if(state==='descend'){const t=Math.min(stt/0.72,1),e=eQuart(t),be=t*t*t*t;     // camera tilts DOWN; beam ACCELERATES and slams at t=1
     camera.position.lerpVectors(camA,CAM_MOON,e);camTgt.lerpVectors(tgtA,CAM_TGT_MOON,e);
-    beam.visible=true;beam.scale.y=0.5;beam.position.set(RELIC_POS.x,RELIC_POS.y+(1.0-e)*14.0,RELIC_POS.z);   // ...the BEAM comes DOWN and lands on the moon
-    beam.material.opacity=(t<0.85)?1.0:Math.max(0.0,1.0-(t-0.85)/0.15);
+    beam.visible=true;beam.scale.y=0.7;beam.position.set(RELIC_POS.x,RELIC_POS.y+(1.0-be)*14.0,RELIC_POS.z);   // ...the BEAM slams DOWN and lands exactly when the effect fires
+    beam.material.opacity=(t<0.95)?1.0:Math.max(0.0,1.0-(t-0.95)/0.05);
     whiteEl.style.opacity=Math.max(0,0.7-t*2.2);   // clear the whiteout fast so the landing is visible (no blinding flash)
-    if(t>=1){beam.visible=false;
+    if(t>=1){   // ===== IMPACT: triple shockwave + flash core + recoil + rising dust plume + debris + camera kick =====
+      shock.visible=true;shock.position.set(RELIC_POS.x,0.06,RELIC_POS.z);shock.scale.setScalar(1);shock.material.opacity=1;
+      shock2.visible=true;shock2.position.set(RELIC_POS.x,0.08,RELIC_POS.z);shock2.scale.setScalar(1);shock2.material.opacity=1;
+      shock3.visible=true;shock3.position.set(RELIC_POS.x,0.05,RELIC_POS.z);shock3.scale.setScalar(1);shock3.material.opacity=0.9;
+      fsphere.visible=true;fsphere.position.set(RELIC_POS.x,0.5,RELIC_POS.z);fsphere.scale.setScalar(0.6);fsphere.material.opacity=1;
+      plume.visible=true;plume.position.set(RELIC_POS.x,0.6,RELIC_POS.z);plume.scale.setScalar(0.6);plume.material.opacity=0.5;
+      beam.visible=true;beam.scale.y=0.22;beam.position.set(RELIC_POS.x,RELIC_POS.y,RELIC_POS.z);beam.material.opacity=1;   // energy recoils back UP
+      shockT=0;mshake=2.2;flashEl.style.opacity=0.9;splat.visible=true;
+      for(let i=0;i<NP;i++){const v=pDir[i];pPos[i*3]=RELIC_POS.x+v.x*0.3;pPos[i*3+1]=0.1+Math.abs(v.y)*0.3;pPos[i*3+2]=RELIC_POS.z+v.z*0.3;}pGeo.attributes.position.needsUpdate=true;pMat.opacity=1;
       reward.visible=true;reward.position.copy(RELIC_POS);reward.rotation.y=0.0;reward.scale.setScalar(0.0001);
-      rewMat.uniforms.uReveal.value=0;outMat.uniforms.uReveal.value=0;glEl.style.filter='url(#sketch)';
+      rewMat.uniforms.uReveal.value=0;outMat.uniforms.uReveal.value=0;glEl.style.filter='url(#sketch)';   // wobble edge back ON the moon (consistent across all objects)
       camera.position.copy(CAM_MOON);camTgt.copy(CAM_TGT_MOON);state='reveal2';stt=0;}}
-  else if(state==='reveal2'){const p=Math.min(stt/1.1,1),e=eQuart(p);               // relic inks in on the moon, front-facing
+  else if(state==='reveal2'){const p=Math.min(stt/1.3,1),e=eQuart(p);               // relic inks in on the moon, front-facing
     whiteEl.style.opacity=Math.max(0,0.35-p*0.8);
     rewMat.uniforms.uReveal.value=e;outMat.uniforms.uReveal.value=e;outMat.uniforms.uOut.value=0.03*p;
     reward.scale.setScalar((eBack(Math.min(p*1.1,1))*0.9+0.1)*RELIC_S);reward.rotation.y=0.0;
-    camera.position.copy(CAM_MOON);camTgt.copy(CAM_TGT_MOON);moon.rotation.y+=0.0003;
+    shockT+=dt;
+    shock.scale.setScalar(1.0+shockT*26.0);shock.material.opacity=Math.max(0,1.0-shockT*1.5);if(shockT>0.7)shock.visible=false;            // outer ring
+    shock2.scale.setScalar(1.0+shockT*46.0);shock2.material.opacity=Math.max(0,1.0-shockT*2.6);if(shockT>0.45)shock2.visible=false;          // inner ring, faster
+    shock3.scale.setScalar(1.0+shockT*14.0);shock3.material.opacity=Math.max(0,0.9-shockT*1.0);if(shockT>0.9)shock3.visible=false;          // huge slow ring
+    if(fsphere.visible){fsphere.scale.setScalar(0.6+shockT*13.0);fsphere.material.opacity=Math.max(0,1.0-shockT*4.2);if(shockT>0.28)fsphere.visible=false;}  // flash core pops fast
+    if(plume.visible){plume.scale.setScalar(0.6+shockT*6.5);plume.position.y=0.6+shockT*3.8;plume.material.opacity=Math.max(0,0.5-shockT*0.62);if(shockT>0.85)plume.visible=false;}  // dust plume rises + expands + fades
+    if(beam.visible){beam.scale.y=0.22+shockT*1.1;beam.material.opacity=Math.max(0,1.0-shockT*4.0);if(shockT>0.28)beam.visible=false;}      // upward recoil pillar
+    if(splat.visible){const k=Math.min(shockT*1.05,1);for(let i=0;i<NP;i++){const v=pDir[i],rr=0.3+k*5.4;pPos[i*3]=RELIC_POS.x+v.x*rr;pPos[i*3+1]=Math.max(0.02,0.1+Math.abs(v.y)*4.6*shockT-8.6*shockT*shockT);pPos[i*3+2]=RELIC_POS.z+v.z*rr;}pGeo.attributes.position.needsUpdate=true;pMat.opacity=Math.max(0,1-k);if(k>=1)splat.visible=false;}   // debris flies wider + higher
+    mshake*=0.88;camera.position.set(CAM_MOON.x+(Math.random()-.5)*mshake,CAM_MOON.y+(Math.random()-.5)*mshake,CAM_MOON.z+(Math.random()-.5)*mshake*0.5);camTgt.copy(CAM_TGT_MOON);moon.rotation.y+=0.0003;
     if(p>=1){state='settle';stt=0;}}
   else if(state==='settle'){rewMat.uniforms.uReveal.value=1;outMat.uniforms.uReveal.value=1;
     reward.position.set(RELIC_POS.x,RELIC_POS.y+Math.sin(now*1.4)*0.04,RELIC_POS.z);reward.rotation.y=Math.sin(now*0.6)*0.16;
@@ -575,6 +679,20 @@ addEventListener('resize',()=>{fitScale();camera.aspect=innerWidth/innerHeight;c
   haloMat.uniforms.uRes.value.set(innerWidth*DPR,innerHeight*DPR);haloMat.uniforms.uAspect.value=innerWidth/innerHeight;
   earthMat.uniforms.uRes.value.set(innerWidth*DPR,innerHeight*DPR);});
 reset();requestAnimationFrame(frame);
+// ---- PRELOAD GATE: wait for all textures+models, pre-compile shaders + upload GPU textures, THEN allow play ----
+const loadingEl=document.getElementById('loading');
+function prewarm(){try{
+  var pv=props.map(function(p){return p.visible;});props.forEach(function(p){p.visible=true;});
+  var mv=moon.visible,dv=moonDecor.visible,rv=reward?reward.visible:false;
+  moon.visible=true;moonDecor.visible=true;if(reward)reward.visible=true;
+  renderer.compile(scene,camera);renderer.render(scene,camera);                                  // compile all shader programs
+  var pc=camera.position.clone(),tc=camTgt.clone();camera.position.copy(CAM_MOON);camTgt.copy(CAM_TGT_MOON);camera.lookAt(camTgt);renderer.render(scene,camera);   // warm the moon-cam path + upload textures
+  camera.position.copy(pc);camTgt.copy(tc);
+  moon.visible=mv;moonDecor.visible=dv;if(reward)reward.visible=rv;props.forEach(function(p,i){p.visible=pv[i];});
+}catch(e){}}
+function finishLoad(){if(ready)return;prewarm();ready=true;if(loadingEl)loadingEl.classList.add('done');}
+if(editMode||editMoon||/moonview|flightview|freeze|demo|record/.test(location.search)){ready=true;if(loadingEl)loadingEl.classList.add('done');if(/record/.test(location.search))window.__rec={hit:hit,reset:reset,info:function(){return state+'|'+charge.toFixed(2);}};}   // editors/debug/record: no gate (record exposes hit for the recorder)
+else{manager.onLoad=finishLoad;setTimeout(finishLoad,9000);}                                       // normal: gate on all assets (with a safety fallback)
 setEarthShader(earthMat);  // default: paper-texture manga hatch (the previous one, not the node-graph diamond)
 if(location.search.includes('moonview')){moon.visible=true;globe.visible=false;spaceStuff.visible=false;reward.visible=true;reward.position.copy(RELIC_POS);reward.rotation.y=0;reward.scale.setScalar(RELIC_S);rewMat.uniforms.uReveal.value=1;outMat.uniforms.uReveal.value=1;camera.position.copy(CAM_MOON);camTgt.copy(RELIC_POS);state='settle';stt=0;}
 if(location.search.includes('flightview')){globe.visible=false;spaceStuff.visible=false;moon.visible=true;beam.visible=false;payload.visible=true;camA.set(0,4.6,5.6);tgtA.set(0,1.6,0);state='descend';stt=0.5;}
@@ -583,11 +701,14 @@ if(editMode){reward.visible=false;beam.visible=false;payload.visible=false;moon.
   sizeSlider.style.display='block';sizeSlider.oninput=function(){if(selObj)selObj.scale.setScalar(+(+sizeSlider.value).toFixed(2));};
   addBtn.style.display='block';addBtn.textContent='+ add';objType.style.display='block';
   addBtn.onclick=function(){var t=objType.value;var m=makeBody(t,0.18);m.position.set(0,0,-1.0);m.userData.label=t+spaceStuff.children.length;spaceStuff.add(m);selObj=m;dragObj=m;sizeSlider.value=1;};}
-if(editMode||editMoon){copyBtn.style.display='block';copyBtn.onclick=function(){var txt=editMoon?('CRATERS=['+CRATERS.map(function(c){return '['+c[0]+','+c[1]+','+c[2]+']';}).join(',')+'];'):spaceStuff.children.map(function(o){return (o.userData.label||'?')+':['+o.position.x.toFixed(2)+','+o.position.y.toFixed(2)+','+o.position.z.toFixed(2)+'] s='+o.scale.x.toFixed(2);}).join('\n');
+if(editMode||editMoon){copyBtn.style.display='block';copyBtn.onclick=function(){var txt=editMoon?('CRATERS=['+CRATERS.map(function(c){return '['+c[0]+','+c[1]+','+c[2]+']';}).join(',')+'];'+props.map(function(p){return '\n'+(p.userData.name||'PROP')+' pos=['+p.position.x.toFixed(2)+','+p.position.y.toFixed(2)+','+p.position.z.toFixed(2)+'] s='+p.scale.x.toFixed(2)+' rot=['+p.rotation.x.toFixed(2)+','+p.rotation.y.toFixed(2)+','+p.rotation.z.toFixed(2)+']'+(p.userData.kind==='earth'?' sep='+earthriseMat.uniforms.uBreak.value.toFixed(2):'');}).join('')):spaceStuff.children.map(function(o){return (o.userData.label||'?')+':['+o.position.x.toFixed(2)+','+o.position.y.toFixed(2)+','+o.position.z.toFixed(2)+'] s='+o.scale.x.toFixed(2);}).join('\n');
   navigator.clipboard.writeText(txt).then(function(){copyBtn.textContent='copied!';setTimeout(function(){copyBtn.textContent='copy';},1200);}).catch(function(){copyBtn.textContent='(copy failed)';});};}
-if(editMoon){addBtn.style.display='block';sizeSlider.style.display='block';
+if(editMoon){addBtn.style.display='block';addStarBtn.style.display='block';sizeSlider.style.display='block';ctrlEl.style.display='block';
+  hSlider.oninput=function(){if(selProp){selProp.position.y=+hSlider.value;if(selProp.userData.kind==='star')selProp.userData.by=+hSlider.value;dPlane.setFromNormalAndCoplanarPoint(new THREE.Vector3(0,1,0),selProp.position);}};   // 3rd axis (height)
+  rotX.oninput=function(){if(selProp)selProp.rotation.x=+rotX.value;};rotY.oninput=function(){if(selProp)selProp.rotation.y=+rotY.value;};rotZ.oninput=function(){if(selProp)selProp.rotation.z=+rotZ.value;};
+  addStarBtn.onclick=function(){var m=makeMoonStar(0.8,0,3,-3);m.visible=true;selProp=m;dragProp=false;selC=-1;sizeSlider.value=0.8;dPlane.setFromNormalAndCoplanarPoint(new THREE.Vector3(0,1,0),m.position);syncCtrl();};   // add a star (drag=X/Z, sliders=height+rotation+size)
   addBtn.onclick=function(){if(CRATERS.length<MAXC){CRATERS.push([0,-3,1.8]);selC=CRATERS.length-1;dragC=-1;sizeSlider.value=1.8;syncCraters();}};   // add a crater (then drag it)
-  sizeSlider.oninput=function(){if(selC>=0){CRATERS[selC][2]=+(+sizeSlider.value).toFixed(2);syncCraters();}};}
+  sizeSlider.oninput=function(){if(selProp){if(selProp.userData.kind==='earth'){earthriseMat.uniforms.uBreak.value=+(+sizeSlider.value).toFixed(2);}else{selProp.scale.setScalar(+(+sizeSlider.value).toFixed(2));if(selProp.userData.kind!=='star')selProp.position.y=(selProp.userData.halfH||1)*selProp.scale.x+(selProp.userData.lift||0);}}else if(selC>=0){CRATERS[selC][2]=+(+sizeSlider.value).toFixed(2);syncCraters();}};}
 addEventListener('contextmenu',function(e){if(!editMoon)return;e.preventDefault();setNDC(e);ray.setFromCamera(ndc,camera);var hit=ray.intersectObject(moon,false);if(hit.length){var p=hit[0].point,bi=-1,bd=1e9;for(var i=0;i<CRATERS.length;i++){var dd=Math.hypot(p.x-CRATERS[i][0],p.z-CRATERS[i][1]);if(dd<CRATERS[i][2]*1.4&&dd<bd){bd=dd;bi=i;}}if(bi>=0){CRATERS.splice(bi,1);syncCraters();}}});
 if(location.search.includes('diamond'))setEarthShader(toonMat);
 if(location.search.includes('demo')){let k=0;const iv=setInterval(()=>{hit(innerWidth/2,innerHeight/2);if(++k>=HITS)clearInterval(iv);},110);}

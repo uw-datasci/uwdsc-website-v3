@@ -4,9 +4,9 @@ A self-contained prototype of the "slash/tap to open → reveal" gacha animation
 **manga / hand-drawn (pencil + wobble)** art direction described in
 [`../ANIMATION_PLAN.md`](../ANIMATION_PLAN.md).
 
-> This is a **throwaway prototype**, not wired into the Next.js app. It's vendored as plain
-> HTML + three.js so it runs with zero build. The real version will be ported into
-> `apps/web/components/gacha/` as proper React Three Fiber components (see the plan).
+> Throwaway prototype, **not wired into the Next.js app**. It's vendored as plain HTML +
+> three.js so it runs with zero build. The real version will be ported into
+> `apps/web/components/gacha/` as React Three Fiber components.
 
 ## Run it
 
@@ -16,44 +16,64 @@ python3 -m http.server 8137        # or any static server
 # open http://localhost:8137
 ```
 
-(Needs a server — ES module imports + textures won't load from `file://`.)
+(Needs a server — ES-module imports + textures won't load from `file://`.)
 
-## What it does
+## The sequence
 
-Charge by tapping/slashing (code-glyph "data" streams into the earth, which grows + shakes) →
-on the 6th hit it **freezes inverted**, then **shatters** → a **beam launches up** and **comes
-back down onto the moon** → the relic **inks in** on the cratered moon surface (manga hatch),
-front-facing → **GET!!**.
+Loading gate (spinner) preloads all assets + **pre-compiles every shader** → then you can play:
+**slash/tap ~7×** to charge (code-glyph "data" streams into the Earth, which grows + the whole
+field gets more frantic per click) → **inverted freeze + shatter**, the planet blows apart and the
+side objects are **blasted outward** → a **beam launches up**, whites out, and **slams down onto the
+moon** with a multi-ring shockwave + dust plume → the relic **inks in** on the cratered surface
+amid a broken Earth, floating stars, a landed ship and a hovering UFO → **GET!!**.
 
-### Editor modes (query params)
-- `?edit` — drag the space objects; pick a shape from the dropdown + **add**; **size slider**;
-  **copy** button outputs `label:[x,y,z] s=scale`.
-- `?editmoon` — place craters: **+ crater**, drag to move, slider/scroll to resize, right-click
-  to delete, **copy** outputs the `CRATERS=[...]` array.
+## In-browser editors (query params)
 
-Baked layouts (object positions/sizes + crater list) live as the defaults inside `index.html`.
+- **`?edit`** — the earth-scene space objects: drag, pick a shape + `+ add`, size slider, `copy`.
+- **`?editmoon`** — the moon scene:
+  - **Craters**: `+ crater`, drag, slider/wheel to resize, right-click delete, `x` removes last.
+  - **Props** (ship / UFO / Earth / stars): click to select, then **drag = X/Z**, **Y slider = height**,
+    **rX/rY/rZ sliders = orientation**, **size slider = scale** (separation for the Earth).
+  - `+ star` adds a star.
+  - **`copy`** outputs `CRATERS=[…]` plus a line per prop: `NAME pos=[x,y,z] s=.. rot=[rx,ry,rz]`
+    (Earth also `sep=`). Paste those back into `index.html` to bake new defaults.
+
+Baked layouts (craters, Earth, stars, ship, UFO) live as the defaults inside `index.html`.
 
 ## How the look works (two layers)
-- **Per-object pencil/hatch** — each material samples `assets/textures/hatch.png` (Blender
+
+- **Per-object pencil/hatch** — every material samples `assets/textures/hatch.png` (Blender
   "Chaotic" sketch texture) in screen space and composites ink/paper bands, with a per-frame
-  "boil" so strokes redraw. The moon adds worley craters + maria + rolling relief.
+  "boil". The moon adds craters + maria + rolling relief; the props/Earth share the moon's hatch
+  + directional lighting (same light `uL1`) so everything reads consistently.
 - **Global wobble** — one SVG `feTurbulence` + `feDisplacementMap` filter on the whole canvas
-  (`#gl`), reseeded ~9 fps, displaces the rendered image so every edge wobbles together.
+  (`#gl`), reseeded ~9 fps, so every edge wobbles together. **Always on.**
+
+## Performance
+
+- Loading gate **pre-compiles shaders + uploads textures** before play (no first-use hitch).
+- The burst + moon scenes render at **reduced resolution** (the moon shader + wobble filter are
+  the heaviest per-pixel costs); the moon crater loop skips the `sqrt` for far craters.
+- The Meshy models are dense (`ufo.glb` ~295k tris, `rocket.glb` similar) — decimate before prod.
+
+## Recording a clip
+
+The page exposes a `?record` mode (skips the gate, exposes `window.__rec.hit/reset/info`). A
+CDP-screencast recorder against a GPU Chrome was used to capture the showcase MP4; software
+headless is too slow (~5 fps).
 
 ## Layout
 ```
 index.html              the whole prototype (scene, shaders, state machine, editors)
 lib/                    vendored three.js r0.181 (module + core + tsl)
 addons/                 GLTFLoader + BufferGeometryUtils (three examples)
-assets/textures/        earth maps (data only), paper.png, hatch.png
-assets/models/          sun.glb, reward.glb
+assets/textures/        00_earthmap (data), 02_earthspec (land/ocean mask), paper.png, hatch.png
+assets/models/          sun.glb, reward.glb, rocket.glb, ufo.glb
 ```
 
-## Notes / TODO before production
-- **`assets/models/reward.glb` is a placeholder** (a Brawl Stars "mortis" fan model used only to
-  test the reveal). Replace with an owned/licensed reward model before shipping.
-- `paper.png` (~7 MB) and `sun.glb` (~7 MB) are heavy source assets — compress/swap when porting.
-- three.js is vendored here for a buildless demo; the real component will use the app's own
-  `three` / `@react-three/fiber` dependencies.
-- Manga shader is grounded in the `blender-to-threejs` `sketch-shader-spec` (hatch bands) and the
-  Manga-Diamond material; see `../ANIMATION_PLAN.md`.
+## TODO before production
+- **`assets/models/reward.glb` is a placeholder** (a Brawl Stars "mortis" fan model). Replace with
+  an owned/licensed reward model.
+- Compress/decimate the heavy assets (`paper.png` ~7 MB, `sun.glb`/`rocket.glb`/`ufo.glb` are big).
+- three.js is vendored for a buildless demo; the real component uses the app's own `three` /
+  `@react-three/fiber`.

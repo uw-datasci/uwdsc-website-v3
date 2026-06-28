@@ -16,13 +16,17 @@ class WebhookService {
     this.supportEmail = SUPPORT_INBOUND_EMAIL;
   }
 
+  private extractEmailAddress(raw: string): string {
+    const trimmed = raw.trim();
+    const start = trimmed.indexOf("<");
+    const end = trimmed.lastIndexOf(">");
+    if (start !== -1 && end > start) return trimmed.slice(start + 1, end).trim();
+    return trimmed;
+  }
+
   private verifyRecipient(to: string[], recipient: string): boolean {
     const want = recipient.trim().toLowerCase();
-    return to.some((raw) => {
-      const t = raw.trim();
-      const match = /<([^>]+)>/.exec(t);
-      return (match?.[1]?.trim() ?? t).toLowerCase() === want;
-    });
+    return to.some((raw) => this.extractEmailAddress(raw).toLowerCase() === want);
   }
 
   resolveInboundTarget(to: string[]): InboundEmailTarget | null {
@@ -46,8 +50,7 @@ class WebhookService {
       };
     }
 
-    const { data, error } =
-      await this.resend.emails.receiving.get(receivingEmailId);
+    const { data, error } = await this.resend.emails.receiving.get(receivingEmailId);
 
     if (error || !data) {
       const message =
@@ -87,8 +90,7 @@ class WebhookService {
       };
     }
 
-    const { data, error } =
-      await this.resend.emails.receiving.get(receivingEmailId);
+    const { data, error } = await this.resend.emails.receiving.get(receivingEmailId);
 
     if (error || !data) {
       const message =

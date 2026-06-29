@@ -95,6 +95,7 @@ export default function PassportPage() {
       <div className="w-full max-w-2xl space-y-4">
         <PassportCard
           userId={user?.id ?? ""}
+          membershipId={membershipStatus?.membership_id ?? null}
           initials={initials}
           displayName={displayName}
           email={user?.email}

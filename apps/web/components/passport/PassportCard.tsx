@@ -13,6 +13,7 @@ import { PassportQRCode } from "./PassportQRCode";
 
 interface PassportCardProps {
   readonly userId: string;
+  readonly membershipId: string | null;
   readonly initials: string;
   readonly displayName: string;
   readonly email: string | null | undefined;
@@ -77,6 +78,7 @@ function MemberBadge({
 
 function BioPage({
   userId,
+  membershipId,
   initials,
   displayName,
   email,
@@ -115,7 +117,7 @@ function BioPage({
           style={CARD_BG}
           onClick={(e) => { e.stopPropagation(); setQrExpanded(false); }}
         >
-          <PassportQRCode userId={userId} size={180} />
+          <PassportQRCode userId={userId} membershipId={membershipId} size={180} />
           <p className="text-white/30 font-mono text-[7px] tracking-widest uppercase">Tap to close</p>
         </div>
       )}
@@ -127,7 +129,7 @@ function BioPage({
           onClick={(e) => { e.stopPropagation(); setQrExpanded(true); }}
           aria-label="Show QR code"
         >
-          <PassportQRCode userId={userId} size={24} />
+          <PassportQRCode userId={userId} membershipId={membershipId} size={24} />
         </button>
       </div>
       <div className="mx-3 h-px bg-white/10" />

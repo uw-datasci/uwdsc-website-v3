@@ -164,6 +164,23 @@ export class EventRepository extends BaseRepository {
   }
 
   /**
+   * Get the attendance record ID for a user at a given event
+   */
+  async getAttendanceId(eventId: string, profileId: string): Promise<string | null> {
+    try {
+      const result = await this.sql<{ id: string }[]>`
+        SELECT id FROM events.attendance
+        WHERE event_id = ${eventId} AND profile_id = ${profileId}
+        LIMIT 1
+      `;
+      return result[0]?.id ?? null;
+    } catch (error: unknown) {
+      console.error("Error fetching attendance id:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Check in a user to an event (insert attendance record)
    */
   async checkInUser(eventId: string, profileId: string): Promise<boolean> {

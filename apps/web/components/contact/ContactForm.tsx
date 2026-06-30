@@ -119,7 +119,7 @@ export function ContactForm() {
             size="lg"
             disabled={isLoading || !form.formState.isValid}
             type="submit"
-            className="h-auto! w-full touch-manipulation rounded-md bg-gradient-purple py-2.5 text-base font-bold sm:text-lg xl:rounded-lg"
+            className="h-auto! w-full touch-manipulation rounded-full bg-gradient-purple py-2.5 text-base font-bold sm:text-lg"
           >
             {isLoading ? (
               <>

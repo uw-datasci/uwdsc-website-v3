@@ -24,6 +24,19 @@
   #addStarBtn{position:fixed;z-index:8;top:54px;left:86px;display:none;font:12px ui-monospace,monospace;color:#0f0;background:#000a;border:1px solid #0f0;padding:7px 14px;cursor:pointer;}
   #addStarBtn:hover{background:#0f0;color:#000;}
   #loading{position:fixed;inset:0;z-index:30;background:#08080c;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .6s ease;color:#cfcfcf;font:14px ui-monospace,Menlo,monospace;letter-spacing:.18em;}
+  #perf{position:fixed;z-index:40;top:8px;left:8px;display:none;font:11px/1.4 ui-monospace,Menlo,monospace;color:#8f8;background:rgba(0,0,0,.72);border:1px solid #0f04;border-radius:5px;max-width:230px;user-select:none;}
+  #perfBar{padding:6px 9px;cursor:pointer;white-space:nowrap;color:#cfc;}
+  #perfBar b{color:#7fff9f;}
+  #perf.collapsed #perfBody{display:none;}
+  #perfBody{padding:4px 8px 8px;max-height:78vh;overflow:auto;border-top:1px solid #0f03;}
+  #perfBody .pg{color:#6c9;margin:7px 0 2px;letter-spacing:.06em;text-transform:uppercase;font-size:9px;}
+  #perfBody .pr{display:flex;align-items:center;gap:6px;margin:2px 0;color:#bdc;}
+  #perfBody .pr span{flex:1;}
+  #perfBody .pr input[type=range]{width:82px;accent-color:#3f6;}
+  #perfBody .pr b{width:30px;text-align:right;color:#7fff9f;}
+  #perfBody .prow{display:flex;gap:5px;margin:2px 0 6px;}
+  #perfBody .prow button{flex:1;font:10px ui-monospace,monospace;color:#3f6;background:#000a;border:1px solid #0f05;border-radius:3px;padding:3px;cursor:pointer;}
+  #perfBody .prow button:hover{background:#3f6;color:#000;}
   #loading.done{opacity:0;pointer-events:none;}
   #loading .lspin{width:38px;height:38px;border:2px solid #333;border-top-color:#ddd;border-radius:50%;animation:lsp .8s linear infinite;}
   @keyframes lsp{to{transform:rotate(360deg);}}
@@ -65,7 +78,7 @@
 <svg width="0" height="0" aria-hidden="true" style="position:absolute"><defs>
   <filter id="sketch" x="-8%" y="-8%" width="116%" height="116%" color-interpolation-filters="sRGB">
     <feTurbulence id="sketchNoise" type="fractalNoise" baseFrequency="0.022" numOctaves="2" seed="1" result="n"/>
-    <feDisplacementMap in="SourceGraphic" in2="n" scale="19" xChannelSelector="R" yChannelSelector="G"/>
+    <feDisplacementMap id="sketchDisp" in="SourceGraphic" in2="n" scale="19" xChannelSelector="R" yChannelSelector="G"/>
   </filter>
 </defs></svg>
 <canvas id="gl"></canvas>
@@ -95,6 +108,10 @@
 <div id="hud"><div id="hint">slash &nbsp;/&nbsp; tap — feed data to the core</div>
   <div id="bar"><div id="fill"></div></div><button id="again">Again ▶</button></div>
 <div id="err"></div>
+<div id="perf" class="collapsed">
+  <div id="perfBar">FPS <b id="perfFps">–</b> · <span id="perfCalls">–</span> calls · <span id="perfTris">–</span> · <span id="perfArrow">▸ perf</span></div>
+  <div id="perfBody"></div>
+</div>
 
 <script type="module">
 import * as THREE from 'three';
@@ -107,6 +124,14 @@ addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
 
 const MOBILE=(matchMedia('(pointer:coarse)').matches)||innerWidth<820;
 const DPR=Math.min(devicePixelRatio, 1.0);
+// ---- PERF: single source of truth for every lag knob (tuned live via the ?perf panel) ----
+const PERF={dpr:DPR, wobble:true, reseedHz:9, wobbleScale:19, relief:true, craters:true, grain:true, maria:true, glyphs:(MOBILE?220:380), stars:true, deco:true, impactFX:true, invert:true};
+function pApplyRes(){var m=(typeof state!=='undefined'&&state==='charging')?1:0.7;renderer.setPixelRatio(PERF.dpr*m);renderer.setSize(innerWidth,innerHeight,false);moonMat.uniforms.uHscale.value=300*PERF.dpr*m;}
+function pApplyWobble(){glEl.style.filter=PERF.wobble?'url(#sketch)':'none';var d=document.getElementById('sketchDisp');if(d)d.setAttribute('scale',PERF.wobbleScale);}
+function pApplyMoon(){moonMat.uniforms.uRelief.value=PERF.relief?1:0;moonMat.uniforms.uCratersOn.value=PERF.craters?1:0;moonMat.uniforms.uGrainOn.value=PERF.grain?1:0;moonMat.uniforms.uMariaOn.value=PERF.maria?1:0;}
+function pApplyScene(){stars.visible=PERF.stars;spaceStuff.visible=PERF.deco;}
+function pApplyAll(){pApplyRes();pApplyWobble();pApplyMoon();pApplyScene();}
+const PERFON=/[?&]perf|[?&]fps/.test(location.search);let pfN=0,pfAcc=0;
 const renderer=new THREE.WebGLRenderer({canvas:document.getElementById('gl'),antialias:false,alpha:true,powerPreference:'high-performance'});
 renderer.setPixelRatio(DPR);renderer.setSize(innerWidth,innerHeight);
 const scene=new THREE.Scene();
@@ -422,24 +447,24 @@ payload.visible=false;scene.add(payload);
 const MAXC=32;
 let CRATERS=[[-15.4,-8.94,2.4],[2.08,-10.36,3],[-8.57,-2.62,1.8],[8.53,-15.35,3.6],[-11.97,-15.51,2],[0.95,-22.77,2.2],[13.06,-7.84,2.5],[-5.8,-18.65,3.2],[6.99,-3.31,2],[-20.57,-16.38,2.6],[-0.83,-5,1.4],[-6.43,-10.56,3.3],[19.25,-12.57,1.8],[-6.91,3.89,2.5],[-2.06,0.11,2.4],[8.44,2.87,1.5],[3.69,1.73,2.1],[12.58,-2,1.6]];
 const cratersUniform=[];for(let i=0;i<MAXC;i++)cratersUniform.push(new THREE.Vector3());
-const moonMat=new THREE.ShaderMaterial({uniforms:{hatchTex:{value:hatchTex},paperTex:{value:paperTex},uL1:{value:L1},uTime:{value:0},uHscale:{value:300.0*DPR},uCraters:{value:cratersUniform},uNumC:{value:0}},
+const moonMat=new THREE.ShaderMaterial({uniforms:{hatchTex:{value:hatchTex},paperTex:{value:paperTex},uL1:{value:L1},uTime:{value:0},uHscale:{value:300.0*DPR},uCraters:{value:cratersUniform},uNumC:{value:0},uRelief:{value:1},uCratersOn:{value:1},uGrainOn:{value:1},uMariaOn:{value:1}},
   vertexShader:`varying vec3 vN;varying vec3 vWp;void main(){vN=normalize(mat3(modelMatrix)*normal);vWp=(modelMatrix*vec4(position,1.0)).xyz;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
-  fragmentShader:`precision highp float;uniform sampler2D hatchTex,paperTex;uniform vec3 uL1;uniform float uTime,uHscale;uniform vec3 uCraters[32];uniform int uNumC;varying vec3 vN;varying vec3 vWp;
+  fragmentShader:`precision highp float;uniform sampler2D hatchTex,paperTex;uniform vec3 uL1;uniform float uTime,uHscale,uRelief,uCratersOn,uGrainOn,uMariaOn;uniform vec3 uCraters[32];uniform int uNumC;varying vec3 vN;varying vec3 vWp;
     float h(vec3 p){p=fract(p*0.3183+0.1);p*=17.0;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
     float n3(vec3 x){vec3 i=floor(x),f=fract(x);f=f*f*(3.0-2.0*f);return mix(mix(mix(h(i),h(i+vec3(1,0,0)),f.x),mix(h(i+vec3(0,1,0)),h(i+vec3(1,1,0)),f.x),f.y),mix(mix(h(i+vec3(0,0,1)),h(i+vec3(1,0,1)),f.x),mix(h(i+vec3(0,1,1)),h(i+vec3(1,1,1)),f.x),f.y),f.z);}
     float prof(float d,float R){return -0.5*(1.0-smoothstep(0.0,R,d))+0.5*exp(-pow((d-R)/(R*0.30),2.0));}  // bowl + raised rim (world units)
     float hgt(vec2 p){return n3(vec3(p*0.16,0.0));}   // single octave (relief uses 4 hgt taps — keep it cheap)
     void main(){
       vec2 P=vWp.xz;float eh=0.3;                                     // rolling relief so the ground isn't flat
-      vec3 Nu=normalize(vec3(-(hgt(P+vec2(eh,0.0))-hgt(P-vec2(eh,0.0)))/(2.0*eh)*0.7,1.0,-(hgt(P+vec2(0.0,eh))-hgt(P-vec2(0.0,eh)))/(2.0*eh)*0.7));
+      vec3 Nu=(uRelief>0.5)?normalize(vec3(-(hgt(P+vec2(eh,0.0))-hgt(P-vec2(eh,0.0)))/(2.0*eh)*0.7,1.0,-(hgt(P+vec2(0.0,eh))-hgt(P-vec2(0.0,eh)))/(2.0*eh)*0.7)):vec3(0.0,1.0,0.0);
       vec2 gr=vec2(0.0);float aoc=0.0;                                // MANUALLY PLACED craters
-      for(int i=0;i<32;i++){ if(i>=uNumC) break; vec3 cr=uCraters[i]; vec2 rv=P-cr.xy; float R=cr.z; float dd2=dot(rv,rv);
-        if(dd2<R*R*2.89){ float dd=sqrt(dd2); float ec=R*0.04; float dH=(prof(dd+ec,R)-prof(dd-ec,R))/(2.0*ec); gr+=dH*normalize(rv+vec2(1e-5)); aoc+=(1.0-smoothstep(0.0,R*0.7,dd))*0.3; } }   // squared-dist cull: sqrt only near a crater
+      if(uCratersOn>0.5){for(int i=0;i<32;i++){ if(i>=uNumC) break; vec3 cr=uCraters[i]; vec2 rv=P-cr.xy; float R=cr.z; float dd2=dot(rv,rv);
+        if(dd2<R*R*2.89){ float dd=sqrt(dd2); float ec=R*0.04; float dH=(prof(dd+ec,R)-prof(dd-ec,R))/(2.0*ec); gr+=dH*normalize(rv+vec2(1e-5)); aoc+=(1.0-smoothstep(0.0,R*0.7,dd))*0.3; } }}   // squared-dist cull: sqrt only near a crater
       vec3 Nb=normalize(Nu+vec3(-gr.x*1.6,0.0,-gr.y*1.6));
       float ndl=max(dot(Nb,normalize(uL1)),0.0);
-      float grain=n3(vWp*7.5)*0.10;
+      float grain=(uGrainOn>0.5)?n3(vWp*7.5)*0.10:0.0;
       float shade=clamp(ndl*0.9+0.16-grain,0.0,1.0)*(1.0-clamp(aoc,0.0,0.4));
-      float maria=smoothstep(0.5,0.62,n3(vWp*0.11));shade*=(1.0-maria*0.4);float t=1.0-shade;   // dark lunar maria patches
+      float maria=(uMariaOn>0.5)?smoothstep(0.5,0.62,n3(vWp*0.11)):0.0;shade*=(1.0-maria*0.4);float t=1.0-shade;   // dark lunar maria patches
       float fr=floor(uTime*8.0);float ja=fr*1.7;mat2 R=mat2(cos(ja),-sin(ja),sin(ja),cos(ja));vec2 off=vec2(fract(sin(fr*91.7)*4373.0),fract(sin(fr*47.3)*7919.0))*1200.0;
       vec3 hx=texture2D(hatchTex,(R*gl_FragCoord.xy+off)/uHscale).rgb;
       float i0=smoothstep(0.10,0.42,t),i1=smoothstep(0.32,0.66,t),i2=smoothstep(0.58,0.95,t);   // hatch shows across more of the surface (sketchier)
@@ -517,11 +542,11 @@ function reset(){state='charging';charge=0;burstFired=false;kicked=false;shock.v
   reward.visible=false;reward.position.set(0,0,0);rewMat.uniforms.uReveal.value=0;outMat.uniforms.uReveal.value=0;
   globe.visible=true;globe.position.set(0,0,0);globe.scale.setScalar(scaleBase);activeEarth.uniforms.uFade.value=1;activeEarth.uniforms.uChg.value=0;activeEarth.uniforms.uBurst.value=0;pulseT=9;
   splat.visible=false;fillEl.style.width='0%';againEl.style.display='none';labelEl.classList.remove('on');hintEl.style.opacity=.6;
-  freeze=0;speedEl.style.opacity=0;glEl.style.filter='url(#sketch)';whiteEl.style.opacity=0;
+  freeze=0;speedEl.style.opacity=0;whiteEl.style.opacity=0;
   beam.visible=false;payload.visible=false;moon.visible=false;spaceStuff.visible=true;dscGroup.visible=true;impactEl.style.opacity=0;flashEl.style.opacity=0;
   dscGroup.scale.setScalar(1);dscGroup.position.set(0,0,0);dscGroup.children.forEach(function(m){m.material.uniforms.uBurst.value=0;m.material.uniforms.uFade.value=1;});
   spaceStuff.children.forEach(function(o){if(o.userData.base)o.position.copy(o.userData.base);if(o.userData.brot)o.rotation.copy(o.userData.brot);o.userData.bdir=null;});   // restore blasted deco to home transform
-  renderer.setPixelRatio(DPR);renderer.setSize(innerWidth,innerHeight,false);moonMat.uniforms.uHscale.value=300*DPR;   // back to full res for the earth scene
+  pApplyAll();   // apply PERF (resolution, wobble, moon detail, scene) for the earth scene
   camera.position.set(0,0,4);camTgt.set(0,0,0);hintEl.style.opacity=.6;}
 againEl.onclick=(e)=>{e.stopPropagation();reset();};
 let ready=false;
@@ -529,7 +554,7 @@ function hit(x,y){ if(!ready)return; if(state==='settle'){reset();return;} if(st
   charge=Math.min(1,charge+1/HITS);fillEl.style.width=(charge*100)+'%';
   shake+=0.06+charge*0.32;scalePop=0.14;pulseT=0;activeEarth.uniforms.uChg.value=charge;   // each click: a shake + a size pop (grows with charge)
   ripples.push({x,y,r:6,life:1});emitData(Math.round((MOBILE?45:80)*charge*charge));   // more data the more you've charged
-  if(charge>=1){state='burst';stt=0;burstFired=false;renderer.setPixelRatio(0.7);renderer.setSize(innerWidth,innerHeight,false);moonMat.uniforms.uHscale.value=210;} }   // wobble stays ON the whole time; burst+moon just render at reduced res for perf
+  if(charge>=1){state='burst';stt=0;burstFired=false;pApplyRes();} }   // burst+moon render at reduced res (per PERF) for perf
 let downX=0,downY=0,downId=null;
 addEventListener('pointerdown',e=>{downX=e.clientX;downY=e.clientY;downId=e.pointerId;});
 addEventListener('pointerup',e=>{if(editMode)return;if(e.pointerId!==downId)return;
@@ -571,7 +596,7 @@ const sketchNoise=document.getElementById('sketchNoise');let skT=0,skS=1;
 let prev=performance.now()/1000;
 const FREEZE=new URLSearchParams(location.search).get('freeze');
 function frame(now){now/=1000;const dt=Math.min(now-prev,0.05);prev=now;
-  if(freeze>0){freeze-=dt;impactEl.style.background='#ffffff';impactEl.style.opacity=1;   // HITSTOP: hold on INVERTED colours
+  if(freeze>0){freeze-=dt;impactEl.style.background='#ffffff';impactEl.style.opacity=(PERF.invert?1:0);   // HITSTOP: hold on INVERTED colours
     renderer.render(scene,camera);requestAnimationFrame(frame);return;}
   stt+=dt;
   if(FREEZE){const a=FREEZE.split(':');state=a[0];stt=parseFloat(a[1]||'0');if(state==='burst')burstFired=true;globe.visible=(state!=='reveal'&&state!=='settle');reward.visible=(state==='reveal'||state==='settle');}
@@ -582,10 +607,10 @@ function frame(now){now/=1000;const dt=Math.min(now-prev,0.05);prev=now;
   halo.visible=false;   // replaced by the SVG feDisplacementMap edge-bleed on the canvas
   if(editMode){let s='EDIT — drag the objects · copy positions:\n';spaceStuff.children.forEach(function(o){s+=(o.userData.label||'?')+': ['+o.position.x.toFixed(2)+', '+o.position.y.toFixed(2)+', '+o.position.z.toFixed(2)+']\n';});editorEl.style.display='block';editorEl.textContent=s;}
   if(editMoon){editorEl.style.display='block';editorEl.textContent='MOON EDITOR · craters:'+CRATERS.length+' props:'+props.length+'\n+crater / +star · drag=move · slider=size (sep for earth) · wheel=rotate · right-click=del crater · x=del last\n→ hit COPY for the full data';}   // compact HUD (full data via copy)
-  if(now-skT>0.11){skT=now;skS=(skS%37)+1;sketchNoise.setAttribute('seed',skS);}   // boil the ink-bleed edge
+  if(PERF.wobble&&PERF.reseedHz>0&&now-skT>1/PERF.reseedHz){skT=now;skS=(skS%37)+1;sketchNoise.setAttribute('seed',skS);}   // boil the ink-bleed edge (rate via PERF)
 
   if(state==='charging'){globe.rotation.y+=0.004+charge*0.02;
-    if(parts.length<DMAX*0.7) emitData(Math.floor(charge*(MOBILE?2:4)));   // ambient inflow ramps with charge (none at start)
+    if(parts.length<PERF.glyphs*0.7) emitData(Math.floor(charge*(MOBILE?2:4)));   // ambient inflow ramps with charge (cap via PERF)
     globe.scale.setScalar(scaleBase*(1+charge*0.22+scalePop)+Math.sin(now*9)*0.01*charge);   // grows with each click (+ pop)
     if(!editMode)spaceStuff.children.forEach(function(o,i){if(!o.userData.base){o.userData.base=o.position.clone();o.userData.brot=o.rotation.clone();}var b=o.userData.base;var ty=o.userData.type;   // movement matching the page
       var ampY=(ty==='sun'||ty==='star')?0.11:0.045;var ch=charge*charge;var sw=1.0+ch*6.0,jit=ch*ch*0.7;   // escalates HARD with each click (like the earth)
@@ -594,7 +619,7 @@ function frame(now){now/=1000;const dt=Math.min(now-prev,0.05);prev=now;
       if(ty==='star'){o.rotation.z=(o.userData.rotZ||0)+Math.sin(now*(0.7+ch*4.0)+i)*(0.10+ch*0.5);}      // stars: sway harder with charge
       else if(ty==='sun'){o.rotation.z=Math.sin(now*(0.7+ch*4.0)+i)*(0.18+ch*0.5);}
       else{o.rotation.y+=0.006+0.001*i+ch*0.12;}});}                                       // others spin faster with charge
-  else if(state==='burst'){impactEl.style.opacity=1;   // the whole grow+burst is the INVERTED-colour beat
+  else if(state==='burst'){impactEl.style.opacity=(PERF.invert?1:0);   // the whole grow+burst is the INVERTED-colour beat
     if(!burstFired){burstFired=true;splat.visible=false;
       globe.scale.setScalar(scaleBase);activeEarth.uniforms.uBurst.value=0.0;
       spaceStuff.children.forEach(function(o){o.userData.bpos=o.position.clone();var d=o.position.clone();if(d.length()<0.5)d.set(Math.random()-.5,Math.random()-.5,Math.random()-.5);o.userData.bdir=d.normalize();o.userData.bspin=new THREE.Vector3((Math.random()-.5)*0.5,(Math.random()-.5)*0.5,(Math.random()-.5)*0.5);});}   // capture blast vectors for the deco
@@ -625,15 +650,15 @@ function frame(now){now/=1000;const dt=Math.min(now-prev,0.05);prev=now;
     whiteEl.style.opacity=Math.max(0,0.7-t*2.2);   // clear the whiteout fast so the landing is visible (no blinding flash)
     if(t>=1){   // ===== IMPACT: triple shockwave + flash core + recoil + rising dust plume + debris + camera kick =====
       shock.visible=true;shock.position.set(RELIC_POS.x,0.06,RELIC_POS.z);shock.scale.setScalar(1);shock.material.opacity=1;
-      shock2.visible=true;shock2.position.set(RELIC_POS.x,0.08,RELIC_POS.z);shock2.scale.setScalar(1);shock2.material.opacity=1;
-      shock3.visible=true;shock3.position.set(RELIC_POS.x,0.05,RELIC_POS.z);shock3.scale.setScalar(1);shock3.material.opacity=0.9;
+      shock2.visible=PERF.impactFX;shock2.position.set(RELIC_POS.x,0.08,RELIC_POS.z);shock2.scale.setScalar(1);shock2.material.opacity=1;
+      shock3.visible=PERF.impactFX;shock3.position.set(RELIC_POS.x,0.05,RELIC_POS.z);shock3.scale.setScalar(1);shock3.material.opacity=0.9;
       fsphere.visible=true;fsphere.position.set(RELIC_POS.x,0.5,RELIC_POS.z);fsphere.scale.setScalar(0.6);fsphere.material.opacity=1;
-      plume.visible=true;plume.position.set(RELIC_POS.x,0.6,RELIC_POS.z);plume.scale.setScalar(0.6);plume.material.opacity=0.5;
+      plume.visible=PERF.impactFX;plume.position.set(RELIC_POS.x,0.6,RELIC_POS.z);plume.scale.setScalar(0.6);plume.material.opacity=0.5;
       beam.visible=true;beam.scale.y=0.22;beam.position.set(RELIC_POS.x,RELIC_POS.y,RELIC_POS.z);beam.material.opacity=1;   // energy recoils back UP
       shockT=0;mshake=2.2;flashEl.style.opacity=0.9;splat.visible=true;
       for(let i=0;i<NP;i++){const v=pDir[i];pPos[i*3]=RELIC_POS.x+v.x*0.3;pPos[i*3+1]=0.1+Math.abs(v.y)*0.3;pPos[i*3+2]=RELIC_POS.z+v.z*0.3;}pGeo.attributes.position.needsUpdate=true;pMat.opacity=1;
       reward.visible=true;reward.position.copy(RELIC_POS);reward.rotation.y=0.0;reward.scale.setScalar(0.0001);
-      rewMat.uniforms.uReveal.value=0;outMat.uniforms.uReveal.value=0;glEl.style.filter='url(#sketch)';   // wobble edge back ON the moon (consistent across all objects)
+      rewMat.uniforms.uReveal.value=0;outMat.uniforms.uReveal.value=0;pApplyWobble();   // wobble on the moon per PERF
       camera.position.copy(CAM_MOON);camTgt.copy(CAM_TGT_MOON);state='reveal2';stt=0;}}
   else if(state==='reveal2'){const p=Math.min(stt/1.3,1),e=eQuart(p);               // relic inks in on the moon, front-facing
     whiteEl.style.opacity=Math.max(0,0.35-p*0.8);
@@ -671,7 +696,9 @@ function frame(now){now/=1000;const dt=Math.min(now-prev,0.05);prev=now;
   if(state!=='burst')impactEl.style.opacity=Math.max(0,(parseFloat(impactEl.style.opacity)||0)-dt*2.0);   // invert fades only AFTER the explosion (gently)
   flashEl.style.opacity=Math.max(0,(parseFloat(flashEl.style.opacity)||0)-dt*3.0);   // the kick flash always fades out (never lingers)
   if(strokes.length||ripples.length||fxClear){drawFx();fxClear=strokes.length>0||ripples.length>0;}
-  renderer.render(scene,camera);requestAnimationFrame(frame);}
+  renderer.render(scene,camera);
+  if(PERFON){pfN++;pfAcc+=dt;if(pfAcc>=0.5){var _f=document.getElementById('perfFps');if(_f){_f.textContent=Math.round(pfN/pfAcc);document.getElementById('perfCalls').textContent=renderer.info.render.calls;document.getElementById('perfTris').textContent=(renderer.info.render.triangles/1000).toFixed(0)+'k';}pfN=0;pfAcc=0;}}
+  requestAnimationFrame(frame);}
 addEventListener('resize',()=>{fitScale();camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();
   renderer.setSize(innerWidth,innerHeight);sizeFx();if(state==='charging')globe.scale.setScalar(scaleBase);
   toonMat.uniforms.uRes.value.set(innerWidth*DPR,innerHeight*DPR);toonMat.uniforms.uAspect.value=innerWidth/innerHeight;
@@ -711,6 +738,43 @@ if(editMoon){addBtn.style.display='block';addStarBtn.style.display='block';sizeS
 addEventListener('contextmenu',function(e){if(!editMoon)return;e.preventDefault();setNDC(e);ray.setFromCamera(ndc,camera);var hit=ray.intersectObject(moon,false);if(hit.length){var p=hit[0].point,bi=-1,bd=1e9;for(var i=0;i<CRATERS.length;i++){var dd=Math.hypot(p.x-CRATERS[i][0],p.z-CRATERS[i][1]);if(dd<CRATERS[i][2]*1.4&&dd<bd){bd=dd;bi=i;}}if(bi>=0){CRATERS.splice(bi,1);syncCraters();}}});
 if(location.search.includes('diamond'))setEarthShader(toonMat);
 if(location.search.includes('demo')){let k=0;const iv=setInterval(()=>{hit(innerWidth/2,innerHeight/2);if(++k>=HITS)clearInterval(iv);},110);}
+
+// ===== PERF PANEL + presets (?perf shows the tuner, ?q=high|med|low forces a tier) =====
+{
+  const GMAX=(MOBILE?220:380);
+  const presets={
+    high:{dpr:DPR,wobble:true,reseedHz:9,wobbleScale:19,relief:true,craters:true,grain:true,maria:true,glyphs:GMAX,stars:true,deco:true,impactFX:true,invert:true},
+    med:{dpr:0.75,wobble:true,reseedHz:4,wobbleScale:15,relief:true,craters:true,grain:false,maria:true,glyphs:Math.round(GMAX*0.6),stars:true,deco:true,impactFX:true,invert:true},
+    low:{dpr:0.55,wobble:false,reseedHz:0,wobbleScale:10,relief:false,craters:true,grain:false,maria:false,glyphs:80,stars:false,deco:true,impactFX:false,invert:false}
+  };
+  const qp=new URLSearchParams(location.search).get('q'); if(qp&&presets[qp]){Object.assign(PERF,presets[qp]);pApplyAll();}
+  if(PERFON){
+    const perfEl=document.getElementById('perf'),body=document.getElementById('perfBody'),bar=document.getElementById('perfBar');
+    perfEl.style.display='block';
+    bar.onclick=function(){perfEl.classList.toggle('collapsed');document.getElementById('perfArrow').textContent=perfEl.classList.contains('collapsed')?'▸ perf':'▾ perf';};
+    const controls=[
+      {g:'Render'},{t:'range',k:'dpr',lbl:'resolution',min:0.4,max:1,step:0.05,apply:pApplyRes},
+      {g:'Wobble filter'},{t:'bool',k:'wobble',lbl:'on',apply:pApplyWobble},{t:'range',k:'reseedHz',lbl:'reseed Hz',min:0,max:12,step:1},{t:'range',k:'wobbleScale',lbl:'displace',min:0,max:28,step:1,apply:pApplyWobble},
+      {g:'Moon shader'},{t:'bool',k:'craters',lbl:'craters',apply:pApplyMoon},{t:'bool',k:'relief',lbl:'relief noise',apply:pApplyMoon},{t:'bool',k:'grain',lbl:'grain',apply:pApplyMoon},{t:'bool',k:'maria',lbl:'maria',apply:pApplyMoon},
+      {g:'Scene / FX'},{t:'range',k:'glyphs',lbl:'data glyphs',min:0,max:GMAX,step:20},{t:'bool',k:'stars',lbl:'bg stars',apply:pApplyScene},{t:'bool',k:'deco',lbl:'deco objects',apply:pApplyScene},{t:'bool',k:'impactFX',lbl:'impact FX'},{t:'bool',k:'invert',lbl:'invert flash'}
+    ];
+    function build(){
+      body.innerHTML='';
+      var prow=document.createElement('div');prow.className='prow';
+      ['high','med','low'].forEach(function(p){var b=document.createElement('button');b.textContent=p;b.onclick=function(){Object.assign(PERF,presets[p]);pApplyAll();build();};prow.appendChild(b);});
+      body.appendChild(prow);
+      controls.forEach(function(c){
+        if(c.g){var hd=document.createElement('div');hd.className='pg';hd.textContent=c.g;body.appendChild(hd);return;}
+        var row=document.createElement('label');row.className='pr';
+        var nm=document.createElement('span');nm.textContent=c.lbl;row.appendChild(nm);
+        if(c.t==='bool'){var cb=document.createElement('input');cb.type='checkbox';cb.checked=!!PERF[c.k];cb.onchange=function(){PERF[c.k]=cb.checked;if(c.apply)c.apply();};row.appendChild(cb);}
+        else{var sl=document.createElement('input');sl.type='range';sl.min=c.min;sl.max=c.max;sl.step=c.step;sl.value=PERF[c.k];var vb=document.createElement('b');var dec=(c.step<1)?2:0;vb.textContent=(+PERF[c.k]).toFixed(dec);sl.oninput=function(){PERF[c.k]=+sl.value;vb.textContent=(+sl.value).toFixed(dec);if(c.apply)c.apply();};row.appendChild(sl);row.appendChild(vb);}
+        body.appendChild(row);
+      });
+    }
+    build();
+  }
+}
 </script>
 </body>
 </html>

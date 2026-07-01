@@ -56,6 +56,15 @@ Baked layouts (craters, Earth, stars, ship, UFO) live as the defaults inside `in
   the heaviest per-pixel costs); the moon crater loop skips the `sqrt` for far craters.
 - The Meshy models are dense (`ufo.glb` ~295k tris, `rocket.glb` similar) — decimate before prod.
 
+### Perf tuner (`?perf`)
+
+Add **`?perf`** (or `?fps`) to reveal a collapsible top-left panel: live **FPS / draw-calls / tri
+count**, plus knobs for every runtime cost — render resolution, the wobble filter (on / reseed Hz /
+displacement), the moon shader (craters / relief / grain / maria), data-glyph budget, bg stars, deco
+objects, impact FX, and the invert flash. `high / med / low` preset buttons retune everything at once.
+**`?q=high|med|low`** forces a tier without opening the panel (for A/B'ing on a real device). The
+wobble `feDisplacementMap` is the single biggest per-pixel cost — the `low` preset disables it.
+
 ## Recording a clip
 
 The page exposes a `?record` mode (skips the gate, exposes `window.__rec.hit/reset/info`). A

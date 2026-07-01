@@ -37,12 +37,12 @@ export const getAdminNavigation = (
     { name: "Hiring", href: "/applications/hiring", icon: UserCheck },
     ...(isAdmin
       ? [
-        {
-          name: "Returning Execs",
-          href: "/applications/returning-execs",
-          icon: UserCheck,
-        },
-      ]
+          {
+            name: "Returning Execs",
+            href: "/applications/returning-execs",
+            icon: UserCheck,
+          },
+        ]
       : []),
   ];
 
@@ -55,9 +55,7 @@ export const getAdminNavigation = (
       subItems: applicationSubItems,
     },
     { name: "Events", href: "/events", icon: Calendar },
-    ...(isAdmin
-      ? [{ name: "Campaigns", href: "/campaigns", icon: Mail }]
-      : []),
+    ...(isAdmin ? [{ name: "Campaigns", href: "/campaigns", icon: Mail }] : []),
     {
       name: "Logistics",
       href: "/logistics",
@@ -65,42 +63,46 @@ export const getAdminNavigation = (
       subItems: [
         ...(onboardingOpen
           ? [
-            {
-              name: "Onboarding",
-              href: "/logistics/onboarding",
-              icon: FileText,
-            },
-          ]
+              {
+                name: "Onboarding",
+                href: "/logistics/onboarding",
+                icon: FileText,
+              },
+            ]
           : []),
         ...(isExec
           ? [
-            {
-              name: "Onboarding review",
-              href: "/logistics/onboarding-review",
-              icon: ClipboardCheck,
-            },
-          ]
+              {
+                name: "Onboarding review",
+                href: "/logistics/onboarding-review",
+                icon: ClipboardCheck,
+              },
+            ]
           : []),
         ...(returningExecOpen
           ? [
-            {
-              name: "Returning execs",
-              href: "/logistics/returning",
-              icon: UserCheck,
-            },
-          ]
+              {
+                name: "Returning execs",
+                href: "/logistics/returning",
+                icon: UserCheck,
+              },
+            ]
           : []),
       ],
     },
-    {
-      name: "Nexus",
-      href: "/nexus",
-      icon: Code2,
-      subItems: [
-        { name: "Foundry", href: "/nexus/foundry", icon: Anvil },
-        { name: "Optics", href: "/nexus/optics", icon: Activity },
-        { name: "Archives", href: "/nexus/archives", icon: Library },
-      ],
-    },
+    ...(isAdmin
+      ? [
+          {
+            name: "Nexus",
+            href: "/nexus",
+            icon: Code2,
+            subItems: [
+              { name: "Foundry", href: "/nexus/foundry", icon: Anvil },
+              { name: "Optics", href: "/nexus/optics", icon: Activity },
+              { name: "Archives", href: "/nexus/archives", icon: Library },
+            ],
+          },
+        ]
+      : []),
   ];
 };

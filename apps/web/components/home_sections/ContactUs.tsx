@@ -29,7 +29,7 @@ const CONTACT_BUTTONS = [
 
 export default function ContactUs() {
   return (
-    <SectionWrapper id="contact">
+    <SectionWrapper id="contact" className="mb-8 lg:mb-12">
       <div className="grid gap-10 lg:grid-cols-2 lg:gap-16 lg:items-start">
         <div className="flex flex-col gap-8">
           <div>

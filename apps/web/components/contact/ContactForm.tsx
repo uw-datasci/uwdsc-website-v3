@@ -13,7 +13,6 @@ import { renderTextField, renderTextAreaField, Button, Form, FormField } from "@
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
-
 export function ContactForm() {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -47,7 +46,9 @@ export function ContactForm() {
       form.reset({ name: data.name, email: data.email, subject: "", message: "" });
     } catch (error: unknown) {
       const err = error as { error?: string; message?: string };
-      setSubmitError(err?.error ?? err?.message ?? "An unexpected error occurred. Please try again.");
+      setSubmitError(
+        err?.error ?? err?.message ?? "An unexpected error occurred. Please try again.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -119,7 +120,7 @@ export function ContactForm() {
             size="lg"
             disabled={isLoading || !form.formState.isValid}
             type="submit"
-            className="h-auto! w-full touch-manipulation rounded-full bg-gradient-purple py-2.5 text-base font-bold sm:text-lg"
+            className="h-auto! w-full touch-manipulation rounded-md bg-gradient-purple py-2.5 text-base font-bold sm:text-lg"
           >
             {isLoading ? (
               <>

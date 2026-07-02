@@ -19,6 +19,3 @@ CREATE POLICY contact_submissions_insert_public ON public.contact_submissions
 CREATE POLICY contact_submissions_select_admin ON public.contact_submissions
   FOR SELECT
   USING (public.is_admin(auth.uid()));
-
-GRANT INSERT ON public.contact_submissions TO authenticated, anon;
-GRANT SELECT ON public.contact_submissions TO service_role;

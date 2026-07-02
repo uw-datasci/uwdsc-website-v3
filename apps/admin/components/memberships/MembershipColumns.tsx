@@ -169,6 +169,10 @@ export const membershipColumns: ColumnDef<Member>[] = [
 
       return <span>{PAYMENT_METHOD_LABELS[method]}</span>;
     },
+    filterFn: (row, _columnId, filterValue) => {
+      if (!filterValue) return true;
+      return row.original.payment_method === filterValue;
+    },
   },
   {
     accessorKey: "is_math_soc_member",

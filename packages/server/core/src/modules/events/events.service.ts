@@ -90,6 +90,17 @@ class EventService {
   }
 
   /**
+   * Get the attendance record ID for a user at a given event
+   */
+  async getAttendanceId(eventId: string, profileId: string): Promise<string | null> {
+    try {
+      return await this.repository.getAttendanceId(eventId, profileId);
+    } catch (error) {
+      throw new ApiError(`Failed to get attendance id: ${(error as Error).message}`, 500);
+    }
+  }
+
+  /**
    * Check in a user to an event
    */
   async checkInUser(eventId: string, profileId: string): Promise<boolean> {

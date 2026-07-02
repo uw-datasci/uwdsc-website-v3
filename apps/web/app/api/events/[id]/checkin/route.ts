@@ -13,7 +13,8 @@ export async function GET(
     if (!user) return isUnauthorized;
 
     const checkedIn = await eventService.getAttendanceForUser(id, user.id);
-    return ApiResponse.ok({ checkedIn });
+    const attendanceId = checkedIn ? await eventService.getAttendanceId(id, user.id) : null;
+    return ApiResponse.ok({ checkedIn, attendanceId });
   } catch (error: unknown) {
     console.error("Error checking attendance:", error);
     return ApiResponse.serverError(error, "Failed to check attendance");

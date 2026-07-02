@@ -22,7 +22,7 @@ export async function getEventsByRange(range: EventsRange): Promise<Event[] | Ev
   return data;
 }
 
-export async function getCheckInStatus(eventId: string): Promise<{ checkedIn: boolean }> {
+export async function getCheckInStatus(eventId: string): Promise<{ checkedIn: boolean; attendanceId: string | null }> {
   const response = await fetch(`/api/events/${eventId}/checkin`);
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);

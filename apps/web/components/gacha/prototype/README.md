@@ -56,6 +56,19 @@ Baked layouts (craters, Earth, stars, ship, UFO) live as the defaults inside `in
   the heaviest per-pixel costs); the moon crater loop skips the `sqrt` for far craters.
 - The Meshy models are dense (`ufo.glb` ~295k tris, `rocket.glb` similar) — decimate before prod.
 
+### Auto quality (default — nobody should see lag)
+
+Quality now manages itself, no query params needed:
+
+- **Starting tier**: phones / ≤4-core / ≤4 GB devices start at `med`, everything else at `high`
+  (a previously saved tier wins).
+- **Governor**: after the load gate, real FPS is measured in ~1.6 s windows. Under **45 fps**
+  → drop a tier (`high → med → low`). Over **57 fps** sustained ~8 s → earn a tier back.
+- **Sticky**: the settled tier is saved to `localStorage` (`gachaQ`), so repeat visits start
+  right immediately.
+- Disabled in `?edit` / `?record` / `?demo` / `?freeze` modes, when `?q=` pins a tier, or the
+  moment you hand-tune anything in the `?perf` panel.
+
 ### Perf tuner (`?perf`)
 
 Add **`?perf`** (or `?fps`) to reveal a collapsible top-left panel: live **FPS / draw-calls / tri

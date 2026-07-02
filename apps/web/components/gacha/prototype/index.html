@@ -109,7 +109,7 @@
   <div id="bar"><div id="fill"></div></div><button id="again">Again ▶</button></div>
 <div id="err"></div>
 <div id="perf" class="collapsed">
-  <div id="perfBar">FPS <b id="perfFps">–</b> · <span id="perfCalls">–</span> calls · <span id="perfTris">–</span> · <span id="perfArrow">▸ perf</span></div>
+  <div id="perfBar">FPS <b id="perfFps">–</b> · <span id="perfCalls">–</span> calls · <span id="perfTris">–</span> · <span id="perfQ">–</span> · <span id="perfArrow">▸ perf</span></div>
   <div id="perfBody"></div>
 </div>
 
@@ -697,6 +697,7 @@ function frame(now){now/=1000;const dt=Math.min(now-prev,0.05);prev=now;
   flashEl.style.opacity=Math.max(0,(parseFloat(flashEl.style.opacity)||0)-dt*3.0);   // the kick flash always fades out (never lingers)
   if(strokes.length||ripples.length||fxClear){drawFx();fxClear=strokes.length>0||ripples.length>0;}
   renderer.render(scene,camera);
+  if(window.pGov)window.pGov();   // auto-quality governor: steps the tier down/up from measured FPS
   if(PERFON){pfN++;pfAcc+=dt;if(pfAcc>=0.5){var _f=document.getElementById('perfFps');if(_f){_f.textContent=Math.round(pfN/pfAcc);document.getElementById('perfCalls').textContent=renderer.info.render.calls;document.getElementById('perfTris').textContent=(renderer.info.render.triangles/1000).toFixed(0)+'k';}pfN=0;pfAcc=0;}}
   requestAnimationFrame(frame);}
 addEventListener('resize',()=>{fitScale();camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();
@@ -747,10 +748,40 @@ if(location.search.includes('demo')){let k=0;const iv=setInterval(()=>{hit(inner
     med:{dpr:0.75,wobble:true,reseedHz:4,wobbleScale:15,relief:true,craters:true,grain:false,maria:true,glyphs:Math.round(GMAX*0.6),stars:true,deco:true,impactFX:true,invert:true},
     low:{dpr:0.55,wobble:false,reseedHz:0,wobbleScale:10,relief:false,craters:true,grain:false,maria:false,glyphs:80,stars:false,deco:true,impactFX:false,invert:false}
   };
-  const qp=new URLSearchParams(location.search).get('q'); if(qp&&presets[qp]){Object.assign(PERF,presets[qp]);pApplyAll();}
+  const qp=new URLSearchParams(location.search).get('q');
+
+  // ---- AUTO-QUALITY GOVERNOR: nobody should ever see lag without touching anything ----
+  // Start tier from ?q= > saved localStorage > device heuristics. After the load gate, measure
+  // real FPS in ~1.6s windows: <45fps -> drop a tier (sticky, saved); >57fps sustained ~8s ->
+  // earn one back. Off in edit/record/demo modes and when ?q= pins a tier.
+  const TIERS=['high','med','low'];
+  let saved=null;try{saved=localStorage.getItem('gachaQ');}catch(e){}
+  let tier=(qp&&presets[qp])?qp
+    :(saved&&presets[saved])?saved
+    :(MOBILE||navigator.hardwareConcurrency<=4||(navigator.deviceMemory&&navigator.deviceMemory<=4))?'med'
+    :'high';
+  let autoQ=!(qp&&presets[qp])&&!/record|demo|freeze|edit/.test(location.search);
+  function setTier(t,save){tier=t;Object.assign(PERF,presets[t]);pApplyAll();
+    if(save){try{localStorage.setItem('gachaQ',t);}catch(e){}}
+    var q=document.getElementById('perfQ');if(q)q.textContent=t;
+    if(window.pRebuild)window.pRebuild();}
+  setTier(tier,false);
+  let gPrev=0,gAcc=0,gN=0,gHold=2.5,gGood=0;   // gHold = grace after load/tier-switch (skip the hitch)
+  window.pGov=function(){var n=performance.now()/1000,d=n-gPrev;gPrev=n;
+    if(!autoQ||!ready||document.hidden||d<=0||d>0.5){gAcc=0;gN=0;return;}   // ignore tab-switch gaps + pre-gate frames
+    if(gHold>0){gHold-=d;return;}
+    gAcc+=d;gN++;
+    if(gAcc<1.6)return;
+    var fps=gN/gAcc,i=TIERS.indexOf(tier);gAcc=0;gN=0;
+    if(fps<45&&i<TIERS.length-1){setTier(TIERS[i+1],true);gHold=2.0;gGood=0;}
+    else if(fps>57&&i>0){if(++gGood>=5){setTier(TIERS[i-1],true);gHold=2.0;gGood=0;}}
+    else gGood=0;};
+
   if(PERFON){
     const perfEl=document.getElementById('perf'),body=document.getElementById('perfBody'),bar=document.getElementById('perfBar');
     perfEl.style.display='block';
+    document.getElementById('perfQ').textContent=tier;
+    body.addEventListener('input',function(){autoQ=false;});   // hand-tuning wins: stop the governor fighting you
     bar.onclick=function(){perfEl.classList.toggle('collapsed');document.getElementById('perfArrow').textContent=perfEl.classList.contains('collapsed')?'▸ perf':'▾ perf';};
     const controls=[
       {g:'Render'},{t:'range',k:'dpr',lbl:'resolution',min:0.4,max:1,step:0.05,apply:pApplyRes},
@@ -761,7 +792,7 @@ if(location.search.includes('demo')){let k=0;const iv=setInterval(()=>{hit(inner
     function build(){
       body.innerHTML='';
       var prow=document.createElement('div');prow.className='prow';
-      ['high','med','low'].forEach(function(p){var b=document.createElement('button');b.textContent=p;b.onclick=function(){Object.assign(PERF,presets[p]);pApplyAll();build();};prow.appendChild(b);});
+      ['high','med','low'].forEach(function(p){var b=document.createElement('button');b.textContent=p;if(p===tier)b.style.background='#9f9';b.onclick=function(){autoQ=false;setTier(p,true);};prow.appendChild(b);});
       body.appendChild(prow);
       controls.forEach(function(c){
         if(c.g){var hd=document.createElement('div');hd.className='pg';hd.textContent=c.g;body.appendChild(hd);return;}
@@ -772,6 +803,7 @@ if(location.search.includes('demo')){let k=0;const iv=setInterval(()=>{hit(inner
         body.appendChild(row);
       });
     }
+    window.pRebuild=build;
     build();
   }
 }

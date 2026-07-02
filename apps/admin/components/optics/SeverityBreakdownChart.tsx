@@ -15,11 +15,11 @@ import {
 import type { RaftSeverityBreakdown } from "@uwdsc/common/types";
 
 const SEVERITY_COLORS: Record<string, string> = {
-  fatal: "hsl(var(--destructive))",
+  fatal: "var(--destructive)",
   error: "hsl(25 95% 53%)",
   warning: "hsl(45 93% 47%)",
   info: "hsl(217 91% 60%)",
-  debug: "hsl(var(--muted-foreground))",
+  debug: "var(--muted-foreground)",
 };
 
 const chartConfig = {
@@ -38,7 +38,7 @@ interface SeverityBreakdownChartProps {
 export function SeverityBreakdownChart({ data }: SeverityBreakdownChartProps) {
   const chartData = data.map((entry) => ({
     ...entry,
-    fill: SEVERITY_COLORS[entry.severity] ?? "hsl(var(--muted))",
+    fill: SEVERITY_COLORS[entry.severity] ?? "var(--muted)",
   }));
 
   return (

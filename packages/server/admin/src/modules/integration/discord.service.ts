@@ -18,10 +18,11 @@ class DiscordService {
   }
 
   private parseSenderName(fromRaw: string): string {
-    let senderName = fromRaw;
-    const m = /^(.*?)\s*<([^>]+)>/.exec(fromRaw);
-    if (m?.[1]) senderName = m[1].trim();
-    return senderName;
+    const ltIndex = fromRaw.indexOf("<");
+    if (ltIndex <= 0) return fromRaw;
+    const gtIndex = fromRaw.indexOf(">", ltIndex);
+    if (gtIndex === -1) return fromRaw;
+    return fromRaw.slice(0, ltIndex).trim();
   }
 
   private buildSupportEmbed(
@@ -77,8 +78,7 @@ class DiscordService {
   ): Promise<void> {
     const subject = email.subject ?? "(no subject)";
     const textBody = email.text ?? (email.html ? "(html-only)" : "(no body)");
-    const fromRaw =
-      forwarderFrom ?? (Array.isArray(email.from) ? email.from.join(", ") : "");
+    const fromRaw = forwarderFrom ?? (Array.isArray(email.from) ? email.from.join(", ") : "");
 
     const result = await this.forwardSupportToDiscord({ subject, textBody, fromRaw });
 

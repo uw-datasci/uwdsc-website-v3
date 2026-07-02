@@ -5,7 +5,7 @@ This document describes the monorepo layout, design system, and API architecture
 ## Monorepo Overview
 
 - **Package manager**: pnpm (workspace root)
-- **Apps**: `apps/web` (main site), `apps/admin` (admin dashboard), `apps/docs` (documentation)
+- **Apps**: `apps/web` (main site), `apps/admin` (admin dashboard)
 - **Shared packages**:
   - `packages/ui` – shared UI primitives (shadcn/ui)
   - `packages/common` – shared types and utils (e.g. `ApiResponse`)

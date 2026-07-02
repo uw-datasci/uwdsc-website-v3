@@ -34,7 +34,7 @@ jobs:
   code-quality:
     name: Code Quality
     needs: setup
-    uses: uw-datasci/nexus-workflows/.github/workflows/quality-gate.yml@v4
+    uses: uw-datasci/nexus-workflows/.github/workflows/quality-gate.yml@main
     with:
       node-version: ${{ needs.setup.outputs.node-version }}
       pnpm-version: ${{ needs.setup.outputs.pnpm-version }}
@@ -47,7 +47,7 @@ jobs:
   build-web:
     name: Build - Web
     needs: [ setup, code-quality ]
-    uses: uw-datasci/nexus-workflows/.github/workflows/build-node.yml@v4
+    uses: uw-datasci/nexus-workflows/.github/workflows/build-node.yml@main
     with:
       node-version: ${{ needs.setup.outputs.node-version }}
       pnpm-version: ${{ needs.setup.outputs.pnpm-version }}
@@ -63,7 +63,7 @@ jobs:
   build-admin:
     name: Build - Admin
     needs: [ setup, code-quality ]
-    uses: uw-datasci/nexus-workflows/.github/workflows/build-node.yml@v4
+    uses: uw-datasci/nexus-workflows/.github/workflows/build-node.yml@main
     with:
       node-version: ${{ needs.setup.outputs.node-version }}
       pnpm-version: ${{ needs.setup.outputs.pnpm-version }}
@@ -87,7 +87,7 @@ jobs:
 
     steps:
       - name: Post Quality Gate Summary
-        uses: uw-datasci/nexus-quality-summary@v3
+        uses: uw-datasci/nexus-quality-summary@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           code-quality-result: ${{ needs.code-quality.result }}

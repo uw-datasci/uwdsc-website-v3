@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { headers } from "next/headers";
 import { ApiError } from "@uwdsc/common/types";
 import { ApiResponse } from "@uwdsc/common/utils";
-import { membershipService, webhookService } from "@uwdsc/admin";
+import { discordService, membershipService, webhookService } from "@uwdsc/admin";
 import { applicationService } from "@uwdsc/core";
 import { Webhook } from "svix";
 import { WebhookEventPayload } from "resend";
@@ -59,8 +59,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     }
 
     const target = webhookService.resolveInboundTarget(evt.data.to);
-    if (!target)
-      return ApiResponse.ok({ success: false, reason: "wrong_recipient" });
+    if (!target) return ApiResponse.ok({ success: false, reason: "wrong_recipient" });
 
     const contents = await webhookService.getReceivedEmail(evt.data.email_id);
     if (!contents.ok) {
@@ -75,8 +74,8 @@ export async function POST(request: NextRequest): Promise<Response> {
     switch (target) {
       case "membership": {
         const activeTerm = await applicationService.getActiveTerm();
-        if (!activeTerm)
-          throw new ApiError("No active term is configured", 400);
+        if (!activeTerm) throw new ApiError("No active term is configured", 400);
+
         await membershipService.processEmailReceipt(
           contents.email,
           activeTerm.start_date,
@@ -85,53 +84,7 @@ export async function POST(request: NextRequest): Promise<Response> {
         break;
       }
       case "support": {
-        // Forward support email to Discord webhook
-        const DISCORD_WEBHOOK = process.env.SUPPORT_DISCORD_WEBHOOK_URL;
-        if (!DISCORD_WEBHOOK) {
-          console.warn(
-            "[Webhook] Missing SUPPORT_DISCORD_WEBHOOK_URL, skipping Discord notify",
-          );
-          break;
-        }
-
-        // Extract fields
-        const received = contents.email;
-        const subject = received.subject ?? "(no subject)";
-        const textBody =
-          received.text ?? (received.html ? "(html-only)" : "(no body)");
-        const fromRaw =
-          evt.data.from ??
-          (Array.isArray(received.from) ? received.from.join(", ") : "");
-
-        // Parse sender name/email
-        let senderName = fromRaw;
-        const m = /^(.*?)\s*<([^>]+)>/.exec(fromRaw);
-        if (m && m[1]) senderName = m[1].trim();
-
-        // Prepare Discord embed (truncate to Discord limits)
-        const truncate = (s: string, n = 4000) =>
-          s.length > n ? s.slice(0, n - 3) + "..." : s;
-        const embed = {
-          title: truncate(subject, 256),
-          author: { name: senderName },
-          description: truncate(textBody, 4096),
-          footer: { text: `To: support@mail.uwdatascience.ca` },
-          timestamp: new Date().toISOString(),
-        };
-
-        try {
-          await fetch(DISCORD_WEBHOOK, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ embeds: [embed] }),
-          });
-        } catch (err) {
-          console.error(
-            "[Webhook] Failed to post support email to Discord:",
-            err,
-          );
-          // don't fail the webhook (Resend expects 200)
-        }
+        await discordService.processSupportEmail(contents.email, evt.data.from);
         break;
       }
       default: {

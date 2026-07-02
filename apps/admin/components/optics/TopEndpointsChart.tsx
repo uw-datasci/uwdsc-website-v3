@@ -16,7 +16,7 @@ import type { RaftEndpointBreakdown } from "@uwdsc/common/types";
 import { truncateText } from "./utils";
 
 const chartConfig = {
-  count: { label: "Errors", color: "hsl(var(--chart-2))" },
+  count: { label: "Errors", color: "var(--chart-2)" },
 } satisfies ChartConfig;
 
 interface TopEndpointsChartProps {

@@ -18,11 +18,11 @@ import type { RaftTimeSeriesPoint } from "@uwdsc/common/types";
 import { formatRaftDate } from "./utils";
 
 const chartConfig = {
-  fatal: { label: "Fatal", color: "hsl(var(--destructive))" },
+  fatal: { label: "Fatal", color: "var(--destructive)" },
   error: { label: "Error", color: "hsl(25 95% 53%)" },
   warning: { label: "Warning", color: "hsl(45 93% 47%)" },
   info: { label: "Info", color: "hsl(217 91% 60%)" },
-  debug: { label: "Debug", color: "hsl(var(--muted-foreground))" },
+  debug: { label: "Debug", color: "var(--muted-foreground)" },
 } satisfies ChartConfig;
 
 interface ErrorsOverTimeChartProps {

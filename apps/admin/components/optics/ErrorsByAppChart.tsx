@@ -15,7 +15,7 @@ import {
 import type { RaftAppBreakdown } from "@uwdsc/common/types";
 
 const chartConfig = {
-  count: { label: "Errors", color: "hsl(var(--primary))" },
+  count: { label: "Errors", color: "var(--primary)" },
 } satisfies ChartConfig;
 
 interface ErrorsByAppChartProps {

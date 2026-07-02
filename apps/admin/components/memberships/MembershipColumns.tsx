@@ -4,7 +4,13 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowUp, ArrowDown, Minus, Pencil, Banknote, Trash2 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button, Tooltip, TooltipContent, TooltipTrigger } from "@uwdsc/ui";
-import { Member } from "@uwdsc/common/types";
+import { Member, PaymentMethod } from "@uwdsc/common/types";
+
+const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
+  cash: "Cash",
+  online: "Online",
+  math_soc: "MathSoc",
+};
 
 const SORT_ICONS = {
   asc: ArrowUp,
@@ -141,6 +147,27 @@ export const membershipColumns: ColumnDef<Member>[] = [
       if (!filterValue) return true;
       const cellValue = row.getValue(columnId) as boolean;
       return filterValue === "true" ? cellValue === true : cellValue === false;
+    },
+  },
+  {
+    accessorKey: "payment_method",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="-ml-3 h-8"
+      >
+        Payment Method
+        <SortIcon direction={column.getIsSorted()} />
+      </Button>
+    ),
+    cell: ({ row }) => {
+      if (!row.original.has_paid) return <span className="text-muted-foreground">-</span>;
+
+      const method = row.original.payment_method;
+      if (!method) return <span className="text-muted-foreground">-</span>;
+
+      return <span>{PAYMENT_METHOD_LABELS[method]}</span>;
     },
   },
   {

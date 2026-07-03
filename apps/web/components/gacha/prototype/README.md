@@ -54,6 +54,10 @@ Baked layouts (craters, Earth, stars, ship, UFO) live as the defaults inside `in
 - Loading gate **pre-compiles shaders + uploads textures** before play (no first-use hitch).
 - The burst + moon scenes render at **reduced resolution** (the moon shader + wobble filter are
   the heaviest per-pixel costs); the moon crater loop skips the `sqrt` for far craters.
+- The "boil" redraw params (hatch-sheet rotation/offset) are **hoisted to CPU uniforms** — computed
+  8×/s instead of per-pixel on the earth + DSC letters; the earth renders **opaque** (early-z, no
+  blending) except while it's actually fading; the full-screen invert/flash overlays are
+  `display:none`'d out of the compositor whenever idle instead of blending at opacity 0.
 - The Meshy models are dense (`ufo.glb` ~295k tris, `rocket.glb` similar) — decimate before prod.
 
 ### Auto quality (default — nobody should see lag)

@@ -4,7 +4,7 @@ export type GetReceivedEmailContentsResult =
   | { ok: true; email: GetReceivingEmailResponseSuccess }
   | {
       ok: false;
-      reason: "missing_api_key" | "resend_error";
+      reason: "missing_api_key" | "resend_error" | "wrong_recipient";
       message: string;
     };
 

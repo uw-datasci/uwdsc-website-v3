@@ -142,31 +142,9 @@ export class EventRepository extends BaseRepository {
   }
 
   /**
-   * Check if a user has an attendance record for a given event
+   * Get the attendance record ID for a user at a given event, or null if not checked in.
    */
-  async getAttendanceForUser(
-    eventId: string,
-    profileId: string,
-  ): Promise<boolean> {
-    try {
-      const result = await this.sql<{ exists: boolean }[]>`
-        SELECT EXISTS(
-          SELECT 1 FROM events.attendance
-          WHERE event_id = ${eventId} AND profile_id = ${profileId}
-        ) AS exists
-      `;
-
-      return result[0]?.exists ?? false;
-    } catch (error: unknown) {
-      console.error("Error checking attendance:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get the attendance record ID for a user at a given event
-   */
-  async getAttendanceId(eventId: string, profileId: string): Promise<string | null> {
+  async getAttendanceForUser(eventId: string, profileId: string): Promise<string | null> {
     try {
       const result = await this.sql<{ id: string }[]>`
         SELECT id FROM events.attendance
@@ -175,7 +153,7 @@ export class EventRepository extends BaseRepository {
       `;
       return result[0]?.id ?? null;
     } catch (error: unknown) {
-      console.error("Error fetching attendance id:", error);
+      console.error("Error checking attendance:", error);
       throw error;
     }
   }

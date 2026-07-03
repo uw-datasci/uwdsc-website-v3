@@ -12,8 +12,7 @@ export async function GET(
     const { user, isUnauthorized } = await tryGetCurrentUser();
     if (!user) return isUnauthorized;
 
-    const checkedIn = await eventService.getAttendanceForUser(id, user.id);
-    const attendanceId = checkedIn ? await eventService.getAttendanceId(id, user.id) : null;
+    const { checkedIn, attendanceId } = await eventService.getAttendanceForUser(id, user.id);
     return ApiResponse.ok({ checkedIn, attendanceId });
   } catch (error: unknown) {
     console.error("Error checking attendance:", error);

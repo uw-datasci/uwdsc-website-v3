@@ -79,24 +79,18 @@ class EventService {
   }
 
   /**
-   * Check if a user has checked in to an event
+   * Check if a user has checked in to an event.
+   * Returns checkedIn boolean and the attendance record ID if present.
    */
-  async getAttendanceForUser(eventId: string, profileId: string): Promise<boolean> {
+  async getAttendanceForUser(
+    eventId: string,
+    profileId: string,
+  ): Promise<{ checkedIn: boolean; attendanceId: string | null }> {
     try {
-      return await this.repository.getAttendanceForUser(eventId, profileId);
+      const attendanceId = await this.repository.getAttendanceForUser(eventId, profileId);
+      return { checkedIn: attendanceId !== null, attendanceId };
     } catch (error) {
       throw new ApiError(`Failed to check attendance: ${(error as Error).message}`, 500);
-    }
-  }
-
-  /**
-   * Get the attendance record ID for a user at a given event
-   */
-  async getAttendanceId(eventId: string, profileId: string): Promise<string | null> {
-    try {
-      return await this.repository.getAttendanceId(eventId, profileId);
-    } catch (error) {
-      throw new ApiError(`Failed to get attendance id: ${(error as Error).message}`, 500);
     }
   }
 

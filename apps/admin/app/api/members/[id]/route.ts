@@ -37,11 +37,8 @@ async function tryCheckInAtEvent(
 
     // No row inserted: either already checked in (treat as success) or a
     // transient conflict. Confirm via attendance lookup.
-    const alreadyIn = await coreEventService.getAttendanceForUser(
-      eventId,
-      profileId,
-    );
-    return alreadyIn
+    const { checkedIn } = await coreEventService.getAttendanceForUser(eventId, profileId);
+    return checkedIn
       ? { checked_in: true }
       : { checked_in: false, check_in_error: "Could not check the member in." };
   } catch (error) {
@@ -88,9 +85,7 @@ export const PATCH = withAuth<Params>(async (request, { params }) => {
 
       // Optionally check the member into the active event. Best-effort: paid is
       // already committed, so a check-in failure is reported, not thrown.
-      const checkIn = event_id
-        ? await tryCheckInAtEvent(event_id, id)
-        : { checked_in: false };
+      const checkIn = event_id ? await tryCheckInAtEvent(event_id, id) : { checked_in: false };
 
       return ApiResponse.ok({
         success: true,

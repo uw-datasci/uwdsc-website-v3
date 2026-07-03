@@ -1,7 +1,10 @@
+"use client";
+
 import { Instagram, Mail } from "react-feather";
 import { RxDiscordLogo } from "react-icons/rx";
 import SectionWrapper from "../SectionWrapper";
 import { Button } from "@uwdsc/ui";
+import { ContactForm } from "@/components/contact/ContactForm";
 
 const CONTACT_BUTTONS = [
   {
@@ -26,45 +29,49 @@ const CONTACT_BUTTONS = [
 
 export default function ContactUs() {
   return (
-    <SectionWrapper
-      id="contact"
-      className="grid gap-10 md:grid-cols-2 md:gap-16"
-    >
-      <div>
-        <h2 className="mb-7 text-4xl font-bold text-white md:text-5xl xl:text-6xl">
-          Contact Us
-        </h2>
-        <p className="leading-loose text-white md:text-lg lg:text-md xl:text-lg">
-          Have a question or interested in sponsoring us? Send us a message
-          through our social medias, or even visit our office at{" "}
-          <span className="font-bold">MC 3031</span>. We&apos;ll get back to you
-          ASAP!
-        </p>
-      </div>
-
-      <div className="flex flex-col justify-center items-center gap-6">
-        {CONTACT_BUTTONS.map((button) => (
-          <div
-            key={button.id}
-            className="rounded-full bg-linear-to-tr from-pink-500 to-indigo-700 p-px"
-          >
-            <Button
-              asChild
-              variant="ghost"
-              size="lg"
-              className="bg-background px-4 py-6 text-sm"
-            >
-              <a
-                href={button.href}
-                target={button.id !== "email" ? "_blank" : undefined}
-                rel={button.id !== "email" ? "noreferrer" : undefined}
-              >
-                {button.icon}
-                {button.label}
-              </a>
-            </Button>
+    <SectionWrapper id="contact" className="mb-8 lg:mb-12">
+      <div className="grid gap-10 lg:grid-cols-2 lg:gap-16 lg:items-start">
+        <div className="flex flex-col gap-8">
+          <div>
+            <h2 className="mb-7 text-4xl font-bold text-white md:text-5xl xl:text-6xl">
+              Contact Us
+            </h2>
+            <p className="leading-loose text-white md:text-lg lg:text-md xl:text-lg">
+              Have a question or interested in sponsoring us? Send us a message through our
+              social medias, or even visit our office at{" "}
+              <span className="font-bold">MC 3031</span>. We&apos;ll get back to you ASAP!
+            </p>
           </div>
-        ))}
+
+          <div className="flex flex-col items-start gap-4">
+            {CONTACT_BUTTONS.map((button) => (
+              <div
+                key={button.id}
+                className="rounded-full bg-linear-to-tr from-pink-500 to-indigo-700 p-px"
+              >
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="lg"
+                  className="bg-background px-4 py-6 text-sm"
+                >
+                  <a
+                    href={button.href}
+                    target={button.id !== "email" ? "_blank" : undefined}
+                    rel={button.id !== "email" ? "noreferrer" : undefined}
+                  >
+                    {button.icon}
+                    {button.label}
+                  </a>
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="w-full border border-white/20 rounded-xl p-6 sm:p-8">
+          <ContactForm />
+        </div>
       </div>
     </SectionWrapper>
   );

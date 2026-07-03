@@ -129,8 +129,8 @@ export function ErrorDetailSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
-        <SheetHeader>
+      <SheetContent className="w-full overflow-y-auto px-6 pb-6 pt-6 sm:max-w-xl">
+        <SheetHeader className="p-0">
           <SheetTitle>Error detail</SheetTitle>
           <SheetDescription>
             {group ? `${group.app_name} · ${group.endpoint}` : "Quarantined error from Raft"}

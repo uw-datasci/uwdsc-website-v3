@@ -25,4 +25,18 @@ if the prototype changes, re-apply these transforms rather than hand-diffing:
   `innerWidth/innerHeight` uses must become container-rect reads.
 - Fonts load from Google Fonts at open; switch to `next/font` if the team
   prefers self-hosting.
-- `app/gacha-demo/` is a dev route — delete or gate before production.
+
+## Trying it locally
+
+There is no demo route (removed after verification). To exercise the modal,
+temporarily drop this into any client page:
+
+```tsx
+const GachaRevealModal = dynamic(
+  () => import("@/components/gacha").then((m) => m.GachaRevealModal),
+  { ssr: false },
+);
+// ...
+<GachaRevealModal open={open} onClose={() => setOpen(false)}
+  onComplete={() => console.log("reveal complete")} />
+```

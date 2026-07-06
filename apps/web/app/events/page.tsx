@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getEventsByRange, getCheckInStatus, checkInToEvent } from "@/lib/api/events";
+import {
+  getEventsByRange,
+  getCheckInStatus,
+  checkInToEvent,
+} from "@/lib/api/events";
 import { getMembershipStatus } from "@/lib/api/profile";
 import type { Event, MembershipStatus } from "@uwdsc/common/types";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,7 +16,14 @@ import {
   NextEventSection,
 } from "@/components/events";
 import { motion } from "framer-motion";
-import { Badge, Button, Card, CardContent, CardHeader, Spinner } from "@uwdsc/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Spinner,
+} from "@uwdsc/ui";
 import { QrCode as QrCodeIcon } from "lucide-react";
 import Image from "next/image";
 
@@ -21,7 +32,8 @@ export default function EventsPage() {
   const [activeEvents, setActiveEvents] = useState<Event[] | null>(null);
   const [nextEvent, setNextEvent] = useState<Event | null>(null);
   const [canCheckIn, setCanCheckIn] = useState(false);
-  const [membershipStatus, setMembershipStatus] = useState<MembershipStatus | null>(null);
+  const [membershipStatus, setMembershipStatus] =
+    useState<MembershipStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [checkingIn, setCheckingIn] = useState(false);
   const [checkInSuccess, setCheckInSuccess] = useState<boolean>(false);
@@ -34,7 +46,8 @@ export default function EventsPage() {
           getMembershipStatus(),
         ]);
 
-        const active = activeResult.status === "fulfilled" ? activeResult.value : [];
+        const active =
+          activeResult.status === "fulfilled" ? activeResult.value : [];
 
         const membership =
           membershipResult.status === "fulfilled"
@@ -66,7 +79,8 @@ export default function EventsPage() {
 
   const currentEvent =
     activeEvents && activeEvents.length > 0 ? (activeEvents[0] ?? null) : null;
-  const shouldShowPaymentQr = membershipStatus !== null && !membershipStatus.has_membership;
+  const shouldShowPaymentQr =
+    membershipStatus !== null && !membershipStatus.has_membership;
 
   const handleCheckIn = async () => {
     if (!currentEvent) return;
@@ -92,17 +106,17 @@ export default function EventsPage() {
   return (
     <div className="min-h-dvh sm:min-h-[80vh] flex flex-col items-center justify-center px-3 py-4 sm:p-4 relative overflow-hidden">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] h-[90vw] max-w-2xl max-h-2xl bg-emerald-500/10 rounded-full blur-[120px] -z-10 pointer-events-none" />
-      <motion.div className="w-full max-w-[500px] flex justify-center">
-        <Card className="relative w-full max-w-[500px] aspect-3/4 min-h-[420px] sm:min-h-0 overflow-hidden shadow-2xl group border-0 p-0 bg-transparent flex flex-col">
+      <motion.div className="w-full max-w-125 flex justify-center">
+        <Card className="relative w-full max-w-125 aspect-3/4 min-h-105 sm:min-h-0 overflow-hidden shadow-2xl group border-0 p-0 bg-transparent flex flex-col">
           <Image
             src="/membership/memCardBg.svg"
             alt="Membership Card"
             fill
             priority
-            className="object-cover z-0 transition-transform duration-1000 group-hover:scale-105"
+            className="object-cover z-0 transition-transform"
           />
 
-          <div className="absolute inset-0 z-10 bg-linear-to-br from-black/40 via-black/20 to-black/80 backdrop-blur-sm p-4 sm:p-6 md:p-8 flex flex-col justify-between transition-colors duration-500">
+          <div className="absolute inset-0 z-10 bg-linear-to-br from-black/40 via-black/20 to-black/80 p-4 sm:p-6 md:p-8 flex flex-col justify-between transition-colors duration-500">
             <CardHeader className="flex flex-row flex-wrap justify-between items-start gap-2 sm:gap-0 sm:flex-nowrap space-y-0 p-0">
               <motion.div
                 whileHover={{ x: 4 }}

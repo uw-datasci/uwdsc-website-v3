@@ -106,7 +106,7 @@ export default function EventsPage() {
   return (
     <div className="min-h-dvh sm:min-h-[80vh] flex flex-col items-center justify-center px-3 py-4 sm:p-4 relative overflow-hidden">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] h-[90vw] max-w-2xl max-h-2xl bg-emerald-500/10 rounded-full blur-[120px] -z-10 pointer-events-none" />
-      <motion.div className="w-full max-w-125 flex justify-center">
+      <motion.div className="w-full max-w-125 flex justify-center sm:mt-6">
         <Card className="relative w-full max-w-125 aspect-3/4 min-h-105 sm:min-h-0 overflow-hidden shadow-2xl group border-0 p-0 bg-transparent flex flex-col">
           <Image
             src="/membership/memCardBg.svg"

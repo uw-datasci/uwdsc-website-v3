@@ -176,6 +176,10 @@ export const membershipColumns: ColumnDef<Member>[] = [
 
       return <span>{row.original.verifier ?? "System"}</span>;
     },
+    filterFn: (row, _columnId, filterValue) => {
+      if (!filterValue) return true;
+      return row.original.has_paid && row.original.verifier === null;
+    },
   },
   {
     accessorKey: "is_math_soc_member",

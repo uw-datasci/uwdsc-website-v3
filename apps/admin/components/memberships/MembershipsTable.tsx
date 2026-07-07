@@ -88,6 +88,13 @@ const MATH_SOC_OPTIONS = [
   { value: "false", label: "No" },
 ] as const;
 
+const PAYMENT_METHOD_OPTIONS = [
+  { value: "all", label: "All" },
+  { value: "cash", label: "Cash" },
+  { value: "online", label: "Online" },
+  { value: "math_soc", label: "MathSoc" },
+] as const;
+
 function getMembershipCsvValue(row: Member, key: string): unknown {
   if (key === "name") {
     const first = row.first_name ?? "";
@@ -297,6 +304,29 @@ export function MembershipsTable({
               </SelectTrigger>
               <SelectContent>
                 {PAID_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-medium text-muted-foreground">Payment Method</span>
+            <Select
+              value={(table.getColumn("payment_method")?.getFilterValue() as string) ?? "all"}
+              onValueChange={(value) =>
+                table
+                  .getColumn("payment_method")
+                  ?.setFilterValue(value === "all" ? undefined : value)
+              }
+            >
+              <SelectTrigger className="h-8 w-36">
+                <SelectValue placeholder="Payment Method" />
+              </SelectTrigger>
+              <SelectContent>
+                {PAYMENT_METHOD_OPTIONS.map((opt) => (
                   <SelectItem key={opt.value} value={opt.value}>
                     {opt.label}
                   </SelectItem>

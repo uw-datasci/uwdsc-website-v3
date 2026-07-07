@@ -14,6 +14,15 @@ export default function PassportPage() {
   const [membershipLoading, setMembershipLoading] = useState(true);
   const [showQr, setShowQr] = useState(false);
 
+  const demoStamps = [
+    { label: "Hack Night", accent: "from-cyan-300 to-sky-500", mark: "DSC" },
+    { label: "Workshop", accent: "from-amber-300 to-orange-500", mark: "101" },
+    { label: "Social", accent: "from-fuchsia-300 to-pink-500", mark: "FRI" },
+    { label: "Datathon", accent: "from-emerald-300 to-teal-500", mark: "202" },
+    { label: "Speaker", accent: "from-violet-300 to-indigo-500", mark: "LIVE" },
+    { label: "Bonus", accent: "from-rose-300 to-red-500", mark: "+1" },
+  ] as const;
+
   useEffect(() => {
     getMembershipStatus()
       .then(setMembershipStatus)
@@ -40,14 +49,12 @@ export default function PassportPage() {
     { label: "WatIam", value: user?.wat_iam ?? "-" },
     { label: "Faculty", value: facultyLabel ?? "-" },
     { label: "Term", value: user?.term ?? "-" },
-    { label: "Placeholder", value: "-" },
-    { label: "Placeholder", value: "-" },
   ];
 
   return (
     <main className="flex min-h-dvh flex-col items-center bg-[#000000] px-4 pb-14 pt-24 lg:px-8 lg:pt-32">
-      <section className="grid w-full max-w-5xl gap-4 lg:grid-cols-[minmax(320px,390px)_1fr] lg:gap-6">
-        <div className="space-y-4 lg:sticky lg:top-30 lg:self-start">
+      <section className="grid w-full max-w-5xl gap-4 lg:grid-cols-[minmax(320px,390px)_minmax(0,1fr)] lg:gap-6">
+        <div className="space-y-4 lg:sticky lg:top-30 lg:self-start lg:w-full lg:max-w-[390px]">
           <div className="relative rounded-3xl border border-zinc-800 bg-[#0f0f11] p-4">
             <button
               type="button"
@@ -119,14 +126,14 @@ export default function PassportPage() {
           </div>
         </div>
 
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+        <div className="min-w-0 space-y-4">
+          <div className="grid min-w-0 grid-cols-2 gap-2.5 sm:gap-3">
             {detailBlocks.map(({ label, value }, index) => (
               <div
                 key={`detail-${index}`}
-                className="flex min-h-20 items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-center sm:min-h-24"
+                className="flex min-h-20 min-w-0 items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-center sm:min-h-24"
               >
-                <span className="text-xs font-medium text-zinc-400 sm:text-sm">
+                <span className="min-w-0 truncate text-xs font-medium text-zinc-400 sm:text-sm">
                   {label}: {value}
                 </span>
               </div>
@@ -134,14 +141,47 @@ export default function PassportPage() {
           </div>
 
           <div className="pt-1">
-            <p className="text-xs font-bold lowercase tracking-wide text-zinc-500">my stamps</p>
-            <div className="mt-3 flex flex-wrap items-center gap-3 pb-1">
-              {Array.from({ length: 5 }).map((_, index) => (
-                <span
-                  key={`stamp-${index}`}
-                  className="size-6 shrink-0 rounded-full bg-zinc-300"
-                />
-              ))}
+            <div className="flex items-end justify-between gap-3">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">
+                  my stamps
+                </p>
+                <p className="mt-1 text-xs text-zinc-400">Scroll sideways to see more stamps.</p>
+              </div>
+              <span className="rounded-full border border-zinc-800 bg-zinc-900 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                6 demo stamps
+              </span>
+            </div>
+
+            <div className="mt-3 w-full max-w-full overflow-x-auto overscroll-x-contain pb-2">
+              <div className="flex w-max gap-4 pr-1">
+                {demoStamps.map(({ label, accent, mark }, index) => (
+                  <div
+                    key={`stamp-${label}`}
+                    className="group relative min-w-36 shrink-0 snap-start overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 p-3 shadow-[0_14px_30px_rgba(0,0,0,0.28)]"
+                  >
+                    <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${accent}`} />
+                    <div className="flex h-full min-h-32 flex-col justify-between">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                            Stamp {index + 1}
+                          </p>
+                          <p className="mt-1 text-sm font-semibold text-white">{label}</p>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 flex flex-1 items-center justify-center rounded-2xl border border-white/8 bg-white/5 px-3 py-4">
+                        <div
+                          className={`flex size-[4.5rem] items-center justify-center rounded-full bg-gradient-to-br ${accent} text-sm font-black tracking-[0.18em] text-white shadow-[0_12px_24px_rgba(0,0,0,0.28)]`}
+                        >
+                          {mark}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

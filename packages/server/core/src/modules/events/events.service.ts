@@ -50,6 +50,20 @@ class EventService {
   }
 
   /**
+   * Get all events attended by a user.
+   */
+  async getEventsAttendedByUser(profileId: string): Promise<Event[]> {
+    try {
+      return await this.repository.getEventsAttendedByUser(profileId);
+    } catch (error) {
+      throw new ApiError(
+        `Failed to get events attended by user: ${(error as Error).message}`,
+        500,
+      );
+    }
+  }
+
+  /**
    * Get a single event by ID
    */
   async getEventById(eventId: string): Promise<Event | null> {

@@ -1,6 +1,11 @@
 import { CompleteProfileData, Profile, ProfileUpdateData } from "@uwdsc/common/types";
 import { BaseRepository } from "@uwdsc/db/base.repository";
 
+export interface WrappedProfileStats {
+  created_at: string;
+  password_reset_count: number;
+}
+
 export class ProfileRepository extends BaseRepository {
   /**
    * Total number of profiles (registered users).
@@ -109,6 +114,27 @@ export class ProfileRepository extends BaseRepository {
     } catch (error: unknown) {
       console.error("Error fetching profile:", error);
       return null;
+    }
+  }
+
+  /**
+   * Get profile fields needed for DSC Wrapped.
+   */
+  async getWrappedProfileStats(userId: string): Promise<WrappedProfileStats | null> {
+    try {
+      const result = await this.sql<WrappedProfileStats[]>`
+        SELECT
+          created_at,
+          password_reset_count
+        FROM profiles
+        WHERE id = ${userId}
+        LIMIT 1
+      `;
+
+      return result[0] ?? null;
+    } catch (error: unknown) {
+      console.error("Error fetching wrapped profile stats:", error);
+      throw error;
     }
   }
 }

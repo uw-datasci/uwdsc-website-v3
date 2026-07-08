@@ -73,6 +73,34 @@ export class EventRepository extends BaseRepository {
   }
 
   /**
+   * Get all events attended by a user, ordered from oldest to newest.
+   */
+  async getEventsAttendedByUser(profileId: string): Promise<Event[]> {
+    try {
+      const result = await this.sql<Event[]>`
+        SELECT
+          e.id,
+          e.name,
+          e.description,
+          e.location,
+          e.image_url,
+          e.start_time,
+          e.end_time,
+          e.buffered_start_time,
+          e.buffered_end_time
+        FROM events.attendance a
+        JOIN events.events e ON e.id = a.event_id
+        WHERE a.profile_id = ${profileId}
+        ORDER BY e.start_time ASC
+      `;
+      return result;
+    } catch (error: unknown) {
+      console.error("Error fetching events attended by user:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Get a single event by ID
    * @param eventId - The event UUID
    */

@@ -21,7 +21,9 @@ export function useActiveTimeTracker({
   const pendingSecondsRef = useRef(0);
   const countingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isSyncingRef = useRef(false);
+  const enabledRef = useRef(enabled);
   const membershipIdRef = useRef(membershipId);
+  enabledRef.current = enabled;
   membershipIdRef.current = membershipId;
 
   const clearCountingInterval = useCallback(() => {
@@ -45,6 +47,8 @@ export function useActiveTimeTracker({
     isSyncingRef.current = true;
 
     try {
+      if (!enabledRef.current) return;
+
       const currentMembershipId = membershipIdRef.current;
       if (!currentMembershipId) return;
 
@@ -71,6 +75,7 @@ export function useActiveTimeTracker({
   useEffect(() => {
     if (!enabled) {
       clearCountingInterval();
+      pendingSecondsRef.current = 0;
       return;
     }
 

@@ -6,11 +6,12 @@ import { getMembershipStatus } from "@/lib/api/profile";
 import { useActiveTimeTracker } from "@/hooks/useActiveTimeTracker";
 
 export function ActiveTimeTracker() {
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [membershipId, setMembershipId] = useState<string | null>(null);
+  const canTrack = !isLoading && isAuthenticated && user !== null;
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!canTrack) {
       setMembershipId(null);
       return;
     }
@@ -31,10 +32,10 @@ export function ActiveTimeTracker() {
     return () => {
       cancelled = true;
     };
-  }, [isAuthenticated]);
+  }, [canTrack]);
 
   useActiveTimeTracker({
-    enabled: isAuthenticated && membershipId !== null,
+    enabled: canTrack && membershipId !== null,
     membershipId,
   });
 

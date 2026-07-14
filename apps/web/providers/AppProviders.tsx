@@ -3,6 +3,7 @@
 import { ReactNode } from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ActiveTimeTracker } from "@/components/tracking/ActiveTimeTracker";
 import { TooltipProvider, Toaster } from "@uwdsc/ui";
 
 interface AppProvidersProps {
@@ -19,6 +20,7 @@ export function AppProviders({ children }: AppProvidersProps) {
       enableColorScheme
     >
       <AuthProvider>
+        <ActiveTimeTracker />
         <TooltipProvider>{children}</TooltipProvider>
         <Toaster />
       </AuthProvider>

@@ -227,7 +227,7 @@ export function WrappedStory({
       />
 
       {/* Control hints — gesture + keybind. Auto-fades, returns while paused. */}
-      <AnimatePresence>
+      {/* <AnimatePresence>
         {(showHints || paused) && (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
@@ -242,7 +242,7 @@ export function WrappedStory({
             </p>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
     </div>
   );
 }

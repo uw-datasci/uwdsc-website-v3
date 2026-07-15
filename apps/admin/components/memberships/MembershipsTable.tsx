@@ -31,6 +31,7 @@ import {
   Card,
   Input,
   Button,
+  Checkbox,
   Select,
   SelectContent,
   SelectItem,
@@ -379,6 +380,23 @@ export function MembershipsTable({
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-medium text-muted-foreground">Verified By</span>
+            <label
+              htmlFor="verified-by-system-filter"
+              className="flex h-8 cursor-pointer items-center gap-2 rounded-md border px-3 text-sm"
+            >
+              <Checkbox
+                id="verified-by-system-filter"
+                checked={table.getColumn("verifier")?.getFilterValue() === "true"}
+                onCheckedChange={(checked) =>
+                  table.getColumn("verifier")?.setFilterValue(checked ? "true" : undefined)
+                }
+              />
+              System
+            </label>
           </div>
         </div>
 

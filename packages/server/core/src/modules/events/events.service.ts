@@ -1,6 +1,6 @@
 import { EventRepository } from "./events.repository";
 import type { EventTimeFilter, GetEventsByTimeRangeOptions } from "../../types/events";
-import { ApiError, Event, EventWithAttendanceCount } from "@uwdsc/common/types";
+import { ApiError, Event, EventWithAttendanceCount, WrappedEvent } from "@uwdsc/common/types";
 
 function toTimeFilter(options: GetEventsByTimeRangeOptions): EventTimeFilter {
   const { range, limit, asOf } = options;
@@ -46,6 +46,20 @@ class EventService {
       return await this.repository.getAllEventsWithAttendanceCount();
     } catch (error) {
       throw new ApiError(`Failed to get events with attendance: ${(error as Error).message}`, 500);
+    }
+  }
+
+  /**
+   * Get all events with attendance counts and per-user attendance for DSC Wrapped.
+   */
+  async getWrappedEventStats(profileId: string): Promise<WrappedEvent[]> {
+    try {
+      return await this.repository.getWrappedEventStats(profileId);
+    } catch (error) {
+      throw new ApiError(
+        `Failed to get wrapped event stats: ${(error as Error).message}`,
+        500,
+      );
     }
   }
 

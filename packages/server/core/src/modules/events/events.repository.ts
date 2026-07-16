@@ -1,5 +1,5 @@
 import { BaseRepository } from "@uwdsc/db/base.repository";
-import { Event, EventWithAttendanceCount } from "@uwdsc/common/types";
+import { Event, EventWithAttendanceCount, WrappedEvent } from "@uwdsc/common/types";
 import type { EventTimeFilter } from "../../types/events";
 
 export class EventRepository extends BaseRepository {
@@ -73,11 +73,12 @@ export class EventRepository extends BaseRepository {
   }
 
   /**
-   * Get all events attended by a user, ordered from oldest to newest.
+   * Get all events with their attendance count and whether the given user
+   * attended each one, ordered from oldest to newest. Single scan for DSC Wrapped.
    */
-  async getEventsAttendedByUser(profileId: string): Promise<Event[]> {
+  async getWrappedEventStats(profileId: string): Promise<WrappedEvent[]> {
     try {
-      const result = await this.sql<Event[]>`
+      const result = await this.sql<WrappedEvent[]>`
         SELECT
           e.id,
           e.name,
@@ -87,15 +88,17 @@ export class EventRepository extends BaseRepository {
           e.start_time,
           e.end_time,
           e.buffered_start_time,
-          e.buffered_end_time
-        FROM events.attendance a
-        JOIN events.events e ON e.id = a.event_id
-        WHERE a.profile_id = ${profileId}
+          e.buffered_end_time,
+          COUNT(a.profile_id)::int AS attendance_count,
+          COALESCE(BOOL_OR(a.profile_id = ${profileId}), false) AS attended_by_user
+        FROM events.events e
+        LEFT JOIN events.attendance a ON a.event_id = e.id
+        GROUP BY e.id
         ORDER BY e.start_time ASC
       `;
       return result;
     } catch (error: unknown) {
-      console.error("Error fetching events attended by user:", error);
+      console.error("Error fetching wrapped event stats:", error);
       throw error;
     }
   }

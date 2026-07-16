@@ -137,29 +137,69 @@ export function MobileMenu({
                               <ChevronDown className="ml-auto size-5 transition-transform duration-200 group-data-[state=open]:rotate-180" />
                             </Button>
                           </CollapsibleTrigger>
-                          <CollapsibleContent className="space-y-1 overflow-hidden data-[state=open]:animate-[collapsible-down_200ms_ease-out] data-[state=closed]:animate-[collapsible-up_200ms_ease-out]">
-                            {link.items.map((item) => (
-                              <Button
-                                key={item.href}
-                                variant="ghost"
-                                className="w-full justify-start text-lg py-3 pl-10 pr-4 h-auto font-semibold hover:bg-accent/50 transition-colors rounded-lg"
-                                asChild
-                              >
-                                <Link
-                                  href={item.href}
-                                  target={item.target}
-                                  rel={
-                                    item.target === "_blank"
-                                      ? "noopener noreferrer"
-                                      : undefined
-                                  }
+                          <CollapsibleContent className="overflow-hidden data-[state=open]:animate-[collapsible-down_200ms_ease-out] data-[state=closed]:animate-[collapsible-up_200ms_ease-out]">
+                            <div
+                              className={
+                                link.adminLink
+                                  ? "flex gap-2 pl-6 pr-4 py-1"
+                                  : "space-y-1 pl-10 pr-4 py-1"
+                              }
+                            >
+                              {link.adminLink ? (
+                                <Button
+                                  variant="ghost"
+                                  className="aspect-square h-auto w-24 shrink-0 flex-col gap-2 py-4 font-semibold hover:bg-accent/50 transition-colors rounded-lg"
+                                  asChild
                                 >
-                                  {item.emoji
-                                    ? `${item.emoji} ${item.label}`
-                                    : item.label}
-                                </Link>
-                              </Button>
-                            ))}
+                                  <Link
+                                    href={link.adminLink.href}
+                                    target={link.adminLink.target}
+                                    rel={
+                                      link.adminLink.target === "_blank"
+                                        ? "noopener noreferrer"
+                                        : undefined
+                                    }
+                                  >
+                                    {link.adminLink.icon ? (
+                                      <link.adminLink.icon
+                                        className="h-5 w-5 shrink-0"
+                                        aria-hidden="true"
+                                      />
+                                    ) : null}
+                                    {link.adminLink.label}
+                                  </Link>
+                                </Button>
+                              ) : null}
+                              <div className="flex min-w-0 flex-1 flex-col gap-1">
+                                {link.items.map((item) => (
+                                  <Button
+                                    key={item.href}
+                                    variant="ghost"
+                                    className="w-full justify-start text-lg py-3 px-4 h-auto font-semibold hover:bg-accent/50 transition-colors rounded-lg"
+                                    asChild
+                                  >
+                                    <Link
+                                      href={item.href}
+                                      target={item.target}
+                                      rel={
+                                        item.target === "_blank"
+                                          ? "noopener noreferrer"
+                                          : undefined
+                                      }
+                                      className="flex items-center gap-2"
+                                    >
+                                      {item.icon ? (
+                                        <item.icon
+                                          className="h-4 w-4 shrink-0"
+                                          aria-hidden="true"
+                                        />
+                                      ) : null}
+                                      {item.label}
+                                    </Link>
+                                  </Button>
+                                ))}
+                              </div>
+                            </div>
                           </CollapsibleContent>
                         </Collapsible>
                       </Fragment>

@@ -8,10 +8,50 @@ import {
   NavigationMenuContent,
   NavigationMenuLink,
 } from "@uwdsc/ui";
-import { NavGroup } from "./types";
+import { NavGroup, NavLinkItem } from "./types";
 
 interface AppsDropdownProps {
   readonly group: NavGroup;
+}
+
+function AppLink({ item }: { readonly item: NavLinkItem }) {
+  return (
+    <NavigationMenuLink asChild>
+      <Link
+        href={item.href}
+        target={item.target}
+        rel={
+          item.target === "_blank" ? "noopener noreferrer" : undefined
+        }
+        className="flex flex-row items-center gap-3 rounded-md p-3 no-underline outline-none transition-colors hover:bg-muted/75 focus:bg-muted/75"
+      >
+        {item.icon ? (
+          <item.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+        ) : null}
+        <span className="text-sm font-medium leading-normal">{item.label}</span>
+      </Link>
+    </NavigationMenuLink>
+  );
+}
+
+function AdminLink({ item }: { readonly item: NavLinkItem }) {
+  const Icon = item.icon;
+
+  return (
+    <NavigationMenuLink asChild>
+      <Link
+        href={item.href}
+        target={item.target}
+        rel={
+          item.target === "_blank" ? "noopener noreferrer" : undefined
+        }
+        className="flex aspect-square w-24 flex-col items-center justify-center gap-2 rounded-md p-3 no-underline outline-none transition-colors hover:bg-muted/75 focus:bg-muted/75"
+      >
+        {Icon ? <Icon className="h-6 w-6 shrink-0" aria-hidden="true" /> : null}
+        <span className="text-sm font-medium leading-normal">{item.label}</span>
+      </Link>
+    </NavigationMenuLink>
+  );
 }
 
 function GridIcon() {
@@ -42,7 +82,7 @@ export function AppsDropdown({ group }: AppsDropdownProps) {
       >
         <GridIcon />
       </NavigationMenuTrigger>
-      <NavigationMenuContent className="bg-transparent! border-0! shadow-none! mt-5! min-w-44 w-max">
+      <NavigationMenuContent className="bg-transparent! border-0! shadow-none! mt-5! w-max">
         <GlassSurface
           width="100%"
           height="auto"
@@ -51,28 +91,30 @@ export function AppsDropdown({ group }: AppsDropdownProps) {
           brightness={95}
           className="p-0 min-w-full"
         >
-          <ul className="grid w-44 gap-1 p-2">
-            {group.items.map((item) => (
-              <li key={item.href}>
-                <NavigationMenuLink asChild>
-                  <Link
-                    href={item.href}
-                    target={item.target}
-                    rel={
-                      item.target === "_blank"
-                        ? "noopener noreferrer"
-                        : undefined
-                    }
-                    className="flex flex-row items-center gap-3 rounded-md p-3 no-underline outline-none transition-colors hover:bg-muted/75 focus:bg-muted/75"
-                  >
-                    <span className="text-sm font-medium leading-normal">
-                      {item.emoji ? `${item.emoji} ${item.label}` : item.label}
-                    </span>
-                  </Link>
-                </NavigationMenuLink>
-              </li>
-            ))}
-          </ul>
+          <div
+            className={
+              group.adminLink
+                ? "flex gap-1 p-2"
+                : "p-2"
+            }
+          >
+            {group.adminLink ? (
+              <AdminLink item={group.adminLink} />
+            ) : null}
+            <ul
+              className={
+                group.adminLink
+                  ? "flex min-w-44 flex-1 flex-col gap-1"
+                  : "grid w-44 gap-1"
+              }
+            >
+              {group.items.map((item) => (
+                <li key={item.href}>
+                  <AppLink item={item} />
+                </li>
+              ))}
+            </ul>
+          </div>
         </GlassSurface>
       </NavigationMenuContent>
     </NavigationMenuItem>

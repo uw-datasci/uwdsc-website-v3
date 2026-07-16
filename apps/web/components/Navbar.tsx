@@ -19,6 +19,7 @@ import {
   Button,
   NavigationMenuItem,
 } from "@uwdsc/ui";
+import { Calculator, Heart, LayoutDashboard } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const hideNavbarPaths = new Set(["/login", "/register", "/complete-profile"]);
@@ -53,34 +54,36 @@ export function Navbar() {
     { href: "/team", label: "Team" },
     ...(applyInNav ? [{ href: "/apply", label: "Apply" }] : []),
     { href: "/calendar", label: "Calendar" },
-    // Add Admin link if user is an admin
-    ...(user?.role && ADMIN_ROLES.has(user.role)
-      ? [
-          {
-            href:
-              process.env.NEXT_PUBLIC_ADMIN_URL ||
-              "https://admin.uwdatascience.ca/",
-            label: "Admin",
-            target: "_blank",
-          },
-        ]
-      : []),
   ];
+
+  const isAdmin = Boolean(user?.role && ADMIN_ROLES.has(user.role));
+  const adminUrl =
+    process.env.NEXT_PUBLIC_ADMIN_URL || "https://admin.uwdatascience.ca/";
 
   // External UWDSC applications, shown in the apps launcher dropdown
   const appsGroup: NavGroup = {
     label: "Apps",
+    ...(isAdmin
+      ? {
+          adminLink: {
+            href: adminUrl,
+            label: "Admin",
+            icon: LayoutDashboard,
+            target: "_blank",
+          },
+        }
+      : {}),
     items: [
       {
         href: "https://speed-dataing.uwdatascience.ca",
         label: "Speed Dataing",
-        emoji: "💘",
+        icon: Heart,
         target: "_blank",
       },
       {
         href: "https://estimathon.uwdatascience.ca",
         label: "Estimathon",
-        emoji: "🧮",
+        icon: Calculator,
         target: "_blank",
       },
     ],
@@ -92,10 +95,7 @@ export function Navbar() {
     <div className="fixed left-0 right-0 z-50 px-6 py-6 lg:px-12 lg:py-8">
       <div className="relative flex items-center justify-between mx-auto">
         {/* DSC Logo */}
-        <Link
-          href="/"
-          className="relative w-12 h-12 lg:w-14 lg:h-14 hover:cursor-pointer"
-        >
+        <Link href="/" className="relative w-12 h-12 lg:w-14 lg:h-14 hover:cursor-pointer">
           <Image
             src="/logos/dsc.svg"
             alt="uwdsc logo"

@@ -1,14 +1,16 @@
+import type { LucideIcon } from "lucide-react";
+
 export interface NavLinkItem {
   href: string;
   label: string;
   target?: string;
-  /** Shown before the label on desktop only */
-  emoji?: string;
+  icon?: LucideIcon;
 }
 
 export interface NavGroup {
   label: string;
   items: NavLinkItem[];
+  adminLink?: NavLinkItem;
 }
 
 export type NavEntry = NavLinkItem | NavGroup;

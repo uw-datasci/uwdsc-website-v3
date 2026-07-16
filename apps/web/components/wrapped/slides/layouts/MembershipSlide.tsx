@@ -1,7 +1,8 @@
+import { motion } from "framer-motion";
 import { cn } from "@uwdsc/ui/lib/utils";
 import { tiltWarp, atkinsonHyperlegibleMono, displayFontClass as display, monoFontClass as mono } from "../../fonts";
 import type { MembershipSlideData } from "../../types";
-import { Floating, motion, slideItem, slideStagger } from "../motion";
+import { Floating, slideItem, slideStagger } from "../motion";
 
 interface MembershipSlideProps {
   readonly slide: MembershipSlideData;

@@ -1,7 +1,8 @@
+import { motion } from "framer-motion";
 import { cn } from "@uwdsc/ui/lib/utils";
 import { tiltWarp, atkinsonHyperlegibleMono, displayFontClass as display, monoFontClass as mono } from "../../fonts";
 import type { EventsNutshellSlideData } from "../../types";
-import { CountUpText, Floating, motion, slideItem, slideStagger } from "../motion";
+import { CountUpText, Floating, slideItem, slideStagger } from "../motion";
 import { SlideVisualSwatch } from "./SlideVisualSwatch";
 
 interface EventsNutshellSlideProps {

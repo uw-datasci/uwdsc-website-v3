@@ -1,6 +1,7 @@
+import { motion } from "framer-motion";
 import { cn } from "@uwdsc/ui/lib/utils";
 import type { HeroSlideData } from "../../types";
-import { CountUpText, motion, slideItem, slideStagger } from "../motion";
+import { CountUpText, slideItem, slideStagger } from "../motion";
 
 interface HeroSlideProps {
   readonly slide: HeroSlideData;

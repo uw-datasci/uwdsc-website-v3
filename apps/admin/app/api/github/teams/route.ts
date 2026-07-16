@@ -1,14 +1,14 @@
 import { ApiResponse } from "@uwdsc/common/utils";
-import { withAuth } from "@/guards/withAuth";
+import { withAdmin } from "@/guards/withAdmin";
 import { githubService } from "@uwdsc/admin";
 
 /**
  * GET /api/github/teams
  * Returns the list of teams in the GitHub organization.
  *
- * Admin/exec only.
+ * Admin only.
  */
-export const GET = withAuth(async () => {
+export const GET = withAdmin(async () => {
   try {
     const teams = await githubService.getTeams();
 

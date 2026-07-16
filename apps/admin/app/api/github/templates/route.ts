@@ -1,5 +1,5 @@
 import { ApiResponse } from "@uwdsc/common/utils";
-import { withAdmin } from "@/guards/withAdmin";
+import { withAuth } from "@/guards/withAuth";
 import { githubService } from "@uwdsc/admin";
 
 function shortenLabel(input: string, maxLen = 60): string {
@@ -12,9 +12,9 @@ function shortenLabel(input: string, maxLen = 60): string {
  * GET /api/github/templates
  * Returns template repositories in the GitHub organization.
  *
- * Admin only.
+ * Admin/exec only.
  */
-export const GET = withAdmin(async () => {
+export const GET = withAuth(async () => {
   try {
     const templates = await githubService.getTemplates();
     return ApiResponse.ok(

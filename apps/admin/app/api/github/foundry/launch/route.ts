@@ -1,5 +1,5 @@
 import { ApiResponse } from "@uwdsc/common/utils";
-import { withAdmin } from "@/guards/withAdmin";
+import { withAuth } from "@/guards/withAuth";
 import {
   foundryFormSchema,
   type FoundryFormValues,
@@ -10,9 +10,9 @@ import { githubService } from "@uwdsc/admin";
  * POST /api/github/foundry/launch
  * Triggers the project provisioning workflow in nexus-foundry.
  *
- * Admin only.
+ * Admin/exec only.
  */
-export const POST = withAdmin(async (request) => {
+export const POST = withAuth(async (request) => {
   try {
     const body = (await request.json()) as FoundryFormValues;
     const parsed = foundryFormSchema.safeParse(body);

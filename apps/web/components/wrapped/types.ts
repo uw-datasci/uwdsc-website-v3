@@ -21,12 +21,4 @@ export interface WrappedSlideData {
   readonly background: string;
   /** Tailwind text-color class for foreground content. */
   readonly foreground?: string;
-  /**
-   * How long this slide stays on screen before auto-advancing, in ms.
-   * Optional per-slide override; falls back to {@link DEFAULT_SLIDE_DURATION_MS}.
-   */
-  readonly durationMs?: number;
 }
-
-/** Default auto-advance duration for a slide when it doesn't specify its own. */
-export const DEFAULT_SLIDE_DURATION_MS = 5000;

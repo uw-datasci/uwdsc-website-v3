@@ -21,8 +21,7 @@
         "RESEND_WEBHOOK_SECRET",
         "DISCORD_INVITE_URL",
         "NEXT_PUBLIC_AUTH_COOKIE_DOMAIN",
-        "FEED_HASH_SALT",
-        "SUPPORT_DISCORD_WEBHOOK_URL"
+        "FEED_HASH_SALT"
       ]
     },
     "lint": { "dependsOn": ["^lint"] },

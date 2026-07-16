@@ -1,5 +1,4 @@
 export * from "./modules/application/application.service";
-export * from "./modules/contact/contact.service";
 export * from "./modules/auth/auth.service";
 export * from "./modules/events/events.service";
 export * from "./modules/file/file.service";

@@ -31,7 +31,6 @@ import {
   Card,
   Input,
   Button,
-  Checkbox,
   Select,
   SelectContent,
   SelectItem,
@@ -87,13 +86,6 @@ const MATH_SOC_OPTIONS = [
   { value: "all", label: "All" },
   { value: "true", label: "Yes" },
   { value: "false", label: "No" },
-] as const;
-
-const PAYMENT_METHOD_OPTIONS = [
-  { value: "all", label: "All" },
-  { value: "cash", label: "Cash" },
-  { value: "online", label: "Online" },
-  { value: "math_soc", label: "MathSoc" },
 ] as const;
 
 function getMembershipCsvValue(row: Member, key: string): unknown {
@@ -314,29 +306,6 @@ export function MembershipsTable({
           </div>
 
           <div className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground">Payment Method</span>
-            <Select
-              value={(table.getColumn("payment_method")?.getFilterValue() as string) ?? "all"}
-              onValueChange={(value) =>
-                table
-                  .getColumn("payment_method")
-                  ?.setFilterValue(value === "all" ? undefined : value)
-              }
-            >
-              <SelectTrigger className="h-8 w-36">
-                <SelectValue placeholder="Payment Method" />
-              </SelectTrigger>
-              <SelectContent>
-                {PAYMENT_METHOD_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex flex-col gap-1">
             <span className="text-xs font-medium text-muted-foreground">MathSoc</span>
             <Select
               value={
@@ -380,23 +349,6 @@ export function MembershipsTable({
                 ))}
               </SelectContent>
             </Select>
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground">Verified By</span>
-            <label
-              htmlFor="verified-by-system-filter"
-              className="flex h-8 cursor-pointer items-center gap-2 rounded-md border px-3 text-sm"
-            >
-              <Checkbox
-                id="verified-by-system-filter"
-                checked={table.getColumn("verifier")?.getFilterValue() === "true"}
-                onCheckedChange={(checked) =>
-                  table.getColumn("verifier")?.setFilterValue(checked ? "true" : undefined)
-                }
-              />
-              System
-            </label>
           </div>
         </div>
 

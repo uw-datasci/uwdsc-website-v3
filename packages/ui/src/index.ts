@@ -35,6 +35,5 @@ export * from "./components/tabs";
 export * from "./icons";
 export * from "./hooks/use-mobile";
 export * from "./components/dropdown-menu";
+
 export * from "./components/spinner";
-export * from "./components/galaxy-hero";
-export * from "./components/chart";

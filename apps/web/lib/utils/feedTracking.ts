@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash } from "crypto";
 import { eventService } from "@uwdsc/core";
 
 /**
@@ -21,9 +21,7 @@ function getClientIp(request: Request): string | null {
 function hashIp(ip: string): string | null {
   const salt = process.env.FEED_HASH_SALT;
   if (!salt) return null;
-  return createHash("sha256")
-    .update(salt + ip)
-    .digest("hex");
+  return createHash("sha256").update(salt + ip).digest("hex");
 }
 
 /**

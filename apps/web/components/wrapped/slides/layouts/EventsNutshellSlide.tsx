@@ -1,6 +1,7 @@
 import { cn } from "@uwdsc/ui/lib/utils";
 import { tiltWarp, atkinsonHyperlegibleMono, displayFontClass as display, monoFontClass as mono } from "../../fonts";
 import type { EventsNutshellSlideData } from "../../types";
+import { CountUpText, Floating, motion, slideItem, slideStagger } from "../motion";
 import { SlideVisualSwatch } from "./SlideVisualSwatch";
 
 interface EventsNutshellSlideProps {
@@ -32,7 +33,10 @@ export function EventsNutshellSlide({ slide }: EventsNutshellSlideProps) {
   ] as const;
 
   return (
-    <div
+    <motion.div
+      variants={slideStagger}
+      initial="hidden"
+      animate="show"
       className={cn(
         "flex h-full w-full flex-col items-center justify-center gap-5 overflow-y-auto bg-[#ffca82] px-6 py-6 text-black",
         tiltWarp.variable,
@@ -73,28 +77,31 @@ export function EventsNutshellSlide({ slide }: EventsNutshellSlideProps) {
             ][pattern.variant - 1];
 
             return (
-              <div
+              <Floating
                 key={`${pattern.left}-${index}`}
                 className="absolute"
+                rotate={pattern.rotation}
+                amplitude={6}
+                duration={4 + (index % 3) * 0.7}
+                delay={index * 0.3}
                 style={{
                   left: pattern.left,
                   top: pattern.top,
                   width: pattern.width,
-                  transform: `rotate(${pattern.rotation}deg)`,
                 }}
               >
                 {Svg}
-              </div>
+              </Floating>
             );
           })}
         </div>
-        <h2 className={cn(display, "relative text-center text-[1.95rem] leading-none tracking-tight text-black")}>
+        <motion.h2 variants={slideItem} className={cn(display, "relative text-center text-[1.95rem] leading-none tracking-tight text-black")}>
           {slide.heading}
-        </h2>
+        </motion.h2>
 
         <ol className="mt-8 flex flex-1 flex-col gap-4">
           {slide.events.map((event, i) => (
-            <li key={event.id} className="grid grid-cols-[3rem_3.25rem_minmax(0,1fr)] items-center gap-3">
+            <motion.li key={event.id} variants={slideItem} className="grid grid-cols-[3rem_3.25rem_minmax(0,1fr)] items-center gap-3">
               <span className={cn(display, "text-left text-[1.8rem] leading-none tracking-tight text-black")}>{`#${i + 1}`}</span>
               <SlideVisualSwatch visual={event} size={52} className="rounded-none object-cover" />
               <div className="min-w-0">
@@ -105,7 +112,7 @@ export function EventsNutshellSlide({ slide }: EventsNutshellSlideProps) {
                   </p>
                 ) : null}
               </div>
-            </li>
+            </motion.li>
           ))}
         </ol>
 
@@ -142,14 +149,14 @@ export function EventsNutshellSlide({ slide }: EventsNutshellSlideProps) {
           ))}
         </div>
 
-        <div className="mt-2 flex items-end justify-between text-black">
+        <motion.div variants={slideItem} className="mt-2 flex items-end justify-between text-black">
           <div className="flex items-center gap-2">
-            <span className={cn(display, "text-2xl leading-none tracking-tight")}>{slide.statValue}</span>
+            <CountUpText className={cn(display, "text-2xl leading-none tracking-tight")}>{slide.statValue}</CountUpText>
           </div>
           <p className={cn(display, "text-[0.68rem] leading-none tracking-[0.12em]")}>TOTAL EVENTS ATTENDED WITH US!</p>
-        </div>
+        </motion.div>
 
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -10,9 +10,6 @@ import {
 } from "framer-motion";
 import { useEffect, type CSSProperties, type ReactNode } from "react";
 
-/** Re-exported so slides import motion elements and helpers from one place. */
-export { motion };
-
 /**
  * Shared animation primitives for the reusable Wrapped slides.
  *
@@ -24,8 +21,8 @@ export { motion };
  * appears" — no scroll/intersection wiring needed.
  *
  * New slides opt in the same way the existing ones do:
- *   1. make the slide root a `motion.div` with `variants={slideStagger}`,
- *      `initial="hidden"` and `animate="show"`;
+ *   1. make the slide root a `motion.div` (from `framer-motion`) with
+ *      `variants={slideStagger}`, `initial="hidden"` and `animate="show"`;
  *   2. mark each element that should fade in sequentially with
  *      `variants={slideItem}` (order follows DOM order);
  *   3. use `<CountUp>` for numeric stats and `<Floating>` for decorative SVGs.
@@ -113,7 +110,7 @@ interface CountUpTextProps extends Omit<CountUpProps, "value"> {
  * plain number; otherwise renders it verbatim so non-numeric stats stay safe.
  */
 export function CountUpText({ children, className, ...rest }: CountUpTextProps) {
-  const parsed = Number(children.replace(/,/g, ""));
+  const parsed = Number(children.replaceAll(",", ""));
   if (!Number.isFinite(parsed) || children.trim() === "") {
     return <span className={className}>{children}</span>;
   }

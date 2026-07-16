@@ -41,7 +41,7 @@ export function UserAvatar() {
   // Show login button if not authenticated
   if (!isAuthenticated) {
     return (
-      <NavigationMenuItem className="relative pl-8 before:absolute before:left-0 before:h-10 before:w-px before:bg-border">
+      <NavigationMenuItem className="relative">
         <Link href="/login">
           <Button
             variant="ghost"
@@ -66,7 +66,7 @@ export function UserAvatar() {
       : "User";
 
   return (
-    <NavigationMenuItem className="relative pl-8 before:absolute before:left-0 before:h-10 before:w-px before:bg-white/35">
+    <NavigationMenuItem className="relative">
       <NavigationMenuTrigger className="h-10 w-10 rounded-full p-0 bg-transparent! hover:bg-transparent! focus:bg-transparent! focus-visible:bg-transparent! data-[state=open]:bg-transparent! hover:scale-105 transition-transform">
         <Avatar className="h-9 w-9">
           <AvatarImage src={undefined} alt={fullName} />

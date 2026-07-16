@@ -1,6 +1,8 @@
 "use client";
 
 import { NavLinks } from "./navbar/NavLinks";
+import { AppsDropdown } from "./navbar/AppsDropdown";
+import { NavGroup, NavLinkItem } from "./navbar/types";
 import { UserAvatar } from "./navbar/UserAvatar";
 import { MobileMenu } from "./navbar/MobileMenu";
 import { WrappedModal } from "./wrapped/WrappedModal";
@@ -45,7 +47,7 @@ export function Navbar() {
   const hideNavbar = hideNavbarPaths.has(pathname);
 
   // Navigation links
-  const navLinks = [
+  const navLinks: NavLinkItem[] = [
     { href: "/", label: "Home" },
     { href: "/events", label: "Check-in" },
     { href: "/team", label: "Team" },
@@ -55,7 +57,9 @@ export function Navbar() {
     ...(user?.role && ADMIN_ROLES.has(user.role)
       ? [
           {
-            href: process.env.NEXT_PUBLIC_ADMIN_URL || "https://admin.uwdatascience.ca/",
+            href:
+              process.env.NEXT_PUBLIC_ADMIN_URL ||
+              "https://admin.uwdatascience.ca/",
             label: "Admin",
             target: "_blank",
           },
@@ -63,13 +67,35 @@ export function Navbar() {
       : []),
   ];
 
+  // External UWDSC applications, shown in the apps launcher dropdown
+  const appsGroup: NavGroup = {
+    label: "Apps",
+    items: [
+      {
+        href: "https://speed-dataing.uwdatascience.ca",
+        label: "Speed Dataing",
+        emoji: "💘",
+        target: "_blank",
+      },
+      {
+        href: "https://estimathon.uwdatascience.ca",
+        label: "Estimathon",
+        emoji: "🧮",
+        target: "_blank",
+      },
+    ],
+  };
+
   if (hideNavbar) return null;
 
   return (
     <div className="fixed left-0 right-0 z-50 px-6 py-6 lg:px-12 lg:py-8">
       <div className="relative flex items-center justify-between mx-auto">
         {/* DSC Logo */}
-        <Link href="/" className="relative w-12 h-12 lg:w-14 lg:h-14 hover:cursor-pointer">
+        <Link
+          href="/"
+          className="relative w-12 h-12 lg:w-14 lg:h-14 hover:cursor-pointer"
+        >
           <Image
             src="/logos/dsc.svg"
             alt="uwdsc logo"
@@ -101,6 +127,7 @@ export function Navbar() {
                     </Button>
                   </NavigationMenuItem>
                 )}
+                <AppsDropdown group={appsGroup} />
                 <UserAvatar />
               </NavigationMenuList>
             </NavigationMenu>
@@ -109,7 +136,7 @@ export function Navbar() {
 
         {/* Mobile Menu */}
         <MobileMenu
-          navLinks={navLinks}
+          navLinks={[...navLinks, appsGroup]}
           user={user}
           onOpenWrapped={() => setWrappedOpen(true)}
         />

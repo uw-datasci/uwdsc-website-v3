@@ -6,15 +6,10 @@ import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
 import { NavigationMenuItem } from "@uwdsc/ui";
-
-interface NavLink {
-  href: string;
-  label: string;
-  target?: string;
-}
+import { NavLinkItem } from "./types";
 
 interface NavLinksProps {
-  readonly navLinks: NavLink[];
+  readonly navLinks: NavLinkItem[];
 }
 
 export function NavLinks({ navLinks }: NavLinksProps) {

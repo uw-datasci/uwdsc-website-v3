@@ -1,6 +1,8 @@
+import { motion } from "framer-motion";
 import { cn } from "@uwdsc/ui/lib/utils";
 import { tiltWarp, atkinsonHyperlegibleMono, displayFontClass as display, monoFontClass as mono } from "../../fonts";
 import type { MembershipSlideData } from "../../types";
+import { Floating, slideItem, slideStagger } from "../motion";
 
 interface MembershipSlideProps {
   readonly slide: MembershipSlideData;
@@ -41,7 +43,10 @@ export function MembershipSlide({ slide }: MembershipSlideProps) {
   ];
 
   return (
-    <div
+    <motion.div
+      variants={slideStagger}
+      initial="hidden"
+      animate="show"
       className={cn(
         "relative flex h-full w-full flex-col overflow-hidden bg-[#ccda96] px-6 py-6 text-black",
         tiltWarp.variable,
@@ -50,58 +55,64 @@ export function MembershipSlide({ slide }: MembershipSlideProps) {
     >
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[32%] overflow-visible">
         {topOrnaments.map((ornament, index) => (
-          <div
+          <Floating
             key={`${ornament.kind}-${index}`}
             className="absolute block select-none"
+            rotate={parseFloat(ornament.rotate)}
+            amplitude={5}
+            duration={4 + (index % 3) * 0.7}
+            delay={index * 0.35}
             style={{
               left: ornament.left,
               top: ornament.top,
               right: ornament.right,
               width: ornament.width,
-              transform: `rotate(${ornament.rotate})`,
             }}
           >
             <OrnamentSvg kind={ornament.kind} />
-          </div>
+          </Floating>
         ))}
       </div>
 
       <div className="relative z-10 flex h-full min-h-0 flex-col justify-center px-4 pt-[30%] pb-[28%] sm:px-6 sm:pt-[28%] sm:pb-[26%]">
         <div className="flex items-center justify-center text-center">
           <div className="max-w-[18ch] sm:max-w-[22ch]">
-            <p className={cn(display, "text-[1.1rem] leading-none tracking-tight text-black sm:text-[1.35rem]")}>{slide.eyebrow}</p>
-            <p className={cn(display, "mt-2 text-[2.35rem] leading-[0.95] tracking-tight text-white sm:mt-3 sm:text-[3.65rem]")}>
+            <motion.p variants={slideItem} className={cn(display, "text-[1.1rem] leading-none tracking-tight text-black sm:text-[1.35rem]")}>{slide.eyebrow}</motion.p>
+            <motion.p variants={slideItem} className={cn(display, "mt-2 text-[2.35rem] leading-[0.95] tracking-tight text-white sm:mt-3 sm:text-[3.65rem]")}>
               {slide.joinDate}
-            </p>
-            <p className={cn(display, "mt-1.5 text-[1.05rem] leading-none tracking-tight text-black sm:mt-2.5 sm:text-[1.35rem]")}>
+            </motion.p>
+            <motion.p variants={slideItem} className={cn(display, "mt-1.5 text-[1.05rem] leading-none tracking-tight text-black sm:mt-2.5 sm:text-[1.35rem]")}>
               {slide.headline}
-            </p>
-            <p className={cn(mono, "mt-3 whitespace-nowrap text-[0.72rem] leading-snug text-black sm:mt-4 sm:text-[0.9rem]")}>
+            </motion.p>
+            <motion.p variants={slideItem} className={cn(mono, "mt-3 whitespace-nowrap text-[0.72rem] leading-snug text-black sm:mt-4 sm:text-[0.9rem]")}>
               {slide.caption}
-            </p>
+            </motion.p>
           </div>
         </div>
       </div>
 
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-[32%] overflow-visible">
         {bottomOrnaments.map((ornament, index) => (
-          <div
+          <Floating
             key={`${ornament.kind}-${index}`}
             className="absolute block select-none"
+            rotate={parseFloat(ornament.rotate)}
+            amplitude={5}
+            duration={4.2 + (index % 3) * 0.7}
+            delay={0.5 + index * 0.35}
             style={{
               left: ornament.left,
               top: ornament.top,
               right: ornament.right,
               bottom: ornament.bottom,
               width: ornament.width,
-              transform: `rotate(${ornament.rotate})`,
             }}
           >
             <OrnamentSvg kind={ornament.kind} />
-          </div>
+          </Floating>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }
 

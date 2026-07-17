@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { ChevronDown } from "lucide-react";
 import { signOut } from "@/lib/api";
 import { Profile } from "@uwdsc/common/types";
 import { useRouter } from "next/navigation";
@@ -16,18 +17,16 @@ import {
   SheetTitle,
   SheetTrigger,
   Button,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
   Separator,
   Badge,
 } from "@uwdsc/ui";
-
-interface NavLink {
-  href: string;
-  label: string;
-  target?: string;
-}
+import { NavEntry, isNavGroup } from "./types";
 
 interface MobileMenuProps {
-  navLinks: NavLink[];
+  navLinks: NavEntry[];
   user: Profile | null;
   onOpenWrapped?: () => void;
 }
@@ -42,7 +41,11 @@ function HamburgerIcon() {
   );
 }
 
-export function MobileMenu({ navLinks, user, onOpenWrapped }: Readonly<MobileMenuProps>) {
+export function MobileMenu({
+  navLinks,
+  user,
+  onOpenWrapped,
+}: Readonly<MobileMenuProps>) {
   const router = useRouter();
   const { mutate } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -69,7 +72,10 @@ export function MobileMenu({ navLinks, user, onOpenWrapped }: Readonly<MobileMen
       <SheetTrigger>
         <HamburgerIcon />
       </SheetTrigger>
-      <SheetContent side="right" className="w-full sm:max-w-sm p-0 [&>button]:hidden">
+      <SheetContent
+        side="right"
+        className="w-full sm:max-w-sm p-0 [&>button]:hidden"
+      >
         <div className="flex flex-col h-full">
           <SheetHeader className="text-left border-b bg-muted/30 px-6 py-4 relative">
             <SheetTitle className="flex items-center gap-3">
@@ -117,11 +123,98 @@ export function MobileMenu({ navLinks, user, onOpenWrapped }: Readonly<MobileMen
                   </Button>
                 )}
                 {navLinks.map((link) => {
+                  if (isNavGroup(link)) {
+                    return (
+                      <Fragment key={link.label}>
+                        <Separator className="my-2" />
+                        <Collapsible>
+                          <CollapsibleTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              className="group w-full justify-start text-lg py-3 px-4 h-auto font-semibold hover:bg-accent/50 transition-colors rounded-lg"
+                            >
+                              {link.label}
+                              <ChevronDown className="ml-auto size-5 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                            </Button>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent className="overflow-hidden data-[state=open]:animate-[collapsible-down_200ms_ease-out] data-[state=closed]:animate-[collapsible-up_200ms_ease-out]">
+                            <div
+                              className={
+                                link.adminLink
+                                  ? "flex gap-2 pl-6 pr-4 py-1"
+                                  : "space-y-1 pl-10 pr-4 py-1"
+                              }
+                            >
+                              {link.adminLink ? (
+                                <Button
+                                  variant="ghost"
+                                  className="aspect-square h-auto w-24 shrink-0 flex-col gap-2 py-4 font-semibold hover:bg-accent/50 transition-colors rounded-lg"
+                                  asChild
+                                >
+                                  <Link
+                                    href={link.adminLink.href}
+                                    target={link.adminLink.target}
+                                    rel={
+                                      link.adminLink.target === "_blank"
+                                        ? "noopener noreferrer"
+                                        : undefined
+                                    }
+                                  >
+                                    {link.adminLink.icon ? (
+                                      <link.adminLink.icon
+                                        className="h-5 w-5 shrink-0"
+                                        aria-hidden="true"
+                                      />
+                                    ) : null}
+                                    {link.adminLink.label}
+                                  </Link>
+                                </Button>
+                              ) : null}
+                              <div className="flex min-w-0 flex-1 flex-col gap-1">
+                                {link.items.map((item) => (
+                                  <Button
+                                    key={item.href}
+                                    variant="ghost"
+                                    className="w-full justify-start text-lg py-3 px-4 h-auto font-semibold hover:bg-accent/50 transition-colors rounded-lg"
+                                    asChild
+                                  >
+                                    <Link
+                                      href={item.href}
+                                      target={item.target}
+                                      rel={
+                                        item.target === "_blank"
+                                          ? "noopener noreferrer"
+                                          : undefined
+                                      }
+                                      className="flex items-center gap-2"
+                                    >
+                                      {item.icon ? (
+                                        <item.icon
+                                          className="h-4 w-4 shrink-0"
+                                          aria-hidden="true"
+                                        />
+                                      ) : null}
+                                      {item.label}
+                                    </Link>
+                                  </Button>
+                                ))}
+                              </div>
+                            </div>
+                          </CollapsibleContent>
+                        </Collapsible>
+                      </Fragment>
+                    );
+                  }
+
                   const linkComponent = (
                     <Link
                       href={link.href}
                       target={link.target}
-                      rel={link.target === "_blank" ? "noopener noreferrer" : undefined}
+                      rel={
+                        link.target === "_blank"
+                          ? "noopener noreferrer"
+                          : undefined
+                      }
                     >
                       {link.label}
                     </Link>
@@ -171,9 +264,13 @@ export function MobileMenu({ navLinks, user, onOpenWrapped }: Readonly<MobileMen
                       </Badge>
                     </div>
 
-                    <p className="text-sm text-muted-foreground mb-1">{user?.email}</p>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      {user?.email}
+                    </p>
 
-                    <p className="text-sm text-muted-foreground">WatIAM: {user.wat_iam}</p>
+                    <p className="text-sm text-muted-foreground">
+                      WatIAM: {user.wat_iam}
+                    </p>
                   </div>
 
                   <nav className="space-y-1">

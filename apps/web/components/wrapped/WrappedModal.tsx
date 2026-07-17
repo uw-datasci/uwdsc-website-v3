@@ -1,8 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { Button, Dialog, DialogClose, DialogContent, DialogTitle } from "@uwdsc/ui";
+import { getWrappedSlides } from "@/lib/api/wrapped";
 import { WrappedStory } from "./WrappedStory";
+import type { WrappedSlideData } from "./types";
 
 interface WrappedModalProps {
   readonly open: boolean;
@@ -10,6 +13,27 @@ interface WrappedModalProps {
 }
 
 export function WrappedModal({ open, onOpenChange }: WrappedModalProps) {
+  const [slides, setSlides] = useState<readonly WrappedSlideData[]>();
+
+  useEffect(() => {
+    if (!open) return;
+
+    let cancelled = false;
+
+    getWrappedSlides()
+      .then((nextSlides) => {
+        if (!cancelled) setSlides(nextSlides);
+      })
+      .catch((error: unknown) => {
+        console.error("Failed to load wrapped slides:", error);
+        if (!cancelled) setSlides(undefined);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -31,7 +55,7 @@ export function WrappedModal({ open, onOpenChange }: WrappedModalProps) {
         </DialogClose>
 
         {/* Wrapped content */}
-        <WrappedStory active={open} />
+        <WrappedStory active={open} slides={slides} />
       </DialogContent>
     </Dialog>
   );

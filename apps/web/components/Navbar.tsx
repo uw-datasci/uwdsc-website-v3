@@ -1,6 +1,8 @@
 "use client";
 
 import { NavLinks } from "./navbar/NavLinks";
+import { AppsDropdown } from "./navbar/AppsDropdown";
+import { NavGroup, NavLinkItem } from "./navbar/types";
 import { UserAvatar } from "./navbar/UserAvatar";
 import { MobileMenu } from "./navbar/MobileMenu";
 import { WrappedModal } from "./wrapped/WrappedModal";
@@ -17,6 +19,7 @@ import {
   Button,
   NavigationMenuItem,
 } from "@uwdsc/ui";
+import { Calculator, Heart, LayoutDashboard } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const hideNavbarPaths = new Set(["/login", "/register", "/complete-profile"]);
@@ -45,23 +48,46 @@ export function Navbar() {
   const hideNavbar = hideNavbarPaths.has(pathname);
 
   // Navigation links
-  const navLinks = [
+  const navLinks: NavLinkItem[] = [
     { href: "/", label: "Home" },
     { href: "/events", label: "Check-in" },
     { href: "/team", label: "Team" },
     ...(applyInNav ? [{ href: "/apply", label: "Apply" }] : []),
     { href: "/calendar", label: "Calendar" },
-    // Add Admin link if user is an admin
-    ...(user?.role && ADMIN_ROLES.has(user.role)
-      ? [
-          {
-            href: process.env.NEXT_PUBLIC_ADMIN_URL || "https://admin.uwdatascience.ca/",
+  ];
+
+  const isAdmin = Boolean(user?.role && ADMIN_ROLES.has(user.role));
+  const adminUrl =
+    process.env.NEXT_PUBLIC_ADMIN_URL || "https://admin.uwdatascience.ca/";
+
+  // External UWDSC applications, shown in the apps launcher dropdown
+  const appsGroup: NavGroup = {
+    label: "Apps",
+    ...(isAdmin
+      ? {
+          adminLink: {
+            href: adminUrl,
             label: "Admin",
+            icon: LayoutDashboard,
             target: "_blank",
           },
-        ]
-      : []),
-  ];
+        }
+      : {}),
+    items: [
+      {
+        href: "https://speed-dataing.uwdatascience.ca",
+        label: "Speed Dataing",
+        icon: Heart,
+        target: "_blank",
+      },
+      {
+        href: "https://estimathon.uwdatascience.ca",
+        label: "Estimathon",
+        icon: Calculator,
+        target: "_blank",
+      },
+    ],
+  };
 
   if (hideNavbar) return null;
 
@@ -101,6 +127,7 @@ export function Navbar() {
                     </Button>
                   </NavigationMenuItem>
                 )}
+                <AppsDropdown group={appsGroup} />
                 <UserAvatar />
               </NavigationMenuList>
             </NavigationMenu>
@@ -109,7 +136,7 @@ export function Navbar() {
 
         {/* Mobile Menu */}
         <MobileMenu
-          navLinks={navLinks}
+          navLinks={[...navLinks, appsGroup]}
           user={user}
           onOpenWrapped={() => setWrappedOpen(true)}
         />

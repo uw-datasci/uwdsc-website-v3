@@ -3,6 +3,7 @@ import {
   type AppQuestion,
   type ApplicationReviewStatus,
   type ApplicationListItem,
+  type ManagablePosition,
   type QuestionPositionOption,
   type QuestionScope,
   type QuestionUpsertInput,
@@ -123,6 +124,72 @@ class ApplicationService {
       if (error instanceof ApiError) throw error;
       throw new ApiError(
         `Failed to update position review status: ${(error as Error).message}`,
+        500,
+      );
+    }
+  }
+
+  /**
+   * List every exec position (excluding Presidents) with its current
+   * application-availability. President-only; callers must already have
+   * enforced `scope.isPresident` via the withPresAccess guard.
+   */
+  async getManagablePositions(): Promise<ManagablePosition[]> {
+    try {
+      return await this.repository.getManagablePositions();
+    } catch (error) {
+      throw new ApiError(
+        `Failed to get managable positions: ${(error as Error).message}`,
+        500,
+      );
+    }
+  }
+
+  /** Open a position for applications by adding it to application_positions_available. */
+  async addAvailablePosition(execPositionId: number): Promise<{ id: number }> {
+    const existing =
+      await this.repository.getAvailablePositionByExecPositionId(
+        execPositionId,
+      );
+    if (existing) {
+      throw new ApiError("This position is already open for applications", 409);
+    }
+
+    try {
+      return await this.repository.addAvailablePosition(execPositionId);
+    } catch (error) {
+      throw new ApiError(
+        `Failed to open position for applications: ${(error as Error).message}`,
+        500,
+      );
+    }
+  }
+
+  /**
+   * Close a position for applications. Blocked if any applicant has already
+   * selected it, to avoid orphaning submitted application data.
+   */
+  async removeAvailablePosition(availableId: number): Promise<void> {
+    const selectionCount =
+      await this.repository.getSelectionCountForAvailablePosition(
+        availableId,
+      );
+    if (selectionCount > 0) {
+      throw new ApiError(
+        "Cannot remove a position that applicants have already selected",
+        409,
+      );
+    }
+
+    try {
+      const removed = await this.repository.removeAvailablePosition(
+        availableId,
+      );
+      if (!removed) throw new ApiError("Position not found", 404);
+    } catch (error) {
+      if (error instanceof ApiError) throw error;
+      throw new ApiError(
+        `Failed to remove available position: ${(error as Error).message}`,
         500,
       );
     }

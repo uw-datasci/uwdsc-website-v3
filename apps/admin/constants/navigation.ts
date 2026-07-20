@@ -6,6 +6,7 @@ import {
   ClipboardCheck,
   Code2,
   FileText,
+  ListChecks,
   Package,
   Library,
   Mail,
@@ -24,6 +25,7 @@ export const getAdminNavigation = (
   },
 ) => {
   const isExec = EXEC_POS.some((r) => position?.toLowerCase().includes(r));
+  const isPresident = position?.toLowerCase().includes("president") ?? false;
   const isAdmin = role === "admin";
   const onboardingOpen = logisticsWindows?.onboardingOpen ?? false;
   const returningExecOpen = logisticsWindows?.returningExecOpen ?? false;
@@ -34,7 +36,16 @@ export const getAdminNavigation = (
       href: "/applications/questions",
       icon: CircleHelp,
     },
-    { name: "Hiring", href: "/applications/hiring", icon: UserCheck },
+    ...(isPresident
+      ? [
+          { name: "Hiring", href: "/applications/hiring", icon: UserCheck },
+          {
+            name: "Positions",
+            href: "/applications/positions",
+            icon: ListChecks,
+          },
+        ]
+      : []),
     ...(isAdmin
       ? [
           {

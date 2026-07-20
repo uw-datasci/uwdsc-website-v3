@@ -36,9 +36,9 @@ export const getAdminNavigation = (
       href: "/applications/questions",
       icon: CircleHelp,
     },
-    { name: "Hiring", href: "/applications/hiring", icon: UserCheck },
     ...(isPresident
       ? [
+          { name: "Hiring", href: "/applications/hiring", icon: UserCheck },
           {
             name: "Positions",
             href: "/applications/positions",

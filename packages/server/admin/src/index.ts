@@ -2,6 +2,7 @@ export * from "./modules/application/application.service";
 export * from "./modules/application/returningExec.service";
 export * from "./modules/email/email.service";
 export * from "./modules/events/events.service";
+export * from "./modules/integration/discord.service";
 export * from "./modules/integration/github.service";
 export * from "./modules/hiring/headshot.service";
 export * from "./modules/hiring/hiring.service";

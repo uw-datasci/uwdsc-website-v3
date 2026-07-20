@@ -3,8 +3,14 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowUp, ArrowDown, Minus, Pencil, Banknote, Trash2 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Button, Tooltip, TooltipContent, TooltipTrigger } from "@uwdsc/ui";
-import { Member } from "@uwdsc/common/types";
+import { Button } from "@uwdsc/ui";
+import { Member, PaymentMethod } from "@uwdsc/common/types";
+
+const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
+  cash: "Cash",
+  online: "Online",
+  math_soc: "MathSoc",
+};
 
 const SORT_ICONS = {
   asc: ArrowUp,
@@ -116,31 +122,63 @@ export const membershipColumns: ColumnDef<Member>[] = [
     ),
     cell: ({ row }) => {
       const v = row.getValue("has_paid") as boolean;
-      const verifier = row.original.verifier ?? "System";
-
-      const content = (
+      return (
         <span className={v ? "text-blue-400 font-medium" : "text-muted-foreground"}>
           {v ? "Yes" : "No"}
         </span>
-      );
-
-      if (!v) return content;
-
-      return (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="inline-block">{content}</div>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p className="text-sm">Verified by: {verifier}</p>
-          </TooltipContent>
-        </Tooltip>
       );
     },
     filterFn: (row, columnId, filterValue) => {
       if (!filterValue) return true;
       const cellValue = row.getValue(columnId) as boolean;
       return filterValue === "true" ? cellValue === true : cellValue === false;
+    },
+  },
+  {
+    accessorKey: "payment_method",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="-ml-3 h-8"
+      >
+        Payment Method
+        <SortIcon direction={column.getIsSorted()} />
+      </Button>
+    ),
+    cell: ({ row }) => {
+      if (!row.original.has_paid) return <span className="text-muted-foreground">-</span>;
+
+      const method = row.original.payment_method;
+      if (!method) return <span className="text-muted-foreground">-</span>;
+
+      return <span>{PAYMENT_METHOD_LABELS[method]}</span>;
+    },
+    filterFn: (row, _columnId, filterValue) => {
+      if (!filterValue) return true;
+      return row.original.payment_method === filterValue;
+    },
+  },
+  {
+    accessorKey: "verifier",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="-ml-3 h-8"
+      >
+        Verified By
+        <SortIcon direction={column.getIsSorted()} />
+      </Button>
+    ),
+    cell: ({ row }) => {
+      if (!row.original.has_paid) return <span className="text-muted-foreground">-</span>;
+
+      return <span>{row.original.verifier ?? "System"}</span>;
+    },
+    filterFn: (row, _columnId, filterValue) => {
+      if (!filterValue) return true;
+      return row.original.has_paid && row.original.verifier === null;
     },
   },
   {

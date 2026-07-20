@@ -107,3 +107,18 @@ export interface ApplicationListItem extends Application {
   position_selections: PositionSelectionWithName[];
   answers: AnswerWithQuestion[];
 }
+
+/**
+ * Every exec position (excluding Presidents) joined against
+ * application_positions_available, for the President-only positions
+ * management dashboard. `available_id` is null when the position is
+ * not currently open for applications.
+ */
+export interface ManagablePosition {
+  exec_position_id: number;
+  name: string;
+  is_vp: boolean;
+  subteam_name: string | null;
+  available_id: number | null;
+  is_available: boolean;
+}

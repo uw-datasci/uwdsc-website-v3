@@ -6,6 +6,7 @@ import type {
   AnswerWithQuestion,
   ApplicationListItem,
   AppQuestion,
+  ManagablePosition,
   QuestionPositionOption,
   QuestionScope,
   QuestionUpsertInput,
@@ -210,6 +211,70 @@ export class ApplicationRepository extends BaseRepository {
         AND st.name IS DISTINCT FROM 'Presidents'
       ORDER BY ep.name ASC
     `;
+  }
+
+  /**
+   * All exec positions (excluding Presidents) joined against
+   * application_positions_available, for the President-only positions
+   * management dashboard.
+   */
+  async getManagablePositions(): Promise<ManagablePosition[]> {
+    return this.sql<ManagablePosition[]>`
+      SELECT
+        ep.id AS exec_position_id,
+        ep.name,
+        ep.is_vp,
+        st.name AS subteam_name,
+        apa.id AS available_id,
+        apa.id IS NOT NULL AS is_available
+      FROM org.exec_positions ep
+      LEFT JOIN org.subteams st ON st.id = ep.subteam_id
+      LEFT JOIN hiring.application_positions_available apa ON apa.position_id = ep.id
+      WHERE st.name IS DISTINCT FROM 'Presidents'
+      ORDER BY st.name NULLS LAST, ep.is_vp DESC, ep.name ASC
+    `;
+  }
+
+  async getAvailablePositionByExecPositionId(
+    execPositionId: number,
+  ): Promise<{ id: number } | null> {
+    const [row] = await this.sql<{ id: number }[]>`
+      SELECT id
+      FROM hiring.application_positions_available
+      WHERE position_id = ${execPositionId}
+      LIMIT 1
+    `;
+    return row ?? null;
+  }
+
+  async addAvailablePosition(execPositionId: number): Promise<{ id: number }> {
+    const [row] = await this.sql<{ id: number }[]>`
+      INSERT INTO hiring.application_positions_available (position_id)
+      VALUES (${execPositionId})
+      RETURNING id
+    `;
+    if (!row) throw new Error("Failed to add available position");
+    return row;
+  }
+
+  async getSelectionCountForAvailablePosition(
+    availableId: number,
+  ): Promise<number> {
+    const [row] = await this.sql<{ count: number }[]>`
+      SELECT COUNT(*)::int AS count
+      FROM hiring.application_position_selections
+      WHERE position_id = ${availableId}
+    `;
+    return row?.count ?? 0;
+  }
+
+  async removeAvailablePosition(availableId: number): Promise<boolean> {
+    const deleted = await this.sql<{ id: number }[]>`
+      DELETE FROM hiring.application_positions_available
+      WHERE id = ${availableId}
+      RETURNING id
+    `;
+    return deleted.length > 0;
   }
 
   async getAllQuestions(): Promise<AppQuestion[]> {

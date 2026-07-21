@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PassportCard, MembershipCta, PassportProfile } from "@/components/passport";
+import { PassportCard, MembershipCta, PassportProfile, PassportPhotoUpload } from "@/components/passport";
 import { useAuth } from "@/contexts/AuthContext";
 import { getMembershipStatus, updateUserProfile } from "@/lib/api/profile";
 import { FACULTY_LABELS, FACULTY_PROFILE_LABEL_TO_VALUE } from "@uwdsc/common/constants";
@@ -75,6 +75,45 @@ export default function PassportPage() {
     setIsEditing(false);
   };
 
+  const handlePhotoUpload = async (file: File) => {
+    try {
+      // TODO: Implement actual API call
+      // const formData = new FormData();
+      // formData.append("photo", file);
+      // const response = await fetch("/api/profile/photo", {
+      //   method: "POST",
+      //   body: formData,
+      // });
+      // const data = await response.json();
+      // if (!response.ok) throw new Error(data.error || "Upload failed");
+      // await mutate();
+      
+      // Simulate network delay for now
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await mutate();
+    } catch (err) {
+      throw err instanceof Error ? err : new Error("Upload failed");
+    }
+  };
+
+  const handlePhotoDelete = async () => {
+    try {
+      // TODO: Implement actual API call
+      // const response = await fetch("/api/profile/photo", {
+      //   method: "DELETE",
+      // });
+      // const data = await response.json();
+      // if (!response.ok) throw new Error(data.error || "Delete failed");
+      // await mutate();
+      
+      // Simulate network delay for now
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      await mutate();
+    } catch (err) {
+      throw err instanceof Error ? err : new Error("Delete failed");
+    }
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center">
@@ -104,6 +143,14 @@ export default function PassportPage() {
           execPositionLabel={user?.exec_position_name}
           facultyLabel={facultyLabel}
           term={user?.term ?? undefined}
+        />
+
+        <PassportPhotoUpload
+          initials={initials}
+          photoUrl={user?.profile_photo_url}
+          displayName={displayName}
+          onPhotoUpload={handlePhotoUpload}
+          onPhotoDelete={handlePhotoDelete}
         />
 
         <PassportProfile

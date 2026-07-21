@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { QrCode, UserRound } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { PassportCard, MembershipCta, PassportProfile, PassportPhotoUpload } from "@/components/passport";
 import { useAuth } from "@/contexts/AuthContext";
 import { getMembershipStatus } from "@/lib/api/profile";
 import { FACULTY_LABELS } from "@uwdsc/common/constants";
@@ -29,6 +32,85 @@ export default function PassportPage() {
       .catch(console.error)
       .finally(() => setMembershipLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    reset({
+      first_name: user.first_name ?? "",
+      last_name: user.last_name ?? "",
+      wat_iam: user.wat_iam ?? "",
+      faculty: user.faculty ? (FACULTY_LABELS[user.faculty] ?? "") : "",
+      term: user.term ?? "",
+    });
+  }, [user, reset]);
+
+  const onSubmit = async (data: PassportProfileEditValues) => {
+    try {
+      await updateUserProfile({
+        first_name: data.first_name,
+        last_name: data.last_name,
+        wat_iam: data.wat_iam,
+        faculty: FACULTY_PROFILE_LABEL_TO_VALUE[data.faculty] ?? "math",
+        term: data.term,
+      });
+      await mutate();
+      setIsEditing(false);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleCancel = () => {
+    if (user) {
+      reset({
+        first_name: user.first_name ?? "",
+        last_name: user.last_name ?? "",
+        wat_iam: user.wat_iam ?? "",
+        faculty: user.faculty ? (FACULTY_LABELS[user.faculty] ?? "") : "",
+        term: user.term ?? "",
+      });
+    }
+    setIsEditing(false);
+  };
+
+  const handlePhotoUpload = async (file: File) => {
+    try {
+      // TODO: Implement actual API call
+      // const formData = new FormData();
+      // formData.append("photo", file);
+      // const response = await fetch("/api/profile/photo", {
+      //   method: "POST",
+      //   body: formData,
+      // });
+      // const data = await response.json();
+      // if (!response.ok) throw new Error(data.error || "Upload failed");
+      // await mutate();
+      
+      // Simulate network delay for now
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await mutate();
+    } catch (err) {
+      throw err instanceof Error ? err : new Error("Upload failed");
+    }
+  };
+
+  const handlePhotoDelete = async () => {
+    try {
+      // TODO: Implement actual API call
+      // const response = await fetch("/api/profile/photo", {
+      //   method: "DELETE",
+      // });
+      // const data = await response.json();
+      // if (!response.ok) throw new Error(data.error || "Delete failed");
+      // await mutate();
+      
+      // Simulate network delay for now
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      await mutate();
+    } catch (err) {
+      throw err instanceof Error ? err : new Error("Delete failed");
+    }
+  };
 
   if (authLoading) {
     return (
@@ -65,31 +147,26 @@ export default function PassportPage() {
               {showQr ? <UserRound className="size-4" /> : <QrCode className="size-4" />}
             </button>
 
-            <div className="flex items-center justify-center py-3">
-              {!showQr ? (
-                <div className="relative size-52 rounded-full border-4 border-zinc-600/70 bg-zinc-950 p-2 shadow-[0_0_0_6px_rgba(63,63,70,0.35)] transition-all duration-300 sm:size-56">
-                  <div className="flex size-full items-center justify-center rounded-full border border-zinc-700 bg-linear-to-br from-sky-950 via-blue-900 to-zinc-900 text-5xl font-semibold text-white">
-                    {initials}
-                  </div>
-                </div>
-              ) : (
-                <div className="relative size-52 rounded-full border-4 border-zinc-600/70 bg-white p-4 shadow-[0_0_0_6px_rgba(63,63,70,0.35)] transition-all duration-300 sm:size-56">
-                  <div className="grid size-full grid-cols-11 grid-rows-11 gap-0.5 rounded-full bg-white p-1">
-                    {Array.from({ length: 121 }).map((_, index) => (
-                      <span
-                        key={index}
-                        className={
-                          (index * 7 + index) % 5 === 0 || (index + 3) % 11 === 0
-                            ? "rounded-[1px] bg-black"
-                            : "rounded-[1px] bg-white"
-                        }
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+        <PassportPhotoUpload
+          initials={initials}
+          photoUrl={user?.profile_photo_url}
+          displayName={displayName}
+          onPhotoUpload={handlePhotoUpload}
+          onPhotoDelete={handlePhotoDelete}
+        />
+
+        <PassportProfile
+          isEditing={isEditing}
+          onEdit={() => setIsEditing(true)}
+          onCancel={handleCancel}
+          form={form}
+          onSubmit={onSubmit}
+          displayName={displayName}
+          email={user?.email ?? "-"}
+          watIam={user?.wat_iam ?? "-"}
+          facultyLabel={facultyLabel ?? "-"}
+          term={user?.term ?? "-"}
+        />
 
           <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-4">
             <div className="flex items-start justify-between gap-3">

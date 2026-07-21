@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Loader2, RotateCcw } from "lucide-react";
 import type { UseFormReturn } from "react-hook-form";
 import {
@@ -8,6 +9,7 @@ import {
   CardTitle,
   FormField,
   Separator,
+  cn,
   renderSelectField,
   renderStringRadioGroupField,
   renderTextAreaField,
@@ -29,33 +31,148 @@ const IN_PERSON_RADIO_OPTIONS = [
   { value: "not_sure", label: "Not sure" },
 ] as const;
 
+const FOLLOW_UP_FIELDS = [
+  "first_choice_position",
+  "second_choice_position",
+  "third_choice_position",
+  "in_person_next_term",
+  "qualifications",
+] as const;
+
+const RADIO_GROUP_CLASS = "flex flex-col gap-3 pt-1 sm:flex-row sm:flex-wrap sm:gap-6";
+
 type SelectOption = { value: string; label: string };
 
 type ReturningExecFormFieldsProps = Readonly<{
   form: UseFormReturn<ReturningExecFormValues>;
   followUpDisabled: boolean;
   deferredReturnTermCode: string;
-  inPersonQuestionLabel: string;
   positionOptions: SelectOption[];
-  optionalPositionSelectOptions: SelectOption[];
   submitted: boolean;
   submitting: boolean;
   submitButtonLoadingText: string;
   submitButtonIdleText: string;
 }>;
 
+function clearFollowUpFields(form: UseFormReturn<ReturningExecFormValues>) {
+  form.setValue("first_choice_position", "");
+  form.setValue("second_choice_position", "");
+  form.setValue("third_choice_position", "");
+  form.setValue("in_person_next_term", undefined);
+  form.setValue("qualifications", "");
+  form.clearErrors([...FOLLOW_UP_FIELDS]);
+  void form.trigger();
+}
+
+function buildOptionalRoleSelect(
+  followUpDisabled: boolean,
+  locked: boolean,
+  lockPlaceholder: string,
+  options: SelectOption[],
+  excludeIds: readonly string[],
+) {
+  const disabled = followUpDisabled || locked;
+  const excluded = new Set(excludeIds.filter(Boolean));
+  return {
+    disabled,
+    dimmed: locked && !followUpDisabled,
+    placeholder: followUpDisabled ? "N/A" : locked ? lockPlaceholder : "Select a position",
+    options: options.filter((opt) => !excluded.has(opt.value)),
+  };
+}
+
+function OptionalRoleSelect({
+  form,
+  name,
+  label,
+  ui,
+}: Readonly<{
+  form: UseFormReturn<ReturningExecFormValues>;
+  name: "second_choice_position" | "third_choice_position";
+  label: string;
+  ui: ReturnType<typeof buildOptionalRoleSelect>;
+}>) {
+  return (
+    <div
+      key={`${name}-${ui.disabled ? "off" : "on"}`}
+      className={cn(ui.dimmed && "opacity-50")}
+    >
+      <FormField
+        control={form.control}
+        name={name}
+        render={renderSelectField({
+          label,
+          placeholder: ui.placeholder,
+          required: false,
+          disabled: ui.disabled,
+          clearValueSentinel: NO_POSITION_SELECT_VALUE,
+          options: ui.options,
+        })}
+      />
+    </div>
+  );
+}
+
 export function ReturningExecFormFields({
   form,
   followUpDisabled,
   deferredReturnTermCode,
-  inPersonQuestionLabel,
   positionOptions,
-  optionalPositionSelectOptions,
   submitted,
   submitting,
   submitButtonLoadingText,
   submitButtonIdleText,
 }: ReturningExecFormFieldsProps) {
+  const interestedInReturning = form.watch("interested_in_returning");
+  const firstChoice = form.watch("first_choice_position") ?? "";
+  const secondChoice = form.watch("second_choice_position") ?? "";
+  const thirdChoice = form.watch("third_choice_position") ?? "";
+
+  const optionalPositionOptions = [
+    { value: NO_POSITION_SELECT_VALUE, label: "None" },
+    ...positionOptions,
+  ];
+
+  const secondRole = buildOptionalRoleSelect(
+    followUpDisabled,
+    !firstChoice,
+    "Select a first choice first",
+    optionalPositionOptions,
+    [firstChoice],
+  );
+  const thirdRole = buildOptionalRoleSelect(
+    followUpDisabled,
+    !firstChoice || !secondChoice,
+    "Select a second choice first",
+    optionalPositionOptions,
+    [firstChoice, secondChoice],
+  );
+
+  const inPersonQuestionLabel =
+    interestedInReturning === "future"
+      ? `Will you be in person in ${deferredReturnTermCode}?`
+      : "Will you be in person next term?";
+
+  useEffect(() => {
+    if (interestedInReturning === "false") clearFollowUpFields(form);
+  }, [interestedInReturning, form]);
+
+  useEffect(() => {
+    if (followUpDisabled) return;
+
+    const secondInvalid =
+      Boolean(secondChoice) && (!firstChoice || secondChoice === firstChoice);
+    const thirdInvalid =
+      Boolean(thirdChoice) &&
+      (!firstChoice ||
+        !secondChoice ||
+        thirdChoice === firstChoice ||
+        thirdChoice === secondChoice);
+
+    if (secondInvalid) form.setValue("second_choice_position", "", { shouldValidate: true });
+    if (thirdInvalid) form.setValue("third_choice_position", "", { shouldValidate: true });
+  }, [firstChoice, secondChoice, thirdChoice, followUpDisabled, form]);
+
   const interestRadioOptions = [
     { value: "true", label: "Yes" },
     { value: "false", label: "No" },
@@ -65,8 +182,7 @@ export function ReturningExecFormFields({
     },
   ] as const;
 
-  // Remount follow-up controls when enabling so Radix Select doesn't keep a stuck disabled state.
-  const followUpFieldsKey = followUpDisabled ? "disabled" : "enabled";
+  const followUpKey = followUpDisabled ? "disabled" : "enabled";
   const { isValid } = form.formState;
 
   return (
@@ -141,8 +257,7 @@ export function ReturningExecFormFields({
                       label: "Are you interested in returning and building on your impact?",
                       required: true,
                       idPrefix: "returning-exec-interest",
-                      groupClassName:
-                        "flex flex-col gap-3 pt-1 sm:flex-row sm:flex-wrap sm:gap-6",
+                      groupClassName: RADIO_GROUP_CLASS,
                       options: interestRadioOptions,
                     })}
                   />
@@ -172,8 +287,8 @@ export function ReturningExecFormFields({
                 <CardTitle>Role Preferences</CardTitle>
               </CardHeader>
               <CardContent
-                key={`roles-${followUpFieldsKey}`}
-                className={followUpDisabled ? "space-y-4 opacity-50" : "space-y-4"}
+                key={`roles-${followUpKey}`}
+                className={cn("space-y-4", followUpDisabled && "opacity-50")}
               >
                 <FormField
                   control={form.control}
@@ -186,31 +301,17 @@ export function ReturningExecFormFields({
                     options: positionOptions,
                   })}
                 />
-
-                <FormField
-                  control={form.control}
+                <OptionalRoleSelect
+                  form={form}
                   name="second_choice_position"
-                  render={renderSelectField({
-                    label: "Second choice role (Optional)",
-                    placeholder: followUpDisabled ? "N/A" : "Select a position",
-                    required: false,
-                    disabled: followUpDisabled,
-                    clearValueSentinel: NO_POSITION_SELECT_VALUE,
-                    options: optionalPositionSelectOptions,
-                  })}
+                  label="Second choice role (Optional)"
+                  ui={secondRole}
                 />
-
-                <FormField
-                  control={form.control}
+                <OptionalRoleSelect
+                  form={form}
                   name="third_choice_position"
-                  render={renderSelectField({
-                    label: "Third choice role (Optional)",
-                    placeholder: followUpDisabled ? "N/A" : "Select a position",
-                    required: false,
-                    disabled: followUpDisabled,
-                    clearValueSentinel: NO_POSITION_SELECT_VALUE,
-                    options: optionalPositionSelectOptions,
-                  })}
+                  label="Third choice role (Optional)"
+                  ui={thirdRole}
                 />
               </CardContent>
             </div>
@@ -222,15 +323,15 @@ export function ReturningExecFormFields({
                 <CardTitle>Additional Details</CardTitle>
               </CardHeader>
               <CardContent
-                key={`details-${followUpFieldsKey}`}
-                className={
-                  followUpDisabled
-                    ? "flex min-h-0 flex-1 flex-col gap-4 opacity-50"
-                    : "flex min-h-0 flex-1 flex-col gap-4"
-                }
+                key={`details-${followUpKey}`}
+                className={cn(
+                  "flex min-h-0 flex-1 flex-col gap-4",
+                  followUpDisabled && "opacity-50",
+                )}
               >
                 <div className="shrink-0">
                   <FormField
+                    key={inPersonQuestionLabel}
                     control={form.control}
                     name="in_person_next_term"
                     render={renderStringRadioGroupField({
@@ -238,8 +339,7 @@ export function ReturningExecFormFields({
                       required: !followUpDisabled,
                       disabled: followUpDisabled,
                       idPrefix: "returning-exec-in-person",
-                      groupClassName:
-                        "flex flex-col gap-3 pt-1 sm:flex-row sm:flex-wrap sm:gap-6",
+                      groupClassName: RADIO_GROUP_CLASS,
                       options: IN_PERSON_RADIO_OPTIONS,
                     })}
                   />

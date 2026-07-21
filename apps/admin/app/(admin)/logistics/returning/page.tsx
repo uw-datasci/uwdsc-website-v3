@@ -9,7 +9,6 @@ import { Form } from "@uwdsc/ui";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  NO_POSITION_SELECT_VALUE,
   ReturningExecFormFields,
   ReturningExecLogisticsHeader,
 } from "@/components/logistics/returning";
@@ -64,12 +63,8 @@ export default function LogisticsReturningExecPage() {
   });
 
   const interestedInReturning = form.watch("interested_in_returning");
-  const isFuture = interestedInReturning === "future";
   const followUpDisabled =
     interestedInReturning !== "true" && interestedInReturning !== "future";
-  const inPersonQuestionLabel = isFuture
-    ? `Will you be in person in ${deferredReturnTermCode}?`
-    : "Will you be in person next term?";
 
   useEffect(() => {
     async function load() {
@@ -195,11 +190,6 @@ export default function LogisticsReturningExecPage() {
     label: p.name,
   }));
 
-  const optionalPositionSelectOptions = [
-    { value: NO_POSITION_SELECT_VALUE, label: "None" },
-    ...positionOptions,
-  ];
-
   const submitButtonLoadingText = submitted ? "Updating..." : "Submitting...";
   const submitButtonIdleText = submitted ? "Update Response" : "Submit";
 
@@ -213,9 +203,7 @@ export default function LogisticsReturningExecPage() {
             form={form}
             followUpDisabled={followUpDisabled}
             deferredReturnTermCode={deferredReturnTermCode}
-            inPersonQuestionLabel={inPersonQuestionLabel}
             positionOptions={positionOptions}
-            optionalPositionSelectOptions={optionalPositionSelectOptions}
             submitted={submitted}
             submitting={submitting}
             submitButtonLoadingText={submitButtonLoadingText}

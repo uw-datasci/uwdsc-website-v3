@@ -1,6 +1,7 @@
 import { MEMBERSHIP_INBOUND_EMAIL, SUPPORT_INBOUND_EMAIL } from "@uwdsc/common/constants";
 import { Resend } from "resend";
 import type { GetReceivedEmailContentsResult } from "../../types/webhook";
+import { extractEmailAddress } from "./emailAddress";
 
 export type InboundEmailTarget = "membership" | "support";
 
@@ -16,17 +17,9 @@ class WebhookService {
     this.supportEmail = SUPPORT_INBOUND_EMAIL;
   }
 
-  private extractEmailAddress(raw: string): string {
-    const trimmed = raw.trim();
-    const start = trimmed.indexOf("<");
-    const end = trimmed.lastIndexOf(">");
-    if (start !== -1 && end > start) return trimmed.slice(start + 1, end).trim();
-    return trimmed;
-  }
-
   private verifyRecipient(to: string[], recipient: string): boolean {
     const want = recipient.trim().toLowerCase();
-    return to.some((raw) => this.extractEmailAddress(raw).toLowerCase() === want);
+    return to.some((raw) => extractEmailAddress(raw).toLowerCase() === want);
   }
 
   resolveInboundTarget(to: string[]): InboundEmailTarget | null {

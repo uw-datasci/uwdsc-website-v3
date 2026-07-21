@@ -5,6 +5,7 @@ import type {
   ForwardSupportResult,
   ForwardSupportToDiscordParams,
 } from "../../types/discord";
+import { parseSenderName } from "./emailAddress";
 
 class DiscordService {
   private readonly webhookUrl: string | null;
@@ -15,14 +16,6 @@ class DiscordService {
 
   private truncate(s: string, n = 4000): string {
     return s.length > n ? s.slice(0, n - 3) + "..." : s;
-  }
-
-  private parseSenderName(fromRaw: string): string {
-    const ltIndex = fromRaw.indexOf("<");
-    if (ltIndex <= 0) return fromRaw;
-    const gtIndex = fromRaw.indexOf(">", ltIndex);
-    if (gtIndex === -1) return fromRaw;
-    return fromRaw.slice(0, ltIndex).trim();
   }
 
   private buildSupportEmbed(
@@ -52,7 +45,7 @@ class DiscordService {
     const embed = this.buildSupportEmbed(
       params.subject,
       params.textBody,
-      this.parseSenderName(params.fromRaw),
+      parseSenderName(params.fromRaw),
     );
 
     try {

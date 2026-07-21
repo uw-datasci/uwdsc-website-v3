@@ -2,8 +2,14 @@ import { NextRequest } from "next/server";
 import { headers } from "next/headers";
 import { ApiError } from "@uwdsc/common/types";
 import { ApiResponse } from "@uwdsc/common/utils";
-import { discordService, membershipService, webhookService } from "@uwdsc/admin";
-import { applicationService } from "@uwdsc/core";
+import {
+  discordService,
+  extractEmailAddress,
+  membershipService,
+  parseSenderName,
+  webhookService,
+} from "@uwdsc/admin";
+import { applicationService, contactService } from "@uwdsc/core";
 import { Webhook } from "svix";
 import { WebhookEventPayload } from "resend";
 
@@ -84,7 +90,22 @@ export async function POST(request: NextRequest): Promise<Response> {
         break;
       }
       case "support": {
-        await discordService.processSupportEmail(contents.email, evt.data.from);
+        const results = await Promise.allSettled([
+          discordService.processSupportEmail(contents.email, evt.data.from),
+          contactService.submit({
+            name: parseSenderName(evt.data.from),
+            email: extractEmailAddress(evt.data.from),
+            subject: contents.email.subject ?? "(no subject)",
+            message: contents.email.text ?? "(no body)",
+            source: "email",
+          }),
+        ]);
+
+        for (const result of results) {
+          if (result.status === "rejected") {
+            console.error("[Webhook] Failed to process support email:", result.reason);
+          }
+        }
         break;
       }
       default: {

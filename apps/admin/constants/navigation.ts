@@ -6,6 +6,7 @@ import {
   ClipboardCheck,
   Code2,
   FileText,
+  LifeBuoy,
   ListChecks,
   Package,
   Library,
@@ -101,6 +102,7 @@ export const getAdminNavigation = (
           : []),
       ],
     },
+    ...(isAdmin ? [{ name: "Support", href: "/support", icon: LifeBuoy }] : []),
     ...(isAdmin
       ? [
           {

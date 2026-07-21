@@ -33,6 +33,7 @@ export class ReturningExecRepository extends BaseRepository {
     const {
       position_selections,
       interested_in_returning,
+      interested_in_future_term,
       not_returning_reason,
       in_person_next_term,
       qualifications,
@@ -42,12 +43,13 @@ export class ReturningExecRepository extends BaseRepository {
     const rows = await this.sql<ReturningExecRow[]>`
       INSERT INTO hiring.returning_exec_submissions (
         profile_id, term_id, email, full_name, discord, past_positions,
-        interested_in_returning, not_returning_reason,
+        interested_in_returning, interested_in_future_term, not_returning_reason,
         in_person_next_term, qualifications, additional_notes
       ) VALUES (
         ${profile_id}, ${rest.term_id}, ${rest.email}, ${rest.full_name},
         ${rest.discord}, ${rest.past_positions},
-        ${interested_in_returning}, ${not_returning_reason ?? null},
+        ${interested_in_returning}, ${interested_in_future_term ?? null},
+        ${not_returning_reason ?? null},
         ${in_person_next_term}, ${qualifications}, ${rest.additional_notes ?? null}
       )
       ON CONFLICT (profile_id, term_id) DO UPDATE SET
@@ -56,6 +58,7 @@ export class ReturningExecRepository extends BaseRepository {
         discord = EXCLUDED.discord,
         past_positions = EXCLUDED.past_positions,
         interested_in_returning = EXCLUDED.interested_in_returning,
+        interested_in_future_term = EXCLUDED.interested_in_future_term,
         not_returning_reason = EXCLUDED.not_returning_reason,
         in_person_next_term = EXCLUDED.in_person_next_term,
         qualifications = EXCLUDED.qualifications,
@@ -132,6 +135,7 @@ export class ReturningExecRepository extends BaseRepository {
       discord: row.discord,
       past_positions: row.past_positions,
       interested_in_returning: row.interested_in_returning,
+      interested_in_future_term: row.interested_in_future_term,
       not_returning_reason: row.not_returning_reason,
       in_person_next_term: row.in_person_next_term,
       qualifications: row.qualifications,

@@ -73,6 +73,13 @@ $$ LANGUAGE plpgsql;
 -- ============================================================================
 -- 1. returning_exec_submissions table
 -- ============================================================================
+CREATE TYPE public.in_person_next_term_enum AS ENUM (
+  'yes',
+  'no_outside_gta',
+  'no_in_gta',
+  'not_sure'
+);
+
 CREATE TABLE public.returning_exec_submissions (
   id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   profile_id            UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
@@ -82,8 +89,9 @@ CREATE TABLE public.returning_exec_submissions (
   discord               VARCHAR(64) NOT NULL,
   past_positions        TEXT NOT NULL,
   interested_in_returning BOOLEAN NOT NULL,
+  interested_in_future_term VARCHAR(8),
   not_returning_reason  TEXT,
-  in_person_next_term   BOOLEAN NOT NULL DEFAULT false,
+  in_person_next_term   public.in_person_next_term_enum,
   qualifications        TEXT NOT NULL DEFAULT '',
   additional_notes      TEXT,
   submitted_at          TIMESTAMPTZ NOT NULL DEFAULT now(),

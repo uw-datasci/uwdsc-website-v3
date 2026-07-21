@@ -34,17 +34,13 @@ export function ReturningExecList({
               onClick={() => onSelect(sub.id)}
               className={cn(
                 "w-full text-left rounded-lg border p-3 transition-colors hover:bg-accent/50 cursor-pointer",
-                selectedId === sub.id
-                  ? "bg-accent border-primary/30"
-                  : "border-transparent",
+                selectedId === sub.id ? "bg-accent border-primary/30" : "border-transparent",
               )}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <p className="font-medium text-sm truncate">{sub.full_name}</p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {sub.email}
-                  </p>
+                  <p className="text-xs text-muted-foreground truncate">{sub.email}</p>
                 </div>
                 {firstSel && (
                   <Badge
@@ -60,14 +56,14 @@ export function ReturningExecList({
               </div>
               {sub.position_selections.length > 0 && (
                 <p className="mt-1 text-xs text-muted-foreground truncate">
-                  {sub.position_selections
-                    .map((s) => s.position_name)
-                    .join(" · ")}
+                  {sub.position_selections.map((s) => s.position_name).join(" · ")}
                 </p>
               )}
               {!sub.interested_in_returning && (
                 <Badge variant="secondary" className="mt-1 text-[10px]">
-                  Not Returning
+                  {sub.interested_in_future_term
+                    ? `Interested in ${sub.interested_in_future_term}`
+                    : "Not Returning"}
                 </Badge>
               )}
             </button>

@@ -14,6 +14,7 @@ ALTER TYPE public.application_status_enum SET SCHEMA hiring;
 ALTER TYPE public.application_review_status_enum SET SCHEMA hiring;
 ALTER TYPE public.application_input_enum SET SCHEMA hiring;
 ALTER TYPE public.term_type_enum SET SCHEMA hiring;
+ALTER TYPE public.in_person_next_term_enum SET SCHEMA hiring;
 
 -- ----------------------------------------------------------------------------
 -- Tables: org

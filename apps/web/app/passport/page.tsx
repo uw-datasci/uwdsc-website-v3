@@ -75,7 +75,7 @@ export default function PassportPage() {
     setIsEditing(false);
   };
 
-  const handlePhotoUpload = async (file: File) => {
+  const handlePhotoUpload = async () => {
     try {
       // TODO: Implement actual API call
       // const formData = new FormData();

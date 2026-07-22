@@ -692,7 +692,8 @@ export function createGachaEngine(root: HTMLElement, opts: GachaEngineOptions = 
     let saved=null;try{saved=localStorage.getItem('gachaQ');}catch(e){}
     let tier=(qp&&presets[qp])?qp
       :(saved&&presets[saved])?saved
-      :(MOBILE||navigator.hardwareConcurrency<=4||(navigator.deviceMemory&&navigator.deviceMemory<=4))?'med'
+      :MOBILE?'low'
+      :(navigator.hardwareConcurrency<=4||(navigator.deviceMemory&&navigator.deviceMemory<=4))?'med'
       :'high';
     let autoQ=!(qp&&presets[qp])&&!/record|demo|freeze|edit/.test(_LS);
     function setTier(t,save){tier=t;Object.assign(PERF,presets[t]);pApplyAll();

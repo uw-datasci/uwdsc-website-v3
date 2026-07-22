@@ -51,12 +51,15 @@ export async function POST(
       return ApiResponse.badRequest("Check-in is not currently open for this event.");
     }
 
-    // 4. Check in the user
-    await eventService.checkInUser(id, user.id);
+    // 4. Check in the user. checkInUser inserts with ON CONFLICT DO NOTHING
+    // and reports whether a row was actually created, so a repeat check-in
+    // is a clean "no new stamp" rather than a silent duplicate success.
+    const stampAwarded = await eventService.checkInUser(id, user.id);
 
     return ApiResponse.ok({
-      message: "Successfully checked in",
+      message: stampAwarded ? "Successfully checked in" : "Already checked in",
       success: true,
+      stampAwarded,
     });
   } catch (error: unknown) {
     console.error("Error during check-in:", error);

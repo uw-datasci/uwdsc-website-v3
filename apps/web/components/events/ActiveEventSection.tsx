@@ -1,11 +1,14 @@
 import type { Event } from "@uwdsc/common/types";
+import { motion } from "framer-motion";
+import type { CheckInState } from "@/app/events/page";
 import { CheckInSuccess } from "./CheckInSuccess";
 import { CheckInButton } from "./CheckInButton";
 
 type ActiveEventSectionProps = {
   event: Event;
   canCheckIn: boolean;
-  checkInSuccess: boolean;
+  checkInState: CheckInState;
+  checkInError: string | null;
   checkingIn: boolean;
   onCheckIn: () => void;
 };
@@ -13,7 +16,8 @@ type ActiveEventSectionProps = {
 export function ActiveEventSection({
   event,
   canCheckIn,
-  checkInSuccess,
+  checkInState,
+  checkInError,
   checkingIn,
   onCheckIn,
 }: Readonly<ActiveEventSectionProps>) {
@@ -34,14 +38,46 @@ export function ActiveEventSection({
         </h3>
       </div>
 
-      {checkInSuccess ? (
+      {checkInState === "success" ? (
         <CheckInSuccess />
       ) : (
-        <CheckInButton
-          hasMembership={canCheckIn}
-          checkingIn={checkingIn}
-          onCheckIn={onCheckIn}
-        />
+        <div className="space-y-2">
+          {checkInState === "noStamp" && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex flex-col items-center justify-center py-4 px-4 rounded-xl bg-amber-500/20 border border-amber-500/30"
+            >
+              <p className="text-amber-300 font-black tracking-[0.15em]">
+                NO NEW STAMP
+              </p>
+              <p className="text-amber-400/80 text-xs mt-1.5 font-medium">
+                You were already checked in to this event
+              </p>
+            </motion.div>
+          )}
+
+          {checkInState === "error" && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex flex-col items-center justify-center py-4 px-4 rounded-xl bg-red-500/20 border border-red-500/30"
+            >
+              <p className="text-red-300 font-black tracking-[0.15em]">
+                CHECK-IN FAILED
+              </p>
+              <p className="text-red-400/80 text-xs mt-1.5 font-medium text-center">
+                {checkInError ?? "Something went wrong. Try again."}
+              </p>
+            </motion.div>
+          )}
+
+          <CheckInButton
+            hasMembership={canCheckIn}
+            checkingIn={checkingIn}
+            onCheckIn={onCheckIn}
+          />
+        </div>
       )}
     </div>
   );

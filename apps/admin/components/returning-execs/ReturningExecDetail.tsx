@@ -14,10 +14,11 @@ import {
   cn,
 } from "@uwdsc/ui";
 import { Mail, MessageSquare, User } from "lucide-react";
-import type {
-  ApplicationReviewStatus,
-  ReturningExecListItem,
-  ReturningExecPositionSelection,
+import {
+  IN_PERSON_NEXT_TERM_LABELS,
+  type ApplicationReviewStatus,
+  type ReturningExecListItem,
+  type ReturningExecPositionSelection,
 } from "@uwdsc/common/types";
 import { VP_REVIEW_STATUS_LIST, VP_REVIEW_STATUS_SET } from "@/constants/applications";
 import { reviewStatusBadgeClassName } from "@/lib/utils/applications";
@@ -104,10 +105,22 @@ export function ReturningExecDetail({
         {/* Returning interest */}
         <div>
           <h3 className="text-sm font-semibold mb-2">Return Interest</h3>
-          <Badge variant={submission.interested_in_returning ? "default" : "secondary"}>
-            {submission.interested_in_returning ? "Interested in returning" : "Not returning"}
+          <Badge
+            variant={
+              submission.interested_in_returning
+                ? "default"
+                : submission.interested_in_future_term
+                  ? "outline"
+                  : "secondary"
+            }
+          >
+            {submission.interested_in_returning
+              ? "Interested in returning"
+              : submission.interested_in_future_term
+                ? `Interested in ${submission.interested_in_future_term}`
+                : "Not returning"}
           </Badge>
-          {!submission.interested_in_returning && submission.not_returning_reason && (
+          {submission.not_returning_reason && (
             <div className="mt-3 rounded-md bg-muted/50 p-3">
               <p className="text-sm whitespace-pre-wrap leading-relaxed">
                 {submission.not_returning_reason}
@@ -116,7 +129,7 @@ export function ReturningExecDetail({
           )}
         </div>
 
-        {submission.interested_in_returning && (
+        {(submission.interested_in_returning || !!submission.interested_in_future_term) && (
           <>
             <Separator />
 
@@ -145,9 +158,17 @@ export function ReturningExecDetail({
 
             {/* In-person */}
             <div>
-              <h3 className="text-sm font-semibold mb-2">In Person Next Term</h3>
-              <Badge variant={submission.in_person_next_term ? "default" : "secondary"}>
-                {submission.in_person_next_term ? "Yes" : "No"}
+              <h3 className="text-sm font-semibold mb-2">
+                {submission.interested_in_future_term
+                  ? `In Person in ${submission.interested_in_future_term}`
+                  : "In Person Next Term"}
+              </h3>
+              <Badge
+                variant={submission.in_person_next_term === "yes" ? "default" : "secondary"}
+              >
+                {submission.in_person_next_term
+                  ? IN_PERSON_NEXT_TERM_LABELS[submission.in_person_next_term]
+                  : "—"}
               </Badge>
             </div>
 
@@ -162,20 +183,20 @@ export function ReturningExecDetail({
                 </p>
               </div>
             </div>
+          </>
+        )}
 
-            {submission.additional_notes && (
-              <>
-                <Separator />
-                <div>
-                  <h3 className="text-sm font-semibold mb-2">Additional Notes</h3>
-                  <div className="rounded-md bg-muted/50 p-3">
-                    <p className="text-sm whitespace-pre-wrap leading-relaxed">
-                      {submission.additional_notes}
-                    </p>
-                  </div>
-                </div>
-              </>
-            )}
+        {submission.additional_notes && (
+          <>
+            <Separator />
+            <div>
+              <h3 className="text-sm font-semibold mb-2">Additional Notes</h3>
+              <div className="rounded-md bg-muted/50 p-3">
+                <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                  {submission.additional_notes}
+                </p>
+              </div>
+            </div>
           </>
         )}
       </div>

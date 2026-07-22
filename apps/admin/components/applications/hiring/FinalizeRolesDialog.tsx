@@ -40,6 +40,7 @@ export function FinalizeRolesDialog({
   const [when2MeetLink, setWhen2MeetLink] = useState("");
   const [linkError, setLinkError] = useState("");
 
+  const presCount = team.filter((m) => m.computed_role === "pres").length;
   const adminCount = team.filter((m) => m.computed_role === "admin").length;
   const execCount = team.filter((m) => m.computed_role === "exec").length;
 
@@ -65,7 +66,7 @@ export function FinalizeRolesDialog({
       setFinalizing(true);
       const { summary } = await finalizeRoles({ when2MeetLink: trimmed });
       toast.success(
-        `Roles finalized: ${summary.promoted_to_admin} admin, ${summary.promoted_to_exec} exec, ${summary.demoted_to_member} demoted to member`,
+        `Roles finalized: ${summary.promoted_to_pres} pres, ${summary.promoted_to_admin} admin, ${summary.promoted_to_exec} exec, ${summary.demoted_to_member} demoted to member`,
       );
       setOpen(false);
       resetForm();
@@ -96,15 +97,19 @@ export function FinalizeRolesDialog({
 
         <div className="space-y-2 rounded-md bg-muted/50 p-4 text-sm">
           <p>
+            <strong>{presCount}</strong> member{presCount === 1 ? "" : "s"} will
+            be set to <strong>pres</strong> (Presidents)
+          </p>
+          <p>
             <strong>{adminCount}</strong> member{adminCount === 1 ? "" : "s"}{" "}
-            will be set to <strong>admin</strong> (Presidents & VPs)
+            will be set to <strong>admin</strong> (VPs)
           </p>
           <p>
             <strong>{execCount}</strong> member{execCount === 1 ? "" : "s"} will
             be set to <strong>exec</strong>
           </p>
           <p className="text-muted-foreground">
-            All other current execs and admins will be demoted to{" "}
+            All other current execs, admins, and presidents will be demoted to{" "}
             <strong>member</strong>.
           </p>
         </div>

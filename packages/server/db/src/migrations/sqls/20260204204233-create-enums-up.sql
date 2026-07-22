@@ -1,5 +1,5 @@
 -- Create user_role_enum
-CREATE TYPE user_role_enum AS ENUM ('member', 'admin', 'exec');
+CREATE TYPE user_role_enum AS ENUM ('member', 'admin', 'exec', 'pres');
 
 -- Create faculty_enum
 CREATE TYPE faculty_enum AS ENUM (

@@ -13,6 +13,7 @@ import {
   UserCheck,
   Users,
 } from "lucide-react";
+import { isAdmin, isPresident } from "@uwdsc/common/constants";
 
 const EXEC_POS = ["president", "vp"];
 
@@ -25,8 +26,6 @@ export const getAdminNavigation = (
   },
 ) => {
   const isExec = EXEC_POS.some((r) => position?.toLowerCase().includes(r));
-  const isPresident = position?.toLowerCase().includes("president") ?? false;
-  const isAdmin = role === "admin";
   const onboardingOpen = logisticsWindows?.onboardingOpen ?? false;
   const returningExecOpen = logisticsWindows?.returningExecOpen ?? false;
 
@@ -36,7 +35,7 @@ export const getAdminNavigation = (
       href: "/applications/questions",
       icon: CircleHelp,
     },
-    ...(isPresident
+    ...(isPresident(role)
       ? [
           { name: "Hiring", href: "/applications/hiring", icon: UserCheck },
           {
@@ -46,7 +45,7 @@ export const getAdminNavigation = (
           },
         ]
       : []),
-    ...(isAdmin
+    ...(isAdmin(role)
       ? [
           {
             name: "Returning Execs",
@@ -66,7 +65,7 @@ export const getAdminNavigation = (
       subItems: applicationSubItems,
     },
     { name: "Events", href: "/events", icon: Calendar },
-    ...(isAdmin ? [{ name: "Campaigns", href: "/campaigns", icon: Mail }] : []),
+    ...(isAdmin(role) ? [{ name: "Campaigns", href: "/campaigns", icon: Mail }] : []),
     {
       name: "Logistics",
       href: "/logistics",
@@ -101,7 +100,7 @@ export const getAdminNavigation = (
           : []),
       ],
     },
-    ...(isAdmin
+    ...(isAdmin(role)
       ? [
           {
             name: "Nexus",

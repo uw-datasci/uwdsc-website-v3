@@ -41,6 +41,7 @@ export interface NewExecTeamMember {
 
 /** Summary returned after finalizing roles */
 export interface FinalizeRolesSummary {
+  promoted_to_pres: number;
   promoted_to_admin: number;
   promoted_to_exec: number;
   demoted_to_member: number;

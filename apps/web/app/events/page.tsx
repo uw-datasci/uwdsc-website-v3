@@ -36,7 +36,10 @@ export default function EventsPage() {
     useState<MembershipStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [checkingIn, setCheckingIn] = useState(false);
-  const [checkInSuccess, setCheckInSuccess] = useState<boolean>(false);
+  const [checkInState, setCheckInState] = useState<
+    "idle" | "success" | "noStamp" | "error"
+  >("idle");
+  const [checkInError, setCheckInError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -63,10 +66,13 @@ export default function EventsPage() {
         if (firstActive) {
           setNextEvent(null);
           const status = await getCheckInStatus(firstActive.id);
-          setCheckInSuccess(status.checkedIn);
+          setCheckInState(status.checkedIn ? "success" : "idle");
+          setCheckInError(null);
         } else {
           const next = await getEventsByRange("next");
           setNextEvent(next);
+          setCheckInState("idle");
+          setCheckInError(null);
         }
       } catch (err) {
         console.error(err);
@@ -85,11 +91,13 @@ export default function EventsPage() {
   const handleCheckIn = async () => {
     if (!currentEvent) return;
     setCheckingIn(true);
+    setCheckInError(null);
     try {
-      await checkInToEvent(currentEvent.id);
-      setCheckInSuccess(true);
+      const result = await checkInToEvent(currentEvent.id);
+      setCheckInState(result.stampAwarded ? "success" : "noStamp");
     } catch (err) {
-      alert("Failed to check in: " + (err as Error).message);
+      setCheckInState("error");
+      setCheckInError((err as Error).message);
     } finally {
       setCheckingIn(false);
     }
@@ -160,7 +168,8 @@ export default function EventsPage() {
                   <ActiveEventSection
                     event={currentEvent}
                     canCheckIn={canCheckIn}
-                    checkInSuccess={checkInSuccess}
+                    checkInState={checkInState}
+                    checkInError={checkInError}
                     checkingIn={checkingIn}
                     onCheckIn={handleCheckIn}
                   />

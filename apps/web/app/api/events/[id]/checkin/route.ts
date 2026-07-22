@@ -52,11 +52,14 @@ export async function POST(
     }
 
     // 4. Check in the user
-    await eventService.checkInUser(id, user.id);
+    const stampAwarded = await eventService.checkInUser(id, user.id);
 
     return ApiResponse.ok({
-      message: "Successfully checked in",
+      message: stampAwarded
+        ? "Successfully checked in. Stamp awarded."
+        : "You are already checked in. No new stamp awarded.",
       success: true,
+      stampAwarded,
     });
   } catch (error: unknown) {
     console.error("Error during check-in:", error);

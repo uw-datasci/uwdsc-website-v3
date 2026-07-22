@@ -22,8 +22,25 @@ export function CheckInButton({
   if (checkingIn) {
     buttonLabel = (
       <span className="flex items-center justify-center gap-3">
-        <div className="w-4 h-4 rounded-full border-2 border-black border-t-transparent animate-spin" />
-        CHECKING IN...
+        <span className="relative size-7 shrink-0 rounded-md border-2 border-black/70 bg-white/70">
+          <span className="absolute inset-1 grid grid-cols-3 gap-[2px] opacity-40">
+            <span className="rounded-xs bg-black/70" />
+            <span className="rounded-xs bg-black/70" />
+            <span className="rounded-xs bg-black/70" />
+            <span className="rounded-xs bg-black/70" />
+            <span className="rounded-xs bg-black/70" />
+            <span className="rounded-xs bg-black/70" />
+            <span className="rounded-xs bg-black/70" />
+            <span className="rounded-xs bg-black/70" />
+            <span className="rounded-xs bg-black/70" />
+          </span>
+          <motion.span
+            className="absolute left-0.5 right-0.5 h-0.5 rounded-full bg-black/90"
+            animate={{ y: [4, 20, 4] }}
+            transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </span>
+        SCANNING QR...
       </span>
     );
   } else if (hasMembership) {

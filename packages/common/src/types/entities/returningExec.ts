@@ -1,5 +1,19 @@
 import type { ApplicationReviewStatus } from "../shared/enums";
 
+/** Presence / location for next term on the returning-exec form. */
+export type InPersonNextTermStatus =
+  | "yes"
+  | "no_outside_gta"
+  | "no_in_gta"
+  | "not_sure";
+
+export const IN_PERSON_NEXT_TERM_LABELS: Record<InPersonNextTermStatus, string> = {
+  yes: "Yes",
+  no_outside_gta: "No, outside of GTA",
+  no_in_gta: "No, but in the GTA (able to commute to Waterloo)",
+  not_sure: "Not sure",
+};
+
 /** Mirrors returning_exec_submissions DB table */
 export interface ReturningExecSubmission {
   id: string;
@@ -10,8 +24,9 @@ export interface ReturningExecSubmission {
   discord: string;
   past_positions: string;
   interested_in_returning: boolean;
+  interested_in_future_term: string | null;
   not_returning_reason: string | null;
-  in_person_next_term: boolean;
+  in_person_next_term: InPersonNextTermStatus | null;
   qualifications: string;
   additional_notes: string | null;
   submitted_at: string;
@@ -50,8 +65,9 @@ export interface ReturningExecListItem {
   discord: string;
   past_positions: string;
   interested_in_returning: boolean;
+  interested_in_future_term: string | null;
   not_returning_reason: string | null;
-  in_person_next_term: boolean;
+  in_person_next_term: InPersonNextTermStatus | null;
   qualifications: string;
   additional_notes: string | null;
   submitted_at: string;

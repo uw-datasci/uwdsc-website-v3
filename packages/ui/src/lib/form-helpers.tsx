@@ -84,6 +84,7 @@ interface RadioFieldOptions {
 interface StringRadioGroupFieldOptions {
   label: string;
   required?: boolean;
+  disabled?: boolean;
   options: readonly { value: string; label: string }[];
   groupClassName?: string;
   /** Unique prefix for `id` / `htmlFor` (e.g. `returning-interest`). */
@@ -186,7 +187,7 @@ export function renderSelectField(opts: SelectFieldOptions) {
 
   function SelectFieldRender({ field }: StringFieldRenderProps) {
     const raw = field.value ?? "";
-    const resolvedValue = raw === "" ? (clearValueSentinel ?? "") : raw;
+    const resolvedValue = raw === "" ? (clearValueSentinel ?? undefined) : raw;
 
     function handleChange(v: string) {
       if (clearValueSentinel === undefined || v !== clearValueSentinel) {
@@ -235,6 +236,7 @@ export function renderStringRadioGroupField(opts: StringRadioGroupFieldOptions) 
   const {
     label,
     required = true,
+    disabled = false,
     options: radioOptions,
     groupClassName = "flex flex-col space-y-1",
     idPrefix,
@@ -251,13 +253,17 @@ export function renderStringRadioGroupField(opts: StringRadioGroupFieldOptions) 
             value={field.value ?? ""}
             onValueChange={field.onChange}
             className={groupClassName}
+            disabled={disabled}
           >
             {radioOptions.map((opt) => {
               const inputId = `${idPrefix}-${opt.value}`;
               return (
                 <div key={opt.value} className="flex items-center gap-2">
-                  <RadioGroupItem value={opt.value} id={inputId} />
-                  <label htmlFor={inputId} className="text-sm">
+                  <RadioGroupItem value={opt.value} id={inputId} disabled={disabled} />
+                  <label
+                    htmlFor={inputId}
+                    className={cn("text-sm", disabled && "cursor-not-allowed opacity-70")}
+                  >
                     {opt.label}
                   </label>
                 </div>

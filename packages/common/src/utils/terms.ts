@@ -68,3 +68,22 @@ export function formatTermCode(code: string): string {
   };
   return `${seasons[season] ?? code} ${year}`;
 }
+
+/**
+ * Term code two seasons ahead of `code` (skip the immediate next term).
+ * Used for "not next term, but interested later" on the returning-exec form.
+ *
+ * Sxx → W(xx+1), Wxx → Fxx, Fxx → S(xx+1)
+ */
+export function getDeferredReturnTermCode(code: string): string {
+  const season = code.charAt(0).toUpperCase();
+  const yearSuffix = Number.parseInt(code.slice(1), 10);
+  if (Number.isNaN(yearSuffix)) return code;
+
+  const pad = (y: number) => String(y).padStart(2, "0");
+
+  if (season === "S") return `W${pad(yearSuffix + 1)}`;
+  if (season === "W") return `F${pad(yearSuffix)}`;
+  if (season === "F") return `S${pad(yearSuffix + 1)}`;
+  return code;
+}

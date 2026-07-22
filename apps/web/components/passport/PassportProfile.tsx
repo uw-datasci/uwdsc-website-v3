@@ -54,9 +54,9 @@ export function PassportProfile({
   ];
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-base">Profile Details</CardTitle>
+    <Card className="overflow-hidden rounded-2xl border border-white/15 bg-[#121212] text-white shadow-2xl">
+      <CardHeader className="flex flex-row items-center justify-between border-b border-white/10 pb-3">
+        <CardTitle className="text-base text-white/90">Profile Details</CardTitle>
         {isEditing ? (
           <div className="flex gap-2">
             <Button
@@ -65,7 +65,7 @@ export function PassportProfile({
               type="button"
               onClick={onCancel}
               disabled={form.formState.isSubmitting}
-              className="gap-1.5 text-muted-foreground h-8 px-3"
+              className="h-8 gap-1.5 px-3 text-white/70 hover:text-white"
             >
               <X className="size-3.5" />
               Cancel
@@ -76,6 +76,7 @@ export function PassportProfile({
               type="submit"
               form="passport-profile-edit"
               disabled={form.formState.isSubmitting || !form.formState.isValid}
+              className="bg-cyan-400 text-black hover:bg-cyan-300"
             >
               {form.formState.isSubmitting ? (
                 <Spinner className="size-3.5" />
@@ -91,7 +92,7 @@ export function PassportProfile({
             size="sm"
             type="button"
             onClick={onEdit}
-            className="gap-1.5 text-muted-foreground hover:text-foreground h-8 px-3"
+            className="h-8 gap-1.5 px-3 text-white/70 hover:text-white"
           >
             <Pencil className="size-3.5" />
             Edit
@@ -99,27 +100,40 @@ export function PassportProfile({
         )}
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="space-y-4">
         {isEditing ? (
           <ProfileEditForm form={form} onSubmit={onSubmit} />
         ) : (
-          <div className="divide-y divide-border/60">
+          <div className="space-y-2.5">
             {readRows.map(({ label, Icon, value }) => (
               <div
                 key={label}
-                className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
+                className="flex items-center gap-3 rounded-lg border border-white/10 bg-black/35 px-3 py-2.5"
               >
-                <div className="size-8 rounded-md bg-muted flex items-center justify-center text-muted-foreground shrink-0">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-white/8 text-white/60">
                   <Icon className="size-4" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted-foreground">{label}</p>
-                  <p className="text-sm font-medium truncate">{value}</p>
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-white/50">
+                    {label}
+                  </p>
+                  <p className="truncate text-sm font-medium text-white/90">{value}</p>
                 </div>
               </div>
             ))}
           </div>
         )}
+
+        {!isEditing ? (
+          <div className="flex items-center justify-center gap-3 pt-1">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <span
+                key={index}
+                className="size-4 rounded-full border border-white/35 bg-white/15 shadow-[inset_0_1px_2px_rgba(255,255,255,0.2)]"
+              />
+            ))}
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   );

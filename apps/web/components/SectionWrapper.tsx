@@ -1,5 +1,3 @@
-import { cn } from "@uwdsc/ui";
-
 interface HomeSectionWrapperProps {
   children: React.ReactNode;
   className?: string;
@@ -12,7 +10,7 @@ export default function SectionWrapper({
   id,
 }: Readonly<HomeSectionWrapperProps>) {
   return (
-    <section id={id} className={cn("mx-container mb-section", className)}>
+    <section id={id} className={`mx-container mb-section ${className}`}>
       {children}
     </section>
   );

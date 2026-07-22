@@ -121,7 +121,7 @@ export function Navbar() {
                     <Button
                       variant="ghost"
                       onClick={() => setWrappedOpen(true)}
-                      className="h-10 flex flex-row items-center gap-2 px-4 rounded-md hover:bg-transparent dark:hover:bg-transparent hover:text-nav-hover-blue"
+                      className="h-10 flex flex-row items-center gap-2 px-4 rounded-md hover:text-nav-hover-blue"
                     >
                       <span className="text-sm font-medium">Wrapped</span>
                     </Button>

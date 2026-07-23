@@ -5,31 +5,35 @@ import { onboardingService } from "@uwdsc/admin";
 
 /**
  * GET /api/auth/user
- * Get the currently authenticated user (admin/exec only)
+ * Get the currently authenticated user (admin/exec, plus alum for the returning-exec form's
+ * `useAuth()`-driven name/email prefill).
  */
-export const GET = withAuth(async (_request, _context, user) => {
-  try {
-    const role = user.app_metadata?.role ?? null;
-    const [profile, positionId, subteamId] = await Promise.all([
-      profileService.getProfileByUserId(user.id),
-      onboardingService.getExecPosId(user.id),
-      onboardingService.getExecSubteamId(user.id),
-    ]);
+export const GET = withAuth(
+  async (_request, _context, user) => {
+    try {
+      const role = user.app_metadata?.role ?? null;
+      const [profile, positionId, subteamId] = await Promise.all([
+        profileService.getProfileByUserId(user.id),
+        onboardingService.getExecPosId(user.id),
+        onboardingService.getExecSubteamId(user.id),
+      ]);
 
-    const data = {
-      id: user.id,
-      email: user.email,
-      role,
-      first_name: profile?.first_name,
-      last_name: profile?.last_name,
-      wat_iam: profile?.wat_iam,
-      faculty: profile?.faculty,
-      position_id: positionId,
-      subteam_id: subteamId,
-    };
-    return ApiResponse.ok(data);
-  } catch (error) {
-    console.error("Error fetching current user:", error);
-    return ApiResponse.serverError(error, "Failed to fetch user");
-  }
-});
+      const data = {
+        id: user.id,
+        email: user.email,
+        role,
+        first_name: profile?.first_name,
+        last_name: profile?.last_name,
+        wat_iam: profile?.wat_iam,
+        faculty: profile?.faculty,
+        position_id: positionId,
+        subteam_id: subteamId,
+      };
+      return ApiResponse.ok(data);
+    } catch (error) {
+      console.error("Error fetching current user:", error);
+      return ApiResponse.serverError(error, "Failed to fetch user");
+    }
+  },
+  { allowAlum: true },
+);

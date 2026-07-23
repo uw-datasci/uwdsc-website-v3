@@ -186,7 +186,7 @@ export default function LogisticsReturningExecPage() {
   }
 
   const positionOptions = positions.map((p) => ({
-    value: String(p.position_id),
+    value: String(p.id),
     label: p.name,
   }));
 

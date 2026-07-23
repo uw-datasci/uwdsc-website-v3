@@ -19,6 +19,11 @@ export interface EventWithAttendanceCount extends Event {
   attendance_count: number;
 }
 
+/** Event row enriched for DSC Wrapped: club-wide count + whether this user attended. */
+export interface WrappedEvent extends EventWithAttendanceCount {
+  attended_by_user: boolean;
+}
+
 export interface CreateEventData {
   name: string;
   description: string;

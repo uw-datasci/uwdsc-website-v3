@@ -31,6 +31,20 @@ class ProfileService {
   }
 
   /**
+   * Get profile fields needed for DSC Wrapped.
+   */
+  async getWrappedProfileStats(userId: string) {
+    try {
+      return await this.repository.getWrappedProfileStats(userId);
+    } catch (error) {
+      throw new ApiError(
+        `Failed to get wrapped profile stats: ${(error as Error).message}`,
+        500,
+      );
+    }
+  }
+
+  /**
    * Update user profile
    */
   async completeProfile(

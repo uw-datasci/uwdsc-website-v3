@@ -1,6 +1,7 @@
 import { AuthRepository } from "./auth.repository";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { ApiError, type QuestionScope, LoginData, RegisterData } from "@uwdsc/common/types";
+import { isPresident } from "@uwdsc/common/constants";
 
 const DUPLICATE_EMAIL_MESSAGE =
   "An account with this email already exists. Please sign in instead.";
@@ -286,15 +287,18 @@ export class AuthService {
    * Resolve VP / Presidents scope for application-question CRUD (admin).
    * Presidents see all positions; other VPs see roles in their subteam(s) (all APA rows whose
    * exec position shares a subteam with any VP role they hold).
+   *
+   * President status is driven purely by `user_role === "pres"` (see `isPresident`), not by
+   * exec_team membership — pass the caller's `app_metadata.role` so it can be resolved.
    */
-  async getScopeForUser(userId: string): Promise<QuestionScope> {
+  async getScopeForUser(userId: string, role?: string | null): Promise<QuestionScope> {
     const [roles, vpPositionIds] = await Promise.all([
       this.repository.getExecTeamVpRolesForProfile(userId),
       this.repository.getVpApplicationPositionIdsForProfile(userId),
     ]);
 
     const hasVpExecRole = roles.some((r) => r.is_vp);
-    const isPresident = roles.some((r) => r.is_vp && (r.subteam_name ?? "") === "Presidents");
+    const scopeIsPresident = isPresident(role);
     const vpSubteamNames = Array.from(
       new Set(
         roles
@@ -319,7 +323,7 @@ export class AuthService {
 
     return {
       hasVpExecRole,
-      isPresident,
+      isPresident: scopeIsPresident,
       vpSubteamNames,
       vpSubteamIds,
       vpPositionIds,

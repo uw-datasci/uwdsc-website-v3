@@ -76,7 +76,9 @@ export function NewExecTeamPanel({ team, loading }: NewExecTeamPanelProps) {
                 <TableCell className={bodyCell}>
                   <Badge
                     variant={
-                      member.computed_role === "admin" ? "default" : "secondary"
+                      member.computed_role === "pres" || member.computed_role === "admin"
+                        ? "default"
+                        : "secondary"
                     }
                     className="text-xs"
                   >

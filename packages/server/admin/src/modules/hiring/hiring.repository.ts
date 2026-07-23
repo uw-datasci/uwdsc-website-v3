@@ -259,13 +259,13 @@ export class HiringRepository extends BaseRepository {
         `;
       }
 
-      // Demote everyone else who is currently exec or admin
+      // Demote everyone else who is currently exec, admin, or pres to alum (former exec).
       let demoted = 0;
       if (profileIds.length > 0) {
         const result = await tx`
           UPDATE user_roles
-          SET role = 'member'
-          WHERE role IN ('exec', 'admin')
+          SET role = 'alum'
+          WHERE role IN ('exec', 'admin', 'pres')
             AND id NOT IN ${tx(profileIds)}
           RETURNING id
         `;
@@ -274,8 +274,8 @@ export class HiringRepository extends BaseRepository {
         // No new team - demote everyone
         const result = await tx`
           UPDATE user_roles
-          SET role = 'member'
-          WHERE role IN ('exec', 'admin')
+          SET role = 'alum'
+          WHERE role IN ('exec', 'admin', 'pres')
           RETURNING id
         `;
         demoted = result.length;

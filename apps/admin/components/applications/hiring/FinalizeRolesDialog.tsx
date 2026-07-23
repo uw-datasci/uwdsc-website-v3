@@ -66,7 +66,7 @@ export function FinalizeRolesDialog({
       setFinalizing(true);
       const { summary } = await finalizeRoles({ when2MeetLink: trimmed });
       toast.success(
-        `Roles finalized: ${summary.promoted_to_pres} pres, ${summary.promoted_to_admin} admin, ${summary.promoted_to_exec} exec, ${summary.demoted_to_member} demoted to member`,
+        `Roles finalized: ${summary.promoted_to_pres} pres, ${summary.promoted_to_admin} admin, ${summary.promoted_to_exec} exec, ${summary.demoted_to_alum} demoted to alum`,
       );
       setOpen(false);
       resetForm();
@@ -110,7 +110,7 @@ export function FinalizeRolesDialog({
           </p>
           <p className="text-muted-foreground">
             All other current execs, admins, and presidents will be demoted to{" "}
-            <strong>member</strong>.
+            <strong>alum</strong>.
           </p>
         </div>
 

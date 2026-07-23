@@ -151,7 +151,7 @@ class HiringService {
         promoted_to_pres,
         promoted_to_admin,
         promoted_to_exec,
-        demoted_to_member: demoted,
+        demoted_to_alum: demoted,
       };
 
       const welcomeEmails = team

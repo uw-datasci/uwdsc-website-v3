@@ -95,7 +95,7 @@ class HiringService {
       const rows = await this.repository.getAcceptedOfferSelections();
       return rows.map((row) => {
         const computed_role: UserRole =
-          row.is_vp || row.subteam_name === "Presidents" ? "admin" : "exec";
+          row.subteam_name === "Presidents" ? "pres" : row.is_vp ? "admin" : "exec";
         return { ...row, computed_role };
       });
     } catch (error) {
@@ -137,6 +137,9 @@ class HiringService {
 
       const { demoted } = await this.repository.finalizeRoles(newTeamRoles);
 
+      const promoted_to_pres = team.filter(
+        (m) => m.computed_role === "pres",
+      ).length;
       const promoted_to_admin = team.filter(
         (m) => m.computed_role === "admin",
       ).length;
@@ -145,9 +148,10 @@ class HiringService {
       ).length;
 
       const summary: FinalizeRolesSummary = {
+        promoted_to_pres,
         promoted_to_admin,
         promoted_to_exec,
-        demoted_to_member: demoted,
+        demoted_to_alum: demoted,
       };
 
       const welcomeEmails = team

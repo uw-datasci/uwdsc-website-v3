@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { FACULTY_VALUES } from "@uwdsc/common/constants";
+import { FACULTY_VALUES, ROLE_VALUES } from "@uwdsc/common/constants";
 
 /**
  * Schema for marking a member as paid
@@ -31,6 +31,16 @@ export const editMemberSchema = z.object({
 });
 
 export type EditMemberFormValues = z.infer<typeof editMemberSchema>;
+
+/**
+ * Schema for updating a member's role.
+ * President-only — enforced server-side by the `withPresAccess` route guard.
+ */
+export const updateMemberRoleSchema = z.object({
+  role: z.enum(ROLE_VALUES),
+});
+
+export type UpdateMemberRoleFormValues = z.infer<typeof updateMemberRoleSchema>;
 
 /**
  * Invite a new member by email (admin invite flow).

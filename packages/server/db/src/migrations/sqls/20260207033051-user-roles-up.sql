@@ -31,16 +31,16 @@ RETURNS user_role_enum AS $$
   SELECT role FROM public.user_roles WHERE id = user_id;
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
 
--- Check if user is admin
+-- Check if user is admin (pres is a superset of admin)
 CREATE OR REPLACE FUNCTION public.is_admin(user_id uuid)
 RETURNS boolean AS $$
-  SELECT COALESCE(public.get_user_role(user_id) = 'admin', false);
+  SELECT COALESCE(public.get_user_role(user_id) IN ('admin', 'pres'), false);
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
 
--- Check if user is exec or admin
+-- Check if user is exec, admin, or pres
 CREATE OR REPLACE FUNCTION public.is_exec_or_admin(user_id uuid)
 RETURNS boolean AS $$
-  SELECT COALESCE(public.get_user_role(user_id) IN ('exec', 'admin'), false);
+  SELECT COALESCE(public.get_user_role(user_id) IN ('exec', 'admin', 'pres'), false);
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
 
 -- ============================================================================

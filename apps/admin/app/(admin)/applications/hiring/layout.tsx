@@ -10,7 +10,9 @@ export default async function HiringLayout({
   const authService = await createAuthService();
   const { user, error } = await authService.getCurrentUser();
   const isPresident =
-    !error && !!user && (await authService.getScopeForUser(user.id)).isPresident;
+    !error &&
+    !!user &&
+    (await authService.getScopeForUser(user.id, user.app_metadata?.role)).isPresident;
 
   if (!isPresident) {
     return (

@@ -176,35 +176,35 @@ export function EditMemberModal({
               />
             </div>
 
-            {/* Faculty */}
-            <FormField
-              control={form.control}
-              name="faculty"
-              render={({ field }) =>
-                renderSelectField({
-                  label: "Faculty",
-                  placeholder: "Select faculty",
-                  options: [...FACULTY_VALUES],
-                  triggerClassName: "w-full",
-                })({ field: { ...field, value: field.value ?? "" } })
-              }
-            />
-
-            {/* Role (President only) */}
-            {canEditRole && (
+            {/* Faculty & Role (Role is President only) */}
+            <div className={canEditRole ? "grid grid-cols-2 gap-4" : undefined}>
               <FormField
                 control={form.control}
-                name="role"
+                name="faculty"
                 render={({ field }) =>
                   renderSelectField({
-                    label: "Role",
-                    placeholder: "Select role",
-                    options: ROLE_SELECT_OPTIONS,
+                    label: "Faculty",
+                    placeholder: "Select faculty",
+                    options: [...FACULTY_VALUES],
                     triggerClassName: "w-full",
                   })({ field: { ...field, value: field.value ?? "" } })
                 }
               />
-            )}
+              {canEditRole && (
+                <FormField
+                  control={form.control}
+                  name="role"
+                  render={({ field }) =>
+                    renderSelectField({
+                      label: "Role",
+                      placeholder: "Select role",
+                      options: ROLE_SELECT_OPTIONS,
+                      triggerClassName: "w-full",
+                    })({ field: { ...field, value: field.value ?? "" } })
+                  }
+                />
+              )}
+            </div>
 
             {/* MathSoc Member */}
             <FormField

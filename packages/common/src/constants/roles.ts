@@ -1,9 +1,35 @@
+import type { UserRole } from "../types/shared/enums";
+
 /**
  * Roles that are allowed to access the admin app (and see the Admin nav link on the public site).
  * `alum` is intentionally excluded — alums get a narrow, single-page exception (the returning-exec
  * form) handled separately, not full admin-app access.
  */
 export const ADMIN_ROLES = new Set<string>(["admin", "exec", "pres"]);
+
+/** Canonical role enum values (DB `user_role_enum`, API, forms). */
+export const ROLE_VALUES = [
+  "member",
+  "exec",
+  "admin",
+  "pres",
+  "alum",
+] as const satisfies readonly UserRole[];
+
+/** Human-readable labels for each role value. */
+export const ROLE_LABELS: Record<UserRole, string> = {
+  member: "Member",
+  exec: "Exec",
+  admin: "Admin (VP)",
+  pres: "President",
+  alum: "Alum",
+};
+
+/** `<Select>`-ready `{ value, label }` options for the role enum. */
+export const ROLE_SELECT_OPTIONS = ROLE_VALUES.map((value) => ({
+  value,
+  label: ROLE_LABELS[value],
+}));
 
 /**
  * Roles with full admin-portal capability. `pres` is a superset of `admin` — presidents get

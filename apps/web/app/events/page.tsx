@@ -26,6 +26,15 @@ import {
 } from "@uwdsc/ui";
 import { QrCode as QrCodeIcon } from "lucide-react";
 import Image from "next/image";
+import dynamic from "next/dynamic";
+
+// Lazy so three.js stays out of the events bundle until a stamp is earned.
+const GachaRevealModal = dynamic(
+  () => import("@/components/gacha").then((m) => m.GachaRevealModal),
+  { ssr: false },
+);
+
+export type CheckInState = "idle" | "success" | "noStamp" | "error";
 
 export default function EventsPage() {
   const { user } = useAuth();
@@ -36,7 +45,9 @@ export default function EventsPage() {
     useState<MembershipStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [checkingIn, setCheckingIn] = useState(false);
-  const [checkInSuccess, setCheckInSuccess] = useState<boolean>(false);
+  const [checkInState, setCheckInState] = useState<CheckInState>("idle");
+  const [checkInError, setCheckInError] = useState<string | null>(null);
+  const [revealOpen, setRevealOpen] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -63,7 +74,7 @@ export default function EventsPage() {
         if (firstActive) {
           setNextEvent(null);
           const status = await getCheckInStatus(firstActive.id);
-          setCheckInSuccess(status.checkedIn);
+          setCheckInState(status.checkedIn ? "success" : "idle");
         } else {
           const next = await getEventsByRange("next");
           setNextEvent(next);
@@ -85,11 +96,19 @@ export default function EventsPage() {
   const handleCheckIn = async () => {
     if (!currentEvent) return;
     setCheckingIn(true);
+    setCheckInError(null);
     try {
-      await checkInToEvent(currentEvent.id);
-      setCheckInSuccess(true);
+      const result = await checkInToEvent(currentEvent.id);
+      if (result.stampAwarded) {
+        // Fresh stamp: play the reveal, land on the checked-in card after.
+        setCheckInState("success");
+        setRevealOpen(true);
+      } else {
+        setCheckInState("noStamp");
+      }
     } catch (err) {
-      alert("Failed to check in: " + (err as Error).message);
+      setCheckInState("error");
+      setCheckInError((err as Error).message);
     } finally {
       setCheckingIn(false);
     }
@@ -160,7 +179,8 @@ export default function EventsPage() {
                   <ActiveEventSection
                     event={currentEvent}
                     canCheckIn={canCheckIn}
-                    checkInSuccess={checkInSuccess}
+                    checkInState={checkInState}
+                    checkInError={checkInError}
                     checkingIn={checkingIn}
                     onCheckIn={handleCheckIn}
                   />
@@ -188,6 +208,8 @@ export default function EventsPage() {
           }
         />
       ) : null}
+
+      <GachaRevealModal open={revealOpen} onClose={() => setRevealOpen(false)} />
     </div>
   );
 }

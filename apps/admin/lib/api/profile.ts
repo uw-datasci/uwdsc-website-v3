@@ -5,9 +5,17 @@
  * Components should use these functions instead of making direct fetch calls.
  */
 
-import type { EditMemberFormValues, InviteMemberFormValues } from "@/lib/schemas/membership";
+import type {
+  EditMemberFormValues,
+  InviteMemberFormValues,
+} from "@/lib/schemas/membership";
 import { createApiError } from "./error";
-import { Member, MembershipStats, MembershipStatus } from "@uwdsc/common/types";
+import {
+  Member,
+  MembershipStats,
+  MembershipStatus,
+  UserRole,
+} from "@uwdsc/common/types";
 
 /**
  * Get all user profiles
@@ -141,6 +149,31 @@ export async function updateMember(
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(memberData),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw createApiError(data, response.status);
+  }
+}
+
+/**
+ * Update a member's role (president-only).
+ *
+ * @param memberId - The profile ID of the member
+ * @param role - The new role to assign
+ * @returns Promise indicating success
+ * @throws Error if request fails or unauthorized
+ */
+export async function updateMemberRole(
+  memberId: string,
+  role: UserRole,
+): Promise<void> {
+  const response = await fetch(`/api/members/${memberId}/role`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ role }),
   });
 
   const data = await response.json();

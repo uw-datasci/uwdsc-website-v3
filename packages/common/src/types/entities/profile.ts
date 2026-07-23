@@ -17,6 +17,7 @@ export interface Profile {
   is_math_soc_member: boolean;
   role: UserRole;
   exec_position_name: string | null;
+  profile_photo_url: string | null;
 }
 
 export interface CompleteProfileData {

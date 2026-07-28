@@ -11,21 +11,16 @@ import { createAuthService, createResumeService } from "@/lib/services";
  */
 export const GET = withAuth(async (_request, _context, user) => {
   try {
-    const [applications, statusCounts, resumeService, authService] =
-      await Promise.all([
-        applicationService.getAllApplications(),
-        applicationService.getApplicationCounts(),
-        createResumeService(),
-        createAuthService(),
-      ]);
+    const [applications, statusCounts, resumeService, authService] = await Promise.all([
+      applicationService.getAllApplications(),
+      applicationService.getApplicationCounts(),
+      createResumeService(),
+      createAuthService(),
+    ]);
 
     const portalRole = user.app_metadata?.role as string | undefined;
     const scope = await authService.getScopeForUser(user.id, portalRole);
-    const canUsePositionReview =
-      isAdmin(portalRole) &&
-      (scope.isPresident ||
-        scope.hasVpExecRole ||
-        scope.vpPositionIds.length > 0);
+    const canUsePositionReview = isAdmin(portalRole);
 
     // Hydrate resume_url with signed URLs from private storage bucket
     const applicationsWithResumes = await Promise.all(

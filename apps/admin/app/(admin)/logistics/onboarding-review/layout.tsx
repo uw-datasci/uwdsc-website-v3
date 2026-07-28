@@ -3,11 +3,17 @@ import { isPresident } from "@uwdsc/common/constants";
 import { Card, CardDescription, CardHeader, CardTitle } from "@uwdsc/ui";
 import { createAuthService } from "@/lib/services";
 
-export default async function PositionsLayout({ children }: { readonly children: ReactNode }) {
+export default async function OnboardingReviewLayout({
+  children,
+}: {
+  readonly children: ReactNode;
+}) {
   const authService = await createAuthService();
   const { user, error } = await authService.getCurrentUser();
   const userIsPresident =
-    !error && !!user && isPresident(user.app_metadata?.role as string | undefined);
+    !error &&
+    !!user &&
+    isPresident(user.app_metadata?.role as string | undefined);
 
   if (!userIsPresident) {
     return (
@@ -15,7 +21,9 @@ export default async function PositionsLayout({ children }: { readonly children:
         <Card className="max-w-md">
           <CardHeader>
             <CardTitle>Access restricted</CardTitle>
-            <CardDescription>Only Presidents can manage application positions.</CardDescription>
+            <CardDescription>
+              Only Presidents can access onboarding review.
+            </CardDescription>
           </CardHeader>
         </Card>
       </div>

@@ -15,17 +15,14 @@ import {
 } from "lucide-react";
 import { isAdmin, isPresident } from "@uwdsc/common/constants";
 
-const EXEC_POS = ["president", "vp"];
-
 export const getAdminNavigation = (
-  position: string | null,
+  _position: string | null,
   role?: string | null,
   logisticsWindows?: {
     onboardingOpen: boolean;
     returningExecOpen: boolean;
   },
 ) => {
-  const isExec = EXEC_POS.some((r) => position?.toLowerCase().includes(r));
   const onboardingOpen = logisticsWindows?.onboardingOpen ?? false;
   const returningExecOpen = logisticsWindows?.returningExecOpen ?? false;
 
@@ -80,7 +77,7 @@ export const getAdminNavigation = (
               },
             ]
           : []),
-        ...(isExec
+        ...(isPresident(role)
           ? [
               {
                 name: "Onboarding review",

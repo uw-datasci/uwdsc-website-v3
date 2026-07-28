@@ -3,6 +3,7 @@ export interface ExecTeamRow {
   id: number;
   name: string;
   position_name: string;
+  is_vp: boolean;
   subteam_id: number;
   subteam_name: string;
   photo_url: string;

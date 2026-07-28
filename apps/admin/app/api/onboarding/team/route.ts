@@ -1,9 +1,9 @@
 import { ApiResponse } from "@uwdsc/common/utils";
 import { onboardingService } from "@uwdsc/admin";
 import { createHeadshotService } from "@/lib/services";
-import { withVpAccess } from "@/guards/withVpAccess";
+import { withPresAccess } from "@/guards/withPresAccess";
 
-export const GET = withVpAccess(async (request, context, user, scope) => {
+export const GET = withPresAccess(async (request) => {
   try {
     const termId = new URL(request.url).searchParams.get("termId");
 
@@ -11,9 +11,8 @@ export const GET = withVpAccess(async (request, context, user, scope) => {
       return ApiResponse.badRequest("termId is required");
     }
 
-    const subteamId = scope.isPresident ? undefined : scope.vpSubteamIds[0];
     const [rows, headshotService] = await Promise.all([
-      onboardingService.getTeamSubmissions(termId, subteamId),
+      onboardingService.getTeamSubmissions(termId),
       createHeadshotService(),
     ]);
     const rowsWithHeadshots = await Promise.all(

@@ -3,6 +3,7 @@ import {
   type ExecMember,
   type Subteam,
 } from "@uwdsc/common/types";
+import type { ExecTeamRow } from "../../types/team";
 import { TeamRepository } from "./team.repository";
 
 class TeamService {
@@ -29,56 +30,56 @@ class TeamService {
     return (a.name ?? "").localeCompare(b.name ?? "");
   }
 
-  /** True if the member is a VP (should appear first in the subteam list). */
-  private isVp(member: ExecMember): boolean {
-    return (member.position ?? "").startsWith("VP");
-  }
-
   /**
    * Get team grouped by subteams, formatted for the team page.
    * Subteams are ordered: Presidents first, CxC second, rest by name, Advisors last.
-   * Within each subteam, VPs are listed first.
+   * Within each subteam, VPs (`exec_positions.is_vp`) are listed first.
    */
   async getTeam(): Promise<Subteam[]> {
     const rows = await this.repository.getExecTeam();
 
-    const subteamMap = new Map<number, { id: number; name: string; members: ExecMember[] }>();
+    const rowsBySubteam = new Map<number, { id: number; name: string; rows: ExecTeamRow[] }>();
 
     for (const row of rows) {
-      const subteamId = row.subteam_id;
-      let subteam = subteamMap.get(subteamId);
-      if (!subteam) {
-        subteam = {
-          id: subteamId,
+      let group = rowsBySubteam.get(row.subteam_id);
+      if (!group) {
+        group = {
+          id: row.subteam_id,
           name: row.subteam_name,
-          members: [],
+          rows: [],
         };
-        subteamMap.set(subteamId, subteam);
+        rowsBySubteam.set(row.subteam_id, group);
       }
-      const storageKey = row.photo_url?.trim();
-      subteam.members.push({
-        id: row.id,
-        name: row.name,
-        position: row.position_name,
-        photo_url: storageKey
-          ? `${this.BUCKET_URL}/${storageKey}`
-          : EXEC_TEAM_PHOTO_PLACEHOLDER,
-        instagram: row.instagram ?? null,
-        updated_at: row.updated_at ?? null,
+      group.rows.push(row);
+    }
+
+    const subteams: Subteam[] = [];
+
+    for (const group of rowsBySubteam.values()) {
+      group.rows.sort((a, b) => {
+        if (a.is_vp !== b.is_vp) return a.is_vp ? -1 : 1;
+        return a.name.localeCompare(b.name);
+      });
+
+      subteams.push({
+        id: group.id,
+        name: group.name,
+        members: group.rows.map((row) => {
+          const storageKey = row.photo_url?.trim();
+          return {
+            id: row.id,
+            name: row.name,
+            position: row.position_name,
+            photo_url: storageKey
+              ? `${this.BUCKET_URL}/${storageKey}`
+              : EXEC_TEAM_PHOTO_PLACEHOLDER,
+            instagram: row.instagram ?? null,
+            updated_at: row.updated_at ?? null,
+          } satisfies ExecMember;
+        }),
       });
     }
 
-    for (const subteam of subteamMap.values()) {
-      subteam.members.sort((a, b) => {
-        const aRank = this.isVp(a) ? 0 : 1;
-        const bRank = this.isVp(b) ? 0 : 1;
-        const order = aRank - bRank;
-        if (order !== 0) return order;
-        return (a.name ?? "").localeCompare(b.name ?? "");
-      });
-    }
-
-    const subteams = Array.from(subteamMap.values());
     subteams.sort((a, b) => this.sortSubteams(a, b));
     return subteams;
   }

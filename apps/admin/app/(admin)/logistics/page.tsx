@@ -1,10 +1,16 @@
 import Link from "next/link";
+import { isPresident } from "@uwdsc/common/constants";
 import { onboardingService } from "@uwdsc/admin";
 import { isOnboardingWindowOpen, isReturningExecWindowOpen } from "@uwdsc/common/utils";
 import { Card, CardDescription, CardHeader, CardTitle } from "@uwdsc/ui";
 import { ChevronRight, ClipboardCheck, ClipboardList, UserCheck } from "lucide-react";
+import { createAuthService } from "@/lib/services";
 
 export default async function LogisticsPage() {
+  const authService = await createAuthService();
+  const { user } = await authService.getCurrentUser();
+  const userIsPresident = isPresident(user?.app_metadata?.role as string | undefined);
+
   const term = await onboardingService.getActiveTerm();
   const showOnboarding = isOnboardingWindowOpen(term);
   const showReturning = isReturningExecWindowOpen(term);
@@ -31,12 +37,16 @@ export default async function LogisticsPage() {
         },
       ]
       : []),
-    {
-      href: "/logistics/onboarding-review" as const,
-      title: "Onboarding review",
-      description: "Presidents and VPs: review team submissions and export headshots.",
-      icon: ClipboardCheck,
-    },
+    ...(userIsPresident
+      ? [
+        {
+          href: "/logistics/onboarding-review" as const,
+          title: "Onboarding review",
+          description: "Review team submissions and export headshots.",
+          icon: ClipboardCheck,
+        },
+      ]
+      : []),
   ];
 
   return (

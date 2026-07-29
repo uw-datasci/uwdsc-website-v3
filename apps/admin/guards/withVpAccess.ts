@@ -1,5 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 import type { QuestionScope } from "@uwdsc/common/types";
+import { isAdmin } from "@uwdsc/common/constants";
 import { ApiResponse } from "@uwdsc/common/utils";
 import { createAuthService } from "@/lib/services";
 import { withAuth, type WithAuthContext } from "./withAuth";
@@ -17,18 +18,15 @@ export function withVpAccess<C extends WithAuthContext = WithAuthContext>(
   handler: WithVpAccessHandler<C>,
 ): (request: Request, context?: C) => Promise<Response> {
   return withAuth<C>(async (request, context, user) => {
-    const authService = await createAuthService();
-    const scope = await authService.getScopeForUser(user.id, user.app_metadata?.role);
-    const hasVpAccess =
-      scope.hasVpExecRole ||
-      scope.isPresident ||
-      scope.vpPositionIds.length > 0;
-
-    if (!hasVpAccess) {
+    const role = user.app_metadata?.role as string | undefined;
+    if (!isAdmin(role)) {
       return ApiResponse.unauthorized(
-        "Only VPs and Presidents can access the application questions dashboard",
+        "Only users with the admin or president role can access this",
       );
     }
+
+    const authService = await createAuthService();
+    const scope = await authService.getScopeForUser(user.id, role);
     return handler(request, context, user, scope);
   });
 }

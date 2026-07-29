@@ -2,7 +2,7 @@ import JSZip from "jszip";
 import { ApiResponse } from "@uwdsc/common/utils";
 import { onboardingService } from "@uwdsc/admin";
 import { createHeadshotService } from "@/lib/services";
-import { withVpAccess } from "@/guards/withVpAccess";
+import { withPresAccess } from "@/guards/withPresAccess";
 
 const DEFAULT_FILENAME = "dsc-exec-headshots";
 
@@ -11,7 +11,7 @@ function getFileName(key: string): string {
   return name;
 }
 
-export const GET = withVpAccess(async (request) => {
+export const GET = withPresAccess(async (request) => {
   try {
     const termId = new URL(request.url).searchParams.get("termId");
 

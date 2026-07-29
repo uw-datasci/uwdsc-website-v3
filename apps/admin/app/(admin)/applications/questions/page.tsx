@@ -41,9 +41,7 @@ export default function QuestionsPage() {
       main = <QuestionsDashboardForbidden message={loadState.message} />;
       break;
     case "error":
-      main = (
-        <QuestionsDashboardError message={loadState.message} onRetry={load} />
-      );
+      main = <QuestionsDashboardError message={loadState.message} onRetry={load} />;
       break;
     case "ready": {
       const { questions, positions, isPresident } = loadState;
@@ -92,9 +90,8 @@ export default function QuestionsPage() {
       <div>
         <h1 className="text-3xl font-bold">Application Questions</h1>
         <p className="text-muted-foreground">
-          Manage the question bank used across application forms. Access is
-          limited to VPs; Presidents can edit all positions, other VPs only
-          their own.
+          Manage the question bank used across application forms. Access is limited to the admin
+          role; presidents can edit all positions, other admins only their own.
         </p>
       </div>
 

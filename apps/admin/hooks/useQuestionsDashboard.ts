@@ -11,10 +11,7 @@ import {
   getScopedQuestions,
   updateQuestion,
 } from "@/lib/api/questions";
-import {
-  questionSchema,
-  type QuestionFormValues,
-} from "@/lib/schemas/questions";
+import { questionSchema, type QuestionFormValues } from "@/lib/schemas/questions";
 
 export type QuestionsLoadState =
   | { status: "loading" }
@@ -67,13 +64,12 @@ export function useQuestionsDashboard() {
       });
     } catch (err: unknown) {
       const status = (err as { status?: number }).status;
-      const message =
-        err instanceof Error ? err.message : "Failed to load questions";
+      const message = err instanceof Error ? err.message : "Failed to load questions";
       if (status === 401) {
         setLoadState({
           status: "forbidden",
           message:
-            "Only VPs can manage application questions. Presidents see all positions; other VPs see their own.",
+            "Only users with the admin or president role can manage application questions. Presidents see all positions; other admins see their own.",
         });
         return;
       }
@@ -88,10 +84,7 @@ export function useQuestionsDashboard() {
   const openCreate = useCallback(() => {
     setDialogMode("create");
     setEditing(null);
-    const firstPos =
-      loadState.status === "ready"
-        ? (loadState.positions[0]?.id ?? null)
-        : null;
+    const firstPos = loadState.status === "ready" ? (loadState.positions[0]?.id ?? null) : null;
     form.reset({
       question_text: "",
       type: "textarea",
@@ -160,8 +153,7 @@ export function useQuestionsDashboard() {
         setEditing(null);
         await load();
       } catch (err: unknown) {
-        const message =
-          err instanceof Error ? err.message : "Something went wrong";
+        const message = err instanceof Error ? err.message : "Something went wrong";
         toast.error(message);
       } finally {
         setSaving(false);
@@ -179,8 +171,7 @@ export function useQuestionsDashboard() {
       setDeleteTarget(null);
       await load();
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "Failed to delete question";
+      const message = err instanceof Error ? err.message : "Failed to delete question";
       toast.error(message);
     } finally {
       setDeleting(false);

@@ -91,6 +91,7 @@ export class ProfileRepository extends BaseRepository {
           term,
           heard_from_where,
           is_math_soc_member,
+          profile_photo_key,
           ur.role AS role,
           (
             SELECT string_agg(ep.name, ' · ' ORDER BY et.id)
@@ -109,6 +110,27 @@ export class ProfileRepository extends BaseRepository {
     } catch (error: unknown) {
       console.error("Error fetching profile:", error);
       return null;
+    }
+  }
+
+  /**
+   * Set (or clear) the storage key of a user's profile photo.
+   * @param userId - The auth.users.id (UUID)
+   * @param key - The storage object key, or null to clear it
+   */
+  async updateProfilePhotoKey(userId: string, key: string | null): Promise<boolean> {
+    try {
+      const result = await this.sql`
+        UPDATE profiles
+        SET profile_photo_key = ${key}, updated_at = NOW()
+        WHERE id = ${userId}
+        RETURNING *
+      `;
+
+      return result.length > 0;
+    } catch (error: unknown) {
+      console.error("Error updating profile photo key:", error);
+      throw error;
     }
   }
 }

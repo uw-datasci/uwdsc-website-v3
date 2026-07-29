@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { cookies } from "next/headers";
 import { createSupabaseServerClient } from "@uwdsc/db";
-import { AuthService, ResumeService } from "@uwdsc/core";
+import { AuthService, ResumeService, ProfilePhotoService } from "@uwdsc/core";
 
 /**
  * Create a Supabase client with Next.js server-side cookies
@@ -33,4 +33,12 @@ export async function createAuthService() {
 export async function createResumeService() {
   const supabase = await createSupabaseClient();
   return new ResumeService(supabase);
+}
+
+/**
+ * Create ProfilePhotoService with server-side Supabase client
+ */
+export async function createProfilePhotoService() {
+  const supabase = await createSupabaseClient();
+  return new ProfilePhotoService(supabase);
 }

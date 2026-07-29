@@ -64,6 +64,26 @@ class ProfileService {
       throw new ApiError(`Failed to update profile: ${(error as Error).message}`, 500);
     }
   }
+
+  /**
+   * Set (or clear) the storage key of a user's profile photo.
+   */
+  async updateProfilePhotoKey(
+    userId: string,
+    key: string | null,
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      const result = await this.repository.updateProfilePhotoKey(userId, key);
+      if (!result) return { success: false, error: "Profile not found" };
+
+      return { success: true };
+    } catch (error) {
+      throw new ApiError(
+        `Failed to update profile photo: ${(error as Error).message}`,
+        500,
+      );
+    }
+  }
 }
 
 export const profileService = new ProfileService();

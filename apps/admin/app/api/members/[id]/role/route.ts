@@ -1,7 +1,7 @@
 import { ApiResponse } from "@uwdsc/common/utils";
 import { updateMemberRoleSchema } from "@/lib/schemas/membership";
 import { profileService } from "@uwdsc/admin";
-import { withPres } from "@/guards/withPres";
+import { withPresAccess } from "@/guards/withPresAccess";
 import type { WithAuthContext } from "@/guards/withAuth";
 
 interface Params extends WithAuthContext {
@@ -12,7 +12,7 @@ interface Params extends WithAuthContext {
  * PATCH /api/members/[id]/role
  * Update a member's role. President-only.
  */
-export const PATCH = withPres<Params>(async (request, { params }) => {
+export const PATCH = withPresAccess<Params>(async (request, { params }) => {
   try {
     const body = await request.json();
     const { id } = await params;
@@ -26,10 +26,16 @@ export const PATCH = withPres<Params>(async (request, { params }) => {
       );
     }
 
-    const result = await profileService.updateMemberRole(id, validationResult.data.role);
+    const result = await profileService.updateMemberRole(
+      id,
+      validationResult.data.role,
+    );
 
     if (!result.success) {
-      return ApiResponse.badRequest(result.error, "Failed to update member role");
+      return ApiResponse.badRequest(
+        result.error,
+        "Failed to update member role",
+      );
     }
 
     return ApiResponse.ok({

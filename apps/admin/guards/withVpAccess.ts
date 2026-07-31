@@ -14,12 +14,16 @@ export type WithVpAccessHandler<C = WithAuthContext> = (
   scope: QuestionScope,
 ) => Promise<Response> | Response;
 
-export function withVp<C extends WithAuthContext = WithAuthContext>(
+export function withVpAccess<C extends WithAuthContext = WithAuthContext>(
   handler: WithVpAccessHandler<C>,
 ): (request: Request, context?: C) => Promise<Response> {
   return withAuth<C>(async (request, context, user) => {
     const role = user.app_metadata?.role as string | undefined;
-    if (!isAdmin(role)) return ApiResponse.unauthorized("Only VPs can access this");
+    if (!isAdmin(role)) {
+      return ApiResponse.unauthorized(
+        "Only users with the admin or president role can access this",
+      );
+    }
 
     const authService = await createAuthService();
     const scope = await authService.getScopeForUser(user.id, role);

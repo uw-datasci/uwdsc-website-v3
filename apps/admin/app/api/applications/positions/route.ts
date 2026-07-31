@@ -1,7 +1,7 @@
 import { ApiError } from "@uwdsc/common/types";
 import { ApiResponse } from "@uwdsc/common/utils";
 import { applicationService } from "@uwdsc/admin";
-import { withPres } from "@/guards/withPres";
+import { withPresAccess } from "@/guards/withPresAccess";
 import { addPositionSchema } from "@/lib/schemas/positions";
 
 /**
@@ -9,7 +9,7 @@ import { addPositionSchema } from "@/lib/schemas/positions";
  * List every exec position (excluding Presidents) with its current
  * application-availability. President only.
  */
-export const GET = withPres(async () => {
+export const GET = withPresAccess(async () => {
   try {
     const positions = await applicationService.getManagablePositions();
     return ApiResponse.ok({ positions });
@@ -23,7 +23,7 @@ export const GET = withPres(async () => {
  * POST /api/applications/positions
  * Open an exec position for applications. President only.
  */
-export const POST = withPres(async (request) => {
+export const POST = withPresAccess(async (request) => {
   try {
     const body = await request.json();
     const parsed = addPositionSchema.safeParse(body);
@@ -33,7 +33,9 @@ export const POST = withPres(async (request) => {
       );
     }
 
-    const created = await applicationService.addAvailablePosition(parsed.data.positionId);
+    const created = await applicationService.addAvailablePosition(
+      parsed.data.positionId,
+    );
     return ApiResponse.ok({ success: true, availableId: created.id });
   } catch (error: unknown) {
     if (error instanceof ApiError) {

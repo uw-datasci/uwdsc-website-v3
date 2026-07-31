@@ -2,13 +2,13 @@ import { ApiError } from "@uwdsc/common/types";
 import { ApiResponse } from "@uwdsc/common/utils";
 import { hiringService } from "@uwdsc/admin";
 import { scheduleBroadcastCleanup } from "@/lib/server/scheduleBroadcastCleanup";
-import { withPres } from "@/guards/withPres";
+import { withPresAccess } from "@/guards/withPresAccess";
 
 /**
  * POST /api/applications/hiring/finalize
  * Finalize user roles for the new term based on accepted offers.
  */
-export const POST = withPres(async (request) => {
+export const POST = withPresAccess(async (request) => {
   try {
     const body = (await request.json().catch(() => null)) as unknown;
     const when2MeetLink =

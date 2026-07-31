@@ -51,7 +51,6 @@ export type MembershipActionType = "edit" | "markPaid" | "delete";
 
 export interface MembershipTableMeta {
   onAction: (type: MembershipActionType, member: Member) => void;
-  canDeleteMembers: boolean;
 }
 
 export const membershipColumns: ColumnDef<Member>[] = [
@@ -254,18 +253,16 @@ export const membershipColumns: ColumnDef<Member>[] = [
             <Banknote className="h-4 w-4" />
             <span className="sr-only">Mark as paid</span>
           </Button>
-          {meta.canDeleteMembers ? (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-destructive hover:text-destructive"
-              onClick={() => meta.onAction("delete", member)}
-              title="Delete"
-            >
-              <Trash2 className="h-4 w-4" />
-              <span className="sr-only">Delete</span>
-            </Button>
-          ) : null}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-destructive hover:text-destructive"
+            onClick={() => meta.onAction("delete", member)}
+            title="Delete"
+          >
+            <Trash2 className="h-4 w-4" />
+            <span className="sr-only">Delete</span>
+          </Button>
         </div>
       );
     },

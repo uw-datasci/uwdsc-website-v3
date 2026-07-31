@@ -1,7 +1,7 @@
 import { ApiResponse } from "@uwdsc/common/utils";
 import { isAdmin } from "@uwdsc/common/constants";
 import { returningExecService } from "@uwdsc/admin";
-import { withVp } from "@/guards/withVp";
+import { withVpAccess } from "@/guards/withVpAccess";
 import type { QuestionScope } from "@uwdsc/common/types";
 
 /**
@@ -9,7 +9,7 @@ import type { QuestionScope } from "@uwdsc/common/types";
  * Returns all returning-exec submissions for the active term.
  * Requires admin role + VP or president scope.
  */
-export const GET = withVp(async (_request, _context, user, scope: QuestionScope) => {
+export const GET = withVpAccess(async (_request, _context, user, scope: QuestionScope) => {
   if (!isAdmin(user.app_metadata?.role)) {
     return ApiResponse.unauthorized(
       "Only users with the admin role can view returning exec submissions",
@@ -17,7 +17,8 @@ export const GET = withVp(async (_request, _context, user, scope: QuestionScope)
   }
 
   try {
-    const { submissions } = await returningExecService.getAllSubmissionsForActiveTerm();
+    const { submissions } =
+      await returningExecService.getAllSubmissionsForActiveTerm();
     return ApiResponse.ok({
       submissions,
       positionReview: {

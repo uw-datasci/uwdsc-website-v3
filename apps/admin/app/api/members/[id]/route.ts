@@ -3,7 +3,6 @@ import { markAsPaidSchema, editMemberSchema } from "@/lib/schemas/membership";
 import { membershipService, profileService } from "@uwdsc/admin";
 import { eventService as coreEventService } from "@uwdsc/core";
 import { withAuth } from "@/guards/withAuth";
-import { withAdmin } from "@/guards/withAdmin";
 import type { WithAuthContext } from "@/guards/withAuth";
 
 /**
@@ -38,7 +37,10 @@ async function tryCheckInAtEvent(
 
     // No row inserted: either already checked in (treat as success) or a
     // transient conflict. Confirm via attendance lookup.
-    const alreadyIn = await coreEventService.getAttendanceForUser(eventId, profileId);
+    const alreadyIn = await coreEventService.getAttendanceForUser(
+      eventId,
+      profileId,
+    );
     return alreadyIn
       ? { checked_in: true }
       : { checked_in: false, check_in_error: "Could not check the member in." };
@@ -86,7 +88,9 @@ export const PATCH = withAuth<Params>(async (request, { params }) => {
 
       // Optionally check the member into the active event. Best-effort: paid is
       // already committed, so a check-in failure is reported, not thrown.
-      const checkIn = event_id ? await tryCheckInAtEvent(event_id, id) : { checked_in: false };
+      const checkIn = event_id
+        ? await tryCheckInAtEvent(event_id, id)
+        : { checked_in: false };
 
       return ApiResponse.ok({
         success: true,
@@ -124,9 +128,9 @@ export const PATCH = withAuth<Params>(async (request, { params }) => {
 /**
  * DELETE /api/members/[id]
  * Delete a member
- * Admin/president only
+ * Admin/exec only
  */
-export const DELETE = withAdmin<Params>(async (_request, { params }) => {
+export const DELETE = withAuth<Params>(async (_request, { params }) => {
   try {
     const { id } = await params;
 

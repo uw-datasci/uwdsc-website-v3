@@ -17,12 +17,14 @@ export type PresAccessHandler<C = WithAuthContext> = (
  *
  * Returns 401 if not signed in or if the user's role is not president.
  */
-export function withPres<C extends WithAuthContext = WithAuthContext>(
+export function withPresAccess<C extends WithAuthContext = WithAuthContext>(
   handler: PresAccessHandler<C>,
 ): (request: Request, context?: C) => Promise<Response> {
   return withAuth<C>(async (request, context, user) => {
     const role = user.app_metadata?.role as string | undefined;
-    if (!isPresident(role)) return ApiResponse.unauthorized("Only Presidents can access this");
+    if (!isPresident(role)) {
+      return ApiResponse.unauthorized("Only Presidents can access this");
+    }
 
     const authService = await createAuthService();
     const scope = await authService.getScopeForUser(user.id, role);

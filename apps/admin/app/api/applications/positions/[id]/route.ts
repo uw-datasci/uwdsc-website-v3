@@ -2,7 +2,7 @@ import { ApiError } from "@uwdsc/common/types";
 import { ApiResponse } from "@uwdsc/common/utils";
 import { applicationService } from "@uwdsc/admin";
 import type { WithAuthContext } from "@/guards/withAuth";
-import { withPresAccess } from "@/guards/withPresAccess";
+import { withPres } from "@/guards/withPres";
 
 interface Params extends WithAuthContext {
   params: Promise<{ id: string }>;
@@ -14,7 +14,7 @@ interface Params extends WithAuthContext {
  * application_positions_available). Blocked if applicants have already
  * selected it. President only.
  */
-export const DELETE = withPresAccess<Params>(async (_request, { params }) => {
+export const DELETE = withPres<Params>(async (_request, { params }) => {
   try {
     const { id } = await params;
     const availableId = Number(id);

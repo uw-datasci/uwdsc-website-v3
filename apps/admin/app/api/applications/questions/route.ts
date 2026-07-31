@@ -1,14 +1,14 @@
 import { ApiError } from "@uwdsc/common/types";
 import { ApiResponse } from "@uwdsc/common/utils";
 import { applicationService } from "@uwdsc/admin";
-import { withVpAccess } from "@/guards/withVpAccess";
+import { withVp } from "@/guards/withVp";
 import { questionSchema } from "@/lib/schemas/questions";
 
 /**
  * GET /api/applications/questions
  * List all questions within the VP's allowed scope.
  */
-export const GET = withVpAccess(async (_request, _context, _user, scope) => {
+export const GET = withVp(async (_request, _context, _user, scope) => {
   try {
     const [questions, positions] = await Promise.all([
       applicationService.getQuestionsForScope(scope),
@@ -33,7 +33,7 @@ export const GET = withVpAccess(async (_request, _context, _user, scope) => {
  * POST /api/applications/questions
  * Create a new question mapped to an allowed position.
  */
-export const POST = withVpAccess(async (request, _context, _user, scope) => {
+export const POST = withVp(async (request, _context, _user, scope) => {
   try {
     const body = await request.json();
     const parsed = questionSchema.safeParse(body);

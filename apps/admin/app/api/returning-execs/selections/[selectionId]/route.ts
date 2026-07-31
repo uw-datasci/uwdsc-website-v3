@@ -6,7 +6,7 @@ import {
 import { ApiResponse } from "@uwdsc/common/utils";
 import { isAdmin } from "@uwdsc/common/constants";
 import { returningExecService } from "@uwdsc/admin";
-import { withVpAccess } from "@/guards/withVpAccess";
+import { withVp } from "@/guards/withVp";
 
 interface ParamsContext {
   params: Promise<{ selectionId: string }>;
@@ -17,7 +17,7 @@ interface ParamsContext {
  * Update the review status of a returning-exec position selection.
  * VPs can update VP-level statuses; presidents can update all statuses.
  */
-export const PATCH = withVpAccess<ParamsContext>(
+export const PATCH = withVp<ParamsContext>(
   async (request, { params }, user, scope: QuestionScope) => {
     if (!isAdmin(user.app_metadata?.role)) {
       return ApiResponse.unauthorized(

@@ -43,6 +43,7 @@ import {
   TableBody,
   TableCell,
 } from "@uwdsc/ui";
+import { useAuth } from "@/contexts/AuthContext";
 import { exportToCsv } from "@/lib/utils/csv";
 import { globalMembershipFilter } from "@/lib/utils/table";
 import { useAuth } from "@/contexts/AuthContext";
@@ -217,6 +218,7 @@ export function MembershipsTable({
           />
         );
       case "delete":
+        if (!canDeleteMembers) return null;
         return (
           <DeleteMemberModal
             open

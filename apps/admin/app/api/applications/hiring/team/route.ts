@@ -1,13 +1,13 @@
 import { ApiError } from "@uwdsc/common/types";
 import { ApiResponse } from "@uwdsc/common/utils";
 import { hiringService } from "@uwdsc/admin";
-import { withPresAccess } from "@/guards/withPresAccess";
+import { withPres } from "@/guards/withPres";
 
 /**
  * GET /api/applications/hiring/team
  * Get the new exec team derived from Accepted Offer selections.
  */
-export const GET = withPresAccess(async () => {
+export const GET = withPres(async () => {
   try {
     const team = await hiringService.getNewExecTeam();
     return ApiResponse.ok({ team });

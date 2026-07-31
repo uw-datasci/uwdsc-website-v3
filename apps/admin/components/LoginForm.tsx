@@ -8,6 +8,7 @@ import { Button, Form, FormField, renderTextField } from "@uwdsc/ui";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { ALUM_ROLE, RETURNING_EXEC_PATH } from "@uwdsc/common/constants";
 import { safeRedirect } from "@uwdsc/common/utils";
+import { useAuth } from "@/contexts/AuthContext";
 import { signIn } from "@/lib/api/auth";
 import {
   LoginFormValues,
@@ -18,6 +19,7 @@ import {
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { mutate } = useAuth();
   const [loading, setLoading] = useState(false);
   const [loginError, setLoginError] = useState<{
     message: string;
@@ -35,6 +37,7 @@ export function LoginForm() {
 
     try {
       const result = await signIn({ email: data.email, password: data.password });
+      await mutate();
       const role = result.user?.app_metadata?.role as string | undefined;
       const fallback = role === ALUM_ROLE ? RETURNING_EXEC_PATH : "/members";
       const target = safeRedirect(searchParams.get("redirect"), fallback);

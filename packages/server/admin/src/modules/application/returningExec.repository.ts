@@ -113,8 +113,7 @@ export class ReturningExecRepository extends BaseRepository {
         ep.is_vp,
         st.name AS subteam_name
       FROM hiring.returning_exec_position_selections reps
-      JOIN hiring.application_positions_available apa ON apa.id = reps.position_id
-      JOIN org.exec_positions ep ON ep.id = apa.position_id
+      JOIN org.exec_positions ep ON ep.id = reps.position_id
       LEFT JOIN org.subteams st ON st.id = ep.subteam_id
       WHERE reps.submission_id IN ${this.sql(submissionIds)}
       ORDER BY reps.priority
@@ -192,8 +191,7 @@ export class ReturningExecRepository extends BaseRepository {
         ep.is_vp,
         st.name AS subteam_name
       FROM hiring.returning_exec_position_selections reps
-      JOIN hiring.application_positions_available apa ON apa.id = reps.position_id
-      JOIN org.exec_positions ep ON ep.id = apa.position_id
+      JOIN org.exec_positions ep ON ep.id = reps.position_id
       LEFT JOIN org.subteams st ON st.id = ep.subteam_id
       WHERE reps.submission_id IN ${this.sql(submissionIds)}
         AND reps.status IN ${this.sql(HIRING_STATUSES)}
@@ -230,23 +228,30 @@ export class ReturningExecRepository extends BaseRepository {
     const rows = await this.sql<
       { id: string; submission_id: string; position_id: number; status: ApplicationReviewStatus }[]
     >`
-      SELECT reps.id, reps.submission_id, apa.position_id AS position_id, reps.status
+      SELECT reps.id, reps.submission_id, reps.position_id, reps.status
       FROM hiring.returning_exec_position_selections reps
-      JOIN hiring.application_positions_available apa ON apa.id = reps.position_id
       WHERE reps.id = ${selectionId}
       LIMIT 1
     `;
     return rows[0] ?? null;
   }
 
-  async getAvailablePositions(): Promise<
-    { id: number; position_id: number; name: string }[]
+  /**
+   * Every exec position (excluding Presidents). Returning execs may express
+   * interest in any role, independent of hiring.application_positions_available
+   * (which only gates the public/external application).
+   */
+  async getSelectablePositions(): Promise<
+    { id: number; name: string; is_vp: boolean; subteam_name: string | null }[]
   > {
-    return this.sql<{ id: number; position_id: number; name: string }[]>`
-      SELECT apa.id, ep.id AS position_id, ep.name
-      FROM hiring.application_positions_available apa
-      JOIN org.exec_positions ep ON ep.id = apa.position_id
-      ORDER BY ep.name
+    return this.sql<
+      { id: number; name: string; is_vp: boolean; subteam_name: string | null }[]
+    >`
+      SELECT ep.id, ep.name, ep.is_vp, st.name AS subteam_name
+      FROM org.exec_positions ep
+      LEFT JOIN org.subteams st ON st.id = ep.subteam_id
+      WHERE st.name IS DISTINCT FROM 'Presidents'
+      ORDER BY st.name NULLS LAST, ep.is_vp DESC, ep.name ASC
     `;
   }
 
@@ -287,8 +292,7 @@ export class ReturningExecRepository extends BaseRepository {
         ep.is_vp,
         st.name AS subteam_name
       FROM hiring.returning_exec_position_selections reps
-      JOIN hiring.application_positions_available apa ON apa.id = reps.position_id
-      JOIN org.exec_positions ep ON ep.id = apa.position_id
+      JOIN org.exec_positions ep ON ep.id = reps.position_id
       LEFT JOIN org.subteams st ON st.id = ep.subteam_id
       WHERE reps.submission_id = ${submission_id}
       ORDER BY reps.priority

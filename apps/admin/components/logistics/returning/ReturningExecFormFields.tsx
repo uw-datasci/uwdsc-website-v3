@@ -41,7 +41,7 @@ const FOLLOW_UP_FIELDS = [
 
 const RADIO_GROUP_CLASS = "flex flex-col gap-3 pt-1 sm:flex-row sm:flex-wrap sm:gap-6";
 
-type SelectOption = { value: string; label: string };
+type SelectOption = { value: string; label: string; group?: string };
 
 type ReturningExecFormFieldsProps = Readonly<{
   form: UseFormReturn<ReturningExecFormValues>;

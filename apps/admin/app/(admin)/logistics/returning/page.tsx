@@ -15,7 +15,7 @@ import {
 
 import { getActiveTerm } from "@/lib/api/onboarding";
 import {
-  getAvailablePositionsForReturningExec,
+  getPositionsForReturningExec,
   getOwnReturningExecSubmission,
   upsertReturningExecSubmission,
 } from "@/lib/api/returningExecs";
@@ -49,7 +49,7 @@ export default function LogisticsReturningExecPage() {
   const router = useRouter();
   const { user } = useAuth();
   const [positions, setPositions] = useState<
-    Awaited<ReturnType<typeof getAvailablePositionsForReturningExec>>
+    Awaited<ReturnType<typeof getPositionsForReturningExec>>
   >([]);
   const [deferredReturnTermCode, setDeferredReturnTermCode] = useState("");
   const [loading, setLoading] = useState(true);
@@ -79,7 +79,7 @@ export default function LogisticsReturningExecPage() {
         setDeferredReturnTermCode(getDeferredReturnTermCode(term.code));
 
         const [positionsData, submissionData] = await Promise.all([
-          getAvailablePositionsForReturningExec(),
+          getPositionsForReturningExec(),
           getOwnReturningExecSubmission(),
         ]);
         setPositions(positionsData);
@@ -188,6 +188,7 @@ export default function LogisticsReturningExecPage() {
   const positionOptions = positions.map((p) => ({
     value: String(p.id),
     label: p.name,
+    group: p.subteam_name ?? "Other",
   }));
 
   const submitButtonLoadingText = submitted ? "Updating..." : "Submitting...";

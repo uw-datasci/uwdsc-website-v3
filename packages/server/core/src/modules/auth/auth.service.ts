@@ -292,9 +292,10 @@ export class AuthService {
    * exec_team membership — pass the caller's `app_metadata.role` so it can be resolved.
    */
   async getScopeForUser(userId: string, role?: string | null): Promise<QuestionScope> {
-    const [roles, vpPositionIds] = await Promise.all([
+    const [roles, vpPositionIds, vpExecPositionIds] = await Promise.all([
       this.repository.getExecTeamVpRolesForProfile(userId),
       this.repository.getVpApplicationPositionIdsForProfile(userId),
+      this.repository.getVpExecPositionIdsForProfile(userId),
     ]);
 
     const hasVpExecRole = roles.some((r) => r.is_vp);
@@ -327,6 +328,7 @@ export class AuthService {
       vpSubteamNames,
       vpSubteamIds,
       vpPositionIds,
+      vpExecPositionIds,
     };
   }
 }

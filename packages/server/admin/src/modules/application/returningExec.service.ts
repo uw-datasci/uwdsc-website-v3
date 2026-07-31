@@ -40,8 +40,10 @@ class ReturningExecService {
     }
   }
 
-  async getAvailablePositions(): Promise<{ id: number; position_id: number; name: string }[]> {
-    return this.repository.getAvailablePositions();
+  async getSelectablePositions(): Promise<
+    { id: number; name: string; is_vp: boolean; subteam_name: string | null }[]
+  > {
+    return this.repository.getSelectablePositions();
   }
 
   async getOwnSubmission(profile_id: string): Promise<ReturningExecOwnSubmission | null> {
@@ -111,7 +113,7 @@ class ReturningExecService {
     }
 
     if (!scope.isPresident) {
-      const allowed = scope.vpPositionIds.includes(selection.position_id);
+      const allowed = scope.vpExecPositionIds.includes(selection.position_id);
       if (!allowed) throw new ApiError("You can only update selections in your subteam", 403);
     }
 

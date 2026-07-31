@@ -58,8 +58,10 @@ export function PositionsManagementSection({
       <CardHeader className="pb-3">
         <CardTitle className="text-base">Positions</CardTitle>
         <CardDescription>
-          Toggle a role on to let applicants select it this cycle. VP roles
-          are listed first within each subteam.
+          Toggle a role on to let members select it on the public
+          application. VP roles are listed first within each subteam. This
+          does not affect the returning exec form — returning execs can
+          always choose any role.
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
@@ -91,7 +93,7 @@ export function PositionsManagementSection({
                         onCheckedChange={(checked) =>
                           onToggle(position, checked)
                         }
-                        aria-label={`Toggle ${position.name} availability for applications`}
+                        aria-label={`Toggle ${position.name} availability for the public application`}
                       />
                     </div>
                   );

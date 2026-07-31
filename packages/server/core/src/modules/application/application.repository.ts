@@ -106,6 +106,9 @@ export class ApplicationRepository extends BaseRepository {
         personal_email,
         location,
         club_experience,
+        linkedin_url,
+        github_url,
+        portfolio_url,
         status,
         submitted_at
       FROM hiring.applications
@@ -159,6 +162,9 @@ export class ApplicationRepository extends BaseRepository {
         personal_email,
         location,
         club_experience,
+        linkedin_url,
+        github_url,
+        portfolio_url,
         status,
         submitted_at
     `;
@@ -180,11 +186,15 @@ export class ApplicationRepository extends BaseRepository {
         year_of_study = COALESCE(${data.year_of_study ?? null}, year_of_study),
         personal_email = COALESCE(${data.personal_email ?? null}, personal_email),
         location = COALESCE(${data.location ?? null}, location),
-        club_experience = COALESCE(${data.club_experience ?? null}, club_experience)
+        club_experience = COALESCE(${data.club_experience ?? null}, club_experience),
+        linkedin_url = COALESCE(${data.linkedin_url ?? null}, linkedin_url),
+        github_url = COALESCE(${data.github_url ?? null}, github_url),
+        portfolio_url = COALESCE(${data.portfolio_url ?? null}, portfolio_url)
         ${data.submit ? this.sql`, status = 'submitted', submitted_at = NOW()` : this.sql``}
       WHERE id = ${id} AND profile_id = ${userId} AND status = 'draft'
       RETURNING id, profile_id, term_id, full_name, major, year_of_study,
-                personal_email, location, club_experience, status, submitted_at
+                personal_email, location, club_experience, linkedin_url,
+                github_url, portfolio_url, status, submitted_at
     `;
     return result[0] ?? null;
   }

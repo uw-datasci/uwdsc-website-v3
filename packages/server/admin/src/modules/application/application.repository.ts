@@ -70,6 +70,9 @@ export class ApplicationRepository extends BaseRepository {
         personal_email,
         location,
         club_experience,
+        linkedin_url,
+        github_url,
+        portfolio_url,
         status,
         submitted_at
       FROM hiring.applications

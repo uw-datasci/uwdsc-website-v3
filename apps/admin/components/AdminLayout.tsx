@@ -30,7 +30,7 @@ interface AdminLayoutProps {
 
 export function AdminLayout({ children }: AdminLayoutProps) {
   const router = useRouter();
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, mutate } = useAuth();
   const [positionName, setPositionName] = useState<string | null>(null);
   const [logisticsWindows, setLogisticsWindows] = useState({
     onboardingOpen: false,
@@ -81,6 +81,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const handleSignOut = async () => {
     try {
       await signOutApi();
+      await mutate();
     } finally {
       router.push("/login");
       router.refresh();

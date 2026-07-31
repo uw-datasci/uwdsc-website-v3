@@ -12,7 +12,13 @@ interface StreakSlideProps {
  * "Your longest streak" slide.
  *
  * Data injection points (see {@link StreakSlideData}):
- * - `slide.subheading` / `slide.captionLines`
+ * - `slide.heading`: the title at the top.
+ * - `slide.subheading`: the line under the title, e.g. "YOU'RE ON FIRE!!!".
+ * - `slide.captionLines`: supporting mono lines below the circle, one per array entry.
+ *
+ * Not driven by data: `slide.visual` is unused here. The circle below the
+ * subheading is a hardcoded `bg-[#ffd7df]` swatch, and the slide background
+ * is a hardcoded `bg-[#9cd8ea]`.
  */
 export function StreakSlide({ slide }: StreakSlideProps) {
   return (

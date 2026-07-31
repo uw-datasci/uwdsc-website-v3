@@ -11,9 +11,9 @@ permissions:
 
 jobs:
   dispatch:
+    if: ${{ github.event.pull_request.merged == true && github.event.pull_request.head.repo.full_name == github.repository }}
     name: Dispatch Docs Update
     uses: uw-datasci/nexus-workflows/.github/workflows/dispatch-docs-update.yml@v4
-    with:
       app-name: "🎯 Main Website"
       section-map: |
         apps/web => 🎯 Main Website

@@ -3,7 +3,6 @@ import { markAsPaidSchema, editMemberSchema } from "@/lib/schemas/membership";
 import { membershipService, profileService } from "@uwdsc/admin";
 import { eventService as coreEventService } from "@uwdsc/core";
 import { withAuth } from "@/guards/withAuth";
-import { withAdmin } from "@/guards/withAdmin";
 import type { WithAuthContext } from "@/guards/withAuth";
 
 /**
@@ -124,9 +123,9 @@ export const PATCH = withAuth<Params>(async (request, { params }) => {
 /**
  * DELETE /api/members/[id]
  * Delete a member
- * Admin/president only
+ * Admin/exec only
  */
-export const DELETE = withAdmin<Params>(async (_request, { params }) => {
+export const DELETE = withAuth<Params>(async (_request, { params }) => {
   try {
     const { id } = await params;
 

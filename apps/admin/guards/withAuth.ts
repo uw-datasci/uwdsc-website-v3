@@ -69,8 +69,9 @@ export function withAuth<C extends WithAuthContext = WithAuthContext>(
 
     const role = user.app_metadata?.role as string | undefined;
     const isAllowedAlum = options.allowAlum && role === ALUM_ROLE;
-    const isAllowed = !role || (!ADMIN_ROLES.has(role) && !isAllowedAlum);
-    if (!isAllowed) return ApiResponse.unauthorized("Admin or exec access required");
+    if (!role || (!ADMIN_ROLES.has(role) && !isAllowedAlum)) {
+      return ApiResponse.unauthorized("Admin or exec access required");
+    }
 
     if (role === "exec") {
       const membershipStatus = await membershipService.getMembershipStatus(user.id);

@@ -207,7 +207,7 @@ class ProfileService {
   }
 
   /**
-   * Delete a member (admin/president only — enforced at the API route).
+   * Delete a member (admin only)
    */
   async deleteMember(
     profileId: string,

@@ -1,9 +1,9 @@
 import { ApiResponse } from "@uwdsc/common/utils";
 import { onboardingService } from "@uwdsc/admin";
 import { createHeadshotService } from "@/lib/services";
-import { withPresAccess } from "@/guards/withPresAccess";
+import { withPres } from "@/guards/withPres";
 
-export const GET = withPresAccess(async (request) => {
+export const GET = withPres(async (request) => {
   try {
     const termId = new URL(request.url).searchParams.get("termId");
 
@@ -18,9 +18,7 @@ export const GET = withPresAccess(async (request) => {
     const rowsWithHeadshots = await Promise.all(
       rows.map(async (row) => {
         if (!row.submission?.headshot_url) return row;
-        const signedUrl = await headshotService.getHeadshotUrl(
-          row.submission.headshot_url,
-        );
+        const signedUrl = await headshotService.getHeadshotUrl(row.submission.headshot_url);
 
         return {
           ...row,

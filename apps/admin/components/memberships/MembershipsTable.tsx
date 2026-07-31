@@ -44,10 +44,11 @@ import {
   TableBody,
   TableCell,
 } from "@uwdsc/ui";
+import { useAuth } from "@/contexts/AuthContext";
 import { exportToCsv } from "@/lib/utils/csv";
 import { globalMembershipFilter } from "@/lib/utils/table";
 import { Event, Member, MembershipFilter } from "@uwdsc/common/types";
-import { FACULTY_FILTER_OPTIONS } from "@uwdsc/common/constants";
+import { FACULTY_FILTER_OPTIONS, isAdmin } from "@uwdsc/common/constants";
 
 interface MembershipsTableProps {
   readonly profiles: Member[];
@@ -113,6 +114,8 @@ export function MembershipsTable({
   initialAction,
   onRequestClearInitialAction,
 }: MembershipsTableProps) {
+  const { user } = useAuth();
+  const canDeleteMembers = isAdmin(user?.role);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -181,6 +184,7 @@ export function MembershipsTable({
       onAction: (type: MembershipActionType, member: Member) => {
         setActionModal({ type, member });
       },
+      canDeleteMembers,
     },
   });
 
@@ -221,6 +225,7 @@ export function MembershipsTable({
           />
         );
       case "delete":
+        if (!canDeleteMembers) return null;
         return (
           <DeleteMemberModal
             open

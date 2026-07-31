@@ -2,7 +2,7 @@ import { ApiError } from "@uwdsc/common/types";
 import { ApiResponse } from "@uwdsc/common/utils";
 import { applicationService } from "@uwdsc/admin";
 import type { WithAuthContext } from "@/guards/withAuth";
-import { withVpAccess } from "@/guards/withVpAccess";
+import { withVp } from "@/guards/withVp";
 import { questionSchema } from "@/lib/schemas/questions";
 
 interface Params extends WithAuthContext {
@@ -13,7 +13,7 @@ interface Params extends WithAuthContext {
  * PATCH /api/applications/questions/[id]
  * Update a scoped question.
  */
-export const PATCH = withVpAccess<Params>(async (request, { params }, _user, scope) => {
+export const PATCH = withVp<Params>(async (request, { params }, _user, scope) => {
   try {
     const { id } = await params;
     const positionQuestionId = Number(id);
@@ -59,7 +59,7 @@ export const PATCH = withVpAccess<Params>(async (request, { params }, _user, sco
  * DELETE /api/applications/questions/[id]
  * Delete a scoped question.
  */
-export const DELETE = withVpAccess<Params>(async (_request, { params }, _user, scope) => {
+export const DELETE = withVp<Params>(async (_request, { params }, _user, scope) => {
   try {
     const { id } = await params;
     const positionQuestionId = Number(id);

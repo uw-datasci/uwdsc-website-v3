@@ -1,13 +1,13 @@
 import { ApiError } from "@uwdsc/common/types";
 import { ApiResponse } from "@uwdsc/common/utils";
 import { hiringService } from "@uwdsc/admin";
-import { withPresAccess } from "@/guards/withPresAccess";
+import { withPres } from "@/guards/withPres";
 
 /**
  * GET /api/applications/hiring
  * Get all applicants with position selections for the hiring dashboard.
  */
-export const GET = withPresAccess(async () => {
+export const GET = withPres(async () => {
   try {
     const applicants = await hiringService.getHiringApplicants();
     return ApiResponse.ok({ applicants });

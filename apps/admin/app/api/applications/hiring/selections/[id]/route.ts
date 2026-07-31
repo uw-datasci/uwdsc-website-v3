@@ -5,7 +5,7 @@ import {
 } from "@uwdsc/common/types";
 import { ApiResponse } from "@uwdsc/common/utils";
 import { hiringService, returningExecService } from "@uwdsc/admin";
-import { withPresAccess } from "@/guards/withPresAccess";
+import { withPres } from "@/guards/withPres";
 
 interface ParamsContext {
   params: Promise<{ id: string }>;
@@ -17,7 +17,7 @@ interface ParamsContext {
  * Dispatches to the correct service based on whether the selection belongs to
  * a regular application or a returning-exec submission.
  */
-export const PATCH = withPresAccess<ParamsContext>(
+export const PATCH = withPres<ParamsContext>(
   async (request, { params }, _user, scope: QuestionScope) => {
     try {
       const { id } = await params;

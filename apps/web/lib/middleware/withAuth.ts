@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { User } from "@supabase/supabase-js";
-import { safeRedirect } from "../auth/safeRedirect";
+import { safeRedirect } from "@uwdsc/common/utils";
 
 /**
  * Middleware to redirect authenticated users away from auth pages

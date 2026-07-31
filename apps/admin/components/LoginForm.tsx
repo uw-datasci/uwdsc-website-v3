@@ -6,6 +6,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Form, FormField, renderTextField } from "@uwdsc/ui";
 import { AlertCircle, Loader2 } from "lucide-react";
+import { ALUM_ROLE, RETURNING_EXEC_PATH } from "@uwdsc/common/constants";
+import { safeRedirect } from "@uwdsc/common/utils";
 import { signIn } from "@/lib/api/auth";
 import {
   LoginFormValues,
@@ -22,8 +24,6 @@ export function LoginForm() {
     needsVerification?: boolean;
   } | null>(null);
 
-  const redirect = searchParams.get("redirect") || "/members";
-
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: loginDefaultValues,
@@ -34,8 +34,11 @@ export function LoginForm() {
     setLoginError(null);
 
     try {
-      await signIn({ email: data.email, password: data.password });
-      router.push(redirect);
+      const result = await signIn({ email: data.email, password: data.password });
+      const role = result.user?.app_metadata?.role as string | undefined;
+      const fallback = role === ALUM_ROLE ? RETURNING_EXEC_PATH : "/members";
+      const target = safeRedirect(searchParams.get("redirect"), fallback);
+      router.push(target);
       router.refresh();
     } catch (err) {
       const raw =

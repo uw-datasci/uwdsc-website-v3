@@ -12,9 +12,17 @@ interface MembershipSlideProps {
  * "Your first day w DSC" slide.
  *
  * Data injection points (see {@link MembershipSlideData}):
+ * - `slide.eyebrow`: small label above the join date.
  * - `slide.joinDate`: the member's start date.
- * - `slide.headline`: the term-count sentence
- * - `slide.caption`: the day-count sentence
+ * - `slide.headline`: the term-count sentence, written as free text.
+ * - `slide.caption`: the day-count sentence, written as free text.
+ *
+ * Not driven by data: `slide.visual` is unused here. The mushroom, flower,
+ * leaf and ladybug doodles above and below the text are rendered by
+ * `OrnamentSvg` below, positioned via the `topOrnaments`/`bottomOrnaments`
+ * arrays. Edit those arrays to change doodle placement, size or rotation,
+ * or edit `OrnamentSvg`'s `fill` values to recolor a shape. The slide
+ * background is a hardcoded `bg-[#ccda96]`.
  */
 export function MembershipSlide({ slide }: MembershipSlideProps) {
   type Ornament = {

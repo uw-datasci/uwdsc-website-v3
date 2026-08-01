@@ -15,10 +15,7 @@ import type { ManagablePosition } from "@uwdsc/common/types";
 interface PositionsManagementSectionProps {
   readonly positions: ManagablePosition[];
   readonly pendingIds: ReadonlySet<number>;
-  readonly onToggle: (
-    position: ManagablePosition,
-    nextAvailable: boolean,
-  ) => void;
+  readonly onToggle: (position: ManagablePosition, nextAvailable: boolean) => void;
 }
 
 const UNASSIGNED_SUBTEAM = "Other";
@@ -46,11 +43,7 @@ export function PositionsManagementSection({
   }, [positions]);
 
   if (positions.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        No positions are configured yet.
-      </p>
-    );
+    return <p className="text-sm text-muted-foreground">No positions are configured yet.</p>;
   }
 
   return (
@@ -58,10 +51,9 @@ export function PositionsManagementSection({
       <CardHeader className="pb-3">
         <CardTitle className="text-base">Positions</CardTitle>
         <CardDescription>
-          Toggle a role on to let members select it on the public
-          application. VP roles are listed first within each subteam. This
-          does not affect the returning exec form — returning execs can
-          always choose any role.
+          Toggle a role on to let members select it on the public application. VP roles are
+          listed first within each subteam. This does not affect the returning exec form —
+          returning execs can choose any role except Presidents and Advisors.
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
@@ -71,9 +63,7 @@ export function PositionsManagementSection({
               key={subteamName}
               className="mb-4 break-inside-avoid space-y-3 rounded-md border p-3"
             >
-              <h3 className="text-sm font-medium text-muted-foreground">
-                {subteamName}
-              </h3>
+              <h3 className="text-sm font-medium text-muted-foreground">{subteamName}</h3>
               <div className="space-y-2">
                 {subteamPositions.map((position) => {
                   const pending = pendingIds.has(position.exec_position_id);
@@ -90,9 +80,7 @@ export function PositionsManagementSection({
                         id={inputId}
                         checked={position.is_available}
                         disabled={pending}
-                        onCheckedChange={(checked) =>
-                          onToggle(position, checked)
-                        }
+                        onCheckedChange={(checked) => onToggle(position, checked)}
                         aria-label={`Toggle ${position.name} availability for the public application`}
                       />
                     </div>

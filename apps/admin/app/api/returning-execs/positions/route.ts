@@ -4,8 +4,8 @@ import { withAuth } from "@/guards/withAuth";
 
 /**
  * GET /api/returning-execs/positions
- * Returns every exec position (excluding Presidents) for the returning exec
- * form. Not gated by the public application's position toggles.
+ * Returns every exec position (excluding Presidents and Advisors) for the
+ * returning exec form. Not gated by the public application's position toggles.
  */
 export const GET = withAuth(
   async () => {

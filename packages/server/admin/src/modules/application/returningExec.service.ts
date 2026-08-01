@@ -76,6 +76,26 @@ class ReturningExecService {
       throw new ApiError("Duplicate priorities in position selections", 400);
     }
 
+    const positionIds = data.position_selections.map((s) => s.position_id);
+    const uniquePositionIds = new Set(positionIds);
+    if (uniquePositionIds.size !== positionIds.length) {
+      throw new ApiError("Cannot select the same position more than once", 400);
+    }
+
+    if (positionIds.some((id) => !Number.isInteger(id) || id <= 0)) {
+      throw new ApiError("Invalid position selection", 400);
+    }
+
+    if (positionIds.length > 0) {
+      const allowedIds = await this.repository.filterSelectablePositionIds(positionIds);
+      if (allowedIds.length !== positionIds.length) {
+        throw new ApiError(
+          "One or more selected positions are not valid returning-exec role choices",
+          400,
+        );
+      }
+    }
+
     return this.repository.upsertSubmission(profile_id, { ...data, term_id: term.id });
   }
 

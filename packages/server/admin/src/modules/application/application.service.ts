@@ -168,6 +168,9 @@ class ApplicationService {
   /**
    * Close a position for applications. Blocked if any applicant has already
    * selected it, to avoid orphaning submitted application data.
+   *
+   * Only affects the external application. Returning-exec role preferences
+   * reference `org.exec_positions` directly and are intentionally unaffected.
    */
   async removeAvailablePosition(availableId: number): Promise<void> {
     const selectionCount =

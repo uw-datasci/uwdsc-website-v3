@@ -157,7 +157,15 @@ export const isStepValid = (
       );
     }
     case 4: // Resume
-      return !errors.resumeKey && !!form.watch("resumeKey");
+      return (
+        !errors.resumeKey &&
+        !errors.linkedin_url &&
+        !errors.github_url &&
+        !errors.portfolio_url &&
+        !!form.watch("resumeKey") &&
+        !!form.watch("linkedin_url") &&
+        !!form.watch("github_url")
+      );
     default:
       return true;
   }

@@ -45,6 +45,9 @@ export interface Application {
   personal_email: string | null;
   location: string | null;
   club_experience: boolean | null;
+  linkedin_url: string | null;
+  github_url: string | null;
+  portfolio_url: string | null;
   status: ApplicationStatus;
   submitted_at: string;
 }

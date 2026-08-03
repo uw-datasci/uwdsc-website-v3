@@ -38,6 +38,11 @@ export const applicationSchema = z
     position_3_answers: z
       .record(z.string(), z.string().trim().min(1, "Answer is required"))
       .optional(),
+    linkedin_url: z.url("Enter a valid LinkedIn URL"),
+    github_url: z.url("Enter a valid GitHub URL"),
+    portfolio_url: z
+      .union([z.literal(""), z.url("Enter a valid URL")])
+      .optional(),
     resumeKey: z.string().min(1, "Please upload your resume"),
   })
   .refine(
@@ -115,5 +120,8 @@ export const applicationDefaultValues: Partial<AppFormValues> = {
   position_2_answers: {},
   position_3: "",
   position_3_answers: {},
+  linkedin_url: "",
+  github_url: "",
+  portfolio_url: "",
   resumeKey: "",
 };

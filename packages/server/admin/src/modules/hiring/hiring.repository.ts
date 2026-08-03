@@ -129,8 +129,7 @@ export class HiringRepository extends BaseRepository {
         ep.is_vp,
         st.name AS subteam_name
       FROM hiring.returning_exec_position_selections reps
-      JOIN hiring.application_positions_available apa ON apa.id = reps.position_id
-      JOIN org.exec_positions ep ON ep.id = apa.position_id
+      JOIN org.exec_positions ep ON ep.id = reps.position_id
       LEFT JOIN org.subteams st ON st.id = ep.subteam_id
       WHERE reps.submission_id IN ${this.sql(returningIds)}
         AND reps.status IN ${this.sql(HIRING_STATUSES)}

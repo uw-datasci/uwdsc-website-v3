@@ -70,6 +70,9 @@ export class ApplicationRepository extends BaseRepository {
         personal_email,
         location,
         club_experience,
+        linkedin_url,
+        github_url,
+        portfolio_url,
         status,
         submitted_at
       FROM hiring.applications
@@ -268,6 +271,10 @@ export class ApplicationRepository extends BaseRepository {
     return row?.count ?? 0;
   }
 
+  /**
+   * Only affects the external application. Returning-exec role preferences
+   * reference `org.exec_positions` directly and are intentionally unaffected.
+   */
   async removeAvailablePosition(availableId: number): Promise<boolean> {
     const deleted = await this.sql<{ id: number }[]>`
       DELETE FROM hiring.application_positions_available

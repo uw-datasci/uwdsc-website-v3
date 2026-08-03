@@ -12,7 +12,17 @@ import {
   SelectValue,
   cn,
 } from "@uwdsc/ui";
-import { ExternalLink, User, MapPin, GraduationCap, Mail, Briefcase } from "lucide-react";
+import {
+  ExternalLink,
+  User,
+  MapPin,
+  GraduationCap,
+  Mail,
+  Briefcase,
+  Linkedin,
+  Github,
+  Globe,
+} from "lucide-react";
 import type {
   ApplicationListItem,
   ApplicationReviewStatus,
@@ -76,6 +86,12 @@ export function ApplicationDetail({
 
   const clubExperienceLabel = getClubExperienceLabel(application.club_experience);
   const showStatusSelect = !!statusOptions && statusOptions.length > 0 && !!onStatusChange;
+  const hasLinks = !!(
+    application.resume_url ||
+    application.linkedin_url ||
+    application.github_url ||
+    application.portfolio_url
+  );
 
   const vpApaIds = new Set(positionReview?.vpPositionIds ?? []);
   const editableReviewOptions = VP_REVIEW_STATUS_LIST;
@@ -163,24 +179,41 @@ export function ApplicationDetail({
               label="Club Experience"
               value={clubExperienceLabel}
             />
-            {application.resume_url && (
-              <div className="flex items-center gap-2 text-sm">
-                <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Resume</p>
-                  <a
-                    href={application.resume_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary underline underline-offset-2 hover:text-primary/80 text-xs"
-                  >
-                    View Resume
-                  </a>
-                </div>
-              </div>
-            )}
           </div>
         </div>
+
+        {hasLinks && (
+          <>
+            <Separator />
+
+            {/* Links */}
+            <div>
+              <h3 className="text-sm font-semibold mb-3">Links</h3>
+              <div className="flex flex-wrap gap-x-6 gap-y-3">
+                <LinkItem
+                  icon={<ExternalLink className="h-4 w-4" />}
+                  label="Resume"
+                  href={application.resume_url}
+                />
+                <LinkItem
+                  icon={<Linkedin className="h-4 w-4" />}
+                  label="LinkedIn"
+                  href={application.linkedin_url}
+                />
+                <LinkItem
+                  icon={<Github className="h-4 w-4" />}
+                  label="GitHub"
+                  href={application.github_url}
+                />
+                <LinkItem
+                  icon={<Globe className="h-4 w-4" />}
+                  label="Portfolio"
+                  href={application.portfolio_url}
+                />
+              </div>
+            </div>
+          </>
+        )}
 
         <Separator />
 
@@ -345,6 +378,32 @@ function InfoItem({ icon, label, value }: Readonly<InfoItemProps>) {
       <div className="min-w-0">
         <p className="text-xs text-muted-foreground">{label}</p>
         <p className="truncate">{value}</p>
+      </div>
+    </div>
+  );
+}
+
+interface LinkItemProps {
+  icon: React.ReactNode;
+  label: string;
+  href: string | null;
+}
+
+function LinkItem({ icon, label, href }: Readonly<LinkItemProps>) {
+  if (!href) return null;
+  return (
+    <div className="flex items-center gap-2 text-sm">
+      <span className="text-muted-foreground shrink-0">{icon}</span>
+      <div>
+        <p className="text-xs text-muted-foreground">{label}</p>
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary underline underline-offset-2 hover:text-primary/80 text-xs"
+        >
+          View {label}
+        </a>
       </div>
     </div>
   );

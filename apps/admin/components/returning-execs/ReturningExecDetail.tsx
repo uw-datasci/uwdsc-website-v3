@@ -51,7 +51,7 @@ export function ReturningExecDetail({
     );
   }
 
-  const vpTeamPositionIds = new Set(positionReview?.vpPositionIds ?? []);
+  const vpTeamPositionIds = new Set(positionReview?.vpExecPositionIds ?? []);
 
   return (
     <ScrollArea className="h-full">
@@ -144,7 +144,7 @@ export function ReturningExecDetail({
                     <ReturningExecPositionSelectionCard
                       key={sel.id}
                       sel={sel}
-                      vpApaIds={vpTeamPositionIds}
+                      vpExecPositionIds={vpTeamPositionIds}
                       positionReview={positionReview}
                       onSelectionStatusChange={onSelectionStatusChange}
                       updatingSelectionId={updatingSelectionId}
@@ -206,7 +206,7 @@ export function ReturningExecDetail({
 
 interface ReturningExecPositionSelectionCardProps {
   readonly sel: ReturningExecPositionSelection;
-  readonly vpApaIds: ReadonlySet<number>;
+  readonly vpExecPositionIds: ReadonlySet<number>;
   readonly positionReview: PositionReviewScopeDto | null | undefined;
   readonly onSelectionStatusChange?: (
     selectionId: string,
@@ -217,7 +217,7 @@ interface ReturningExecPositionSelectionCardProps {
 
 function ReturningExecPositionSelectionCard({
   sel,
-  vpApaIds,
+  vpExecPositionIds,
   positionReview,
   onSelectionStatusChange,
   updatingSelectionId,
@@ -226,7 +226,7 @@ function ReturningExecPositionSelectionCard({
   const canEdit =
     !!positionReview?.canUse &&
     !!onSelectionStatusChange &&
-    (positionReview.isPresident || vpApaIds.has(sel.position_id)) &&
+    (positionReview.isPresident || vpExecPositionIds.has(sel.position_id)) &&
     statusAllowsVpEdit;
   const showReadOnly = !!positionReview?.canUse && !canEdit;
 

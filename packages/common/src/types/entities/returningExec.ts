@@ -1,11 +1,7 @@
 import type { ApplicationReviewStatus } from "../shared/enums";
 
 /** Presence / location for next term on the returning-exec form. */
-export type InPersonNextTermStatus =
-  | "yes"
-  | "no_outside_gta"
-  | "no_in_gta"
-  | "not_sure";
+export type InPersonNextTermStatus = "yes" | "no_outside_gta" | "no_in_gta" | "not_sure";
 
 export const IN_PERSON_NEXT_TERM_LABELS: Record<InPersonNextTermStatus, string> = {
   yes: "Yes",

@@ -20,6 +20,9 @@ export interface ApplicationUpdatePayload {
   personal_email?: string;
   location?: string;
   club_experience?: boolean;
+  linkedin_url?: string;
+  github_url?: string;
+  portfolio_url?: string;
   position_selections?: PositionSelectionInput[];
   answers?: AnswerInput[];
   /** When true, marks the application as submitted after applying updates */
@@ -73,6 +76,9 @@ export interface UpdateApplicationData {
   personal_email?: string;
   location?: string;
   club_experience?: boolean;
+  linkedin_url?: string;
+  github_url?: string;
+  portfolio_url?: string;
   /** When true, sets status to 'submitted' and submitted_at to NOW() */
   submit?: boolean;
 }

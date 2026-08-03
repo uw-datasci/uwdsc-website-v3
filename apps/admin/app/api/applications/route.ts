@@ -37,6 +37,7 @@ export const GET = withAuth(async (_request, _context, user) => {
         canUse: canUsePositionReview,
         isPresident: scope.isPresident,
         vpPositionIds: scope.vpPositionIds,
+        vpExecPositionIds: scope.vpExecPositionIds,
       },
     });
   } catch (error: unknown) {

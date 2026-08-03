@@ -161,6 +161,9 @@ export default function ApplyPage() {
           position_2_answers: pos2Answers,
           position_3: pos3?.position_id ?? "",
           position_3_answers: pos3Answers,
+          linkedin_url: existing.linkedin_url ?? "",
+          github_url: existing.github_url ?? "",
+          portfolio_url: existing.portfolio_url ?? "",
           resumeKey: resumeStatus.url ?? "",
         });
 
@@ -218,6 +221,12 @@ export default function ApplyPage() {
           return {
             position_selections: buildPositionSelections(values),
             answers: collectAllAnswers(values),
+          };
+        case 4:
+          return {
+            linkedin_url: values.linkedin_url,
+            github_url: values.github_url,
+            portfolio_url: values.portfolio_url ?? "",
           };
         default:
           return {};

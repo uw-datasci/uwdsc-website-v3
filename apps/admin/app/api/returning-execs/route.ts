@@ -25,6 +25,7 @@ export const GET = withVpAccess(async (_request, _context, user, scope: Question
         canUse: true,
         isPresident: scope.isPresident,
         vpPositionIds: scope.vpPositionIds,
+        vpExecPositionIds: scope.vpExecPositionIds,
       },
     });
   } catch (error) {

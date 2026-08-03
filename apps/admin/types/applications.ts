@@ -4,6 +4,7 @@ export interface PositionReviewScopeDto {
   canUse: boolean;
   isPresident: boolean;
   vpPositionIds: number[];
+  vpExecPositionIds: number[];
 }
 
 export interface ApplicationsListResponse {

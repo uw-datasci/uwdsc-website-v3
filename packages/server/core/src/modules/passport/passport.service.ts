@@ -1,5 +1,6 @@
 import { createHmac } from "node:crypto";
 import { ApiError } from "@uwdsc/common/types";
+import type { ScanOutcome } from "@uwdsc/common/types";
 import { PassportRepository } from "./passport.repository";
 
 const TIME_STEP_SECONDS = 30;
@@ -15,12 +16,6 @@ const ROLE_DROP_RATE: Record<string, number> = {
 
 /** Base probability gained per lifetime scan (1%). */
 const BASE_RATE_PER_SCAN = 0.01;
-
-export type ScanOutcome =
-  | { outcome: "already_scanned" }
-  | { outcome: "already_has_stamp" }
-  | { outcome: "lost"; probability: number }
-  | { outcome: "won"; probability: number; stampId: string };
 
 class PassportService {
   private readonly repository = new PassportRepository();

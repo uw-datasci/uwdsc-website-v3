@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { createSupabaseBrowserClient } from "@uwdsc/db";
 import { getOrCreateVisitorId } from "@/lib/tracking/visitorId";
 
 export function PageViewTracker() {
@@ -17,15 +16,18 @@ export function PageViewTracker() {
     let cancelled = false;
 
     const logPageView = async () => {
-      const supabase = createSupabaseBrowserClient();
-      const { error } = await supabase.rpc("log_page_view", {
-        p_path: pathname,
-        p_visitor_id: visitorId,
+      const response = await fetch("/api/analytics/page-view", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: pathname,
+          visitor_id: visitorId,
+        }),
       });
 
-      if (cancelled || !error) return;
+      if (cancelled || response.ok) return;
 
-      console.error("Failed to log page view:", error);
+      console.error("Failed to log page view:", response.status);
     };
 
     void logPageView();

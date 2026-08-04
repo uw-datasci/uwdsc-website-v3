@@ -11,7 +11,10 @@ import {
 } from "@/components/passport";
 import { useAuth } from "@/contexts/AuthContext";
 import { getMembershipStatus, updateUserProfile } from "@/lib/api/profile";
-import { FACULTY_LABELS, FACULTY_PROFILE_LABEL_TO_VALUE } from "@uwdsc/common/constants";
+import {
+  FACULTY_LABELS,
+  FACULTY_PROFILE_LABEL_TO_VALUE,
+} from "@uwdsc/common/constants";
 import {
   passportProfileEditSchema,
   passportProfileEditDefaultValues,
@@ -22,7 +25,8 @@ import { Spinner } from "@uwdsc/ui";
 
 export default function PassportPage() {
   const { user, isLoading: authLoading, mutate } = useAuth();
-  const [membershipStatus, setMembershipStatus] = useState<MembershipStatus | null>(null);
+  const [membershipStatus, setMembershipStatus] =
+    useState<MembershipStatus | null>(null);
   const [membershipLoading, setMembershipLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -89,11 +93,16 @@ export default function PassportPage() {
   }
 
   const initials =
-    [user?.first_name?.[0], user?.last_name?.[0]].filter(Boolean).join("").toUpperCase() || "?";
+    [user?.first_name?.[0], user?.last_name?.[0]]
+      .filter(Boolean)
+      .join("")
+      .toUpperCase() || "?";
   const displayName =
-    [user?.first_name, user?.last_name].filter(Boolean).join(" ") || "Unknown Member";
+    [user?.first_name, user?.last_name].filter(Boolean).join(" ") ||
+    "Unknown Member";
   const isMember = membershipStatus?.has_membership;
-  const facultyLabel = user?.faculty == null ? undefined : FACULTY_LABELS[user.faculty];
+  const facultyLabel =
+    user?.faculty == null ? undefined : FACULTY_LABELS[user.faculty];
 
   return (
     <main className="flex min-h-dvh flex-col items-center px-4 pb-16 pt-28 lg:pt-32">

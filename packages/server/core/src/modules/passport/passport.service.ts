@@ -28,6 +28,21 @@ class PassportService {
     scannerProfileId: string,
     params: { membershipId: string; eventId: string; token: string },
   ): Promise<ScanOutcome> {
+    try {
+      return await this.processScan(scannerProfileId, params);
+    } catch (error) {
+      if (error instanceof ApiError) throw error;
+      throw new ApiError(
+        `Failed to process scan: ${(error as Error).message}`,
+        500,
+      );
+    }
+  }
+
+  private async processScan(
+    scannerProfileId: string,
+    params: { membershipId: string; eventId: string; token: string },
+  ): Promise<ScanOutcome> {
     const membership = await this.repository.getActiveMembershipById(
       params.membershipId,
     );

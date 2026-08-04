@@ -36,8 +36,7 @@ export async function buildPassportQRValue({
   eventId: string | null;
 }): Promise<string> {
   const token = await generateCheckInToken(userId);
-  const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL ?? "http://localhost:3001";
-  const url = new URL("/checkin", adminUrl);
+  const url = new URL("/passport", window.location.origin);
 
   if (membershipId) url.searchParams.set("membership_id", membershipId);
   if (eventId) url.searchParams.set("event_id", eventId);

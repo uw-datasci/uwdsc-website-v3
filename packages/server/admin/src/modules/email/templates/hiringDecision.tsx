@@ -25,7 +25,7 @@ const SOCIAL_LINKS = [
     label: "LinkedIn",
     href: "https://www.linkedin.com/company/waterloo-data-science-club/",
   },
-  { label: "Discord", href: "https://discord.gg/VFVkyP5mgm" },
+  { label: "Discord", href: "https://discord.gg/2gBB3ufyCR" },
   { label: "Website", href: "https://uwdatascience.ca" },
 ] as const;
 

@@ -21,8 +21,8 @@ const CONTACT_BUTTONS = [
   },
   {
     id: "discord",
-    label: "discord.gg/VFVkyP5mgm",
-    href: "https://discord.gg/VFVkyP5mgm",
+    label: "discord.gg/2gBB3ufyCR",
+    href: "https://discord.gg/2gBB3ufyCR",
     icon: <RxDiscordLogo size={24} className="text-white" />,
   },
 ];

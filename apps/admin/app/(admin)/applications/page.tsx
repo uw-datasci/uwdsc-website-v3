@@ -12,6 +12,7 @@ import {
   ApplicationsHeader,
 } from "@/components/applications";
 import { getAllApplications, updatePositionSelectionReviewStatus } from "@/lib/api";
+import { SUBMITTED_SUBMISSION_STATUS_FILTER } from "@/constants/applications";
 import type { PositionReviewScopeDto } from "@/types/applications";
 import type { ApplicationListItem, ApplicationReviewStatus } from "@uwdsc/common/types";
 
@@ -61,7 +62,9 @@ export default function ApplicationsPage() {
         } = await getAllApplications();
         setApplications(list);
         setStatusCounts(statusCounts);
-        setFilteredApplications(list);
+        setFilteredApplications(
+          list.filter((app) => app.status === SUBMITTED_SUBMISSION_STATUS_FILTER),
+        );
         setPositionReview(pr);
       } catch (err) {
         console.error("Error fetching applications:", err);

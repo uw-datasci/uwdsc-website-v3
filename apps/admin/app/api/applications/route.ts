@@ -6,7 +6,7 @@ import { createAuthService, createResumeService } from "@/lib/services";
 
 /**
  * GET /api/applications
- * Non-draft applications with full details, plus draft/submitted counts (all applications).
+ * All applications (draft and submitted) with full details, plus draft/submitted counts.
  * Admin/exec only
  */
 export const GET = withAuth(async (_request, _context, user) => {
@@ -37,6 +37,7 @@ export const GET = withAuth(async (_request, _context, user) => {
         canUse: canUsePositionReview,
         isPresident: scope.isPresident,
         vpPositionIds: scope.vpPositionIds,
+        vpExecPositionIds: scope.vpExecPositionIds,
       },
     });
   } catch (error: unknown) {

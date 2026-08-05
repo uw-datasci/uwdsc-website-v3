@@ -41,7 +41,7 @@ const FOLLOW_UP_FIELDS = [
 
 const RADIO_GROUP_CLASS = "flex flex-col gap-3 pt-1 sm:flex-row sm:flex-wrap sm:gap-6";
 
-type SelectOption = { value: string; label: string };
+type SelectOption = { value: string; label: string; group?: string };
 
 type ReturningExecFormFieldsProps = Readonly<{
   form: UseFormReturn<ReturningExecFormValues>;
@@ -64,20 +64,27 @@ function clearFollowUpFields(form: UseFormReturn<ReturningExecFormValues>) {
   void form.trigger();
 }
 
+function filterPositionOptions(
+  options: SelectOption[],
+  excludeIds: readonly string[],
+  currentValue: string,
+): SelectOption[] {
+  const excluded = new Set(excludeIds.filter((id) => Boolean(id) && id !== currentValue));
+  return options.filter((opt) => !excluded.has(opt.value));
+}
+
 function buildOptionalRoleSelect(
   followUpDisabled: boolean,
   locked: boolean,
   lockPlaceholder: string,
   options: SelectOption[],
-  excludeIds: readonly string[],
 ) {
   const disabled = followUpDisabled || locked;
-  const excluded = new Set(excludeIds.filter(Boolean));
   return {
     disabled,
     dimmed: locked && !followUpDisabled,
     placeholder: followUpDisabled ? "N/A" : locked ? lockPlaceholder : "Select a position",
-    options: options.filter((opt) => !excluded.has(opt.value)),
+    options,
   };
 }
 
@@ -86,15 +93,17 @@ function OptionalRoleSelect({
   name,
   label,
   ui,
+  optionsKey,
 }: Readonly<{
   form: UseFormReturn<ReturningExecFormValues>;
   name: "second_choice_position" | "third_choice_position";
   label: string;
   ui: ReturnType<typeof buildOptionalRoleSelect>;
+  optionsKey: string;
 }>) {
   return (
     <div
-      key={`${name}-${ui.disabled ? "off" : "on"}`}
+      key={`${name}-${optionsKey}-${ui.disabled ? "off" : "on"}`}
       className={cn(ui.dimmed && "opacity-50")}
     >
       <FormField
@@ -133,19 +142,28 @@ export function ReturningExecFormFields({
     ...positionOptions,
   ];
 
+  const secondRoleOptions = filterPositionOptions(
+    optionalPositionOptions,
+    [firstChoice],
+    secondChoice,
+  );
+  const thirdRoleOptions = filterPositionOptions(
+    secondRoleOptions,
+    [secondChoice],
+    thirdChoice,
+  );
+
   const secondRole = buildOptionalRoleSelect(
     followUpDisabled,
     !firstChoice,
     "Select a first choice first",
-    optionalPositionOptions,
-    [firstChoice],
+    secondRoleOptions,
   );
   const thirdRole = buildOptionalRoleSelect(
     followUpDisabled,
     !firstChoice || !secondChoice,
     "Select a second choice first",
-    optionalPositionOptions,
-    [firstChoice, secondChoice],
+    thirdRoleOptions,
   );
 
   const inPersonQuestionLabel =
@@ -306,12 +324,14 @@ export function ReturningExecFormFields({
                   name="second_choice_position"
                   label="Second choice role (Optional)"
                   ui={secondRole}
+                  optionsKey={firstChoice}
                 />
                 <OptionalRoleSelect
                   form={form}
                   name="third_choice_position"
                   label="Third choice role (Optional)"
                   ui={thirdRole}
+                  optionsKey={`${firstChoice}-${secondChoice}`}
                 />
               </CardContent>
             </div>

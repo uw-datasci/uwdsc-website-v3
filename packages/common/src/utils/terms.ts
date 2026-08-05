@@ -7,10 +7,7 @@ function toDateMs(iso: string | null | undefined): number | null {
 }
 
 /** Active-term window for /logistics/onboarding (inclusive of endpoints). */
-export function isOnboardingWindowOpen(
-  term: Term | null,
-  now: Date = new Date(),
-): boolean {
+export function isOnboardingWindowOpen(term: Term | null, now: Date = new Date()): boolean {
   const start = toDateMs(term?.start_date ?? null);
   const due = toDateMs(term?.onboarding_due_date ?? null);
   if (start === null || due === null) return false;
@@ -19,10 +16,7 @@ export function isOnboardingWindowOpen(
 }
 
 /** Active-term window for /logistics/returning (inclusive of endpoints). */
-export function isReturningExecWindowOpen(
-  term: Term | null,
-  now: Date = new Date(),
-): boolean {
+export function isReturningExecWindowOpen(term: Term | null, now: Date = new Date()): boolean {
   const release = toDateMs(term?.returning_exec_release_date ?? null);
   const deadline = toDateMs(term?.returning_exec_deadline ?? null);
   if (release === null || deadline === null) return false;
@@ -43,10 +37,7 @@ export function isApplicationPageWindowOpen(
 }
 
 /** Application read/write APIs: release through hard deadline (inclusive). */
-export function isApplicationApiWindowOpen(
-  term: Term | null,
-  now: Date = new Date(),
-): boolean {
+export function isApplicationApiWindowOpen(term: Term | null, now: Date = new Date()): boolean {
   const release = toDateMs(term?.application_release_date ?? null);
   const hard = toDateMs(term?.application_hard_deadline ?? null);
   if (release === null || hard === null) return false;
@@ -67,6 +58,23 @@ export function formatTermCode(code: string): string {
     F: "Fall",
   };
   return `${seasons[season] ?? code} ${year}`;
+}
+
+/**
+ * Term code for the immediate next academic term.
+ * Sxx → Fxx, Fxx → W(xx+1), Wxx → S(xx+1)
+ */
+export function getNextTermCode(code: string): string {
+  const season = code.charAt(0).toUpperCase();
+  const yearSuffix = Number.parseInt(code.slice(1), 10);
+  if (Number.isNaN(yearSuffix)) return code;
+
+  const pad = (y: number) => String(y).padStart(2, "0");
+
+  if (season === "S") return `F${pad(yearSuffix)}`;
+  if (season === "F") return `W${pad(yearSuffix + 1)}`;
+  if (season === "W") return `S${pad(yearSuffix + 1)}`;
+  return code;
 }
 
 /**

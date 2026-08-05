@@ -46,8 +46,9 @@ export default function PositionsPage() {
       <div>
         <h1 className="text-3xl font-bold">Application Positions</h1>
         <p className="text-muted-foreground">
-          Choose which roles are open for applications this cycle. Access is
-          limited to Presidents.
+          Choose which roles members can apply to on the public application
+          this cycle. The returning exec form always shows every role. Access
+          is limited to Presidents.
         </p>
       </div>
 

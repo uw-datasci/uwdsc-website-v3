@@ -4,7 +4,7 @@
  *   - localhost on any port (dev)
  *   - any subdomain of uwdatascience.ca (estimathon, admin, etc.)
  *
- * Everything else falls back to `/` so we never bounce users to an external site.
+ * Everything else falls back to `fallback` so we never bounce users to an external site.
  */
 const ALLOWED_SUFFIX = ".uwdatascience.ca";
 

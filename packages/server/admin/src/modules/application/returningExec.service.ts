@@ -40,8 +40,10 @@ class ReturningExecService {
     }
   }
 
-  async getAvailablePositions(): Promise<{ id: number; position_id: number; name: string }[]> {
-    return this.repository.getAvailablePositions();
+  async getSelectablePositions(): Promise<
+    { id: number; name: string; is_vp: boolean; subteam_name: string | null }[]
+  > {
+    return this.repository.getSelectablePositions();
   }
 
   async getOwnSubmission(profile_id: string): Promise<ReturningExecOwnSubmission | null> {
@@ -72,6 +74,26 @@ class ReturningExecService {
     const uniquePriorities = new Set(priorities);
     if (uniquePriorities.size !== priorities.length) {
       throw new ApiError("Duplicate priorities in position selections", 400);
+    }
+
+    const positionIds = data.position_selections.map((s) => s.position_id);
+    const uniquePositionIds = new Set(positionIds);
+    if (uniquePositionIds.size !== positionIds.length) {
+      throw new ApiError("Cannot select the same position more than once", 400);
+    }
+
+    if (positionIds.some((id) => !Number.isInteger(id) || id <= 0)) {
+      throw new ApiError("Invalid position selection", 400);
+    }
+
+    if (positionIds.length > 0) {
+      const allowedIds = await this.repository.filterSelectablePositionIds(positionIds);
+      if (allowedIds.length !== positionIds.length) {
+        throw new ApiError(
+          "One or more selected positions are not valid returning-exec role choices",
+          400,
+        );
+      }
     }
 
     return this.repository.upsertSubmission(profile_id, { ...data, term_id: term.id });
@@ -111,7 +133,7 @@ class ReturningExecService {
     }
 
     if (!scope.isPresident) {
-      const allowed = scope.vpPositionIds.includes(selection.position_id);
+      const allowed = scope.vpExecPositionIds.includes(selection.position_id);
       if (!allowed) throw new ApiError("You can only update selections in your subteam", 403);
     }
 

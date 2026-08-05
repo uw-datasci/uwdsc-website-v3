@@ -8,9 +8,21 @@ import {
   RETURNING_EXEC_PATH,
   WEB_COMPLETE_PROFILE_PATH,
 } from "@uwdsc/common/constants";
+import { safeRedirect } from "@uwdsc/common/utils";
 
 const LOGIN_ROUTE = "/login";
 const UNAUTHORIZED_ROUTE = "/unauthorized";
+
+function loginUrlWithRedirect(request: NextRequest): URL {
+  const loginUrl = new URL(LOGIN_ROUTE, request.url);
+  const returnPath = `${request.nextUrl.pathname}${request.nextUrl.search}`;
+
+  if (returnPath !== LOGIN_ROUTE) {
+    loginUrl.searchParams.set("redirect", returnPath);
+  }
+
+  return loginUrl;
+}
 
 function webCompleteProfileAbsoluteUrl(): string {
   const base = process.env.NEXT_PUBLIC_APP_URL || "https://uwdatascience.ca/";
@@ -47,11 +59,12 @@ export async function proxy(request: NextRequest) {
 
   switch (true) {
     case !user && !isLoginRoute:
-      return NextResponse.redirect(new URL("/login", request.url));
-    case user && isLoginRoute:
-      return NextResponse.redirect(
-        new URL(isAlum ? RETURNING_EXEC_PATH : "/members", request.url),
-      );
+      return NextResponse.redirect(loginUrlWithRedirect(request));
+    case user && isLoginRoute: {
+      const fallback = isAlum ? RETURNING_EXEC_PATH : "/members";
+      const target = safeRedirect(request.nextUrl.searchParams.get("redirect"), fallback);
+      return NextResponse.redirect(new URL(target, request.url));
+    }
     case user && isAlum && !alumAllowedRoute:
       return NextResponse.redirect(new URL("/unauthorized", request.url));
     case user && !isAdmin && !isAlum && !isUnauthorizedRoute:

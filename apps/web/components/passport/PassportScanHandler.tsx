@@ -13,9 +13,8 @@ type SpinState =
   | { status: "error"; message: string };
 
 /**
- * Runs the QR scan flow when the passport page is opened through
- * another member's QR code (membership_id/event_id/token in the URL).
- * State logic only - the gacha reveal animation consumes `result`.
+ * Runs the scan flow when the page is opened with QR params in the URL.
+ * State logic only, the gacha reveal will consume the result later.
  */
 export function PassportScanHandler() {
   const search = useSearchParams();

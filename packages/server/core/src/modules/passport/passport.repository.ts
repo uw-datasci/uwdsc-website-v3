@@ -2,11 +2,7 @@ import { BaseRepository } from "@uwdsc/db/base.repository";
 import type { ScannedMembership, ScanEvent } from "../../types/passport";
 
 export class PassportRepository extends BaseRepository {
-  /**
-   * Get a membership by id, but only if it belongs to the currently
-   * active term. Returns the profile_id of the scanned member, which
-   * downstream validation (token check, role lookup) depends on.
-   */
+  /** Get a membership by id if it belongs to the active term. */
   async getActiveMembershipById(
     membershipId: string,
   ): Promise<ScannedMembership | null> {
@@ -25,9 +21,7 @@ export class PassportRepository extends BaseRepository {
     }
   }
 
-  /**
-   * Get an event by id along with the stamp it can unlock.
-   */
+  /** Get an event and the stamp it can unlock. */
   async getEventById(eventId: string): Promise<ScanEvent | null> {
     try {
       const result = await this.sql<ScanEvent[]>`
@@ -43,10 +37,7 @@ export class PassportRepository extends BaseRepository {
     }
   }
 
-  /**
-   * Role of the scanned member: determines their bonus drop rate.
-   * Users without a user_roles row are plain members.
-   */
+  /** Role of the scanned member, defaults to member. */
   async getUserRole(profileId: string): Promise<string> {
     try {
       const result = await this.sql<{ role: string }[]>`
@@ -62,10 +53,7 @@ export class PassportRepository extends BaseRepository {
     }
   }
 
-  /**
-   * Lifetime number of QR codes this user has scanned: drives the
-   * base probability (+1% per scan).
-   */
+  /** Lifetime scan count, +1% base probability per scan. */
   async countScansByScanner(scannerProfileId: string): Promise<number> {
     try {
       const result = await this.sql<{ count: string }[]>`
@@ -80,9 +68,7 @@ export class PassportRepository extends BaseRepository {
     }
   }
 
-  /**
-   * Whether the user already owns a given stamp.
-   */
+  /** Whether the user already owns a given stamp. */
   async hasStamp(profileId: string, stampId: string): Promise<boolean> {
     try {
       const result = await this.sql<{ id: string }[]>`
@@ -99,10 +85,8 @@ export class PassportRepository extends BaseRepository {
   }
 
   /**
-   * Record a scan. The table's UNIQUE (scanner, scanned, event)
-   * constraint makes this the duplicate check as well: inserting
-   * returns a row only for a first-time scan, so two racing requests
-   * can never both count.
+   * Record a scan. Returns false if this person was already scanned
+   * at this event (unique constraint handles the race).
    */
   async recordScan(
     scannerProfileId: string,
@@ -123,10 +107,7 @@ export class PassportRepository extends BaseRepository {
     }
   }
 
-  /**
-   * Add a stamp to the user's collection. ON CONFLICT keeps a
-   * double-award harmless (unique per profile + stamp).
-   */
+  /** Add a stamp to the user's collection. */
   async awardStamp(profileId: string, stampId: string): Promise<void> {
     try {
       await this.sql`

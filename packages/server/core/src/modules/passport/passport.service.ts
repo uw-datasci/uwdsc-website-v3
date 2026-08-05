@@ -5,7 +5,7 @@ import { PassportRepository } from "./passport.repository";
 
 const TIME_STEP_SECONDS = 30;
 
-/** Bonus drop rate by the ROLE of the person being scanned. */
+/** Drop rate bonus based on the role of the person scanned. */
 const ROLE_DROP_RATE: Record<string, number> = {
   member: 0,
   alum: 0.05,
@@ -14,16 +14,13 @@ const ROLE_DROP_RATE: Record<string, number> = {
   pres: 0.15,
 };
 
-/** Base probability gained per lifetime scan (1%). */
+/** Base probability gained per lifetime scan. */
 const BASE_RATE_PER_SCAN = 0.01;
 
 class PassportService {
   private readonly repository = new PassportRepository();
 
-  /**
-   * Handle one passport QR scan: validate the code, record the scan,
-   * and spin the mystery box. All game logic is server-side.
-   */
+  /** Validate a scanned QR, record the scan and roll for the event stamp. */
   async scanQrCode(
     scannerProfileId: string,
     params: { membershipId: string; eventId: string; token: string },
@@ -90,11 +87,8 @@ class PassportService {
   }
 
   /**
-   * Recompute the QR token server-side: HMAC-SHA256 keyed with the
-   * scanned user's id over the 30s timestep (same construction as the
-   * client's qr.ts). Accepting the current and previous step tolerates
-   * scanning right at a rotation boundary while keeping screenshots
-   * valid for at most ~60 seconds.
+   * Recompute the token the same way qr.ts generates it. Current and
+   * previous timestep are accepted, so screenshots expire within a minute.
    */
   private isTokenValid(userId: string, token: string): boolean {
     const step = Math.floor(Date.now() / (TIME_STEP_SECONDS * 1000));

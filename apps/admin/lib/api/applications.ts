@@ -9,7 +9,7 @@ import type { ApplicationsListResponse } from "@/types/applications";
 import { createApiError } from "./error";
 
 /**
- * Get all non-draft applications with full details plus draft/submitted counts (all rows).
+ * Get all applications (draft and submitted) with full details plus draft/submitted counts.
  *
  * @throws Error if request fails or unauthorized
  */

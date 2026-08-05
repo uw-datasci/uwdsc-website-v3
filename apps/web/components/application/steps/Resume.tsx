@@ -11,6 +11,7 @@ import {
   FormControl,
   FormDescription,
   FormMessage,
+  renderTextField,
 } from "@uwdsc/ui";
 import { uploadResume } from "@/lib/api/resume";
 import { FileUp, Loader2, CheckCircle } from "lucide-react";
@@ -84,6 +85,41 @@ export function Resume({ form }: ResumeProps) {
   return (
     <div className="space-y-6">
       <Form {...form}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <FormField
+            control={form.control}
+            name="linkedin_url"
+            render={renderTextField({
+              label: "LinkedIn",
+              required: true,
+              placeholder: "https://linkedin.com/in/janedoe",
+              inputProps: { type: "url" },
+            })}
+          />
+          <FormField
+            control={form.control}
+            name="github_url"
+            render={renderTextField({
+              label: "GitHub",
+              required: true,
+              placeholder: "https://github.com/janedoe",
+              inputProps: { type: "url" },
+            })}
+          />
+          <div className="md:col-span-2">
+            <FormField
+              control={form.control}
+              name="portfolio_url"
+              render={renderTextField({
+                label: "Portfolio / Personal Site",
+                placeholder: "https://janedoe.dev",
+                description: "Optional",
+                inputProps: { type: "url" },
+              })}
+            />
+          </div>
+        </div>
+
         <FormField
           control={form.control}
           name="resumeKey"

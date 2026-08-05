@@ -12,7 +12,7 @@ import { Loader2 } from "lucide-react";
 import { VerifyEmailModal } from "./VerifyEmailModal";
 import { login } from "@/lib/api/auth";
 import { useAuth } from "@/contexts/AuthContext";
-import { safeRedirect } from "@/lib/auth/safeRedirect";
+import { safeRedirect } from "@uwdsc/common/utils";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 

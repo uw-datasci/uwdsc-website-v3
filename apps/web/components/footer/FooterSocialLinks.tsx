@@ -31,7 +31,7 @@ const SOCIALS: SocialLink[] = [
   {
     name: "Discord",
     icon: RxDiscordLogo,
-    href: "https://discord.gg/VFVkyP5mgm",
+    href: "https://discord.gg/2gBB3ufyCR",
     hoverClassName: "hover:text-[#5865F2]",
   },
   {
@@ -75,11 +75,7 @@ export function FooterSocialLinks() {
         const Icon = social.icon;
 
         return (
-          <motion.div
-            key={social.name}
-            whileHover={{ rotate: 10 }}
-            transition={tiltTransition}
-          >
+          <motion.div key={social.name} whileHover={{ rotate: 10 }} transition={tiltTransition}>
             <Button
               size="icon"
               variant="ghost"

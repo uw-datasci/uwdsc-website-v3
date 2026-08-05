@@ -13,8 +13,10 @@ export interface OwnSubmissionResponse {
   submission: ReturningExecOwnSubmission | null;
 }
 
-export interface AvailablePosition {
+export interface SelectablePosition {
+  /** org.exec_positions.id */
   id: number;
-  position_id: number;
   name: string;
+  is_vp: boolean;
+  subteam_name: string | null;
 }

@@ -176,4 +176,28 @@ export class AuthRepository extends BaseRepository {
     `;
     return rows.map((row) => row.position_id);
   }
+
+  /**
+   * `org.exec_positions.id` for every role whose subteam matches a subteam the
+   * user serves as VP in. Unlike `getVpApplicationPositionIdsForProfile`, this is
+   * NOT joined through `hiring.application_positions_available` — a VP must be
+   * able to review returning-exec role preferences even for roles that aren't
+   * open on the external application.
+   */
+  async getVpExecPositionIdsForProfile(profileId: string): Promise<number[]> {
+    const rows = await this.sql<{ position_id: number }[]>`
+      WITH vp_subteams AS (
+        SELECT DISTINCT COALESCE(ep.subteam_id, et.subteam_id) AS sid
+        FROM org.exec_team et
+        JOIN org.exec_positions ep ON et.position_id = ep.id
+        WHERE et.profile_id = ${profileId} AND ep.is_vp = true
+      )
+      SELECT ep.id AS position_id
+      FROM org.exec_positions ep
+      WHERE ep.subteam_id IN (
+        SELECT sid FROM vp_subteams WHERE sid IS NOT NULL
+      )
+    `;
+    return rows.map((row) => row.position_id);
+  }
 }

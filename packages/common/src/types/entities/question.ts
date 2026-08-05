@@ -16,8 +16,16 @@ export interface QuestionScope {
   vpSubteamNames: string[];
   /** VP subteam ids resolved from exec roles (excluding Presidents). */
   vpSubteamIds: number[];
-  /** `application_positions_available.id` scoped to the user’s VP subteam(s) (see auth repository). */
+  /**
+   * `application_positions_available.id` scoped to the user’s VP subteam(s) (see auth repository).
+   * External application only — do not use for returning-exec authorization checks.
+   */
   vpPositionIds: number[];
+  /**
+   * `org.exec_positions.id` scoped to the user’s VP subteam(s), independent of application
+   * availability. Use this for returning-exec role-preference authorization checks.
+   */
+  vpExecPositionIds: number[];
 }
 
 /** Open role option for assigning a question to a position. */

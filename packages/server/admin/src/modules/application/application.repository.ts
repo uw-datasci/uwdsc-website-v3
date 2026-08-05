@@ -54,11 +54,10 @@ export class ApplicationRepository extends BaseRepository {
   }
 
   /**
-   * Get all submitted applications with position selections (incl. names) and answers (incl. question text).
-   * Excludes draft applications.
+   * Get all applications (draft and submitted) with position selections (incl. names)
+   * and answers (incl. question text).
    */
   async getAllApplicationsDetails(): Promise<ApplicationListItem[]> {
-    // 1. Get all submitted applications
     const applications = await this.sql<Application[]>`
       SELECT
         id,
@@ -76,8 +75,7 @@ export class ApplicationRepository extends BaseRepository {
         status,
         submitted_at
       FROM hiring.applications
-      WHERE status != 'draft'
-      ORDER BY submitted_at DESC
+      ORDER BY submitted_at DESC NULLS LAST, full_name ASC
     `;
 
     if (applications.length === 0) return [];
@@ -103,9 +101,7 @@ export class ApplicationRepository extends BaseRepository {
     `;
 
     // 3. Get all answers with question text
-    const answers = await this.sql<
-      (AnswerWithQuestion & { application_id: string })[]
-    >`
+    const answers = await this.sql<(AnswerWithQuestion & { application_id: string })[]>`
       SELECT
         a.id,
         a.application_id,
@@ -185,9 +181,7 @@ export class ApplicationRepository extends BaseRepository {
     return updated.length > 0;
   }
 
-  async getPositionOptions(
-    scope: QuestionScope,
-  ): Promise<QuestionPositionOption[]> {
+  async getPositionOptions(scope: QuestionScope): Promise<QuestionPositionOption[]> {
     if (scope.isPresident) {
       return this.sql<QuestionPositionOption[]>`
         SELECT
@@ -260,9 +254,7 @@ export class ApplicationRepository extends BaseRepository {
     return row;
   }
 
-  async getSelectionCountForAvailablePosition(
-    availableId: number,
-  ): Promise<number> {
+  async getSelectionCountForAvailablePosition(availableId: number): Promise<number> {
     const [row] = await this.sql<{ count: number }[]>`
       SELECT COUNT(*)::int AS count
       FROM hiring.application_position_selections
@@ -307,9 +299,7 @@ export class ApplicationRepository extends BaseRepository {
     `;
   }
 
-  async getPositionQuestionPositionId(
-    positionQuestionId: number,
-  ): Promise<number | null> {
+  async getPositionQuestionPositionId(positionQuestionId: number): Promise<number | null> {
     const rows = await this.sql<{ position_id: number | null }[]>`
       SELECT position_id
       FROM hiring.position_questions
@@ -320,9 +310,7 @@ export class ApplicationRepository extends BaseRepository {
   }
 
   async createQuestion(data: QuestionUpsertInput): Promise<AppQuestion> {
-    const createdQuestion = await this.sql<
-      { id: number; created_at: string }[]
-    >`
+    const createdQuestion = await this.sql<{ id: number; created_at: string }[]>`
       INSERT INTO hiring.questions (
         question_text,
         type,

@@ -40,13 +40,16 @@ export default function PassportPage() {
 
   const initials =
     [user?.first_name?.[0], user?.last_name?.[0]].filter(Boolean).join("").toUpperCase() || "?";
-
   const displayName =
     [user?.first_name, user?.last_name].filter(Boolean).join(" ") || "Unknown Member";
-
   const isMember = Boolean(membershipStatus?.has_membership);
-
   const facultyLabel = user?.faculty == null ? undefined : FACULTY_LABELS[user.faculty];
+  const detailBlocks = [
+    { label: "Email", value: user?.email ?? "-" },
+    { label: "WatIam", value: user?.wat_iam ?? "-" },
+    { label: "Faculty", value: facultyLabel ?? "-" },
+    { label: "Term", value: user?.term ?? "-" },
+  ];
 
   return (
     <main className="flex min-h-dvh flex-col items-center bg-[#000000] px-4 pb-14 pt-24 lg:px-8 lg:pt-32">
@@ -62,44 +65,11 @@ export default function PassportPage() {
               {showQr ? <UserRound className="size-4" /> : <QrCode className="size-4" />}
             </button>
 
-        <div className="pt-1">
-          <div className="flex items-end justify-between gap-3">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">
-                my stamps
-              </p>
-              <p className="mt-1 text-xs text-zinc-400">Scroll sideways to see more stamps.</p>
-            </div>
-
-            <span className="rounded-full border border-zinc-800 bg-zinc-900 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
-              6 demo stamps
-            </span>
-          </div>
-
-          <div className="mt-3 w-full max-w-full overflow-x-auto overscroll-x-contain pb-2">
-            <div className="flex w-max gap-4 pr-1">
-              {demoStamps.map(({ label, accent, mark }, index) => (
-                <div
-                  key={`stamp-${label}`}
-                  className="group relative min-w-36 shrink-0 snap-start overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 p-3 shadow-[0_14px_30px_rgba(0,0,0,0.28)]"
-                >
-                  <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${accent}`} />
-
-                  <div className="flex min-h-32 flex-col justify-between">
-                    <div>
-                      <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">
-                        Stamp {index + 1}
-                      </p>
-                      <p className="mt-1 text-sm font-semibold text-white">{label}</p>
-                    </div>
-
-                    <div className="mt-3 flex flex-1 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-3 py-4">
-                      <div
-                        className={`flex size-[4.5rem] items-center justify-center rounded-full bg-gradient-to-br ${accent} text-sm font-black tracking-[0.18em] text-white shadow-[0_12px_24px_rgba(0,0,0,0.28)]`}
-                      >
-                        {mark}
-                      </div>
-                    </div>
+            <div className="flex items-center justify-center py-3">
+              {!showQr ? (
+                <div className="relative size-52 rounded-full border-4 border-zinc-600/70 bg-zinc-950 p-2 shadow-[0_0_0_6px_rgba(63,63,70,0.35)] transition-all duration-300 sm:size-56">
+                  <div className="flex size-full items-center justify-center rounded-full border border-zinc-700 bg-gradient-to-br from-sky-950 via-blue-900 to-zinc-900 text-5xl font-semibold text-white">
+                    {initials}
                   </div>
                 </div>
               ) : (

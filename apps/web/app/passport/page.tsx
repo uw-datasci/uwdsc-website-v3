@@ -54,7 +54,7 @@ export default function PassportPage() {
   return (
     <main className="flex min-h-dvh flex-col items-center bg-[#000000] px-4 pb-14 pt-24 lg:px-8 lg:pt-32">
       <section className="grid w-full max-w-5xl gap-4 lg:grid-cols-[minmax(320px,390px)_minmax(0,1fr)] lg:gap-6">
-        <div className="space-y-4 lg:sticky lg:top-30 lg:self-start lg:w-full lg:max-w-[390px]">
+        <div className="space-y-4 lg:sticky lg:top-30 lg:self-start lg:w-full lg:max-w-97.5">
           <div className="relative rounded-3xl border border-zinc-800 bg-[#0f0f11] p-4">
             <button
               type="button"
@@ -68,13 +68,13 @@ export default function PassportPage() {
             <div className="flex items-center justify-center py-3">
               {!showQr ? (
                 <div className="relative size-52 rounded-full border-4 border-zinc-600/70 bg-zinc-950 p-2 shadow-[0_0_0_6px_rgba(63,63,70,0.35)] transition-all duration-300 sm:size-56">
-                  <div className="flex size-full items-center justify-center rounded-full border border-zinc-700 bg-gradient-to-br from-sky-950 via-blue-900 to-zinc-900 text-5xl font-semibold text-white">
+                  <div className="flex size-full items-center justify-center rounded-full border border-zinc-700 bg-linear-to-br from-sky-950 via-blue-900 to-zinc-900 text-5xl font-semibold text-white">
                     {initials}
                   </div>
                 </div>
               ) : (
                 <div className="relative size-52 rounded-full border-4 border-zinc-600/70 bg-white p-4 shadow-[0_0_0_6px_rgba(63,63,70,0.35)] transition-all duration-300 sm:size-56">
-                  <div className="grid size-full grid-cols-11 grid-rows-11 gap-[2px] rounded-full bg-white p-1">
+                  <div className="grid size-full grid-cols-11 grid-rows-11 gap-0.5 rounded-full bg-white p-1">
                     {Array.from({ length: 121 }).map((_, index) => (
                       <span
                         key={index}
@@ -94,7 +94,7 @@ export default function PassportPage() {
           <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">
-                <div className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-700 to-violet-900 text-sm font-semibold text-white">
+                <div className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-violet-700 to-violet-900 text-sm font-semibold text-white">
                   {initials}
                 </div>
                 <div className="min-w-0">
@@ -146,7 +146,9 @@ export default function PassportPage() {
                 <p className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">
                   my stamps
                 </p>
-                <p className="mt-1 text-xs text-zinc-400">Scroll sideways to see more stamps.</p>
+                <p className="mt-1 text-xs text-zinc-400">
+                  Scroll sideways to see more stamps.
+                </p>
               </div>
               <span className="rounded-full border border-zinc-800 bg-zinc-900 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
                 6 demo stamps
@@ -160,7 +162,7 @@ export default function PassportPage() {
                     key={`stamp-${label}`}
                     className="group relative min-w-36 shrink-0 snap-start overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 p-3 shadow-[0_14px_30px_rgba(0,0,0,0.28)]"
                   >
-                    <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${accent}`} />
+                    <div className={`absolute inset-x-0 top-0 h-1 bg-linear-to-r ${accent}`} />
                     <div className="flex h-full min-h-32 flex-col justify-between">
                       <div className="flex items-start justify-between gap-2">
                         <div>
@@ -173,7 +175,7 @@ export default function PassportPage() {
 
                       <div className="mt-3 flex flex-1 items-center justify-center rounded-2xl border border-white/8 bg-white/5 px-3 py-4">
                         <div
-                          className={`flex size-[4.5rem] items-center justify-center rounded-full bg-gradient-to-br ${accent} text-sm font-black tracking-[0.18em] text-white shadow-[0_12px_24px_rgba(0,0,0,0.28)]`}
+                          className={`flex size-18 items-center justify-center rounded-full bg-linear-to-br ${accent} text-sm font-black tracking-[0.18em] text-white shadow-[0_12px_24px_rgba(0,0,0,0.28)]`}
                         >
                           {mark}
                         </div>

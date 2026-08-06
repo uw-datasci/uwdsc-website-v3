@@ -21,7 +21,7 @@ env:
 jobs:
   setup:
     name: Setup Variables
-    if: ${{ !startsWith(github.head_ref, 'auto-docs/merge-') }}
+    if: ${{ !(github.event_name == 'pull_request' && github.base_ref == 'main' && startsWith(github.head_ref, 'auto-docs/merge-')) }}
     runs-on: ubuntu-latest
     outputs:
       node-version: ${{ env.NODE_VERSION }}
@@ -80,7 +80,7 @@ jobs:
     name: Quality Gate Summary
     runs-on: ubuntu-latest
     needs: [ code-quality, build-web, build-admin ]
-    if: always()
+    if: ${{ always() && !(github.event_name == 'pull_request' && github.base_ref == 'main' && startsWith(github.head_ref, 'auto-docs/merge-')) }}
     permissions:
       pull-requests: write
       contents: read

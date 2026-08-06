@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { headers } from "next/headers";
 import { ApiError } from "@uwdsc/common/types";
 import { ApiResponse } from "@uwdsc/common/utils";
-import { membershipService, webhookService } from "@uwdsc/admin";
+import { discordService, membershipService, webhookService } from "@uwdsc/admin";
 import { applicationService } from "@uwdsc/core";
 import { Webhook } from "svix";
 import { WebhookEventPayload } from "resend";
@@ -51,7 +51,11 @@ export async function POST(request: NextRequest): Promise<Response> {
     }
 
     if (evt.type !== "email.received") {
-      return ApiResponse.ok({ success: false, reason: "invalid_event_type", event: evt.type });
+      return ApiResponse.ok({
+        success: false,
+        reason: "invalid_event_type",
+        event: evt.type,
+      });
     }
 
     const target = webhookService.resolveInboundTarget(evt.data.to);
@@ -71,6 +75,7 @@ export async function POST(request: NextRequest): Promise<Response> {
       case "membership": {
         const activeTerm = await applicationService.getActiveTerm();
         if (!activeTerm) throw new ApiError("No active term is configured", 400);
+
         await membershipService.processEmailReceipt(
           contents.email,
           activeTerm.start_date,
@@ -79,8 +84,7 @@ export async function POST(request: NextRequest): Promise<Response> {
         break;
       }
       case "support": {
-        // TODO: support@ inbound flow (to be implemented)
-        console.log("[Webhook] Received support email", evt.data.email_id);
+        await discordService.processSupportEmail(contents.email, evt.data.from);
         break;
       }
       default: {

@@ -16,13 +16,17 @@ class WebhookService {
     this.supportEmail = SUPPORT_INBOUND_EMAIL;
   }
 
+  private extractEmailAddress(raw: string): string {
+    const trimmed = raw.trim();
+    const start = trimmed.indexOf("<");
+    const end = trimmed.lastIndexOf(">");
+    if (start !== -1 && end > start) return trimmed.slice(start + 1, end).trim();
+    return trimmed;
+  }
+
   private verifyRecipient(to: string[], recipient: string): boolean {
     const want = recipient.trim().toLowerCase();
-    return to.some((raw) => {
-      const t = raw.trim();
-      const match = /<([^>]+)>/.exec(t);
-      return (match?.[1]?.trim() ?? t).toLowerCase() === want;
-    });
+    return to.some((raw) => this.extractEmailAddress(raw).toLowerCase() === want);
   }
 
   resolveInboundTarget(to: string[]): InboundEmailTarget | null {
@@ -38,6 +42,46 @@ class WebhookService {
    * `receivingEmailId` is `data.email_id` from the verified payload.
    */
   async getReceivedEmail(receivingEmailId: string): Promise<GetReceivedEmailContentsResult> {
+    if (!this.resend) {
+      return {
+        ok: false,
+        reason: "missing_api_key",
+        message: "RESEND_API_KEY is not configured",
+      };
+    }
+
+    const { data, error } = await this.resend.emails.receiving.get(receivingEmailId);
+
+    if (error || !data) {
+      const message =
+        typeof error === "object" &&
+        error !== null &&
+        "message" in error &&
+        typeof (error as { message: unknown }).message === "string"
+          ? (error as { message: string }).message
+          : "Failed to fetch received email from Resend";
+      return { ok: false, reason: "resend_error", message };
+    }
+
+    return { ok: true, email: data };
+  }
+
+  /**
+   * Same as `getReceivedEmail` but verifies against an arbitrary recipient address.
+   */
+  async getReceivedEmailForRecipient(
+    receivingEmailId: string,
+    webhookTo: string[],
+    recipient: string,
+  ): Promise<GetReceivedEmailContentsResult> {
+    if (!this.verifyRecipient(webhookTo, recipient)) {
+      return {
+        ok: false,
+        reason: "wrong_recipient",
+        message: `Email is not addressed to ${recipient}`,
+      };
+    }
+
     if (!this.resend) {
       return {
         ok: false,

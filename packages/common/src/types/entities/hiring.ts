@@ -41,9 +41,11 @@ export interface NewExecTeamMember {
 
 /** Summary returned after finalizing roles */
 export interface FinalizeRolesSummary {
+  promoted_to_pres: number;
   promoted_to_admin: number;
   promoted_to_exec: number;
-  demoted_to_member: number;
+  /** Outgoing execs/admins/presidents not on the new team, demoted to `alum`. */
+  demoted_to_alum: number;
   /**
    * When set, a marketing broadcast was sent to these addresses; callers may schedule
    * delayed removal from the Resend campaign segment (same pattern as email campaigns).

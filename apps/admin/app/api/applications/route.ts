@@ -1,30 +1,26 @@
 import { ApiResponse } from "@uwdsc/common/utils";
+import { isAdmin } from "@uwdsc/common/constants";
 import { applicationService } from "@uwdsc/admin";
 import { withAuth } from "@/guards/withAuth";
 import { createAuthService, createResumeService } from "@/lib/services";
 
 /**
  * GET /api/applications
- * Non-draft applications with full details, plus draft/submitted counts (all applications).
+ * All applications (draft and submitted) with full details, plus draft/submitted counts.
  * Admin/exec only
  */
 export const GET = withAuth(async (_request, _context, user) => {
   try {
-    const [applications, statusCounts, resumeService, authService] =
-      await Promise.all([
-        applicationService.getAllApplications(),
-        applicationService.getApplicationCounts(),
-        createResumeService(),
-        createAuthService(),
-      ]);
+    const [applications, statusCounts, resumeService, authService] = await Promise.all([
+      applicationService.getAllApplications(),
+      applicationService.getApplicationCounts(),
+      createResumeService(),
+      createAuthService(),
+    ]);
 
-    const scope = await authService.getScopeForUser(user.id);
     const portalRole = user.app_metadata?.role as string | undefined;
-    const canUsePositionReview =
-      portalRole === "admin" &&
-      (scope.isPresident ||
-        scope.hasVpExecRole ||
-        scope.vpPositionIds.length > 0);
+    const scope = await authService.getScopeForUser(user.id, portalRole);
+    const canUsePositionReview = isAdmin(portalRole);
 
     // Hydrate resume_url with signed URLs from private storage bucket
     const applicationsWithResumes = await Promise.all(
@@ -41,6 +37,7 @@ export const GET = withAuth(async (_request, _context, user) => {
         canUse: canUsePositionReview,
         isPresident: scope.isPresident,
         vpPositionIds: scope.vpPositionIds,
+        vpExecPositionIds: scope.vpExecPositionIds,
       },
     });
   } catch (error: unknown) {

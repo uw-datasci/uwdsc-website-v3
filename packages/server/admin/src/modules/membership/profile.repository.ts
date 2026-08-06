@@ -47,10 +47,11 @@ export class ProfileRepository extends BaseRepository {
       FROM profiles p
       JOIN auth.users au ON p.id = au.id
       JOIN user_roles r ON p.id = r.id
-      ${options?.paidOnly
+      ${
+        options?.paidOnly
           ? this.sql`JOIN public.memberships m ON m.profile_id = p.id`
           : this.sql`LEFT JOIN public.memberships m ON m.profile_id = p.id`
-        }
+      }
       LEFT JOIN profiles pv ON pv.id = m.verifier_id
       ${searchCondition}
       ORDER BY au.created_at DESC
@@ -163,6 +164,28 @@ export class ProfileRepository extends BaseRepository {
       return result.length > 0;
     } catch (error: unknown) {
       console.error("Error updating member:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update a member's role by profile ID.
+   * A DB trigger mirrors `user_roles.role` into Supabase `app_metadata.role`.
+   * @param profileId - The profile ID (UUID)
+   * @param role - The new role to assign
+   */
+  async updateRoleById(profileId: string, role: UserRole): Promise<boolean> {
+    try {
+      const result = await this.sql`
+        UPDATE user_roles
+        SET role = ${role}
+        WHERE id = ${profileId}
+        RETURNING id
+      `;
+
+      return result.length > 0;
+    } catch (error: unknown) {
+      console.error("Error updating member role:", error);
       throw error;
     }
   }

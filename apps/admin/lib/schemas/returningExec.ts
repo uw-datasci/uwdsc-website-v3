@@ -6,15 +6,13 @@ export const returningExecSchema = z
     email: z.email("Invalid email address"),
     full_name: z.string().min(1, "Full name is required"),
     discord: z.string().min(1, "Discord handle is required").max(64),
-    past_positions: z
-      .string()
-      .min(1, "Please list your past positions and terms"),
-    interested_in_returning: z.enum(["true", "false"]).optional(),
+    past_positions: z.string().min(1, "Please list your past positions and terms"),
+    interested_in_returning: z.enum(["true", "false", "future"]).optional(),
     not_returning_reason: z.string().optional(),
     first_choice_position: z.string().optional(),
     second_choice_position: z.string().optional(),
     third_choice_position: z.string().optional(),
-    in_person_next_term: z.enum(["true", "false"]).optional(),
+    in_person_next_term: z.enum(["yes", "no_outside_gta", "no_in_gta", "not_sure"]).optional(),
     qualifications: z.string().optional(),
     additional_notes: z.string().optional(),
   })
@@ -23,39 +21,35 @@ export const returningExecSchema = z
       ctx.addIssue({
         path: ["interested_in_returning"],
         code: "custom",
-        message: "Please select Yes or No",
+        message: "Please select an option",
       });
       return;
     }
-    const isReturning = data.interested_in_returning === "true";
-    if (isReturning) {
-      if (!data.first_choice_position) {
-        ctx.addIssue({
-          path: ["first_choice_position"],
-          code: "custom",
-          message: "Please select at least a first choice position",
-        });
-      }
-      if (!data.in_person_next_term) {
-        ctx.addIssue({
-          path: ["in_person_next_term"],
-          code: "custom",
-          message: "Please indicate whether you will be in person",
-        });
-      }
-      if (!data.qualifications?.trim()) {
-        ctx.addIssue({
-          path: ["qualifications"],
-          code: "custom",
-          message: "Please describe why you are interested/qualified",
-        });
-      }
-    } else if (!data.not_returning_reason?.trim()) {
+
+    const needsFollowUp =
+      data.interested_in_returning === "true" || data.interested_in_returning === "future";
+
+    if (!needsFollowUp) return;
+
+    if (!data.first_choice_position) {
       ctx.addIssue({
-        path: ["not_returning_reason"],
+        path: ["first_choice_position"],
         code: "custom",
-        message:
-          "Please provide a brief explanation for not returning (optional but encouraged)",
+        message: "Please select at least a first choice position",
+      });
+    }
+    if (!data.in_person_next_term) {
+      ctx.addIssue({
+        path: ["in_person_next_term"],
+        code: "custom",
+        message: "Please indicate whether you will be in person",
+      });
+    }
+    if (!data.qualifications?.trim()) {
+      ctx.addIssue({
+        path: ["qualifications"],
+        code: "custom",
+        message: "Please describe why you are interested/qualified",
       });
     }
   });

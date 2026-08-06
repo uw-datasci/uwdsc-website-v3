@@ -17,7 +17,9 @@ import {
   RadioGroupItem,
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
   Textarea,
@@ -46,7 +48,7 @@ interface TextFieldOptions {
   inputProps?: Partial<ComponentProps<typeof Input>>;
 }
 
-type SelectOption = string | { value: string; label: string };
+type SelectOption = string | { value: string; label: string; group?: string };
 
 interface SelectFieldOptions {
   placeholder: string;
@@ -84,6 +86,7 @@ interface RadioFieldOptions {
 interface StringRadioGroupFieldOptions {
   label: string;
   required?: boolean;
+  disabled?: boolean;
   options: readonly { value: string; label: string }[];
   groupClassName?: string;
   /** Unique prefix for `id` / `htmlFor` (e.g. `returning-interest`). */
@@ -170,6 +173,60 @@ export function renderTextField(opts: TextFieldOptions) {
   return TextFieldRender;
 }
 
+/**
+ * Renders flat when no option carries a `group`. Once any option does, options
+ * are bucketed under `<SelectGroup>` / `<SelectLabel>` headers in first-seen
+ * order; options without a group render ungrouped, in their original position.
+ */
+function renderSelectOptions(options: SelectOption[], itemClassName?: string) {
+  const hasGroups = options.some((option) => typeof option !== "string" && option.group != null);
+  if (!hasGroups) {
+    return options.map((option) => {
+      const value = typeof option === "string" ? option : option.value;
+      const label = typeof option === "string" ? option : option.label;
+      return (
+        <SelectItem key={value} value={value} className={itemClassName}>
+          {label}
+        </SelectItem>
+      );
+    });
+  }
+
+  const order: string[] = [];
+  const buckets = new Map<string, { value: string; label: string }[]>();
+  for (const option of options) {
+    const value = typeof option === "string" ? option : option.value;
+    const label = typeof option === "string" ? option : option.label;
+    const group = typeof option === "string" ? "" : (option.group ?? "");
+    if (!buckets.has(group)) {
+      order.push(group);
+      buckets.set(group, []);
+    }
+    buckets.get(group)?.push({ value, label });
+  }
+
+  return order.map((group) => {
+    const items = buckets.get(group) ?? [];
+    if (group === "") {
+      return items.map((item) => (
+        <SelectItem key={item.value} value={item.value} className={itemClassName}>
+          {item.label}
+        </SelectItem>
+      ));
+    }
+    return (
+      <SelectGroup key={group}>
+        <SelectLabel>{group}</SelectLabel>
+        {items.map((item) => (
+          <SelectItem key={item.value} value={item.value} className={itemClassName}>
+            {item.label}
+          </SelectItem>
+        ))}
+      </SelectGroup>
+    );
+  });
+}
+
 export function renderSelectField(opts: SelectFieldOptions) {
   const {
     placeholder,
@@ -186,7 +243,7 @@ export function renderSelectField(opts: SelectFieldOptions) {
 
   function SelectFieldRender({ field }: StringFieldRenderProps) {
     const raw = field.value ?? "";
-    const resolvedValue = raw === "" ? (clearValueSentinel ?? "") : raw;
+    const resolvedValue = raw === "" ? (clearValueSentinel ?? undefined) : raw;
 
     function handleChange(v: string) {
       if (clearValueSentinel === undefined || v !== clearValueSentinel) {
@@ -211,15 +268,7 @@ export function renderSelectField(opts: SelectFieldOptions) {
               </SelectTrigger>
             </FormControl>
             <SelectContent className={contentClassName} position={contentPosition}>
-              {options.map((option) => {
-                const value = typeof option === "string" ? option : option.value;
-                const label = typeof option === "string" ? option : option.label;
-                return (
-                  <SelectItem key={value} value={value} className={itemClassName}>
-                    {label}
-                  </SelectItem>
-                );
-              })}
+              {renderSelectOptions(options, itemClassName)}
             </SelectContent>
           </Select>
         </div>
@@ -235,6 +284,7 @@ export function renderStringRadioGroupField(opts: StringRadioGroupFieldOptions) 
   const {
     label,
     required = true,
+    disabled = false,
     options: radioOptions,
     groupClassName = "flex flex-col space-y-1",
     idPrefix,
@@ -251,13 +301,17 @@ export function renderStringRadioGroupField(opts: StringRadioGroupFieldOptions) 
             value={field.value ?? ""}
             onValueChange={field.onChange}
             className={groupClassName}
+            disabled={disabled}
           >
             {radioOptions.map((opt) => {
               const inputId = `${idPrefix}-${opt.value}`;
               return (
                 <div key={opt.value} className="flex items-center gap-2">
-                  <RadioGroupItem value={opt.value} id={inputId} />
-                  <label htmlFor={inputId} className="text-sm">
+                  <RadioGroupItem value={opt.value} id={inputId} disabled={disabled} />
+                  <label
+                    htmlFor={inputId}
+                    className={cn("text-sm", disabled && "cursor-not-allowed opacity-70")}
+                  >
                     {opt.label}
                   </label>
                 </div>

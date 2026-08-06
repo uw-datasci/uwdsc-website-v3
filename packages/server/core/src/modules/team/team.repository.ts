@@ -18,6 +18,7 @@ export class TeamRepository extends BaseRepository {
         et.instagram,
         et.updated_at,
         ep.name AS position_name,
+        ep.is_vp,
         s.id AS subteam_id,
         s.name AS subteam_name
       FROM org.exec_team et

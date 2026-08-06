@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card, Sheet, SheetContent, SheetTitle, useIsMobile } from "@uwdsc/ui";
 import { toast } from "sonner";
+import { isAdmin } from "@uwdsc/common/constants";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   ReturningExecList,
@@ -47,7 +48,7 @@ export default function ReturningExecsPage() {
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
 
   useEffect(() => {
-    if (user && user.role !== "admin") {
+    if (user && !isAdmin(user.role)) {
       setError("Only admin users can access this page.");
       setLoading(false);
       return;

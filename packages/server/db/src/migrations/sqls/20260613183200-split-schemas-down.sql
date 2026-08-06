@@ -132,6 +132,7 @@ ALTER TABLE org.subteams SET SCHEMA public;
 -- ----------------------------------------------------------------------------
 -- Enums back to public
 -- ----------------------------------------------------------------------------
+ALTER TYPE hiring.in_person_next_term_enum SET SCHEMA public;
 ALTER TYPE hiring.term_type_enum SET SCHEMA public;
 ALTER TYPE hiring.application_input_enum SET SCHEMA public;
 ALTER TYPE hiring.application_review_status_enum SET SCHEMA public;

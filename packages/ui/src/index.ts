@@ -38,3 +38,5 @@ export * from "./components/dropdown-menu";
 export * from "./components/spinner";
 export * from "./components/galaxy-hero";
 export * from "./components/chart";
+
+export * from "./components/switch"

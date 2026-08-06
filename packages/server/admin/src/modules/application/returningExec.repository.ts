@@ -10,6 +10,11 @@ import type {
 import type { ReturningExecRow, SelectionRow } from "../../types/application";
 
 export class ReturningExecRepository extends BaseRepository {
+  private static readonly RETURNING_EXEC_EXCLUDED_SUBTEAMS = [
+    "Presidents",
+    "Advisors",
+  ] as const;
+
   async getSubmission(
     profile_id: string,
     term_id: string,
@@ -33,6 +38,7 @@ export class ReturningExecRepository extends BaseRepository {
     const {
       position_selections,
       interested_in_returning,
+      interested_in_future_term,
       not_returning_reason,
       in_person_next_term,
       qualifications,
@@ -42,12 +48,13 @@ export class ReturningExecRepository extends BaseRepository {
     const rows = await this.sql<ReturningExecRow[]>`
       INSERT INTO hiring.returning_exec_submissions (
         profile_id, term_id, email, full_name, discord, past_positions,
-        interested_in_returning, not_returning_reason,
+        interested_in_returning, interested_in_future_term, not_returning_reason,
         in_person_next_term, qualifications, additional_notes
       ) VALUES (
         ${profile_id}, ${rest.term_id}, ${rest.email}, ${rest.full_name},
         ${rest.discord}, ${rest.past_positions},
-        ${interested_in_returning}, ${not_returning_reason ?? null},
+        ${interested_in_returning}, ${interested_in_future_term ?? null},
+        ${not_returning_reason ?? null},
         ${in_person_next_term}, ${qualifications}, ${rest.additional_notes ?? null}
       )
       ON CONFLICT (profile_id, term_id) DO UPDATE SET
@@ -56,6 +63,7 @@ export class ReturningExecRepository extends BaseRepository {
         discord = EXCLUDED.discord,
         past_positions = EXCLUDED.past_positions,
         interested_in_returning = EXCLUDED.interested_in_returning,
+        interested_in_future_term = EXCLUDED.interested_in_future_term,
         not_returning_reason = EXCLUDED.not_returning_reason,
         in_person_next_term = EXCLUDED.in_person_next_term,
         qualifications = EXCLUDED.qualifications,
@@ -75,12 +83,12 @@ export class ReturningExecRepository extends BaseRepository {
     if (position_selections.length > 0) {
       await this.sql`
         INSERT INTO hiring.returning_exec_position_selections ${this.sql(
-        position_selections.map((s) => ({
-          submission_id: row.id,
-          position_id: s.position_id,
-          priority: s.priority,
-        })),
-      )}
+          position_selections.map((s) => ({
+            submission_id: row.id,
+            position_id: s.position_id,
+            priority: s.priority,
+          })),
+        )}
       `;
     }
 
@@ -110,8 +118,7 @@ export class ReturningExecRepository extends BaseRepository {
         ep.is_vp,
         st.name AS subteam_name
       FROM hiring.returning_exec_position_selections reps
-      JOIN hiring.application_positions_available apa ON apa.id = reps.position_id
-      JOIN org.exec_positions ep ON ep.id = apa.position_id
+      JOIN org.exec_positions ep ON ep.id = reps.position_id
       LEFT JOIN org.subteams st ON st.id = ep.subteam_id
       WHERE reps.submission_id IN ${this.sql(submissionIds)}
       ORDER BY reps.priority
@@ -132,6 +139,7 @@ export class ReturningExecRepository extends BaseRepository {
       discord: row.discord,
       past_positions: row.past_positions,
       interested_in_returning: row.interested_in_returning,
+      interested_in_future_term: row.interested_in_future_term,
       not_returning_reason: row.not_returning_reason,
       in_person_next_term: row.in_person_next_term,
       qualifications: row.qualifications,
@@ -161,7 +169,13 @@ export class ReturningExecRepository extends BaseRepository {
     ] as const;
 
     const submissions = await this.sql<
-      { id: string; profile_id: string; full_name: string; email: string; submitted_at: string }[]
+      {
+        id: string;
+        profile_id: string;
+        full_name: string;
+        email: string;
+        submitted_at: string;
+      }[]
     >`
       SELECT s.id, s.profile_id, s.full_name, s.email, s.submitted_at
       FROM hiring.returning_exec_submissions s
@@ -188,8 +202,7 @@ export class ReturningExecRepository extends BaseRepository {
         ep.is_vp,
         st.name AS subteam_name
       FROM hiring.returning_exec_position_selections reps
-      JOIN hiring.application_positions_available apa ON apa.id = reps.position_id
-      JOIN org.exec_positions ep ON ep.id = apa.position_id
+      JOIN org.exec_positions ep ON ep.id = reps.position_id
       LEFT JOIN org.subteams st ON st.id = ep.subteam_id
       WHERE reps.submission_id IN ${this.sql(submissionIds)}
         AND reps.status IN ${this.sql(HIRING_STATUSES)}
@@ -220,30 +233,64 @@ export class ReturningExecRepository extends BaseRepository {
     `;
   }
 
-  async getSelectionById(
-    selectionId: string,
-  ): Promise<{ id: string; submission_id: string; position_id: number; status: ApplicationReviewStatus } | null> {
+  async getSelectionById(selectionId: string): Promise<{
+    id: string;
+    submission_id: string;
+    position_id: number;
+    status: ApplicationReviewStatus;
+  } | null> {
     const rows = await this.sql<
-      { id: string; submission_id: string; position_id: number; status: ApplicationReviewStatus }[]
+      {
+        id: string;
+        submission_id: string;
+        position_id: number;
+        status: ApplicationReviewStatus;
+      }[]
     >`
-      SELECT reps.id, reps.submission_id, apa.position_id AS position_id, reps.status
+      SELECT reps.id, reps.submission_id, reps.position_id, reps.status
       FROM hiring.returning_exec_position_selections reps
-      JOIN hiring.application_positions_available apa ON apa.id = reps.position_id
       WHERE reps.id = ${selectionId}
       LIMIT 1
     `;
     return rows[0] ?? null;
   }
 
-  async getAvailablePositions(): Promise<
-    { id: number; position_id: number; name: string }[]
+  /**
+   * Every exec position (excluding Presidents and Advisors). Returning execs may
+   * express interest in any other role, independent of
+   * hiring.application_positions_available (which only gates the public/external
+   * application).
+   */
+  async getSelectablePositions(): Promise<
+    { id: number; name: string; is_vp: boolean; subteam_name: string | null }[]
   > {
-    return this.sql<{ id: number; position_id: number; name: string }[]>`
-      SELECT apa.id, ep.id AS position_id, ep.name
-      FROM hiring.application_positions_available apa
-      JOIN org.exec_positions ep ON ep.id = apa.position_id
-      ORDER BY ep.name
+    return this.sql<
+      { id: number; name: string; is_vp: boolean; subteam_name: string | null }[]
+    >`
+      SELECT ep.id, ep.name, ep.is_vp, st.name AS subteam_name
+      FROM org.exec_positions ep
+      LEFT JOIN org.subteams st ON st.id = ep.subteam_id
+      WHERE COALESCE(st.name, '') NOT IN ${this.sql([
+        ...ReturningExecRepository.RETURNING_EXEC_EXCLUDED_SUBTEAMS,
+      ])}
+      ORDER BY st.name NULLS LAST, ep.is_vp DESC, ep.name ASC
     `;
+  }
+
+  /** Returns which of the given ids are valid returning-exec role choices. */
+  async filterSelectablePositionIds(positionIds: number[]): Promise<number[]> {
+    if (positionIds.length === 0) return [];
+
+    const rows = await this.sql<{ id: number }[]>`
+      SELECT ep.id
+      FROM org.exec_positions ep
+      LEFT JOIN org.subteams st ON st.id = ep.subteam_id
+      WHERE ep.id IN ${this.sql(positionIds)}
+        AND COALESCE(st.name, '') NOT IN ${this.sql([
+          ...ReturningExecRepository.RETURNING_EXEC_EXCLUDED_SUBTEAMS,
+        ])}
+    `;
+    return rows.map((row) => row.id);
   }
 
   async getActiveTerm(): Promise<Term | null> {
@@ -283,8 +330,7 @@ export class ReturningExecRepository extends BaseRepository {
         ep.is_vp,
         st.name AS subteam_name
       FROM hiring.returning_exec_position_selections reps
-      JOIN hiring.application_positions_available apa ON apa.id = reps.position_id
-      JOIN org.exec_positions ep ON ep.id = apa.position_id
+      JOIN org.exec_positions ep ON ep.id = reps.position_id
       LEFT JOIN org.subteams st ON st.id = ep.subteam_id
       WHERE reps.submission_id = ${submission_id}
       ORDER BY reps.priority

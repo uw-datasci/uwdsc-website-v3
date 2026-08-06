@@ -129,8 +129,7 @@ export class HiringRepository extends BaseRepository {
         ep.is_vp,
         st.name AS subteam_name
       FROM hiring.returning_exec_position_selections reps
-      JOIN hiring.application_positions_available apa ON apa.id = reps.position_id
-      JOIN org.exec_positions ep ON ep.id = apa.position_id
+      JOIN org.exec_positions ep ON ep.id = reps.position_id
       LEFT JOIN org.subteams st ON st.id = ep.subteam_id
       WHERE reps.submission_id IN ${this.sql(returningIds)}
         AND reps.status IN ${this.sql(HIRING_STATUSES)}
@@ -259,13 +258,13 @@ export class HiringRepository extends BaseRepository {
         `;
       }
 
-      // Demote everyone else who is currently exec or admin
+      // Demote everyone else who is currently exec, admin, or pres to alum (former exec).
       let demoted = 0;
       if (profileIds.length > 0) {
         const result = await tx`
           UPDATE user_roles
-          SET role = 'member'
-          WHERE role IN ('exec', 'admin')
+          SET role = 'alum'
+          WHERE role IN ('exec', 'admin', 'pres')
             AND id NOT IN ${tx(profileIds)}
           RETURNING id
         `;
@@ -274,8 +273,8 @@ export class HiringRepository extends BaseRepository {
         // No new team - demote everyone
         const result = await tx`
           UPDATE user_roles
-          SET role = 'member'
-          WHERE role IN ('exec', 'admin')
+          SET role = 'alum'
+          WHERE role IN ('exec', 'admin', 'pres')
           RETURNING id
         `;
         demoted = result.length;

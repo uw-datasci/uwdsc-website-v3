@@ -1,16 +1,16 @@
 import { createApiError } from "./error";
 import type { ApplicationReviewStatus, ReturningExecSubmissionData } from "@uwdsc/common/types";
 import type {
-  AvailablePosition,
+  SelectablePosition,
   OwnSubmissionResponse,
   ReturningExecsResponse,
 } from "@/types/returningExecs";
 
-export async function getAvailablePositionsForReturningExec(): Promise<AvailablePosition[]> {
+export async function getPositionsForReturningExec(): Promise<SelectablePosition[]> {
   const response = await fetch("/api/returning-execs/positions");
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);
-  return data as AvailablePosition[];
+  return data as SelectablePosition[];
 }
 
 export async function getOwnReturningExecSubmission(): Promise<OwnSubmissionResponse> {

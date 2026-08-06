@@ -6,6 +6,7 @@ import type {
   AnswerWithQuestion,
   ApplicationListItem,
   AppQuestion,
+  ManagablePosition,
   QuestionPositionOption,
   QuestionScope,
   QuestionUpsertInput,
@@ -53,11 +54,10 @@ export class ApplicationRepository extends BaseRepository {
   }
 
   /**
-   * Get all submitted applications with position selections (incl. names) and answers (incl. question text).
-   * Excludes draft applications.
+   * Get all applications (draft and submitted) with position selections (incl. names)
+   * and answers (incl. question text).
    */
   async getAllApplicationsDetails(): Promise<ApplicationListItem[]> {
-    // 1. Get all submitted applications
     const applications = await this.sql<Application[]>`
       SELECT
         id,
@@ -69,11 +69,13 @@ export class ApplicationRepository extends BaseRepository {
         personal_email,
         location,
         club_experience,
+        linkedin_url,
+        github_url,
+        portfolio_url,
         status,
         submitted_at
       FROM hiring.applications
-      WHERE status != 'draft'
-      ORDER BY submitted_at DESC
+      ORDER BY submitted_at DESC NULLS LAST, full_name ASC
     `;
 
     if (applications.length === 0) return [];
@@ -99,9 +101,7 @@ export class ApplicationRepository extends BaseRepository {
     `;
 
     // 3. Get all answers with question text
-    const answers = await this.sql<
-      (AnswerWithQuestion & { application_id: string })[]
-    >`
+    const answers = await this.sql<(AnswerWithQuestion & { application_id: string })[]>`
       SELECT
         a.id,
         a.application_id,
@@ -181,9 +181,7 @@ export class ApplicationRepository extends BaseRepository {
     return updated.length > 0;
   }
 
-  async getPositionOptions(
-    scope: QuestionScope,
-  ): Promise<QuestionPositionOption[]> {
+  async getPositionOptions(scope: QuestionScope): Promise<QuestionPositionOption[]> {
     if (scope.isPresident) {
       return this.sql<QuestionPositionOption[]>`
         SELECT
@@ -212,6 +210,72 @@ export class ApplicationRepository extends BaseRepository {
     `;
   }
 
+  /**
+   * All exec positions (excluding Presidents) joined against
+   * application_positions_available, for the President-only positions
+   * management dashboard.
+   */
+  async getManagablePositions(): Promise<ManagablePosition[]> {
+    return this.sql<ManagablePosition[]>`
+      SELECT
+        ep.id AS exec_position_id,
+        ep.name,
+        ep.is_vp,
+        st.name AS subteam_name,
+        apa.id AS available_id,
+        apa.id IS NOT NULL AS is_available
+      FROM org.exec_positions ep
+      LEFT JOIN org.subteams st ON st.id = ep.subteam_id
+      LEFT JOIN hiring.application_positions_available apa ON apa.position_id = ep.id
+      WHERE st.name IS DISTINCT FROM 'Presidents'
+      ORDER BY st.name NULLS LAST, ep.is_vp DESC, ep.name ASC
+    `;
+  }
+
+  async getAvailablePositionByExecPositionId(
+    execPositionId: number,
+  ): Promise<{ id: number } | null> {
+    const [row] = await this.sql<{ id: number }[]>`
+      SELECT id
+      FROM hiring.application_positions_available
+      WHERE position_id = ${execPositionId}
+      LIMIT 1
+    `;
+    return row ?? null;
+  }
+
+  async addAvailablePosition(execPositionId: number): Promise<{ id: number }> {
+    const [row] = await this.sql<{ id: number }[]>`
+      INSERT INTO hiring.application_positions_available (position_id)
+      VALUES (${execPositionId})
+      RETURNING id
+    `;
+    if (!row) throw new Error("Failed to add available position");
+    return row;
+  }
+
+  async getSelectionCountForAvailablePosition(availableId: number): Promise<number> {
+    const [row] = await this.sql<{ count: number }[]>`
+      SELECT COUNT(*)::int AS count
+      FROM hiring.application_position_selections
+      WHERE position_id = ${availableId}
+    `;
+    return row?.count ?? 0;
+  }
+
+  /**
+   * Only affects the external application. Returning-exec role preferences
+   * reference `org.exec_positions` directly and are intentionally unaffected.
+   */
+  async removeAvailablePosition(availableId: number): Promise<boolean> {
+    const deleted = await this.sql<{ id: number }[]>`
+      DELETE FROM hiring.application_positions_available
+      WHERE id = ${availableId}
+      RETURNING id
+    `;
+    return deleted.length > 0;
+  }
+
   async getAllQuestions(): Promise<AppQuestion[]> {
     return this.sql<AppQuestion[]>`
       SELECT
@@ -235,9 +299,7 @@ export class ApplicationRepository extends BaseRepository {
     `;
   }
 
-  async getPositionQuestionPositionId(
-    positionQuestionId: number,
-  ): Promise<number | null> {
+  async getPositionQuestionPositionId(positionQuestionId: number): Promise<number | null> {
     const rows = await this.sql<{ position_id: number | null }[]>`
       SELECT position_id
       FROM hiring.position_questions
@@ -248,9 +310,7 @@ export class ApplicationRepository extends BaseRepository {
   }
 
   async createQuestion(data: QuestionUpsertInput): Promise<AppQuestion> {
-    const createdQuestion = await this.sql<
-      { id: number; created_at: string }[]
-    >`
+    const createdQuestion = await this.sql<{ id: number; created_at: string }[]>`
       INSERT INTO hiring.questions (
         question_text,
         type,

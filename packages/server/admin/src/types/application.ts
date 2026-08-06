@@ -1,4 +1,4 @@
-import type { ApplicationReviewStatus } from "@uwdsc/common/types";
+import type { ApplicationReviewStatus, InPersonNextTermStatus } from "@uwdsc/common/types";
 
 export interface ReturningExecRow {
   id: string;
@@ -9,8 +9,9 @@ export interface ReturningExecRow {
   discord: string;
   past_positions: string;
   interested_in_returning: boolean;
+  interested_in_future_term: string | null;
   not_returning_reason: string | null;
-  in_person_next_term: boolean;
+  in_person_next_term: InPersonNextTermStatus | null;
   qualifications: string;
   additional_notes: string | null;
   submitted_at: string;

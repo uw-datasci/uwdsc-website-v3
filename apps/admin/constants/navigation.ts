@@ -6,25 +6,23 @@ import {
   ClipboardCheck,
   Code2,
   FileText,
+  ListChecks,
   Package,
   Library,
   Mail,
   UserCheck,
   Users,
 } from "lucide-react";
-
-const EXEC_POS = ["president", "vp"];
+import { isAdmin, isPresident } from "@uwdsc/common/constants";
 
 export const getAdminNavigation = (
-  position: string | null,
+  _position: string | null,
   role?: string | null,
   logisticsWindows?: {
     onboardingOpen: boolean;
     returningExecOpen: boolean;
   },
 ) => {
-  const isExec = EXEC_POS.some((r) => position?.toLowerCase().includes(r));
-  const isAdmin = role === "admin";
   const onboardingOpen = logisticsWindows?.onboardingOpen ?? false;
   const returningExecOpen = logisticsWindows?.returningExecOpen ?? false;
 
@@ -34,8 +32,17 @@ export const getAdminNavigation = (
       href: "/applications/questions",
       icon: CircleHelp,
     },
-    { name: "Hiring", href: "/applications/hiring", icon: UserCheck },
-    ...(isAdmin
+    ...(isPresident(role)
+      ? [
+          { name: "Hiring", href: "/applications/hiring", icon: UserCheck },
+          {
+            name: "Positions",
+            href: "/applications/positions",
+            icon: ListChecks,
+          },
+        ]
+      : []),
+    ...(isAdmin(role)
       ? [
           {
             name: "Returning Execs",
@@ -55,7 +62,7 @@ export const getAdminNavigation = (
       subItems: applicationSubItems,
     },
     { name: "Events", href: "/events", icon: Calendar },
-    ...(isAdmin ? [{ name: "Campaigns", href: "/campaigns", icon: Mail }] : []),
+    ...(isAdmin(role) ? [{ name: "Campaigns", href: "/campaigns", icon: Mail }] : []),
     {
       name: "Logistics",
       href: "/logistics",
@@ -70,7 +77,7 @@ export const getAdminNavigation = (
               },
             ]
           : []),
-        ...(isExec
+        ...(isPresident(role)
           ? [
               {
                 name: "Onboarding review",
@@ -90,7 +97,7 @@ export const getAdminNavigation = (
           : []),
       ],
     },
-    ...(isAdmin
+    ...(isAdmin(role)
       ? [
           {
             name: "Nexus",

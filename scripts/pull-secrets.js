@@ -14,8 +14,6 @@ const APPS = [
   { name: "admin", infisicalPath: "/website/admin" },
 ];
 
-const PACKAGES = [{ name: "server/db", infisicalPath: "/website/db" }];
-
 try {
   // Extract environment variables
   const INFISICAL_PROJECT_ID = process.env.INFISICAL_PROJECT_ID;
@@ -89,23 +87,6 @@ try {
   // Sync app secrets
   APPS.forEach(({ name, infisicalPath }) => {
     const targetDir = join(rootDir, "apps", name);
-    const targetFile = join(targetDir, ".env.local");
-
-    if (!existsSync(targetDir)) return console.warn(`⚠️  Skipping ${name} (folder missing)`);
-
-    console.log(`⚡ Syncing ${name}...`);
-    const secrets = execSync(
-      `infisical export --path="${infisicalPath}" --env=dev ${projectFlag}`,
-      { encoding: "utf8" },
-    );
-
-    writeFileSync(targetFile, secrets);
-    console.log(`   ✅ Updated .env.local`);
-  });
-
-  // Sync package secrets
-  PACKAGES.forEach(({ name, infisicalPath }) => {
-    const targetDir = join(rootDir, "packages", name);
     const targetFile = join(targetDir, ".env.local");
 
     if (!existsSync(targetDir)) return console.warn(`⚠️  Skipping ${name} (folder missing)`);

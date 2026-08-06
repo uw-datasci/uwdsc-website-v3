@@ -1,5 +1,6 @@
 import { type ApplicationReviewStatus } from "@uwdsc/common/types";
 import { ApiResponse } from "@uwdsc/common/utils";
+import { isAdmin } from "@uwdsc/common/constants";
 import { applicationService } from "@uwdsc/admin";
 import { withVpAccess } from "@/guards/withVpAccess";
 
@@ -13,7 +14,7 @@ interface ParamsContext {
  */
 export const PATCH = withVpAccess<ParamsContext>(
   async (request, { params }, user, scope) => {
-    if (user.app_metadata?.role !== "admin") {
+    if (!isAdmin(user.app_metadata?.role)) {
       return ApiResponse.unauthorized(
         "Only users with the admin role can update position review status",
       );

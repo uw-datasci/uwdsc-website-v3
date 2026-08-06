@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { updateMember } from "@/lib/api";
-import { editMemberSchema, type EditMemberFormValues } from "@/lib/schemas/membership";
+import { z } from "zod";
+import { updateMember, updateMemberRole } from "@/lib/api";
+import { editMemberSchema } from "@/lib/schemas/membership";
+import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -23,8 +25,18 @@ import {
   renderTextField,
   renderSelectField,
 } from "@uwdsc/ui";
-import { FACULTY_VALUES } from "@uwdsc/common/constants";
+import {
+  FACULTY_VALUES,
+  ROLE_VALUES,
+  ROLE_SELECT_OPTIONS,
+  isPresident,
+} from "@uwdsc/common/constants";
 import { Member } from "@uwdsc/common/types";
+
+const editMemberFormSchema = editMemberSchema.extend({
+  role: z.enum(ROLE_VALUES).optional(),
+});
+type EditMemberFormValues = z.infer<typeof editMemberFormSchema>;
 
 interface EditMemberModalProps {
   open: boolean;
@@ -40,9 +52,11 @@ export function EditMemberModal({
   onSuccess,
 }: Readonly<EditMemberModalProps>) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useAuth();
+  const canEditRole = isPresident(user?.role);
 
   const form = useForm<EditMemberFormValues>({
-    resolver: zodResolver(editMemberSchema),
+    resolver: zodResolver(editMemberFormSchema),
     defaultValues: {
       first_name: member.first_name || "",
       last_name: member.last_name || "",
@@ -50,6 +64,7 @@ export function EditMemberModal({
       faculty: (member.faculty as EditMemberFormValues["faculty"]) || undefined,
       term: member.term || "",
       is_math_soc_member: member.is_math_soc_member || false,
+      role: member.user_role,
     },
   });
 
@@ -60,9 +75,11 @@ export function EditMemberModal({
         first_name: member.first_name || "",
         last_name: member.last_name || "",
         wat_iam: member.wat_iam || "",
-        faculty: (member.faculty as EditMemberFormValues["faculty"]) || undefined,
+        faculty:
+          (member.faculty as EditMemberFormValues["faculty"]) || undefined,
         term: member.term || "",
         is_math_soc_member: member.is_math_soc_member || false,
+        role: member.user_role,
       });
     }
   }, [open, member, form]);
@@ -70,13 +87,18 @@ export function EditMemberModal({
   const onSubmit = async (data: EditMemberFormValues) => {
     setIsSubmitting(true);
     try {
-      await updateMember(member.id, data);
+      const { role, ...profileData } = data;
+      await updateMember(member.id, profileData);
+      if (canEditRole && role && role !== member.user_role) {
+        await updateMemberRole(member.id, role);
+      }
       toast.success("Member updated successfully");
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
       onOpenChange(false);
-      const errorMessage = error instanceof Error ? error.message : "Failed to update member";
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to update member";
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -154,19 +176,35 @@ export function EditMemberModal({
               />
             </div>
 
-            {/* Faculty */}
-            <FormField
-              control={form.control}
-              name="faculty"
-              render={({ field }) =>
-                renderSelectField({
-                  label: "Faculty",
-                  placeholder: "Select faculty",
-                  options: [...FACULTY_VALUES],
-                  triggerClassName: "w-full",
-                })({ field: { ...field, value: field.value ?? "" } })
-              }
-            />
+            {/* Faculty & Role (Role is President only) */}
+            <div className={canEditRole ? "grid grid-cols-2 gap-4" : undefined}>
+              <FormField
+                control={form.control}
+                name="faculty"
+                render={({ field }) =>
+                  renderSelectField({
+                    label: "Faculty",
+                    placeholder: "Select faculty",
+                    options: [...FACULTY_VALUES],
+                    triggerClassName: "w-full",
+                  })({ field: { ...field, value: field.value ?? "" } })
+                }
+              />
+              {canEditRole && (
+                <FormField
+                  control={form.control}
+                  name="role"
+                  render={({ field }) =>
+                    renderSelectField({
+                      label: "Role",
+                      placeholder: "Select role",
+                      options: ROLE_SELECT_OPTIONS,
+                      triggerClassName: "w-full",
+                    })({ field: { ...field, value: field.value ?? "" } })
+                  }
+                />
+              )}
+            </div>
 
             {/* MathSoc Member */}
             <FormField
@@ -175,7 +213,10 @@ export function EditMemberModal({
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
-                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
                   </FormControl>
                   <div className="space-y-1 leading-none">
                     <FormLabel>MathSoc Member</FormLabel>

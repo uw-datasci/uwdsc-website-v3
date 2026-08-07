@@ -13,9 +13,15 @@ interface EventsNutshellSlideProps {
  * "Your events in a nutshell" slide: a ranked list of top events.
  *
  * Data injection points (see {@link EventsNutshellSlideData}):
- * - `slide.events`: the ranked rows (#1, #2, ...) -> up to 5
+ * - `slide.heading`: the title at the top.
+ * - `slide.events`: the ranked rows (#1, #2, ...), up to 5. Each row's swatch
+ *   comes from `event.color`/`event.icon` (rendered by `SlideVisualSwatch`).
  * - `slide.statValue` / `slide.statCaption`: the "N total events attended
  *   with us!" line at the bottom.
+ *
+ * Not driven by data: the decorative pattern SVGs behind the heading
+ * (`topPatterns`), the divider squares under the list (`dividerSquares`),
+ * and the slide background color (`bg-[#ffca82]`) are hardcoded below.
  */
 export function EventsNutshellSlide({ slide }: EventsNutshellSlideProps) {
   const dividerSquares = [

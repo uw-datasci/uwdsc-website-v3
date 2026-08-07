@@ -135,6 +135,11 @@ export class ProfileRepository extends BaseRepository {
       return result.length > 0;
     } catch (error: unknown) {
       console.error("Error updating profile photo key:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Get profile fields needed for DSC Wrapped.
    */
   async getWrappedProfileStats(userId: string): Promise<WrappedProfileStats | null> {

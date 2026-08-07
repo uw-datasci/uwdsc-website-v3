@@ -86,6 +86,8 @@ function buildWrappedSlides({
         };
       case "hero":
         return buildHeroSlide(slide, { passwordResetCount, highestAttendanceEvent });
+      default:
+        return slide;
     }
   });
 }

@@ -3,10 +3,11 @@ import type { WrappedSlideData } from "../types";
 /**
  * Placeholder DSC Wrapped slides.
  *
- * TODO(db): Replace this static array with data fetched per-user. The intended
- * path is a `lib/api/` client wrapper -> `app/api/wrapped` route -> service ->
- * repository (see CLAUDE.md "API architecture"). Components consume
- * `WrappedSlideData[]`, so swapping the source here is the only change needed.
+ * TODO(db): Replace this static array with data fetched per-user. The
+ * intended path is a `lib/api/` client wrapper -> `app/api/wrapped` route ->
+ * service -> repository (see CLAUDE.md "API architecture"). Components
+ * consume `WrappedSlideData[]`, so swapping the source here is the only
+ * change needed.
  */
 export const WRAPPED_SLIDES: readonly WrappedSlideData[] = [
   {
@@ -76,78 +77,53 @@ export const WRAPPED_SLIDES: readonly WrappedSlideData[] = [
   },
   {
     id: "minutes",
-    layout: "hero",
+    layout: "minutes-on-site",
     eyebrow: "Locked in",
-    title: "Minutes on the site",
+    heading: "MINUTES ON THE SITE",
     stat: "0",
-    subtitle: "Browsing events, your profile, and more.",
-    background: "bg-gradient-to-br from-violet-600 via-indigo-600 to-blue-700",
-    foreground: "text-white",
+    captionLines: ["More time spent than", "# of DSC members"],
   },
   {
     id: "password-resets",
-    layout: "hero",
+    layout: "password-resets",
     eyebrow: "Oops",
-    title: "Password resets",
+    heading: "LOCKED OUT",
     stat: "0",
-    subtitle: "We've all been there.",
-    background: "bg-gradient-to-br from-slate-600 via-gray-700 to-zinc-800",
-    foreground: "text-white",
+    captionLines: ["times, we've all been there."],
   },
   {
-    id: "top-event",
-    layout: "hero",
-    eyebrow: "Your headliner",
-    title: "Top event",
-    subtitle: "Placeholder Event Name",
-    background: "bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500",
-    foreground: "text-white",
+    id: "fun-facts",
+    layout: "fun-facts",
+    heading: "TERM FUN FACTS!",
+    facts: [
+      {
+        id: "highest-attendance",
+        value: "Estimathon",
+        label: "Highest attended event",
+        visual: { color: "#ccda96" },
+      },
+      {
+        id: "common-snack",
+        value: "Boba",
+        label: "Most eaten snack",
+        visual: { color: "#ff7075" },
+      },
+      {
+        id: "most-visited-page",
+        value: "BOT",
+        label: "Most visited event page",
+        visual: { color: "#9cd8ea" },
+      },
+    ],
   },
   {
-    id: "club-highest-attendance",
-    layout: "hero",
-    eyebrow: "Club fun fact",
-    title: "Highest-attendance event",
-    stat: "0",
-    subtitle: "Placeholder Event Name packed the room.",
-    background: "bg-gradient-to-br from-fuchsia-500 via-purple-600 to-indigo-700",
-    foreground: "text-white",
-  },
-  {
-    id: "club-most-visited",
-    layout: "hero",
-    eyebrow: "Club fun fact",
-    title: "Most visited event page",
-    subtitle: "Placeholder Event Name had everyone clicking.",
-    background: "bg-gradient-to-br from-cyan-500 via-sky-600 to-blue-700",
-    foreground: "text-white",
-  },
-  {
-    id: "club-snack",
-    layout: "hero",
-    eyebrow: "Club fun fact",
-    title: "Most common snack",
-    subtitle: "Placeholder Snack fueled the club this year.",
-    background: "bg-gradient-to-br from-lime-500 via-green-600 to-emerald-700",
-    foreground: "text-white",
-  },
-  {
-    id: "award-chronically-online",
-    layout: "hero",
-    eyebrow: "Award unlocked",
-    title: "Chronically Online 🏆",
-    subtitle: "You spent a remarkable amount of time on the site.",
-    background: "bg-gradient-to-br from-purple-600 via-violet-700 to-fuchsia-800",
-    foreground: "text-white",
-  },
-  {
-    id: "award-super-fan",
-    layout: "hero",
-    eyebrow: "Award unlocked",
-    title: "DSC Super Fan 🌟",
-    subtitle: "You showed up to more events than almost anyone.",
-    background: "bg-gradient-to-br from-orange-500 via-amber-600 to-yellow-600",
-    foreground: "text-white",
+    id: "awards",
+    layout: "awards",
+    awards: [
+      { id: "award-chronically-online", title: "Chronically Online", topPercent: "Top 10%" },
+      { id: "award-super-fan", title: "DSC Super Fan", topPercent: "Top 10%" },
+      { id: "award-password-resets", title: "Most Password Resets", topPercent: "Top 10%" },
+    ],
   },
   {
     id: "outro",

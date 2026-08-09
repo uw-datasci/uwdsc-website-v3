@@ -11,7 +11,7 @@ import {
   renderTextField,
   renderTextAreaField,
 } from "@uwdsc/ui";
-import { UseFormReturn } from "react-hook-form";
+import { UseFormReturn, useWatch } from "react-hook-form";
 import { AppFormValues } from "@/lib/schemas/application";
 import { Briefcase, Users } from "lucide-react";
 import { DuplicateBanner } from "../banners/DuplicateBanner";
@@ -24,9 +24,13 @@ interface PositionsProps {
 }
 
 export function Positions({ form, positions }: PositionsProps) {
-  const position1 = form.watch("position_1");
-  const position2 = form.watch("position_2");
-  const position3 = form.watch("position_3");
+  // useWatch, not form.watch: React Compiler (reactCompiler is on for this app)
+  // caches the component body on `form`/`positions`, which never change identity,
+  // so a `form.watch(...)` result taken here would freeze at its first value and
+  // the role's questions would never render.
+  const position1 = useWatch({ control: form.control, name: "position_1" });
+  const position2 = useWatch({ control: form.control, name: "position_2" });
+  const position3 = useWatch({ control: form.control, name: "position_3" });
 
   if (positions.length === 0) {
     return (

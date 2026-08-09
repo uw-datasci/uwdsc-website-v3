@@ -8,6 +8,7 @@ import {
   type QuestionScope,
   type QuestionUpsertInput,
 } from "@uwdsc/common/types";
+import { DEFAULT_QUESTION_PLACEHOLDER } from "@uwdsc/common/constants";
 import { ApplicationRepository } from "./application.repository";
 
 class ApplicationService {
@@ -184,7 +185,10 @@ class ApplicationService {
       throw new ApiError("You can only create questions for your VP position scope", 403);
     }
     try {
-      return await this.repository.createQuestion(data);
+      return await this.repository.createQuestion({
+        ...data,
+        placeholder: data.placeholder?.trim() || DEFAULT_QUESTION_PLACEHOLDER,
+      });
     } catch (error) {
       throw new ApiError(
         `Failed to create application question: ${(error as Error).message}`,

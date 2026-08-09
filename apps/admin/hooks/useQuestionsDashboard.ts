@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import type { AppQuestion, QuestionPositionOption } from "@uwdsc/common/types";
+import { DEFAULT_QUESTION_PLACEHOLDER } from "@uwdsc/common/constants";
 import {
   createQuestion,
   deleteQuestion,
@@ -44,7 +45,7 @@ export function useQuestionsDashboard() {
       question_text: "",
       type: "textarea",
       max_length: null,
-      placeholder: null,
+      placeholder: DEFAULT_QUESTION_PLACEHOLDER,
       help_text: null,
       sort_order: 0,
       position_id: null,
@@ -89,7 +90,7 @@ export function useQuestionsDashboard() {
       question_text: "",
       type: "textarea",
       max_length: null,
-      placeholder: null,
+      placeholder: DEFAULT_QUESTION_PLACEHOLDER,
       help_text: null,
       sort_order: 0,
       position_id: firstPos,

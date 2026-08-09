@@ -41,26 +41,62 @@ export function partitionDraftAnswers(
 
 type AnswerPair = { question_id: string; answer_text: string };
 
-function recordToAnswerPairs(record: Record<string, string> | undefined): AnswerPair[] {
-  if (!record) return [];
-  return Object.entries(record)
-    .filter(([, text]) => text)
-    .map(([question_id, answer_text]) => ({ question_id, answer_text }));
+interface QuestionContext {
+  positions: PositionWithQuestions[];
+  generalQuestionIds: string[];
 }
 
-/** Collect general + position answers into a single array for API payloads. */
-export function collectAllAnswers(values: {
-  general_answers?: Record<string, string>;
-  position_1_answers?: Record<string, string>;
-  position_2_answers?: Record<string, string>;
-  position_3_answers?: Record<string, string>;
-}): AnswerPair[] {
-  return [
-    ...recordToAnswerPairs(values.general_answers),
-    ...recordToAnswerPairs(values.position_1_answers),
-    ...recordToAnswerPairs(values.position_2_answers),
-    ...recordToAnswerPairs(values.position_3_answers),
+/**
+ * Pick only the answers belonging to `questionIds`. Answers left behind by a
+ * previously selected position stay in form state under their own question ids,
+ * so keying off the expected ids drops them.
+ */
+function pickAnswers(
+  record: Record<string, string> | undefined,
+  questionIds: string[],
+): AnswerPair[] {
+  if (!record) return [];
+  const pairs: AnswerPair[] = [];
+  for (const question_id of questionIds) {
+    const answer_text = record[question_id];
+    if (answer_text) pairs.push({ question_id, answer_text });
+  }
+  return pairs;
+}
+
+/**
+ * Collect general + position answers into a single array for API payloads,
+ * scoped to the questions of the currently selected positions.
+ */
+export function collectAllAnswers(
+  values: {
+    general_answers?: Record<string, string>;
+    position_1?: string;
+    position_1_answers?: Record<string, string>;
+    position_2?: string;
+    position_2_answers?: Record<string, string>;
+    position_3?: string;
+    position_3_answers?: Record<string, string>;
+  },
+  context: QuestionContext,
+): AnswerPair[] {
+  const questionIdsFor = (positionId: string | undefined) =>
+    positionId
+      ? (context.positions.find((p) => p.id === positionId)?.questions ?? []).map(
+          (q) => q.id,
+        )
+      : [];
+
+  const pairs = [
+    ...pickAnswers(values.general_answers, context.generalQuestionIds),
+    ...pickAnswers(values.position_1_answers, questionIdsFor(values.position_1)),
+    ...pickAnswers(values.position_2_answers, questionIdsFor(values.position_2)),
+    ...pickAnswers(values.position_3_answers, questionIdsFor(values.position_3)),
   ];
+
+  // hiring.answers has no unique constraint on (application_id, question_id),
+  // so duplicates would insert as extra rows.
+  return [...new Map(pairs.map((p) => [p.question_id, p])).values()];
 }
 
 /** Build position_selections array from form position_1/2/3. */
@@ -76,18 +112,13 @@ export function buildPositionSelections(values: {
   return list;
 }
 
-interface ValidationContext {
-  positions: PositionWithQuestions[];
-  generalQuestionIds: string[];
-}
-
 /**
  * Checks if the current step in the application form is valid
  */
 export const isStepValid = (
   form: UseFormReturn<AppFormValues>,
   currentStep: number,
-  context: ValidationContext,
+  context: QuestionContext,
 ): boolean => {
   const { errors } = form.formState;
   const { positions, generalQuestionIds } = context;
@@ -137,9 +168,13 @@ export const isStepValid = (
         if (!positionId) return true;
         const positionData = positions.find((p) => p.id === positionId);
         if (!positionData) return false;
+        // Check each expected question id rather than counting entries: answers
+        // left over from a previously selected position inflate the count.
         return positionData.questions.every((q) => {
           const answer = answers[q.id];
-          return answer && answer.trim().length >= 1 && answer.trim().length <= 1000;
+          return (
+            !!answer && answer.trim().length >= 1 && answer.trim().length <= 1000
+          );
         });
       };
 

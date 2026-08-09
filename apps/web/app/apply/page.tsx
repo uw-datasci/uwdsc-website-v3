@@ -215,11 +215,13 @@ export default function ApplyPage() {
             club_experience: values.club_experience,
           };
         case 2:
-          return { answers: collectAllAnswers(values) };
+          return {
+            answers: collectAllAnswers(values, { positions, generalQuestionIds }),
+          };
         case 3:
           return {
             position_selections: buildPositionSelections(values),
-            answers: collectAllAnswers(values),
+            answers: collectAllAnswers(values, { positions, generalQuestionIds }),
           };
         case 4:
           return {
@@ -231,7 +233,7 @@ export default function ApplyPage() {
           return {};
       }
     },
-    [form],
+    [form, positions, generalQuestionIds],
   );
 
   const goToStep = useCallback(

@@ -14,7 +14,7 @@ import {
 import { UseFormReturn } from "react-hook-form";
 import { AppFormValues } from "@/lib/schemas/application";
 import { Briefcase, Users } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { DuplicateBanner } from "../banners/DuplicateBanner";
 import { VPConsideration } from "../banners/VPConsideration";
 import type { PositionWithQuestions } from "@uwdsc/common/types";
@@ -24,37 +24,22 @@ interface PositionsProps {
   readonly positions: PositionWithQuestions[];
 }
 
-type PositionAnswersField = "position_1_answers" | "position_2_answers" | "position_3_answers";
-
-/** Clear answers when the selected role changes or is removed; preserve on first selection from empty. */
-function useClearAnswersOnPositionChange(
-  form: UseFormReturn<AppFormValues>,
-  positionId: string | undefined,
-  answersField: PositionAnswersField,
-) {
-  const prevPositionRef = useRef(positionId);
-
-  useEffect(() => {
-    const prev = prevPositionRef.current;
-    if (prev === positionId) return;
-
-    if (!positionId || prev) {
-      form.setValue(answersField, {});
-      form.clearErrors(answersField);
-    }
-
-    prevPositionRef.current = positionId;
-  }, [positionId, answersField, form]);
-}
-
 export function Positions({ form, positions }: PositionsProps) {
   const position1 = form.watch("position_1");
   const position2 = form.watch("position_2");
   const position3 = form.watch("position_3");
 
-  useClearAnswersOnPositionChange(form, position1, "position_1_answers");
-  useClearAnswersOnPositionChange(form, position2, "position_2_answers");
-  useClearAnswersOnPositionChange(form, position3, "position_3_answers");
+  useEffect(() => {
+    if (!position1) form.setValue("position_1_answers", {});
+  }, [position1, form]);
+
+  useEffect(() => {
+    if (!position2) form.setValue("position_2_answers", {});
+  }, [position2, form]);
+
+  useEffect(() => {
+    if (!position3) form.setValue("position_3_answers", {});
+  }, [position3, form]);
 
   if (positions.length === 0) {
     return (
@@ -72,11 +57,18 @@ export function Positions({ form, positions }: PositionsProps) {
   const position2Data = position2 ? getPositionData(position2) : undefined;
   const position3Data = position3 ? getPositionData(position3) : undefined;
 
-  const getAvailablePositions = (currentPosition?: string, includeNone: boolean = false) => {
+  const getAvailablePositions = (
+    currentPosition?: string,
+    includeNone: boolean = false,
+  ) => {
     const selected = new Set(
-      [position1, position2, position3].filter((p) => p && p !== currentPosition),
+      [position1, position2, position3].filter(
+        (p) => p && p !== currentPosition,
+      ),
     );
-    const available = positions.filter((p) => !selected.has(p.id)).map((p) => p.name);
+    const available = positions
+      .filter((p) => !selected.has(p.id))
+      .map((p) => p.name);
 
     if (includeNone) {
       return ["None (Remove selection)", ...available];
@@ -97,11 +89,13 @@ export function Positions({ form, positions }: PositionsProps) {
       <div className="mb-5 flex flex-col gap-3 px-4">
         <div className="flex items-center">
           <Users className="mr-2 h-5 w-5 text-blue-300" />
-          <h2 className="text-xl font-semibold text-white">Position Preferences</h2>
+          <h2 className="text-xl font-semibold text-white">
+            Position Preferences
+          </h2>
         </div>
         <p className="mb-2 block text-base text-white">
-          Please select <b>at least 1 and up to 3</b> positions you are interested in, and
-          answer the corresponding questions.
+          Please select <b>at least 1 and up to 3</b> positions you are
+          interested in, and answer the corresponding questions.
         </p>
       </div>
 
@@ -133,7 +127,8 @@ export function Positions({ form, positions }: PositionsProps) {
                     onChange: (value: string) => {
                       field.onChange(getPositionId(value));
                     },
-                    value: positions.find((p) => p.id === field.value)?.name || "",
+                    value:
+                      positions.find((p) => p.id === field.value)?.name || "",
                   },
                 })
               }
@@ -151,17 +146,22 @@ export function Positions({ form, positions }: PositionsProps) {
                         label: q.question_text,
                         required: true,
                         inputProps:
-                          q.max_length != null ? { maxLength: q.max_length } : undefined,
+                          q.max_length != null
+                            ? { maxLength: q.max_length }
+                            : undefined,
                       })
                     : renderTextAreaField({
                         placeholder: q.placeholder ?? "",
                         label: q.question_text,
                         required: true,
                         textareaProps:
-                          q.max_length != null ? { maxLength: q.max_length } : undefined,
+                          q.max_length != null
+                            ? { maxLength: q.max_length }
+                            : undefined,
                         description:
                           q.max_length != null
-                            ? (value) => `${value.length}/${q.max_length} characters`
+                            ? (value) =>
+                                `${value.length}/${q.max_length} characters`
                             : undefined,
                       })
                 }
@@ -175,7 +175,9 @@ export function Positions({ form, positions }: PositionsProps) {
             <CardTitle className="flex items-center text-xl">
               <Briefcase className="mr-2 h-5 w-5 text-blue-300" />
               Position #2{" "}
-              <span className="ml-2 text-sm font-normal text-gray-400">(Optional)</span>
+              <span className="ml-2 text-sm font-normal text-gray-400">
+                (Optional)
+              </span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -198,7 +200,8 @@ export function Positions({ form, positions }: PositionsProps) {
                     onChange: (value: string) => {
                       field.onChange(getPositionId(value));
                     },
-                    value: positions.find((p) => p.id === field.value)?.name || "",
+                    value:
+                      positions.find((p) => p.id === field.value)?.name || "",
                   },
                 })
               }
@@ -216,17 +219,22 @@ export function Positions({ form, positions }: PositionsProps) {
                         label: q.question_text,
                         required: true,
                         inputProps:
-                          q.max_length != null ? { maxLength: q.max_length } : undefined,
+                          q.max_length != null
+                            ? { maxLength: q.max_length }
+                            : undefined,
                       })
                     : renderTextAreaField({
                         placeholder: q.placeholder ?? "",
                         label: q.question_text,
                         required: true,
                         textareaProps:
-                          q.max_length != null ? { maxLength: q.max_length } : undefined,
+                          q.max_length != null
+                            ? { maxLength: q.max_length }
+                            : undefined,
                         description:
                           q.max_length != null
-                            ? (value) => `${value.length}/${q.max_length} characters`
+                            ? (value) =>
+                                `${value.length}/${q.max_length} characters`
                             : undefined,
                       })
                 }
@@ -240,7 +248,9 @@ export function Positions({ form, positions }: PositionsProps) {
             <CardTitle className="flex items-center text-xl">
               <Briefcase className="mr-2 h-5 w-5 text-blue-300" />
               Position #3{" "}
-              <span className="ml-2 text-sm font-normal text-gray-400">(Optional)</span>
+              <span className="ml-2 text-sm font-normal text-gray-400">
+                (Optional)
+              </span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -263,7 +273,8 @@ export function Positions({ form, positions }: PositionsProps) {
                     onChange: (value: string) => {
                       field.onChange(getPositionId(value));
                     },
-                    value: positions.find((p) => p.id === field.value)?.name || "",
+                    value:
+                      positions.find((p) => p.id === field.value)?.name || "",
                   },
                 })
               }
@@ -281,17 +292,22 @@ export function Positions({ form, positions }: PositionsProps) {
                         label: q.question_text,
                         required: true,
                         inputProps:
-                          q.max_length != null ? { maxLength: q.max_length } : undefined,
+                          q.max_length != null
+                            ? { maxLength: q.max_length }
+                            : undefined,
                       })
                     : renderTextAreaField({
                         placeholder: q.placeholder ?? "",
                         label: q.question_text,
                         required: true,
                         textareaProps:
-                          q.max_length != null ? { maxLength: q.max_length } : undefined,
+                          q.max_length != null
+                            ? { maxLength: q.max_length }
+                            : undefined,
                         description:
                           q.max_length != null
-                            ? (value) => `${value.length}/${q.max_length} characters`
+                            ? (value) =>
+                                `${value.length}/${q.max_length} characters`
                             : undefined,
                       })
                 }

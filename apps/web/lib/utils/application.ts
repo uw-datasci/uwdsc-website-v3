@@ -137,10 +137,12 @@ export const isStepValid = (
         if (!positionId) return true;
         const positionData = positions.find((p) => p.id === positionId);
         if (!positionData) return false;
-        return positionData.questions.every((q) => {
-          const answer = answers[q.id];
-          return answer && answer.trim().length >= 1 && answer.trim().length <= 1000;
-        });
+        const answerValues = Object.values(answers);
+        const expectedQuestionCount = positionData.questions.length;
+        return (
+          answerValues.length === expectedQuestionCount &&
+          answerValues.every((a) => a && a.trim().length >= 1)
+        );
       };
 
       return (

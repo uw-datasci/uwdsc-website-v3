@@ -3,7 +3,10 @@ import { eventService, profileService } from "@uwdsc/core";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 import { WRAPPED_SLIDES } from "@/components/wrapped/slides";
 import type { WrappedEvent } from "@uwdsc/common/types";
-import type { HeroSlideData, WrappedSlideData } from "@/components/wrapped/types";
+import type {
+  HeroSlideData,
+  WrappedSlideData,
+} from "@/components/wrapped/types";
 
 /**
  * GET /api/wrapped
@@ -24,6 +27,9 @@ export async function GET(): Promise<Response> {
         events,
         memberSince: profileStats?.created_at,
         passwordResetCount: profileStats?.password_reset_count ?? 0,
+        minutesOnWebsite: profileStats?.minutes_on_website ?? 0,
+        isChronicallyOnline: profileStats?.is_chronically_online ?? false,
+        isDscFan: profileStats?.is_dsc_fan ?? false,
       }),
     });
   } catch (error: unknown) {
@@ -39,16 +45,24 @@ interface WrappedSlideInputs {
   readonly events: readonly WrappedEvent[];
   readonly memberSince?: string;
   readonly passwordResetCount: number;
+  readonly minutesOnWebsite: number;
+  readonly isChronicallyOnline: boolean;
+  readonly isDscFan: boolean;
 }
 
 function buildWrappedSlides({
   events,
   memberSince,
   passwordResetCount,
+  minutesOnWebsite,
+  isChronicallyOnline,
+  isDscFan,
 }: WrappedSlideInputs): WrappedSlideData[] {
   const now = Date.now();
   // Query returns oldest → newest, so order-dependent stats need no re-sort.
-  const pastEvents = events.filter((event) => Date.parse(event.start_time) <= now);
+  const pastEvents = events.filter(
+    (event) => Date.parse(event.start_time) <= now,
+  );
   const attendedEvents = pastEvents.filter((event) => event.attended_by_user);
   const longestStreak = getLongestAttendanceStreak(pastEvents);
   const highestAttendanceEvent = getHighestAttendanceEvent(pastEvents);
@@ -56,9 +70,18 @@ function buildWrappedSlides({
     .sort((a, b) => b.attendance_count - a.attendance_count)
     .slice(0, 5);
 
-  return WRAPPED_SLIDES.map((slide): WrappedSlideData => {
+  return WRAPPED_SLIDES.map((slide): WrappedSlideData | null => {
     switch (slide.layout) {
       case "events-nutshell":
+        if (attendedEvents.length === 0) {
+          return {
+            ...slide,
+            events: [],
+            statValue: "0",
+            statCaption: "You haven't gone to a DSC event yet!",
+          };
+        }
+
         return {
           ...slide,
           events: topAttendedEvents.map((event, index) => ({
@@ -70,6 +93,14 @@ function buildWrappedSlides({
           statValue: String(attendedEvents.length),
         };
       case "streak":
+        if (longestStreak === 0) {
+          return {
+            ...slide,
+            subheading: "OH NO!",
+            captionLines: ["You haven't been to a DSC event!"],
+          };
+        }
+
         return {
           ...slide,
           captionLines: [
@@ -85,9 +116,17 @@ function buildWrappedSlides({
           caption: `${daysSince(memberSince).toLocaleString()} days with us!`,
         };
       case "hero":
-        return buildHeroSlide(slide, { passwordResetCount, highestAttendanceEvent });
+        return buildHeroSlide(slide, {
+          passwordResetCount,
+          highestAttendanceEvent,
+          topAttendedEvent: topAttendedEvents[0] ?? null,
+          attendedEventCount: attendedEvents.length,
+          minutesOnWebsite,
+          isChronicallyOnline,
+          isDscFan,
+        });
     }
-  });
+  }).filter((slide): slide is WrappedSlideData => slide !== null);
 }
 
 function buildHeroSlide(
@@ -95,11 +134,32 @@ function buildHeroSlide(
   stats: {
     passwordResetCount: number;
     highestAttendanceEvent: WrappedEvent | null;
+    topAttendedEvent: WrappedEvent | null;
+    attendedEventCount: number;
+    minutesOnWebsite: number;
+    isChronicallyOnline: boolean;
+    isDscFan: boolean;
   },
-): HeroSlideData {
+): HeroSlideData | null {
   switch (slide.id) {
+    case "top-event":
+      return stats.topAttendedEvent
+        ? { ...slide, subtitle: stats.topAttendedEvent.name }
+        : {
+            ...slide,
+            title: "You don't have one! Go to more DSC events!",
+            subtitle: undefined,
+          };
+    case "minutes":
+      return stats.isChronicallyOnline
+        ? null
+        : { ...slide, stat: String(stats.minutesOnWebsite) };
     case "password-resets":
-      return { ...slide, stat: String(stats.passwordResetCount) };
+      return {
+        ...slide,
+        stat: String(stats.passwordResetCount),
+        subtitle: getPasswordResetMessage(stats.passwordResetCount),
+      };
     case "club-highest-attendance":
       return stats.highestAttendanceEvent
         ? {
@@ -108,12 +168,47 @@ function buildHeroSlide(
             subtitle: `${stats.highestAttendanceEvent.name} packed the room.`,
           }
         : slide;
+    case "award-super-fan": {
+      if (stats.attendedEventCount === 0) {
+        return {
+          ...slide,
+          eyebrow: "Award unlocked",
+          title: "DSC Hater!",
+          subtitle: "You showed up to no events!",
+        };
+      }
+
+      if (stats.isDscFan) return slide;
+
+      return {
+        ...slide,
+        eyebrow: "Your DSC attendance",
+        title: `${stats.attendedEventCount} event${stats.attendedEventCount === 1 ? "" : "s"}`,
+        subtitle: "Thanks for showing up!",
+      };
+    }
+    case "award-chronically-online":
+      return stats.isChronicallyOnline ? slide : null;
     default:
       return slide;
   }
 }
 
-function getLongestAttendanceStreak(pastEvents: readonly WrappedEvent[]): number {
+function getPasswordResetMessage(passwordResetCount: number): string {
+  if (passwordResetCount === 0) {
+    return "Good memory - you remembered your password!";
+  }
+
+  if (passwordResetCount <= 4) {
+    return "Oopsies... it happens to the best of us.";
+  }
+
+  return "Just keep swimming... Finding Dory type shi.";
+}
+
+function getLongestAttendanceStreak(
+  pastEvents: readonly WrappedEvent[],
+): number {
   let current = 0;
   let longest = 0;
 
@@ -129,7 +224,8 @@ function getHighestAttendanceEvent(
   events: readonly WrappedEvent[],
 ): WrappedEvent | null {
   const highest = events.reduce<WrappedEvent | null>((highest, event) => {
-    if (!highest || event.attendance_count > highest.attendance_count) return event;
+    if (!highest || event.attendance_count > highest.attendance_count)
+      return event;
     return highest;
   }, null);
 

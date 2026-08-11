@@ -8,7 +8,7 @@ import { MobileMenu } from "./navbar/MobileMenu";
 import { WrappedModal } from "./wrapped/WrappedModal";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { getApplyWindowOpen } from "@/lib/api";
+import { useApplyWindow } from "@/hooks/useApplyWindow";
 import Image from "next/image";
 import Link from "next/link";
 import { ADMIN_ROLES } from "@uwdsc/common/constants";
@@ -20,30 +20,15 @@ import {
   NavigationMenuItem,
 } from "@uwdsc/ui";
 import { Calculator, Heart, LayoutDashboard } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const hideNavbarPaths = new Set(["/login", "/register", "/complete-profile"]);
 
 export function Navbar() {
   const pathname = usePathname();
   const { user } = useAuth();
-  const [applyInNav, setApplyInNav] = useState(false);
+  const { open: applyOpen } = useApplyWindow();
   const [wrappedOpen, setWrappedOpen] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const data = await getApplyWindowOpen();
-        if (!cancelled) setApplyInNav(Boolean(data.open));
-      } catch {
-        /* keep hidden */
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const hideNavbar = hideNavbarPaths.has(pathname);
 
@@ -52,7 +37,7 @@ export function Navbar() {
     { href: "/", label: "Home" },
     { href: "/events", label: "Check-in" },
     { href: "/team", label: "Team" },
-    ...(applyInNav ? [{ href: "/apply", label: "Apply" }] : []),
+    ...(applyOpen ? [{ href: "/apply", label: "Apply", pulse: true }] : []),
     { href: "/calendar", label: "Calendar" },
   ];
 

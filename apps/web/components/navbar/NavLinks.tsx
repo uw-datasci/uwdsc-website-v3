@@ -7,6 +7,7 @@ import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
 import { NavigationMenuItem } from "@uwdsc/ui";
 import { NavLinkItem } from "./types";
+import { PulseLabel } from "./PulseLabel";
 
 interface NavLinksProps {
   readonly navLinks: NavLinkItem[];
@@ -65,7 +66,12 @@ export function NavLinks({ navLinks }: NavLinksProps) {
             rel={link.target === "_blank" ? "noopener noreferrer" : undefined}
             className="inline-flex items-center justify-center px-2 sm:px-3 md:px-4 py-2 text-sm sm:text-base font-medium transition-colors hover:text-nav-hover-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 relative z-10 text-nowrap"
           >
-            {link.label}
+            {/* Once you're on the page, the active pill is signal enough */}
+            {link.pulse && !isActive(link.href) ? (
+              <PulseLabel>{link.label}</PulseLabel>
+            ) : (
+              link.label
+            )}
           </Link>
           {isActive(link.href) && mounted && (
             <motion.div

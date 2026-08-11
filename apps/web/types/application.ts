@@ -7,4 +7,6 @@ export interface PositionsWithQuestionsResponse {
 
 export interface ApplyWindowOpenResponse {
   open: boolean;
+  softDeadline: string | null;
+  termCode: string | null;
 }

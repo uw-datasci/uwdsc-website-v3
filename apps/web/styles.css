@@ -230,13 +230,12 @@ html {
   --animate-orbit: orbit calc(var(--duration) * 1s) linear infinite;
   @keyframes orbit {
     0% {
-      transform: rotate(calc(var(--angle) * 1deg))
-        translateY(calc(var(--radius) * 1px)) rotate(calc(var(--angle) * -1deg));
+      transform: rotate(calc(var(--angle) * 1deg)) translateY(calc(var(--radius) * 1px))
+        rotate(calc(var(--angle) * -1deg));
     }
     100% {
       transform: rotate(calc(var(--angle) * 1deg + 360deg))
-        translateY(calc(var(--radius) * 1px))
-        rotate(calc((var(--angle) * -1deg) - 360deg));
+        translateY(calc(var(--radius) * 1px)) rotate(calc((var(--angle) * -1deg) - 360deg));
     }
   }
   --animate-marquee: marquee var(--duration) infinite linear;
@@ -268,8 +267,7 @@ html {
       opacity: 0;
     }
   }
-  --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite
-    alternate;
+  --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite alternate;
   --animate-spin-around: spin-around calc(var(--speed) * 2) infinite linear;
   @keyframes shimmer-slide {
     to {
@@ -311,39 +309,4 @@ html {
   .mb-section {
     @apply mb-24 lg:mb-52;
   }
-}
-
-/* Sonner Toast Styles */
-[data-sonner-toast][data-type="success"] {
-  background: oklch(0.696 0.17 162.48) !important;
-  border-color: oklch(0.696 0.17 162.48) !important;
-  color: white !important;
-}
-
-[data-sonner-toast][data-type="error"] {
-  background: var(--destructive) !important;
-  border-color: var(--destructive) !important;
-  color: white !important;
-}
-
-[data-sonner-toast][data-type="success"] [data-icon],
-[data-sonner-toast][data-type="error"] [data-icon] {
-  color: white !important;
-}
-
-[data-sonner-toast][data-type="success"] [data-content],
-[data-sonner-toast][data-type="error"] [data-content] {
-  color: white !important;
-}
-
-/* Warning toast – persistent membership alert */
-[data-sonner-toast][data-type="warning"] {
-  background: oklch(0.72 0.12 73) !important;
-  border-color: oklch(0.76 0.14 73) !important;
-  color: oklch(0.99 0.01 75) !important;
-}
-
-[data-sonner-toast][data-type="warning"] [data-icon],
-[data-sonner-toast][data-type="warning"] [data-content] {
-  color: oklch(0.99 0.01 75) !important;
 }

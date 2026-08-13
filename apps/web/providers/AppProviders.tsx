@@ -5,7 +5,7 @@ import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { PageViewTracker } from "@/components/tracking/PageViewTracker";
 import { ActiveTimeTracker } from "@/components/tracking/ActiveTimeTracker";
-import { TooltipProvider, Toaster } from "@uwdsc/ui";
+import { TooltipProvider } from "@uwdsc/ui";
 
 interface AppProvidersProps {
   readonly children: ReactNode;
@@ -24,7 +24,6 @@ export function AppProviders({ children }: AppProvidersProps) {
         <PageViewTracker />
         <ActiveTimeTracker />
         <TooltipProvider>{children}</TooltipProvider>
-        <Toaster />
       </AuthProvider>
     </NextThemesProvider>
   );

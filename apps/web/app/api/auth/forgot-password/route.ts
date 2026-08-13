@@ -14,10 +14,9 @@ export async function POST(request: NextRequest): Promise<Response> {
     const result = await authService.forgotPassword(email, emailRedirectTo);
 
     if (!result.success) {
-      return ApiResponse.badRequest(
-        result.error,
-        "Failed to send password reset email",
-      );
+      if (result.userNotFound) return ApiResponse.notFound(result.error);
+
+      return ApiResponse.badRequest(result.error, "Failed to send password reset email");
     }
 
     return ApiResponse.ok({ success: true, message: result.message });

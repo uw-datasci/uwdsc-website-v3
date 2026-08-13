@@ -239,6 +239,16 @@ export class AuthService {
    */
   async forgotPassword(email: string, emailRedirectTo: string) {
     try {
+      const userExists = await this.repository.authUserExistsByEmail(email);
+
+      if (!userExists) {
+        return {
+          success: false,
+          userNotFound: true,
+          error: "No account found with this email address.",
+        };
+      }
+
       const { error } = await this.repository.resetPasswordForEmail(email, emailRedirectTo);
 
       if (error) {

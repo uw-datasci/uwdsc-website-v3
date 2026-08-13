@@ -76,7 +76,7 @@ The UI package exports:
 - `@uwdsc/ui` - All component exports
 - `@uwdsc/ui/globals.css` - Global styles
 - `@uwdsc/ui/postcss.config` - PostCSS configuration
-- `@uwdsc/ui/lib/utils` - Utilities such as `cn` (used in apps and docs)
+- `@uwdsc/ui/lib/utils` - Utilities such as `cn` (used across apps)
 
 ## Dependencies
 

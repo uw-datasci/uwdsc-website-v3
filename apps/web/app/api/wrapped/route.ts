@@ -3,10 +3,7 @@ import { eventService, profileService } from "@uwdsc/core";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 import { WRAPPED_SLIDES } from "@/components/wrapped/slides";
 import type { WrappedEvent } from "@uwdsc/common/types";
-import type {
-  HeroSlideData,
-  WrappedSlideData,
-} from "@/components/wrapped/types";
+import type { HeroSlideData, WrappedSlideData } from "@/components/wrapped/types";
 
 /**
  * GET /api/wrapped
@@ -60,9 +57,7 @@ function buildWrappedSlides({
 }: WrappedSlideInputs): WrappedSlideData[] {
   const now = Date.now();
   // Query returns oldest → newest, so order-dependent stats need no re-sort.
-  const pastEvents = events.filter(
-    (event) => Date.parse(event.start_time) <= now,
-  );
+  const pastEvents = events.filter((event) => Date.parse(event.start_time) <= now);
   const attendedEvents = pastEvents.filter((event) => event.attended_by_user);
   const longestStreak = getLongestAttendanceStreak(pastEvents);
   const highestAttendanceEvent = getHighestAttendanceEvent(pastEvents);
@@ -125,6 +120,8 @@ function buildWrappedSlides({
           isChronicallyOnline,
           isDscFan,
         });
+      default:
+        return null;
     }
   }).filter((slide): slide is WrappedSlideData => slide !== null);
 }
@@ -206,9 +203,7 @@ function getPasswordResetMessage(passwordResetCount: number): string {
   return "Just keep swimming... Finding Dory type shi.";
 }
 
-function getLongestAttendanceStreak(
-  pastEvents: readonly WrappedEvent[],
-): number {
+function getLongestAttendanceStreak(pastEvents: readonly WrappedEvent[]): number {
   let current = 0;
   let longest = 0;
 
@@ -220,12 +215,9 @@ function getLongestAttendanceStreak(
   return longest;
 }
 
-function getHighestAttendanceEvent(
-  events: readonly WrappedEvent[],
-): WrappedEvent | null {
+function getHighestAttendanceEvent(events: readonly WrappedEvent[]): WrappedEvent | null {
   const highest = events.reduce<WrappedEvent | null>((highest, event) => {
-    if (!highest || event.attendance_count > highest.attendance_count)
-      return event;
+    if (!highest || event.attendance_count > highest.attendance_count) return event;
     return highest;
   }, null);
 

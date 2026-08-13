@@ -5,7 +5,6 @@ import type { Metadata, Viewport } from "next";
 import { Navbar } from "@/components/Navbar";
 import { baseMetadata, baseViewport } from "@/lib/metadata";
 import { AppProviders } from "@/providers/AppProviders";
-import { MembershipWarningBanner } from "@/components/membership/MembershipWarningBanner";
 import Footer from "@/components/Footer";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -54,7 +53,6 @@ export default function RootLayout({
         <div className="min-h-screen bg-slate-50 dark:bg-background">
           <AppProviders>
             <Navbar />
-            <MembershipWarningBanner />
             {children}
             <Footer />
           </AppProviders>

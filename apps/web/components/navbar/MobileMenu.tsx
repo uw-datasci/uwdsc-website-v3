@@ -24,6 +24,7 @@ import {
   Badge,
 } from "@uwdsc/ui";
 import { NavEntry, isNavGroup } from "./types";
+import { PulseLabel } from "./PulseLabel";
 
 interface MobileMenuProps {
   navLinks: NavEntry[];
@@ -216,7 +217,11 @@ export function MobileMenu({
                           : undefined
                       }
                     >
-                      {link.label}
+                      {link.pulse ? (
+                        <PulseLabel>{link.label}</PulseLabel>
+                      ) : (
+                        link.label
+                      )}
                     </Link>
                   );
 

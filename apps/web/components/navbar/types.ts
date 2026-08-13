@@ -5,6 +5,8 @@ export interface NavLinkItem {
   label: string;
   target?: string;
   icon?: LucideIcon;
+  /** Draw attention to this link (e.g. Apply while applications are open). */
+  pulse?: boolean;
 }
 
 export interface NavGroup {

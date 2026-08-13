@@ -10,7 +10,6 @@ Run everything from the repo root with pnpm (Node >=24, pnpm 11.x — run `corep
 pnpm dev            # all apps (web + admin)
 pnpm dev:web        # web only (port 3000)
 pnpm dev:admin      # admin only
-pnpm dev:docs       # docs only
 pnpm build          # turbo build all packages
 pnpm lint           # turbo lint (eslint runs with --max-warnings 0, so warnings fail)
 pnpm check-types    # turbo tsc --noEmit across the workspace
@@ -26,7 +25,7 @@ There is **no test framework** in this repo. Verify changes with `pnpm lint`, `p
 
 Turborepo + pnpm workspace. Members: `apps/*`, `packages/*`, `packages/server/*`.
 
-- `apps/web`, `apps/admin`, `apps/docs` — Next.js 16 (Turbopack), React 19, Tailwind v4.
+- `apps/web`, `apps/admin` — Next.js 16 (Turbopack), React 19, Tailwind v4.
 - `packages/ui` (`@uwdsc/ui`) — shared shadcn/ui "new-york" primitives. Add via `pnpm ui:add`, never hand-install or duplicate into apps.
 - `packages/common` (`@uwdsc/common`) — `@uwdsc/common/types` (entities, DTOs, enums) and `@uwdsc/common/utils` (`ApiResponse` and other helpers). Used by both apps and server packages.
 - `packages/server/db` (`@uwdsc/db`) — postgres.js connection (`sql`), Supabase client factories, `BaseRepository`, and db-migrate migrations.

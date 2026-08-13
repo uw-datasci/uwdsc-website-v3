@@ -7,6 +7,20 @@ interface HeroSlideProps {
   readonly slide: HeroSlideData;
 }
 
+/**
+ * Generic full-bleed headline/stat slide. Used for the intro, outro, and
+ * "top event" slides, each with its own background gradient.
+ *
+ * Data injection points (see {@link HeroSlideData}):
+ * - `slide.eyebrow`: optional small label above the title.
+ * - `slide.title`: the main headline.
+ * - `slide.stat`: optional large hero number, rendered above the title.
+ * - `slide.subtitle`: optional supporting copy below the title.
+ * - `slide.background`: Tailwind classes for the slide background. This is
+ *   the color customization point, there's nothing hardcoded to edit here.
+ * - `slide.foreground`: Tailwind text-color class for the content, defaults
+ *   to `text-white`.
+ */
 export function HeroSlide({ slide }: HeroSlideProps) {
   return (
     <motion.div

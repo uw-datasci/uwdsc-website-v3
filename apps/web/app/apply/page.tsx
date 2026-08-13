@@ -39,7 +39,7 @@ import {
 } from "@/components/application/steps";
 import { STEP_NAMES } from "@/constants/application";
 import type { PositionWithQuestions, Term } from "@uwdsc/common/types";
-import { formatTermCode } from "@uwdsc/common/utils";
+import { formatTermCode, getNextTermCode } from "@uwdsc/common/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { Loader2, MoveLeft, MoveRight, User } from "lucide-react";
 import { Button, Card, CardHeader, CardTitle, CardContent } from "@uwdsc/ui";
@@ -140,8 +140,10 @@ export default function ApplyPage() {
         }
 
         setApplicationId(existing.id);
-        const { generalAnswers, pos1Answers, pos2Answers, pos3Answers } =
-          partitionDraftAnswers(existing, positionsData);
+        const { generalAnswers, pos1Answers, pos2Answers, pos3Answers } = partitionDraftAnswers(
+          existing,
+          positionsData,
+        );
         const pos1 = existing.position_selections.find((s) => s.priority === 1);
         const pos2 = existing.position_selections.find((s) => s.priority === 2);
         const pos3 = existing.position_selections.find((s) => s.priority === 3);
@@ -168,14 +170,11 @@ export default function ApplyPage() {
         });
 
         const storedStep = readStoredStep(term.id);
-        const initialStep =
-          storedStep && storedStep >= 1 && storedStep <= 4 ? storedStep : 1;
+        const initialStep = storedStep && storedStep >= 1 && storedStep <= 4 ? storedStep : 1;
         setCurrentStep(initialStep);
       } catch (err) {
         console.error("Failed to fetch application data:", err);
-        setFetchError(
-          err instanceof Error ? err.message : "Failed to load application",
-        );
+        setFetchError(err instanceof Error ? err.message : "Failed to load application");
       } finally {
         setIsFetching(false);
       }
@@ -216,11 +215,13 @@ export default function ApplyPage() {
             club_experience: values.club_experience,
           };
         case 2:
-          return { answers: collectAllAnswers(values) };
+          return {
+            answers: collectAllAnswers(values, { positions, generalQuestionIds }),
+          };
         case 3:
           return {
             position_selections: buildPositionSelections(values),
-            answers: collectAllAnswers(values),
+            answers: collectAllAnswers(values, { positions, generalQuestionIds }),
           };
         case 4:
           return {
@@ -232,7 +233,7 @@ export default function ApplyPage() {
           return {};
       }
     },
-    [form],
+    [form, positions, generalQuestionIds],
   );
 
   const goToStep = useCallback(
@@ -267,16 +268,14 @@ export default function ApplyPage() {
   const renderButton = () => {
     const isLastStep = currentStep === 4;
     const isPastHardDeadline = Boolean(
-      currentTerm &&
-      new Date() > new Date(currentTerm.application_hard_deadline),
+      currentTerm && new Date() > new Date(currentTerm.application_hard_deadline),
     );
     const isValid =
       isStepValid(form, currentStep, {
         positions,
         generalQuestionIds,
       }) || false;
-    const isButtonDisabled =
-      !isValid || isLoading || (isLastStep && isPastHardDeadline);
+    const isButtonDisabled = !isValid || isLoading || (isLastStep && isPastHardDeadline);
 
     let buttonClassName = "hover:scale-105 ";
     if (isLastStep) {
@@ -313,12 +312,7 @@ export default function ApplyPage() {
     switch (currentStep) {
       case 0: {
         if (!currentTerm) return null;
-        return (
-          <Intro
-            onStartApplication={handleStartApplication}
-            isLoading={isLoading}
-          />
-        );
+        return <Intro onStartApplication={handleStartApplication} isLoading={isLoading} />;
       }
       case 1:
         return <Personal form={form} />;
@@ -342,9 +336,7 @@ export default function ApplyPage() {
   if (fetchError || !currentTerm) {
     return (
       <div className="container mx-auto flex min-h-[50vh] flex-col items-center justify-center px-4 text-center">
-        <p className="text-lg text-red-400">
-          {fetchError ?? "No active application period"}
-        </p>
+        <p className="text-lg text-red-400">{fetchError ?? "No active application period"}</p>
       </div>
     );
   }
@@ -356,11 +348,9 @@ export default function ApplyPage() {
       <DueDateTag deadline={new Date(currentTerm.application_soft_deadline)} />
 
       <div className="mx-auto max-w-4xl text-center mb-6">
-        <h1 className="mb-2 text-3xl font-bold text-white">
-          DSC Exec Application Form
-        </h1>
+        <h1 className="mb-2 text-3xl font-bold text-white">DSC Exec Application Form</h1>
         <p className="text-3xl font-semibold text-blue-400">
-          {formatTermCode(currentTerm.code)}
+          {formatTermCode(getNextTermCode(currentTerm.code))}
         </p>
       </div>
 

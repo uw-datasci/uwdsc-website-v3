@@ -11,10 +11,9 @@ import {
   renderTextField,
   renderTextAreaField,
 } from "@uwdsc/ui";
-import { UseFormReturn } from "react-hook-form";
+import { UseFormReturn, useWatch } from "react-hook-form";
 import { AppFormValues } from "@/lib/schemas/application";
 import { Briefcase, Users } from "lucide-react";
-import { useEffect } from "react";
 import { DuplicateBanner } from "../banners/DuplicateBanner";
 import { VPConsideration } from "../banners/VPConsideration";
 import type { PositionWithQuestions } from "@uwdsc/common/types";
@@ -25,21 +24,13 @@ interface PositionsProps {
 }
 
 export function Positions({ form, positions }: PositionsProps) {
-  const position1 = form.watch("position_1");
-  const position2 = form.watch("position_2");
-  const position3 = form.watch("position_3");
-
-  useEffect(() => {
-    if (!position1) form.setValue("position_1_answers", {});
-  }, [position1, form]);
-
-  useEffect(() => {
-    if (!position2) form.setValue("position_2_answers", {});
-  }, [position2, form]);
-
-  useEffect(() => {
-    if (!position3) form.setValue("position_3_answers", {});
-  }, [position3, form]);
+  // useWatch, not form.watch: React Compiler (reactCompiler is on for this app)
+  // caches the component body on `form`/`positions`, which never change identity,
+  // so a `form.watch(...)` result taken here would freeze at its first value and
+  // the role's questions would never render.
+  const position1 = useWatch({ control: form.control, name: "position_1" });
+  const position2 = useWatch({ control: form.control, name: "position_2" });
+  const position3 = useWatch({ control: form.control, name: "position_3" });
 
   if (positions.length === 0) {
     return (
@@ -79,6 +70,24 @@ export function Positions({ form, positions }: PositionsProps) {
   const getPositionId = (name: string) => {
     if (name === "None (Remove selection)") return "";
     return positions.find((p) => p.name === name)?.id || "";
+  };
+
+  /**
+   * Discard the answers typed for the previously selected role. Answers are
+   * keyed by question id, so leaving them behind would mix two roles' answers
+   * in the same record.
+   */
+  const clearAnswersOnChange = (
+    answersField:
+      | "position_1_answers"
+      | "position_2_answers"
+      | "position_3_answers",
+    nextId: string,
+    currentId: string | undefined,
+  ) => {
+    if (nextId === currentId) return;
+    form.setValue(answersField, {});
+    form.clearErrors(answersField);
   };
 
   return (
@@ -125,7 +134,13 @@ export function Positions({ form, positions }: PositionsProps) {
                   field: {
                     ...field,
                     onChange: (value: string) => {
-                      field.onChange(getPositionId(value));
+                      const nextId = getPositionId(value);
+                      clearAnswersOnChange(
+                        "position_1_answers",
+                        nextId,
+                        field.value,
+                      );
+                      field.onChange(nextId);
                     },
                     value:
                       positions.find((p) => p.id === field.value)?.name || "",
@@ -198,7 +213,13 @@ export function Positions({ form, positions }: PositionsProps) {
                   field: {
                     ...field,
                     onChange: (value: string) => {
-                      field.onChange(getPositionId(value));
+                      const nextId = getPositionId(value);
+                      clearAnswersOnChange(
+                        "position_2_answers",
+                        nextId,
+                        field.value,
+                      );
+                      field.onChange(nextId);
                     },
                     value:
                       positions.find((p) => p.id === field.value)?.name || "",
@@ -271,7 +292,13 @@ export function Positions({ form, positions }: PositionsProps) {
                   field: {
                     ...field,
                     onChange: (value: string) => {
-                      field.onChange(getPositionId(value));
+                      const nextId = getPositionId(value);
+                      clearAnswersOnChange(
+                        "position_3_answers",
+                        nextId,
+                        field.value,
+                      );
+                      field.onChange(nextId);
                     },
                     value:
                       positions.find((p) => p.id === field.value)?.name || "",

@@ -67,6 +67,7 @@ export class ApplicationRepository extends BaseRepository {
         ep.name
       FROM hiring.application_positions_available apa
       JOIN org.exec_positions ep ON apa.position_id = ep.id
+      WHERE apa.is_open = true
       ORDER BY ep.name
     `;
     return result;

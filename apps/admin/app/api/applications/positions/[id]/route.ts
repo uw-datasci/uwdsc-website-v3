@@ -10,9 +10,10 @@ interface Params extends WithAuthContext {
 
 /**
  * DELETE /api/applications/positions/[id]
- * Close a position for applications (removes it from
- * application_positions_available). Blocked if applicants have already
- * selected it. President only.
+ * Close a position for applications (soft-closes its
+ * application_positions_available row -- the row, existing selections, and
+ * its question assignments are kept; the role just stops appearing as an
+ * option for new applicants). President only.
  */
 export const DELETE = withPresAccess<Params>(async (_request, { params }) => {
   try {
@@ -22,7 +23,7 @@ export const DELETE = withPresAccess<Params>(async (_request, { params }) => {
       return ApiResponse.badRequest("Invalid position identifier");
     }
 
-    await applicationService.removeAvailablePosition(availableId);
+    await applicationService.closeAvailablePosition(availableId);
     return ApiResponse.ok({ success: true });
   } catch (error: unknown) {
     if (error instanceof ApiError) {

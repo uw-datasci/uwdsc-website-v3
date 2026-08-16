@@ -123,15 +123,13 @@ class ApplicationService {
     }
   }
 
-  /** Open a position for applications by adding it to application_positions_available. */
-  async addAvailablePosition(execPositionId: number): Promise<{ id: number }> {
-    const existing = await this.repository.getAvailablePositionByExecPositionId(execPositionId);
-    if (existing) {
-      throw new ApiError("This position is already open for applications", 409);
-    }
-
+  /**
+   * Open a position for applications. Idempotent (upsert), so re-opening a
+   * previously-closed role reuses its existing apa id instead of erroring.
+   */
+  async openAvailablePosition(execPositionId: number): Promise<{ id: number }> {
     try {
-      return await this.repository.addAvailablePosition(execPositionId);
+      return await this.repository.openAvailablePosition(execPositionId);
     } catch (error) {
       throw new ApiError(
         `Failed to open position for applications: ${(error as Error).message}`,
@@ -141,26 +139,23 @@ class ApplicationService {
   }
 
   /**
-   * Close a position for applications. Blocked if any applicant has already
-   * selected it, to avoid orphaning submitted application data.
+   * Close a position for applications. This is a soft close (`is_open =
+   * false`), not a delete, so it never disturbs applicants who already
+   * selected the role -- their `application_position_selections` and the
+   * role's `position_questions` are left exactly as they were. The role just
+   * stops appearing as an option for new applicants going forward.
    *
    * Only affects the external application. Returning-exec role preferences
    * reference `org.exec_positions` directly and are intentionally unaffected.
    */
-  async removeAvailablePosition(availableId: number): Promise<void> {
-    const selectionCount =
-      await this.repository.getSelectionCountForAvailablePosition(availableId);
-    if (selectionCount > 0) {
-      throw new ApiError("Cannot remove a position that applicants have already selected", 409);
-    }
-
+  async closeAvailablePosition(availableId: number): Promise<void> {
     try {
-      const removed = await this.repository.removeAvailablePosition(availableId);
-      if (!removed) throw new ApiError("Position not found", 404);
+      const closed = await this.repository.closeAvailablePosition(availableId);
+      if (!closed) throw new ApiError("Position not found", 404);
     } catch (error) {
       if (error instanceof ApiError) throw error;
       throw new ApiError(
-        `Failed to remove available position: ${(error as Error).message}`,
+        `Failed to close available position: ${(error as Error).message}`,
         500,
       );
     }

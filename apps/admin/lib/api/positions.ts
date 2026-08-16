@@ -8,7 +8,7 @@ export async function getManagablePositions(): Promise<ManagablePosition[]> {
   return (data as { positions: ManagablePosition[] }).positions;
 }
 
-export async function addAvailablePosition(
+export async function openPosition(
   positionId: number,
 ): Promise<{ availableId: number }> {
   const response = await fetch("/api/applications/positions", {
@@ -21,9 +21,7 @@ export async function addAvailablePosition(
   return data as { availableId: number };
 }
 
-export async function removeAvailablePosition(
-  availableId: number,
-): Promise<void> {
+export async function closePosition(availableId: number): Promise<void> {
   const response = await fetch(`/api/applications/positions/${availableId}`, {
     method: "DELETE",
   });

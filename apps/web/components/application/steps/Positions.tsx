@@ -8,14 +8,13 @@ import {
   Form,
   FormField,
   renderSelectField,
-  renderTextField,
-  renderTextAreaField,
 } from "@uwdsc/ui";
 import { UseFormReturn, useWatch } from "react-hook-form";
 import { AppFormValues } from "@/lib/schemas/application";
 import { Briefcase, Users } from "lucide-react";
 import { DuplicateBanner } from "../banners/DuplicateBanner";
 import { VPConsideration } from "../banners/VPConsideration";
+import { renderAnswerField } from "./answerField";
 import type { PositionWithQuestions } from "@uwdsc/common/types";
 
 interface PositionsProps {
@@ -154,32 +153,7 @@ export function Positions({ form, positions }: PositionsProps) {
                 key={q.id}
                 control={form.control}
                 name={`position_1_answers.${q.id}`}
-                render={
-                  q.type === "text"
-                    ? renderTextField({
-                        placeholder: q.placeholder ?? "",
-                        label: q.question_text,
-                        required: true,
-                        inputProps:
-                          q.max_length != null
-                            ? { maxLength: q.max_length }
-                            : undefined,
-                      })
-                    : renderTextAreaField({
-                        placeholder: q.placeholder ?? "",
-                        label: q.question_text,
-                        required: true,
-                        textareaProps:
-                          q.max_length != null
-                            ? { maxLength: q.max_length }
-                            : undefined,
-                        description:
-                          q.max_length != null
-                            ? (value) =>
-                                `${value.length}/${q.max_length} characters`
-                            : undefined,
-                      })
-                }
+                render={renderAnswerField(q)}
               />
             ))}
           </CardContent>
@@ -233,32 +207,7 @@ export function Positions({ form, positions }: PositionsProps) {
                 key={q.id}
                 control={form.control}
                 name={`position_2_answers.${q.id}`}
-                render={
-                  q.type === "text"
-                    ? renderTextField({
-                        placeholder: q.placeholder ?? "",
-                        label: q.question_text,
-                        required: true,
-                        inputProps:
-                          q.max_length != null
-                            ? { maxLength: q.max_length }
-                            : undefined,
-                      })
-                    : renderTextAreaField({
-                        placeholder: q.placeholder ?? "",
-                        label: q.question_text,
-                        required: true,
-                        textareaProps:
-                          q.max_length != null
-                            ? { maxLength: q.max_length }
-                            : undefined,
-                        description:
-                          q.max_length != null
-                            ? (value) =>
-                                `${value.length}/${q.max_length} characters`
-                            : undefined,
-                      })
-                }
+                render={renderAnswerField(q)}
               />
             ))}
           </CardContent>
@@ -312,32 +261,7 @@ export function Positions({ form, positions }: PositionsProps) {
                 key={q.id}
                 control={form.control}
                 name={`position_3_answers.${q.id}`}
-                render={
-                  q.type === "text"
-                    ? renderTextField({
-                        placeholder: q.placeholder ?? "",
-                        label: q.question_text,
-                        required: true,
-                        inputProps:
-                          q.max_length != null
-                            ? { maxLength: q.max_length }
-                            : undefined,
-                      })
-                    : renderTextAreaField({
-                        placeholder: q.placeholder ?? "",
-                        label: q.question_text,
-                        required: true,
-                        textareaProps:
-                          q.max_length != null
-                            ? { maxLength: q.max_length }
-                            : undefined,
-                        description:
-                          q.max_length != null
-                            ? (value) =>
-                                `${value.length}/${q.max_length} characters`
-                            : undefined,
-                      })
-                }
+                render={renderAnswerField(q)}
               />
             ))}
           </CardContent>

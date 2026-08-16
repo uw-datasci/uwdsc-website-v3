@@ -7,24 +7,14 @@ import {
   CardTitle,
   Form,
   FormField,
-  renderTextField,
-  renderTextAreaField,
 } from "@uwdsc/ui";
 import { UseFormReturn } from "react-hook-form";
 import { AppFormValues } from "@/lib/schemas/application";
 import { MessageSquare } from "lucide-react";
-import type { ApplicationInputType } from "@uwdsc/common/types";
+import type { GeneralQuestion } from "@uwdsc/common/types";
 
 import { GeneralTip } from "../banners/GeneralTip";
-
-interface GeneralQuestion {
-  id: string;
-  question_text: string;
-  type: ApplicationInputType;
-  sort_order: number;
-  placeholder: string | null;
-  max_length: number | null;
-}
+import { renderAnswerField } from "./answerField";
 
 interface GeneralProps {
   readonly form: UseFormReturn<AppFormValues>;
@@ -61,32 +51,7 @@ export function General({ form, questions }: GeneralProps) {
                 key={q.id}
                 control={form.control}
                 name={`general_answers.${q.id}`}
-                render={
-                  q.type === "text"
-                    ? renderTextField({
-                        placeholder: q.placeholder ?? "",
-                        label: q.question_text,
-                        required: true,
-                        inputProps:
-                          q.max_length != null
-                            ? { maxLength: q.max_length }
-                            : undefined,
-                      })
-                    : renderTextAreaField({
-                        placeholder: q.placeholder ?? "",
-                        label: q.question_text,
-                        required: true,
-                        textareaProps:
-                          q.max_length != null
-                            ? { maxLength: q.max_length }
-                            : undefined,
-                        description:
-                          q.max_length != null
-                            ? (value) =>
-                                `${value.length}/${q.max_length} characters`
-                            : undefined,
-                      })
-                }
+                render={renderAnswerField(q)}
               />
             ))}
           </CardContent>

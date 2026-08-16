@@ -43,7 +43,8 @@ interface TextFieldOptions {
   placeholder: string;
   label?: string;
   required?: boolean;
-  description?: string;
+  description?: string | ((value: string) => React.ReactNode);
+  descriptionClassName?: string;
   className?: string;
   inputProps?: Partial<ComponentProps<typeof Input>>;
 }
@@ -150,11 +151,14 @@ export function renderTextField(opts: TextFieldOptions) {
     label,
     required = false,
     description,
+    descriptionClassName,
     className,
     inputProps = {},
   } = opts;
 
   function TextFieldRender({ field }: StringFieldRenderProps) {
+    const desc =
+      typeof description === "function" ? description(field.value ?? "") : description;
     return (
       <FormItem>
         {label != null && (
@@ -165,7 +169,9 @@ export function renderTextField(opts: TextFieldOptions) {
         <FormControl>
           <Input {...field} {...inputProps} placeholder={placeholder} className={className} />
         </FormControl>
-        {description != null && <FormDescription>{description}</FormDescription>}
+        {desc != null && (
+          <FormDescription className={descriptionClassName}>{desc}</FormDescription>
+        )}
         <FormMessage />
       </FormItem>
     );

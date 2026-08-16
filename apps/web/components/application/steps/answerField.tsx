@@ -11,24 +11,18 @@ export interface AnswerQuestion {
 
 export function renderAnswerField(question: AnswerQuestion) {
   const maxLength = answerMaxLength(question);
+  const counter = (value: string) => (
+    <span className={value.length > maxLength ? "text-red-400" : undefined}>
+      {value.length}/{maxLength} characters
+    </span>
+  );
   const shared = {
     placeholder: question.placeholder ?? "",
     label: question.question_text,
     required: true,
+    description: counter,
+    descriptionClassName: "text-right tabular-nums",
   };
 
-  if (question.type === "text") {
-    return renderTextField({ ...shared, inputProps: { maxLength } });
-  }
-
-  return renderTextAreaField({
-    ...shared,
-    textareaProps: { maxLength },
-    descriptionClassName: "text-right tabular-nums",
-    description: (value: string) => (
-      <span className={value.length > maxLength ? "text-red-400" : undefined}>
-        {value.length}/{maxLength} characters
-      </span>
-    ),
-  });
+  return question.type === "text" ? renderTextField(shared) : renderTextAreaField(shared);
 }

@@ -1,7 +1,24 @@
 import type { PositionsWithQuestionsResponse } from "@/types/application";
 import { AppFormValues } from "@/lib/schemas/application";
 import { UseFormReturn } from "react-hook-form";
-import type { ApplicationWithDetails, PositionWithQuestions } from "@uwdsc/common/types";
+import { DEFAULT_ANSWER_MAX_LENGTH } from "@uwdsc/common/constants";
+import type {
+  ApplicationWithDetails,
+  GeneralQuestion,
+  PositionWithQuestions,
+} from "@uwdsc/common/types";
+
+export function answerMaxLength(question: { max_length: number | null }): number {
+  return question.max_length ?? DEFAULT_ANSWER_MAX_LENGTH;
+}
+
+function isAnswerComplete(
+  answer: string | undefined,
+  question: { max_length: number | null },
+): boolean {
+  const trimmed = answer?.trim() ?? "";
+  return trimmed.length >= 1 && trimmed.length <= answerMaxLength(question);
+}
 
 export function partitionDraftAnswers(
   existing: ApplicationWithDetails,
@@ -62,7 +79,7 @@ type AnswerPair = { question_id: string; answer_text: string };
 
 interface QuestionContext {
   positions: PositionWithQuestions[];
-  generalQuestionIds: string[];
+  generalQuestions: GeneralQuestion[];
 }
 
 /**
@@ -101,13 +118,14 @@ export function collectAllAnswers(
 ): AnswerPair[] {
   const questionIdsFor = (positionId: string | undefined) =>
     positionId
-      ? (context.positions.find((p) => p.id === positionId)?.questions ?? []).map(
-          (q) => q.id,
-        )
+      ? (context.positions.find((p) => p.id === positionId)?.questions ?? []).map((q) => q.id)
       : [];
 
   const pairs = [
-    ...pickAnswers(values.general_answers, context.generalQuestionIds),
+    ...pickAnswers(
+      values.general_answers,
+      context.generalQuestions.map((q) => q.id),
+    ),
     ...pickAnswers(values.position_1_answers, questionIdsFor(values.position_1)),
     ...pickAnswers(values.position_2_answers, questionIdsFor(values.position_2)),
     ...pickAnswers(values.position_3_answers, questionIdsFor(values.position_3)),
@@ -140,7 +158,7 @@ export const isStepValid = (
   context: QuestionContext,
 ): boolean => {
   const { errors } = form.formState;
-  const { positions, generalQuestionIds } = context;
+  const { positions, generalQuestions } = context;
 
   switch (currentStep) {
     case 1: // Personal Details
@@ -163,11 +181,8 @@ export const isStepValid = (
     case 2: {
       // General - dynamic questions
       const generalAnswers = form.watch("general_answers") || {};
-      const allAnswered = generalQuestionIds.every(
-        (id) =>
-          generalAnswers[id] &&
-          generalAnswers[id].trim().length >= 1 &&
-          generalAnswers[id].trim().length <= 1000,
+      const allAnswered = generalQuestions.every((q) =>
+        isAnswerComplete(generalAnswers[q.id], q),
       );
       return !errors.general_answers && allAnswered;
     }
@@ -189,12 +204,7 @@ export const isStepValid = (
         if (!positionData) return false;
         // Check each expected question id rather than counting entries: answers
         // left over from a previously selected position inflate the count.
-        return positionData.questions.every((q) => {
-          const answer = answers[q.id];
-          return (
-            !!answer && answer.trim().length >= 1 && answer.trim().length <= 1000
-          );
-        });
+        return positionData.questions.every((q) => isAnswerComplete(answers[q.id], q));
       };
 
       return (

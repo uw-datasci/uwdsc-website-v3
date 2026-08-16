@@ -39,7 +39,7 @@ import {
   Submitted,
 } from "@/components/application/steps";
 import { STEP_NAMES } from "@/constants/application";
-import type { PositionWithQuestions, Term } from "@uwdsc/common/types";
+import type { GeneralQuestion, PositionWithQuestions, Term } from "@uwdsc/common/types";
 import { formatTermCode, getNextTermCode } from "@uwdsc/common/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { Loader2, MoveLeft, MoveRight, User } from "lucide-react";
@@ -63,17 +63,7 @@ const slideVariants = {
 export default function ApplyPage() {
   const [currentTerm, setCurrentTerm] = useState<Term | null>(null);
   const [positions, setPositions] = useState<PositionWithQuestions[]>([]);
-  const [generalQuestionIds, setGeneralQuestionIds] = useState<string[]>([]);
-  const [generalQuestions, setGeneralQuestions] = useState<
-    {
-      id: string;
-      question_text: string;
-      type: "text" | "textarea";
-      sort_order: number;
-      placeholder: string | null;
-      max_length: number | null;
-    }[]
-  >([]);
+  const [generalQuestions, setGeneralQuestions] = useState<GeneralQuestion[]>([]);
   const [applicationId, setApplicationId] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [direction, setDirection] = useState<number>(1);
@@ -106,7 +96,6 @@ export default function ApplyPage() {
           getProfileAutofill(),
         ]);
         setPositions(positionsData.positions);
-        setGeneralQuestionIds(positionsData.generalQuestions.map((q) => q.id));
         setGeneralQuestions(positionsData.generalQuestions);
 
         const fullName =
@@ -220,12 +209,12 @@ export default function ApplyPage() {
           };
         case 2:
           return {
-            answers: collectAllAnswers(values, { positions, generalQuestionIds }),
+            answers: collectAllAnswers(values, { positions, generalQuestions }),
           };
         case 3:
           return {
             position_selections: buildPositionSelections(values),
-            answers: collectAllAnswers(values, { positions, generalQuestionIds }),
+            answers: collectAllAnswers(values, { positions, generalQuestions }),
           };
         case 4:
           return {
@@ -237,7 +226,7 @@ export default function ApplyPage() {
           return {};
       }
     },
-    [form, positions, generalQuestionIds],
+    [form, positions, generalQuestions],
   );
 
   const goToStep = useCallback(
@@ -277,7 +266,7 @@ export default function ApplyPage() {
     const isValid =
       isStepValid(form, currentStep, {
         positions,
-        generalQuestionIds,
+        generalQuestions,
       }) || false;
     const isButtonDisabled = !isValid || isLoading || (isLastStep && isPastHardDeadline);
 

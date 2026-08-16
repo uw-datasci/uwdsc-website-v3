@@ -5,103 +5,34 @@ import { z } from "zod";
  * general_answers: dynamic question_id -> answer_text (from API)
  * resumeKey: populated after file upload (replaces resumeUrl)
  */
-export const applicationSchema = z
-  .object({
-    full_name: z.string().min(2, "Full name is required"),
-    personal_email: z.email("Personal email is required"),
-    waterloo_email: z
-      .email("UWaterloo email is required")
-      .regex(
-        /@uwaterloo\.ca$/,
-        "Must be a valid UWaterloo email (@uwaterloo.ca)",
-      ),
-    program: z.string().min(1, "Program is required"),
-    academic_term: z.string().min(1, "Academic term is required"),
-    location: z.string().min(1, "Location is required"),
-    club_experience: z.boolean({
-      message: "Please select whether you have past exec experience",
-    }),
-    general_answers: z.record(
-      z.string(),
-      z.string().trim().min(1, "Answer is required"),
-    ),
-    position_1: z.string().min(1, "Please select a position"),
-    position_1_answers: z.record(
-      z.string(),
-      z.string().trim().min(1, "Answer is required"),
-    ),
-    position_2: z.string().optional(),
-    position_2_answers: z
-      .record(z.string(), z.string().trim().min(1, "Answer is required"))
-      .optional(),
-    position_3: z.string().optional(),
-    position_3_answers: z
-      .record(z.string(), z.string().trim().min(1, "Answer is required"))
-      .optional(),
-    linkedin_url: z.url("Enter a valid LinkedIn URL"),
-    github_url: z.url("Enter a valid GitHub URL"),
-    portfolio_url: z
-      .union([z.literal(""), z.url("Enter a valid URL")])
-      .optional(),
-    resumeKey: z.string().min(1, "Please upload your resume"),
-  })
-  .refine(
-    (data) => {
-      if (data.position_1 && data.position_1 !== "") {
-        const answers = data.position_1_answers || {};
-        return (
-          Object.values(answers).length > 0 &&
-          Object.values(answers).every(
-            (a) =>
-              a && typeof a === "string" && a.length >= 1 && a.length <= 1000,
-          )
-        );
-      }
-      return true;
-    },
-    {
-      message: "Please answer all questions for your selected position",
-      path: ["position_1_answers"],
-    },
-  )
-  .refine(
-    (data) => {
-      if (data.position_2 && data.position_2 !== "") {
-        const answers = data.position_2_answers || {};
-        return (
-          Object.values(answers).length > 0 &&
-          Object.values(answers).every(
-            (a) =>
-              a && typeof a === "string" && a.length >= 1 && a.length <= 1000,
-          )
-        );
-      }
-      return true;
-    },
-    {
-      message: "Please answer all questions for your selected position",
-      path: ["position_2_answers"],
-    },
-  )
-  .refine(
-    (data) => {
-      if (data.position_3 && data.position_3 !== "") {
-        const answers = data.position_3_answers || {};
-        return (
-          Object.values(answers).length > 0 &&
-          Object.values(answers).every(
-            (a) =>
-              a && typeof a === "string" && a.length >= 1 && a.length <= 1000,
-          )
-        );
-      }
-      return true;
-    },
-    {
-      message: "Please answer all questions for your selected position",
-      path: ["position_3_answers"],
-    },
-  );
+export const applicationSchema = z.object({
+  full_name: z.string().min(2, "Full name is required"),
+  personal_email: z.email("Personal email is required"),
+  waterloo_email: z
+    .email("UWaterloo email is required")
+    .regex(/@uwaterloo\.ca$/, "Must be a valid UWaterloo email (@uwaterloo.ca)"),
+  program: z.string().min(1, "Program is required"),
+  academic_term: z.string().min(1, "Academic term is required"),
+  location: z.string().min(1, "Location is required"),
+  club_experience: z.boolean({
+    message: "Please select whether you have past exec experience",
+  }),
+  general_answers: z.record(z.string(), z.string().trim().min(1, "Answer is required")),
+  position_1: z.string().min(1, "Please select a position"),
+  position_1_answers: z.record(z.string(), z.string().trim().min(1, "Answer is required")),
+  position_2: z.string().optional(),
+  position_2_answers: z
+    .record(z.string(), z.string().trim().min(1, "Answer is required"))
+    .optional(),
+  position_3: z.string().optional(),
+  position_3_answers: z
+    .record(z.string(), z.string().trim().min(1, "Answer is required"))
+    .optional(),
+  linkedin_url: z.url("Enter a valid LinkedIn URL"),
+  github_url: z.url("Enter a valid GitHub URL"),
+  portfolio_url: z.union([z.literal(""), z.url("Enter a valid URL")]).optional(),
+  resumeKey: z.string().min(1, "Please upload your resume"),
+});
 
 export type AppFormValues = z.infer<typeof applicationSchema>;
 

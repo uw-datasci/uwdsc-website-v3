@@ -10,6 +10,8 @@ export const atkinsonHyperlegibleMono = Atkinson_Hyperlegible_Mono({
   weight: "400",
   subsets: ["latin"],
   variable: "--font-atkinson-mono",
+  adjustFontFallback: false,
+  fallback: ["ui-monospace", "monospace"],
 });
 
 export const displayFontClass = "font-[family-name:var(--font-tilt-warp)]";

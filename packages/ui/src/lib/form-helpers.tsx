@@ -43,7 +43,8 @@ interface TextFieldOptions {
   placeholder: string;
   label?: string;
   required?: boolean;
-  description?: string;
+  description?: string | ((value: string) => React.ReactNode);
+  descriptionClassName?: string;
   className?: string;
   inputProps?: Partial<ComponentProps<typeof Input>>;
 }
@@ -73,6 +74,7 @@ interface TextAreaFieldOptions {
   label?: string;
   required?: boolean;
   description?: string | ((value: string) => React.ReactNode);
+  descriptionClassName?: string;
   className?: string;
   textareaProps?: Partial<ComponentProps<typeof Textarea>>;
   stretchToParent?: boolean;
@@ -124,7 +126,7 @@ interface MultiSelectDropdownFieldOptions {
 // Helpers: each returns a component that receives { field } for FormField render
 // ---------------------------------------------------------------------------
 
-interface StringFieldRenderProps {
+export interface StringFieldRenderProps {
   readonly field: StringFieldProps;
 }
 
@@ -149,11 +151,14 @@ export function renderTextField(opts: TextFieldOptions) {
     label,
     required = false,
     description,
+    descriptionClassName,
     className,
     inputProps = {},
   } = opts;
 
   function TextFieldRender({ field }: StringFieldRenderProps) {
+    const desc =
+      typeof description === "function" ? description(field.value ?? "") : description;
     return (
       <FormItem>
         {label != null && (
@@ -164,7 +169,9 @@ export function renderTextField(opts: TextFieldOptions) {
         <FormControl>
           <Input {...field} {...inputProps} placeholder={placeholder} className={className} />
         </FormControl>
-        {description != null && <FormDescription>{description}</FormDescription>}
+        {desc != null && (
+          <FormDescription className={descriptionClassName}>{desc}</FormDescription>
+        )}
         <FormMessage />
       </FormItem>
     );
@@ -333,6 +340,7 @@ export function renderTextAreaField(opts: TextAreaFieldOptions) {
     label,
     required = false,
     description,
+    descriptionClassName,
     className,
     textareaProps = {},
     stretchToParent = false,
@@ -364,7 +372,9 @@ export function renderTextAreaField(opts: TextAreaFieldOptions) {
         <FormControl className={stretchToParent ? "min-h-0 flex-1" : undefined}>
           {textarea}
         </FormControl>
-        {desc != null && <FormDescription>{desc}</FormDescription>}
+        {desc != null && (
+          <FormDescription className={descriptionClassName}>{desc}</FormDescription>
+        )}
         <FormMessage className={stretchToParent ? "shrink-0" : undefined} />
       </FormItem>
     );

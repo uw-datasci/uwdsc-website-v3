@@ -191,6 +191,7 @@ export class ApplicationRepository extends BaseRepository {
         JOIN org.exec_positions ep ON apa.position_id = ep.id
         LEFT JOIN org.subteams st ON st.id = ep.subteam_id
         WHERE st.name IS DISTINCT FROM 'Presidents'
+          AND apa.is_open = true
         ORDER BY ep.name ASC
       `;
     }
@@ -206,6 +207,7 @@ export class ApplicationRepository extends BaseRepository {
       LEFT JOIN org.subteams st ON st.id = ep.subteam_id
       WHERE apa.id IN ${this.sql(scope.vpPositionIds)}
         AND st.name IS DISTINCT FROM 'Presidents'
+        AND apa.is_open = true
       ORDER BY ep.name ASC
     `;
   }
@@ -213,7 +215,8 @@ export class ApplicationRepository extends BaseRepository {
   /**
    * All exec positions (excluding Presidents) joined against
    * application_positions_available, for the President-only positions
-   * management dashboard.
+   * management dashboard. `is_available` reflects `apa.is_open` (false for a
+   * role that has never been opened, since the LEFT JOIN then yields NULL).
    */
   async getManagablePositions(): Promise<ManagablePosition[]> {
     return this.sql<ManagablePosition[]>`
@@ -223,7 +226,7 @@ export class ApplicationRepository extends BaseRepository {
         ep.is_vp,
         st.name AS subteam_name,
         apa.id AS available_id,
-        apa.id IS NOT NULL AS is_available
+        COALESCE(apa.is_open, false) AS is_available
       FROM org.exec_positions ep
       LEFT JOIN org.subteams st ON st.id = ep.subteam_id
       LEFT JOIN hiring.application_positions_available apa ON apa.position_id = ep.id
@@ -232,48 +235,38 @@ export class ApplicationRepository extends BaseRepository {
     `;
   }
 
-  async getAvailablePositionByExecPositionId(
-    execPositionId: number,
-  ): Promise<{ id: number } | null> {
+  /**
+   * Open a position for applications. Idempotent: a role that already has an
+   * apa row (even a previously-closed one) is flipped back to open in place,
+   * reusing the same id so existing question assignments and any historical
+   * selections keep pointing at it.
+   */
+  async openAvailablePosition(execPositionId: number): Promise<{ id: number }> {
     const [row] = await this.sql<{ id: number }[]>`
-      SELECT id
-      FROM hiring.application_positions_available
-      WHERE position_id = ${execPositionId}
-      LIMIT 1
-    `;
-    return row ?? null;
-  }
-
-  async addAvailablePosition(execPositionId: number): Promise<{ id: number }> {
-    const [row] = await this.sql<{ id: number }[]>`
-      INSERT INTO hiring.application_positions_available (position_id)
-      VALUES (${execPositionId})
+      INSERT INTO hiring.application_positions_available (position_id, is_open)
+      VALUES (${execPositionId}, true)
+      ON CONFLICT (position_id) DO UPDATE SET is_open = true
       RETURNING id
     `;
-    if (!row) throw new Error("Failed to add available position");
+    if (!row) throw new Error("Failed to open position for applications");
     return row;
   }
 
-  async getSelectionCountForAvailablePosition(availableId: number): Promise<number> {
-    const [row] = await this.sql<{ count: number }[]>`
-      SELECT COUNT(*)::int AS count
-      FROM hiring.application_position_selections
-      WHERE position_id = ${availableId}
-    `;
-    return row?.count ?? 0;
-  }
-
   /**
-   * Only affects the external application. Returning-exec role preferences
+   * Close a position for applications. This flips `is_open` rather than
+   * deleting the row, so submitted `application_position_selections` and
+   * `position_questions` assignments for this role are untouched, and only
+   * affects the external application -- returning-exec role preferences
    * reference `org.exec_positions` directly and are intentionally unaffected.
    */
-  async removeAvailablePosition(availableId: number): Promise<boolean> {
-    const deleted = await this.sql<{ id: number }[]>`
-      DELETE FROM hiring.application_positions_available
+  async closeAvailablePosition(availableId: number): Promise<boolean> {
+    const updated = await this.sql<{ id: number }[]>`
+      UPDATE hiring.application_positions_available
+      SET is_open = false
       WHERE id = ${availableId}
       RETURNING id
     `;
-    return deleted.length > 0;
+    return updated.length > 0;
   }
 
   async getAllQuestions(): Promise<AppQuestion[]> {

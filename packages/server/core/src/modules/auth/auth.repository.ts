@@ -159,9 +159,13 @@ export class AuthRepository extends BaseRepository {
   }
 
   /**
-   * `application_positions_available.id` for every open role whose `exec_positions.subteam_id`
-   * matches a subteam the user serves as VP in (from `exec_team` + `exec_positions.is_vp`,
-   * resolving subteam via COALESCE(ep.subteam_id, et.subteam_id)).
+   * `application_positions_available.id` for every role (open OR closed) whose
+   * `exec_positions.subteam_id` matches a subteam the user serves as VP in
+   * (from `exec_team` + `exec_positions.is_vp`, resolving subteam via
+   * COALESCE(ep.subteam_id, et.subteam_id)). Deliberately not filtered on
+   * `apa.is_open`: a VP must keep review access and question-edit rights for a
+   * role after a President closes it mid-cycle, so submitted applicants aren't
+   * orphaned from their reviewer.
    */
   async getVpApplicationPositionIdsForProfile(profileId: string): Promise<number[]> {
     const rows = await this.sql<{ position_id: number }[]>`

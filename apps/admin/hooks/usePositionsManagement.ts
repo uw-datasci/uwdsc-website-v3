@@ -4,9 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { ManagablePosition } from "@uwdsc/common/types";
 import {
-  addAvailablePosition,
+  closePosition,
   getManagablePositions,
-  removeAvailablePosition,
+  openPosition,
 } from "@/lib/api/positions";
 
 export type PositionsLoadState =
@@ -68,7 +68,7 @@ export function usePositionsManagement() {
 
       try {
         if (nextAvailable) {
-          const { availableId } = await addAvailablePosition(
+          const { availableId } = await openPosition(
             position.exec_position_id,
           );
           patchPosition(position.exec_position_id, {
@@ -76,8 +76,10 @@ export function usePositionsManagement() {
           });
           toast.success(`${position.name} is now open for applications`);
         } else if (position.available_id !== null) {
-          await removeAvailablePosition(position.available_id);
-          patchPosition(position.exec_position_id, { available_id: null });
+          // Closing is a soft flag, not a delete -- the row (and its id) is
+          // kept so existing applications and question assignments survive,
+          // so available_id is intentionally left in place here.
+          await closePosition(position.available_id);
           toast.success(`${position.name} is now closed for applications`);
         }
       } catch (err: unknown) {

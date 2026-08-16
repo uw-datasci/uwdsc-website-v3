@@ -51,9 +51,11 @@ export function PositionsManagementSection({
       <CardHeader className="pb-3">
         <CardTitle className="text-base">Positions</CardTitle>
         <CardDescription>
-          Toggle a role on to let members select it on the public application. VP roles are
-          listed first within each subteam. This does not affect the returning exec form —
-          returning execs can choose any role except Presidents and Advisors.
+          Toggle a role on to let members select it on the public application. Turning a role
+          off hides it from new applicants — existing applications for that role and its
+          questions are kept, they just aren&apos;t deleted. VP roles are listed first within
+          each subteam. This does not affect the returning exec form — returning execs can
+          choose any role except Presidents and Advisors.
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-0">

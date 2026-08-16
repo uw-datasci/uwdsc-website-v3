@@ -39,6 +39,25 @@ export function partitionDraftAnswers(
   return { generalAnswers, pos1Answers, pos2Answers, pos3Answers };
 }
 
+/**
+ * Resolve a saved position selection to a form value, dropping it if the
+ * position is no longer open. `positionsData.positions` only lists positions
+ * currently open for applications, so a role closed after the draft was
+ * saved won't be found here -- restoring its id verbatim would leave the
+ * select showing blank (its name isn't in the options list) while the form
+ * still silently held a stale id. Returning "" instead makes the field
+ * genuinely empty, so the required-field validation catches it and the
+ * applicant has to pick an open role.
+ */
+export function openPositionSelection(
+  selection: { position_id: string } | undefined,
+  positionsData: PositionsWithQuestionsResponse,
+): string {
+  if (!selection) return "";
+  const isOpen = positionsData.positions.some((p) => p.id === selection.position_id);
+  return isOpen ? selection.position_id : "";
+}
+
 type AnswerPair = { question_id: string; answer_text: string };
 
 interface QuestionContext {

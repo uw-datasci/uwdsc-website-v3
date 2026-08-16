@@ -20,6 +20,7 @@ import {
   buildPositionSelections,
   collectAllAnswers,
   isStepValid,
+  openPositionSelection,
   partitionDraftAnswers,
 } from "@/lib/utils/application";
 import { useApplicationStepStorage } from "@/hooks/useApplicationStepStorage";
@@ -157,11 +158,14 @@ export default function ApplyPage() {
           location: existing.location ?? "",
           club_experience: existing.club_experience ?? undefined,
           general_answers: generalAnswers,
-          position_1: pos1?.position_id ?? "",
+          // Drop a saved pick if that position has since been closed -- otherwise
+          // the select renders blank (its name isn't in the open options list)
+          // while the form still silently holds the stale id.
+          position_1: openPositionSelection(pos1, positionsData),
           position_1_answers: pos1Answers,
-          position_2: pos2?.position_id ?? "",
+          position_2: openPositionSelection(pos2, positionsData),
           position_2_answers: pos2Answers,
-          position_3: pos3?.position_id ?? "",
+          position_3: openPositionSelection(pos3, positionsData),
           position_3_answers: pos3Answers,
           linkedin_url: existing.linkedin_url ?? "",
           github_url: existing.github_url ?? "",

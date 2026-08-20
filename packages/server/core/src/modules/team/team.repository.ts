@@ -1,4 +1,5 @@
 import { BaseRepository } from "@uwdsc/db/base.repository";
+import type { SubteamOption } from "@uwdsc/common/types";
 import type { ExecTeamRow } from "../../types/team";
 
 export class TeamRepository extends BaseRepository {
@@ -28,5 +29,17 @@ export class TeamRepository extends BaseRepository {
       ORDER BY s.id ASC, et.id ASC
     `;
     return result;
+  }
+
+  /**
+   * Every subteam, for pickers and filters (e.g. assigning a member's subteam).
+   * Ordered by id so the seeded ordering (Presidents first) is preserved.
+   */
+  async getSubteams(): Promise<SubteamOption[]> {
+    return this.sql<SubteamOption[]>`
+      SELECT id, name
+      FROM org.subteams
+      ORDER BY id ASC
+    `;
   }
 }

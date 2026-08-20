@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { FACULTY_VALUES, ROLE_VALUES } from "@uwdsc/common/constants";
+import {
+  FACULTY_VALUES,
+  ROLE_VALUES,
+  roleRequiresSubteam,
+} from "@uwdsc/common/constants";
 
 /**
  * Schema for marking a member as paid
@@ -36,9 +40,33 @@ export type EditMemberFormValues = z.infer<typeof editMemberSchema>;
  * Schema for updating a member's role.
  * President-only — enforced server-side by the `withPresAccess` route guard.
  */
-export const updateMemberRoleSchema = z.object({
-  role: z.enum(ROLE_VALUES),
-});
+/**
+ * Role change plus the subteam it is scoped to. Mirrors the
+ * `user_roles_subteam_matches_role` check constraint so the form surfaces the rule
+ * before the request goes out.
+ */
+export const updateMemberRoleSchema = z
+  .object({
+    role: z.enum(ROLE_VALUES),
+    subteam_id: z.number().int().nullable(),
+  })
+  .superRefine((data, ctx) => {
+    if (roleRequiresSubteam(data.role) && data.subteam_id === null) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["subteam_id"],
+        message: "Select a subteam for this role",
+      });
+    }
+
+    if (!roleRequiresSubteam(data.role) && data.subteam_id !== null) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["subteam_id"],
+        message: "This role cannot have a subteam",
+      });
+    }
+  });
 
 export type UpdateMemberRoleFormValues = z.infer<typeof updateMemberRoleSchema>;
 

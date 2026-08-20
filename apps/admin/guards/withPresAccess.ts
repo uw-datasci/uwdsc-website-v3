@@ -1,5 +1,5 @@
 import type { User } from "@supabase/supabase-js";
-import { isPresident } from "@uwdsc/common/constants";
+import { isPresident, readRoleClaims } from "@uwdsc/common/constants";
 import type { QuestionScope } from "@uwdsc/common/types";
 import { ApiResponse } from "@uwdsc/common/utils";
 import { createAuthService } from "@/lib/services";
@@ -21,13 +21,13 @@ export function withPresAccess<C extends WithAuthContext = WithAuthContext>(
   handler: PresAccessHandler<C>,
 ): (request: Request, context?: C) => Promise<Response> {
   return withAuth<C>(async (request, context, user) => {
-    const role = user.app_metadata?.role as string | undefined;
-    if (!isPresident(role)) {
+    const claims = readRoleClaims(user.app_metadata);
+    if (!isPresident(claims.role)) {
       return ApiResponse.unauthorized("Only Presidents can access this");
     }
 
     const authService = await createAuthService();
-    const scope = await authService.getScopeForUser(user.id, role);
+    const scope = await authService.getScopeForUser(claims);
     return handler(request, context, user, scope);
   });
 }

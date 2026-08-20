@@ -27,14 +27,6 @@ class OnboardingService {
     }
   }
 
-  async getExecSubteamId(profile_id: string): Promise<number | null> {
-    try {
-      return await this.repository.getExecSubteamId(profile_id);
-    } catch (error) {
-      throw new ApiError(`Failed to get current exec role: ${(error as Error).message}`, 500);
-    }
-  }
-
   /**
    * Get all exec positions for onboarding application form dropdown
    */

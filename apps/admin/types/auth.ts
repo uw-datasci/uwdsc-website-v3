@@ -4,6 +4,7 @@ import type { Session, User } from "@supabase/supabase-js";
 export type ExecUser = Profile & {
   position_id?: number | null;
   subteam_id?: number | null;
+  subteam_name?: string | null;
   role?: string | null;
 };
 

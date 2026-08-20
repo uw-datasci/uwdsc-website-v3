@@ -40,6 +40,7 @@ export class ProfileRepository extends BaseRepository {
         p.term,
         p.is_math_soc_member,
         r.role AS user_role,
+        r.subteam_id,
         m.profile_id IS NOT NULL AS has_paid,
         m.payment_method,
         m.payment_location,
@@ -169,16 +170,30 @@ export class ProfileRepository extends BaseRepository {
   }
 
   /**
-   * Update a member's role by profile ID.
-   * A DB trigger mirrors `user_roles.role` into Supabase `app_metadata.role`.
+   * Update a member's role and subteam by profile ID.
+   *
+   * Both columns are written in a single statement: the
+   * `user_roles_subteam_matches_role` check constraint is evaluated per row per
+   * statement, so changing them separately would trip it in between.
+   *
+   * A DB trigger mirrors `user_roles.role` and `user_roles.subteam_id` into Supabase
+   * `app_metadata` as `role`, `subteam_id`, and `subteam`.
+   *
    * @param profileId - The profile ID (UUID)
    * @param role - The new role to assign
+   * @param subteamId - The subteam to scope them to; must be null for `member`/`alum`
+   *   and non-null for `exec`/`admin`/`pres` (validated in the service)
    */
-  async updateRoleById(profileId: string, role: UserRole): Promise<boolean> {
+  async updateRoleById(
+    profileId: string,
+    role: UserRole,
+    subteamId: number | null,
+  ): Promise<boolean> {
     try {
       const result = await this.sql`
         UPDATE user_roles
-        SET role = ${role}
+        SET role = ${role},
+            subteam_id = ${subteamId}
         WHERE id = ${profileId}
         RETURNING id
       `;

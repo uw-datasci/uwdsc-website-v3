@@ -33,8 +33,8 @@ export interface NewExecTeamMember {
   full_name: string;
   position_name: string;
   is_vp: boolean;
+  subteam_id: number | null;
   subteam_name: string | null;
-  /** Auth email when linked; used for exec welcome broadcast on finalize. */
   email: string | null;
   computed_role: UserRole;
 }
@@ -44,12 +44,7 @@ export interface FinalizeRolesSummary {
   promoted_to_pres: number;
   promoted_to_admin: number;
   promoted_to_exec: number;
-  /** Outgoing execs/admins/presidents not on the new team, demoted to `alum`. */
   demoted_to_alum: number;
-  /**
-   * When set, a marketing broadcast was sent to these addresses; callers may schedule
-   * delayed removal from the Resend campaign segment (same pattern as email campaigns).
-   */
   exec_welcome_broadcast?: {
     id?: string;
     recipient_emails: string[];

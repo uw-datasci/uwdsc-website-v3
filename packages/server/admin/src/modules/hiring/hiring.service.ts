@@ -111,7 +111,7 @@ class HiringService {
   }): Promise<FinalizeRolesSummary> {
     try {
       const when2MeetLink = params.when2MeetLink.trim();
-      if (when2MeetLink.startsWith("https://")) {
+      if (!when2MeetLink.startsWith("https://")) {
         throw new ApiError(
           "A When2Meet link starting with https:// is required.",
           400,
@@ -130,9 +130,23 @@ class HiringService {
 
       const team = await this.getNewExecTeam();
 
+      // exec_positions.subteam_id is nullable, but user_roles_subteam_matches_role
+      // requires one for every elevated role. Fail before opening the transaction so
+      // the President gets an actionable message instead of a constraint violation.
+      const missingSubteam = team.filter((m) => m.subteam_id === null);
+      if (missingSubteam.length > 0) {
+        throw new ApiError(
+          `These accepted roles have no subteam assigned: ${missingSubteam
+            .map((m) => m.position_name)
+            .join(", ")}. Set a subteam on each position before finalizing.`,
+          400,
+        );
+      }
+
       const newTeamRoles = team.map((m) => ({
         profileId: m.profile_id,
         role: m.computed_role,
+        subteamId: m.subteam_id,
       }));
 
       const { demoted } = await this.repository.finalizeRoles(newTeamRoles);

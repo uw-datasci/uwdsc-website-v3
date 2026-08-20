@@ -5,6 +5,7 @@ export interface AcceptedOfferRow {
   full_name: string;
   position_name: string;
   is_vp: boolean;
+  subteam_id: number | null;
   subteam_name: string | null;
   email: string | null;
 }

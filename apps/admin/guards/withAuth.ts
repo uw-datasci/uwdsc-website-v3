@@ -3,7 +3,7 @@ import { ApiResponse } from "@uwdsc/common/utils";
 import { membershipService } from "@uwdsc/core";
 import { graceDuringOnboarding } from "@/lib/graceDuringOnboarding";
 import { createAuthService } from "@/lib/services";
-import { ADMIN_ROLES, ALUM_ROLE } from "@uwdsc/common/constants";
+import { ADMIN_ROLES, ALUM_ROLE, readRoleClaims } from "@uwdsc/common/constants";
 
 /**
  * Context shape passed to route handlers (e.g. { params: Promise<{ id: string }> }).
@@ -67,7 +67,7 @@ export function withAuth<C extends WithAuthContext = WithAuthContext>(
 
     if (error || !user) return ApiResponse.unauthorized("Authentication required");
 
-    const role = user.app_metadata?.role as string | undefined;
+    const { role } = readRoleClaims(user.app_metadata);
     const isAllowedAlum = options.allowAlum && role === ALUM_ROLE;
     if (!role || (!ADMIN_ROLES.has(role) && !isAllowedAlum)) {
       return ApiResponse.unauthorized("Admin or exec access required");

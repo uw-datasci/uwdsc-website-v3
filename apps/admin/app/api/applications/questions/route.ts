@@ -19,7 +19,6 @@ export const GET = withVpAccess(async (_request, _context, _user, scope) => {
       positions,
       scope: {
         isPresident: scope.isPresident,
-        hasVpExecRole: scope.hasVpExecRole,
         vpSubteamNames: scope.vpSubteamNames,
       },
     });

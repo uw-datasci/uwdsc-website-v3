@@ -2,6 +2,7 @@ import {
   EXEC_TEAM_PHOTO_PLACEHOLDER,
   type ExecMember,
   type Subteam,
+  type SubteamOption,
 } from "@uwdsc/common/types";
 import type { ExecTeamRow } from "../../types/team";
 import { TeamRepository } from "./team.repository";
@@ -82,6 +83,14 @@ class TeamService {
 
     subteams.sort((a, b) => this.sortSubteams(a, b));
     return subteams;
+  }
+
+  /**
+   * Flat list of every subteam (`{ id, name }`), for pickers such as the President's
+   * member role/subteam editor.
+   */
+  async getSubteams(): Promise<SubteamOption[]> {
+    return this.repository.getSubteams();
   }
 }
 

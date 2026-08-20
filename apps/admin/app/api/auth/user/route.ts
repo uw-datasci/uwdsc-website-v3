@@ -2,6 +2,7 @@ import { ApiResponse } from "@uwdsc/common/utils";
 import { withAuth } from "@/guards/withAuth";
 import { profileService } from "@uwdsc/core";
 import { onboardingService } from "@uwdsc/admin";
+import { readRoleClaims } from "@uwdsc/common/constants";
 
 /**
  * GET /api/auth/user
@@ -11,11 +12,10 @@ import { onboardingService } from "@uwdsc/admin";
 export const GET = withAuth(
   async (_request, _context, user) => {
     try {
-      const role = user.app_metadata?.role ?? null;
-      const [profile, positionId, subteamId] = await Promise.all([
+      const { role, subteamId, subteamName } = readRoleClaims(user.app_metadata);
+      const [profile, positionId] = await Promise.all([
         profileService.getProfileByUserId(user.id),
         onboardingService.getExecPosId(user.id),
-        onboardingService.getExecSubteamId(user.id),
       ]);
 
       const data = {
@@ -28,6 +28,7 @@ export const GET = withAuth(
         faculty: profile?.faculty,
         position_id: positionId,
         subteam_id: subteamId,
+        subteam_name: subteamName,
       };
       return ApiResponse.ok(data);
     } catch (error) {

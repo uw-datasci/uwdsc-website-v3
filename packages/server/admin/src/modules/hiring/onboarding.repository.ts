@@ -60,18 +60,6 @@ export class OnboardingRepository extends BaseRepository {
     return result[0]?.position_id ?? null;
   }
 
-  async getExecSubteamId(profile_id: string): Promise<number | null> {
-    const result = await this.sql<{ subteam_id: number }[]>`
-      SELECT subteam_id
-      FROM org.exec_team
-      WHERE profile_id = ${profile_id}
-      ORDER BY updated_at DESC, created_at DESC
-      LIMIT 1
-    `;
-
-    return result[0]?.subteam_id ?? null;
-  }
-
   /* Get all exec positions for onboarding application form dropdown */
   async getExecPositions(): Promise<ExecPosition[]> {
     const result = await this.sql<ExecPosition[]>`
@@ -117,8 +105,10 @@ export class OnboardingRepository extends BaseRepository {
       FROM profiles p
       JOIN auth.users au ON p.id = au.id
       JOIN user_roles r ON p.id = r.id
+      -- exec_team supplies the display-only current position; the subteam now
+      -- comes from user_roles (see the filter below).
       LEFT JOIN LATERAL (
-        SELECT position_id, subteam_id
+        SELECT position_id
         FROM org.exec_team
         WHERE profile_id = p.id
         ORDER BY updated_at DESC, created_at DESC
@@ -130,7 +120,7 @@ export class OnboardingRepository extends BaseRepository {
       AND s.term_id = ${term_id}
       LEFT JOIN org.exec_positions ep_submission ON ep_submission.id = s.role_id
       WHERE r.role IN ('exec', 'admin')
-      ${subteam_id ? this.sql`AND COALESCE(ep_current.subteam_id, et.subteam_id) = ${subteam_id}` : this.sql``}
+      ${subteam_id ? this.sql`AND r.subteam_id = ${subteam_id}` : this.sql``}
       ORDER BY r.role DESC, p.first_name NULLS LAST, p.last_name NULLS LAST
     `;
 

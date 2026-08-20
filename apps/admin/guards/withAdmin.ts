@@ -1,5 +1,5 @@
 import { ApiResponse } from "@uwdsc/common/utils";
-import { isAdmin } from "@uwdsc/common/constants";
+import { isAdmin, readRoleClaims } from "@uwdsc/common/constants";
 import { withAuth, type WithAuthContext, type WithAuthHandler } from "./withAuth";
 
 /**
@@ -11,7 +11,7 @@ export function withAdmin<C extends WithAuthContext = WithAuthContext>(
   handler: WithAuthHandler<C>,
 ): (request: Request, context?: C) => Promise<Response> {
   return withAuth<C>(async (request, context, user) => {
-    const role = user.app_metadata?.role as string | undefined;
+    const { role } = readRoleClaims(user.app_metadata);
     if (!isAdmin(role)) {
       return ApiResponse.forbidden("Only admin users can access this resource.");
     }

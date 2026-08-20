@@ -10,7 +10,7 @@ interface Params extends WithAuthContext {
 
 /**
  * PATCH /api/members/[id]/role
- * Update a member's role. President-only.
+ * Update a member's role and subteam. President-only.
  */
 export const PATCH = withPresAccess<Params>(async (request, { params }) => {
   try {
@@ -29,6 +29,7 @@ export const PATCH = withPresAccess<Params>(async (request, { params }) => {
     const result = await profileService.updateMemberRole(
       id,
       validationResult.data.role,
+      validationResult.data.subteam_id,
     );
 
     if (!result.success) {

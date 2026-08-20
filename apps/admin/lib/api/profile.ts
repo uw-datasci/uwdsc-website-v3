@@ -159,21 +159,24 @@ export async function updateMember(
 }
 
 /**
- * Update a member's role (president-only).
+ * Update a member's role and the subteam it scopes them to (president-only).
  *
  * @param memberId - The profile ID of the member
  * @param role - The new role to assign
+ * @param subteamId - The subteam to scope them to; must be null for `member`/`alum`
+ *   and non-null for `exec`/`admin`/`pres`
  * @returns Promise indicating success
  * @throws Error if request fails or unauthorized
  */
 export async function updateMemberRole(
   memberId: string,
   role: UserRole,
+  subteamId: number | null,
 ): Promise<void> {
   const response = await fetch(`/api/members/${memberId}/role`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ role }),
+    body: JSON.stringify({ role, subteam_id: subteamId }),
   });
 
   const data = await response.json();

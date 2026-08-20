@@ -4,25 +4,27 @@
  */
 
 /**
- * VP / Presidents scope for CRUD - from exec_team, exec_positions (is_vp, subteam),
- * and application_positions_available ids for question assignment.
+ * VP / Presidents scope for CRUD - resolved from the caller's role claims
+ * (`user_roles.role` + `user_roles.subteam_id`, mirrored into Supabase app_metadata)
+ * and the positions belonging to that subteam.
+ *
+ * Presidents are unscoped: every consumer short-circuits on `isPresident`, so the
+ * subteam and position arrays are empty for them.
  */
 export interface QuestionScope {
-  /** True if the user holds any exec role with `exec_positions.is_vp` (via exec_team). */
-  hasVpExecRole: boolean;
-  /** VP on Presidents subteam (exec + subteam name). */
+  /** True if `user_role === "pres"`. */
   isPresident: boolean;
-  /** VP subteam names resolved from exec roles (excluding Presidents). */
+  /** The VP's subteam name, or empty for presidents and non-VPs. */
   vpSubteamNames: string[];
-  /** VP subteam ids resolved from exec roles (excluding Presidents). */
+  /** The VP's subteam id, or empty for presidents and non-VPs. */
   vpSubteamIds: number[];
   /**
-   * `application_positions_available.id` scoped to the user’s VP subteam(s) (see auth repository).
+   * `application_positions_available.id` scoped to the user’s VP subteam (see auth repository).
    * External application only — do not use for returning-exec authorization checks.
    */
   vpPositionIds: number[];
   /**
-   * `org.exec_positions.id` scoped to the user’s VP subteam(s), independent of application
+   * `org.exec_positions.id` scoped to the user’s VP subteam, independent of application
    * availability. Use this for returning-exec role-preference authorization checks.
    */
   vpExecPositionIds: number[];
@@ -70,7 +72,6 @@ export interface QuestionsListResponse {
   positions: QuestionPositionOption[];
   scope: {
     isPresident: boolean;
-    hasVpExecRole: boolean;
     vpSubteamNames: string[];
   };
 }

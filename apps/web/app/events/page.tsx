@@ -9,7 +9,7 @@ import {
   ActiveEventSection,
   EventCardMemberSection,
   MembershipPaymentDrawer,
-  NextEventSection,
+  NextEventSection
 } from "@/components/events";
 import { motion } from "framer-motion";
 import { Badge, Button, Card, CardContent, CardHeader, Spinner } from "@uwdsc/ui";
@@ -31,7 +31,7 @@ export default function EventsPage() {
       try {
         const [activeResult, membershipResult] = await Promise.allSettled([
           getEventsByRange("active"),
-          getMembershipStatus(),
+          getMembershipStatus()
         ]);
 
         const active = activeResult.status === "fulfilled" ? activeResult.value : [];

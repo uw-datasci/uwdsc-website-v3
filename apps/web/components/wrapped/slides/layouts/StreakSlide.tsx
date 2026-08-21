@@ -4,7 +4,7 @@ import {
   tiltWarp,
   atkinsonHyperlegibleMono,
   displayFontClass as display,
-  monoFontClass as mono,
+  monoFontClass as mono
 } from "../../fonts";
 import type { StreakSlideData } from "../../types";
 import { Floating, slideItem, slideStagger } from "../motion";

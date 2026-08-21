@@ -167,7 +167,7 @@ export default function Hero({ user, mutate }: Readonly<HeroProps>) {
             className="absolute bottom-0 left-0 h-0.5 bg-white cursor-pointer"
             variants={{
               initial: { width: "0%" },
-              hover: { width: "100%" },
+              hover: { width: "100%" }
             }}
             transition={{ duration: 0.2 }}
           ></motion.span>

@@ -9,7 +9,7 @@ import {
   FormField,
   renderTextField,
   renderSelectField,
-  renderRadioField,
+  renderRadioField
 } from "@uwdsc/ui";
 import { UseFormReturn, useWatch } from "react-hook-form";
 import { useEffect } from "react";
@@ -18,7 +18,7 @@ import type { ExecPosition } from "@uwdsc/common/types";
 
 const termtypeOptions = [
   { value: "study", label: "Study Term" },
-  { value: "coop", label: "Co-op Term" },
+  { value: "coop", label: "Co-op Term" }
 ];
 
 // headshot upload constants
@@ -38,11 +38,11 @@ export function ExecProfile({
   execPositions,
   headshotFile,
   onHeadshotFileChange,
-  isLocked = false,
+  isLocked = false
 }: ExecProfileProps) {
   const consentWebsite = useWatch({
     control: form.control,
-    name: "consent_website",
+    name: "consent_website"
   });
 
   useEffect(() => {
@@ -67,7 +67,7 @@ export function ExecProfile({
                 render={renderTextField({
                   placeholder: "Enter your full name",
                   label: "Full Name",
-                  required: true,
+                  required: true
                 })}
                 disabled={true}
               />
@@ -79,7 +79,7 @@ export function ExecProfile({
                   placeholder: "johndoe@gmail.com",
                   label: "Personal Email Address",
                   required: true,
-                  inputProps: { type: "email" },
+                  inputProps: { type: "email" }
                 })}
               />
             </CardContent>
@@ -102,7 +102,7 @@ export function ExecProfile({
                   triggerClassName: "w-full",
                   contentClassName: "bg-popover text-popover-foreground",
                   itemClassName:
-                    "transition-colors hover:bg-accent/70 focus:bg-accent focus:text-accent-foreground",
+                    "transition-colors hover:bg-accent/70 focus:bg-accent focus:text-accent-foreground"
                 })}
               />
 
@@ -112,7 +112,7 @@ export function ExecProfile({
                 render={renderTextField({
                   placeholder: "Will you be located in Waterloo this term?",
                   label: "Location",
-                  required: true,
+                  required: true
                 })}
               />
             </CardContent>
@@ -132,7 +132,7 @@ export function ExecProfile({
                   placeholder: "Select your executive position",
                   options: execPositions.map((pos) => ({
                     value: String(pos.id),
-                    label: pos.name,
+                    label: pos.name
                   })),
                   label: "What is your Executive Position for this term?",
                   required: true,
@@ -141,13 +141,13 @@ export function ExecProfile({
                   contentClassName: "h-48 overflow-y-auto bg-popover text-popover-foreground",
                   contentPosition: "popper",
                   itemClassName:
-                    "transition-colors hover:bg-accent/70 focus:bg-accent focus:text-accent-foreground",
+                    "transition-colors hover:bg-accent/70 focus:bg-accent focus:text-accent-foreground"
                 })({
                   field: {
                     ...field,
                     value: String(field.value),
-                    onChange: (v: string) => field.onChange(Number(v)),
-                  },
+                    onChange: (v: string) => field.onChange(Number(v))
+                  }
                 })
               }
             />
@@ -165,7 +165,7 @@ export function ExecProfile({
               render={({ field }) =>
                 renderRadioField({
                   label: "Can we display your headshot on our website?",
-                  required: true,
+                  required: true
                 })({ field })
               }
             />

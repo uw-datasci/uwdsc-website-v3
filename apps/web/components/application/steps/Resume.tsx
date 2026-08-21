@@ -11,7 +11,7 @@ import {
   FormControl,
   FormDescription,
   FormMessage,
-  renderTextField,
+  renderTextField
 } from "@uwdsc/ui";
 import { uploadResume } from "@/lib/api/resume";
 import { FileUp, Loader2, CheckCircle } from "lucide-react";
@@ -92,7 +92,7 @@ export function Resume({ form }: ResumeProps) {
               label: "LinkedIn",
               required: true,
               placeholder: "https://linkedin.com/in/janedoe",
-              inputProps: { type: "url" },
+              inputProps: { type: "url" }
             })}
           />
           <FormField
@@ -102,7 +102,7 @@ export function Resume({ form }: ResumeProps) {
               label: "GitHub",
               required: true,
               placeholder: "https://github.com/janedoe",
-              inputProps: { type: "url" },
+              inputProps: { type: "url" }
             })}
           />
           <div className="md:col-span-2">
@@ -113,7 +113,7 @@ export function Resume({ form }: ResumeProps) {
                 label: "Portfolio / Personal Site",
                 placeholder: "https://janedoe.dev",
                 description: "Optional",
-                inputProps: { type: "url" },
+                inputProps: { type: "url" }
               })}
             />
           </div>

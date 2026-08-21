@@ -16,7 +16,7 @@ export interface UseActiveTimeTrackerOptions {
 
 export function useActiveTimeTracker({
   enabled,
-  membershipId,
+  membershipId
 }: UseActiveTimeTrackerOptions): void {
   const pendingSecondsRef = useRef(0);
   const countingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -60,7 +60,7 @@ export function useActiveTimeTracker({
       const supabase = createSupabaseBrowserClient();
       const { error } = await supabase.rpc("increment_membership_active_time", {
         p_membership_id: currentMembershipId,
-        p_seconds: seconds,
+        p_seconds: seconds
       });
 
       if (error) {

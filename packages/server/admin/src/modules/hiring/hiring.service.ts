@@ -4,7 +4,7 @@ import {
   type FinalizeRolesSummary,
   type HiringApplicant,
   type NewExecTeamMember,
-  type UserRole,
+  type UserRole
 } from "@uwdsc/common/types";
 import { applicationService } from "@uwdsc/core";
 import { HiringRepository } from "./hiring.repository";
@@ -15,7 +15,7 @@ const PRESIDENT_ONLY_STATUSES = new Set<ApplicationReviewStatus>([
   "Offer Sent",
   "Accepted Offer",
   "Declined Offer",
-  "Rejection Sent",
+  "Rejection Sent"
 ]);
 
 class HiringService {
@@ -64,7 +64,7 @@ class HiringService {
           type,
           applicantName: recipient.full_name,
           positionName: recipient.position_name,
-          offerTermLabel: recipient.term_code ? formatTermCode(recipient.term_code) : undefined,
+          offerTermLabel: recipient.term_code ? formatTermCode(recipient.term_code) : undefined
         });
       }
     } catch (error) {
@@ -121,7 +121,7 @@ class HiringService {
       const newTeamRoles = team.map((m) => ({
         profileId: m.profile_id,
         role: m.computed_role,
-        subteamId: m.subteam_id,
+        subteamId: m.subteam_id
       }));
 
       const { demoted } = await this.repository.finalizeRoles(newTeamRoles);
@@ -134,7 +134,7 @@ class HiringService {
         promoted_to_pres,
         promoted_to_admin,
         promoted_to_exec,
-        demoted_to_alum: demoted,
+        demoted_to_alum: demoted
       };
 
       const welcomeEmails = team
@@ -144,15 +144,15 @@ class HiringService {
         const broadcast = await emailService.sendNewExecWelcomeBroadcast(welcomeEmails, {
           when2MeetLink,
           termLabel,
-          discordLink,
+          discordLink
         });
         if (broadcast) {
           return {
             ...summary,
             exec_welcome_broadcast: {
               id: broadcast.id,
-              recipient_emails: [...broadcast.recipientEmails],
-            },
+              recipient_emails: [...broadcast.recipientEmails]
+            }
           };
         }
       } catch (err) {

@@ -12,7 +12,7 @@ import {
   Rocket,
   AlertTriangle,
   RotateCcw,
-  ExternalLink,
+  ExternalLink
 } from "lucide-react";
 import {
   Form,
@@ -22,12 +22,12 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-  Separator,
+  Separator
 } from "@uwdsc/ui";
 import {
   foundryFormSchema,
   foundryFormDefaultValues,
-  type FoundryFormValues,
+  type FoundryFormValues
 } from "@/lib/schemas/foundry";
 import { launchFoundryProject } from "@/lib/api/foundry";
 import { FOUNDRY_STEPS } from "@/constants/foundry";
@@ -43,7 +43,7 @@ const launchGlowShadow =
 const launchProjectButtonVariants = {
   rest: {
     boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
-    transition: { duration: 0.25, ease: [0.4, 0, 0.2, 1] as const },
+    transition: { duration: 0.25, ease: [0.4, 0, 0.2, 1] as const }
   },
   hover: {
     boxShadow: launchGlowShadow,
@@ -51,41 +51,41 @@ const launchProjectButtonVariants = {
       boxShadow: {
         delay: 0.5,
         duration: 0.5,
-        ease: [0.4, 0, 0.2, 1] as const,
-      },
-    },
+        ease: [0.4, 0, 0.2, 1] as const
+      }
+    }
   },
   processing: {
     boxShadow: launchGlowShadow,
-    transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] as const },
-  },
+    transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] as const }
+  }
 };
 
 const launchProjectOverlayVariants = {
   rest: {
     x: "-100%",
-    transition: { duration: 0.35, ease: [0.4, 0, 0.2, 1] as const },
+    transition: { duration: 0.35, ease: [0.4, 0, 0.2, 1] as const }
   },
   hover: {
     x: "0%",
-    transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] as const },
+    transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] as const }
   },
   processing: {
     x: "0%",
-    transition: { duration: 0.45, ease: [0.4, 0, 0.2, 1] as const },
-  },
+    transition: { duration: 0.45, ease: [0.4, 0, 0.2, 1] as const }
+  }
 };
 
 const foundrySlideVariants = {
   enter: (direction: number) => ({
     x: direction > 0 ? 32 : -32,
-    opacity: 0,
+    opacity: 0
   }),
   center: { x: 0, opacity: 1 },
   exit: (direction: number) => ({
     x: direction > 0 ? -32 : 32,
-    opacity: 0,
-  }),
+    opacity: 0
+  })
 };
 
 interface StateCardProps {
@@ -103,7 +103,7 @@ function StateCard({
   cardClassName,
   title,
   description,
-  actions,
+  actions
 }: StateCardProps) {
   return (
     <motion.div
@@ -138,38 +138,38 @@ export function FoundryForm() {
   const form = useForm<FoundryFormValues>({
     resolver: zodResolver(foundryFormSchema),
     mode: "onChange",
-    defaultValues: foundryFormDefaultValues,
+    defaultValues: foundryFormDefaultValues
   });
 
   // Ensure the parent form component re-renders when step fields change,
   // so Next button enabled/disabled state stays accurate.
   const watchedProjectName = useWatch({
     control: form.control,
-    name: "projectName",
+    name: "projectName"
   });
   const watchedTeamAccess = useWatch({
     control: form.control,
-    name: "teamAccess",
+    name: "teamAccess"
   });
   const watchedSubdomain = useWatch({
     control: form.control,
-    name: "subdomain",
+    name: "subdomain"
   });
   const watchedProjectType = useWatch({
     control: form.control,
-    name: "projectType",
+    name: "projectType"
   });
   const watchedDatabase = useWatch({
     control: form.control,
-    name: "database",
+    name: "database"
   });
   const watchedPostgresProvider = useWatch({
     control: form.control,
-    name: "postgresProvider",
+    name: "postgresProvider"
   });
   const watchedMongoClient = useWatch({
     control: form.control,
-    name: "mongoClient",
+    name: "mongoClient"
   });
 
   const isCurrentStepValid = useMemo(() => {
@@ -181,7 +181,7 @@ export function FoundryForm() {
         projectType: watchedProjectType,
         database: watchedDatabase,
         postgresProvider: watchedPostgresProvider,
-        mongoClient: watchedMongoClient,
+        mongoClient: watchedMongoClient
       },
       step
     );
@@ -193,7 +193,7 @@ export function FoundryForm() {
     watchedDatabase,
     watchedPostgresProvider,
     watchedMongoClient,
-    step,
+    step
   ]);
   const goNext = async () => {
     const fields = FOUNDRY_STEP_FIELDS[step];

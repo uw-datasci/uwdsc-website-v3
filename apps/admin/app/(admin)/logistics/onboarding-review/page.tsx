@@ -8,7 +8,7 @@ import {
   OnboardingLoading,
   OnboardingHeader,
   OnboardingList,
-  OnboardingDetail,
+  OnboardingDetail
 } from "@/components/logistics/onboarding-review";
 
 export default function LogisticsOnboardingReviewPage() {

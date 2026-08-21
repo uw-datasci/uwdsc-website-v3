@@ -16,7 +16,7 @@ interface EventDetailsDialogProps {
 export function EventDetailsDialog({
   event,
   open,
-  onOpenChange,
+  onOpenChange
 }: Readonly<EventDetailsDialogProps>) {
   if (!event) return null;
 

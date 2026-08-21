@@ -16,7 +16,7 @@ const DEFAULT_FILTERS: RaftGroupFilters = {
   timeRange: "7d",
   resolved: "all",
   page: 1,
-  pageSize: 20,
+  pageSize: 20
 };
 
 export function OpticsDashboard() {
@@ -34,7 +34,7 @@ export function OpticsDashboard() {
     try {
       const [overviewData, groupsData] = await Promise.all([
         getRaftOverview(nextFilters),
-        getRaftErrorGroups(nextFilters),
+        getRaftErrorGroups(nextFilters)
       ]);
 
       setOverview(overviewData);

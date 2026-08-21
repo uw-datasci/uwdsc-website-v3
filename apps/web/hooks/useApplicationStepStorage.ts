@@ -7,7 +7,7 @@ interface UseApplicationStepStorageOptions {
 
 export function useApplicationStepStorage({
   termId,
-  currentStep,
+  currentStep
 }: UseApplicationStepStorageOptions) {
   const getStepStorageKey = useCallback((id: string) => `application:current-step:${id}`, []);
 
@@ -54,6 +54,6 @@ export function useApplicationStepStorage({
 
   return {
     readStoredStep,
-    clearStoredStep,
+    clearStoredStep
   };
 }

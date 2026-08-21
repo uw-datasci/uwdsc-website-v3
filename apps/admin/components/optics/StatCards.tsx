@@ -14,26 +14,26 @@ export function StatCards({ stats }: StatCardsProps) {
       title: "Total errors",
       value: stats.total_errors,
       description: "In selected time range",
-      icon: Bug,
+      icon: Bug
     },
     {
       title: "Open errors",
       value: stats.open_errors,
       description: "Awaiting triage",
-      icon: CircleDot,
+      icon: CircleDot
     },
     {
       title: "Critical errors",
       value: stats.critical_errors,
       description: "Error + fatal severity",
-      icon: AlertTriangle,
+      icon: AlertTriangle
     },
     {
       title: "Apps affected",
       value: stats.distinct_apps,
       description: "Distinct RAFT_APP_NAME values",
-      icon: AppWindow,
-    },
+      icon: AppWindow
+    }
   ];
 
   return (

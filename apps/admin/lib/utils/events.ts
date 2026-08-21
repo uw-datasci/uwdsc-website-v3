@@ -25,7 +25,7 @@ function getZonedDateParts(date: Date, timeZone: string): ZonedDateParts {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
-    hour12: false,
+    hour12: false
   });
   const parts = formatter.formatToParts(date);
   const get = (type: Intl.DateTimeFormatPartTypes) =>
@@ -37,7 +37,7 @@ function getZonedDateParts(date: Date, timeZone: string): ZonedDateParts {
     day: get("day"),
     hour: get("hour") % 24,
     minute: get("minute"),
-    second: get("second"),
+    second: get("second")
   };
 }
 
@@ -59,7 +59,7 @@ function wallClockInZoneToUtcIso(
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
-    hour12: false,
+    hour12: false
   });
 
   const getOffset = (utcMs: number): number => {
@@ -136,7 +136,7 @@ export function formatDateTime(iso: string): string {
       year: "numeric",
       hour: "numeric",
       minute: "2-digit",
-      hour12: true,
+      hour12: true
     }).format(new Date(iso));
     return `${formatted} ET`;
   } catch {
@@ -183,7 +183,7 @@ export function buildICS(events: Event[]): string {
       `SUMMARY:${escapeICSText(event.name)}`,
       `DESCRIPTION:${escapeICSText(formatEventDescription(event.description || ""))}`,
       `LOCATION:${escapeICSText(event.location || "")}`,
-      "END:VEVENT",
+      "END:VEVENT"
     ].join("\r\n");
   });
   return [
@@ -193,7 +193,7 @@ export function buildICS(events: Event[]): string {
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     ...vevents,
-    "END:VCALENDAR",
+    "END:VCALENDAR"
   ].join("\r\n");
 }
 
@@ -206,7 +206,7 @@ export function getGoogleCalendarUrl(event: Event): string {
     text: event.name,
     dates: `${toICSDate(event.start_time)}/${toICSDate(event.end_time)}`,
     details: formatEventDescription(event.description || ""),
-    location: event.location || "",
+    location: event.location || ""
   });
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
@@ -230,7 +230,7 @@ export function downloadICS(event: Event): void {
     `DESCRIPTION:${escapeICSText(formatEventDescription(event.description || ""))}`,
     `LOCATION:${escapeICSText(event.location || "")}`,
     "END:VEVENT",
-    "END:VCALENDAR",
+    "END:VCALENDAR"
   ].join("\r\n");
   const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
   const url = URL.createObjectURL(blob);
@@ -254,7 +254,7 @@ export function isEndAfterStart({ start_time, end_time }: EndAfterStartError) {
 
 export const endAfterStartError: { message: string; path: PropertyKey[] } = {
   message: "End date & time must be after start date & time",
-  path: ["end_time"],
+  path: ["end_time"]
 };
 
 // ─── Term helpers ────────────────────────────────────────────────────────────
@@ -291,7 +291,7 @@ export const EVENT_CSV_HEADERS = [
   "end_time",
   "location",
   "attendance",
-  "term",
+  "term"
 ] as const;
 
 export type EventCsvHeader = (typeof EVENT_CSV_HEADERS)[number];

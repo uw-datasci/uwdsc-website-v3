@@ -13,11 +13,11 @@ function roundUpToTens(n: number): number {
 export const GET = withRaftRoute(async () => {
   const [rawMembers, rawEvents] = await Promise.all([
     profileService.getProfileCount(),
-    eventService.getEventCount(),
+    eventService.getEventCount()
   ]);
 
   return RaftResponse.ok({
     members: roundUpToTens(rawMembers),
-    events: roundUpToTens(rawEvents),
+    events: roundUpToTens(rawEvents)
   });
 });

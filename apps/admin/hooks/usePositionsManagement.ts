@@ -13,7 +13,7 @@ export type PositionsLoadState =
 
 export function usePositionsManagement() {
   const [loadState, setLoadState] = useState<PositionsLoadState>({
-    status: "loading",
+    status: "loading"
   });
   const [pendingIds, setPendingIds] = useState<Set<number>>(new Set());
 
@@ -28,7 +28,7 @@ export function usePositionsManagement() {
       if (status === 401) {
         setLoadState({
           status: "forbidden",
-          message: "Only Presidents can manage application positions.",
+          message: "Only Presidents can manage application positions."
         });
         return;
       }
@@ -49,7 +49,7 @@ export function usePositionsManagement() {
           status: "ready",
           positions: state.positions.map((p) =>
             p.exec_position_id === execPositionId ? { ...p, ...patch } : p
-          ),
+          )
         };
       });
     },
@@ -65,7 +65,7 @@ export function usePositionsManagement() {
         if (nextAvailable) {
           const { availableId } = await openPosition(position.exec_position_id);
           patchPosition(position.exec_position_id, {
-            available_id: availableId,
+            available_id: availableId
           });
           toast.success(`${position.name} is now open for applications`);
         } else if (position.available_id !== null) {
@@ -81,7 +81,7 @@ export function usePositionsManagement() {
         // Revert the optimistic flip since the request failed.
         patchPosition(position.exec_position_id, {
           is_available: position.is_available,
-          available_id: position.available_id,
+          available_id: position.available_id
         });
       } finally {
         setPendingIds((prev) => {

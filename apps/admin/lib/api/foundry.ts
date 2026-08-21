@@ -46,7 +46,7 @@ export async function launchFoundryProject(
   const response = await fetch("/api/github/foundry/launch", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(payload)
   });
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);

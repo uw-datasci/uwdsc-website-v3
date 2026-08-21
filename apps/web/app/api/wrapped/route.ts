@@ -18,7 +18,7 @@ export const GET = withRaftRoute(async () => {
 
   const [events, profileStats] = await Promise.all([
     eventService.getWrappedEventStats(user.id),
-    profileService.getWrappedProfileStats(user.id),
+    profileService.getWrappedProfileStats(user.id)
   ]);
 
   return RaftResponse.ok({
@@ -28,8 +28,8 @@ export const GET = withRaftRoute(async () => {
       passwordResetCount: profileStats?.password_reset_count ?? 0,
       minutesOnWebsite: profileStats?.minutes_on_website ?? 0,
       isChronicallyOnline: profileStats?.is_chronically_online ?? false,
-      isDscFan: profileStats?.is_dsc_fan ?? false,
-    }),
+      isDscFan: profileStats?.is_dsc_fan ?? false
+    })
   });
 });
 
@@ -51,7 +51,7 @@ function buildWrappedSlides({
   passwordResetCount,
   minutesOnWebsite,
   isChronicallyOnline,
-  isDscFan,
+  isDscFan
 }: WrappedSlideInputs): WrappedSlideData[] {
   const now = Date.now();
   // Query returns oldest → newest, so order-dependent stats need no re-sort.
@@ -71,7 +71,7 @@ function buildWrappedSlides({
             ...slide,
             events: [],
             statValue: "0",
-            statCaption: "You haven't gone to a DSC event yet!",
+            statCaption: "You haven't gone to a DSC event yet!"
           };
         }
 
@@ -81,16 +81,16 @@ function buildWrappedSlides({
             id: event.id,
             name: event.name,
             description: event.description,
-            color: NUTSHELL_COLORS[index % NUTSHELL_COLORS.length] ?? "#9cd8ea",
+            color: NUTSHELL_COLORS[index % NUTSHELL_COLORS.length] ?? "#9cd8ea"
           })),
-          statValue: String(attendedEvents.length),
+          statValue: String(attendedEvents.length)
         };
       case "streak":
         if (longestStreak === 0) {
           return {
             ...slide,
             subheading: "OH NO!",
-            captionLines: ["You haven't been to a DSC event!"],
+            captionLines: ["You haven't been to a DSC event!"]
           };
         }
 
@@ -98,15 +98,15 @@ function buildWrappedSlides({
           ...slide,
           captionLines: [
             `${longestStreak} event${longestStreak === 1 ? "" : "s"} in a row`,
-            "without missing a beat",
-          ],
+            "without missing a beat"
+          ]
         };
       case "membership":
         return {
           ...slide,
           joinDate: formatJoinDate(memberSince),
           headline: `${termsSince(memberSince)} terms since then as a member!`,
-          caption: `${daysSince(memberSince).toLocaleString()} days with us!`,
+          caption: `${daysSince(memberSince).toLocaleString()} days with us!`
         };
       case "hero":
         return buildHeroSlide(slide, {
@@ -116,7 +116,7 @@ function buildWrappedSlides({
           attendedEventCount: attendedEvents.length,
           minutesOnWebsite,
           isChronicallyOnline,
-          isDscFan,
+          isDscFan
         });
       default:
         return null;
@@ -143,7 +143,7 @@ function buildHeroSlide(
         : {
             ...slide,
             title: "You don't have one! Go to more DSC events!",
-            subtitle: undefined,
+            subtitle: undefined
           };
     case "minutes":
       return stats.isChronicallyOnline
@@ -153,14 +153,14 @@ function buildHeroSlide(
       return {
         ...slide,
         stat: String(stats.passwordResetCount),
-        subtitle: getPasswordResetMessage(stats.passwordResetCount),
+        subtitle: getPasswordResetMessage(stats.passwordResetCount)
       };
     case "club-highest-attendance":
       return stats.highestAttendanceEvent
         ? {
             ...slide,
             stat: String(stats.highestAttendanceEvent.attendance_count),
-            subtitle: `${stats.highestAttendanceEvent.name} packed the room.`,
+            subtitle: `${stats.highestAttendanceEvent.name} packed the room.`
           }
         : slide;
     case "award-super-fan": {
@@ -169,7 +169,7 @@ function buildHeroSlide(
           ...slide,
           eyebrow: "Award unlocked",
           title: "DSC Hater!",
-          subtitle: "You showed up to no events!",
+          subtitle: "You showed up to no events!"
         };
       }
 
@@ -179,7 +179,7 @@ function buildHeroSlide(
         ...slide,
         eyebrow: "Your DSC attendance",
         title: `${stats.attendedEventCount} event${stats.attendedEventCount === 1 ? "" : "s"}`,
-        subtitle: "Thanks for showing up!",
+        subtitle: "Thanks for showing up!"
       };
     }
     case "award-chronically-online":
@@ -229,7 +229,7 @@ function formatJoinDate(memberSince?: string): string {
   return new Date(joinedAt).toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
-    year: "numeric",
+    year: "numeric"
   });
 }
 

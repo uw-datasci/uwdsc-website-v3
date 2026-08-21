@@ -10,7 +10,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  Button,
+  Button
 } from "@uwdsc/ui";
 
 interface VerifyEmailModalProps {
@@ -22,7 +22,7 @@ interface VerifyEmailModalProps {
 export function VerifyEmailModal({
   open,
   onOpenChange,
-  email,
+  email
 }: Readonly<VerifyEmailModalProps>) {
   const [resendStatus, setResendStatus] = useState("");
   const [isLoading, setIsLoading] = useState(false);

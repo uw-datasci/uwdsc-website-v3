@@ -9,7 +9,7 @@ import {
   ApplicationDetail,
   ApplicationsLoading,
   ApplicationsError,
-  ApplicationsHeader,
+  ApplicationsHeader
 } from "@/components/applications";
 import { getAllApplications, updatePositionSelectionReviewStatus } from "@/lib/api";
 import { SUBMITTED_SUBMISSION_STATUS_FILTER } from "@/constants/applications";
@@ -28,7 +28,7 @@ function withUpdatedPositionSelection(
         ...app,
         position_selections: app.position_selections.map((s) =>
           s.id === selectionId ? { ...s, status } : s
-        ),
+        )
       };
     }
     return app;
@@ -39,7 +39,7 @@ export default function ApplicationsPage() {
   const [applications, setApplications] = useState<ApplicationListItem[]>([]);
   const [statusCounts, setStatusCounts] = useState({
     draft: 0,
-    submitted: 0,
+    submitted: 0
   });
   const [filteredApplications, setFilteredApplications] = useState<ApplicationListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,7 +58,7 @@ export default function ApplicationsPage() {
         const {
           applications: list,
           statusCounts,
-          positionReview: pr,
+          positionReview: pr
         } = await getAllApplications();
         setApplications(list);
         setStatusCounts(statusCounts);

@@ -3,7 +3,7 @@
 import {
   ResetPasswordFormValues,
   resetPasswordSchema,
-  resetPasswordDefaultValues,
+  resetPasswordDefaultValues
 } from "@/lib/schemas/resetPassword";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,7 +21,7 @@ export function ResetPasswordForm() {
   const form = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: resetPasswordDefaultValues,
-    mode: "onTouched",
+    mode: "onTouched"
   });
 
   const onSubmit = async (data: ResetPasswordFormValues) => {
@@ -56,8 +56,8 @@ export function ResetPasswordForm() {
                 "!h-auto !text-base border-gray-100/80 !bg-black px-4.5 py-3.5 placeholder:text-gray-100/80 rounded-lg xl:px-6 xl:py-4.5",
               inputProps: {
                 type: "password",
-                autoComplete: "new-password",
-              },
+                autoComplete: "new-password"
+              }
             })}
           />
           <FormField
@@ -69,8 +69,8 @@ export function ResetPasswordForm() {
                 "!h-auto !text-base border-gray-100/80 !bg-black px-4.5 py-3.5 placeholder:text-gray-100/80 rounded-lg xl:px-6 xl:py-4.5",
               inputProps: {
                 type: "password",
-                autoComplete: "new-password",
-              },
+                autoComplete: "new-password"
+              }
             })}
           />
         </div>

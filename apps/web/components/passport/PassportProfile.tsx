@@ -27,14 +27,14 @@ export function PassportProfile({
   email,
   watIam,
   facultyLabel,
-  term,
+  term
 }: Readonly<PassportProfileProps>) {
   const readRows = [
     { label: "Full Name", Icon: User, value: displayName },
     { label: "Email", Icon: Mail, value: email },
     { label: "WatIAM", Icon: Hash, value: watIam },
     { label: "Faculty", Icon: GraduationCap, value: facultyLabel },
-    { label: "Current Term", Icon: Calendar, value: term },
+    { label: "Current Term", Icon: Calendar, value: term }
   ];
 
   return (

@@ -3,7 +3,7 @@ import {
   tiltWarp,
   atkinsonHyperlegibleMono,
   displayFontClass as display,
-  monoFontClass as mono,
+  monoFontClass as mono
 } from "../../fonts";
 import type { PasswordResetsSlideData } from "../../types";
 
@@ -44,49 +44,49 @@ export function PasswordResetsSlide({ slide }: PasswordResetsSlideProps) {
       left: "-4%",
       bottom: "-12%",
       width: "5.5rem",
-      rotate: "-14deg",
+      rotate: "-14deg"
     },
     {
       kind: "mushroom",
       left: "14%",
       bottom: "-18%",
       width: "6.5rem",
-      rotate: "10deg",
+      rotate: "10deg"
     },
     {
       kind: "flower",
       left: "34%",
       bottom: "-10%",
       width: "5.5rem",
-      rotate: "-6deg",
+      rotate: "-6deg"
     },
     {
       kind: "flower",
       left: "52%",
       bottom: "-16%",
       width: "6rem",
-      rotate: "14deg",
+      rotate: "14deg"
     },
     {
       kind: "mushroom",
       left: "70%",
       bottom: "-10%",
       width: "6rem",
-      rotate: "-8deg",
+      rotate: "-8deg"
     },
     {
       kind: "leaf",
       right: "-4%",
       bottom: "-14%",
       width: "5.5rem",
-      rotate: "12deg",
-    },
+      rotate: "12deg"
+    }
   ];
 
   const PILE_BLOBS = {
     mushroom: MushroomBlob,
     flower: FlowerBlob,
-    leaf: LeafBlob,
+    leaf: LeafBlob
   };
 
   return (
@@ -112,7 +112,7 @@ export function PasswordResetsSlide({ slide }: PasswordResetsSlideProps) {
                 right: ornament.right,
                 bottom: ornament.bottom,
                 width: ornament.width,
-                transform: `rotate(${ornament.rotate})`,
+                transform: `rotate(${ornament.rotate})`
               }}
             >
               <Blob />

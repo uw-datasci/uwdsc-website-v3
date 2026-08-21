@@ -8,7 +8,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
+  DialogFooter
 } from "@uwdsc/ui";
 import type { Event } from "@uwdsc/common/types";
 import { formatEventDescription } from "@uwdsc/common/utils";
@@ -28,7 +28,7 @@ export function EventDetailsDialog({
   open,
   onOpenChange,
   onEdit,
-  onDelete,
+  onDelete
 }: Readonly<EventDetailsDialogProps>) {
   if (!event) return null;
 

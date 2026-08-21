@@ -6,7 +6,7 @@ import {
   Html,
   Preview,
   Section,
-  Text,
+  Text
 } from "@react-email/components";
 import { Markdown } from "@react-email/markdown";
 import type { ReactElement } from "react";
@@ -20,7 +20,7 @@ export function CampaignEmail({ subject, body }: Readonly<CampaignEmailProps>): 
       <Body
         style={{
           backgroundColor: "#f6f9fc",
-          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
         }}
       >
         <Container
@@ -30,7 +30,7 @@ export function CampaignEmail({ subject, body }: Readonly<CampaignEmailProps>): 
             backgroundColor: "#ffffff",
             borderRadius: "8px",
             padding: "40px",
-            border: "1px solid #e6ebf1",
+            border: "1px solid #e6ebf1"
           }}
         >
           <Section>
@@ -39,7 +39,7 @@ export function CampaignEmail({ subject, body }: Readonly<CampaignEmailProps>): 
                 fontSize: "20px",
                 fontWeight: "bold",
                 color: "#1a1a2e",
-                margin: "0 0 2px 0",
+                margin: "0 0 2px 0"
               }}
             >
               UWDSC
@@ -48,7 +48,7 @@ export function CampaignEmail({ subject, body }: Readonly<CampaignEmailProps>): 
               style={{
                 fontSize: "12px",
                 color: "#6b7280",
-                margin: "0 0 24px 0",
+                margin: "0 0 24px 0"
               }}
             >
               University of Waterloo Data Science Club
@@ -66,21 +66,21 @@ export function CampaignEmail({ subject, body }: Readonly<CampaignEmailProps>): 
                 p: {
                   color: "#374151",
                   lineHeight: "1.6",
-                  margin: "0 0 16px 0",
+                  margin: "0 0 16px 0"
                 },
                 link: { color: "#6366f1" },
                 blockQuote: {
                   borderLeft: "4px solid #e6ebf1",
                   paddingLeft: "16px",
-                  color: "#6b7280",
+                  color: "#6b7280"
                 },
                 codeInline: {
                   backgroundColor: "#f3f4f6",
                   padding: "2px 6px",
                   borderRadius: "4px",
                   fontFamily: "monospace",
-                  fontSize: "14px",
-                },
+                  fontSize: "14px"
+                }
               }}
             >
               {body}
@@ -95,7 +95,7 @@ export function CampaignEmail({ subject, body }: Readonly<CampaignEmailProps>): 
                 fontSize: "12px",
                 color: "#9ca3af",
                 textAlign: "center",
-                margin: "0",
+                margin: "0"
               }}
             >
               University of Waterloo Data Science Club &mdash; uwdatascience.ca

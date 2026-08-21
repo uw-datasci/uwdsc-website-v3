@@ -12,7 +12,7 @@ type MembershipPaymentDrawerProps = {
 
 export function MembershipPaymentDrawer({
   profileId,
-  trigger,
+  trigger
 }: Readonly<MembershipPaymentDrawerProps>) {
   const [open, setOpen] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);

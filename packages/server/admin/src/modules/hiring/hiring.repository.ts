@@ -4,7 +4,7 @@ import type {
   ApplicationReviewStatus,
   HiringApplicant,
   HiringPositionSelection,
-  UserRole,
+  UserRole
 } from "@uwdsc/common/types";
 import type { AcceptedOfferRow } from "../../types/hiring";
 
@@ -16,7 +16,7 @@ export class HiringRepository extends BaseRepository {
       "Offer Sent",
       "Accepted Offer",
       "Declined Offer",
-      "Rejection Sent",
+      "Rejection Sent"
     ] as const;
 
     const applications = await this.sql<
@@ -82,7 +82,7 @@ export class HiringRepository extends BaseRepository {
     const regularApplicants: HiringApplicant[] = applications.map((app) => ({
       ...app,
       source: "application" as const,
-      position_selections: selectionsMap.get(app.id) ?? [],
+      position_selections: selectionsMap.get(app.id) ?? []
     }));
 
     // Fetch returning-exec hiring rows for the active term
@@ -151,7 +151,7 @@ export class HiringRepository extends BaseRepository {
       personal_email: null,
       submitted_at: s.submitted_at,
       source: "returning_exec" as const,
-      position_selections: returningSelectionsMap.get(s.id) ?? [],
+      position_selections: returningSelectionsMap.get(s.id) ?? []
     }));
 
     return [...regularApplicants, ...returningApplicants];

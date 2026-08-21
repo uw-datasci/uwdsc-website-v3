@@ -7,7 +7,7 @@ import {
   CarouselPrevious,
   CarouselNext,
   CarouselContent,
-  CarouselItem,
+  CarouselItem
 } from "@uwdsc/ui";
 
 export default function PastEvents() {
@@ -18,7 +18,7 @@ export default function PastEvents() {
       </SectionTitle>
       <Carousel
         opts={{
-          align: "start",
+          align: "start"
         }}
         className="w-full max-w-62.5 md:max-w-2xl xl:max-w-6xl"
       >

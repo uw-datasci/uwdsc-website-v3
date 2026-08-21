@@ -14,7 +14,7 @@ export const onboardingSchema = z
     role_id: z.number().int({ message: "Please select a role" }),
     in_waterloo: z.string().min(1, "Please indicate your location next term"),
     term_type: z.enum(["study", "coop"], {
-      message: "Please select study or co-op term",
+      message: "Please select study or co-op term"
     }),
     instagram: z.string().max(30).optional().nullable(),
     headshot_url: z.string().optional().nullable(),
@@ -22,14 +22,14 @@ export const onboardingSchema = z
     consent_instagram: z.boolean(),
     discord: z.string().min(1).max(32),
     datasci_competency: z.number().int().min(0).max(4),
-    anything_else: z.string().optional().nullable(),
+    anything_else: z.string().optional().nullable()
   })
   .superRefine((data, ctx) => {
     if (data.consent_instagram && !data.instagram?.trim()) {
       ctx.addIssue({
         code: "custom",
         message: "Instagram handle is required when you consent to Instagram",
-        path: ["instagram"],
+        path: ["instagram"]
       });
     }
   });
@@ -48,5 +48,5 @@ export const OnboardingDefaultValues: Partial<OnboardingFormValues> = {
   consent_instagram: false,
   discord: "",
   datasci_competency: 2,
-  anything_else: "",
+  anything_else: ""
 };

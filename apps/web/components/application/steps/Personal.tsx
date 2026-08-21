@@ -9,7 +9,7 @@ import {
   FormField,
   renderTextField,
   renderSelectField,
-  renderRadioField,
+  renderRadioField
 } from "@uwdsc/ui";
 import { UseFormReturn } from "react-hook-form";
 import { AppFormValues } from "@/lib/schemas/application";
@@ -22,7 +22,7 @@ const locationOptions = [
   "Study Term",
   "Co-op Term in Waterloo",
   "Co-op Term but can commute to Waterloo",
-  "Co-op term not in Waterloo",
+  "Co-op term not in Waterloo"
 ];
 
 const terms = ["1A", "1B", "2A", "2B", "3A", "3B", "4A", "4B", "5A", "5B"];
@@ -49,7 +49,7 @@ export function Personal({ form }: PersonalProps) {
                 render={renderTextField({
                   placeholder: "Enter your full name",
                   label: "Full Name",
-                  required: true,
+                  required: true
                 })}
               />
 
@@ -61,7 +61,7 @@ export function Personal({ form }: PersonalProps) {
                   placeholder: "johndoe@gmail.com",
                   label: "Personal Email Address",
                   required: true,
-                  inputProps: { type: "email" },
+                  inputProps: { type: "email" }
                 })}
               />
 
@@ -73,7 +73,7 @@ export function Personal({ form }: PersonalProps) {
                   placeholder: "jdoe@uwaterloo.ca",
                   label: "UW Email Address",
                   required: true,
-                  inputProps: { type: "email" },
+                  inputProps: { type: "email" }
                 })}
               />
             </CardContent>
@@ -95,7 +95,7 @@ export function Personal({ form }: PersonalProps) {
                 render={renderTextField({
                   placeholder: "Computer Science",
                   label: "Program",
-                  required: true,
+                  required: true
                 })}
               />
 
@@ -111,7 +111,7 @@ export function Personal({ form }: PersonalProps) {
                   triggerClassName: "w-full",
                   contentClassName: "bg-slate-700",
                   itemClassName:
-                    "text-slate-200 focus:bg-slate-600 focus:text-white hover:bg-slate-600 hover:text-white transition-colors",
+                    "text-slate-200 focus:bg-slate-600 focus:text-white hover:bg-slate-600 hover:text-white transition-colors"
                 })}
               />
 
@@ -127,7 +127,7 @@ export function Personal({ form }: PersonalProps) {
                   triggerClassName: "w-full",
                   contentClassName: "bg-slate-700",
                   itemClassName:
-                    "text-slate-200 focus:bg-slate-600 focus:text-white hover:bg-slate-600 hover:text-white transition-colors",
+                    "text-slate-200 focus:bg-slate-600 focus:text-white hover:bg-slate-600 hover:text-white transition-colors"
                 })}
               />
             </CardContent>
@@ -144,7 +144,7 @@ export function Personal({ form }: PersonalProps) {
                 name="club_experience"
                 render={renderRadioField({
                   label: "Have you been a member of UW Data Science Club before?",
-                  required: true,
+                  required: true
                 })}
               />
             </CardContent>

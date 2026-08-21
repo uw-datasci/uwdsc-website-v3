@@ -25,8 +25,8 @@ export default async function LogisticsPage() {
             href: "/logistics/onboarding" as const,
             title: "Exec onboarding",
             description: "Submit your profile, headshot, and preferences for the current term.",
-            icon: ClipboardList,
-          },
+            icon: ClipboardList
+          }
         ]
       : []),
     ...(showReturning
@@ -36,8 +36,8 @@ export default async function LogisticsPage() {
             title: "Returning exec form",
             description:
               "Let us know if you plan to return next term and share role preferences.",
-            icon: UserCheck,
-          },
+            icon: UserCheck
+          }
         ]
       : []),
     ...(userIsPresident
@@ -46,10 +46,10 @@ export default async function LogisticsPage() {
             href: "/logistics/onboarding-review" as const,
             title: "Onboarding review",
             description: "Review team submissions and export headshots.",
-            icon: ClipboardCheck,
-          },
+            icon: ClipboardCheck
+          }
         ]
-      : []),
+      : [])
   ];
 
   return (

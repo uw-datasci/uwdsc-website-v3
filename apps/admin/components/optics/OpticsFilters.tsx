@@ -5,7 +5,7 @@ import type {
   RaftGroupFilters,
   RaftResolvedFilter,
   RaftSeverity,
-  RaftTimeRange,
+  RaftTimeRange
 } from "@uwdsc/common/types";
 import {
   Label,
@@ -13,7 +13,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@uwdsc/ui";
 
 interface OpticsFiltersProps {
@@ -26,13 +26,13 @@ interface OpticsFiltersProps {
 const TIME_RANGES: { value: RaftTimeRange; label: string }[] = [
   { value: "24h", label: "Last 24 hours" },
   { value: "7d", label: "Last 7 days" },
-  { value: "30d", label: "Last 30 days" },
+  { value: "30d", label: "Last 30 days" }
 ];
 
 const RESOLVED_OPTIONS: { value: RaftResolvedFilter; label: string }[] = [
   { value: "all", label: "All statuses" },
   { value: "open", label: "Open only" },
-  { value: "resolved", label: "Resolved only" },
+  { value: "resolved", label: "Resolved only" }
 ];
 
 const SEVERITIES: RaftSeverity[] = ["fatal", "error", "warning", "info", "debug"];
@@ -89,7 +89,7 @@ export function OpticsFilters({ filters, apps, environments, onChange }: OpticsF
           value={filters.severity ?? "all"}
           onValueChange={(value) =>
             update({
-              severity: value === "all" ? undefined : (value as RaftSeverity),
+              severity: value === "all" ? undefined : (value as RaftSeverity)
             })
           }
         >
@@ -148,7 +148,7 @@ export function OpticsFilters({ filters, apps, environments, onChange }: OpticsF
 
 function FilterField({
   label,
-  children,
+  children
 }: {
   readonly label: string;
   readonly children: ReactNode;

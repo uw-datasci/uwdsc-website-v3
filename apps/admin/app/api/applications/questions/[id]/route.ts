@@ -37,7 +37,7 @@ export const PATCH = withAdmin<Params>(
 
     return RaftResponse.ok({
       success: true,
-      question: updated,
+      question: updated
     });
   },
   { scope: true }

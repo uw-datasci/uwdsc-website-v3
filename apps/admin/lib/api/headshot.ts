@@ -30,7 +30,7 @@ export async function uploadHeadshot(
 
   const response = await fetch("/api/onboarding/headshots", {
     method: "POST",
-    body: formData,
+    body: formData
   });
 
   const data = await parseJsonResponse<UploadHeadshotResponse>(response);

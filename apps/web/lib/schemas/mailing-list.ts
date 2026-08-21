@@ -5,11 +5,11 @@ import z from "zod";
  */
 
 export const mailingListSchema = z.object({
-  email: z.email("Please enter a valid email address"),
+  email: z.email("Please enter a valid email address")
 });
 
 export type MailingListFormValues = z.infer<typeof mailingListSchema>;
 
 export const mailingListDefaultValues: MailingListFormValues = {
-  email: "",
+  email: ""
 };

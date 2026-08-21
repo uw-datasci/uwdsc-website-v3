@@ -2,7 +2,7 @@ import { z } from "zod";
 import {
   DATABASE_OPTIONS,
   MONGO_CLIENT_OPTIONS,
-  POSTGRES_PROVIDER_OPTIONS,
+  POSTGRES_PROVIDER_OPTIONS
 } from "@/constants/foundry";
 
 export { DATABASE_OPTIONS } from "@/constants/foundry";
@@ -51,7 +51,7 @@ function refineDatabaseStack(
       ctx.addIssue({
         code: "custom",
         message: "Select a PostgreSQL provider",
-        path: ["postgresProvider"],
+        path: ["postgresProvider"]
       });
     }
   }
@@ -60,7 +60,7 @@ function refineDatabaseStack(
       ctx.addIssue({
         code: "custom",
         message: "Select a MongoDB client",
-        path: ["mongoClient"],
+        path: ["mongoClient"]
       });
     }
   }
@@ -71,7 +71,7 @@ export const foundryStep3Schema = z
     projectType: z.string().trim().min(1, "Select a project template"),
     database: databaseFieldSchema,
     postgresProvider: postgresProviderEnum.optional(),
-    mongoClient: mongoClientEnum.optional(),
+    mongoClient: mongoClientEnum.optional()
   })
   .superRefine(refineDatabaseStack);
 
@@ -94,8 +94,8 @@ export const foundryFormObjectSchema = z.object({
   mongoClient: mongoClientEnum.optional(),
   extras: z.object({
     redis: z.boolean(),
-    s3: z.boolean(),
-  }),
+    s3: z.boolean()
+  })
 });
 
 export const foundryFormSchema = foundryFormObjectSchema.superRefine(refineDatabaseStack);
@@ -110,5 +110,5 @@ export const foundryFormDefaultValues: FoundryFormValues = {
   database: "",
   postgresProvider: undefined,
   mongoClient: undefined,
-  extras: { redis: false, s3: false },
+  extras: { redis: false, s3: false }
 };

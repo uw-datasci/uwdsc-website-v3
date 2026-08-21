@@ -9,7 +9,7 @@ const ConfettiPiece = ({
   color,
   size,
   rotate,
-  duration,
+  duration
 }: {
   delay: number;
   x: number;
@@ -28,12 +28,12 @@ const ConfettiPiece = ({
       y: y,
       opacity: 0,
       scale: 0,
-      rotate,
+      rotate
     }}
     transition={{
       duration,
       delay,
-      ease: "easeOut",
+      ease: "easeOut"
     }}
   />
 );
@@ -65,7 +65,7 @@ const ConfettiEffect = () => {
     "bg-red-300",
     "bg-yellow-300",
     "bg-blue-950",
-    "bg-blue-900",
+    "bg-blue-900"
   ];
 
   useEffect(() => {
@@ -91,7 +91,7 @@ const ConfettiEffect = () => {
       color: getRandomColor(),
       size: Math.random() * 12 + 4,
       rotate: Math.random() * 720,
-      duration: 3 + Math.random() * 2,
+      duration: 3 + Math.random() * 2
     }));
 
     // Second wave from center - 100 pieces
@@ -102,7 +102,7 @@ const ConfettiEffect = () => {
       color: getRandomColor(),
       size: Math.random() * 10 + 3,
       rotate: Math.random() * 720,
-      duration: 3 + Math.random() * 2,
+      duration: 3 + Math.random() * 2
     }));
 
     // Left side burst - 80 pieces
@@ -113,7 +113,7 @@ const ConfettiEffect = () => {
       color: getRandomColor(),
       size: Math.random() * 8 + 3,
       rotate: Math.random() * 720,
-      duration: 3 + Math.random() * 2,
+      duration: 3 + Math.random() * 2
     }));
 
     // Right side burst - 80 pieces
@@ -124,7 +124,7 @@ const ConfettiEffect = () => {
       color: getRandomColor(),
       size: Math.random() * 8 + 3,
       rotate: Math.random() * 720,
-      duration: 3 + Math.random() * 2,
+      duration: 3 + Math.random() * 2
     }));
 
     // Top shower - 90 pieces
@@ -135,7 +135,7 @@ const ConfettiEffect = () => {
       color: getRandomColor(),
       size: Math.random() * 6 + 2,
       rotate: Math.random() * 720,
-      duration: 3 + Math.random() * 2,
+      duration: 3 + Math.random() * 2
     }));
 
     // Continuous sprinkle - 70 pieces
@@ -146,7 +146,7 @@ const ConfettiEffect = () => {
       color: getRandomColor(),
       size: Math.random() * 8 + 3,
       rotate: Math.random() * 720,
-      duration: 3 + Math.random() * 2,
+      duration: 3 + Math.random() * 2
     }));
 
     // Final celebration burst - 60 pieces
@@ -157,7 +157,7 @@ const ConfettiEffect = () => {
       color: getRandomColor(),
       size: Math.random() * 10 + 4,
       rotate: Math.random() * 720,
-      duration: 3 + Math.random() * 2,
+      duration: 3 + Math.random() * 2
     }));
 
     allPieces.push(

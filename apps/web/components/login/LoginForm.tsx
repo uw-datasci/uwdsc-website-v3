@@ -23,7 +23,7 @@ export function LoginForm() {
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: loginDefaultValues,
+    defaultValues: loginDefaultValues
   });
 
   const onSubmit = async (data: LoginFormValues) => {
@@ -33,7 +33,7 @@ export function LoginForm() {
     try {
       const responseData = await login({
         email: data.email,
-        password: data.password,
+        password: data.password
       });
 
       // Success (200): API returns { success: true, user, session }
@@ -71,7 +71,7 @@ export function LoginForm() {
               placeholder: "Email (ex. slchow@uwaterloo.ca)",
               className:
                 "!h-auto !text-base border-gray-100/80 !bg-black px-4.5 py-3.5 placeholder:text-gray-100/80 rounded-lg xl:px-6 xl:py-4.5",
-              inputProps: { type: "email" },
+              inputProps: { type: "email" }
             })}
           />
 
@@ -82,7 +82,7 @@ export function LoginForm() {
               placeholder: "Password",
               className:
                 "!h-auto !text-base border-gray-100/80 !bg-black px-4.5 py-3.5 placeholder:text-gray-100/80 rounded-lg xl:px-6 xl:py-4.5",
-              inputProps: { type: "password", autoComplete: "off" },
+              inputProps: { type: "password", autoComplete: "off" }
             })}
           />
 

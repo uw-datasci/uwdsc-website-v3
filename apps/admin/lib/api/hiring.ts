@@ -9,7 +9,7 @@ import type { ApplicationReviewStatus } from "@uwdsc/common/types";
 import type {
   FinalizeRolesResponse,
   HiringApplicantsResponse,
-  NewExecTeamResponse,
+  NewExecTeamResponse
 } from "@/types/hiring";
 
 export async function getHiringApplicants(): Promise<HiringApplicantsResponse> {
@@ -27,7 +27,7 @@ export async function updateSelectionStatus(
   const response = await fetch(`/api/applications/hiring/selections/${selectionId}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status, source }),
+    body: JSON.stringify({ status, source })
   });
   if (!response.ok) {
     const data = await response.json();
@@ -48,7 +48,7 @@ export async function finalizeRoles(input: {
   const response = await fetch("/api/applications/hiring/finalize", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ when2MeetLink: input.when2MeetLink }),
+    body: JSON.stringify({ when2MeetLink: input.when2MeetLink })
   });
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);

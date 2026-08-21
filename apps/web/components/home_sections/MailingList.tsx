@@ -11,7 +11,7 @@ import { renderTextField, Form, FormField, Button } from "@uwdsc/ui";
 import {
   mailingListDefaultValues,
   MailingListFormValues,
-  mailingListSchema,
+  mailingListSchema
 } from "@/lib/schemas/mailing-list";
 
 export default function MailingList() {
@@ -21,7 +21,7 @@ export default function MailingList() {
 
   const form = useForm<MailingListFormValues>({
     resolver: zodResolver(mailingListSchema),
-    defaultValues: mailingListDefaultValues,
+    defaultValues: mailingListDefaultValues
   });
 
   const onSubmit = async (data: MailingListFormValues) => {
@@ -85,7 +85,7 @@ export default function MailingList() {
                           placeholder: "Enter your email",
                           className:
                             "w-full rounded-full! border border-grey1! bg-grey4! h-auto! py-3.5 pl-4.5 text-white outline-none placeholder:text-grey1! md:px-6 md:py-4.5 pr-32 md:text-lg",
-                          inputProps: { type: "email" },
+                          inputProps: { type: "email" }
                         })}
                       />
                     </div>

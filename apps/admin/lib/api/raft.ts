@@ -3,7 +3,7 @@ import type {
   RaftErrorGroupsResponse,
   RaftErrorsResponse,
   RaftGroupFilters,
-  RaftOverview,
+  RaftOverview
 } from "@uwdsc/common/types";
 import { createApiError } from "./error";
 
@@ -73,7 +73,7 @@ export async function setRaftErrorResolved(id: string, resolved: boolean): Promi
   const response = await fetch(`/api/raft/errors/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ resolved }),
+    body: JSON.stringify({ resolved })
   });
   const data = await response.json();
 

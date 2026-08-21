@@ -7,7 +7,7 @@ import {
   Link,
   Preview,
   Section,
-  Text,
+  Text
 } from "@react-email/components";
 import { MEMBERSHIP_MONERIS_RECEIPT_FROM } from "@uwdsc/common/constants";
 import type { ReactElement } from "react";
@@ -126,7 +126,7 @@ export function MembershipReceipt({ kind }: Readonly<MembershipReceiptProps>): R
     color: "#374151",
     lineHeight: "1.6" as const,
     margin: "0 0 16px 0",
-    fontSize: "16px",
+    fontSize: "16px"
   };
 
   return (
@@ -136,7 +136,7 @@ export function MembershipReceipt({ kind }: Readonly<MembershipReceiptProps>): R
       <Body
         style={{
           backgroundColor: "#f6f9fc",
-          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
         }}
       >
         <Container
@@ -146,7 +146,7 @@ export function MembershipReceipt({ kind }: Readonly<MembershipReceiptProps>): R
             backgroundColor: "#ffffff",
             borderRadius: "8px",
             padding: "40px",
-            border: "1px solid #e6ebf1",
+            border: "1px solid #e6ebf1"
           }}
         >
           <Section>
@@ -155,7 +155,7 @@ export function MembershipReceipt({ kind }: Readonly<MembershipReceiptProps>): R
                 fontSize: "20px",
                 fontWeight: "bold",
                 color: "#1a1a2e",
-                margin: "0 0 2px 0",
+                margin: "0 0 2px 0"
               }}
             >
               UWDSC
@@ -164,7 +164,7 @@ export function MembershipReceipt({ kind }: Readonly<MembershipReceiptProps>): R
               style={{
                 fontSize: "12px",
                 color: "#6b7280",
-                margin: "0 0 24px 0",
+                margin: "0 0 24px 0"
               }}
             >
               University of Waterloo Data Science Club
@@ -183,7 +183,7 @@ export function MembershipReceipt({ kind }: Readonly<MembershipReceiptProps>): R
                 fontSize: "12px",
                 color: "#9ca3af",
                 textAlign: "center",
-                margin: "0",
+                margin: "0"
               }}
             >
               University of Waterloo Data Science Club &mdash; uwdatascience.ca

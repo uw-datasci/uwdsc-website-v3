@@ -38,7 +38,7 @@ export async function updateUserProfile(
   const response = await fetch("/api/profile", {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(profileData),
+    body: JSON.stringify(profileData)
   });
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);
@@ -58,7 +58,7 @@ export async function completeProfile(
   const response = await fetch("/api/profile", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(profileData),
+    body: JSON.stringify(profileData)
   });
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);

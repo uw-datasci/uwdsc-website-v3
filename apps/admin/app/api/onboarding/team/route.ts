@@ -10,7 +10,7 @@ export const GET = withPresAccess(async (request) => {
 
   const [rows, headshotService] = await Promise.all([
     onboardingService.getTeamSubmissions(termId),
-    createHeadshotService(),
+    createHeadshotService()
   ]);
 
   const rowsWithHeadshots = await Promise.all(

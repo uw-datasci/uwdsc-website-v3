@@ -7,12 +7,12 @@ import { FACULTY_VALUES, ROLE_VALUES, roleRequiresSubteam } from "@uwdsc/common/
  */
 export const markAsPaidSchema = z.object({
   payment_method: z.enum(["cash", "online", "math_soc"], {
-    message: "Payment method is required",
+    message: "Payment method is required"
   }),
   payment_location: z.string().trim().min(1, "Payment location is required"),
   verifier: z.string().trim().min(1, "Verifier is required"),
   // Optional: when verifying at an active event, also check the member into it.
-  event_id: z.string().uuid().optional(),
+  event_id: z.string().uuid().optional()
 });
 
 export type MarkAsPaidFormValues = z.infer<typeof markAsPaidSchema>;
@@ -27,7 +27,7 @@ export const editMemberSchema = z.object({
   wat_iam: z.string().trim().optional(),
   faculty: z.enum(FACULTY_VALUES).optional(),
   term: z.string().trim().optional(),
-  is_math_soc_member: z.boolean().optional(),
+  is_math_soc_member: z.boolean().optional()
 });
 
 export type EditMemberFormValues = z.infer<typeof editMemberSchema>;
@@ -44,14 +44,14 @@ export type EditMemberFormValues = z.infer<typeof editMemberSchema>;
 export const updateMemberRoleSchema = z
   .object({
     role: z.enum(ROLE_VALUES),
-    subteam_id: z.number().int().nullable(),
+    subteam_id: z.number().int().nullable()
   })
   .superRefine((data, ctx) => {
     if (roleRequiresSubteam(data.role) && data.subteam_id === null) {
       ctx.addIssue({
         code: "custom",
         path: ["subteam_id"],
-        message: "Select a subteam for this role",
+        message: "Select a subteam for this role"
       });
     }
 
@@ -59,7 +59,7 @@ export const updateMemberRoleSchema = z
       ctx.addIssue({
         code: "custom",
         path: ["subteam_id"],
-        message: "This role cannot have a subteam",
+        message: "This role cannot have a subteam"
       });
     }
   });
@@ -78,11 +78,11 @@ export const inviteMemberSchema = z
     wat_iam: z.string().trim().optional(),
     faculty: z.enum(FACULTY_VALUES).optional(),
     term: z.string().trim().optional(),
-    is_math_soc_member: z.boolean().optional(),
+    is_math_soc_member: z.boolean().optional()
   })
   .refine((data) => data.email.toLowerCase().endsWith("@uwaterloo.ca"), {
     message: "Please use your @uwaterloo.ca email address",
-    path: ["email"],
+    path: ["email"]
   });
 
 export type InviteMemberFormValues = z.infer<typeof inviteMemberSchema>;

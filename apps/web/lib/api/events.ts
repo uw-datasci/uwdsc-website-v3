@@ -33,7 +33,7 @@ export async function checkInToEvent(
   eventId: string
 ): Promise<{ success: boolean; message: string }> {
   const response = await fetch(`/api/events/${eventId}/checkin`, {
-    method: "POST",
+    method: "POST"
   });
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);

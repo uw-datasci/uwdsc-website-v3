@@ -14,13 +14,13 @@ export function DueDateTag({ deadline }: DueDateTagProps) {
           boxShadow: [
             "0 0 20px rgba(250, 204, 21, 0.3), 0 0 40px rgba(250, 204, 21, 0.1)",
             "0 0 30px rgba(250, 204, 21, 0.5), 0 0 60px rgba(250, 204, 21, 0.2)",
-            "0 0 20px rgba(250, 204, 21, 0.3), 0 0 40px rgba(250, 204, 21, 0.1)",
-          ],
+            "0 0 20px rgba(250, 204, 21, 0.3), 0 0 40px rgba(250, 204, 21, 0.1)"
+          ]
         }}
         transition={{
           duration: 2,
           repeat: Infinity,
-          ease: "easeInOut",
+          ease: "easeInOut"
         }}
       >
         <span className="mr-2 flex items-center">
@@ -29,7 +29,7 @@ export function DueDateTag({ deadline }: DueDateTagProps) {
         {new Date(deadline).toLocaleDateString("en-US", {
           month: "short",
           day: "numeric",
-          year: "numeric",
+          year: "numeric"
         }) || "Jul 30, 2025"}
       </motion.div>
     </div>

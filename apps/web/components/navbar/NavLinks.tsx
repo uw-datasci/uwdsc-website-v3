@@ -41,7 +41,7 @@ export function NavLinks({ navLinks }: NavLinksProps) {
           inset 0 1px 0 0 rgba(255, 255, 255, 0.25),
           inset 0 -1px 0 0 rgba(255, 255, 255, 0.1),
           0 4px 12px 0 rgba(0, 0, 0, 0.3)
-        `,
+        `
       }
     : {
         background: "rgba(255, 255, 255, 0.35)",
@@ -52,7 +52,7 @@ export function NavLinks({ navLinks }: NavLinksProps) {
           inset 0 1px 0 0 rgba(255, 255, 255, 0.5),
           inset 0 -1px 0 0 rgba(255, 255, 255, 0.2),
           0 2px 8px 0 rgba(0, 0, 0, 0.08)
-        `,
+        `
       };
 
   return (
@@ -81,7 +81,7 @@ export function NavLinks({ navLinks }: NavLinksProps) {
                 type: "spring",
                 stiffness: 300,
                 damping: 25,
-                mass: 1.2,
+                mass: 1.2
               }}
               initial={false}
             />

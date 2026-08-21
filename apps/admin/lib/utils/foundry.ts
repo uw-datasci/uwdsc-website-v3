@@ -6,13 +6,13 @@ export const FOUNDRY_STEP_FIELDS: Record<number, (keyof FoundryFormValues)[]> = 
   // Step 1 (Introduction) has no required fields.
   1: [],
   2: ["projectName", "teamAccess", "subdomain"],
-  3: ["projectType", "database", "postgresProvider", "mongoClient"],
+  3: ["projectType", "database", "postgresProvider", "mongoClient"]
 };
 
 const STEP2_SCHEMA = foundryFormObjectSchema.pick({
   projectName: true,
   teamAccess: true,
-  subdomain: true,
+  subdomain: true
 });
 
 /**
@@ -33,7 +33,7 @@ export const isFoundryStepValid = (
       return STEP2_SCHEMA.safeParse({
         projectName: values.projectName,
         teamAccess: values.teamAccess,
-        subdomain: values.subdomain,
+        subdomain: values.subdomain
       }).success;
     }
 
@@ -43,7 +43,7 @@ export const isFoundryStepValid = (
         projectType: values.projectType,
         database: values.database,
         postgresProvider: values.postgresProvider,
-        mongoClient: values.mongoClient,
+        mongoClient: values.mongoClient
       }).success;
     }
 

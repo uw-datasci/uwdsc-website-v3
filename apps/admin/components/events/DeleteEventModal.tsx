@@ -8,7 +8,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "@uwdsc/ui";
 import { deleteEvent } from "@/lib/api";
 import type { Event } from "@uwdsc/common/types";
@@ -24,7 +24,7 @@ interface DeleteEventDialogProps {
 export function DeleteEventDialog({
   event,
   onConfirm,
-  onSuccess,
+  onSuccess
 }: Readonly<DeleteEventDialogProps>) {
   const [open, setOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);

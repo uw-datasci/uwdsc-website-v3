@@ -10,7 +10,7 @@ import type {
   RaftSeverityBreakdown,
   RaftStats,
   RaftTimeRange,
-  RaftTimeSeriesPoint,
+  RaftTimeSeriesPoint
 } from "@uwdsc/common/types";
 
 const ENDPOINT_EXPR = `COALESCE(metadata->>'route', metadata->>'url', 'unknown')`;
@@ -95,7 +95,7 @@ export class RaftRepository extends BaseRepository {
         total_errors: 0,
         open_errors: 0,
         critical_errors: 0,
-        distinct_apps: 0,
+        distinct_apps: 0
       }
     );
   }
@@ -137,7 +137,7 @@ export class RaftRepository extends BaseRepository {
       warning: row.warning,
       error: row.error,
       fatal: row.fatal,
-      total: row.total,
+      total: row.total
     }));
   }
 
@@ -251,9 +251,9 @@ export class RaftRepository extends BaseRepository {
         ...group,
         first_seen: new Date(group.first_seen).toISOString(),
         last_seen: new Date(group.last_seen).toISOString(),
-        latest_severity: group.latest_severity as RaftSeverity,
+        latest_severity: group.latest_severity as RaftSeverity
       })),
-      total: countRow?.total ?? 0,
+      total: countRow?.total ?? 0
     };
   }
 
@@ -304,9 +304,9 @@ export class RaftRepository extends BaseRepository {
         ...error,
         severity: error.severity as RaftSeverity,
         metadata: (error.metadata ?? {}) as RaftError["metadata"],
-        created_at: new Date(error.created_at).toISOString(),
+        created_at: new Date(error.created_at).toISOString()
       })),
-      total: countRow?.total ?? 0,
+      total: countRow?.total ?? 0
     };
   }
 
@@ -332,7 +332,7 @@ export class RaftRepository extends BaseRepository {
       ...error,
       severity: error.severity as RaftSeverity,
       metadata: (error.metadata ?? {}) as RaftError["metadata"],
-      created_at: new Date(error.created_at).toISOString(),
+      created_at: new Date(error.created_at).toISOString()
     };
   }
 
@@ -359,7 +359,7 @@ export class RaftRepository extends BaseRepository {
       ...error,
       severity: error.severity as RaftSeverity,
       metadata: (error.metadata ?? {}) as RaftError["metadata"],
-      created_at: new Date(error.created_at).toISOString(),
+      created_at: new Date(error.created_at).toISOString()
     };
   }
 }

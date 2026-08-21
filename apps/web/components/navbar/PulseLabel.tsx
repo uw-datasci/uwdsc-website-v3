@@ -22,7 +22,7 @@ export function PulseLabel({ children }: PulseLabelProps) {
     return (
       <span
         style={{
-          textShadow: "0 0 10px rgba(255, 255, 255, 0.7), 0 0 24px rgba(255, 255, 255, 0.4)",
+          textShadow: "0 0 10px rgba(255, 255, 255, 0.7), 0 0 24px rgba(255, 255, 255, 0.4)"
         }}
       >
         {children}
@@ -38,8 +38,8 @@ export function PulseLabel({ children }: PulseLabelProps) {
         textShadow: [
           "0 0 6px rgba(255, 255, 255, 0.2), 0 0 14px rgba(255, 255, 255, 0.12), 0 0 26px rgba(255, 255, 255, 0.06)",
           "0 0 14px rgba(255, 255, 255, 1), 0 0 30px rgba(255, 255, 255, 0.85), 0 0 52px rgba(255, 255, 255, 0.55)",
-          "0 0 6px rgba(255, 255, 255, 0.2), 0 0 14px rgba(255, 255, 255, 0.12), 0 0 26px rgba(255, 255, 255, 0.06)",
-        ],
+          "0 0 6px rgba(255, 255, 255, 0.2), 0 0 14px rgba(255, 255, 255, 0.12), 0 0 26px rgba(255, 255, 255, 0.06)"
+        ]
       }}
       transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
     >

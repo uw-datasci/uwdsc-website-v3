@@ -5,7 +5,7 @@ import { DEFAULT_ANSWER_MAX_LENGTH } from "@uwdsc/common/constants";
 import type {
   ApplicationWithDetails,
   GeneralQuestion,
-  PositionWithQuestions,
+  PositionWithQuestions
 } from "@uwdsc/common/types";
 
 export function answerMaxLength(question: { max_length: number | null }): number {
@@ -128,7 +128,7 @@ export function collectAllAnswers(
     ),
     ...pickAnswers(values.position_1_answers, questionIdsFor(values.position_1)),
     ...pickAnswers(values.position_2_answers, questionIdsFor(values.position_2)),
-    ...pickAnswers(values.position_3_answers, questionIdsFor(values.position_3)),
+    ...pickAnswers(values.position_3_answers, questionIdsFor(values.position_3))
   ];
 
   // hiring.answers has no unique constraint on (application_id, question_id),

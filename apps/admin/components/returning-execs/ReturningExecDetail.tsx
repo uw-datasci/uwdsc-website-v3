@@ -11,14 +11,14 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  cn,
+  cn
 } from "@uwdsc/ui";
 import { Mail, MessageSquare, User } from "lucide-react";
 import {
   IN_PERSON_NEXT_TERM_LABELS,
   type ApplicationReviewStatus,
   type ReturningExecListItem,
-  type ReturningExecPositionSelection,
+  type ReturningExecPositionSelection
 } from "@uwdsc/common/types";
 import { VP_REVIEW_STATUS_LIST, VP_REVIEW_STATUS_SET } from "@/constants/applications";
 import { reviewStatusBadgeClassName } from "@/lib/utils/applications";
@@ -38,7 +38,7 @@ export function ReturningExecDetail({
   submission,
   positionReview = null,
   onSelectionStatusChange,
-  updatingSelectionId = null,
+  updatingSelectionId = null
 }: Readonly<ReturningExecDetailProps>) {
   if (!submission) {
     return (
@@ -64,7 +64,7 @@ export function ReturningExecDetail({
             {new Date(submission.submitted_at).toLocaleDateString("en-US", {
               year: "numeric",
               month: "long",
-              day: "numeric",
+              day: "numeric"
             })}
           </p>
         </div>
@@ -220,7 +220,7 @@ function ReturningExecPositionSelectionCard({
   vpExecPositionIds,
   positionReview,
   onSelectionStatusChange,
-  updatingSelectionId,
+  updatingSelectionId
 }: ReturningExecPositionSelectionCardProps) {
   const statusAllowsVpEdit = VP_REVIEW_STATUS_SET.has(sel.status);
   const canEdit =

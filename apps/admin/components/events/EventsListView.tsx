@@ -11,7 +11,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@uwdsc/ui";
 import type { EventWithAttendanceCount, Term } from "@uwdsc/common/types";
 import { formatDateTime, getEventTerm } from "@/lib/utils/events";
@@ -34,7 +34,7 @@ function EventCard({
   event,
   terms,
   onEdit,
-  onRefresh,
+  onRefresh
 }: Readonly<{
   event: EventWithAttendanceCount;
   terms: Term[];
@@ -86,7 +86,7 @@ export function EventsListView({
   events,
   terms,
   onEdit,
-  onRefresh,
+  onRefresh
 }: Readonly<EventsListViewProps>) {
   return (
     <div className="space-y-4">

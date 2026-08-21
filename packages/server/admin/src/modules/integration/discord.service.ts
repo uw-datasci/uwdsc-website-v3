@@ -3,7 +3,7 @@ import type { GetReceivingEmailResponseSuccess } from "resend";
 import type {
   DiscordSupportEmbed,
   ForwardSupportResult,
-  ForwardSupportToDiscordParams,
+  ForwardSupportToDiscordParams
 } from "../../types/discord";
 
 class DiscordService {
@@ -35,7 +35,7 @@ class DiscordService {
       author: { name: senderName },
       description: this.truncate(textBody, 4096),
       footer: { text: `To: ${SUPPORT_INBOUND_EMAIL}` },
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     };
   }
 
@@ -59,7 +59,7 @@ class DiscordService {
       await fetch(this.webhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ embeds: [embed] }),
+        body: JSON.stringify({ embeds: [embed] })
       });
       return { ok: true };
     } catch (err) {
@@ -83,7 +83,7 @@ class DiscordService {
     const result = await this.forwardSupportToDiscord({
       subject,
       textBody,
-      fromRaw,
+      fromRaw
     });
 
     if (!result.ok && result.reason === "missing_discord_webhook") {

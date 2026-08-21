@@ -10,13 +10,13 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  type ChartConfig,
+  type ChartConfig
 } from "@uwdsc/ui";
 import type { RaftEndpointBreakdown } from "@uwdsc/common/types";
 import { truncateText } from "./utils";
 
 const chartConfig = {
-  count: { label: "Errors", color: "var(--chart-2)" },
+  count: { label: "Errors", color: "var(--chart-2)" }
 } satisfies ChartConfig;
 
 interface TopEndpointsChartProps {
@@ -26,7 +26,7 @@ interface TopEndpointsChartProps {
 export function TopEndpointsChart({ data }: TopEndpointsChartProps) {
   const chartData = data.map((item) => ({
     ...item,
-    label: truncateText(item.endpoint, 40),
+    label: truncateText(item.endpoint, 40)
   }));
 
   return (

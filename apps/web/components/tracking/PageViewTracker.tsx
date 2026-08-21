@@ -21,8 +21,8 @@ export function PageViewTracker() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           path: pathname,
-          visitor_id: visitorId,
-        }),
+          visitor_id: visitorId
+        })
       });
 
       if (cancelled || response.ok) return;

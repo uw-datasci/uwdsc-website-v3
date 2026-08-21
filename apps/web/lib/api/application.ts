@@ -9,11 +9,11 @@ import type {
   ApplicationUpdatePayload,
   ApplicationWithDetails,
   ProfileAutofill,
-  Term,
+  Term
 } from "@uwdsc/common/types";
 import type {
   ApplyWindowOpenResponse,
-  PositionsWithQuestionsResponse,
+  PositionsWithQuestionsResponse
 } from "@/types/application";
 import { createApiError } from "./errors";
 
@@ -56,7 +56,7 @@ export async function createApplication(termId: string): Promise<ApplicationWith
   const response = await fetch("/api/applications", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ termId }),
+    body: JSON.stringify({ termId })
   });
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);
@@ -70,7 +70,7 @@ export async function updateApplication(
   const response = await fetch(`/api/applications/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(payload)
   });
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);

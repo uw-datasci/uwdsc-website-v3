@@ -7,7 +7,7 @@ export const FACULTY_VALUES = [
   "science",
   "arts",
   "health",
-  "environment",
+  "environment"
 ] as const satisfies readonly Faculty[];
 
 /** Human-readable labels for each faculty value. */
@@ -17,7 +17,7 @@ export const FACULTY_LABELS: Record<Faculty, string> = {
   science: "Science",
   arts: "Arts",
   health: "Health",
-  environment: "Environment",
+  environment: "Environment"
 };
 
 /** Display strings for profile / passport faculty `<Select>` (human labels). */
@@ -33,6 +33,6 @@ export const FACULTY_FILTER_OPTIONS = [
   { value: "all" as const, label: "All Faculties" },
   ...FACULTY_VALUES.map((value) => ({
     value,
-    label: FACULTY_LABELS[value],
-  })),
+    label: FACULTY_LABELS[value]
+  }))
 ] as const;

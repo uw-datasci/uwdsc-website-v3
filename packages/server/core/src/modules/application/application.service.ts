@@ -5,7 +5,7 @@ import {
   GeneralQuestion,
   PositionWithQuestions,
   ProfileAutofill,
-  Term,
+  Term
 } from "@uwdsc/common/types";
 import { ApplicationRepository } from "./application.repository";
 
@@ -39,7 +39,7 @@ class ApplicationService {
     try {
       const [positionRows, questionRows] = await Promise.all([
         this.repository.getAvailablePositions(),
-        this.repository.getQuestionsForPositions(),
+        this.repository.getQuestionsForPositions()
       ]);
 
       const generalQuestions = questionRows
@@ -50,7 +50,7 @@ class ApplicationService {
           type: q.type,
           sort_order: q.sort_order,
           placeholder: q.placeholder,
-          max_length: q.max_length,
+          max_length: q.max_length
         }))
         .sort((a, b) => a.sort_order - b.sort_order);
 
@@ -60,14 +60,14 @@ class ApplicationService {
           .map((q) => ({
             ...q,
             sort_order: q.sort_order,
-            position_id: q.position_id,
+            position_id: q.position_id
           }))
           .sort((a, b) => a.sort_order - b.sort_order);
         return {
           id: pos.id,
           position_id: pos.position_id,
           name: pos.name,
-          questions,
+          questions
         };
       });
 
@@ -108,13 +108,13 @@ class ApplicationService {
       const app = await this.repository.createApplication({
         profile_id: userId,
         term_id: termId,
-        full_name: fullName,
+        full_name: fullName
       });
 
       return {
         ...app,
         position_selections: [],
-        answers: [],
+        answers: []
       };
     } catch (error) {
       if (error instanceof ApiError) throw error;

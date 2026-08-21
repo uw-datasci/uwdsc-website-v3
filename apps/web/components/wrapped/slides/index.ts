@@ -17,7 +17,7 @@ export const WRAPPED_SLIDES: readonly WrappedSlideData[] = [
     title: "Your DSC Wrapped",
     subtitle: "Let's look back at everything since you joined.",
     background: "bg-gradient-to-br from-indigo-600 via-purple-600 to-fuchsia-600",
-    foreground: "text-white",
+    foreground: "text-white"
   },
   {
     id: "events-nutshell",
@@ -28,35 +28,35 @@ export const WRAPPED_SLIDES: readonly WrappedSlideData[] = [
         id: "event-1",
         name: "Event Name",
         description: "Event description",
-        color: "#9cd8ea",
+        color: "#9cd8ea"
       },
       {
         id: "event-2",
         name: "Event Name",
         description: "Event description",
-        color: "#ff8f64",
+        color: "#ff8f64"
       },
       {
         id: "event-3",
         name: "Event Name",
         description: "Event description",
-        color: "#ff7075",
+        color: "#ff7075"
       },
       {
         id: "event-4",
         name: "Event Name",
         description: "Event description",
-        color: "#ccda96",
+        color: "#ccda96"
       },
       {
         id: "event-5",
         name: "Event Name",
         description: "Event description",
-        color: "#e6c6e0",
-      },
+        color: "#e6c6e0"
+      }
     ],
     statValue: "5",
-    statCaption: "total events attended with us!",
+    statCaption: "total events attended with us!"
   },
   {
     id: "streak",
@@ -64,7 +64,7 @@ export const WRAPPED_SLIDES: readonly WrappedSlideData[] = [
     heading: "YOUR LONGEST STREAK",
     visual: { color: "#ff8f64" },
     subheading: "YOU'RE ON FIRE!!!",
-    captionLines: ["That's more than 65%", "of other members of DSC"],
+    captionLines: ["That's more than 65%", "of other members of DSC"]
   },
   {
     id: "membership",
@@ -73,7 +73,7 @@ export const WRAPPED_SLIDES: readonly WrappedSlideData[] = [
     joinDate: "January 10, 2024",
     visual: { color: "#e6c6e0" },
     headline: "# terms since then as a member!",
-    caption: "# number of days with us!",
+    caption: "# number of days with us!"
   },
   {
     id: "minutes",
@@ -81,7 +81,7 @@ export const WRAPPED_SLIDES: readonly WrappedSlideData[] = [
     eyebrow: "Locked in",
     heading: "MINUTES ON THE SITE",
     stat: "0",
-    captionLines: ["More time spent than", "# of DSC members"],
+    captionLines: ["More time spent than", "# of DSC members"]
   },
   {
     id: "password-resets",
@@ -89,7 +89,7 @@ export const WRAPPED_SLIDES: readonly WrappedSlideData[] = [
     eyebrow: "Oops",
     heading: "LOCKED OUT",
     stat: "0",
-    captionLines: ["times, we've all been there."],
+    captionLines: ["times, we've all been there."]
   },
   {
     id: "fun-facts",
@@ -100,21 +100,21 @@ export const WRAPPED_SLIDES: readonly WrappedSlideData[] = [
         id: "highest-attendance",
         value: "Estimathon",
         label: "Highest attended event",
-        visual: { color: "#ccda96" },
+        visual: { color: "#ccda96" }
       },
       {
         id: "common-snack",
         value: "Boba",
         label: "Most eaten snack",
-        visual: { color: "#ff7075" },
+        visual: { color: "#ff7075" }
       },
       {
         id: "most-visited-page",
         value: "BOT",
         label: "Most visited event page",
-        visual: { color: "#9cd8ea" },
-      },
-    ],
+        visual: { color: "#9cd8ea" }
+      }
+    ]
   },
   {
     id: "awards",
@@ -123,15 +123,15 @@ export const WRAPPED_SLIDES: readonly WrappedSlideData[] = [
       {
         id: "award-chronically-online",
         title: "Chronically Online",
-        topPercent: "Top 10%",
+        topPercent: "Top 10%"
       },
       { id: "award-super-fan", title: "DSC Super Fan", topPercent: "Top 10%" },
       {
         id: "award-password-resets",
         title: "Most Password Resets",
-        topPercent: "Top 10%",
-      },
-    ],
+        topPercent: "Top 10%"
+      }
+    ]
   },
   {
     id: "outro",
@@ -140,6 +140,6 @@ export const WRAPPED_SLIDES: readonly WrappedSlideData[] = [
     title: "Here's to what's next 👋",
     subtitle: "Thanks for being part of DSC since day one.",
     background: "bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700",
-    foreground: "text-white",
-  },
+    foreground: "text-white"
+  }
 ];

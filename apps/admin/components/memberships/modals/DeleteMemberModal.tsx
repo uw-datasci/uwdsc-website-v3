@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
+  DialogFooter
 } from "@uwdsc/ui";
 import { deleteMember } from "@/lib/api";
 import { Member } from "@uwdsc/common/types";
@@ -30,7 +30,7 @@ export function DeleteMemberModal({
   open,
   onOpenChange,
   member,
-  onSuccess,
+  onSuccess
 }: Readonly<DeleteMemberModalProps>) {
   const [isDeleting, setIsDeleting] = useState(false);
 

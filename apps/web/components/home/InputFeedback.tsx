@@ -7,7 +7,7 @@ interface InputFeedbackProps {
 export default function InputFeedback({
   state,
   children,
-  classes,
+  classes
 }: Readonly<InputFeedbackProps>) {
   return (
     <p

@@ -13,7 +13,7 @@ export function Intro({
   onStartApplication,
   isLoading,
   isStartDisabled = false,
-  disabledMessage,
+  disabledMessage
 }: IntroProps) {
   const isDisabled = isLoading || isStartDisabled;
 

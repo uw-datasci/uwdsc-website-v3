@@ -21,7 +21,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
   Separator,
-  Badge,
+  Badge
 } from "@uwdsc/ui";
 import { NavEntry, isNavGroup } from "./types";
 import { PulseLabel } from "./PulseLabel";

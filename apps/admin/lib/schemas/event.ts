@@ -7,7 +7,7 @@ const eventFields = {
   location: z.string().trim().min(1, "Location is required"),
   image_url: z.string().trim().optional().nullable(),
   start_time: z.iso.datetime({ error: "Invalid start time" }),
-  end_time: z.iso.datetime({ error: "Invalid end time" }),
+  end_time: z.iso.datetime({ error: "Invalid end time" })
 };
 
 /**

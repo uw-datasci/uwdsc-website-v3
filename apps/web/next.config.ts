@@ -8,15 +8,15 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "tpkibsgwhostzcovlyjf.supabase.co",
-        pathname: "/storage/**",
+        pathname: "/storage/**"
       },
       {
         protocol: "https",
         hostname: "zpyhgjfqstrgoqsdkicc.supabase.co",
-        pathname: "/storage/**",
-      },
-    ],
-  },
+        pathname: "/storage/**"
+      }
+    ]
+  }
 };
 
 export default nextConfig;

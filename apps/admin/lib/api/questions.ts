@@ -13,7 +13,7 @@ export async function createQuestion(payload: QuestionFormValues): Promise<Quest
   const response = await fetch("/api/applications/questions", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(payload)
   });
   const data = (await response.json()) as { question: Question };
   if (!response.ok) throw createApiError(data, response.status);
@@ -27,7 +27,7 @@ export async function updateQuestion(
   const response = await fetch(`/api/applications/questions/${positionQuestionId}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(payload)
   });
   const data = (await response.json()) as { question: Question };
   if (!response.ok) throw createApiError(data, response.status);
@@ -36,7 +36,7 @@ export async function updateQuestion(
 
 export async function deleteQuestion(positionQuestionId: number): Promise<void> {
   const response = await fetch(`/api/applications/questions/${positionQuestionId}`, {
-    method: "DELETE",
+    method: "DELETE"
   });
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);

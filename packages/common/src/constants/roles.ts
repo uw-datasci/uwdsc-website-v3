@@ -13,7 +13,7 @@ export const ROLE_VALUES = [
   "exec",
   "admin",
   "pres",
-  "alum",
+  "alum"
 ] as const satisfies readonly UserRole[];
 
 /** Human-readable labels for each role value. */
@@ -22,13 +22,13 @@ export const ROLE_LABELS: Record<UserRole, string> = {
   exec: "Exec",
   admin: "Admin (VP)",
   pres: "President",
-  alum: "Alum",
+  alum: "Alum"
 };
 
 /** `<Select>`-ready `{ value, label }` options for the role enum. */
 export const ROLE_SELECT_OPTIONS = ROLE_VALUES.map((value) => ({
   value,
-  label: ROLE_LABELS[value],
+  label: ROLE_LABELS[value]
 }));
 
 /**

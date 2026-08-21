@@ -14,7 +14,7 @@ export const GET = withAuth(async (_request, _context, user) => {
     applicationService.getAllApplications(),
     applicationService.getApplicationCounts(),
     createResumeService(),
-    createAuthService(),
+    createAuthService()
   ]);
 
   const claims = readRoleClaims(user.app_metadata);
@@ -25,7 +25,7 @@ export const GET = withAuth(async (_request, _context, user) => {
   const applicationsWithResumes = await Promise.all(
     applications.map(async (app) => ({
       ...app,
-      resume_url: await resumeService.getResumeUrl(app.profile_id),
+      resume_url: await resumeService.getResumeUrl(app.profile_id)
     }))
   );
 
@@ -36,7 +36,7 @@ export const GET = withAuth(async (_request, _context, user) => {
       canUse: canUsePositionReview,
       isPresident: scope.isPresident,
       vpPositionIds: scope.vpPositionIds,
-      vpExecPositionIds: scope.vpExecPositionIds,
-    },
+      vpExecPositionIds: scope.vpExecPositionIds
+    }
   });
 });

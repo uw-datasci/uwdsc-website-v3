@@ -36,20 +36,20 @@ export class AuthService {
             success: false,
             needsVerification: true,
             email: credentials.email,
-            error: "Email not verified",
+            error: "Email not verified"
           };
         }
 
         return {
           success: false,
-          error: error.message,
+          error: error.message
         };
       }
 
       return {
         success: true,
         user: data.user,
-        session: data.session,
+        session: data.session
       };
     } catch (error) {
       throw new ApiError(`Login failed: ${(error as Error).message}`, 500);
@@ -68,7 +68,7 @@ export class AuthService {
           success: false,
           error: isDuplicateEmailAuthError(error.message)
             ? DUPLICATE_EMAIL_MESSAGE
-            : error.message,
+            : error.message
         };
       }
 
@@ -86,7 +86,7 @@ export class AuthService {
         needsEmailConfirmation,
         message: needsEmailConfirmation
           ? "Please check your email to verify your account"
-          : "Registration successful",
+          : "Registration successful"
       };
     } catch (error) {
       throw new ApiError(`Registration failed: ${(error as Error).message}`, 500);
@@ -103,13 +103,13 @@ export class AuthService {
       if (error) {
         return {
           success: false,
-          error: error.message,
+          error: error.message
         };
       }
 
       return {
         success: true,
-        message: "Signed out successfully",
+        message: "Signed out successfully"
       };
     } catch (error) {
       throw new ApiError(`Sign out failed: ${(error as Error).message}`, 500);
@@ -127,13 +127,13 @@ export class AuthService {
         return {
           success: false,
           user: null,
-          error: error?.message || "Not authenticated",
+          error: error?.message || "Not authenticated"
         };
       }
 
       return {
         success: true,
-        user: data.user,
+        user: data.user
       };
     } catch (error) {
       throw new ApiError(`Failed to get user: ${(error as Error).message}`, 500);
@@ -153,7 +153,7 @@ export class AuthService {
       const { data, error } = await this.repository.signUp({
         email,
         password: placeholderPassword,
-        emailRedirectTo,
+        emailRedirectTo
       });
 
       if (error) {
@@ -163,25 +163,25 @@ export class AuthService {
         ) {
           return {
             success: true,
-            message: "If an account exists, a new verification email was sent.",
+            message: "If an account exists, a new verification email was sent."
           };
         }
         return {
           success: false,
-          error: error.message,
+          error: error.message
         };
       }
 
       if (data?.user && !data?.session) {
         return {
           success: true,
-          message: "Verification email sent successfully",
+          message: "Verification email sent successfully"
         };
       }
 
       return {
         success: true,
-        message: "If an account exists, a new verification email was sent.",
+        message: "If an account exists, a new verification email was sent."
       };
     } catch (error) {
       throw new ApiError(
@@ -201,7 +201,7 @@ export class AuthService {
       if (error) {
         return {
           success: false,
-          error: error.message,
+          error: error.message
         };
       }
 
@@ -224,7 +224,7 @@ export class AuthService {
       if (error) {
         return {
           success: false,
-          error: error.message,
+          error: error.message
         };
       }
 
@@ -245,7 +245,7 @@ export class AuthService {
         return {
           success: false,
           userNotFound: true,
-          error: "No account found with this email address.",
+          error: "No account found with this email address."
         };
       }
 
@@ -254,13 +254,13 @@ export class AuthService {
       if (error) {
         return {
           success: false,
-          error: error.message,
+          error: error.message
         };
       }
 
       return {
         success: true,
-        message: "Password reset email sent successfully",
+        message: "Password reset email sent successfully"
       };
     } catch (error) {
       throw new ApiError(
@@ -280,13 +280,13 @@ export class AuthService {
       if (error) {
         return {
           success: false,
-          error: error.message,
+          error: error.message
         };
       }
 
       return {
         success: true,
-        message: "Password reset successfully",
+        message: "Password reset successfully"
       };
     } catch (error) {
       throw new ApiError(`Failed to reset password: ${(error as Error).message}`, 500);
@@ -315,13 +315,13 @@ export class AuthService {
         vpSubteamNames: [],
         vpSubteamIds: [],
         vpPositionIds: [],
-        vpExecPositionIds: [],
+        vpExecPositionIds: []
       };
     }
 
     const [vpPositionIds, vpExecPositionIds] = await Promise.all([
       this.repository.getApplicationPositionIdsForSubteam(claims.subteamId),
-      this.repository.getExecPositionIdsForSubteam(claims.subteamId),
+      this.repository.getExecPositionIdsForSubteam(claims.subteamId)
     ]);
 
     return {
@@ -329,7 +329,7 @@ export class AuthService {
       vpSubteamNames: claims.subteamName ? [claims.subteamName] : [],
       vpSubteamIds: [claims.subteamId],
       vpPositionIds,
-      vpExecPositionIds,
+      vpExecPositionIds
     };
   }
 }

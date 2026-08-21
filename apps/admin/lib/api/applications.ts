@@ -30,7 +30,7 @@ export async function updatePositionSelectionReviewStatus(
   const response = await fetch(`/api/applications/review/${selectionId}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status }),
+    body: JSON.stringify({ status })
   });
 
   if (!response.ok) {

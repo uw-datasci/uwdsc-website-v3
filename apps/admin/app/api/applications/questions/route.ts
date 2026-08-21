@@ -11,15 +11,15 @@ export const GET = withAdmin(
   async (_request, _context, _user, scope) => {
     const [questions, positions] = await Promise.all([
       applicationService.getQuestionsForScope(scope),
-      applicationService.getPositionOptionsForScope(scope),
+      applicationService.getPositionOptionsForScope(scope)
     ]);
     return RaftResponse.ok({
       questions,
       positions,
       scope: {
         isPresident: scope.isPresident,
-        vpSubteamNames: scope.vpSubteamNames,
-      },
+        vpSubteamNames: scope.vpSubteamNames
+      }
     });
   },
   { scope: true }

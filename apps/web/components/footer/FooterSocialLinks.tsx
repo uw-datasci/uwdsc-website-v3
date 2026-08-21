@@ -20,50 +20,50 @@ const SOCIALS: SocialLink[] = [
     name: "Email",
     icon: Mail,
     href: "mailto:contact@uwdatascience.ca",
-    hoverClassName: "hover:text-[#0078D4]",
+    hoverClassName: "hover:text-[#0078D4]"
   },
   {
     name: "Instagram",
     icon: Instagram,
     href: "https://www.instagram.com/uwaterloodsc/",
-    hoverClassName: "hover:text-[#FF0069]",
+    hoverClassName: "hover:text-[#FF0069]"
   },
   {
     name: "Discord",
     icon: RxDiscordLogo,
     href: "https://discord.gg/2gBB3ufyCR",
-    hoverClassName: "hover:text-[#5865F2]",
+    hoverClassName: "hover:text-[#5865F2]"
   },
   {
     name: "LinkedIn",
     icon: Linkedin,
     href: "https://www.linkedin.com/company/waterloo-data-science-club/",
-    hoverClassName: "hover:text-[#0A66C2]",
+    hoverClassName: "hover:text-[#0A66C2]"
   },
   {
     name: "Youtube",
     icon: Youtube,
     href: "https://www.youtube.com/channel/UCknY88pglf2xz_S72WHIDxg",
-    hoverClassName: "hover:text-[#FF0000]",
+    hoverClassName: "hover:text-[#FF0000]"
   },
   {
     name: "Twitter",
     icon: RiTwitterXLine,
     href: "https://twitter.com/uwaterloodsc",
-    hoverClassName: "hover:text-white",
+    hoverClassName: "hover:text-white"
   },
   {
     name: "Tiktok",
     icon: RiTiktokLine,
     href: "https://vm.tiktok.com/ZMF3YveUq/",
-    hoverClassName: "hover:text-[#25F4EE]",
+    hoverClassName: "hover:text-[#25F4EE]"
   },
   {
     name: "Spotify",
     icon: RiSpotifyLine,
     href: "https://open.spotify.com/show/4iWipypyDClyRHM47JIMzg",
-    hoverClassName: "hover:text-[#1DB954]",
-  },
+    hoverClassName: "hover:text-[#1DB954]"
+  }
 ];
 
 const tiltTransition = { type: "spring", stiffness: 400, damping: 18 } as const;

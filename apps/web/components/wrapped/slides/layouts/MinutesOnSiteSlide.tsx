@@ -3,7 +3,7 @@ import {
   tiltWarp,
   atkinsonHyperlegibleMono,
   displayFontClass as display,
-  monoFontClass as mono,
+  monoFontClass as mono
 } from "../../fonts";
 import type { MinutesOnSiteSlideData } from "../../types";
 
@@ -39,7 +39,7 @@ export function MinutesOnSiteSlide({ slide }: MinutesOnSiteSlideProps) {
     readonly rotate: string;
   }[] = [
     { left: "6%", top: "10%", width: "3.6rem", rotate: "-12deg" },
-    { right: "8%", bottom: "12%", width: "3.2rem", rotate: "16deg" },
+    { right: "8%", bottom: "12%", width: "3.2rem", rotate: "16deg" }
   ];
 
   return (
@@ -61,7 +61,7 @@ export function MinutesOnSiteSlide({ slide }: MinutesOnSiteSlideProps) {
             top: accent.top,
             bottom: accent.bottom,
             width: accent.width,
-            transform: `rotate(${accent.rotate})`,
+            transform: `rotate(${accent.rotate})`
           }}
         >
           <CritterAccentSvg />

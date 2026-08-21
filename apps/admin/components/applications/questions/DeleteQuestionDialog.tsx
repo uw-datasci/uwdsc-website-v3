@@ -7,7 +7,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "@uwdsc/ui";
 import type { AppQuestion } from "@uwdsc/common/types";
 
@@ -22,7 +22,7 @@ export function DeleteQuestionDialog({
   question,
   onOpenChange,
   deleting,
-  onConfirm,
+  onConfirm
 }: DeleteQuestionDialogProps) {
   return (
     <Dialog open={question !== null} onOpenChange={onOpenChange}>

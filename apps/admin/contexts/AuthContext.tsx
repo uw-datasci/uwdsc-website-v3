@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
     // Don't retry on error (for 401s)
     shouldRetryOnError: false,
     // Show cached data while revalidating
-    revalidateIfStale: true,
+    revalidateIfStale: true
   });
 
   const value: AuthContextType = useMemo(
@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
       mutate: async () => {
         await mutate();
       },
-      isAuthenticated: !!data,
+      isAuthenticated: !!data
     }),
     [data, isLoading, error, mutate]
   );

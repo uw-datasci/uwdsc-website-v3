@@ -9,17 +9,17 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Apply | UWaterloo Data Science Club",
     description: "Apply to join the University of Waterloo Data Science Club executive team",
-    images: ["/meta/og-image.png"],
+    images: ["/meta/og-image.png"]
   },
   twitter: {
     card: "summary",
     description: "Apply to join the University of Waterloo Data Science Club executive team",
-    images: ["/meta/og-image.png"],
-  },
+    images: ["/meta/og-image.png"]
+  }
 };
 
 export default function ApplicationLayout({
-  children,
+  children
 }: Readonly<{
   children: React.ReactNode;
 }>) {

@@ -12,7 +12,7 @@ import {
   DialogTrigger,
   DialogClose,
   Input,
-  Label,
+  Label
 } from "@uwdsc/ui";
 import { toast } from "sonner";
 import { finalizeRoles } from "@/lib/api";
@@ -33,7 +33,7 @@ interface FinalizeRolesDialogProps {
 export function FinalizeRolesDialog({
   team,
   disabled,
-  onFinalized,
+  onFinalized
 }: Readonly<FinalizeRolesDialogProps>) {
   const [open, setOpen] = useState(false);
   const [finalizing, setFinalizing] = useState(false);

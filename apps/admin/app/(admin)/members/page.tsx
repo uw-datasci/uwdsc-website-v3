@@ -52,7 +52,7 @@ export default function MembersPage() {
       const [profilesData, statsData, activeEventData] = await Promise.all([
         getAllProfiles(),
         getMembershipStats(),
-        getActiveEvent(),
+        getActiveEvent()
       ]);
 
       setProfiles(profilesData);

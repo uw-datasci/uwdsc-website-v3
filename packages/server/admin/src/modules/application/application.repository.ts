@@ -11,7 +11,7 @@ import type {
   QuestionScope,
   QuestionUpsertInput,
   Term,
-  TermScheduleInput,
+  TermScheduleInput
 } from "@uwdsc/common/types";
 
 export class ApplicationRepository extends BaseRepository {
@@ -37,7 +37,7 @@ export class ApplicationRepository extends BaseRepository {
     return applications.map((app) => ({
       ...app,
       position_selections: selectionsMap.get(app.id) ?? [],
-      answers: answersMap.get(app.id) ?? [],
+      answers: answersMap.get(app.id) ?? []
     }));
   }
 

@@ -4,7 +4,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@uwdsc/ui";
 import { createAuthService } from "@/lib/services";
 
 export default async function OnboardingReviewLayout({
-  children,
+  children
 }: {
   readonly children: ReactNode;
 }) {

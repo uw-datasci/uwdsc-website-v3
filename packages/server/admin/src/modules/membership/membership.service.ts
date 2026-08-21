@@ -7,7 +7,7 @@ import {
   parseMembershipReceipt,
   parseUwaterlooEmailAddress,
   dedupeRecipients,
-  throwIfParseFailed,
+  throwIfParseFailed
 } from "../../utils/membershipReceipt";
 import { emailService } from "../email/email.service";
 import { profileService } from "./profile.service";
@@ -88,7 +88,7 @@ class MembershipService {
         if (recipientEmails.length > 0) {
           await emailService
             .sendMembershipReceiptNotice(recipientEmails, {
-              kind: "already_verified",
+              kind: "already_verified"
             })
             .catch((e) =>
               console.error("[MembershipService] Already-verified notice email failed:", e)
@@ -100,7 +100,7 @@ class MembershipService {
       const markResult = await this.markMemberAsPaid(profile.id, {
         payment_method: "online",
         payment_location: "WUSA Online Shop",
-        verifier: null,
+        verifier: null
       });
 
       if (!markResult.success) {

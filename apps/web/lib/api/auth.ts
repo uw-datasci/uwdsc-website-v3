@@ -24,7 +24,7 @@ export async function register(credentials: LoginData) {
   const response = await fetch("/api/auth/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(credentials),
+    body: JSON.stringify(credentials)
   });
 
   const data = await response.json();
@@ -45,7 +45,7 @@ export async function login(credentials: LoginData): Promise<LoginResponse> {
   const response = await fetch("/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(credentials),
+    body: JSON.stringify(credentials)
   });
 
   const data = await response.json();
@@ -68,7 +68,7 @@ export async function resendVerificationEmail(request: {
   const response = await fetch("/api/auth/resend-verification-email", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(request),
+    body: JSON.stringify(request)
   });
 
   const data = await response.json();
@@ -89,7 +89,7 @@ export async function forgotPassword(email: string): Promise<{ message: string }
   const response = await fetch("/api/auth/forgot-password", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email })
   });
 
   const data = await response.json();
@@ -112,7 +112,7 @@ export async function verifyPasswordRecovery(token_hash: string): Promise<{
   const response = await fetch("/api/auth/verify-recovery", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token_hash }),
+    body: JSON.stringify({ token_hash })
   });
 
   const data = await response.json();
@@ -133,7 +133,7 @@ export async function resetPassword(password: string): Promise<{ message: string
   const response = await fetch("/api/auth/reset-password", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ password }),
+    body: JSON.stringify({ password })
   });
 
   const data = await response.json();
@@ -152,7 +152,7 @@ export async function resetPassword(password: string): Promise<{ message: string
 export async function signOut(): Promise<{ message: string }> {
   const response = await fetch("/api/auth/signout", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" }
   });
 
   const data = await response.json();
@@ -171,7 +171,7 @@ export async function signOut(): Promise<{ message: string }> {
 export async function getCurrentUser(): Promise<Profile | null> {
   const response = await fetch("/api/auth/user", {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" }
   });
 
   const data = await response.json();

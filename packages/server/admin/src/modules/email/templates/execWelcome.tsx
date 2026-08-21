@@ -6,7 +6,7 @@ import {
   Link,
   Preview,
   Section,
-  Text,
+  Text
 } from "@react-email/components";
 import type { ReactElement } from "react";
 import type { ExecWelcomeEmailProps } from "../../../types/email";
@@ -19,30 +19,30 @@ const bodyTextStyle = {
   color: "#374151",
   lineHeight: "1.6" as const,
   margin: "0 0 16px 0",
-  fontSize: "16px",
+  fontSize: "16px"
 };
 
 const linkStyle = {
   color: "#2563eb",
   textDecoration: "underline" as const,
-  fontWeight: 600 as const,
+  fontWeight: 600 as const
 };
 
 const listItemStyle = {
   ...bodyTextStyle,
-  margin: "0 0 8px 0",
+  margin: "0 0 8px 0"
 };
 
 const nestedListItemStyle = {
   ...bodyTextStyle,
   margin: "0 0 8px 0",
-  paddingLeft: "20px",
+  paddingLeft: "20px"
 };
 
 export function ExecWelcomeEmail({
   termLabel,
   when2MeetLink,
-  discordLink,
+  discordLink
 }: Readonly<ExecWelcomeEmailProps>): ReactElement {
   const subject = getExecWelcomeSubject(termLabel);
 
@@ -53,7 +53,7 @@ export function ExecWelcomeEmail({
       <Body
         style={{
           backgroundColor: "#f6f9fc",
-          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
         }}
       >
         <Container
@@ -63,7 +63,7 @@ export function ExecWelcomeEmail({
             backgroundColor: "#ffffff",
             borderRadius: "8px",
             padding: "40px",
-            border: "1px solid #e6ebf1",
+            border: "1px solid #e6ebf1"
           }}
         >
           <Section>

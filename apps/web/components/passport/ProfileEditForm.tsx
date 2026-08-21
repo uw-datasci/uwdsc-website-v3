@@ -22,7 +22,7 @@ export function ProfileEditForm({ form, onSubmit }: ProfileEditFormProps) {
           name="first_name"
           render={renderTextField({
             label: "First Name",
-            placeholder: "First name",
+            placeholder: "First name"
           })}
         />
 
@@ -31,7 +31,7 @@ export function ProfileEditForm({ form, onSubmit }: ProfileEditFormProps) {
           name="last_name"
           render={renderTextField({
             label: "Last Name",
-            placeholder: "Last name",
+            placeholder: "Last name"
           })}
         />
 
@@ -40,7 +40,7 @@ export function ProfileEditForm({ form, onSubmit }: ProfileEditFormProps) {
           name="wat_iam"
           render={renderTextField({
             label: "WatIAM Username",
-            placeholder: "e.g. j3smith",
+            placeholder: "e.g. j3smith"
           })}
         />
 
@@ -53,7 +53,7 @@ export function ProfileEditForm({ form, onSubmit }: ProfileEditFormProps) {
             options: FACULTY_PROFILE_FORM_OPTIONS,
             contentPosition: "popper",
             triggerClassName: "w-full",
-            contentClassName: "w-full",
+            contentClassName: "w-full"
           })}
         />
 
@@ -66,7 +66,7 @@ export function ProfileEditForm({ form, onSubmit }: ProfileEditFormProps) {
             options: TERM_OPTIONS,
             contentPosition: "popper",
             triggerClassName: "w-full",
-            contentClassName: "w-full",
+            contentClassName: "w-full"
           })}
         />
       </form>

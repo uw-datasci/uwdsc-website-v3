@@ -5,7 +5,7 @@ import {
   Term,
   Onboarding,
   OnboardingData,
-  OnboardingAdminRow,
+  OnboardingAdminRow
 } from "@uwdsc/common/types";
 import { isDateWindowOpen } from "@uwdsc/common/utils";
 

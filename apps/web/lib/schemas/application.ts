@@ -15,7 +15,7 @@ export const applicationSchema = z.object({
   academic_term: z.string().min(1, "Academic term is required"),
   location: z.string().min(1, "Location is required"),
   club_experience: z.boolean({
-    message: "Please select whether you have past exec experience",
+    message: "Please select whether you have past exec experience"
   }),
   general_answers: z.record(z.string(), z.string().trim().min(1, "Answer is required")),
   position_1: z.string().min(1, "Please select a position"),
@@ -31,7 +31,7 @@ export const applicationSchema = z.object({
   linkedin_url: z.url("Enter a valid LinkedIn URL"),
   github_url: z.url("Enter a valid GitHub URL"),
   portfolio_url: z.union([z.literal(""), z.url("Enter a valid URL")]).optional(),
-  resumeKey: z.string().min(1, "Please upload your resume"),
+  resumeKey: z.string().min(1, "Please upload your resume")
 });
 
 export type AppFormValues = z.infer<typeof applicationSchema>;
@@ -54,5 +54,5 @@ export const applicationDefaultValues: Partial<AppFormValues> = {
   linkedin_url: "",
   github_url: "",
   portfolio_url: "",
-  resumeKey: "",
+  resumeKey: ""
 };

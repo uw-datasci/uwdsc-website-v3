@@ -13,7 +13,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
+  useSidebar
 } from "@uwdsc/ui";
 import { ChevronsUpDown, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";

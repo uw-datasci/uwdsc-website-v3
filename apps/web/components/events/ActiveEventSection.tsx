@@ -15,7 +15,7 @@ export function ActiveEventSection({
   canCheckIn,
   checkInSuccess,
   checkingIn,
-  onCheckIn,
+  onCheckIn
 }: Readonly<ActiveEventSectionProps>) {
   return (
     <div className="space-y-3 sm:space-y-5">

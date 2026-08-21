@@ -1,7 +1,7 @@
 import type {
   ApplicationInputType,
   ApplicationReviewStatus,
-  ApplicationStatus,
+  ApplicationStatus
 } from "../shared/enums";
 
 // ==========================================

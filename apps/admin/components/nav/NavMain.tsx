@@ -23,7 +23,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-  useSidebar,
+  useSidebar
 } from "@uwdsc/ui";
 
 interface NavMainProps {

@@ -17,7 +17,7 @@ import {
   NavigationMenu,
   NavigationMenuList,
   Button,
-  NavigationMenuItem,
+  NavigationMenuItem
 } from "@uwdsc/ui";
 import { Calculator, Heart, LayoutDashboard } from "lucide-react";
 import { useState } from "react";
@@ -38,7 +38,7 @@ export function Navbar() {
     { href: "/events", label: "Check-in" },
     { href: "/team", label: "Team" },
     ...(applyOpen ? [{ href: "/apply", label: "Apply", pulse: true }] : []),
-    { href: "/calendar", label: "Calendar" },
+    { href: "/calendar", label: "Calendar" }
   ];
 
   const isAdmin = Boolean(user?.role && ADMIN_ROLES.has(user.role));
@@ -53,8 +53,8 @@ export function Navbar() {
             href: adminUrl,
             label: "Admin",
             icon: LayoutDashboard,
-            target: "_blank",
-          },
+            target: "_blank"
+          }
         }
       : {}),
     items: [
@@ -62,15 +62,15 @@ export function Navbar() {
         href: "https://speed-dataing.uwdatascience.ca",
         label: "Speed Dataing",
         icon: Heart,
-        target: "_blank",
+        target: "_blank"
       },
       {
         href: "https://estimathon.uwdatascience.ca",
         label: "Estimathon",
         icon: Calculator,
-        target: "_blank",
-      },
-    ],
+        target: "_blank"
+      }
+    ]
   };
 
   if (hideNavbar) return null;

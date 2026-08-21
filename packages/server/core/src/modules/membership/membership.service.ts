@@ -18,7 +18,7 @@ class MembershipService {
       const membership = await this.repository.getMembershipByProfileId(profileId);
       return {
         has_membership: !!membership,
-        membership_id: membership?.id ?? null,
+        membership_id: membership?.id ?? null
       };
     } catch (error) {
       throw new ApiError(`Failed to check membership: ${(error as Error).message}`, 500);

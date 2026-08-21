@@ -11,6 +11,6 @@ export async function getPublicStats(): Promise<PublicStats> {
   if (!response.ok) throw createApiError(data, response.status);
   return {
     members: data.members,
-    events: data.events,
+    events: data.events
   };
 }

@@ -8,7 +8,7 @@ const UPDATE_EVENT_COLUMNS = [
   "location",
   "image_url",
   "start_time",
-  "end_time",
+  "end_time"
 ] as const;
 
 class EventService {

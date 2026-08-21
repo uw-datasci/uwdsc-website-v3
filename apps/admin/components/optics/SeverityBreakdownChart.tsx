@@ -10,7 +10,7 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  type ChartConfig,
+  type ChartConfig
 } from "@uwdsc/ui";
 import type { RaftSeverityBreakdown } from "@uwdsc/common/types";
 
@@ -19,7 +19,7 @@ const SEVERITY_COLORS: Record<string, string> = {
   error: "hsl(25 95% 53%)",
   warning: "hsl(45 93% 47%)",
   info: "hsl(217 91% 60%)",
-  debug: "var(--muted-foreground)",
+  debug: "var(--muted-foreground)"
 };
 
 const chartConfig = {
@@ -28,7 +28,7 @@ const chartConfig = {
   error: { label: "Error", color: SEVERITY_COLORS.error },
   warning: { label: "Warning", color: SEVERITY_COLORS.warning },
   info: { label: "Info", color: SEVERITY_COLORS.info },
-  debug: { label: "Debug", color: SEVERITY_COLORS.debug },
+  debug: { label: "Debug", color: SEVERITY_COLORS.debug }
 } satisfies ChartConfig;
 
 interface SeverityBreakdownChartProps {
@@ -38,7 +38,7 @@ interface SeverityBreakdownChartProps {
 export function SeverityBreakdownChart({ data }: SeverityBreakdownChartProps) {
   const chartData = data.map((entry) => ({
     ...entry,
-    fill: SEVERITY_COLORS[entry.severity] ?? "var(--muted)",
+    fill: SEVERITY_COLORS[entry.severity] ?? "var(--muted)"
   }));
 
   return (

@@ -91,7 +91,7 @@ export function withAuth<C extends WithAuthContext = WithAuthContext>(
     if (role === "exec") {
       const [membershipStatus, grace] = await Promise.all([
         membershipService.getMembershipStatus(user.id),
-        graceDuringOnboarding(),
+        graceDuringOnboarding()
       ]);
 
       if (!membershipStatus.has_membership && !grace) {

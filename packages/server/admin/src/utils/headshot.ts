@@ -20,7 +20,7 @@ export const HEADSHOT_VALIDATION_CONFIG: FileValidationConfig = {
 
     return {
       valid: false,
-      error: "Invalid file type. Allowed: JPG, PNG, or WEBP.",
+      error: "Invalid file type. Allowed: JPG, PNG, or WEBP."
     };
-  },
+  }
 };

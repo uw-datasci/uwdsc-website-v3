@@ -24,7 +24,7 @@ export function LoginForm() {
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: loginDefaultValues,
+    defaultValues: loginDefaultValues
   });
 
   const onSubmit = async (data: LoginFormValues) => {
@@ -34,7 +34,7 @@ export function LoginForm() {
     try {
       const result = await signIn({
         email: data.email,
-        password: data.password,
+        password: data.password
       });
       await mutate();
       const role = result.user?.app_metadata?.role as string | undefined;
@@ -102,7 +102,7 @@ export function LoginForm() {
                 label: "Email",
                 placeholder: "Email",
                 required: true,
-                inputProps: { type: "email" },
+                inputProps: { type: "email" }
               })}
             />
 
@@ -113,7 +113,7 @@ export function LoginForm() {
                 label: "Password",
                 placeholder: "Password",
                 required: true,
-                inputProps: { type: "password", autoComplete: "off" },
+                inputProps: { type: "password", autoComplete: "off" }
               })}
             />
 

@@ -21,7 +21,7 @@ export function renderAnswerField(question: AnswerQuestion) {
     label: question.question_text,
     required: true,
     description: counter,
-    descriptionClassName: "text-right tabular-nums",
+    descriptionClassName: "text-right tabular-nums"
   };
 
   return question.type === "text" ? renderTextField(shared) : renderTextAreaField(shared);

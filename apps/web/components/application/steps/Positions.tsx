@@ -7,7 +7,7 @@ import {
   CardTitle,
   Form,
   FormField,
-  renderSelectField,
+  renderSelectField
 } from "@uwdsc/ui";
 import { UseFormReturn, useWatch } from "react-hook-form";
 import { AppFormValues } from "@/lib/schemas/application";
@@ -116,7 +116,7 @@ export function Positions({ form, positions }: PositionsProps) {
                   triggerClassName: "w-full",
                   contentClassName: "bg-slate-700",
                   itemClassName:
-                    "text-slate-200 focus:bg-slate-600 focus:text-white hover:bg-slate-600 hover:text-white transition-colors",
+                    "text-slate-200 focus:bg-slate-600 focus:text-white hover:bg-slate-600 hover:text-white transition-colors"
                 })({
                   field: {
                     ...field,
@@ -125,8 +125,8 @@ export function Positions({ form, positions }: PositionsProps) {
                       clearAnswersOnChange("position_1_answers", nextId, field.value);
                       field.onChange(nextId);
                     },
-                    value: positions.find((p) => p.id === field.value)?.name || "",
-                  },
+                    value: positions.find((p) => p.id === field.value)?.name || ""
+                  }
                 })
               }
             />
@@ -163,7 +163,7 @@ export function Positions({ form, positions }: PositionsProps) {
                   triggerClassName: "w-full",
                   contentClassName: "bg-slate-700",
                   itemClassName:
-                    "text-slate-200 focus:bg-slate-600 focus:text-white hover:bg-slate-600 hover:text-white transition-colors",
+                    "text-slate-200 focus:bg-slate-600 focus:text-white hover:bg-slate-600 hover:text-white transition-colors"
                 })({
                   field: {
                     ...field,
@@ -172,8 +172,8 @@ export function Positions({ form, positions }: PositionsProps) {
                       clearAnswersOnChange("position_2_answers", nextId, field.value);
                       field.onChange(nextId);
                     },
-                    value: positions.find((p) => p.id === field.value)?.name || "",
-                  },
+                    value: positions.find((p) => p.id === field.value)?.name || ""
+                  }
                 })
               }
             />
@@ -210,7 +210,7 @@ export function Positions({ form, positions }: PositionsProps) {
                   triggerClassName: "w-full",
                   contentClassName: "bg-slate-700",
                   itemClassName:
-                    "text-slate-200 focus:bg-slate-600 focus:text-white hover:bg-slate-600 hover:text-white transition-colors",
+                    "text-slate-200 focus:bg-slate-600 focus:text-white hover:bg-slate-600 hover:text-white transition-colors"
                 })({
                   field: {
                     ...field,
@@ -219,8 +219,8 @@ export function Positions({ form, positions }: PositionsProps) {
                       clearAnswersOnChange("position_3_answers", nextId, field.value);
                       field.onChange(nextId);
                     },
-                    value: positions.find((p) => p.id === field.value)?.name || "",
-                  },
+                    value: positions.find((p) => p.id === field.value)?.name || ""
+                  }
                 })
               }
             />

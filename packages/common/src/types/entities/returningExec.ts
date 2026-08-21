@@ -7,7 +7,7 @@ export const IN_PERSON_NEXT_TERM_LABELS: Record<InPersonNextTermStatus, string> 
   yes: "Yes",
   no_outside_gta: "No, outside of GTA",
   no_in_gta: "No, but in the GTA (able to commute to Waterloo)",
-  not_sure: "Not sure",
+  not_sure: "Not sure"
 };
 
 /** Mirrors returning_exec_submissions DB table */

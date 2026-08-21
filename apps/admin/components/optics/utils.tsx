@@ -9,7 +9,7 @@ const SEVERITY_VARIANT: Record<
   error: "destructive",
   warning: "outline",
   info: "secondary",
-  debug: "secondary",
+  debug: "secondary"
 };
 
 export function SeverityBadge({ severity }: { readonly severity: RaftSeverity }) {
@@ -25,7 +25,7 @@ export function formatRaftDate(iso: string): string {
     month: "short",
     day: "numeric",
     hour: "numeric",
-    minute: "2-digit",
+    minute: "2-digit"
   });
 }
 

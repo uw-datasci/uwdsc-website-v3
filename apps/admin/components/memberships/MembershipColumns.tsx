@@ -9,19 +9,19 @@ import { Member, PaymentMethod } from "@uwdsc/common/types";
 const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   cash: "Cash",
   online: "Online",
-  math_soc: "MathSoc",
+  math_soc: "MathSoc"
 };
 
 const SORT_ICONS = {
   asc: ArrowUp,
   desc: ArrowDown,
-  false: Minus,
+  false: Minus
 } as const;
 
 const SORT_LABELS: Record<"asc" | "desc" | "false", string> = {
   asc: "ascending",
   desc: "descending",
-  false: "unsorted",
+  false: "unsorted"
 };
 
 function SortIcon({ direction }: Readonly<{ direction: false | "asc" | "desc" }>) {
@@ -73,7 +73,7 @@ export const membershipColumns: ColumnDef<Member>[] = [
       const last = row.original.last_name ?? "";
       const name = [first, last].filter(Boolean).join(" ");
       return <div className="min-w-32 px-1">{name || "-"}</div>;
-    },
+    }
   },
   {
     accessorKey: "wat_iam",
@@ -90,7 +90,7 @@ export const membershipColumns: ColumnDef<Member>[] = [
     cell: ({ row }) => {
       const v = row.getValue("wat_iam") as string | null;
       return <span>{v ?? "-"}</span>;
-    },
+    }
   },
   {
     accessorKey: "user_role",
@@ -107,7 +107,7 @@ export const membershipColumns: ColumnDef<Member>[] = [
     cell: ({ row }) => {
       const v = row.getValue("user_role") as string | null;
       return <span className="capitalize">{v ?? "-"}</span>;
-    },
+    }
   },
   {
     accessorKey: "has_paid",
@@ -133,7 +133,7 @@ export const membershipColumns: ColumnDef<Member>[] = [
       if (!filterValue) return true;
       const cellValue = row.getValue(columnId) as boolean;
       return filterValue === "true" ? cellValue === true : cellValue === false;
-    },
+    }
   },
   {
     accessorKey: "payment_method",
@@ -158,7 +158,7 @@ export const membershipColumns: ColumnDef<Member>[] = [
     filterFn: (row, _columnId, filterValue) => {
       if (!filterValue) return true;
       return row.original.payment_method === filterValue;
-    },
+    }
   },
   {
     accessorKey: "verifier",
@@ -180,7 +180,7 @@ export const membershipColumns: ColumnDef<Member>[] = [
     filterFn: (row, _columnId, filterValue) => {
       if (!filterValue) return true;
       return row.original.has_paid && row.original.verifier === null;
-    },
+    }
   },
   {
     accessorKey: "is_math_soc_member",
@@ -206,7 +206,7 @@ export const membershipColumns: ColumnDef<Member>[] = [
       if (!filterValue) return true;
       const cellValue = row.getValue(columnId) as boolean;
       return filterValue === "true" ? cellValue === true : cellValue === false;
-    },
+    }
   },
   {
     accessorKey: "faculty",
@@ -223,7 +223,7 @@ export const membershipColumns: ColumnDef<Member>[] = [
     cell: ({ row }) => {
       const v = row.getValue("faculty") as string | null;
       return <span>{v ?? "-"}</span>;
-    },
+    }
   },
   {
     id: "actions",
@@ -268,6 +268,6 @@ export const membershipColumns: ColumnDef<Member>[] = [
           )}
         </div>
       );
-    },
-  },
+    }
+  }
 ];

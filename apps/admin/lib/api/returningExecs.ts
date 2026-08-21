@@ -3,7 +3,7 @@ import type { ApplicationReviewStatus, ReturningExecSubmissionData } from "@uwds
 import type {
   SelectablePosition,
   OwnSubmissionResponse,
-  ReturningExecsResponse,
+  ReturningExecsResponse
 } from "@/types/returningExecs";
 
 export async function getPositionsForReturningExec(): Promise<SelectablePosition[]> {
@@ -26,7 +26,7 @@ export async function upsertReturningExecSubmission(
   const response = await fetch("/api/returning-execs/me", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    body: JSON.stringify(body)
   });
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);
@@ -47,7 +47,7 @@ export async function updateReturningExecSelectionStatus(
   const response = await fetch(`/api/returning-execs/selections/${selectionId}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status }),
+    body: JSON.stringify({ status })
   });
   if (!response.ok) {
     const data = await response.json();

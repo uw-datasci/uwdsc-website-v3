@@ -1,7 +1,7 @@
 import {
   tryGetCurrentUser,
   validateBaseProfileFields,
-  trimBaseProfilePayload,
+  trimBaseProfilePayload
 } from "@/lib/api/utils";
 import { profileService } from "@uwdsc/core";
 import { RaftResponse } from "@uw-datasci/raft";
@@ -36,7 +36,7 @@ export const PUT = withRaftRoute(async (request) => {
   const result = await profileService.completeProfile(user.id, {
     ...base,
     heard_from_where: body.heard_from_where.trim(),
-    is_math_soc_member: base.faculty === "math",
+    is_math_soc_member: base.faculty === "math"
   });
   if (!result.success) {
     return RaftResponse.badRequest("Failed to complete profile", result.error);

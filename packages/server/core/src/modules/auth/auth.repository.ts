@@ -16,7 +16,7 @@ export class AuthRepository extends BaseRepository {
   async signInWithPassword(credentials: LoginData) {
     const { data, error } = await this.supabase.auth.signInWithPassword({
       email: credentials.email,
-      password: credentials.password,
+      password: credentials.password
     });
 
     return { data, error };
@@ -29,7 +29,7 @@ export class AuthRepository extends BaseRepository {
     const { data, error } = await this.supabase.auth.signUp({
       email: credentials.email,
       password: credentials.password,
-      options: { emailRedirectTo: credentials.emailRedirectTo },
+      options: { emailRedirectTo: credentials.emailRedirectTo }
     });
 
     return { data, error };
@@ -58,7 +58,7 @@ export class AuthRepository extends BaseRepository {
     const { data, error } = await this.supabase.auth.resend({
       type: "signup",
       email,
-      options: { emailRedirectTo },
+      options: { emailRedirectTo }
     });
 
     return { data, error };
@@ -101,7 +101,7 @@ export class AuthRepository extends BaseRepository {
    */
   async resetPasswordForEmail(email: string, emailRedirectTo?: string) {
     const { data, error } = await this.supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: emailRedirectTo,
+      redirectTo: emailRedirectTo
     });
 
     return { data, error };
@@ -112,7 +112,7 @@ export class AuthRepository extends BaseRepository {
    */
   async updateUserPassword(newPassword: string) {
     const { data, error } = await this.supabase.auth.updateUser({
-      password: newPassword,
+      password: newPassword
     });
 
     if (!error && data?.user?.id) {

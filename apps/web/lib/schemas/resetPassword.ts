@@ -7,16 +7,16 @@ import { z } from "zod";
 export const resetPasswordSchema = z
   .object({
     password: z.string().min(8, "Your password needs to be at least 8 characters long"),
-    confirmPassword: z.string(),
+    confirmPassword: z.string()
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
-    path: ["confirmPassword"],
+    path: ["confirmPassword"]
   });
 
 export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 
 export const resetPasswordDefaultValues: Partial<ResetPasswordFormValues> = {
   password: "",
-  confirmPassword: "",
+  confirmPassword: ""
 };

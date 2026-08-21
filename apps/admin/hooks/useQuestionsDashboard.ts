@@ -10,7 +10,7 @@ import {
   createQuestion,
   deleteQuestion,
   getScopedQuestions,
-  updateQuestion,
+  updateQuestion
 } from "@/lib/api/questions";
 import { questionSchema, type QuestionFormValues } from "@/lib/schemas/questions";
 
@@ -30,7 +30,7 @@ export type QuestionDialogMode = "create" | "edit" | "view";
 
 export function useQuestionsDashboard() {
   const [loadState, setLoadState] = useState<QuestionsLoadState>({
-    status: "loading",
+    status: "loading"
   });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<QuestionDialogMode>("create");
@@ -48,8 +48,8 @@ export function useQuestionsDashboard() {
       placeholder: DEFAULT_QUESTION_PLACEHOLDER,
       help_text: null,
       sort_order: 0,
-      position_id: null,
-    },
+      position_id: null
+    }
   });
 
   const load = useCallback(async () => {
@@ -61,7 +61,7 @@ export function useQuestionsDashboard() {
         questions: data.questions,
         positions: data.positions,
         isPresident: data.scope.isPresident,
-        vpSubteamNames: data.scope.vpSubteamNames,
+        vpSubteamNames: data.scope.vpSubteamNames
       });
     } catch (err: unknown) {
       const status = (err as { status?: number }).status;
@@ -70,7 +70,7 @@ export function useQuestionsDashboard() {
         setLoadState({
           status: "forbidden",
           message:
-            "Only users with the admin or president role can manage application questions. Presidents see all positions; other admins see their own.",
+            "Only users with the admin or president role can manage application questions. Presidents see all positions; other admins see their own."
         });
         return;
       }
@@ -93,7 +93,7 @@ export function useQuestionsDashboard() {
       placeholder: DEFAULT_QUESTION_PLACEHOLDER,
       help_text: null,
       sort_order: 0,
-      position_id: firstPos,
+      position_id: firstPos
     });
     setDialogOpen(true);
   }, [form, loadState]);
@@ -113,7 +113,7 @@ export function useQuestionsDashboard() {
         placeholder: q.placeholder,
         help_text: q.help_text,
         sort_order: q.sort_order,
-        position_id: q.position_id,
+        position_id: q.position_id
       });
       setDialogOpen(true);
     },
@@ -131,7 +131,7 @@ export function useQuestionsDashboard() {
         placeholder: q.placeholder,
         help_text: q.help_text,
         sort_order: q.sort_order,
-        position_id: q.position_id,
+        position_id: q.position_id
       });
       setDialogOpen(true);
     },
@@ -216,6 +216,6 @@ export function useQuestionsDashboard() {
     submitQuestion,
     confirmDelete,
     onFormDialogOpenChange,
-    onDeleteDialogOpenChange,
+    onDeleteDialogOpenChange
   };
 }

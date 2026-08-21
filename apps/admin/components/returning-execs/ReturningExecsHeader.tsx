@@ -8,7 +8,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@uwdsc/ui";
 import { Search } from "lucide-react";
 import type { ReturningExecListItem } from "@uwdsc/common/types";
@@ -20,7 +20,7 @@ interface ReturningExecsHeaderProps {
 
 export function ReturningExecsHeader({
   submissions,
-  onFilteredChange,
+  onFilteredChange
 }: ReturningExecsHeaderProps) {
   const [positionFilter, setPositionFilter] = useState<string>("all");
   const [nameSearch, setNameSearch] = useState("");

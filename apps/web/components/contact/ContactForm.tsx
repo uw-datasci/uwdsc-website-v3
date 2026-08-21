@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   contactSchema,
   contactDefaultValues,
-  type ContactFormValues,
+  type ContactFormValues
 } from "@/lib/schemas/contact";
 import { submitContact } from "@/lib/api/contact";
 import { renderTextField, renderTextAreaField, Button, Form, FormField } from "@uwdsc/ui";
@@ -22,7 +22,7 @@ export function ContactForm() {
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactSchema),
     defaultValues: contactDefaultValues,
-    mode: "onTouched",
+    mode: "onTouched"
   });
 
   useEffect(() => {
@@ -40,14 +40,14 @@ export function ContactForm() {
         name: data.name,
         email: data.email,
         subject: data.subject,
-        message: data.message,
+        message: data.message
       });
       setSubmitSuccess(true);
       form.reset({
         name: data.name,
         email: data.email,
         subject: "",
-        message: "",
+        message: ""
       });
     } catch (error: unknown) {
       const err = error as { error?: string; message?: string };
@@ -89,7 +89,7 @@ export function ContactForm() {
           render={renderTextField({
             label: "Name",
             placeholder: "Your name",
-            inputProps: { disabled: true, readOnly: true },
+            inputProps: { disabled: true, readOnly: true }
           })}
         />
         <FormField
@@ -98,7 +98,7 @@ export function ContactForm() {
           render={renderTextField({
             label: "Email",
             placeholder: "Your email",
-            inputProps: { disabled: true, readOnly: true },
+            inputProps: { disabled: true, readOnly: true }
           })}
         />
         <FormField
@@ -107,7 +107,7 @@ export function ContactForm() {
           render={renderTextField({
             label: "Subject",
             required: true,
-            placeholder: "What's this about?",
+            placeholder: "What's this about?"
           })}
         />
         <FormField
@@ -116,7 +116,7 @@ export function ContactForm() {
           render={renderTextAreaField({
             label: "Message",
             required: true,
-            placeholder: "Write your message here...",
+            placeholder: "Write your message here..."
           })}
         />
         {submitError && <div className="text-red-400 text-base mt-1">{submitError}</div>}

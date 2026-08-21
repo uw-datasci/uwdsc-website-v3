@@ -46,7 +46,7 @@ export const POST = withRaftRoute(
 
     return RaftResponse.ok({
       message: "Successfully checked in",
-      success: true,
+      success: true
     });
   }
 );

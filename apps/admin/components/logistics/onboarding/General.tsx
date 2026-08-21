@@ -11,7 +11,7 @@ import {
   renderTextField,
   renderTextAreaField,
   renderRadioField,
-  renderScaleField,
+  renderScaleField
 } from "@uwdsc/ui";
 import { UseFormReturn } from "react-hook-form";
 import { OnboardingFormValues } from "@/lib/schemas/onboarding";
@@ -24,7 +24,7 @@ interface GeneralProps {
 export function General({ form }: GeneralProps) {
   const consentInstagram = useWatch({
     control: form.control,
-    name: "consent_instagram",
+    name: "consent_instagram"
   });
 
   return (
@@ -43,7 +43,7 @@ export function General({ form }: GeneralProps) {
                 render={renderTextField({
                   placeholder: "Please enter your Discord username",
                   label: "Discord",
-                  required: true,
+                  required: true
                 })}
               />
 
@@ -53,7 +53,7 @@ export function General({ form }: GeneralProps) {
                 render={({ field }) =>
                   renderRadioField({
                     label: "Can we tag you on Instagram on our posts?",
-                    required: true,
+                    required: true
                   })({ field })
                 }
               />
@@ -65,12 +65,12 @@ export function General({ form }: GeneralProps) {
                   render={({ field }) =>
                     renderTextField({
                       placeholder: "Instagram username",
-                      label: "Instagram Handle",
+                      label: "Instagram Handle"
                     })({
                       field: {
                         ...field,
-                        value: field.value ?? "",
-                      },
+                        value: field.value ?? ""
+                      }
                     })
                   }
                 />
@@ -91,13 +91,13 @@ export function General({ form }: GeneralProps) {
                   renderScaleField({
                     label: "Data Science Competency",
                     labels: ["None", "Beginner", "Intermediate", "Advanced", "Expert"],
-                    required: true,
+                    required: true
                   })({
                     field: {
                       ...field,
                       value: String(field.value), // convert number → string for display
-                      onChange: (v: string) => field.onChange(Number(v)), // convert string → number for storage
-                    },
+                      onChange: (v: string) => field.onChange(Number(v)) // convert string → number for storage
+                    }
                   })
                 }
               />
@@ -116,12 +116,12 @@ export function General({ form }: GeneralProps) {
               render={({ field }) =>
                 renderTextAreaField({
                   placeholder: "",
-                  label: "Anything else we should know?",
+                  label: "Anything else we should know?"
                 })({
                   field: {
                     ...field,
-                    value: field.value ?? "",
-                  },
+                    value: field.value ?? ""
+                  }
                 })
               }
             />

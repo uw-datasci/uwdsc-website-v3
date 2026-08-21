@@ -8,11 +8,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import {
   ReturningExecList,
   ReturningExecDetail,
-  ReturningExecsHeader,
+  ReturningExecsHeader
 } from "@/components/returning-execs";
 import {
   getAllReturningExecs,
-  updateReturningExecSelectionStatus,
+  updateReturningExecSelectionStatus
 } from "@/lib/api/returningExecs";
 import type { ApplicationReviewStatus, ReturningExecListItem } from "@uwdsc/common/types";
 import type { PositionReviewScopeDto } from "@/types/applications";
@@ -30,7 +30,7 @@ function withUpdatedSelection(
       ...sub,
       position_selections: sub.position_selections.map((s) =>
         s.id === selectionId ? { ...s, status } : s
-      ),
+      )
     };
   });
 }

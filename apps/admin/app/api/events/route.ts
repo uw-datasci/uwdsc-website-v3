@@ -45,6 +45,6 @@ export const POST = withAuth(async (request) => {
   return RaftResponse.ok({
     success: true,
     message: "Event created successfully",
-    event: result.event,
+    event: result.event
   });
 });

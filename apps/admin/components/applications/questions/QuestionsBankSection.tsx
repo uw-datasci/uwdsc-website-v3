@@ -9,7 +9,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  Toggle,
+  Toggle
 } from "@uwdsc/ui";
 import type { AppQuestion, QuestionPositionOption } from "@uwdsc/common/types";
 import { QuestionsTable } from "./QuestionsTable";
@@ -31,7 +31,7 @@ export function QuestionsBankSection({
   onAddClick,
   onEdit,
   onView,
-  onRequestDelete,
+  onRequestDelete
 }: QuestionsBankSectionProps) {
   const [presidentFiltersSelected, setPresidentFiltersSelected] = useState<Set<string>>(
     new Set(["all"])
@@ -46,8 +46,8 @@ export function QuestionsBankSection({
       { key: "general", label: "General" },
       ...positions.map((p) => ({
         key: `position:${p.id}`,
-        label: p.name,
-      })),
+        label: p.name
+      }))
     ];
     return filters;
   }, [positions]);

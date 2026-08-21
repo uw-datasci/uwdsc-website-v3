@@ -8,7 +8,7 @@ import {
   type QuestionScope,
   type QuestionUpsertInput,
   type Term,
-  type TermScheduleInput,
+  type TermScheduleInput
 } from "@uwdsc/common/types";
 import { DEFAULT_QUESTION_PLACEHOLDER } from "@uwdsc/common/constants";
 import { ApplicationRepository } from "./application.repository";
@@ -18,7 +18,7 @@ class ApplicationService {
     "In Review",
     "Interviewing",
     "Wanted",
-    "Not Wanted",
+    "Not Wanted"
   ]);
 
   private readonly PRESIDENT_REVIEW_STATUS_SET = new Set<ApplicationReviewStatus>([
@@ -26,7 +26,7 @@ class ApplicationService {
     "Offer Sent",
     "Accepted Offer",
     "Declined Offer",
-    "Rejection Sent",
+    "Rejection Sent"
   ]);
   private readonly repository: ApplicationRepository;
 
@@ -185,7 +185,7 @@ class ApplicationService {
 
     return allQuestions.map((q) => ({
       ...q,
-      can_edit: q.position_id !== null && scope.vpPositionIds.includes(q.position_id),
+      can_edit: q.position_id !== null && scope.vpPositionIds.includes(q.position_id)
     }));
   }
 
@@ -200,7 +200,7 @@ class ApplicationService {
     try {
       return await this.repository.createQuestion({
         ...data,
-        placeholder: data.placeholder?.trim() || DEFAULT_QUESTION_PLACEHOLDER,
+        placeholder: data.placeholder?.trim() || DEFAULT_QUESTION_PLACEHOLDER
       });
     } catch (error) {
       throw new ApiError(

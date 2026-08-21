@@ -8,17 +8,17 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Events | UWaterloo Data Science Club",
     description: "Check in to UWaterloo Data Science Club events",
-    images: ["/meta/og-image.png"],
+    images: ["/meta/og-image.png"]
   },
   twitter: {
     card: "summary",
     description: "Check in to UWaterloo Data Science Club events",
-    images: ["/meta/og-image.png"],
-  },
+    images: ["/meta/og-image.png"]
+  }
 };
 
 export default function EventsLayout({
-  children,
+  children
 }: Readonly<{
   children: React.ReactNode;
 }>) {

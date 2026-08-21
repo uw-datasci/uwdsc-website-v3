@@ -14,14 +14,14 @@ export const returningExecSchema = z
     third_choice_position: z.string().optional(),
     in_person_next_term: z.enum(["yes", "no_outside_gta", "no_in_gta", "not_sure"]).optional(),
     qualifications: z.string().optional(),
-    additional_notes: z.string().optional(),
+    additional_notes: z.string().optional()
   })
   .superRefine((data, ctx) => {
     if (data.interested_in_returning === undefined) {
       ctx.addIssue({
         path: ["interested_in_returning"],
         code: "custom",
-        message: "Please select an option",
+        message: "Please select an option"
       });
       return;
     }
@@ -35,21 +35,21 @@ export const returningExecSchema = z
       ctx.addIssue({
         path: ["first_choice_position"],
         code: "custom",
-        message: "Please select at least a first choice position",
+        message: "Please select at least a first choice position"
       });
     }
     if (!data.in_person_next_term) {
       ctx.addIssue({
         path: ["in_person_next_term"],
         code: "custom",
-        message: "Please indicate whether you will be in person",
+        message: "Please indicate whether you will be in person"
       });
     }
     if (!data.qualifications?.trim()) {
       ctx.addIssue({
         path: ["qualifications"],
         code: "custom",
-        message: "Please describe why you are interested/qualified",
+        message: "Please describe why you are interested/qualified"
       });
     }
   });
@@ -68,5 +68,5 @@ export const ReturningExecDefaultValues: ReturningExecFormValues = {
   third_choice_position: "",
   in_person_next_term: undefined,
   qualifications: "",
-  additional_notes: "",
+  additional_notes: ""
 };

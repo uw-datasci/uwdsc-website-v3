@@ -18,7 +18,7 @@ export const GET = withPresAccess(async (request) => {
 
   const [rows, headshotService] = await Promise.all([
     onboardingService.getTeamSubmissions(termId),
-    createHeadshotService(),
+    createHeadshotService()
   ]);
 
   const zip = new JSZip();
@@ -45,7 +45,7 @@ export const GET = withPresAccess(async (request) => {
   return new Response(zipBody, {
     headers: {
       "Content-Type": "application/zip",
-      "Content-Disposition": `attachment; filename="${filename}"`,
-    },
+      "Content-Disposition": `attachment; filename="${filename}"`
+    }
   });
 });

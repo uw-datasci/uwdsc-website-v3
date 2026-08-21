@@ -1,27 +1,18 @@
 import type { FoundryFormValues } from "@/lib/schemas/foundry";
-import {
-  foundryFormObjectSchema,
-  foundryStep3Schema,
-} from "@/lib/schemas/foundry";
+import { foundryFormObjectSchema, foundryStep3Schema } from "@/lib/schemas/foundry";
 
 /** Step field slices used for partial trigger validation (Next button enablement). */
-export const FOUNDRY_STEP_FIELDS: Record<number, (keyof FoundryFormValues)[]> =
-  {
-    // Step 1 (Introduction) has no required fields.
-    1: [],
-    2: ["projectName", "teamAccess", "subdomain"],
-    3: ["projectType", "database", "postgresProvider", "mongoClient"],
-    4: ["description"],
-  };
+export const FOUNDRY_STEP_FIELDS: Record<number, (keyof FoundryFormValues)[]> = {
+  // Step 1 (Introduction) has no required fields.
+  1: [],
+  2: ["projectName", "teamAccess", "subdomain"],
+  3: ["projectType", "database", "postgresProvider", "mongoClient"],
+};
 
 const STEP2_SCHEMA = foundryFormObjectSchema.pick({
   projectName: true,
   teamAccess: true,
   subdomain: true,
-});
-
-const STEP4_SCHEMA = foundryFormObjectSchema.pick({
-  description: true,
 });
 
 /**
@@ -54,12 +45,6 @@ export const isFoundryStepValid = (
         postgresProvider: values.postgresProvider,
         mongoClient: values.mongoClient,
       }).success;
-    }
-
-    // Step 4 (Description)
-    case 4: {
-      return STEP4_SCHEMA.safeParse({ description: values.description })
-        .success;
     }
 
     default:

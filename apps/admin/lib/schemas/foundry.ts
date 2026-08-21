@@ -96,9 +96,6 @@ export const foundryFormObjectSchema = z.object({
     redis: z.boolean(),
     s3: z.boolean(),
   }),
-
-  // Step 3 - Description (optional)
-  description: z.string().trim().max(1000, "Description must be 1000 characters or fewer"),
 });
 
 export const foundryFormSchema = foundryFormObjectSchema.superRefine(refineDatabaseStack);
@@ -114,5 +111,4 @@ export const foundryFormDefaultValues: FoundryFormValues = {
   postgresProvider: undefined,
   mongoClient: undefined,
   extras: { redis: false, s3: false },
-  description: "",
 };

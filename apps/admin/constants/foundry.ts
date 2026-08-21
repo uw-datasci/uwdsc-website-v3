@@ -9,7 +9,6 @@ export const FOUNDRY_STEPS = [
   { id: 1, title: "Introduction" },
   { id: 2, title: "Project Details" },
   { id: 3, title: "Tech Stack & Infrastructure" },
-  { id: 4, title: "Description" },
 ] as const;
 
 // ---------------------------------------------------------------------------

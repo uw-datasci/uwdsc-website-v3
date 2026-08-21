@@ -59,9 +59,7 @@ function extractReceiptEmail(body: string): string | null {
   if (custIdx === -1) return null;
 
   let searchFrom = custIdx + "cust id:".length;
-  while (searchFrom < body.length && /\s/.test(body[searchFrom]!)) {
-    searchFrom++;
-  }
+  while (searchFrom < body.length && /\s/.test(body[searchFrom]!)) searchFrom++;
 
   return extractUwaterlooEmailFromText(body, searchFrom);
 }

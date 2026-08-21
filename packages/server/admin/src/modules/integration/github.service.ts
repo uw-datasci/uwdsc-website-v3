@@ -156,7 +156,6 @@ class GitHubService {
           mongo_client: payload.mongoClient ?? "",
           redis: String(payload.extras.redis),
           s3: String(payload.extras.s3),
-          description: payload.description,
         },
       };
 

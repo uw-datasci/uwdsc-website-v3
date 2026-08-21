@@ -4,7 +4,12 @@ import { useEffect, useState } from "react";
 import { QrCode, UserRound } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PassportCard, MembershipCta, PassportProfile, PassportPhotoUpload } from "@/components/passport";
+import {
+  PassportCard,
+  MembershipCta,
+  PassportProfile,
+  PassportPhotoUpload,
+} from "@/components/passport";
 import { useAuth } from "@/contexts/AuthContext";
 import { getMembershipStatus } from "@/lib/api/profile";
 import { FACULTY_LABELS } from "@uwdsc/common/constants";
@@ -85,7 +90,7 @@ export default function PassportPage() {
       // const data = await response.json();
       // if (!response.ok) throw new Error(data.error || "Upload failed");
       // await mutate();
-      
+
       // Simulate network delay for now
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await mutate();
@@ -103,7 +108,7 @@ export default function PassportPage() {
       // const data = await response.json();
       // if (!response.ok) throw new Error(data.error || "Delete failed");
       // await mutate();
-      
+
       // Simulate network delay for now
       await new Promise((resolve) => setTimeout(resolve, 800));
       await mutate();
@@ -149,7 +154,7 @@ export default function PassportPage() {
 
         <PassportPhotoUpload
           initials={initials}
-          photoUrl={user?.profile_photo_url}
+          photoUrl={user?.profile_photo_key}
           displayName={displayName}
           onPhotoUpload={handlePhotoUpload}
           onPhotoDelete={handlePhotoDelete}

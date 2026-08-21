@@ -21,7 +21,7 @@ import {
 } from "@/lib/schemas/onboarding";
 import { useForm } from "react-hook-form";
 import { ExecPosition, Onboarding, Term } from "@uwdsc/common/types";
-import { isOnboardingWindowOpen } from "@uwdsc/common/utils";
+import { isDateWindowOpen } from "@uwdsc/common/utils";
 
 export default function LogisticsOnboardingPage() {
   const router = useRouter();
@@ -116,7 +116,7 @@ export default function LogisticsOnboardingPage() {
 
         const typedCurrentUser = currentUser;
 
-        if (!isOnboardingWindowOpen(term)) {
+        if (!isDateWindowOpen(term?.start_date, term?.onboarding_due_date)) {
           router.replace("/logistics");
           return;
         }

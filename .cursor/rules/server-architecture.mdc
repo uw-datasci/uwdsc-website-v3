@@ -32,7 +32,7 @@ The `packages/server/` directory contains three sub-packages:
 - `services/` - AuthService, ProfileService, ApplicationService, FileService, ResumeService, TeamService
 - `repositories/` - ProfileRepository, ApplicationRepository, AuthRepository, etc. (extend `BaseRepository` from `@uwdsc/db`)
 
-**Exports**: Service classes and **singleton instances** `profileService`, `applicationService`, `teamService`. `AuthService` and `ResumeService` take a Supabase client and are created per-request in app `lib/services.ts` via `createAuthService()` / `createResumeService()`.
+**Exports**: Service classes and **singleton instances** `profileService`, `applicationService`, `teamService`. `AuthService` and `ResumeService` take a Supabase client and are created per-request in app `lib/services.ts` via `createAuthService()` / `createResumeService()`. A separate subpath, `@uwdsc/core/http` (`packages/server/core/src/http/`), exports `withRaftRoute` — see [Error Handling & Observability](#error-handling--observability-raft).
 
 ```typescript
 import { profileService, applicationService, teamService } from "@uwdsc/core";
@@ -81,7 +81,7 @@ import { profileService } from "@uwdsc/admin";
 
 2. **Client API Functions** (`apps/{web,admin}/lib/api/`) - Type-safe wrappers; import types from `@uwdsc/common/types`; call Next.js API routes.
 
-3. **API Routes** (`apps/{web,admin}/app/api/`) - Thin HTTP layer; import services from `@uwdsc/core` or `@uwdsc/admin`; return responses using `ApiResponse` from `@uwdsc/common/utils`.
+3. **API Routes** (`apps/{web,admin}/app/api/`) - Thin HTTP layer; import services from `@uwdsc/core` or `@uwdsc/admin`; return responses using `RaftResponse` from `@uw-datasci/raft`. No manual try/catch — see [Error Handling & Observability](#error-handling--observability-raft) below.
 
 4. **Services** (`packages/server/core` or `admin`) - Business logic; use **singletons** (`profileService`, `applicationService`, `teamService`) from `@uwdsc/core` where applicable; create **AuthService** / **ResumeService** in app with `createAuthService()` / `createResumeService()` from `lib/services.ts`.
 
@@ -100,9 +100,13 @@ const profile = await getProfile();
 
 // 3. API route (app/api/profile/route.ts) calls service
 import { profileService } from "@uwdsc/core";
-import { ApiResponse } from "@uwdsc/common/utils";
-const profile = await profileService.getProfileByUserId(user.id);
-return ApiResponse.ok({ profile, isComplete });
+import { RaftResponse } from "@uw-datasci/raft";
+import { withRaftRoute } from "@uwdsc/core/http";
+
+export const GET = withRaftRoute(async () => {
+  const profile = await profileService.getProfileByUserId(user.id);
+  return RaftResponse.ok({ profile, isComplete });
+});
 
 // 4. Service uses repository; repository extends BaseRepository from @uwdsc/db
 ```
@@ -116,6 +120,42 @@ const authService = await createAuthService();
 const result = await authService.login({ email, password });
 ```
 
+## Error Handling & Observability (Raft)
+
+Route handlers don't write their own try/catch. Every export is wrapped so an unhandled
+throw is quarantined to Postgres (`raft.error_quarantine`) and turned into a clean 500,
+instead of disappearing into a serverless function's logs.
+
+- **`@uw-datasci/raft`** - a private, server-only SDK (GitHub Packages, `@uw-datasci`
+  scope; `.npmrc` routes the scope, `NODE_AUTH_TOKEN` is required to install). Full API
+  surface, body shapes, and usage rules: `.github/context/raft-reference.md` (synced
+  automatically from the raft repo - don't hand-edit it).
+- **`withRaftRoute`** (from `@uwdsc/core/http`, source `packages/server/core/src/http/`) is
+  `withRaft` (raft's own wrapper) plus this repo's `ApiError` → status-code translation:
+  - Anything thrown that **isn't** `ApiError` reaches `withRaft`, which quarantines it and
+    returns a generic 500.
+  - `ApiError` (from `@uwdsc/common/types` - **not** the identically-named class raft also
+    exports) with a 4xx `statusCode` is mapped to that status and **not** quarantined -
+    these are expected, caller-caused failures.
+  - `ApiError` with a 5xx `statusCode` is mapped **and** quarantined.
+- **`apps/admin`** doesn't call `withRaftRoute` directly in route files - it's folded into
+  the guards in `apps/admin/guards` (`withAuth`, `withAdmin`, `withPresAccess`). Wrap a
+  handler with one of those for auth + Raft together; `withAdmin` accepts `{ scope: true }`
+  for handlers that need VP/subteam scoping.
+- **`apps/web`** has no route guard, so routes wrap directly:
+  `export const GET = withRaftRoute(async (request, context) => { ... });`
+- Build every response with **`RaftResponse`** - `ok`, `badRequest`, `unauthorized`,
+  `forbidden`, `notFound`, `json`, `text`, and the **async** `serverError` (always `await`
+  it, or `return` it from an async handler). Never construct `NextResponse` by hand.
+- **Environment**: `RAFT_APP_NAME` (`"web"` / `"admin"`) and `RAFT_DATABASE_URL` aren't
+  stored in Infisical - each app's `instrumentation.ts` sets them at server boot, deriving
+  `RAFT_DATABASE_URL` from the already-present `DATABASE_URL` via `??=`.
+- **Reading quarantined errors**: admin's Optics dashboard is the read side of the same
+  table - `apps/admin/components/optics`, `apps/admin/app/api/raft/**`,
+  `packages/server/admin/src/modules/raft`.
+- The `raft` Postgres schema and its migrations are owned by the raft repo - never add a
+  migration for it in `packages/server/db/src/migrations/`.
+
 ## Usage Guidelines
 
 ### ✅ Do
@@ -123,8 +163,9 @@ const result = await authService.login({ email, password });
 1. **Import services from `@uwdsc/core` or `@uwdsc/admin`** in API routes; use singletons (`profileService`, `applicationService`, `teamService`) when the service is stateless.
 2. **Create AuthService/ResumeService in the app** via `lib/services.ts` using `createSupabaseServerClient` from `@uwdsc/db`.
 3. **Extend BaseRepository** from `@uwdsc/db/baseRepository` when creating new repositories.
-4. **Use ApiResponse** from `@uwdsc/common/utils` in API routes for consistent responses.
-5. **Keep API routes thin** - delegate to services.
+4. **Wrap every route export with `withRaftRoute`** (directly in `apps/web`, or via an `apps/admin/guards` guard) and build responses with **`RaftResponse`**.
+5. **Throw `ApiError`** (`@uwdsc/common/types`) from services for expected non-200 outcomes; let it propagate to the wrapper instead of catching it in the route.
+6. **Keep API routes thin** - delegate to services.
 
 ### ❌ Don't
 
@@ -132,3 +173,5 @@ const result = await authService.login({ email, password });
 2. **Don't put business logic in API routes or repositories** - use services.
 3. **Don't access the database directly from API routes** - always go through services and repositories.
 4. **Don't assume Prisma** - the project uses postgres.js and Supabase.
+5. **Don't write a manual try/catch in a route handler** - `withRaftRoute` (or the guard wrapping it) already does this.
+6. **Don't construct `NextResponse` by hand in a route** - use `RaftResponse.*`.

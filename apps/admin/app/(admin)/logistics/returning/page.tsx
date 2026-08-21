@@ -24,7 +24,11 @@ import {
   ReturningExecFormValues,
   returningExecSchema,
 } from "@/lib/schemas/returningExec";
-import { isReturningExecWindowOpen, getDeferredReturnTermCode } from "@uwdsc/common/utils";
+import {
+  DEFERRED_RETURN_TERM_SHIFT,
+  isDateWindowOpen,
+  shiftTermCode,
+} from "@uwdsc/common/utils";
 
 function positionIdStringForPriority(
   selections: readonly { priority: number; position_id: number }[],
@@ -71,12 +75,16 @@ export default function LogisticsReturningExecPage() {
       setLoading(true);
       try {
         const term = await getActiveTerm();
-        if (!isReturningExecWindowOpen(term)) {
+        const isReturningExecWindowOpen = isDateWindowOpen(
+          term?.returning_exec_release_date,
+          term?.returning_exec_deadline
+        );
+        if (!isReturningExecWindowOpen) {
           router.replace("/logistics");
           return;
         }
 
-        setDeferredReturnTermCode(getDeferredReturnTermCode(term.code));
+        setDeferredReturnTermCode(shiftTermCode(term.code, DEFERRED_RETURN_TERM_SHIFT));
 
         const [positionsData, submissionData] = await Promise.all([
           getPositionsForReturningExec(),

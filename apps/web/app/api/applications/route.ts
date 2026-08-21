@@ -1,6 +1,6 @@
 import { RaftResponse } from "@uw-datasci/raft";
 import { withRaftRoute } from "@uwdsc/core/http";
-import { isApplicationWindowOpen } from "@uwdsc/common/utils";
+import { isDateWindowOpen } from "@uwdsc/common/utils";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 import { applicationService } from "@uwdsc/core";
 
@@ -14,7 +14,7 @@ export const GET = withRaftRoute(async (request) => {
 
   const activeTerm = await applicationService.getActiveTerm();
   if (!activeTerm) return RaftResponse.notFound("No active application period");
-  if (!isApplicationWindowOpen(activeTerm)) {
+  if (!isDateWindowOpen(activeTerm.application_release_date, activeTerm.application_hard_deadline)) {
     return RaftResponse.forbidden("The application period is closed.");
   }
   if (termId !== activeTerm.id) {
@@ -31,7 +31,7 @@ export const POST = withRaftRoute(async (request) => {
 
   const activeTerm = await applicationService.getActiveTerm();
   if (!activeTerm) return RaftResponse.notFound("No active application period");
-  if (!isApplicationWindowOpen(activeTerm)) {
+  if (!isDateWindowOpen(activeTerm.application_release_date, activeTerm.application_hard_deadline)) {
     return RaftResponse.forbidden("The application period is closed.");
   }
 

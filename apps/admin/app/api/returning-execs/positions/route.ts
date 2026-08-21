@@ -1,5 +1,5 @@
 import { RaftResponse } from "@uw-datasci/raft";
-import { isReturningExecWindowOpen } from "@uwdsc/common/utils";
+import { isDateWindowOpen } from "@uwdsc/common/utils";
 import { returningExecService } from "@uwdsc/admin";
 import { withAuth } from "@/guards/withAuth";
 
@@ -11,7 +11,12 @@ import { withAuth } from "@/guards/withAuth";
 export const GET = withAuth(
   async () => {
     const term = await returningExecService.getActiveTerm();
-    if (!term || !isReturningExecWindowOpen(term)) {
+    const isReturningExecWindowOpen = isDateWindowOpen(
+      term?.returning_exec_release_date,
+      term?.returning_exec_deadline
+    );
+
+    if (!term || !isReturningExecWindowOpen) {
       return RaftResponse.forbidden(
         "Returning exec form is not available at this time",
         "Form not available"

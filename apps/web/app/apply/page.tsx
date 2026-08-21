@@ -40,7 +40,12 @@ import {
 } from "@/components/application/steps";
 import { STEP_NAMES } from "@/constants/application";
 import type { GeneralQuestion, PositionWithQuestions, Term } from "@uwdsc/common/types";
-import { formatTermCode, getNextTermCode, isApplicationWindowOpen } from "@uwdsc/common/utils";
+import {
+  formatTermCode,
+  isDateWindowOpen,
+  NEXT_TERM_SHIFT,
+  shiftTermCode,
+} from "@uwdsc/common/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { Loader2, MoveLeft, MoveRight, User } from "lucide-react";
 import { Button, Card, CardHeader, CardTitle, CardContent } from "@uwdsc/ui";
@@ -260,7 +265,10 @@ export default function ApplyPage() {
 
   const renderButton = () => {
     const isLastStep = currentStep === 4;
-    const isPastHardDeadline = !isApplicationWindowOpen(currentTerm);
+    const isPastHardDeadline = !isDateWindowOpen(
+      currentTerm?.application_release_date,
+      currentTerm?.application_hard_deadline
+    );
     const isValid =
       isStepValid(form, currentStep, {
         positions,
@@ -341,7 +349,7 @@ export default function ApplyPage() {
       <div className="mx-auto max-w-4xl text-center mb-6">
         <h1 className="mb-2 text-3xl font-bold text-white">DSC Exec Application Form</h1>
         <p className="text-3xl font-semibold text-blue-400">
-          {formatTermCode(getNextTermCode(currentTerm.code))}
+          {formatTermCode(shiftTermCode(currentTerm.code, NEXT_TERM_SHIFT))}
         </p>
       </div>
 

@@ -1,12 +1,14 @@
 import { RaftResponse } from "@uw-datasci/raft";
 import { withRaftRoute } from "@uwdsc/core/http";
-import { isApplicationWindowOpen } from "@uwdsc/common/utils";
+import { isDateWindowOpen } from "@uwdsc/common/utils";
 import { applicationService } from "@uwdsc/core";
 
 /** Public: whether the exec apply page should be linked in navigation. */
 export const GET = withRaftRoute(async () => {
   const term = await applicationService.getActiveTerm();
-  const open = Boolean(term && isApplicationWindowOpen(term));
+  const open = Boolean(
+    term && isDateWindowOpen(term.application_release_date, term.application_hard_deadline)
+  );
   // Only expose term details while the window is open, so an unreleased
   // term's dates never leak from this unauthenticated route. The window
   // now stays open through the hard deadline, so both dates are exposed

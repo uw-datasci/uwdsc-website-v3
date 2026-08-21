@@ -7,7 +7,7 @@ import {
   type ReturningExecOwnSubmission,
   type ReturningExecSubmissionData,
 } from "@uwdsc/common/types";
-import { isReturningExecWindowOpen } from "@uwdsc/common/utils";
+import { isDateWindowOpen } from "@uwdsc/common/utils";
 import { ReturningExecRepository } from "./returningExec.repository";
 
 const VP_REVIEW_STATUS_SET = new Set<ApplicationReviewStatus>([
@@ -49,7 +49,7 @@ class ReturningExecService {
   async getOwnSubmission(profile_id: string): Promise<ReturningExecOwnSubmission | null> {
     const term = await this.getActiveTerm();
     if (!term) return null;
-    if (!isReturningExecWindowOpen(term)) {
+    if (!isDateWindowOpen(term.returning_exec_release_date, term.returning_exec_deadline)) {
       throw new ApiError("Returning exec submissions are not open for the active term", 403);
     }
     return this.repository.getSubmission(profile_id, term.id);
@@ -62,7 +62,7 @@ class ReturningExecService {
     const term = await this.getActiveTerm();
     if (!term) throw new ApiError("No active term found", 400);
 
-    if (!isReturningExecWindowOpen(term)) {
+    if (!isDateWindowOpen(term.returning_exec_release_date, term.returning_exec_deadline)) {
       throw new ApiError("Returning exec submissions are not open for the active term", 403);
     }
 

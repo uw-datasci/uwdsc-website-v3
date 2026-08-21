@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { isPres } from "@uwdsc/common/constants";
 import { onboardingService } from "@uwdsc/admin";
-import { isOnboardingWindowOpen, isReturningExecWindowOpen } from "@uwdsc/common/utils";
+import { isDateWindowOpen } from "@uwdsc/common/utils";
 import { Card, CardDescription, CardHeader, CardTitle } from "@uwdsc/ui";
 import { ChevronRight, ClipboardCheck, ClipboardList, UserCheck } from "lucide-react";
 import { createAuthService } from "@/lib/services";
@@ -12,8 +12,11 @@ export default async function LogisticsPage() {
   const userIsPresident = isPres(user?.app_metadata?.role as string | undefined);
 
   const term = await onboardingService.getActiveTerm();
-  const showOnboarding = isOnboardingWindowOpen(term);
-  const showReturning = isReturningExecWindowOpen(term);
+  const showOnboarding = isDateWindowOpen(term?.start_date, term?.onboarding_due_date);
+  const showReturning = isDateWindowOpen(
+    term?.returning_exec_release_date,
+    term?.returning_exec_deadline
+  );
 
   const links = [
     ...(showOnboarding

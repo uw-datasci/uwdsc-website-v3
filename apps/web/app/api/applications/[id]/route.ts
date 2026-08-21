@@ -1,4 +1,4 @@
-import { isApplicationWindowOpen } from "@uwdsc/common/utils";
+import { isDateWindowOpen } from "@uwdsc/common/utils";
 import { RaftResponse } from "@uw-datasci/raft";
 import { withRaftRoute, type RouteContext } from "@uwdsc/core/http";
 import { tryGetCurrentUser } from "@/lib/api/utils";
@@ -11,7 +11,7 @@ export const PATCH = withRaftRoute(
 
     const term = await applicationService.getActiveTerm();
     if (!term) return RaftResponse.notFound("No active application period");
-    if (!isApplicationWindowOpen(term)) {
+    if (!isDateWindowOpen(term.application_release_date, term.application_hard_deadline)) {
       return RaftResponse.forbidden("The application period is closed.");
     }
 

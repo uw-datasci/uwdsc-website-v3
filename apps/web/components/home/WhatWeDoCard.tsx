@@ -14,7 +14,7 @@ interface WhatWeDoCardProps {
 export default function WhatWeDoCard({
   title,
   description,
-  graphic
+  graphic,
 }: Readonly<WhatWeDoCardProps>) {
   return (
     <div className="duration-300 ease-in-out group relative flex aspect-3/2 flex-col justify-end overflow-hidden rounded-3xl border border-grey3 px-6 pb-8 hover:border-grey2">

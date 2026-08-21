@@ -13,7 +13,7 @@ export const POST = withRaftRoute(async (request) => {
   const result = await authService.register({
     email,
     password,
-    emailRedirectTo
+    emailRedirectTo,
   });
 
   if (!result.success) return RaftResponse.badRequest(result.error, "Registration failed");
@@ -23,6 +23,6 @@ export const POST = withRaftRoute(async (request) => {
     user: result.user,
     session: result.session,
     needsEmailConfirmation: result.needsEmailConfirmation,
-    message: result.message
+    message: result.message,
   });
 });

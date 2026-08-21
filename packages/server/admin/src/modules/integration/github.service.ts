@@ -1,7 +1,7 @@
 import type {
   FoundryLaunchPayload,
   GitHubOrgTeam,
-  GitHubOrgTemplateRepo
+  GitHubOrgTemplateRepo,
 } from "../../types/github";
 
 const githubToken = process.env.GITHUB_TOKEN;
@@ -27,7 +27,7 @@ class GitHubService {
       Accept: "application/vnd.github+json",
       Authorization: `Bearer ${githubToken}`,
       "X-GitHub-Api-Version": "2022-11-28",
-      "User-Agent": "uwdsc-website-admin"
+      "User-Agent": "uwdsc-website-admin",
     };
   }
 
@@ -41,7 +41,7 @@ class GitHubService {
     try {
       const res = await fetch(url, {
         method: "GET",
-        headers: this.headers
+        headers: this.headers,
       });
 
       if (!res.ok) {
@@ -90,7 +90,7 @@ class GitHubService {
     try {
       const res = await fetch(url, {
         method: "GET",
-        headers: this.headers
+        headers: this.headers,
       });
 
       if (!res.ok) {
@@ -118,7 +118,7 @@ class GitHubService {
           return {
             name,
             description: typeof r.description === "string" ? r.description : "",
-            language: typeof r.language === "string" ? r.language : ""
+            language: typeof r.language === "string" ? r.language : "",
           };
         })
         .filter((r): r is GitHubOrgTemplateRepo => r !== null);
@@ -151,15 +151,15 @@ class GitHubService {
           postgres_provider: payload.postgresProvider ?? "",
           mongo_client: payload.mongoClient ?? "",
           redis: String(payload.extras.redis),
-          s3: String(payload.extras.s3)
-        }
+          s3: String(payload.extras.s3),
+        },
       };
 
       try {
         const res = await fetch(workflowUrl, {
           method: "POST",
           headers: this.headers,
-          body: JSON.stringify(workflowBody)
+          body: JSON.stringify(workflowBody),
         });
 
         if (!res.ok) {
@@ -180,15 +180,15 @@ class GitHubService {
       event_type: "foundry-launch",
       client_payload: {
         ...payload,
-        subdomain: subdomainHost
-      }
+        subdomain: subdomainHost,
+      },
     };
 
     try {
       const res = await fetch(dispatchUrl, {
         method: "POST",
         headers: this.headers,
-        body: JSON.stringify(dispatchBody)
+        body: JSON.stringify(dispatchBody),
       });
 
       if (!res.ok) {

@@ -21,40 +21,40 @@ import MEF from "@/public/logos/mef.png";
 import Techyon from "@/public/logos/techyon.png";
 import {
   MEMBERSHIP_INBOUND_EMAIL,
-  MEMBERSHIP_MONERIS_RECEIPT_FROM
+  MEMBERSHIP_MONERIS_RECEIPT_FROM,
 } from "@uwdsc/common/constants";
 
 export const WHAT_WE_DO_CARDS = [
   {
     title: "Workshops",
     description: "Join us for workshops, where we teach a variety of Data Science topics.",
-    graphic: rocket
+    graphic: rocket,
   },
   {
     title: "CxC",
     description: "Stay tuned for our CxC hackathon, happening this winter!",
-    graphic: trophy
+    graphic: trophy,
   },
   {
     title: "Project Program",
     description: "Collaborate with fellow students on any project of your choice.",
-    graphic: folder
+    graphic: folder,
   },
   {
     title: "E-Leetcoding",
     description: "Prepare for technical interviews with our weekly Leetcoding sessions.",
-    graphic: computer
+    graphic: computer,
   },
   {
     title: "Reading Groups",
     description: "Learn about the latest developments in Data Science and Machine Learning.",
-    graphic: documents
+    graphic: documents,
   },
   {
     title: "Social Events",
     description: "Come hang out with us and meet other students interested in Data Science!",
-    graphic: chat
-  }
+    graphic: chat,
+  },
 ];
 
 export const CLUB_STATS = [
@@ -62,79 +62,79 @@ export const CLUB_STATS = [
     id: "workshops-held",
     title: "Workshops Held",
     stat: 150,
-    suffix: "+"
+    suffix: "+",
   },
   {
     id: "current-members",
     title: "Current Members",
     stat: 600,
-    suffix: "+"
+    suffix: "+",
   },
   {
     id: "instagram-followers",
     title: "Instagram Followers",
     stat: 5000,
-    suffix: "+"
-  }
+    suffix: "+",
+  },
 ];
 
 export const PAST_EVENTS = [
   {
     id: "1",
     title: "Upper Year Co-op Panel",
-    image: EventPlaceholder
+    image: EventPlaceholder,
   },
   {
     id: "2",
     title: "BOT ",
-    image: BOT
+    image: BOT,
   },
   {
     id: "3",
     title: "Point72 Q&A Panel",
-    image: Point72
+    image: Point72,
   },
   {
     id: "4",
     title: "Karaoke Night",
-    image: Karaoke
+    image: Karaoke,
   },
   {
     id: "5",
     title: "How to Build an AI Companion",
-    image: AiCompanion
+    image: AiCompanion,
   },
   {
     id: "6",
     title: "EOT Estimathon",
-    image: Estimathon
+    image: Estimathon,
   },
   {
     id: "7",
     title: "Bonfire",
-    image: Bonfire
+    image: Bonfire,
   },
   {
     id: "8",
     title: "Speed Friending",
-    image: SpeedFriending
+    image: SpeedFriending,
   },
   {
     id: "9",
     title: "DSC Trivia Night",
-    image: Trivia
+    image: Trivia,
   },
   {
     id: "10",
     title: "Intro to Langchain",
-    image: Langchain
-  }
+    image: Langchain,
+  },
 ];
 
 export const CURRENT_SPONSORS = [
   { name: "MathSoc", logo: MathsocLogo },
   { name: "MEF", logo: MEF },
-  { name: "Techyon", logo: Techyon, link: "https://techyon.org/" }
+  { name: "Techyon", logo: Techyon, link: "https://techyon.org/" },
 ];
 
 export type GeneralFaqItem = {
@@ -148,33 +148,33 @@ export const GENERAL_FAQ: GeneralFaqItem[] = [
   {
     id: "1",
     question: "What is DSC?",
-    answer: `We are a MathSoc club dedicated to building a community of students passionate about exploring the field of Data Science. DSC hosts a number of workshops and events throughout the term, mostly academic focused (see below). Our iconic mascots include Echo the Whale, Sharkira, and Bert!`
+    answer: `We are a MathSoc club dedicated to building a community of students passionate about exploring the field of Data Science. DSC hosts a number of workshops and events throughout the term, mostly academic focused (see below). Our iconic mascots include Echo the Whale, Sharkira, and Bert!`,
   },
   {
     id: "2",
     question: "What are some events DSC hosts?",
-    answer: `1. Intro workshops on data tools that will look great on your resume :)\nE.g. Pandas, Tableau, Build Your Own DS Project, Machine Learning Algorithms\n2. Industry professionals/alumni/upper-year panels to help students explore more of the field and opportunities\nE.g. Data Science Across Sectors, Upper Year Co-Op Panel, Company Collabs and Info Sessions\n3. Technical interview prep and resume reviews by experienced upper-year mentors and Data Science Office Hours\n4. Hackathons to apply your learning and create cool projects\nEg. CxC (Data Hackathon) and Project Program\n5. Social events to connect with other students (Karaoke, Speed Friending, Trivia)\n6. Reading groups targeted to intermediate/advanced members where execs present ML research papers (Eg. NLP, computer vision)\n7. Visit our BOT (beginning of term event) for more events introductions!`
+    answer: `1. Intro workshops on data tools that will look great on your resume :)\nE.g. Pandas, Tableau, Build Your Own DS Project, Machine Learning Algorithms\n2. Industry professionals/alumni/upper-year panels to help students explore more of the field and opportunities\nE.g. Data Science Across Sectors, Upper Year Co-Op Panel, Company Collabs and Info Sessions\n3. Technical interview prep and resume reviews by experienced upper-year mentors and Data Science Office Hours\n4. Hackathons to apply your learning and create cool projects\nEg. CxC (Data Hackathon) and Project Program\n5. Social events to connect with other students (Karaoke, Speed Friending, Trivia)\n6. Reading groups targeted to intermediate/advanced members where execs present ML research papers (Eg. NLP, computer vision)\n7. Visit our BOT (beginning of term event) for more events introductions!`,
   },
   {
     id: "3",
     question: "Do I need to major in Data Science?",
     answer:
-      "No! We welcome UWaterloo undergraduate students of any level of study/program/faculty."
+      "No! We welcome UWaterloo undergraduate students of any level of study/program/faculty.",
   },
   {
     id: "4",
     question: "How often do I have to go to the events and when are they?",
-    answer: `All of our events are OPTIONAL! We do NOT have a set schedule for most events, so look out for the newest info/updates on our Instagram/Discord.`
+    answer: `All of our events are OPTIONAL! We do NOT have a set schedule for most events, so look out for the newest info/updates on our Instagram/Discord.`,
   },
   {
     id: "5",
     question: "What is the $4 membership fee going to?",
-    answer: `The membership fee covers the ENTIRE term (not per event). By paying the membership fee, you can attend all of our events, most of which include FREE FOOD like boba, ChungChun, Bao, and more!`
+    answer: `The membership fee covers the ENTIRE term (not per event). By paying the membership fee, you can attend all of our events, most of which include FREE FOOD like boba, ChungChun, Bao, and more!`,
   },
   {
     id: "6",
     question: "How to sign up?",
     answer: `Click the **“Join Us”** button to create an account on our website. You can pay the $4 membership fee through one of the following methods:\n- Online through WUSA (navigate to **Shop → Memberships → DSC**). If you pay online, forward the **Moneris payment receipt** (from **${MEMBERSHIP_MONERIS_RECEIPT_FROM}** - not the WUSA order summary email) to **${MEMBERSHIP_INBOUND_EMAIL}** (from the same inbox as your club account) so we can mark your membership as paid.\n- In-person at our office/events with cash\n- In-person at the MathSoc office with credit/debit (keep receipt)`,
-    showMembershipPayLink: true
-  }
+    showMembershipPayLink: true,
+  },
 ];

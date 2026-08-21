@@ -28,7 +28,7 @@ export async function parseJsonResponse<T = Record<string, unknown>>(
     const message = messageFromPlainText(response.status, text);
     throw Object.assign(new Error(message), {
       status: response.status,
-      details: { raw: text }
+      details: { raw: text },
     });
   }
 }

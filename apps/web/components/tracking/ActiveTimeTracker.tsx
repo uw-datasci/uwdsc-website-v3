@@ -36,7 +36,7 @@ export function ActiveTimeTracker() {
 
   useActiveTimeTracker({
     enabled: canTrack && membershipId !== null,
-    membershipId
+    membershipId,
   });
 
   return null;

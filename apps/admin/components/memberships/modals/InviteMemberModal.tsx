@@ -21,7 +21,7 @@ import {
   Button,
   Checkbox,
   renderTextField,
-  renderSelectField
+  renderSelectField,
 } from "@uwdsc/ui";
 import { FACULTY_VALUES } from "@uwdsc/common/constants";
 
@@ -38,19 +38,19 @@ const EMPTY_VALUES: InviteMemberFormValues = {
   wat_iam: "",
   faculty: undefined,
   term: "",
-  is_math_soc_member: false
+  is_math_soc_member: false,
 };
 
 export function InviteMemberModal({
   open,
   onOpenChange,
-  onSuccess
+  onSuccess,
 }: Readonly<InviteMemberModalProps>) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<InviteMemberFormValues>({
     resolver: zodResolver(inviteMemberSchema),
-    defaultValues: EMPTY_VALUES
+    defaultValues: EMPTY_VALUES,
   });
 
   useEffect(() => {
@@ -104,7 +104,7 @@ export function InviteMemberModal({
                   placeholder: "member@uwaterloo.ca",
                   required: true,
                   description: "Must be a @uwaterloo.ca address (same as self-serve signup).",
-                  inputProps: { type: "email", autoComplete: "email" }
+                  inputProps: { type: "email", autoComplete: "email" },
                 })({ field: { ...field, value: field.value ?? "" } })
               }
             />
@@ -116,7 +116,7 @@ export function InviteMemberModal({
                 render={({ field }) =>
                   renderTextField({
                     label: "First name",
-                    placeholder: "Optional"
+                    placeholder: "Optional",
                   })({ field: { ...field, value: field.value ?? "" } })
                 }
               />
@@ -126,7 +126,7 @@ export function InviteMemberModal({
                 render={({ field }) =>
                   renderTextField({
                     label: "Last name",
-                    placeholder: "Optional"
+                    placeholder: "Optional",
                   })({ field: { ...field, value: field.value ?? "" } })
                 }
               />
@@ -139,7 +139,7 @@ export function InviteMemberModal({
                 render={({ field }) =>
                   renderTextField({
                     label: "WatIAM",
-                    placeholder: "Optional"
+                    placeholder: "Optional",
                   })({ field: { ...field, value: field.value ?? "" } })
                 }
               />
@@ -149,7 +149,7 @@ export function InviteMemberModal({
                 render={({ field }) =>
                   renderTextField({
                     label: "Term",
-                    placeholder: "e.g., 1A, 2B"
+                    placeholder: "e.g., 1A, 2B",
                   })({ field: { ...field, value: field.value ?? "" } })
                 }
               />
@@ -163,7 +163,7 @@ export function InviteMemberModal({
                   label: "Faculty",
                   placeholder: "Optional",
                   options: [...FACULTY_VALUES],
-                  triggerClassName: "w-full"
+                  triggerClassName: "w-full",
                 })({ field: { ...field, value: field.value ?? "" } })
               }
             />

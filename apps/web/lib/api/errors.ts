@@ -16,6 +16,6 @@ export function createApiError(data: any, status: number) {
     error: data.error ?? data.message ?? "Request failed",
     message,
     details: data,
-    status
+    status,
   });
 }

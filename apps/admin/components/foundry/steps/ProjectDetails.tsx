@@ -12,7 +12,7 @@ import {
   Input,
   renderSelectField,
   renderTextField,
-  Spinner
+  Spinner,
 } from "@uwdsc/ui";
 import { FOUNDRY_DOMAIN } from "@/constants/foundry";
 import { FOUNDRY_SUBDOMAIN_MAX_LEN, type FoundryFormValues } from "@/lib/schemas/foundry";
@@ -65,7 +65,7 @@ export function ProjectDetails() {
           label: "Project Name",
           placeholder: "my-cool-project",
           required: true,
-          description: "Lowercase kebab-case - this becomes your repo slug."
+          description: "Lowercase kebab-case - this becomes your repo slug.",
         })}
       />
 
@@ -114,7 +114,7 @@ export function ProjectDetails() {
           placeholder: "Choose a team…",
           required: true,
           options: teams.map((t) => ({ value: t.value, label: t.label })),
-          triggerClassName: "w-full"
+          triggerClassName: "w-full",
         })}
       />
     </>

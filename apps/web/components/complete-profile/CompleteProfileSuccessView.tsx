@@ -6,7 +6,7 @@ import { Button } from "@uwdsc/ui";
 import {
   MEMBERSHIP_INBOUND_EMAIL,
   MEMBERSHIP_MONERIS_RECEIPT_FROM,
-  MEMBERSHIP_PAYMENT_URL
+  MEMBERSHIP_PAYMENT_URL,
 } from "@uwdsc/common/constants";
 
 export function CompleteProfileSuccessView() {

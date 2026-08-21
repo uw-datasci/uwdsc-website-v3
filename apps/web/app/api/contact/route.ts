@@ -18,7 +18,7 @@ export const POST = withRaftRoute(async (request) => {
     email: email.trim(),
     subject: subject.trim(),
     message: message.trim(),
-    source: "contact_form"
+    source: "contact_form",
   });
 
   return RaftResponse.ok({ success: true });

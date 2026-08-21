@@ -6,7 +6,7 @@ import {
   NavigationMenuItem,
   NavigationMenuTrigger,
   NavigationMenuContent,
-  NavigationMenuLink
+  NavigationMenuLink,
 } from "@uwdsc/ui";
 import { NavGroup, NavLinkItem } from "./types";
 

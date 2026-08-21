@@ -46,7 +46,7 @@ class WebhookService {
       return {
         ok: false,
         reason: "missing_api_key",
-        message: "RESEND_API_KEY is not configured"
+        message: "RESEND_API_KEY is not configured",
       };
     }
 
@@ -78,7 +78,7 @@ class WebhookService {
       return {
         ok: false,
         reason: "wrong_recipient",
-        message: `Email is not addressed to ${recipient}`
+        message: `Email is not addressed to ${recipient}`,
       };
     }
 
@@ -86,7 +86,7 @@ class WebhookService {
       return {
         ok: false,
         reason: "missing_api_key",
-        message: "RESEND_API_KEY is not configured"
+        message: "RESEND_API_KEY is not configured",
       };
     }
 

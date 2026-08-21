@@ -2,7 +2,7 @@ import {
   EXEC_TEAM_PHOTO_PLACEHOLDER,
   type ExecMember,
   type Subteam,
-  type SubteamOption
+  type SubteamOption,
 } from "@uwdsc/common/types";
 import type { ExecTeamRow } from "../../types/team";
 import { TeamRepository } from "./team.repository";
@@ -47,7 +47,7 @@ class TeamService {
         group = {
           id: row.subteam_id,
           name: row.subteam_name,
-          rows: []
+          rows: [],
         };
         rowsBySubteam.set(row.subteam_id, group);
       }
@@ -75,9 +75,9 @@ class TeamService {
               ? `${this.BUCKET_URL}/${storageKey}`
               : EXEC_TEAM_PHOTO_PLACEHOLDER,
             instagram: row.instagram ?? null,
-            updated_at: row.updated_at ?? null
+            updated_at: row.updated_at ?? null,
           } satisfies ExecMember;
-        })
+        }),
       });
     }
 

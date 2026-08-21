@@ -10,7 +10,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from "@uwdsc/ui";
 import { getAllEventsWithAttendance, getAllTerms } from "@/lib/api";
 import type { Event, EventWithAttendanceCount, Term } from "@uwdsc/common/types";
@@ -61,7 +61,7 @@ export default function EventsPage() {
       setError(null);
       const [eventsData, termsData] = await Promise.all([
         getAllEventsWithAttendance(),
-        getAllTerms()
+        getAllTerms(),
       ]);
       setEvents(eventsData);
       setTerms(termsData);
@@ -106,7 +106,7 @@ export default function EventsPage() {
       filteredEvents,
       {
         headers: [...EVENT_CSV_HEADERS],
-        getValue: (row, key) => getEventCsvValue(row, key, terms)
+        getValue: (row, key) => getEventCsvValue(row, key, terms),
       },
       `events-${new Date().toISOString().split("T")[0]}`
     );
@@ -149,12 +149,12 @@ export default function EventsPage() {
               className="absolute top-1 bottom-1 rounded-full bg-secondary"
               style={{
                 width: "calc(50% - 4px)",
-                left: viewMode === "list" ? 4 : "calc(50% + 2px)"
+                left: viewMode === "list" ? 4 : "calc(50% + 2px)",
               }}
               transition={{
                 type: "spring",
                 stiffness: 400,
-                damping: 30
+                damping: 30,
               }}
             />
             <Button

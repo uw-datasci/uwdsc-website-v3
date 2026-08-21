@@ -20,12 +20,12 @@ export async function tryGetCurrentUser(): Promise<AuthResult> {
   if (userError || !user) {
     return {
       user: null,
-      isUnauthorized: RaftResponse.unauthorized("Authentication required")
+      isUnauthorized: RaftResponse.unauthorized("Authentication required"),
     };
   }
 
   return {
     user,
-    isUnauthorized: null
+    isUnauthorized: null,
   };
 }

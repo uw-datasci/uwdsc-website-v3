@@ -44,6 +44,6 @@ export const POST = withRaftRoute(async (request) => {
   return RaftResponse.ok({
     message: "Upload successful",
     key: result.key,
-    url: result.key
+    url: result.key,
   });
 });

@@ -19,7 +19,7 @@ export async function sendCampaign(data: SendCampaignFormValues): Promise<{ id: 
   const response = await fetch("/api/emails/campaigns", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
   });
 
   const result = await response.json();

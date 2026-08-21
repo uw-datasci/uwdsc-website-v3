@@ -14,7 +14,7 @@ const sharedCookieOptions: CookieOptionsWithName | undefined = authCookieDomain
       domain: authCookieDomain,
       sameSite: "lax",
       secure: true,
-      path: "/"
+      path: "/",
     }
   : undefined;
 
@@ -23,7 +23,7 @@ const sharedCookieOptions: CookieOptionsWithName | undefined = authCookieDomain
  */
 export function createSupabaseBrowserClient() {
   return createBrowserClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
-    cookieOptions: sharedCookieOptions
+    cookieOptions: sharedCookieOptions,
   });
 }
 
@@ -51,8 +51,8 @@ export function createSupabaseServerClient(cookieStore: {
           // This can be ignored if you have middleware refreshing
           // user sessions.
         }
-      }
-    }
+      },
+    },
   });
 }
 
@@ -85,11 +85,11 @@ export function createSupabaseMiddlewareClient<NextRequest = any, NextResponse =
           response.cookies.set({
             name,
             value,
-            ...options
+            ...options,
           });
         }
-      }
-    }
+      },
+    },
   });
 }
 
@@ -111,7 +111,7 @@ export function createSupabaseServiceRoleClient() {
   return createClient(process.env.SUPABASE_URL!, serviceRoleKey, {
     auth: {
       autoRefreshToken: false,
-      persistSession: false
-    }
+      persistSession: false,
+    },
   });
 }

@@ -4,7 +4,7 @@ import {
   tiltWarp,
   atkinsonHyperlegibleMono,
   displayFontClass as display,
-  monoFontClass as mono
+  monoFontClass as mono,
 } from "../../fonts";
 import type { MembershipSlideData } from "../../types";
 import { Floating, slideItem, slideStagger } from "../motion";
@@ -46,7 +46,7 @@ export function MembershipSlide({ slide }: MembershipSlideProps) {
       left: "0%",
       top: "-3%",
       width: "6.1rem",
-      rotate: "-10deg"
+      rotate: "-10deg",
     },
     { kind: "flower", left: "15%", top: "5%", width: "5.5rem", rotate: "8deg" },
     { kind: "leaf", left: "35%", top: "-2%", width: "6rem", rotate: "-8deg" },
@@ -55,15 +55,15 @@ export function MembershipSlide({ slide }: MembershipSlideProps) {
       left: "59%",
       top: "2%",
       width: "6.4rem",
-      rotate: "13deg"
+      rotate: "13deg",
     },
     {
       kind: "mushroom",
       left: "82%",
       top: "-5%",
       width: "5rem",
-      rotate: "8deg"
-    }
+      rotate: "8deg",
+    },
   ];
 
   const bottomOrnaments: Ornament[] = [
@@ -72,29 +72,29 @@ export function MembershipSlide({ slide }: MembershipSlideProps) {
       left: "4%",
       bottom: "3%",
       width: "5.7rem",
-      rotate: "10deg"
+      rotate: "10deg",
     },
     {
       kind: "ladybug",
       left: "26%",
       bottom: "9%",
       width: "6rem",
-      rotate: "-9deg"
+      rotate: "-9deg",
     },
     {
       kind: "flower",
       left: "52%",
       bottom: "5%",
       width: "5.6rem",
-      rotate: "7deg"
+      rotate: "7deg",
     },
     {
       kind: "mushroom",
       right: "5%",
       bottom: "1%",
       width: "6rem",
-      rotate: "-12deg"
-    }
+      rotate: "-12deg",
+    },
   ];
 
   return (
@@ -124,7 +124,7 @@ export function MembershipSlide({ slide }: MembershipSlideProps) {
               left: ornament.left,
               top: ornament.top,
               right: ornament.right,
-              width: ornament.width
+              width: ornament.width,
             }}
           >
             <OrnamentSvg kind={ornament.kind} />
@@ -192,7 +192,7 @@ export function MembershipSlide({ slide }: MembershipSlideProps) {
               top: ornament.top,
               right: ornament.right,
               bottom: ornament.bottom,
-              width: ornament.width
+              width: ornament.width,
             }}
           >
             <OrnamentSvg kind={ornament.kind} />

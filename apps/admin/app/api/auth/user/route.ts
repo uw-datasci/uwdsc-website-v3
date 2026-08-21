@@ -14,7 +14,7 @@ export const GET = withAuth(
     const { role, subteamId, subteamName } = readRoleClaims(user.app_metadata);
     const [profile, positionId] = await Promise.all([
       profileService.getProfileByUserId(user.id),
-      onboardingService.getExecPosId(user.id)
+      onboardingService.getExecPosId(user.id),
     ]);
 
     return RaftResponse.ok({
@@ -27,7 +27,7 @@ export const GET = withAuth(
       faculty: profile?.faculty,
       position_id: positionId,
       subteam_id: subteamId,
-      subteam_name: subteamName
+      subteam_name: subteamName,
     });
   },
   { allowAlum: true }

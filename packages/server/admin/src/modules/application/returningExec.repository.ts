@@ -5,14 +5,14 @@ import type {
   ReturningExecOwnSubmission,
   ReturningExecPositionSelection,
   ReturningExecSubmissionData,
-  Term
+  Term,
 } from "@uwdsc/common/types";
 import type { ReturningExecRow, SelectionRow } from "../../types/application";
 
 export class ReturningExecRepository extends BaseRepository {
   private static readonly RETURNING_EXEC_EXCLUDED_SUBTEAMS = [
     "Presidents",
-    "Advisors"
+    "Advisors",
   ] as const;
 
   async getSubmission(
@@ -86,7 +86,7 @@ export class ReturningExecRepository extends BaseRepository {
           position_selections.map((s) => ({
             submission_id: row.id,
             position_id: s.position_id,
-            priority: s.priority
+            priority: s.priority,
           }))
         )}
       `;
@@ -145,7 +145,7 @@ export class ReturningExecRepository extends BaseRepository {
       qualifications: row.qualifications,
       additional_notes: row.additional_notes,
       submitted_at: row.submitted_at,
-      position_selections: selectionMap.get(row.id) ?? []
+      position_selections: selectionMap.get(row.id) ?? [],
     }));
   }
 
@@ -165,7 +165,7 @@ export class ReturningExecRepository extends BaseRepository {
       "Offer Sent",
       "Accepted Offer",
       "Declined Offer",
-      "Rejection Sent"
+      "Rejection Sent",
     ] as const;
 
     const submissions = await this.sql<
@@ -218,7 +218,7 @@ export class ReturningExecRepository extends BaseRepository {
 
     return submissions.map((s) => ({
       ...s,
-      position_selections: selectionMap.get(s.id) ?? []
+      position_selections: selectionMap.get(s.id) ?? [],
     }));
   }
 
@@ -276,7 +276,7 @@ export class ReturningExecRepository extends BaseRepository {
       FROM org.exec_positions ep
       LEFT JOIN org.subteams st ON st.id = ep.subteam_id
       WHERE COALESCE(st.name, '') NOT IN ${this.sql([
-        ...ReturningExecRepository.RETURNING_EXEC_EXCLUDED_SUBTEAMS
+        ...ReturningExecRepository.RETURNING_EXEC_EXCLUDED_SUBTEAMS,
       ])}
       ORDER BY st.name NULLS LAST, ep.is_vp DESC, ep.name ASC
     `;
@@ -292,7 +292,7 @@ export class ReturningExecRepository extends BaseRepository {
       LEFT JOIN org.subteams st ON st.id = ep.subteam_id
       WHERE ep.id IN ${this.sql(positionIds)}
         AND COALESCE(st.name, '') NOT IN ${this.sql([
-          ...ReturningExecRepository.RETURNING_EXEC_EXCLUDED_SUBTEAMS
+          ...ReturningExecRepository.RETURNING_EXEC_EXCLUDED_SUBTEAMS,
         ])}
     `;
     return rows.map((row) => row.id);

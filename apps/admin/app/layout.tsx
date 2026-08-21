@@ -10,9 +10,9 @@ export const metadata: Metadata = {
   ...baseMetadata,
   title: {
     default: "UW Data Science Club - Admin",
-    template: "%s | UW DSC Admin"
+    template: "%s | UW DSC Admin",
   },
-  description: "Internal tools for the University of Waterloo Data Science Club"
+  description: "Internal tools for the University of Waterloo Data Science Club",
 };
 
 export const viewport: Viewport = baseViewport;
@@ -20,11 +20,11 @@ export const viewport: Viewport = baseViewport;
 const geistSans = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
 const geistMono = Geist_Mono({
   subsets: ["latin"],
-  variable: "--font-geist-mono"
+  variable: "--font-geist-mono",
 });
 
 export default function RootLayout({
-  children
+  children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {

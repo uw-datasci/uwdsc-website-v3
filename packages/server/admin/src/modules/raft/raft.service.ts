@@ -2,7 +2,7 @@ import type {
   RaftError,
   RaftFilters,
   RaftGroupFilters,
-  RaftOverview
+  RaftOverview,
 } from "@uwdsc/common/types";
 import { ApiError } from "@uwdsc/common/types";
 import { RaftRepository } from "./raft.repository";
@@ -24,7 +24,7 @@ class RaftService {
           this.repository.getBySeverity(filters),
           this.repository.getTopEndpoints(filters),
           this.repository.getDistinctApps(),
-          this.repository.getDistinctEnvironments()
+          this.repository.getDistinctEnvironments(),
         ]);
 
       return {
@@ -34,7 +34,7 @@ class RaftService {
         bySeverity,
         topEndpoints,
         apps,
-        environments
+        environments,
       };
     } catch (error) {
       throw new ApiError(`Failed to fetch raft overview: ${(error as Error).message}`, 500);

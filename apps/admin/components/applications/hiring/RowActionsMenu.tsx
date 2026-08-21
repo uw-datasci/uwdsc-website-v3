@@ -14,7 +14,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from "@uwdsc/ui";
 import type { ApplicationReviewStatus } from "@uwdsc/common/types";
 import {
@@ -25,20 +25,20 @@ import {
   HIRING_ROW_ACTION_DROPDOWN_CONTENT_CLASS,
   HIRING_ROW_ACTION_MENU_LABEL,
   HIRING_ROW_ACTION_WORKING_LABEL,
-  type HiringRowActionStatus
+  type HiringRowActionStatus,
 } from "@/constants/applications";
 
 const ROW_ACTION_ICONS: Record<HiringRowActionStatus, LucideIcon> = {
   "Offer Sent": Send,
   "Rejection Sent": Ban,
   "Accepted Offer": CheckCircle2,
-  "Declined Offer": XCircle
+  "Declined Offer": XCircle,
 };
 
 const MENU_ITEMS = HIRING_ROW_ACTION_ORDER.map((status) => ({
   status,
   label: HIRING_ROW_ACTION_MENU_LABEL[status],
-  Icon: ROW_ACTION_ICONS[status]
+  Icon: ROW_ACTION_ICONS[status],
 }));
 
 interface ApplicantRowActionsMenuProps {
@@ -62,7 +62,7 @@ export function ApplicantRowActionsMenu({
   roleLabel,
   disabled,
   source,
-  onConfirmStatus
+  onConfirmStatus,
 }: Readonly<ApplicantRowActionsMenuProps>) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [pending, setPending] = useState<HiringRowActionStatus | null>(null);

@@ -6,7 +6,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from "@uwdsc/ui";
 import { Layers, Search } from "lucide-react";
 import type { HiringSubteamOption } from "@/lib/utils/applications";
@@ -26,7 +26,7 @@ export function HiringHeader({
   onNameSearchChange,
   subteamFilter,
   onSubteamFilterChange,
-  subteamOptions
+  subteamOptions,
 }: HiringHeaderProps) {
   const showSubteamFilter = subteamOptions.length > 1;
 

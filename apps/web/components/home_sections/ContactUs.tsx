@@ -11,20 +11,20 @@ const CONTACT_BUTTONS = [
     id: "email",
     label: "contact@uwdatascience.ca",
     href: "mailto:contact@uwdatascience.ca",
-    icon: <Mail className="w-5 text-white" />
+    icon: <Mail className="w-5 text-white" />,
   },
   {
     id: "instagram",
     label: "@uwaterloodsc",
     href: "https://www.instagram.com/uwaterloodsc/",
-    icon: <Instagram className="w-5 text-white" />
+    icon: <Instagram className="w-5 text-white" />,
   },
   {
     id: "discord",
     label: "discord.gg/2gBB3ufyCR",
     href: "https://discord.gg/2gBB3ufyCR",
-    icon: <RxDiscordLogo size={24} className="text-white" />
-  }
+    icon: <RxDiscordLogo size={24} className="text-white" />,
+  },
 ];
 
 export default function ContactUs() {

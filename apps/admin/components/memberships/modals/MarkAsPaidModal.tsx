@@ -26,7 +26,7 @@ import {
   FormMessage,
   Input,
   renderTextField,
-  renderSelectField
+  renderSelectField,
 } from "@uwdsc/ui";
 
 interface MarkAsPaidModalProps {
@@ -49,7 +49,7 @@ export function MarkAsPaidModal({
   onOpenChange,
   member,
   activeEvent,
-  onSuccess
+  onSuccess,
 }: Readonly<MarkAsPaidModalProps>) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [checkIn, setCheckIn] = useState(true);
@@ -67,8 +67,8 @@ export function MarkAsPaidModal({
     defaultValues: {
       payment_method: undefined,
       payment_location: activeEvent?.name ?? "",
-      verifier: user?.id ?? ""
-    }
+      verifier: user?.id ?? "",
+    },
   });
 
   // Update verifier when profile changes
@@ -83,7 +83,7 @@ export function MarkAsPaidModal({
     try {
       const { checked_in, check_in_error } = await markMemberAsPaid(member.id, {
         ...data,
-        event_id: eventToCheckInto?.id
+        event_id: eventToCheckInto?.id,
       });
 
       if (eventToCheckInto && checked_in) {
@@ -132,7 +132,7 @@ export function MarkAsPaidModal({
                   label: "Payment Method",
                   placeholder: "Select payment method",
                   options: PAYMENT_METHOD_OPTIONS,
-                  required: true
+                  required: true,
                 })}
               />
 
@@ -142,7 +142,7 @@ export function MarkAsPaidModal({
                 render={renderTextField({
                   label: "Payment Location",
                   placeholder: "e.g., DSC Office, SLC, Online",
-                  required: true
+                  required: true,
                 })}
               />
             </div>

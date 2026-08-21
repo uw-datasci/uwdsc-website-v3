@@ -6,7 +6,7 @@ import {
   useMotionValue,
   useReducedMotion,
   useTransform,
-  type Variants
+  type Variants,
 } from "framer-motion";
 import { useEffect, type CSSProperties, type ReactNode } from "react";
 
@@ -44,14 +44,14 @@ const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 export const slideStagger: Variants = {
   hidden: {},
   show: {
-    transition: { staggerChildren: 0.12, delayChildren: 0.15 }
-  }
+    transition: { staggerChildren: 0.12, delayChildren: 0.15 },
+  },
 };
 
 /** A single element in the staggered sequence: a subtle fade + rise. */
 export const slideItem: Variants = {
   hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE_OUT } }
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE_OUT } },
 };
 
 interface CountUpProps {
@@ -79,7 +79,7 @@ export function CountUp({
   duration = 1.2,
   delay = 0.2,
   format,
-  className
+  className,
 }: CountUpProps) {
   const reduce = useReducedMotion();
   const count = useMotionValue(0);
@@ -95,7 +95,7 @@ export function CountUp({
     const controls = animate(count, value, {
       duration,
       delay,
-      ease: "easeOut"
+      ease: "easeOut",
     });
     return () => controls.stop();
   }, [value, duration, delay, reduce, count]);
@@ -149,7 +149,7 @@ export function Floating({
   delay = 0,
   rotate = 0,
   className,
-  style
+  style,
 }: FloatingProps) {
   return (
     <motion.div
@@ -160,7 +160,7 @@ export function Floating({
         duration,
         delay,
         repeat: Infinity,
-        ease: "easeInOut"
+        ease: "easeInOut",
       }}
     >
       {children}

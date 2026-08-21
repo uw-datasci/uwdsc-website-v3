@@ -10,24 +10,24 @@ import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   ReturningExecFormFields,
-  ReturningExecLogisticsHeader
+  ReturningExecLogisticsHeader,
 } from "@/components/logistics/returning";
 
 import { getActiveTerm } from "@/lib/api/onboarding";
 import {
   getPositionsForReturningExec,
   getOwnReturningExecSubmission,
-  upsertReturningExecSubmission
+  upsertReturningExecSubmission,
 } from "@/lib/api/returningExecs";
 import {
   ReturningExecDefaultValues,
   ReturningExecFormValues,
-  returningExecSchema
+  returningExecSchema,
 } from "@/lib/schemas/returningExec";
 import {
   DEFERRED_RETURN_TERM_SHIFT,
   isDateWindowOpen,
-  shiftTermCode
+  shiftTermCode,
 } from "@uwdsc/common/utils";
 
 function positionIdStringForPriority(
@@ -63,7 +63,7 @@ export default function LogisticsReturningExecPage() {
   const form = useForm<ReturningExecFormValues>({
     resolver: zodResolver(returningExecSchema as never) as Resolver<ReturningExecFormValues>,
     defaultValues: ReturningExecDefaultValues,
-    mode: "onChange"
+    mode: "onChange",
   });
 
   const interestedInReturning = form.watch("interested_in_returning");
@@ -88,7 +88,7 @@ export default function LogisticsReturningExecPage() {
 
         const [positionsData, submissionData] = await Promise.all([
           getPositionsForReturningExec(),
-          getOwnReturningExecSubmission()
+          getOwnReturningExecSubmission(),
         ]);
         setPositions(positionsData);
 
@@ -111,7 +111,7 @@ export default function LogisticsReturningExecPage() {
             third_choice_position: positionIdStringForPriority(sel, 3),
             in_person_next_term: sub.in_person_next_term ?? undefined,
             qualifications: sub.qualifications,
-            additional_notes: sub.additional_notes ?? ""
+            additional_notes: sub.additional_notes ?? "",
           });
           await form.trigger();
         } else if (user) {
@@ -142,17 +142,17 @@ export default function LogisticsReturningExecPage() {
         if (values.first_choice_position)
           positionSelections.push({
             position_id: Number(values.first_choice_position),
-            priority: 1
+            priority: 1,
           });
         if (values.second_choice_position)
           positionSelections.push({
             position_id: Number(values.second_choice_position),
-            priority: 2
+            priority: 2,
           });
         if (values.third_choice_position)
           positionSelections.push({
             position_id: Number(values.third_choice_position),
-            priority: 3
+            priority: 3,
           });
       }
 
@@ -170,7 +170,7 @@ export default function LogisticsReturningExecPage() {
         in_person_next_term: needsFollowUp ? (values.in_person_next_term ?? null) : null,
         qualifications: needsFollowUp ? (values.qualifications ?? "") : "",
         additional_notes: values.additional_notes ?? null,
-        position_selections: positionSelections
+        position_selections: positionSelections,
       });
 
       const wasAlreadySubmitted = submitted;
@@ -196,7 +196,7 @@ export default function LogisticsReturningExecPage() {
   const positionOptions = positions.map((p) => ({
     value: String(p.id),
     label: p.name,
-    group: p.subteam_name ?? "Other"
+    group: p.subteam_name ?? "Other",
   }));
 
   const submitButtonLoadingText = submitted ? "Updating..." : "Submitting...";

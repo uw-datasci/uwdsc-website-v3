@@ -8,7 +8,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow
+  TableRow,
 } from "@uwdsc/ui";
 import type { NewExecTeamMember } from "@uwdsc/common/types";
 

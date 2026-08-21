@@ -9,13 +9,13 @@ import {
   HiringDecisionEmail,
   getHiringDecisionSubject,
   MembershipReceipt,
-  getMembershipReceiptSubject
+  getMembershipReceiptSubject,
 } from "./templates";
 import { appendUnsubscribeFooter } from "../../utils/marketingEmail";
 import type {
   MarketingSegmentBroadcastResult,
   MembershipReceiptNoticeKind,
-  SendMarketingSegmentBroadcastParams
+  SendMarketingSegmentBroadcastParams,
 } from "../../types/email";
 
 class EmailService {
@@ -66,7 +66,7 @@ class EmailService {
       from: this.from,
       to: params.to,
       subject: params.subject,
-      html: params.html
+      html: params.html,
     });
 
     if (error) {
@@ -94,7 +94,7 @@ class EmailService {
       subject: params.subject,
       html: params.html,
       name: `UWDSC admin campaign ${new Date().toISOString()}`,
-      send: true
+      send: true,
     });
 
     if (error) {
@@ -130,7 +130,7 @@ class EmailService {
       const created = await this.resend.contacts.create({
         email,
         unsubscribed: false,
-        segments: [{ id: segmentId }]
+        segments: [{ id: segmentId }],
       });
 
       if (!created.error) {
@@ -139,7 +139,7 @@ class EmailService {
 
       const added = await this.resend.contacts.segments.add({
         email,
-        segmentId
+        segmentId,
       });
 
       if (added.error) {
@@ -163,7 +163,7 @@ class EmailService {
       emails.map((email) =>
         this.resend.contacts.segments.remove({
           email,
-          segmentId: this.campaignSegmentId
+          segmentId: this.campaignSegmentId,
         })
       )
     );
@@ -198,7 +198,7 @@ class EmailService {
       emailHtml,
       recipientEmails,
       onEmptyRecipients,
-      emptyRecipientsMessage = "No recipients found for the selected audiences"
+      emptyRecipientsMessage = "No recipients found for the selected audiences",
     } = params;
 
     const unique = this.dedupeRecipientEmails(recipientEmails);
@@ -218,7 +218,7 @@ class EmailService {
       const { id } = await this.sendMarketingBroadcast({
         segmentId: this.campaignSegmentId,
         subject,
-        html
+        html,
       });
       return { id, recipientEmails: unique };
     } catch (err) {
@@ -244,14 +244,14 @@ class EmailService {
       createElement(ExecWelcomeEmail, {
         termLabel,
         when2MeetLink,
-        discordLink
+        discordLink,
       })
     );
     return this.sendMarketingSegmentBroadcast({
       subject: getExecWelcomeSubject(termLabel),
       emailHtml,
       recipientEmails,
-      onEmptyRecipients: "skip"
+      onEmptyRecipients: "skip",
     });
   }
 
@@ -268,7 +268,7 @@ class EmailService {
       subject,
       emailHtml,
       recipientEmails,
-      onEmptyRecipients: "throw"
+      onEmptyRecipients: "throw",
     });
     if (!result) {
       throw new ApiError(
@@ -302,7 +302,7 @@ class EmailService {
         applicantName,
         positionName,
         offerTermLabel,
-        offerAcceptByDateLabel
+        offerAcceptByDateLabel,
       })
     );
 

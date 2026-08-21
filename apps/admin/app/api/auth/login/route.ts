@@ -16,7 +16,7 @@ export const POST = withRaftRoute(async (request) => {
       {
         error: result.error,
         needsVerification: result.needsVerification,
-        email: result.email
+        email: result.email,
       },
       400
     );

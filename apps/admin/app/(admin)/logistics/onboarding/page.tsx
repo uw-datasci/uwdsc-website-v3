@@ -10,14 +10,14 @@ import {
   getAllExecPositions,
   getActiveTerm,
   getOnboardingSubmission,
-  submitOnboardingForm
+  submitOnboardingForm,
 } from "@/lib/api/onboarding";
 import { getCurrentUser } from "@/lib/api/auth";
 import { ExecProfile, General } from "@/components/logistics/onboarding";
 import {
   OnboardingFormValues,
   OnboardingDefaultValues,
-  onboardingSchema
+  onboardingSchema,
 } from "@/lib/schemas/onboarding";
 import { useForm } from "react-hook-form";
 import { ExecPosition, Onboarding, Term } from "@uwdsc/common/types";
@@ -39,7 +39,7 @@ export default function LogisticsOnboardingPage() {
   const form = useForm<OnboardingFormValues>({
     resolver: zodResolver(onboardingSchema),
     defaultValues: OnboardingDefaultValues,
-    mode: "onTouched"
+    mode: "onTouched",
   });
 
   const prefillFromUser = useCallback(
@@ -98,7 +98,7 @@ export default function LogisticsOnboardingPage() {
         consent_instagram: submission.consent_instagram,
         discord: submission.discord,
         datasci_competency: submission.datasci_competency,
-        anything_else: submission.anything_else ?? ""
+        anything_else: submission.anything_else ?? "",
       };
     },
     []
@@ -111,7 +111,7 @@ export default function LogisticsOnboardingPage() {
         const [positionsData, currentUser, term] = await Promise.all([
           getAllExecPositions(),
           getCurrentUser(),
-          getActiveTerm()
+          getActiveTerm(),
         ]);
 
         const typedCurrentUser = currentUser;
@@ -133,7 +133,7 @@ export default function LogisticsOnboardingPage() {
 
         if (existingSubmission) {
           form.reset(mapSubmissionToForm(existingSubmission, typedCurrentUser), {
-            keepDirty: false
+            keepDirty: false,
           });
           setHasSubmission(true);
           setIsEditing(false);
@@ -173,7 +173,7 @@ export default function LogisticsOnboardingPage() {
                 ? values.instagram.trim()
                 : null,
             headshot_url: values.headshot_url ?? null,
-            anything_else: values.anything_else ?? null
+            anything_else: values.anything_else ?? null,
           },
           headshotFile,
           fullName
@@ -237,7 +237,7 @@ export default function LogisticsOnboardingPage() {
                   month: "long",
                   day: "numeric",
                   hour: "numeric",
-                  minute: "2-digit"
+                  minute: "2-digit",
                 })}
               </time>
             </p>

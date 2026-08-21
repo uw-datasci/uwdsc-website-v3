@@ -24,7 +24,7 @@ export async function signIn(credentials: LoginData): Promise<LoginResponse> {
   const response = await fetch("/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(credentials)
+    body: JSON.stringify(credentials),
   });
 
   const data = await response.json();
@@ -45,7 +45,7 @@ export async function signIn(credentials: LoginData): Promise<LoginResponse> {
 export async function signOut(): Promise<{ message: string }> {
   const response = await fetch("/api/auth/signout", {
     method: "POST",
-    headers: { "Content-Type": "application/json" }
+    headers: { "Content-Type": "application/json" },
   });
 
   const data = await response.json();
@@ -66,7 +66,7 @@ export async function signOut(): Promise<{ message: string }> {
 export async function getCurrentUser(): Promise<ExecUser | null> {
   const response = await fetch("/api/auth/user", {
     method: "GET",
-    headers: { "Content-Type": "application/json" }
+    headers: { "Content-Type": "application/json" },
   });
 
   const data = await response.json();

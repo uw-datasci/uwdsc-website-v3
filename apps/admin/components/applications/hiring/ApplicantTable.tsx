@@ -11,13 +11,13 @@ import {
   TableRow,
   Tooltip,
   TooltipContent,
-  TooltipTrigger
+  TooltipTrigger,
 } from "@uwdsc/ui";
 import { cn } from "@uwdsc/ui/lib/utils";
 import type {
   ApplicationReviewStatus,
   HiringApplicant,
-  HiringPositionSelection
+  HiringPositionSelection,
 } from "@uwdsc/common/types";
 import { sortPositionsByPriority } from "@uwdsc/common/utils";
 import { reviewStatusBadgeClassName } from "@/lib/utils/applications";
@@ -41,7 +41,7 @@ const SELECTION_LINE = `${SELECTION_LINE_ROW} gap-2`;
 const SELECTION_STACK_GAP = "gap-2";
 
 function SelectionRow({
-  selection
+  selection,
 }: Readonly<{
   selection: HiringPositionSelection;
 }>) {
@@ -68,7 +68,7 @@ function SelectionRow({
 export function ApplicantTable({
   applicants,
   updatingSelectionId,
-  onSelectionStatusChange
+  onSelectionStatusChange,
 }: Readonly<ApplicantTableProps>) {
   if (applicants.length === 0) {
     return (

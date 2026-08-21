@@ -8,7 +8,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow
+  TableRow,
 } from "@uwdsc/ui";
 import type { AppQuestion } from "@uwdsc/common/types";
 
@@ -27,7 +27,7 @@ export function QuestionsTable({
   onView,
   onRequestDelete,
   readOnly = false,
-  emptyMessage = "No questions yet. Add one to get started."
+  emptyMessage = "No questions yet. Add one to get started.",
 }: QuestionsTableProps) {
   if (questions.length === 0) {
     return <p className="text-sm text-muted-foreground py-6 text-center">{emptyMessage}</p>;

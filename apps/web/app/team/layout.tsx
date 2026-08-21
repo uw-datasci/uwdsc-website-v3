@@ -7,17 +7,17 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Team | UWaterloo Data Science Club",
     description: "Meet the UWaterloo Data Science Club team members and executives",
-    images: ["/meta/og-image.png"]
+    images: ["/meta/og-image.png"],
   },
   twitter: {
     card: "summary",
     description: "Meet the UWaterloo Data Science Club team members and executives",
-    images: ["/meta/og-image.png"]
-  }
+    images: ["/meta/og-image.png"],
+  },
 };
 
 export default function TeamLayout({
-  children
+  children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {

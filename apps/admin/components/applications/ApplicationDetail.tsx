@@ -10,7 +10,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  cn
+  cn,
 } from "@uwdsc/ui";
 import {
   ExternalLink,
@@ -21,12 +21,12 @@ import {
   Briefcase,
   Linkedin,
   Github,
-  Globe
+  Globe,
 } from "lucide-react";
 import type {
   ApplicationListItem,
   ApplicationReviewStatus,
-  ApplicationStatus
+  ApplicationStatus,
 } from "@uwdsc/common/types";
 import { sortPositionsByPriority } from "@uwdsc/common/utils";
 import type { PositionReviewScopeDto } from "@/types/applications";
@@ -55,7 +55,7 @@ export function ApplicationDetail({
   onStatusChange,
   positionReview = null,
   onPositionReviewStatusChange,
-  positionReviewUpdatingId = null
+  positionReviewUpdatingId = null,
 }: Readonly<ApplicationDetailProps>) {
   const getStatusLabel = (status: string): string => {
     return status
@@ -134,7 +134,7 @@ export function ApplicationDetail({
                 month: "long",
                 day: "numeric",
                 hour: "numeric",
-                minute: "2-digit"
+                minute: "2-digit",
               })}
             </p>
           )}

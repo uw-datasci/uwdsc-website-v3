@@ -83,7 +83,7 @@ export async function createEvent(eventData: CreateEventFormValues): Promise<Eve
   const response = await fetch("/api/events", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(eventData)
+    body: JSON.stringify(eventData),
   });
 
   const data = await response.json();
@@ -108,7 +108,7 @@ export async function updateEvent(
   const response = await fetch(`/api/events/${eventId}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(eventData)
+    body: JSON.stringify(eventData),
   });
 
   const data = await response.json();
@@ -125,7 +125,7 @@ export async function updateEvent(
  */
 export async function deleteEvent(eventId: string): Promise<void> {
   const response = await fetch(`/api/events/${eventId}`, {
-    method: "DELETE"
+    method: "DELETE",
   });
 
   const data = await response.json();

@@ -22,7 +22,7 @@ export class MembershipRepository extends BaseRepository {
         result[0] ?? {
           total_users: 0,
           paid_users: 0,
-          math_soc_members: 0
+          math_soc_members: 0,
         }
       );
     } catch (error: unknown) {

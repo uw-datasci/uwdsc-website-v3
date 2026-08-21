@@ -12,7 +12,7 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarRail,
-  SidebarTrigger
+  SidebarTrigger,
 } from "@uwdsc/ui";
 import { Shield } from "lucide-react";
 import { signOut as signOutApi } from "@/lib/api/auth";
@@ -34,7 +34,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const [positionName, setPositionName] = useState<string | null>(null);
   const [logisticsWindows, setLogisticsWindows] = useState({
     onboardingOpen: false,
-    returningExecOpen: false
+    returningExecOpen: false,
   });
 
   useEffect(() => {
@@ -63,13 +63,13 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           returningExecOpen: isDateWindowOpen(
             term?.returning_exec_release_date,
             term?.returning_exec_deadline
-          )
+          ),
         });
       } catch {
         if (!cancelled) {
           setLogisticsWindows({
             onboardingOpen: false,
-            returningExecOpen: false
+            returningExecOpen: false,
           });
         }
       }

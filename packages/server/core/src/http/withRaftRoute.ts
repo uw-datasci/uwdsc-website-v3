@@ -3,7 +3,7 @@ import {
   RaftResponse,
   withRaft,
   type RaftRouteContext,
-  type RaftRouteHandler
+  type RaftRouteHandler,
 } from "@uw-datasci/raft";
 // This repo's ApiError, NOT the identically named class @uw-datasci/raft also
 // exports. Importing raft's would make every `instanceof` check below silently
@@ -61,7 +61,7 @@ export function withRaftRoute<C extends RaftRouteContext = RaftRouteContext>(
         await RaftClient.getInstance().reportError(error, {
           route: request.nextUrl?.pathname,
           method: request.method,
-          url: request.url
+          url: request.url,
         });
       }
 

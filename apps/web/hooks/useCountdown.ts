@@ -21,7 +21,7 @@ function remaining(targetMs: number): Countdown | null {
     hours: Math.floor((seconds % 86400) / 3600),
     minutes: Math.floor((seconds % 3600) / 60),
     seconds: seconds % 60,
-    total
+    total,
   };
 }
 

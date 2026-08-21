@@ -7,7 +7,7 @@ import {
   ALUM_ROLE,
   RETURNING_EXEC_PATH,
   WEB_COMPLETE_PROFILE_PATH,
-  readRoleClaims
+  readRoleClaims,
 } from "@uwdsc/common/constants";
 import { safeRedirect } from "@uwdsc/common/utils";
 
@@ -47,7 +47,7 @@ export async function proxy(request: NextRequest) {
   const supabase = createSupabaseMiddlewareClient(request, response);
 
   const {
-    data: { user }
+    data: { user },
   } = await supabase.auth.getUser();
 
   const { role } = readRoleClaims(user?.app_metadata);
@@ -93,6 +93,6 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)"
-  ]
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+  ],
 };

@@ -14,13 +14,13 @@ import {
   RadioGroupItem,
   Spinner,
   renderSelectField,
-  renderCheckboxField
+  renderCheckboxField,
 } from "@uwdsc/ui";
 import {
   DATABASE_OPTIONS,
   EXTRAS_OPTIONS,
   MONGO_CLIENT_OPTIONS,
-  POSTGRES_PROVIDER_OPTIONS
+  POSTGRES_PROVIDER_OPTIONS,
 } from "@/constants/foundry";
 import type { FoundryFormValues } from "@/lib/schemas/foundry";
 import type { GitHubTemplateOption } from "@uwdsc/common/types";
@@ -70,7 +70,7 @@ export function TechStack() {
 
   const templateOptions = templates.map((t) => ({
     value: t.value,
-    label: t.value
+    label: t.value,
   }));
 
   const projectTypeSelectKey = templatesLoading ? "loading" : `templates:${templates.length}`;
@@ -106,7 +106,7 @@ export function TechStack() {
             placeholder: "Choose a template…",
             required: true,
             options: templateOptions,
-            triggerClassName: "w-full"
+            triggerClassName: "w-full",
           })}
         />
       </div>
@@ -124,9 +124,9 @@ export function TechStack() {
           required: true,
           options: DATABASE_OPTIONS.map((d) => ({
             value: d.value,
-            label: d.label
+            label: d.label,
           })),
-          triggerClassName: "w-full"
+          triggerClassName: "w-full",
         })}
       />
 
@@ -236,7 +236,7 @@ export function TechStack() {
               name={extra.name}
               render={renderCheckboxField({
                 label: extra.label,
-                description: extra.description
+                description: extra.description,
               })}
             />
           ))}

@@ -3,7 +3,7 @@
 import {
   ForgotPasswordFormValues,
   forgotPasswordSchema,
-  forgotPasswordDefaultValues
+  forgotPasswordDefaultValues,
 } from "@/lib/schemas/forgotPassword";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,7 +24,7 @@ export function ForgotPasswordForm() {
   const form = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: forgotPasswordDefaultValues,
-    mode: "onTouched"
+    mode: "onTouched",
   });
 
   const onSubmit = async (data: ForgotPasswordFormValues) => {
@@ -131,7 +131,7 @@ export function ForgotPasswordForm() {
             placeholder: "Email (ex. slchow@uwaterloo.ca)",
             className:
               "!h-auto !text-base border-gray-100/80 !bg-black px-4.5 py-3.5 placeholder:text-gray-100/80 rounded-lg xl:px-6 xl:py-4.5",
-            inputProps: { type: "email" }
+            inputProps: { type: "email" },
           })}
         />
 

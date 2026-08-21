@@ -15,7 +15,7 @@ interface MembershipStatsCardsProps {
 export function MembershipStatsCards({
   stats,
   activeFilter,
-  onFilterChange
+  onFilterChange,
 }: MembershipStatsCardsProps) {
   const [hoveredCard, setHoveredCard] = useState<MembershipFilter | null>(null);
 

@@ -35,7 +35,7 @@ export class ResumeService extends FileService {
     } catch (error) {
       return {
         success: false,
-        error: (error as Error).message
+        error: (error as Error).message,
       };
     }
   }

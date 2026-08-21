@@ -9,7 +9,7 @@ export const sendCampaignSchema = z.object({
   recipientRoles: z
     .array(z.enum(CAMPAIGN_RECIPIENT_ROLES))
     .min(1, "Select at least one audience"),
-  body: z.string().min(1, "Email body cannot be empty")
+  body: z.string().min(1, "Email body cannot be empty"),
 });
 
 export type SendCampaignFormValues = z.infer<typeof sendCampaignSchema>;

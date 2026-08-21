@@ -4,7 +4,7 @@ import type {
   FileValidationConfig,
   FileUploadData,
   UploadResult,
-  UploadError
+  UploadError,
 } from "@uwdsc/common/types";
 
 export class FileService {
@@ -38,7 +38,7 @@ export class FileService {
       if (result && !result.valid) {
         return {
           success: false,
-          error: result.error ?? "File validation failed"
+          error: result.error ?? "File validation failed",
         };
       }
     }
@@ -67,14 +67,14 @@ export class FileService {
         file: data.file,
         userId: data.userId,
         objectKey,
-        contentType: data.file.type
+        contentType: data.file.type,
       });
 
       return { success: true, key };
     } catch (error) {
       return {
         success: false,
-        error: (error as Error).message
+        error: (error as Error).message,
       };
     }
   }

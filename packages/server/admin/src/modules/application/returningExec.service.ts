@@ -5,7 +5,7 @@ import {
   type QuestionScope,
   type ReturningExecListItem,
   type ReturningExecOwnSubmission,
-  type ReturningExecSubmissionData
+  type ReturningExecSubmissionData,
 } from "@uwdsc/common/types";
 import { isDateWindowOpen } from "@uwdsc/common/utils";
 import { ReturningExecRepository } from "./returningExec.repository";
@@ -14,7 +14,7 @@ const VP_REVIEW_STATUS_SET = new Set<ApplicationReviewStatus>([
   "In Review",
   "Interviewing",
   "Wanted",
-  "Not Wanted"
+  "Not Wanted",
 ]);
 
 const PRESIDENT_REVIEW_STATUS_SET = new Set<ApplicationReviewStatus>([
@@ -22,7 +22,7 @@ const PRESIDENT_REVIEW_STATUS_SET = new Set<ApplicationReviewStatus>([
   "Offer Sent",
   "Accepted Offer",
   "Declined Offer",
-  "Rejection Sent"
+  "Rejection Sent",
 ]);
 
 class ReturningExecService {
@@ -98,7 +98,7 @@ class ReturningExecService {
 
     return this.repository.upsertSubmission(profile_id, {
       ...data,
-      term_id: term.id
+      term_id: term.id,
     });
   }
 

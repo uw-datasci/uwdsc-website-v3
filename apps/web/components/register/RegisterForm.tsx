@@ -3,7 +3,7 @@
 import {
   registerDefaultValues,
   registerSchema,
-  type RegisterFormValues
+  type RegisterFormValues,
 } from "@/lib/schemas/register";
 import { register } from "@/lib/api";
 import { useForm } from "react-hook-form";
@@ -24,7 +24,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: registerDefaultValues,
-    mode: "onTouched"
+    mode: "onTouched",
   });
 
   const onSubmit = async (data: RegisterFormValues) => {
@@ -33,7 +33,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
     try {
       await register({
         email: data.email,
-        password: data.password
+        password: data.password,
       });
       onSuccess(data.email);
     } catch (error: unknown) {
@@ -59,7 +59,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
               placeholder: "Email (ex. slchow@uwaterloo.ca)",
               className:
                 "!h-auto !text-base border-gray-100/80 !bg-black px-4.5 py-3.5 placeholder:text-gray-100/80 rounded-lg xl:px-6 xl:py-4.5",
-              inputProps: { type: "email" }
+              inputProps: { type: "email" },
             })}
           />
           <FormField
@@ -71,8 +71,8 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
                 "!h-auto !text-base border-gray-100/80 !bg-black px-4.5 py-3.5 placeholder:text-gray-100/80 rounded-lg xl:px-6 xl:py-4.5",
               inputProps: {
                 type: "password",
-                autoComplete: "new-password"
-              }
+                autoComplete: "new-password",
+              },
             })}
           />
           <FormField
@@ -84,8 +84,8 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
                 "!h-auto !text-base border-gray-100/80 !bg-black px-4.5 py-3.5 placeholder:text-gray-100/80 rounded-lg xl:px-6 xl:py-4.5",
               inputProps: {
                 type: "password",
-                autoComplete: "new-password"
-              }
+                autoComplete: "new-password",
+              },
             })}
           />
         </div>

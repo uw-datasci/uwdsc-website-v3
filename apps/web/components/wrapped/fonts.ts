@@ -3,7 +3,7 @@ import { Tilt_Warp, Atkinson_Hyperlegible_Mono } from "next/font/google";
 export const tiltWarp = Tilt_Warp({
   weight: "400",
   subsets: ["latin"],
-  variable: "--font-tilt-warp"
+  variable: "--font-tilt-warp",
 });
 
 export const atkinsonHyperlegibleMono = Atkinson_Hyperlegible_Mono({
@@ -11,7 +11,7 @@ export const atkinsonHyperlegibleMono = Atkinson_Hyperlegible_Mono({
   subsets: ["latin"],
   variable: "--font-atkinson-mono",
   adjustFontFallback: false,
-  fallback: ["ui-monospace", "monospace"]
+  fallback: ["ui-monospace", "monospace"],
 });
 
 export const displayFontClass = "font-[family-name:var(--font-tilt-warp)]";

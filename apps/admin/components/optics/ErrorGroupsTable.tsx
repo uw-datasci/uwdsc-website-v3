@@ -13,7 +13,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow
+  TableRow,
 } from "@uwdsc/ui";
 import type { RaftErrorGroup, RaftGroupFilters } from "@uwdsc/common/types";
 import { formatRaftDate, SeverityBadge, truncateText } from "./utils";
@@ -36,7 +36,7 @@ export function ErrorGroupsTable({
   pageSize,
   filters,
   onPageChange,
-  onResolvedChange
+  onResolvedChange,
 }: ErrorGroupsTableProps) {
   const [selectedErrorId, setSelectedErrorId] = useState<string | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<RaftErrorGroup | null>(null);

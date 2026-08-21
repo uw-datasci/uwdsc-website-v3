@@ -8,18 +8,18 @@ import {
   ApplicantTable,
   FinalizeRolesDialog,
   HiringHeader,
-  NewExecTeamPanel
+  NewExecTeamPanel,
 } from "@/components/applications/hiring";
 import { getHiringApplicants, getNewExecTeam, updateSelectionStatus } from "@/lib/api";
 import {
   buildHiringSubteamOptions,
   filterApplicantsBySubteam,
-  HIRING_SUBTEAM_ALL
+  HIRING_SUBTEAM_ALL,
 } from "@/lib/utils/applications";
 import type {
   ApplicationReviewStatus,
   HiringApplicant,
-  NewExecTeamMember
+  NewExecTeamMember,
 } from "@uwdsc/common/types";
 
 export default function HiringPage() {

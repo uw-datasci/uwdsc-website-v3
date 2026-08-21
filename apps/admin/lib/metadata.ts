@@ -6,7 +6,7 @@ export const baseMetadata: Metadata = {
   metadataBase: new URL(siteUrl),
   robots: {
     index: false,
-    follow: false
+    follow: false,
   },
   icons: {
     icon: [
@@ -17,8 +17,8 @@ export const baseMetadata: Metadata = {
       {
         url: "/meta/android-icon-192x192.png",
         sizes: "192x192",
-        type: "image/png"
-      }
+        type: "image/png",
+      },
     ],
     apple: [
       { url: "/meta/apple-icon-57x57.png", sizes: "57x57" },
@@ -29,17 +29,17 @@ export const baseMetadata: Metadata = {
       { url: "/meta/apple-icon-120x120.png", sizes: "120x120" },
       { url: "/meta/apple-icon-144x144.png", sizes: "144x144" },
       { url: "/meta/apple-icon-152x152.png", sizes: "152x152" },
-      { url: "/meta/apple-icon-180x180.png", sizes: "180x180" }
+      { url: "/meta/apple-icon-180x180.png", sizes: "180x180" },
     ],
-    shortcut: "/meta/favicon.ico"
+    shortcut: "/meta/favicon.ico",
   },
   manifest: "/meta/manifest.json",
   other: {
     "msapplication-TileColor": "#000211",
-    "msapplication-TileImage": "/meta/ms-icon-144x144.png"
-  }
+    "msapplication-TileImage": "/meta/ms-icon-144x144.png",
+  },
 };
 
 export const baseViewport: Viewport = {
-  themeColor: "#000211"
+  themeColor: "#000211",
 };

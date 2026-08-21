@@ -3,7 +3,7 @@ export const STEP_NAMES = [
   "Personal Details",
   "General",
   "Positions",
-  "Resume"
+  "Resume",
 ];
 
 export const PERSONAL_FIELDS = [
@@ -13,16 +13,16 @@ export const PERSONAL_FIELDS = [
   "program",
   "academic_term",
   "location",
-  "club_experience"
+  "club_experience",
 ];
 
 export const BLANK_APPLICATION = {
   rolesApplyingFor: [],
   roleQuestionAnswers: {
-    general: {}
+    general: {},
   },
   resumeUrl: "",
-  status: "draft"
+  status: "draft",
 };
 
 export const MAX_ALLOWED_ROLES_TO_APPLY = 3;

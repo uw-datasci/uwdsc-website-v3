@@ -13,7 +13,7 @@ interface ReturningExecListProps {
 export function ReturningExecList({
   submissions,
   selectedId,
-  onSelect
+  onSelect,
 }: ReturningExecListProps) {
   if (submissions.length === 0) {
     return (

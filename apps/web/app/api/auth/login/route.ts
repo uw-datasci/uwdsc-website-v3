@@ -16,7 +16,7 @@ export const POST = withRaftRoute(async (request) => {
       {
         error: result.error,
         needsVerification: result.needsVerification,
-        email: result.email
+        email: result.email,
       },
       400
     );
@@ -25,6 +25,6 @@ export const POST = withRaftRoute(async (request) => {
   return RaftResponse.ok({
     success: true,
     user: result.user,
-    session: result.session
+    session: result.session,
   });
 });

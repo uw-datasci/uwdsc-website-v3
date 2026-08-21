@@ -12,7 +12,7 @@ import type {
   Term,
   Onboarding,
   OnboardingData,
-  OnboardingAdminRow
+  OnboardingAdminRow,
 } from "@uwdsc/common/types";
 
 /**
@@ -71,13 +71,13 @@ export async function submitOnboardingForm(
 
   const submissionPayload: OnboardingData = {
     ...payload,
-    headshot_url: headshotUrl
+    headshot_url: headshotUrl,
   };
 
   const response = await fetch("/api/onboarding/submission", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(submissionPayload)
+    body: JSON.stringify(submissionPayload),
   });
   const data = await parseJsonResponse<Onboarding>(response);
   if (!response.ok) throw createApiError(data, response.status);

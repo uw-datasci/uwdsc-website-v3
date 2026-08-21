@@ -17,7 +17,7 @@ export const RESUME_VALIDATION_CONFIG: FileValidationConfig = {
   allowedMimeTypes: new Set([
     "application/pdf",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
-    "application/msword" // .doc
+    "application/msword", // .doc
   ]),
   mimeToExtension: getExtensionFromMime,
   customValidation: (file: File) => {
@@ -27,7 +27,7 @@ export const RESUME_VALIDATION_CONFIG: FileValidationConfig = {
 
     return {
       valid: false,
-      error: "Invalid file type. Allowed: PDF, DOC, or DOCX."
+      error: "Invalid file type. Allowed: PDF, DOC, or DOCX.",
     };
-  }
+  },
 };

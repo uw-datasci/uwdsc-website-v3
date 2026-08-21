@@ -11,7 +11,7 @@ import {
   Mail,
   Settings,
   UserCheck,
-  Users
+  Users,
 } from "lucide-react";
 import { isAdmin, isPres } from "@uwdsc/common/constants";
 
@@ -30,7 +30,7 @@ export const getAdminNavigation = (
     {
       name: "Questions",
       href: "/applications/questions",
-      icon: CircleHelp
+      icon: CircleHelp,
     },
     ...(isPres(role)
       ? [
@@ -47,10 +47,10 @@ export const getAdminNavigation = (
           {
             name: "Returning Execs",
             href: "/applications/returning-execs",
-            icon: UserCheck
-          }
+            icon: UserCheck,
+          },
         ]
-      : [])
+      : []),
   ];
 
   return [
@@ -59,7 +59,7 @@ export const getAdminNavigation = (
       name: "Applications",
       href: "/applications",
       icon: FileText,
-      subItems: applicationSubItems
+      subItems: applicationSubItems,
     },
     { name: "Events", href: "/events", icon: Calendar },
     ...(isAdmin(role) ? [{ name: "Campaigns", href: "/campaigns", icon: Mail }] : []),
@@ -73,8 +73,8 @@ export const getAdminNavigation = (
               {
                 name: "Onboarding",
                 href: "/logistics/onboarding",
-                icon: FileText
-              }
+                icon: FileText,
+              },
             ]
           : []),
         ...(isPres(role)
@@ -82,8 +82,8 @@ export const getAdminNavigation = (
               {
                 name: "Onboarding review",
                 href: "/logistics/onboarding-review",
-                icon: ClipboardCheck
-              }
+                icon: ClipboardCheck,
+              },
             ]
           : []),
         ...(returningExecOpen
@@ -91,11 +91,11 @@ export const getAdminNavigation = (
               {
                 name: "Returning execs",
                 href: "/logistics/returning",
-                icon: UserCheck
-              }
+                icon: UserCheck,
+              },
             ]
-          : [])
-      ]
+          : []),
+      ],
     },
     ...(isAdmin(role)
       ? [
@@ -106,10 +106,10 @@ export const getAdminNavigation = (
             subItems: [
               { name: "Foundry", href: "/nexus/foundry", icon: Anvil },
               { name: "Optics", href: "/nexus/optics", icon: Activity },
-              { name: "Archives", href: "/nexus/archives", icon: Library }
-            ]
-          }
+              { name: "Archives", href: "/nexus/archives", icon: Library },
+            ],
+          },
         ]
-      : [])
+      : []),
   ];
 };

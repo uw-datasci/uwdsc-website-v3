@@ -18,21 +18,21 @@ export function AvailablePositions() {
           boxShadow: [
             "0 0 0 0 rgba(59, 130, 246, 0)",
             "0 0 0 4px rgba(59, 130, 246, 0.1)",
-            "0 0 0 0 rgba(59, 130, 246, 0)"
-          ]
+            "0 0 0 0 rgba(59, 130, 246, 0)",
+          ],
         }}
         transition={{
           duration: 0.6,
           boxShadow: {
             duration: 3,
             repeat: Infinity,
-            repeatDelay: 4
-          }
+            repeatDelay: 4,
+          },
         }}
         whileHover={{
           scale: 1.02,
           boxShadow: "0 8px 25px rgba(59, 130, 246, 0.15)",
-          transition: { duration: 0.2 }
+          transition: { duration: 0.2 },
         }}
       >
         {/* Shimmer overlay */}
@@ -44,7 +44,7 @@ export function AvailablePositions() {
             duration: 2,
             repeat: Infinity,
             repeatDelay: 5,
-            ease: "easeInOut"
+            ease: "easeInOut",
           }}
         />
 

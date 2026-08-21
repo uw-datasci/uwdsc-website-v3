@@ -23,21 +23,21 @@ import {
   Button,
   Checkbox,
   renderTextField,
-  renderSelectField
+  renderSelectField,
 } from "@uwdsc/ui";
 import {
   FACULTY_VALUES,
   ROLE_VALUES,
   ROLE_SELECT_OPTIONS,
   isPres,
-  roleRequiresSubteam
+  roleRequiresSubteam,
 } from "@uwdsc/common/constants";
 import { Member, SubteamOption } from "@uwdsc/common/types";
 
 const editMemberFormSchema = editMemberSchema
   .extend({
     role: z.enum(ROLE_VALUES).optional(),
-    subteam_id: z.string().optional()
+    subteam_id: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     const hasSubteam = Boolean(data.subteam_id);
@@ -45,14 +45,14 @@ const editMemberFormSchema = editMemberSchema
       ctx.addIssue({
         code: "custom",
         path: ["subteam_id"],
-        message: "Select a subteam for this role"
+        message: "Select a subteam for this role",
       });
     }
     if (!roleRequiresSubteam(data.role) && hasSubteam) {
       ctx.addIssue({
         code: "custom",
         path: ["subteam_id"],
-        message: "This role cannot have a subteam"
+        message: "This role cannot have a subteam",
       });
     }
   });
@@ -69,7 +69,7 @@ export function EditMemberModal({
   open,
   onOpenChange,
   member,
-  onSuccess
+  onSuccess,
 }: Readonly<EditMemberModalProps>) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [subteams, setSubteams] = useState<SubteamOption[]>([]);
@@ -86,8 +86,8 @@ export function EditMemberModal({
       term: member.term || "",
       is_math_soc_member: member.is_math_soc_member || false,
       role: member.user_role,
-      subteam_id: member.subteam_id != null ? String(member.subteam_id) : ""
-    }
+      subteam_id: member.subteam_id != null ? String(member.subteam_id) : "",
+    },
   });
 
   const selectedRole = useWatch({ control: form.control, name: "role" });
@@ -105,7 +105,7 @@ export function EditMemberModal({
         term: member.term || "",
         is_math_soc_member: member.is_math_soc_member || false,
         role: member.user_role,
-        subteam_id: member.subteam_id != null ? String(member.subteam_id) : ""
+        subteam_id: member.subteam_id != null ? String(member.subteam_id) : "",
       });
     }
   }, [open, member, form]);
@@ -134,7 +134,7 @@ export function EditMemberModal({
     if (!roleNeedsSubteam && form.getValues("subteam_id")) {
       form.setValue("subteam_id", "", {
         shouldDirty: true,
-        shouldValidate: true
+        shouldValidate: true,
       });
     }
   }, [roleNeedsSubteam, form]);
@@ -194,7 +194,7 @@ export function EditMemberModal({
                   renderTextField({
                     label: "First Name",
                     placeholder: "Enter first name",
-                    required: true
+                    required: true,
                   })({ field })
                 }
               />
@@ -205,7 +205,7 @@ export function EditMemberModal({
                   renderTextField({
                     label: "Last Name",
                     placeholder: "Enter last name",
-                    required: true
+                    required: true,
                   })({ field })
                 }
               />
@@ -219,7 +219,7 @@ export function EditMemberModal({
                 render={({ field }) =>
                   renderTextField({
                     label: "WatIAM",
-                    placeholder: "Enter WatIAM username"
+                    placeholder: "Enter WatIAM username",
                   })({ field: { ...field, value: field.value ?? "" } })
                 }
               />
@@ -229,7 +229,7 @@ export function EditMemberModal({
                 render={({ field }) =>
                   renderTextField({
                     label: "Term",
-                    placeholder: "e.g., 1A, 2B, 4A"
+                    placeholder: "e.g., 1A, 2B, 4A",
                   })({ field: { ...field, value: field.value ?? "" } })
                 }
               />
@@ -245,7 +245,7 @@ export function EditMemberModal({
                     label: "Faculty",
                     placeholder: "Select faculty",
                     options: [...FACULTY_VALUES],
-                    triggerClassName: "w-full"
+                    triggerClassName: "w-full",
                   })({ field: { ...field, value: field.value ?? "" } })
                 }
               />
@@ -258,7 +258,7 @@ export function EditMemberModal({
                       label: "Role",
                       placeholder: "Select role",
                       options: ROLE_SELECT_OPTIONS,
-                      triggerClassName: "w-full"
+                      triggerClassName: "w-full",
                     })({ field: { ...field, value: field.value ?? "" } })
                   }
                 />
@@ -276,9 +276,9 @@ export function EditMemberModal({
                     required: true,
                     options: subteams.map((subteam) => ({
                       value: String(subteam.id),
-                      label: subteam.name
+                      label: subteam.name,
                     })),
-                    triggerClassName: "w-full"
+                    triggerClassName: "w-full",
                   })({ field: { ...field, value: field.value ?? "" } })
                 }
               />

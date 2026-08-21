@@ -10,18 +10,18 @@ export const metadata: Metadata = {
     title: "My Passport | UWaterloo Data Science Club",
     description:
       "Track your Data Science Club journey with achievements, event stamps, and challenges. Build your member passport at UW.",
-    images: ["/meta/og-image.png"]
+    images: ["/meta/og-image.png"],
   },
   twitter: {
     card: "summary",
     description:
       "Track your Data Science Club journey with achievements, event stamps, and challenges. Build your member passport at UW.",
-    images: ["/meta/og-image.png"]
-  }
+    images: ["/meta/og-image.png"],
+  },
 };
 
 export default function PassportLayout({
-  children
+  children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {

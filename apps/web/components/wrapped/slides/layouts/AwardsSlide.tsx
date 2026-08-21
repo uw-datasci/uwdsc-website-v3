@@ -3,7 +3,7 @@ import {
   tiltWarp,
   atkinsonHyperlegibleMono,
   displayFontClass as display,
-  monoFontClass as mono
+  monoFontClass as mono,
 } from "../../fonts";
 import type { AwardsSlideData } from "../../types";
 
@@ -38,7 +38,7 @@ export function AwardsSlide({ slide }: AwardsSlideProps) {
       color: "#ffca82",
       Icon: CherryDoodle,
       iconWidthPct: 71,
-      iconRotate: "-19.34deg"
+      iconRotate: "-19.34deg",
     },
     {
       award: center,
@@ -46,7 +46,7 @@ export function AwardsSlide({ slide }: AwardsSlideProps) {
       color: "#ff8f64",
       Icon: BirdDoodle,
       iconWidthPct: 79,
-      iconRotate: "-12.81deg"
+      iconRotate: "-12.81deg",
     },
     {
       award: right,
@@ -54,8 +54,8 @@ export function AwardsSlide({ slide }: AwardsSlideProps) {
       color: "#9cd8ea",
       Icon: PetalDoodle,
       iconWidthPct: 55,
-      iconRotate: "0deg"
-    }
+      iconRotate: "0deg",
+    },
   ] as const;
 
   return (
@@ -76,7 +76,7 @@ export function AwardsSlide({ slide }: AwardsSlideProps) {
               className="mb-2"
               style={{
                 width: `${column.iconWidthPct}%`,
-                transform: `rotate(${column.iconRotate})`
+                transform: `rotate(${column.iconRotate})`,
               }}
             >
               <column.Icon />
@@ -85,7 +85,7 @@ export function AwardsSlide({ slide }: AwardsSlideProps) {
               className="flex w-full flex-col items-center gap-0.5 pt-3"
               style={{
                 height: `${column.heightPct}%`,
-                backgroundColor: column.color
+                backgroundColor: column.color,
               }}
             >
               <p className={cn(mono, "text-center text-[0.625rem] leading-tight text-black")}>

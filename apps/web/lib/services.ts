@@ -15,7 +15,7 @@ async function createSupabaseClient() {
     },
     set(name: string, value: string, options?: any) {
       cookieStore.set(name, value, options);
-    }
+    },
   });
 }
 

@@ -115,14 +115,14 @@ export function parseMembershipReceipt(body: string): MembershipReceiptParse {
     return {
       ok: false,
       kind: "invalid_structure",
-      receiptEmail
+      receiptEmail,
     };
   }
 
   return {
     ok: true,
     receiptEmail,
-    transactionDateText
+    transactionDateText,
   };
 }
 

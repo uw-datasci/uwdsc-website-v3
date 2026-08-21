@@ -21,7 +21,7 @@ export async function uploadResume(file: File): Promise<UploadResumeResponse> {
 
   const response = await fetch("/api/applications/resumes", {
     method: "POST",
-    body: formData
+    body: formData,
   });
 
   const data = await response.json();

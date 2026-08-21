@@ -34,7 +34,7 @@ export function useApplyWindow() {
       revalidateOnReconnect: true,
       refreshInterval: 5 * 60 * 1000,
       dedupingInterval: 60000,
-      shouldRetryOnError: false
+      shouldRetryOnError: false,
     }
   );
 
@@ -43,6 +43,6 @@ export function useApplyWindow() {
     softDeadline: data?.softDeadline ?? null,
     hardDeadline: data?.hardDeadline ?? null,
     termCode: data?.termCode ?? null,
-    isLoading
+    isLoading,
   };
 }

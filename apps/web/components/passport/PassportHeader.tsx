@@ -17,7 +17,7 @@ export function PassportHeader({
   email,
   membershipLoading,
   isMember,
-  execPositionLabel
+  execPositionLabel,
 }: PassportHeaderProps) {
   let membershipBadge: ReactNode;
 

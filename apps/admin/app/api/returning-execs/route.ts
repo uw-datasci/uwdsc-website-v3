@@ -22,8 +22,8 @@ export const GET = withAdmin(
         canUse: true,
         isPresident: scope.isPresident,
         vpPositionIds: scope.vpPositionIds,
-        vpExecPositionIds: scope.vpExecPositionIds
-      }
+        vpExecPositionIds: scope.vpExecPositionIds,
+      },
     });
   },
   { scope: true }

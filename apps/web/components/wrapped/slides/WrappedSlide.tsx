@@ -28,7 +28,7 @@ const SLIDE_LAYOUTS: {
   "minutes-on-site": MinutesOnSiteSlide,
   "password-resets": PasswordResetsSlide,
   "fun-facts": FunFactsSlide,
-  awards: AwardsSlide
+  awards: AwardsSlide,
 };
 
 /** Renders `slide` with whichever layout component matches its `layout` discriminant. */

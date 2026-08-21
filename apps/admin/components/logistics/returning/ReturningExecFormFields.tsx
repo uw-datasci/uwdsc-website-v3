@@ -13,7 +13,7 @@ import {
   renderSelectField,
   renderStringRadioGroupField,
   renderTextAreaField,
-  renderTextField
+  renderTextField,
 } from "@uwdsc/ui";
 
 import type { ReturningExecFormValues } from "@/lib/schemas/returningExec";
@@ -26,9 +26,9 @@ const IN_PERSON_RADIO_OPTIONS = [
   { value: "no_outside_gta", label: "No, outside of GTA" },
   {
     value: "no_in_gta",
-    label: "No, but in the GTA (able to commute to Waterloo)"
+    label: "No, but in the GTA (able to commute to Waterloo)",
   },
-  { value: "not_sure", label: "Not sure" }
+  { value: "not_sure", label: "Not sure" },
 ] as const;
 
 const FOLLOW_UP_FIELDS = [
@@ -36,7 +36,7 @@ const FOLLOW_UP_FIELDS = [
   "second_choice_position",
   "third_choice_position",
   "in_person_next_term",
-  "qualifications"
+  "qualifications",
 ] as const;
 
 const RADIO_GROUP_CLASS = "flex flex-col gap-3 pt-1 sm:flex-row sm:flex-wrap sm:gap-6";
@@ -84,7 +84,7 @@ function buildOptionalRoleSelect(
     disabled,
     dimmed: locked && !followUpDisabled,
     placeholder: followUpDisabled ? "N/A" : locked ? lockPlaceholder : "Select a position",
-    options
+    options,
   };
 }
 
@@ -93,7 +93,7 @@ function OptionalRoleSelect({
   name,
   label,
   ui,
-  optionsKey
+  optionsKey,
 }: Readonly<{
   form: UseFormReturn<ReturningExecFormValues>;
   name: "second_choice_position" | "third_choice_position";
@@ -115,7 +115,7 @@ function OptionalRoleSelect({
           required: false,
           disabled: ui.disabled,
           clearValueSentinel: NO_POSITION_SELECT_VALUE,
-          options: ui.options
+          options: ui.options,
         })}
       />
     </div>
@@ -130,7 +130,7 @@ export function ReturningExecFormFields({
   submitted,
   submitting,
   submitButtonLoadingText,
-  submitButtonIdleText
+  submitButtonIdleText,
 }: ReturningExecFormFieldsProps) {
   const interestedInReturning = form.watch("interested_in_returning");
   const firstChoice = form.watch("first_choice_position") ?? "";
@@ -139,7 +139,7 @@ export function ReturningExecFormFields({
 
   const optionalPositionOptions = [
     { value: NO_POSITION_SELECT_VALUE, label: "None" },
-    ...positionOptions
+    ...positionOptions,
   ];
 
   const secondRoleOptions = filterPositionOptions(
@@ -196,8 +196,8 @@ export function ReturningExecFormFields({
     { value: "false", label: "No" },
     {
       value: "future",
-      label: `No, but interested in returning to ${deferredReturnTermCode}`
-    }
+      label: `No, but interested in returning to ${deferredReturnTermCode}`,
+    },
   ] as const;
 
   const followUpKey = followUpDisabled ? "disabled" : "enabled";
@@ -221,7 +221,7 @@ export function ReturningExecFormFields({
                       label: "Email address",
                       placeholder: "you@example.com",
                       required: true,
-                      inputProps: { disabled: true }
+                      inputProps: { disabled: true },
                     })}
                   />
                   <FormField
@@ -231,7 +231,7 @@ export function ReturningExecFormFields({
                       label: "Full name",
                       placeholder: "Jane Smith",
                       required: true,
-                      inputProps: { disabled: true }
+                      inputProps: { disabled: true },
                     })}
                   />
                 </div>
@@ -242,7 +242,7 @@ export function ReturningExecFormFields({
                   render={renderTextField({
                     label: "Discord handle",
                     placeholder: "username",
-                    required: true
+                    required: true,
                   })}
                 />
 
@@ -254,7 +254,7 @@ export function ReturningExecFormFields({
                     placeholder: "e.g. VP Marketing (W25), Events Lead (F24)",
                     required: true,
                     className: "resize-none",
-                    textareaProps: { rows: 1 }
+                    textareaProps: { rows: 1 },
                   })}
                 />
               </CardContent>
@@ -276,7 +276,7 @@ export function ReturningExecFormFields({
                       required: true,
                       idPrefix: "returning-exec-interest",
                       groupClassName: RADIO_GROUP_CLASS,
-                      options: interestRadioOptions
+                      options: interestRadioOptions,
                     })}
                   />
                 </div>
@@ -290,7 +290,7 @@ export function ReturningExecFormFields({
                     required: false,
                     stretchToParent: true,
                     className: "resize-none",
-                    textareaProps: { rows: 1 }
+                    textareaProps: { rows: 1 },
                   })}
                 />
               </CardContent>
@@ -316,7 +316,7 @@ export function ReturningExecFormFields({
                     placeholder: followUpDisabled ? "N/A" : "Select a position",
                     required: !followUpDisabled,
                     disabled: followUpDisabled,
-                    options: positionOptions
+                    options: positionOptions,
                   })}
                 />
                 <OptionalRoleSelect
@@ -360,7 +360,7 @@ export function ReturningExecFormFields({
                       disabled: followUpDisabled,
                       idPrefix: "returning-exec-in-person",
                       groupClassName: RADIO_GROUP_CLASS,
-                      options: IN_PERSON_RADIO_OPTIONS
+                      options: IN_PERSON_RADIO_OPTIONS,
                     })}
                   />
                 </div>
@@ -374,7 +374,7 @@ export function ReturningExecFormFields({
                     required: !followUpDisabled,
                     stretchToParent: true,
                     className: "resize-none text-sm",
-                    textareaProps: { rows: 2, disabled: followUpDisabled }
+                    textareaProps: { rows: 2, disabled: followUpDisabled },
                   })}
                 />
               </CardContent>
@@ -396,7 +396,7 @@ export function ReturningExecFormFields({
               placeholder: "Any additional context...",
               required: false,
               className: "resize-none",
-              textareaProps: { rows: 3 }
+              textareaProps: { rows: 3 },
             })}
           />
         </CardContent>

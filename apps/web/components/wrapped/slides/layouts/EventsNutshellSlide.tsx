@@ -4,7 +4,7 @@ import {
   tiltWarp,
   atkinsonHyperlegibleMono,
   displayFontClass as display,
-  monoFontClass as mono
+  monoFontClass as mono,
 } from "../../fonts";
 import type { EventsNutshellSlideData } from "../../types";
 import { CountUpText, Floating, slideItem, slideStagger } from "../motion";
@@ -34,14 +34,14 @@ export function EventsNutshellSlide({ slide }: EventsNutshellSlideProps) {
     { left: "30%", top: "50%" },
     { left: "48%", top: "60%" },
     { left: "70%", top: "49%" },
-    { left: "88%", top: "57%" }
+    { left: "88%", top: "57%" },
   ] as const;
 
   const topPatterns = [
     { left: "-6%", top: "-24%", width: 82, rotation: -14, variant: 1 },
     { left: "16%", top: "-16%", width: 72, rotation: 18, variant: 2 },
     { left: "54%", top: "-22%", width: 86, rotation: -10, variant: 3 },
-    { left: "84%", top: "-26%", width: 64, rotation: 16, variant: 4 }
+    { left: "84%", top: "-26%", width: 64, rotation: 16, variant: 4 },
   ] as const;
 
   return (
@@ -133,7 +133,7 @@ export function EventsNutshellSlide({ slide }: EventsNutshellSlideProps) {
                   d="M102.301 70.373C103.374 75.6236 102.062 94.6462 102.227 101.323C102.6 116.313 103.513 130.427 105.84 145.266C108.589 162.789 103.203 183.766 129.015 176.26C135.428 167.936 140.855 159.735 147.918 151.837C154.128 166.097 157.253 172.21 159.692 187.642C144.32 188.487 106.618 194.253 91.4027 197.146C80.652 198.75 69.9743 200.817 59.4017 203.341C51.7217 182.597 44.1426 166.998 36.9902 144.747C47.5514 153.57 61.1701 173.158 75.7005 168.554C88.1187 164.618 83.5315 142.202 84.5975 131.865C86.786 110.636 92.0403 89.1996 102.301 70.373Z"
                   fill="#ccda96"
                 />
-              </svg>
+              </svg>,
             ][pattern.variant - 1];
 
             return (
@@ -147,7 +147,7 @@ export function EventsNutshellSlide({ slide }: EventsNutshellSlideProps) {
                 style={{
                   left: pattern.left,
                   top: pattern.top,
-                  width: pattern.width
+                  width: pattern.width,
                 }}
               >
                 {Svg}
@@ -221,7 +221,7 @@ export function EventsNutshellSlide({ slide }: EventsNutshellSlideProps) {
                 top: square.top,
                 width: 21,
                 height: 30,
-                transform: "translate(-50%, -50%)"
+                transform: "translate(-50%, -50%)",
               }}
               viewBox="0 0 169 244"
               fill="none"

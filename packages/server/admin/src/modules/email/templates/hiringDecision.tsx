@@ -6,7 +6,7 @@ import {
   Link,
   Preview,
   Section,
-  Text
+  Text,
 } from "@react-email/components";
 import type { ReactElement } from "react";
 import type { HiringDecisionEmailProps } from "../../../types/email";
@@ -23,10 +23,10 @@ const SOCIAL_LINKS = [
   { label: "Instagram", href: "https://www.instagram.com/uwaterloodsc/" },
   {
     label: "LinkedIn",
-    href: "https://www.linkedin.com/company/waterloo-data-science-club/"
+    href: "https://www.linkedin.com/company/waterloo-data-science-club/",
   },
   { label: "Discord", href: "https://discord.gg/2gBB3ufyCR" },
-  { label: "Website", href: "https://uwdatascience.ca" }
+  { label: "Website", href: "https://uwdatascience.ca" },
 ] as const;
 
 export function getHiringDecisionSubject(type: "offer" | "rejection"): string {
@@ -38,7 +38,7 @@ export function HiringDecisionEmail({
   applicantName,
   positionName,
   offerTermLabel = DEFAULT_OFFER_TERM,
-  offerAcceptByDateLabel = DEFAULT_OFFER_ACCEPT_BY
+  offerAcceptByDateLabel = DEFAULT_OFFER_ACCEPT_BY,
 }: Readonly<HiringDecisionEmailProps>): ReactElement {
   const subject = getHiringDecisionSubject(type);
   const termLower = offerTermLabel.toLowerCase();
@@ -53,12 +53,12 @@ export function HiringDecisionEmail({
     color: "#374151",
     lineHeight: "1.6" as const,
     margin: "0 0 16px 0",
-    fontSize: "16px"
+    fontSize: "16px",
   };
 
   const linkStyle = {
     color: "#2563eb",
-    textDecoration: "underline" as const
+    textDecoration: "underline" as const,
   };
 
   return (
@@ -68,7 +68,7 @@ export function HiringDecisionEmail({
       <Body
         style={{
           backgroundColor: "#f6f9fc",
-          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         }}
       >
         <Container
@@ -78,7 +78,7 @@ export function HiringDecisionEmail({
             backgroundColor: "#ffffff",
             borderRadius: "8px",
             padding: "40px",
-            border: "1px solid #e6ebf1"
+            border: "1px solid #e6ebf1",
           }}
         >
           <Section>
@@ -92,7 +92,7 @@ export function HiringDecisionEmail({
                       backgroundColor: "#dbeafe",
                       fontWeight: 700,
                       padding: "0 4px",
-                      borderRadius: "2px"
+                      borderRadius: "2px",
                     }}
                   >
                     Congratulations
@@ -114,7 +114,7 @@ export function HiringDecisionEmail({
                   style={{
                     ...bodyTextStyle,
                     marginBottom: "4px",
-                    fontWeight: 700
+                    fontWeight: 700,
                   }}
                 >
                   Co-Presidents
@@ -126,7 +126,7 @@ export function HiringDecisionEmail({
                   style={{
                     ...bodyTextStyle,
                     marginBottom: "0",
-                    fontSize: "14px"
+                    fontSize: "14px",
                   }}
                 >
                   {SOCIAL_LINKS.map((item, index) => (
@@ -156,7 +156,7 @@ export function HiringDecisionEmail({
                     marginBottom: "0",
                     fontSize: "12px",
                     color: "#9ca3af",
-                    textAlign: "center" as const
+                    textAlign: "center" as const,
                   }}
                 >
                   UW Data Science Club &mdash;{" "}

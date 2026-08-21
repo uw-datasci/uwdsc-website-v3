@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   completeProfileSchema,
   completeProfileDefaultValues,
-  type CompleteProfileFormValues
+  type CompleteProfileFormValues,
 } from "@/lib/schemas/profile";
 import { completeProfile } from "@/lib/api/profile";
 import { renderTextField, renderSelectField, Button, Form, FormField } from "@uwdsc/ui";
@@ -15,7 +15,7 @@ import { TERM_OPTIONS } from "@/constants/profile";
 import {
   FACULTY_LABELS,
   FACULTY_PROFILE_FORM_OPTIONS,
-  FACULTY_PROFILE_LABEL_TO_VALUE
+  FACULTY_PROFILE_LABEL_TO_VALUE,
 } from "@uwdsc/common/constants";
 import type { Profile } from "@uwdsc/common/types";
 
@@ -31,7 +31,7 @@ export function CompleteProfileForm({ prefill, onSuccess }: CompleteProfileFormP
   const form = useForm<CompleteProfileFormValues>({
     resolver: zodResolver(completeProfileSchema),
     defaultValues: completeProfileDefaultValues,
-    mode: "onTouched"
+    mode: "onTouched",
   });
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export function CompleteProfileForm({ prefill, onSuccess }: CompleteProfileFormP
         wat_iam: formData.wat_iam,
         faculty: FACULTY_PROFILE_LABEL_TO_VALUE[formData.faculty] ?? "math",
         term: formData.term,
-        heard_from_where: formData.heard_from_where
+        heard_from_where: formData.heard_from_where,
       };
 
       await completeProfile(profileData);
@@ -84,7 +84,7 @@ export function CompleteProfileForm({ prefill, onSuccess }: CompleteProfileFormP
           render={renderTextField({
             placeholder: "Enter your first name",
             className:
-              "!h-auto !text-base border-gray-100/80 !bg-black px-4.5 py-3.5 placeholder:text-gray-100/80 rounded-lg xl:px-6 xl:py-4.5"
+              "!h-auto !text-base border-gray-100/80 !bg-black px-4.5 py-3.5 placeholder:text-gray-100/80 rounded-lg xl:px-6 xl:py-4.5",
           })}
         />
         <FormField
@@ -93,7 +93,7 @@ export function CompleteProfileForm({ prefill, onSuccess }: CompleteProfileFormP
           render={renderTextField({
             placeholder: "Enter your last name",
             className:
-              "!h-auto !text-base border-gray-100/80 !bg-black px-4.5 py-3.5 placeholder:text-gray-100/80 rounded-lg xl:px-6 xl:py-4.5"
+              "!h-auto !text-base border-gray-100/80 !bg-black px-4.5 py-3.5 placeholder:text-gray-100/80 rounded-lg xl:px-6 xl:py-4.5",
           })}
         />
         <FormField
@@ -102,7 +102,7 @@ export function CompleteProfileForm({ prefill, onSuccess }: CompleteProfileFormP
           render={renderTextField({
             placeholder: "WatIAM (ex. slchow)",
             className:
-              "!h-auto !text-base border-gray-100/80 !bg-black px-4.5 py-3.5 placeholder:text-gray-100/80 rounded-lg xl:px-6 xl:py-4.5"
+              "!h-auto !text-base border-gray-100/80 !bg-black px-4.5 py-3.5 placeholder:text-gray-100/80 rounded-lg xl:px-6 xl:py-4.5",
           })}
         />
         <FormField
@@ -117,7 +117,7 @@ export function CompleteProfileForm({ prefill, onSuccess }: CompleteProfileFormP
               "bg-black border border-gray-100/80 rounded-lg shadow-lg max-h-64 min-w-[var(--radix-select-trigger-width)]",
             itemClassName:
               "text-slate-200 focus:text-white focus:bg-slate-600/50 hover:bg-slate-600/50 hover:text-white cursor-pointer py-2 pl-3 pr-8 text-base rounded-sm",
-            contentPosition: "popper"
+            contentPosition: "popper",
           })}
         />
         <FormField
@@ -132,7 +132,7 @@ export function CompleteProfileForm({ prefill, onSuccess }: CompleteProfileFormP
               "bg-black border border-gray-100/80 rounded-lg shadow-lg max-h-64 min-w-[var(--radix-select-trigger-width)]",
             itemClassName:
               "text-slate-200 focus:text-white focus:bg-slate-600/50 hover:bg-slate-600/50 hover:text-white cursor-pointer py-2 pl-3 pr-8 text-base rounded-sm",
-            contentPosition: "popper"
+            contentPosition: "popper",
           })}
         />
         <FormField
@@ -141,7 +141,7 @@ export function CompleteProfileForm({ prefill, onSuccess }: CompleteProfileFormP
           render={renderTextField({
             placeholder: "Where did you hear about us?",
             className:
-              "!h-auto !text-base border-gray-100/80 !bg-black px-4.5 py-3.5 placeholder:text-gray-100/80 rounded-lg xl:px-6 xl:py-4.5"
+              "!h-auto !text-base border-gray-100/80 !bg-black px-4.5 py-3.5 placeholder:text-gray-100/80 rounded-lg xl:px-6 xl:py-4.5",
           })}
         />
         {authError && <div className="text-red-400 text-base mt-3">{authError}</div>}

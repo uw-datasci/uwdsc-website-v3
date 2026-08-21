@@ -57,7 +57,7 @@ function collectSubteamNames(applicants: readonly HiringApplicant[]): {
   }
   return {
     names: [...names].sort((a, b) => a.localeCompare(b)),
-    hasNone
+    hasNone,
   };
 }
 

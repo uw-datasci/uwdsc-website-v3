@@ -10,7 +10,7 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  Skeleton
+  Skeleton,
 } from "@uwdsc/ui";
 import type { RaftError, RaftErrorGroup, RaftGroupFilters } from "@uwdsc/common/types";
 import { getRaftError, getRaftOccurrences, setRaftErrorResolved } from "@/lib/api/raft";
@@ -68,8 +68,8 @@ function useErrorDetail(
         endpoint: group.endpoint,
         errorMessage: group.error_message,
         page: 1,
-        pageSize: 10
-      })
+        pageSize: 10,
+      }),
     ])
       .then(([detail, occurrenceResult]) => {
         if (cancelled) return;
@@ -117,7 +117,7 @@ export function ErrorDetailSheet({
   open,
   onOpenChange,
   onResolvedChange,
-  onSelectError
+  onSelectError,
 }: ErrorDetailSheetProps) {
   const { error, occurrences, loading, updating, loadError, toggleResolved } = useErrorDetail(
     open,
@@ -160,7 +160,7 @@ function ErrorDetailBody({
   occurrences,
   updating,
   onToggleResolved,
-  onSelectError
+  onSelectError,
 }: {
   readonly loading: boolean;
   readonly loadError: string | null;
@@ -203,7 +203,7 @@ function ErrorDetailContent({
   occurrences,
   updating,
   onToggleResolved,
-  onSelectError
+  onSelectError,
 }: {
   readonly error: RaftError;
   readonly group: RaftErrorGroup | null;
@@ -275,7 +275,7 @@ function OccurrencesList({
   error,
   group,
   occurrences,
-  onSelectError
+  onSelectError,
 }: {
   readonly error: RaftError;
   readonly group: RaftErrorGroup | null;

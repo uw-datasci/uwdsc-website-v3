@@ -21,18 +21,18 @@ import {
   Button,
   Input,
   Textarea,
-  DateTimePicker
+  DateTimePicker,
 } from "@uwdsc/ui";
 import {
   createEventSchema,
   type CreateEventFormValues,
-  type UpdateEventFormValues
+  type UpdateEventFormValues,
 } from "@/lib/schemas/event";
 import { createEvent, updateEvent } from "@/lib/api/events";
 import {
   EVENT_TIMEZONE_LABEL,
   pickerValueToUtcIso,
-  utcIsoToPickerValue
+  utcIsoToPickerValue,
 } from "@/lib/utils/events";
 import type { Event } from "@uwdsc/common/types";
 
@@ -55,8 +55,8 @@ export function EventForm({ open, onOpenChange, event, onSuccess }: Readonly<Eve
       location: "",
       image_url: null,
       start_time: "",
-      end_time: ""
-    }
+      end_time: "",
+    },
   });
 
   useEffect(() => {
@@ -68,7 +68,7 @@ export function EventForm({ open, onOpenChange, event, onSuccess }: Readonly<Eve
           location: event.location,
           image_url: event.image_url ?? null,
           start_time: event.start_time,
-          end_time: event.end_time
+          end_time: event.end_time,
         });
       } else {
         form.reset({
@@ -77,7 +77,7 @@ export function EventForm({ open, onOpenChange, event, onSuccess }: Readonly<Eve
           location: "",
           image_url: null,
           start_time: "",
-          end_time: ""
+          end_time: "",
         });
       }
     }

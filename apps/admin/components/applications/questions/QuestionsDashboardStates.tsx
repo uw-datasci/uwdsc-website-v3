@@ -7,7 +7,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  Spinner
+  Spinner,
 } from "@uwdsc/ui";
 
 export function QuestionsDashboardLoading() {

@@ -4,7 +4,7 @@ import {
   tiltWarp,
   atkinsonHyperlegibleMono,
   displayFontClass as display,
-  monoFontClass as mono
+  monoFontClass as mono,
 } from "../../fonts";
 import type { FunFactPolaroid, FunFactsSlideData } from "../../types";
 
@@ -67,7 +67,7 @@ function Polaroid({ fact, centerX, centerY, rotate }: PolaroidProps) {
       style={{
         left: centerX,
         top: centerY,
-        transform: `translate(-50%, -50%) rotate(${rotate})`
+        transform: `translate(-50%, -50%) rotate(${rotate})`,
       }}
     >
       <div

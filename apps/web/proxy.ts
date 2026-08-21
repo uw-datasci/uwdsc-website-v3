@@ -13,7 +13,7 @@ export async function proxy(request: NextRequest) {
   // Get user session
   const supabase = createSupabaseMiddlewareClient(request, response);
   const {
-    data: { user }
+    data: { user },
   } = await supabase.auth.getUser();
   const { pathname } = request.nextUrl;
 
@@ -50,6 +50,6 @@ export const config = {
      * - logos (logo files)
      * - images (image files)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|logos|images).*)"
-  ]
+    "/((?!api|_next/static|_next/image|favicon.ico|logos|images).*)",
+  ],
 };

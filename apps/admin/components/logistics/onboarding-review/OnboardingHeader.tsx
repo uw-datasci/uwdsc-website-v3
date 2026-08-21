@@ -9,7 +9,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from "@uwdsc/ui";
 import { Download, Image, Search } from "lucide-react";
 import type { OnboardingAdminRow, Term } from "@uwdsc/common/types";
@@ -19,19 +19,19 @@ import { downloadTeamHeadshots } from "@/lib/api/onboarding";
 const STATUS_OPTIONS = [
   { value: "all", label: "All" },
   { value: "submitted", label: "Submitted" },
-  { value: "missing", label: "Not submitted" }
+  { value: "missing", label: "Not submitted" },
 ] as const;
 
 const ROLE_OPTIONS = [
   { value: "all", label: "All Roles" },
   { value: "admin", label: "Admin" },
-  { value: "exec", label: "Exec" }
+  { value: "exec", label: "Exec" },
 ] as const;
 
 const TERM_TYPE_OPTIONS = [
   { value: "all", label: "All Term Types" },
   { value: "study", label: "Study" },
-  { value: "coop", label: "Co-op" }
+  { value: "coop", label: "Co-op" },
 ] as const;
 
 const ONBOARDING_CSV_HEADERS = [
@@ -45,7 +45,7 @@ const ONBOARDING_CSV_HEADERS = [
   "discord",
   "datasci_competency",
   "instagram",
-  "additional_comments"
+  "additional_comments",
 ] as const;
 
 function getCsvValue(row: OnboardingAdminRow, key: string): unknown {
@@ -83,7 +83,7 @@ export function OnboardingHeader({
   rows,
   term,
   termId,
-  onFilteredRowsChange
+  onFilteredRowsChange,
 }: OnboardingHeaderProps) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");

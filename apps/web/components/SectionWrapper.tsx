@@ -9,7 +9,7 @@ interface HomeSectionWrapperProps {
 export default function SectionWrapper({
   children,
   className,
-  id
+  id,
 }: Readonly<HomeSectionWrapperProps>) {
   return (
     <section id={id} className={cn("mx-container mb-section", className)}>

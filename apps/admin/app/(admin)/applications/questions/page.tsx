@@ -7,7 +7,7 @@ import {
   QuestionsBankSection,
   QuestionsDashboardError,
   QuestionsDashboardForbidden,
-  QuestionsDashboardLoading
+  QuestionsDashboardLoading,
 } from "@/components/applications/questions";
 import { useQuestionsDashboard } from "@/hooks/useQuestionsDashboard";
 
@@ -29,7 +29,7 @@ export default function QuestionsPage() {
     submitQuestion,
     confirmDelete,
     onFormDialogOpenChange,
-    onDeleteDialogOpenChange
+    onDeleteDialogOpenChange,
   } = useQuestionsDashboard();
 
   let main: ReactNode;

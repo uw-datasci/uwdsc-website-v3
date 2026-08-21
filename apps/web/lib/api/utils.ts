@@ -26,13 +26,13 @@ export async function tryGetCurrentUser(): Promise<AuthResult> {
   if (userError || !user) {
     return {
       user: null,
-      isUnauthorized: RaftResponse.unauthorized("Authentication required")
+      isUnauthorized: RaftResponse.unauthorized("Authentication required"),
     };
   }
 
   return {
     user,
-    isUnauthorized: RaftResponse.unauthorized("Authentication required")
+    isUnauthorized: RaftResponse.unauthorized("Authentication required"),
   };
 }
 
@@ -72,6 +72,6 @@ export function trimBaseProfilePayload(body: Record<string, unknown>): ProfileUp
     last_name: String(body.last_name).trim(),
     wat_iam: String(body.wat_iam).trim(),
     faculty: String(body.faculty),
-    term: String(body.term)
+    term: String(body.term),
   };
 }

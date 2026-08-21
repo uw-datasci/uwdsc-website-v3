@@ -12,7 +12,7 @@ import {
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
-  type ChartConfig
+  type ChartConfig,
 } from "@uwdsc/ui";
 import type { RaftTimeSeriesPoint } from "@uwdsc/common/types";
 import { formatRaftDate } from "./utils";
@@ -22,7 +22,7 @@ const chartConfig = {
   error: { label: "Error", color: "hsl(25 95% 53%)" },
   warning: { label: "Warning", color: "hsl(45 93% 47%)" },
   info: { label: "Info", color: "hsl(217 91% 60%)" },
-  debug: { label: "Debug", color: "var(--muted-foreground)" }
+  debug: { label: "Debug", color: "var(--muted-foreground)" },
 } satisfies ChartConfig;
 
 interface ErrorsOverTimeChartProps {
@@ -32,7 +32,7 @@ interface ErrorsOverTimeChartProps {
 export function ErrorsOverTimeChart({ data }: ErrorsOverTimeChartProps) {
   const chartData = data.map((point) => ({
     ...point,
-    label: formatRaftDate(point.bucket)
+    label: formatRaftDate(point.bucket),
   }));
 
   return (

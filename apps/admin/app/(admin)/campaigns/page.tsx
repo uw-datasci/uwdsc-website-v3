@@ -21,13 +21,13 @@ import {
   TabsTrigger,
   Textarea,
   renderMultiSelectDropdownField,
-  renderTextField
+  renderTextField,
 } from "@uwdsc/ui";
 import {
   CAMPAIGN_RECIPIENT_ROLES,
   sendCampaignSchema,
   type CampaignRecipientRole,
-  type SendCampaignFormValues
+  type SendCampaignFormValues,
 } from "@/lib/schemas/emails";
 import { sendCampaign } from "@/lib/api/emails";
 
@@ -59,7 +59,7 @@ const MARKDOWN_COMPONENTS: Components = {
       {children}
     </a>
   ),
-  hr: () => <hr className="my-4 border-t border-muted" />
+  hr: () => <hr className="my-4 border-t border-muted" />,
 };
 
 export default function CampaignsPage() {
@@ -71,12 +71,12 @@ export default function CampaignsPage() {
     defaultValues: {
       subject: "",
       recipientRoles: [] as CampaignRecipientRole[],
-      body: ""
-    }
+      body: "",
+    },
   });
 
   const {
-    formState: { isValid }
+    formState: { isValid },
   } = form;
 
   const body = useWatch({ control: form.control, name: "body" }) ?? "";
@@ -112,7 +112,7 @@ export default function CampaignsPage() {
               render={renderTextField({
                 label: "Subject",
                 placeholder: "Email subject...",
-                required: true
+                required: true,
               })}
             />
             <FormField
@@ -122,7 +122,7 @@ export default function CampaignsPage() {
                 label: "Recipients",
                 required: true,
                 emptyPlaceholder: "Select audiences",
-                options: CAMPAIGN_RECIPIENT_ROLES
+                options: CAMPAIGN_RECIPIENT_ROLES,
               })}
             />
           </div>

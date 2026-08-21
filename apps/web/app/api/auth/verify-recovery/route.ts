@@ -13,7 +13,7 @@ export const POST = withRaftRoute(async (request) => {
   const authService = await createAuthService();
   const result = await authService.verifyOtp({
     token_hash: token_hash.trim(),
-    type: "recovery"
+    type: "recovery",
   });
 
   if (!result.success) {
@@ -25,6 +25,6 @@ export const POST = withRaftRoute(async (request) => {
 
   return RaftResponse.ok({
     success: true,
-    message: "Recovery session established"
+    message: "Recovery session established",
   });
 });

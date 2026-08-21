@@ -8,7 +8,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from "@uwdsc/ui";
 import { Search } from "lucide-react";
 import type { ApplicationListItem } from "@uwdsc/common/types";
@@ -17,7 +17,7 @@ import {
   DEFAULT_SUBMISSION_STATUS_FILTER,
   DRAFT_SUBMISSION_STATUS_FILTER,
   SUBMITTED_SUBMISSION_STATUS_FILTER,
-  type ApplicationSubmissionStatusFilter
+  type ApplicationSubmissionStatusFilter,
 } from "@/constants/applications";
 
 function matchesSubmissionStatusFilter(
@@ -50,7 +50,7 @@ interface ApplicationsHeaderProps {
 export function ApplicationsHeader({
   applications,
   statusCounts,
-  onFilteredApplicationsChange
+  onFilteredApplicationsChange,
 }: ApplicationsHeaderProps) {
   const [submissionStatusFilter, setSubmissionStatusFilter] =
     useState<ApplicationSubmissionStatusFilter>(DEFAULT_SUBMISSION_STATUS_FILTER);

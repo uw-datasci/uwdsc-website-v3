@@ -7,21 +7,21 @@ import {
   getApplication,
   getPositionsWithQuestions,
   getProfileAutofill,
-  updateApplication
+  updateApplication,
 } from "@/lib/api/application";
 import { getResumeStatus } from "@/lib/api/resume";
 
 import {
   applicationDefaultValues,
   applicationSchema,
-  type AppFormValues
+  type AppFormValues,
 } from "@/lib/schemas/application";
 import {
   buildPositionSelections,
   collectAllAnswers,
   isStepValid,
   openPositionSelection,
-  partitionDraftAnswers
+  partitionDraftAnswers,
 } from "@/lib/utils/application";
 import { useApplicationStepStorage } from "@/hooks/useApplicationStepStorage";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,7 +36,7 @@ import {
   Personal,
   Positions,
   Resume,
-  Submitted
+  Submitted,
 } from "@/components/application/steps";
 import { STEP_NAMES } from "@/constants/application";
 import type { GeneralQuestion, PositionWithQuestions, Term } from "@uwdsc/common/types";
@@ -53,16 +53,16 @@ import { Button, Card, CardHeader, CardTitle, CardContent } from "@uwdsc/ui";
 const slideVariants = {
   enter: (direction: number) => ({
     x: direction > 0 ? 1000 : -1000,
-    opacity: 0
+    opacity: 0,
   }),
   center: {
     x: 0,
-    opacity: 1
+    opacity: 1,
   },
   exit: (direction: number) => ({
     x: direction > 0 ? -1000 : 1000,
-    opacity: 0
-  })
+    opacity: 0,
+  }),
 };
 
 export default function ApplyPage() {
@@ -81,12 +81,12 @@ export default function ApplyPage() {
   const form = useForm<AppFormValues>({
     resolver: zodResolver(applicationSchema),
     defaultValues: applicationDefaultValues,
-    mode: "onTouched"
+    mode: "onTouched",
   });
 
   const { readStoredStep, clearStoredStep } = useApplicationStepStorage({
     termId: currentTerm?.id ?? null,
-    currentStep
+    currentStep,
   });
 
   useEffect(() => {
@@ -98,7 +98,7 @@ export default function ApplyPage() {
 
         const [positionsData, autofill] = await Promise.all([
           getPositionsWithQuestions(),
-          getProfileAutofill()
+          getProfileAutofill(),
         ]);
         setPositions(positionsData.positions);
         setGeneralQuestions(positionsData.generalQuestions);
@@ -117,7 +117,7 @@ export default function ApplyPage() {
           personal_email: form.getValues("personal_email") || "",
           program: form.getValues("program") || "",
           location: form.getValues("location") || "",
-          resumeKey: resumeStatus.url ?? ""
+          resumeKey: resumeStatus.url ?? "",
         });
 
         const existing = await getApplication(term.id);
@@ -164,7 +164,7 @@ export default function ApplyPage() {
           linkedin_url: existing.linkedin_url ?? "",
           github_url: existing.github_url ?? "",
           portfolio_url: existing.portfolio_url ?? "",
-          resumeKey: resumeStatus.url ?? ""
+          resumeKey: resumeStatus.url ?? "",
         });
 
         const storedStep = readStoredStep(term.id);
@@ -210,22 +210,22 @@ export default function ApplyPage() {
             year_of_study: values.academic_term,
             personal_email: values.personal_email,
             location: values.location,
-            club_experience: values.club_experience
+            club_experience: values.club_experience,
           };
         case 2:
           return {
-            answers: collectAllAnswers(values, { positions, generalQuestions })
+            answers: collectAllAnswers(values, { positions, generalQuestions }),
           };
         case 3:
           return {
             position_selections: buildPositionSelections(values),
-            answers: collectAllAnswers(values, { positions, generalQuestions })
+            answers: collectAllAnswers(values, { positions, generalQuestions }),
           };
         case 4:
           return {
             linkedin_url: values.linkedin_url,
             github_url: values.github_url,
-            portfolio_url: values.portfolio_url ?? ""
+            portfolio_url: values.portfolio_url ?? "",
           };
         default:
           return {};
@@ -249,7 +249,7 @@ export default function ApplyPage() {
       const payload = buildUpdatePayload(currentStep);
       await updateApplication(applicationId, {
         ...payload,
-        ...(currentStep === 4 && { submit: true })
+        ...(currentStep === 4 && { submit: true }),
       });
       goToStep(currentStep === 4 ? 5 : currentStep + 1);
     } catch (err) {
@@ -272,7 +272,7 @@ export default function ApplyPage() {
     const isValid =
       isStepValid(form, currentStep, {
         positions,
-        generalQuestions
+        generalQuestions,
       }) || false;
     const isButtonDisabled = !isValid || isLoading || (isLastStep && isPastHardDeadline);
 
@@ -394,7 +394,7 @@ export default function ApplyPage() {
                 exit="exit"
                 transition={{
                   x: { type: "spring", stiffness: 300, damping: 30 },
-                  opacity: { duration: 0.2 }
+                  opacity: { duration: 0.2 },
                 }}
               >
                 {renderStep()}

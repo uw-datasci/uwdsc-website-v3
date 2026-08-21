@@ -21,7 +21,7 @@ export const POST = withRaftRoute(async (request) => {
     console.error("[Webhook] Missing RESEND_WEBHOOK_SECRET");
     return RaftResponse.ok({
       success: false,
-      reason: "missing_webhook_secret"
+      reason: "missing_webhook_secret",
     });
   }
 
@@ -34,7 +34,7 @@ export const POST = withRaftRoute(async (request) => {
     if (!svix_id || !svix_timestamp || !svix_signature) {
       return RaftResponse.ok({
         success: false,
-        reason: "missing_svix_headers"
+        reason: "missing_svix_headers",
       });
     }
 
@@ -49,7 +49,7 @@ export const POST = withRaftRoute(async (request) => {
       evt = wh.verify(body, {
         "svix-id": svix_id,
         "svix-timestamp": svix_timestamp,
-        "svix-signature": svix_signature
+        "svix-signature": svix_signature,
       }) as WebhookEventPayload;
     } catch (err) {
       console.error("[Webhook] Error verifying webhook:", err);
@@ -60,7 +60,7 @@ export const POST = withRaftRoute(async (request) => {
       return RaftResponse.ok({
         success: false,
         reason: "invalid_event_type",
-        event: evt.type
+        event: evt.type,
       });
     }
 
@@ -73,7 +73,7 @@ export const POST = withRaftRoute(async (request) => {
       return RaftResponse.ok({
         success: false,
         reason: contents.reason,
-        message: contents.message
+        message: contents.message,
       });
     }
 
@@ -102,7 +102,7 @@ export const POST = withRaftRoute(async (request) => {
     return RaftResponse.ok({
       success: true,
       event: evt.type,
-      emailId: evt.data.email_id
+      emailId: evt.data.email_id,
     });
   } catch (error) {
     if (error instanceof ApiError) {
@@ -110,7 +110,7 @@ export const POST = withRaftRoute(async (request) => {
         success: false,
         reason: "processing_error",
         message: error.message,
-        statusCode: error.statusCode
+        statusCode: error.statusCode,
       });
     }
     console.error("[Webhook] Failed to process request:", error);
@@ -122,7 +122,7 @@ export const POST = withRaftRoute(async (request) => {
     return RaftResponse.ok({
       success: false,
       reason: "unexpected_error",
-      message: error instanceof Error ? error.message : "Unknown error"
+      message: error instanceof Error ? error.message : "Unknown error",
     });
   }
 });

@@ -24,7 +24,7 @@ import {
   SelectValue,
   renderTextField,
   renderTextAreaField,
-  renderSelectField
+  renderSelectField,
 } from "@uwdsc/ui";
 import type { AppQuestion } from "@uwdsc/common/types";
 import type { QuestionPositionOption } from "@uwdsc/common/types";
@@ -52,7 +52,7 @@ export function EditQuestionDialog({
   isPresident,
   positions,
   saving,
-  onSubmit
+  onSubmit,
 }: EditQuestionDialogProps) {
   const isViewing = mode === "view";
   const isEditing = mode === "edit";
@@ -62,12 +62,12 @@ export function EditQuestionDialog({
   if (saving) submitLabel = "Saving…";
   const placeholderFieldRenderer = renderTextField({
     label: "Placeholder (optional)",
-    placeholder: "Optional placeholder shown in the input"
+    placeholder: "Optional placeholder shown in the input",
   });
   const helpTextFieldRenderer = renderTextAreaField({
     label: "Help text (optional)",
     placeholder: "Short hint shown under the field",
-    className: `min-h-[72px] ${isViewing ? "resize-none" : ""}`
+    className: `min-h-[72px] ${isViewing ? "resize-none" : ""}`,
   });
 
   return (
@@ -99,7 +99,7 @@ export function EditQuestionDialog({
                   label: "Question",
                   placeholder: "What should applicants answer?",
                   required: true,
-                  className: `min-h-[100px] ${isViewing ? "resize-none" : ""}`
+                  className: `min-h-[100px] ${isViewing ? "resize-none" : ""}`,
                 })}
               />
 
@@ -130,8 +130,8 @@ export function EditQuestionDialog({
                       triggerClassName: "w-full",
                       options: [
                         { value: "textarea", label: "Long text (textarea)" },
-                        { value: "text", label: "Short text (single line)" }
-                      ]
+                        { value: "text", label: "Short text (single line)" },
+                      ],
                     })}
                   />
                 )}
@@ -255,8 +255,8 @@ export function EditQuestionDialog({
                       onChange: (e: ChangeEvent<HTMLInputElement>) => {
                         const next = e.target.value;
                         field.onChange(next === "" ? null : next);
-                      }
-                    } as never
+                      },
+                    } as never,
                   })
                 }
               />
@@ -272,8 +272,8 @@ export function EditQuestionDialog({
                       onChange: (e: ChangeEvent<HTMLTextAreaElement>) => {
                         const next = e.target.value;
                         field.onChange(next === "" ? null : next);
-                      }
-                    } as never
+                      },
+                    } as never,
                   })
                 }
               />

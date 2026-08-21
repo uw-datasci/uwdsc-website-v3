@@ -52,7 +52,7 @@ export function buildICS(events: Event[]): string {
       `SUMMARY:${escapeICSText(event.name)}`,
       `DESCRIPTION:${escapeICSText(formatEventDescription(event.description || ""))}`,
       `LOCATION:${escapeICSText(event.location || "")}`,
-      "END:VEVENT"
+      "END:VEVENT",
     ].join("\r\n");
   });
   return [
@@ -62,7 +62,7 @@ export function buildICS(events: Event[]): string {
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     ...vevents,
-    "END:VCALENDAR"
+    "END:VCALENDAR",
   ].join("\r\n");
 }
 
@@ -75,7 +75,7 @@ export function getGoogleCalendarUrl(event: Event): string {
     text: event.name,
     dates: `${toICSDate(event.start_time)}/${toICSDate(event.end_time)}`,
     details: formatEventDescription(event.description || ""),
-    location: event.location || ""
+    location: event.location || "",
   });
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
@@ -99,7 +99,7 @@ export function downloadICS(event: Event): void {
     `DESCRIPTION:${escapeICSText(formatEventDescription(event.description || ""))}`,
     `LOCATION:${escapeICSText(event.location || "")}`,
     "END:VEVENT",
-    "END:VCALENDAR"
+    "END:VCALENDAR",
   ].join("\r\n");
   const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
   const url = URL.createObjectURL(blob);

@@ -11,39 +11,39 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
-  subsets: ["latin"]
+  subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
-  subsets: ["latin"]
+  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
   ...baseMetadata,
   title: {
     default: "UWaterloo Data Science Club",
-    template: "%s | UWaterloo Data Science Club"
+    template: "%s | UWaterloo Data Science Club",
   },
   description: "University of Waterloo Data Science Club website",
   openGraph: {
     type: "website",
     title: "UWaterloo Data Science Club",
     description: "University of Waterloo Data Science Club website",
-    images: ["/meta/og-image.png"]
+    images: ["/meta/og-image.png"],
   },
   twitter: {
     card: "summary",
     title: "UWaterloo Data Science Club",
     description: "University of Waterloo Data Science Club website",
-    images: ["/meta/og-image.png"]
-  }
+    images: ["/meta/og-image.png"],
+  },
 };
 
 export const viewport: Viewport = baseViewport;
 
 export default function RootLayout({
-  children
+  children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {

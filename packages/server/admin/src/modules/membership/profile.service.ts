@@ -10,7 +10,7 @@ const UPDATE_MEMBER_COLUMNS = [
   "wat_iam",
   "faculty",
   "term",
-  "is_math_soc_member"
+  "is_math_soc_member",
 ] as const;
 
 class ProfileService {
@@ -85,7 +85,7 @@ class ProfileService {
       if (!result) {
         return {
           success: false,
-          error: "Profile not found"
+          error: "Profile not found",
         };
       }
 
@@ -110,14 +110,14 @@ class ProfileService {
     if (!roleRequiresSubteam(role) && subteamId !== null) {
       return {
         success: false,
-        error: `The ${role} role cannot be assigned a subteam.`
+        error: `The ${role} role cannot be assigned a subteam.`,
       };
     }
 
     if (roleRequiresSubteam(role) && subteamId === null) {
       return {
         success: false,
-        error: `The ${role} role requires a subteam.`
+        error: `The ${role} role requires a subteam.`,
       };
     }
 
@@ -127,7 +127,7 @@ class ProfileService {
       if (!result) {
         return {
           success: false,
-          error: "Profile not found"
+          error: "Profile not found",
         };
       }
 
@@ -151,7 +151,7 @@ class ProfileService {
     if (existing) {
       return {
         success: false,
-        error: "A member with this email already exists"
+        error: "A member with this email already exists",
       };
     }
 
@@ -160,7 +160,7 @@ class ProfileService {
     try {
       const supabase = createSupabaseServiceRoleClient();
       const { data, error } = await supabase.auth.admin.inviteUserByEmail(email, {
-        redirectTo
+        redirectTo,
       });
 
       if (error) return { success: false, error: error.message };
@@ -174,7 +174,7 @@ class ProfileService {
         if (!updateResult.success) {
           return {
             success: false,
-            error: updateResult.error ?? "Failed to update profile after invite"
+            error: updateResult.error ?? "Failed to update profile after invite",
           };
         }
       }
@@ -195,7 +195,7 @@ class ProfileService {
       if (!result) {
         return {
           success: false,
-          error: "User not found"
+          error: "User not found",
         };
       }
 

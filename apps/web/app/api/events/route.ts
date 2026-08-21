@@ -20,7 +20,7 @@ export const GET = withRaftRoute(async (request) => {
   if (range === "next") {
     const events = await eventService.getEventsByTimeRange({
       range: "upcoming",
-      limit: 1
+      limit: 1,
     });
     return RaftResponse.ok(events[0] ?? null);
   }

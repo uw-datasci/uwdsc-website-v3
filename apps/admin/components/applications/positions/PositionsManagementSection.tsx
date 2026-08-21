@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
   Label,
-  Switch
+  Switch,
 } from "@uwdsc/ui";
 import type { ManagablePosition } from "@uwdsc/common/types";
 
@@ -23,7 +23,7 @@ const UNASSIGNED_SUBTEAM = "Other";
 export function PositionsManagementSection({
   positions,
   pendingIds,
-  onToggle
+  onToggle,
 }: PositionsManagementSectionProps) {
   const groups = useMemo(() => {
     const bySubteam = new Map<string, ManagablePosition[]>();

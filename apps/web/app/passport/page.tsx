@@ -10,7 +10,7 @@ import { FACULTY_LABELS, FACULTY_PROFILE_LABEL_TO_VALUE } from "@uwdsc/common/co
 import {
   passportProfileEditSchema,
   passportProfileEditDefaultValues,
-  type PassportProfileEditValues
+  type PassportProfileEditValues,
 } from "@/lib/schemas/profile";
 import type { MembershipStatus } from "@uwdsc/common/types";
 import { Spinner } from "@uwdsc/ui";
@@ -24,7 +24,7 @@ export default function PassportPage() {
   const form = useForm<PassportProfileEditValues>({
     resolver: zodResolver(passportProfileEditSchema),
     defaultValues: passportProfileEditDefaultValues,
-    mode: "onTouched"
+    mode: "onTouched",
   });
   const { reset } = form;
 
@@ -42,7 +42,7 @@ export default function PassportPage() {
       last_name: user.last_name ?? "",
       wat_iam: user.wat_iam ?? "",
       faculty: user.faculty ? (FACULTY_LABELS[user.faculty] ?? "") : "",
-      term: user.term ?? ""
+      term: user.term ?? "",
     });
   }, [user, reset]);
 
@@ -53,7 +53,7 @@ export default function PassportPage() {
         last_name: data.last_name,
         wat_iam: data.wat_iam,
         faculty: FACULTY_PROFILE_LABEL_TO_VALUE[data.faculty] ?? "math",
-        term: data.term
+        term: data.term,
       });
       await mutate();
       setIsEditing(false);
@@ -69,7 +69,7 @@ export default function PassportPage() {
         last_name: user.last_name ?? "",
         wat_iam: user.wat_iam ?? "",
         faculty: user.faculty ? (FACULTY_LABELS[user.faculty] ?? "") : "",
-        term: user.term ?? ""
+        term: user.term ?? "",
       });
     }
     setIsEditing(false);

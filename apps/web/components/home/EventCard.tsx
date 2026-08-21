@@ -26,7 +26,7 @@ export default function EventCard({
   location,
   link,
   startTime,
-  endTime
+  endTime,
 }: Readonly<EventCardProps>) {
   // Format individual times for display
   const formatTime = (timeString: string) => {
@@ -36,7 +36,7 @@ export default function EventCard({
       day: "numeric",
       hour: "numeric",
       minute: "2-digit",
-      hour12: true
+      hour12: true,
     });
   };
 

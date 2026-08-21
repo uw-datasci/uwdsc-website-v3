@@ -22,12 +22,12 @@ export const POST = withRaftRoute(async (request) => {
     },
     set(name: string, value: string, options?) {
       cookieStore.set(name, value, options);
-    }
+    },
   });
 
   const { error } = await supabase.rpc("log_page_view", {
     p_path: path,
-    p_visitor_id: visitorId
+    p_visitor_id: visitorId,
   });
 
   if (error) {

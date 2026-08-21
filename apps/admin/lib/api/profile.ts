@@ -66,7 +66,7 @@ export async function inviteMember(payload: InviteMemberFormValues): Promise<{
   const response = await fetch("/api/members", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
   });
 
   const data = await response.json();
@@ -110,7 +110,7 @@ export async function markMemberAsPaid(
   const response = await fetch(`/api/members/${memberId}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(paymentData)
+    body: JSON.stringify(paymentData),
   });
 
   const data = await response.json();
@@ -121,7 +121,7 @@ export async function markMemberAsPaid(
 
   return {
     checked_in: Boolean(data?.checked_in),
-    check_in_error: data?.check_in_error
+    check_in_error: data?.check_in_error,
   };
 }
 
@@ -140,7 +140,7 @@ export async function updateMember(
   const response = await fetch(`/api/members/${memberId}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(memberData)
+    body: JSON.stringify(memberData),
   });
 
   const data = await response.json();
@@ -168,7 +168,7 @@ export async function updateMemberRole(
   const response = await fetch(`/api/members/${memberId}/role`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ role, subteam_id: subteamId })
+    body: JSON.stringify({ role, subteam_id: subteamId }),
   });
 
   const data = await response.json();
@@ -187,7 +187,7 @@ export async function updateMemberRole(
  */
 export async function deleteMember(memberId: string): Promise<void> {
   const response = await fetch(`/api/members/${memberId}`, {
-    method: "DELETE"
+    method: "DELETE",
   });
 
   const data = await response.json();

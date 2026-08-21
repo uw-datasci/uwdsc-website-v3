@@ -2,7 +2,7 @@ import type {
   RaftGroupFilters,
   RaftResolvedFilter,
   RaftSeverity,
-  RaftTimeRange
+  RaftTimeRange,
 } from "@uwdsc/common/types";
 
 const TIME_RANGES = new Set<RaftTimeRange>(["24h", "7d", "30d"]);
@@ -43,7 +43,7 @@ export function parseRaftFilters(searchParams: URLSearchParams): RaftGroupFilter
     page: parsePage(searchParams.get("page")) ?? 1,
     pageSize: parsePage(searchParams.get("pageSize")) ?? 20,
     endpoint: searchParams.get("endpoint") ?? undefined,
-    errorMessage: searchParams.get("errorMessage") ?? undefined
+    errorMessage: searchParams.get("errorMessage") ?? undefined,
   };
 
   if (mode === "occurrences" || mode === "groups") filters.mode = mode;

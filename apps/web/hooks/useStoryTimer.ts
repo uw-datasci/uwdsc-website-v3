@@ -30,7 +30,7 @@ export function useStoryTimer({
   paused,
   durationMs,
   slideKey,
-  onComplete
+  onComplete,
 }: UseStoryTimerOptions): number {
   const [progress, setProgress] = useState(0);
   const elapsedRef = useRef(0);

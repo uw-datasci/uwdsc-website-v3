@@ -12,7 +12,7 @@ export async function openPosition(positionId: number): Promise<{ availableId: n
   const response = await fetch("/api/applications/positions", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ positionId })
+    body: JSON.stringify({ positionId }),
   });
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);
@@ -21,7 +21,7 @@ export async function openPosition(positionId: number): Promise<{ availableId: n
 
 export async function closePosition(availableId: number): Promise<void> {
   const response = await fetch(`/api/applications/positions/${availableId}`, {
-    method: "DELETE"
+    method: "DELETE",
   });
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);

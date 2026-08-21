@@ -4,7 +4,7 @@ import type {
   Term,
   Onboarding,
   OnboardingData,
-  OnboardingAdminRow
+  OnboardingAdminRow,
 } from "@uwdsc/common/types";
 import type { OnboardingAdminRowDb } from "../../types/hiring";
 
@@ -30,7 +30,7 @@ export class OnboardingRepository extends BaseRepository {
           anything_else: row.submission_anything_else ?? null,
           submitted_at: row.submission_submitted_at ?? "",
           created_at: row.submission_created_at ?? "",
-          updated_at: row.submission_updated_at ?? ""
+          updated_at: row.submission_updated_at ?? "",
         }
       : null;
 
@@ -44,7 +44,7 @@ export class OnboardingRepository extends BaseRepository {
       exec_position_name: row.exec_position_name,
       submission_role_id: row.submission_role_id,
       submission_role_name: row.submission_role_name,
-      submission
+      submission,
     };
   }
 

@@ -1,7 +1,7 @@
 import type {
   FinalizeRolesSummary,
   HiringApplicant,
-  NewExecTeamMember
+  NewExecTeamMember,
 } from "@uwdsc/common/types";
 
 export interface HiringApplicantsResponse {

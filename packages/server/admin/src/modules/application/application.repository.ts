@@ -37,7 +37,7 @@ export class ApplicationRepository extends BaseRepository {
     return applications.map((app) => ({
       ...app,
       position_selections: selectionsMap.get(app.id) ?? [],
-      answers: answersMap.get(app.id) ?? []
+      answers: answersMap.get(app.id) ?? [],
     }));
   }
 

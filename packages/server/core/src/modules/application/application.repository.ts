@@ -10,7 +10,7 @@ import type {
   ProfileAutofill,
   QuestionRow,
   Term,
-  UpdateApplicationData
+  UpdateApplicationData,
 } from "@uwdsc/common/types";
 import { BaseRepository } from "@uwdsc/db/base.repository";
 
@@ -145,7 +145,7 @@ export class ApplicationRepository extends BaseRepository {
     return {
       ...app,
       position_selections: selections,
-      answers
+      answers,
     };
   }
 

@@ -23,7 +23,7 @@ interface WrappedStoryProps {
 const slideVariants = {
   enter: (direction: number) => ({ x: direction > 0 ? 300 : -300, opacity: 0 }),
   center: { x: 0, opacity: 1 },
-  exit: (direction: number) => ({ x: direction > 0 ? -300 : 300, opacity: 0 })
+  exit: (direction: number) => ({ x: direction > 0 ? -300 : 300, opacity: 0 }),
 };
 
 // Below this hold duration a press counts as a tap (skip); at or above it the
@@ -70,7 +70,7 @@ export function WrappedStory({ slides = WRAPPED_SLIDES, active = true }: Wrapped
     paused,
     durationMs: slide?.durationMs ?? DEFAULT_SLIDE_DURATION_MS,
     slideKey: slide?.id ?? "",
-    onComplete: goNext
+    onComplete: goNext,
   });
 
   // Auto-hide the control hints after the first few seconds.
@@ -138,7 +138,7 @@ export function WrappedStory({ slides = WRAPPED_SLIDES, active = true }: Wrapped
                   i !== index && "transition-[width] duration-300"
                 )}
                 style={{
-                  width: i < index ? "100%" : i === index ? `${progress * 100}%` : "0%"
+                  width: i < index ? "100%" : i === index ? `${progress * 100}%` : "0%",
                 }}
               />
             </div>
@@ -170,7 +170,7 @@ export function WrappedStory({ slides = WRAPPED_SLIDES, active = true }: Wrapped
             exit="exit"
             transition={{
               x: { type: "spring", stiffness: 300, damping: 30 },
-              opacity: { duration: 0.2 }
+              opacity: { duration: 0.2 },
             }}
             className="absolute inset-0"
           >

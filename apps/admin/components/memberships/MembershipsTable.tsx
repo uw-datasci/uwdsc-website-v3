@@ -10,7 +10,7 @@ import {
   getSortedRowModel,
   useReactTable,
   type ColumnFiltersState,
-  type SortingState
+  type SortingState,
 } from "@tanstack/react-table";
 import {
   ChevronLeft,
@@ -18,14 +18,14 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Download,
-  UserPlus
+  UserPlus,
 } from "lucide-react";
 import { membershipColumns, type MembershipActionType } from "./MembershipColumns";
 import {
   DeleteMemberModal,
   EditMemberModal,
   InviteMemberModal,
-  MarkAsPaidModal
+  MarkAsPaidModal,
 } from "./modals";
 import {
   Card,
@@ -42,7 +42,7 @@ import {
   TableRow,
   TableHead,
   TableBody,
-  TableCell
+  TableCell,
 } from "@uwdsc/ui";
 import { exportToCsv } from "@/lib/utils/csv";
 import { globalMembershipFilter } from "@/lib/utils/table";
@@ -69,33 +69,33 @@ const MEMBERSHIP_CSV_HEADERS = [
   "user_role",
   "has_paid",
   "is_math_soc_member",
-  "faculty"
+  "faculty",
 ] as const;
 
 const ROLE_OPTIONS = [
   { value: "all", label: "All Roles" },
   { value: "member", label: "Member" },
   { value: "exec", label: "Exec" },
-  { value: "admin", label: "Admin" }
+  { value: "admin", label: "Admin" },
 ] as const;
 
 const PAID_OPTIONS = [
   { value: "all", label: "All" },
   { value: "true", label: "Paid" },
-  { value: "false", label: "Unpaid" }
+  { value: "false", label: "Unpaid" },
 ] as const;
 
 const MATH_SOC_OPTIONS = [
   { value: "all", label: "All" },
   { value: "true", label: "Yes" },
-  { value: "false", label: "No" }
+  { value: "false", label: "No" },
 ] as const;
 
 const PAYMENT_METHOD_OPTIONS = [
   { value: "all", label: "All" },
   { value: "cash", label: "Cash" },
   { value: "online", label: "Online" },
-  { value: "math_soc", label: "MathSoc" }
+  { value: "math_soc", label: "MathSoc" },
 ] as const;
 
 function getMembershipCsvValue(row: Member, key: string): unknown {
@@ -113,7 +113,7 @@ export function MembershipsTable({
   activeEvent,
   onRefresh,
   initialAction,
-  onRequestClearInitialAction
+  onRequestClearInitialAction,
 }: MembershipsTableProps) {
   const { user } = useAuth();
   const canDeleteMember = isAdmin(user?.role);
@@ -140,7 +140,7 @@ export function MembershipsTable({
           return [
             ...filtered,
             { id: "has_paid", value: "true" },
-            { id: "is_math_soc_member", value: "true" }
+            { id: "is_math_soc_member", value: "true" },
           ];
         case "all":
         default:
@@ -185,8 +185,8 @@ export function MembershipsTable({
       onAction: (type: MembershipActionType, member: Member) => {
         setActionModal({ type, member });
       },
-      canDeleteMember
-    }
+      canDeleteMember,
+    },
   });
 
   const onExportCsv = useCallback(() => {

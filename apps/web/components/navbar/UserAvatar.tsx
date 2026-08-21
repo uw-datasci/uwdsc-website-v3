@@ -14,7 +14,7 @@ import {
   NavigationMenuItem,
   NavigationMenuTrigger,
   NavigationMenuContent,
-  NavigationMenuLink
+  NavigationMenuLink,
 } from "@uwdsc/ui";
 
 export function UserAvatar() {

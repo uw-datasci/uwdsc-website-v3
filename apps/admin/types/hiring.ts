@@ -1,4 +1,8 @@
-import type { FinalizeRolesSummary, HiringApplicant, NewExecTeamMember } from "@uwdsc/common/types";
+import type {
+  FinalizeRolesSummary,
+  HiringApplicant,
+  NewExecTeamMember,
+} from "@uwdsc/common/types";
 
 export interface HiringApplicantsResponse {
   applicants: HiringApplicant[];

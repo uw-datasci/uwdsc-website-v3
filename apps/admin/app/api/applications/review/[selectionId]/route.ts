@@ -1,8 +1,8 @@
 import { type ApplicationReviewStatus } from "@uwdsc/common/types";
-import { ApiResponse } from "@uwdsc/common/utils";
+import { RaftResponse } from "@uw-datasci/raft";
 import { isAdmin } from "@uwdsc/common/constants";
 import { applicationService } from "@uwdsc/admin";
-import { withVpAccess } from "@/guards/withVpAccess";
+import { withAdmin } from "@/guards/withAdmin";
 
 interface ParamsContext {
   params: Promise<{ selectionId: string }>;
@@ -12,33 +12,18 @@ interface ParamsContext {
  * PATCH /api/applications/review/[selectionId]
  * Update review status for a single position selection (VP subteam or President).
  */
-export const PATCH = withVpAccess<ParamsContext>(
+export const PATCH = withAdmin<ParamsContext>(
   async (request, { params }, user, scope) => {
     if (!isAdmin(user.app_metadata?.role)) {
-      return ApiResponse.unauthorized(
-        "Only users with the admin role can update position review status",
-      );
+      return RaftResponse.unauthorized("You cannot perform this action");
     }
 
-    try {
-      const { selectionId } = await params;
-      const body = (await request.json()) as {
-        status?: ApplicationReviewStatus;
-      };
+    const { selectionId } = await params;
+    const body = (await request.json()) as { status?: ApplicationReviewStatus };
+    if (!body.status) return RaftResponse.badRequest("Missing status");
 
-      if (!body.status) return ApiResponse.badRequest("Missing status");
-
-      await applicationService.updatePositionSelectionReviewStatus(
-        scope,
-        selectionId,
-        body.status,
-      );
-      return ApiResponse.ok({ success: true });
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to update status";
-      console.error("Error updating position selection review status:", error);
-      return ApiResponse.serverError(errorMessage, "Failed to update status");
-    }
+    await applicationService.updatePositionStatus(scope, selectionId, body.status);
+    return RaftResponse.ok({ success: true });
   },
+  { scope: true }
 );

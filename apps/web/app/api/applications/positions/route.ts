@@ -1,25 +1,19 @@
-import { ApiResponse, isApplicationWindowOpen } from "@uwdsc/common/utils";
+import { RaftResponse } from "@uw-datasci/raft";
+import { withRaftRoute } from "@uwdsc/core/http";
+import { isApplicationWindowOpen } from "@uwdsc/common/utils";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 import { applicationService } from "@uwdsc/core";
 
-export async function GET(): Promise<Response> {
-  try {
-    const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (!user) return isUnauthorized;
+export const GET = withRaftRoute(async () => {
+  const { user, isUnauthorized } = await tryGetCurrentUser();
+  if (!user) return isUnauthorized;
 
-    const term = await applicationService.getActiveTerm();
-    if (!term) return ApiResponse.notFound("No active application period");
-    if (!isApplicationWindowOpen(term)) {
-      return ApiResponse.forbidden(
-        "The application period is closed.",
-        "The application period is closed.",
-      );
-    }
-
-    const data = await applicationService.getPositionsWithQuestions();
-    return ApiResponse.ok(data);
-  } catch (error) {
-    console.error("Error fetching positions:", error);
-    return ApiResponse.serverError(error, "Failed to fetch positions");
+  const term = await applicationService.getActiveTerm();
+  if (!term) return RaftResponse.notFound("No active application period");
+  if (!isApplicationWindowOpen(term)) {
+    return RaftResponse.forbidden("The application period is closed.");
   }
-}
+
+  const data = await applicationService.getPositionsWithQuestions();
+  return RaftResponse.ok(data);
+});

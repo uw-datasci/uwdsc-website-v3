@@ -14,7 +14,7 @@ export class FileService {
   constructor(
     supabaseClient: SupabaseClient,
     bucketName: string,
-    validationConfig: FileValidationConfig,
+    validationConfig: FileValidationConfig
   ) {
     this.repository = new FileRepository(supabaseClient, bucketName);
     this.validationConfig = validationConfig;
@@ -52,18 +52,13 @@ export class FileService {
    */
   protected resolveFileName(file: File): string {
     const extension = this.validationConfig.mimeToExtension?.(file.type);
-    return extension
-      ? `${file.name.replace(/\.[^.]+$/, "")}.${extension}`
-      : file.name;
+    return extension ? `${file.name.replace(/\.[^.]+$/, "")}.${extension}` : file.name;
   }
 
   /**
    * Validate and upload a file to the given object key within the bucket.
    */
-  async upload(
-    data: FileUploadData,
-    objectKey: string,
-  ): Promise<UploadResult | UploadError> {
+  async upload(data: FileUploadData, objectKey: string): Promise<UploadResult | UploadError> {
     const validationError = this.validateFile(data.file);
     if (validationError) return validationError;
 

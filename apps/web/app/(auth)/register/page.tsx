@@ -45,9 +45,9 @@ export default function RegisterPage() {
                   <div className="text-center md:text-start">
                     <h2 className="text-7xl font-bold mb-10">Join Us!</h2>
                     <p className="leading-loose text-xl">
-                      Become a part of a growing community of data science
-                      enthusiasts and participate in engaging discussions,
-                      hands-on projects, and networking opportunities.
+                      Become a part of a growing community of data science enthusiasts and
+                      participate in engaging discussions, hands-on projects, and networking
+                      opportunities.
                     </p>
                   </div>
                 </div>

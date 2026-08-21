@@ -37,7 +37,7 @@ export class EventRepository extends BaseRepository {
   async updateEventById(
     eventId: string,
     data: Record<string, string | null>,
-    columns: string[],
+    columns: string[]
   ): Promise<boolean> {
     try {
       const result = await this.sql`

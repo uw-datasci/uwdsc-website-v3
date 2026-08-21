@@ -5,9 +5,7 @@ export class MembershipRepository extends BaseRepository {
   /**
    * Get a membership record for a given profile
    */
-  async getMembershipByProfileId(
-    profileId: string,
-  ): Promise<MembershipRow | null> {
+  async getMembershipByProfileId(profileId: string): Promise<MembershipRow | null> {
     try {
       const result = await this.sql<MembershipRow[]>`
         SELECT id, profile_id

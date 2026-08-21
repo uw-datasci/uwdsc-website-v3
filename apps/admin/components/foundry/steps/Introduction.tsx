@@ -1,10 +1,4 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@uwdsc/ui";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@uwdsc/ui";
 import { Layers, Zap, Shield, Rocket } from "lucide-react";
 
 export function Introduction() {
@@ -13,8 +7,8 @@ export function Introduction() {
       <div className="flex flex-col gap-2">
         <h3 className="text-lg font-medium">Welcome to the Foundry</h3>
         <p className="text-sm text-muted-foreground">
-          Foundry helps you spin up new projects in seconds with standard
-          infrastructure, CI/CD pipelines, and manages secrets out of the box.
+          Foundry helps you spin up new projects in seconds with standard infrastructure, CI/CD
+          pipelines, and manages secrets out of the box.
         </p>
       </div>
 

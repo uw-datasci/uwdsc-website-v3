@@ -6,9 +6,7 @@ import type { ApplicationListItem } from "@uwdsc/common/types";
 import { reviewStatusBadgeClassName } from "@/lib/utils/applications";
 
 // Status -> badge variant mapping
-function getStatusVariant(
-  status: string,
-): "default" | "secondary" | "destructive" | "outline" {
+function getStatusVariant(status: string): "default" | "secondary" | "destructive" | "outline" {
   switch (status) {
     case "submitted":
       return "secondary";
@@ -36,11 +34,7 @@ interface ApplicationListProps {
   readonly onSelect: (id: string) => void;
 }
 
-export function ApplicationList({
-  applications,
-  selectedId,
-  onSelect,
-}: ApplicationListProps) {
+export function ApplicationList({ applications, selectedId, onSelect }: ApplicationListProps) {
   if (applications.length === 0) {
     return (
       <div className="flex items-center justify-center h-full p-6">
@@ -58,9 +52,7 @@ export function ApplicationList({
             onClick={() => onSelect(app.id)}
             className={cn(
               "w-full text-left rounded-lg border p-3 transition-colors hover:bg-accent/50 cursor-pointer",
-              selectedId === app.id
-                ? "border-primary bg-accent"
-                : "border-transparent",
+              selectedId === app.id ? "border-primary bg-accent" : "border-transparent"
             )}
           >
             {/* Name + status */}
@@ -92,7 +84,7 @@ export function ApplicationList({
                     variant="outline"
                     className={cn(
                       "max-w-full truncate px-1.5 py-0 text-[10px] font-medium",
-                      reviewStatusBadgeClassName(sel.status),
+                      reviewStatusBadgeClassName(sel.status)
                     )}
                     title={`${sel.position_name}: ${sel.status}`}
                   >

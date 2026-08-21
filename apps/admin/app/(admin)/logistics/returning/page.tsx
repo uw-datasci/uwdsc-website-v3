@@ -28,7 +28,7 @@ import { isReturningExecWindowOpen, getDeferredReturnTermCode } from "@uwdsc/com
 
 function positionIdStringForPriority(
   selections: readonly { priority: number; position_id: number }[],
-  priority: 1 | 2 | 3,
+  priority: 1 | 2 | 3
 ): string {
   const row = selections.find((s) => s.priority === priority);
   if (row) return String(row.position_id);
@@ -38,7 +38,7 @@ function positionIdStringForPriority(
 
 function interestFormValue(
   interestedInReturning: boolean,
-  interestedInFutureTerm: string | null,
+  interestedInFutureTerm: string | null
 ): ReturningExecFormValues["interested_in_returning"] {
   if (interestedInReturning) return "true";
   if (interestedInFutureTerm) return "future";
@@ -95,7 +95,7 @@ export default function LogisticsReturningExecPage() {
             past_positions: sub.past_positions,
             interested_in_returning: interestFormValue(
               sub.interested_in_returning,
-              sub.interested_in_future_term,
+              sub.interested_in_future_term
             ),
             not_returning_reason: sub.not_returning_reason ?? "",
             first_choice_position: positionIdStringForPriority(sel, 1),
@@ -110,7 +110,7 @@ export default function LogisticsReturningExecPage() {
           form.setValue(
             "full_name",
             [user.first_name, user.last_name].filter(Boolean).join(" "),
-            { shouldValidate: true },
+            { shouldValidate: true }
           );
           form.setValue("email", user.email ?? "", { shouldValidate: true });
         }
@@ -168,7 +168,7 @@ export default function LogisticsReturningExecPage() {
       const wasAlreadySubmitted = submitted;
       setSubmitted(true);
       toast.success(
-        wasAlreadySubmitted ? "Response updated successfully" : "Response submitted",
+        wasAlreadySubmitted ? "Response updated successfully" : "Response submitted"
       );
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to submit response");

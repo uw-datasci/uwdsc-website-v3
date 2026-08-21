@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Form,
-  FormField,
-} from "@uwdsc/ui";
+import { Card, CardContent, CardHeader, CardTitle, Form, FormField } from "@uwdsc/ui";
 import { UseFormReturn } from "react-hook-form";
 import { AppFormValues } from "@/lib/schemas/application";
 import { MessageSquare } from "lucide-react";

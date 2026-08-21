@@ -12,12 +12,7 @@ function getExtensionFromMime(mime: string): string | null {
 
 export const HEADSHOT_VALIDATION_CONFIG: FileValidationConfig = {
   maxBytes: 5 * 1024 * 1024, // 5 MB
-  allowedMimeTypes: new Set([
-    "image/jpeg",
-    "image/jpg",
-    "image/png",
-    "image/webp",
-  ]),
+  allowedMimeTypes: new Set(["image/jpeg", "image/jpg", "image/png", "image/webp"]),
   mimeToExtension: getExtensionFromMime,
   customValidation: (file: File) => {
     const ext = getExtensionFromMime(file.type);

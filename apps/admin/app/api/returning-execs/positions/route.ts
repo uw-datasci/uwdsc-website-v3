@@ -1,4 +1,5 @@
-import { ApiResponse, isReturningExecWindowOpen } from "@uwdsc/common/utils";
+import { RaftResponse } from "@uw-datasci/raft";
+import { isReturningExecWindowOpen } from "@uwdsc/common/utils";
 import { returningExecService } from "@uwdsc/admin";
 import { withAuth } from "@/guards/withAuth";
 
@@ -9,20 +10,15 @@ import { withAuth } from "@/guards/withAuth";
  */
 export const GET = withAuth(
   async () => {
-    try {
-      const term = await returningExecService.getActiveTerm();
-      if (!term || !isReturningExecWindowOpen(term)) {
-        return ApiResponse.forbidden(
-          "The returning exec form is only available during the configured submission window.",
-          "Returning exec form is not open",
-        );
-      }
-      const positions = await returningExecService.getSelectablePositions();
-      return ApiResponse.ok(positions);
-    } catch (error) {
-      console.error("Error fetching available positions:", error);
-      return ApiResponse.serverError(error, "Failed to fetch positions");
+    const term = await returningExecService.getActiveTerm();
+    if (!term || !isReturningExecWindowOpen(term)) {
+      return RaftResponse.forbidden(
+        "Returning exec form is not available at this time",
+        "Form not available"
+      );
     }
+    const positions = await returningExecService.getSelectablePositions();
+    return RaftResponse.ok(positions);
   },
-  { allowAlum: true },
+  { allowAlum: true }
 );

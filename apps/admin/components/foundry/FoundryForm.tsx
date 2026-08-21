@@ -183,7 +183,7 @@ export function FoundryForm() {
         postgresProvider: watchedPostgresProvider,
         mongoClient: watchedMongoClient,
       },
-      step,
+      step
     );
   }, [
     watchedProjectName,

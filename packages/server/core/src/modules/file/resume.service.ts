@@ -22,10 +22,8 @@ export class ResumeService extends FileService {
    * folder only ever contains one resume.
    */
   async uploadResume(
-    data: FileUploadData,
-  ): Promise<
-    { success: true; key: string } | { success: false; error: string }
-  > {
+    data: FileUploadData
+  ): Promise<{ success: true; key: string } | { success: false; error: string }> {
     const validationError = this.validateFile(data.file);
     if (validationError) return validationError;
 

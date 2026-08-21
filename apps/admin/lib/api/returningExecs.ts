@@ -21,7 +21,7 @@ export async function getOwnReturningExecSubmission(): Promise<OwnSubmissionResp
 }
 
 export async function upsertReturningExecSubmission(
-  body: ReturningExecSubmissionData,
+  body: ReturningExecSubmissionData
 ): Promise<OwnSubmissionResponse> {
   const response = await fetch("/api/returning-execs/me", {
     method: "PUT",
@@ -42,7 +42,7 @@ export async function getAllReturningExecs(): Promise<ReturningExecsResponse> {
 
 export async function updateReturningExecSelectionStatus(
   selectionId: string,
-  status: ApplicationReviewStatus,
+  status: ApplicationReviewStatus
 ): Promise<void> {
   const response = await fetch(`/api/returning-execs/selections/${selectionId}`, {
     method: "PATCH",

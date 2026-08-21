@@ -65,7 +65,7 @@ export function CompleteProfileForm({ prefill, onSuccess }: CompleteProfileFormP
       const err = error as { error?: string; message?: string };
       console.error(error);
       setAuthError(
-        err?.error ?? err?.message ?? "An unexpected error occurred. Please try again",
+        err?.error ?? err?.message ?? "An unexpected error occurred. Please try again"
       );
     } finally {
       setIsLoading(false);

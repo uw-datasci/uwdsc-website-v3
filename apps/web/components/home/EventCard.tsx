@@ -47,9 +47,7 @@ export default function EventCard({
         <div className="bg-gradient-purple absolute inset-0 opacity-10" />
         <div className="relative px-5 py-3 md:px-6 md:pb-8 md:pt-5">
           <h4
-            className={`text-2xl font-bold text-white md:text-3xl ${
-              description ? "mb-2" : ""
-            }`}
+            className={`text-2xl font-bold text-white md:text-3xl ${description ? "mb-2" : ""}`}
           >
             {title}
           </h4>
@@ -71,15 +69,11 @@ export default function EventCard({
                   <div className="ml-8 space-y-2">
                     <div className="flex items-center gap-2">
                       <p className="min-w-10 text-xs text-grey1">Start:</p>
-                      <p className="font-medium text-white">
-                        {formatTime(startTime)}
-                      </p>
+                      <p className="font-medium text-white">{formatTime(startTime)}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <p className="min-w-10 text-xs text-grey1">End:</p>
-                      <p className="font-medium text-white">
-                        {formatTime(endTime)}
-                      </p>
+                      <p className="font-medium text-white">{formatTime(endTime)}</p>
                     </div>
                   </div>
                 </div>

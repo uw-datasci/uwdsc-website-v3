@@ -1,4 +1,4 @@
-import { ApiResponse } from "@uwdsc/common/utils";
+import { RaftResponse } from "@uw-datasci/raft";
 import { eventService as adminEventService } from "@uwdsc/admin";
 import { eventService as coreEventService } from "@uwdsc/core";
 import { withAuth } from "@/guards/withAuth";
@@ -10,21 +10,16 @@ import { createEventSchema } from "@/lib/schemas/event";
  * Admin/exec only
  */
 export const GET = withAuth(async (request) => {
-  try {
-    const { searchParams } = new URL(request.url);
-    const activeOnly = searchParams.get("active") === "true";
-    const withAttendance = searchParams.get("withAttendance") === "true";
+  const { searchParams } = new URL(request.url);
+  const activeOnly = searchParams.get("active") === "true";
+  const withAttendance = searchParams.get("withAttendance") === "true";
 
-    const events = activeOnly
-      ? await coreEventService.getEventsByTimeRange({ range: "active" })
-      : withAttendance
-        ? await coreEventService.getAllEventsWithAttendanceCount()
-        : await coreEventService.getAllEvents();
-    return ApiResponse.ok(events);
-  } catch (error: unknown) {
-    console.error("Error fetching events:", error);
-    return ApiResponse.serverError(error, "Failed to fetch events");
-  }
+  const events = activeOnly
+    ? await coreEventService.getEventsByTimeRange({ range: "active" })
+    : withAttendance
+      ? await coreEventService.getAllEventsWithAttendanceCount()
+      : await coreEventService.getAllEvents();
+  return RaftResponse.ok(events);
 });
 
 /**
@@ -33,29 +28,23 @@ export const GET = withAuth(async (request) => {
  * Admin/exec only
  */
 export const POST = withAuth(async (request) => {
-  try {
-    const body = await request.json();
-    const validationResult = createEventSchema.safeParse(body);
+  const body = await request.json();
+  const validationResult = createEventSchema.safeParse(body);
 
-    if (!validationResult.success) {
-      return ApiResponse.badRequest(
-        validationResult.error.issues[0]?.message || "Invalid data",
-        "Validation error",
-      );
-    }
-
-    const result = await adminEventService.createEvent(validationResult.data);
-
-    if (!result.success) {
-      return ApiResponse.badRequest(result.error, "Failed to create event");
-    }
-    return ApiResponse.ok({
-      success: true,
-      message: "Event created successfully",
-      event: result.event,
-    });
-  } catch (error: unknown) {
-    console.error("Error creating event:", error);
-    return ApiResponse.serverError(error, "Failed to create event");
+  if (!validationResult.success) {
+    return RaftResponse.badRequest(
+      validationResult.error.issues[0]?.message || "Invalid data",
+      "Validation error"
+    );
   }
+
+  const result = await adminEventService.createEvent(validationResult.data);
+
+  if (!result.success) return RaftResponse.badRequest(result.error, "Failed to create event");
+
+  return RaftResponse.ok({
+    success: true,
+    message: "Event created successfully",
+    event: result.event,
+  });
 });

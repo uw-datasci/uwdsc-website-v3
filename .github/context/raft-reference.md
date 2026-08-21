@@ -55,20 +55,20 @@ class RaftResponse {
     body: string,
     contentType: string,
     status?: number,
-    init?: ResponseInit,
+    init?: ResponseInit
   ): NextResponse;
 
   // ASYNC - awaits error quarantine before resolving.
   static serverError(
     message?: unknown,
     error?: string,
-    context?: Record<string, any>,
+    context?: Record<string, any>
   ): Promise<NextResponse>; // 500
 }
 
 // ── Route wrapper ───────────────────────────────────────────────────────────
 function withRaft<C extends RaftRouteContext = RaftRouteContext>(
-  handler: (request: NextRequest, context: C) => Promise<Response> | Response,
+  handler: (request: NextRequest, context: C) => Promise<Response> | Response
 ): (request: NextRequest, context: C) => Promise<Response> | Response;
 
 interface RaftRouteContext {
@@ -192,7 +192,7 @@ try {
   await RaftClient.getInstance().reportError(
     err as Error,
     { route: "cron:nightly-sync" },
-    "fatal",
+    "fatal"
   );
 }
 ```

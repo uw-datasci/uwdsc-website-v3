@@ -45,7 +45,10 @@ class EventService {
     try {
       return await this.repository.getAllEventsWithAttendanceCount();
     } catch (error) {
-      throw new ApiError(`Failed to get events with attendance: ${(error as Error).message}`, 500);
+      throw new ApiError(
+        `Failed to get events with attendance: ${(error as Error).message}`,
+        500
+      );
     }
   }
 
@@ -56,10 +59,7 @@ class EventService {
     try {
       return await this.repository.getWrappedEventStats(profileId);
     } catch (error) {
-      throw new ApiError(
-        `Failed to get wrapped event stats: ${(error as Error).message}`,
-        500,
-      );
+      throw new ApiError(`Failed to get wrapped event stats: ${(error as Error).message}`, 500);
     }
   }
 

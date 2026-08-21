@@ -1,5 +1,5 @@
 import { createAuthService } from "@/lib/services";
-import { ApiResponse } from "@uwdsc/common/utils";
+import { RaftResponse } from "@uw-datasci/raft";
 import type { ProfileUpdateData } from "@uwdsc/common/types";
 import { BASE_PROFILE_FIELDS } from "@/constants/profile";
 import type { AuthResult, ProfileValidationError } from "@/types/route-utils";
@@ -26,13 +26,13 @@ export async function tryGetCurrentUser(): Promise<AuthResult> {
   if (userError || !user) {
     return {
       user: null,
-      isUnauthorized: ApiResponse.unauthorized("Authentication required"),
+      isUnauthorized: RaftResponse.unauthorized("Authentication required"),
     };
   }
 
   return {
     user,
-    isUnauthorized: ApiResponse.unauthorized("Authentication required"),
+    isUnauthorized: RaftResponse.unauthorized("Authentication required"),
   };
 }
 
@@ -45,7 +45,7 @@ export async function tryGetCurrentUser(): Promise<AuthResult> {
  * Returns an error object if validation fails, null otherwise.
  */
 export function validateBaseProfileFields(
-  body: Record<string, unknown>,
+  body: Record<string, unknown>
 ): ProfileValidationError | null {
   for (const field of BASE_PROFILE_FIELDS) {
     const value = body[field];

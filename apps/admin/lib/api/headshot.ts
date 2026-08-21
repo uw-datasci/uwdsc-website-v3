@@ -20,7 +20,7 @@ import { assertHeadshotWithinLimit, parseJsonResponse } from "./parse-response";
 
 export async function uploadHeadshot(
   file: File,
-  fullName: string,
+  fullName: string
 ): Promise<UploadHeadshotResponse> {
   assertHeadshotWithinLimit(file);
 

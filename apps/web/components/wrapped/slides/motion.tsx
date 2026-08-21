@@ -84,7 +84,7 @@ export function CountUp({
   const reduce = useReducedMotion();
   const count = useMotionValue(0);
   const display = useTransform(count, (latest) =>
-    format ? format(latest) : Math.round(latest).toLocaleString(),
+    format ? format(latest) : Math.round(latest).toLocaleString()
   );
 
   useEffect(() => {
@@ -92,7 +92,11 @@ export function CountUp({
       count.set(value);
       return;
     }
-    const controls = animate(count, value, { duration, delay, ease: "easeOut" });
+    const controls = animate(count, value, {
+      duration,
+      delay,
+      ease: "easeOut",
+    });
     return () => controls.stop();
   }, [value, duration, delay, reduce, count]);
 

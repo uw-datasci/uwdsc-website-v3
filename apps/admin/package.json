@@ -15,6 +15,7 @@
     "@hookform/resolvers": "^5.2.2",
     "@supabase/supabase-js": "^2.95.3",
     "@tanstack/react-table": "^8.21.3",
+    "@uw-datasci/raft": "^1.0.1",
     "@uwdsc/admin": "workspace:*",
     "@uwdsc/common": "workspace:*",
     "@uwdsc/core": "workspace:*",

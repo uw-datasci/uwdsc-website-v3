@@ -22,7 +22,7 @@ import {
 
 function matchesSubmissionStatusFilter(
   status: ApplicationListItem["status"],
-  filter: ApplicationSubmissionStatusFilter,
+  filter: ApplicationSubmissionStatusFilter
 ): boolean {
   switch (filter) {
     case ALL_SUBMISSION_STATUS_FILTER:
@@ -72,7 +72,7 @@ export function ApplicationsHeader({
     return applications.filter((app) => {
       const matchesSubmissionStatus = matchesSubmissionStatusFilter(
         app.status,
-        submissionStatusFilter,
+        submissionStatusFilter
       );
       const matchesPosition =
         positionFilter === "all" ||

@@ -1,64 +1,45 @@
-import { ApiResponse, isApplicationWindowOpen } from "@uwdsc/common/utils";
+import { RaftResponse } from "@uw-datasci/raft";
+import { withRaftRoute } from "@uwdsc/core/http";
+import { isApplicationWindowOpen } from "@uwdsc/common/utils";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 import { applicationService } from "@uwdsc/core";
-import { NextRequest } from "next/server";
 
-export async function GET(request: NextRequest): Promise<Response> {
-  try {
-    const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (!user) return isUnauthorized;
+export const GET = withRaftRoute(async (request) => {
+  const { user, isUnauthorized } = await tryGetCurrentUser();
+  if (!user) return isUnauthorized;
 
-    const { searchParams } = new URL(request.url);
-    const termId = searchParams.get("termId");
-    if (!termId) return ApiResponse.badRequest("termId is required");
+  const { searchParams } = new URL(request.url);
+  const termId = searchParams.get("termId");
+  if (!termId) return RaftResponse.badRequest("termId is required");
 
-    const activeTerm = await applicationService.getActiveTerm();
-    if (!activeTerm) return ApiResponse.notFound("No active application period");
-    if (!isApplicationWindowOpen(activeTerm)) {
-      return ApiResponse.forbidden(
-        "The application period is closed.",
-        "The application period is closed.",
-      );
-    }
-    if (termId !== activeTerm.id) {
-      return ApiResponse.badRequest("termId does not match active term");
-    }
-
-    const application = await applicationService.getApplicationForUser(user.id, termId);
-    return ApiResponse.ok(application);
-  } catch (error) {
-    console.error("Error fetching application:", error);
-    return ApiResponse.serverError(error, "Failed to fetch application");
+  const activeTerm = await applicationService.getActiveTerm();
+  if (!activeTerm) return RaftResponse.notFound("No active application period");
+  if (!isApplicationWindowOpen(activeTerm)) {
+    return RaftResponse.forbidden("The application period is closed.");
   }
-}
-
-export async function POST(request: NextRequest): Promise<Response> {
-  try {
-    const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (!user) return isUnauthorized;
-
-    const activeTerm = await applicationService.getActiveTerm();
-    if (!activeTerm) return ApiResponse.notFound("No active application period");
-    if (!isApplicationWindowOpen(activeTerm)) {
-      return ApiResponse.forbidden(
-        "The application period is closed.",
-        "The application period is closed.",
-      );
-    }
-
-    const body = await request.json();
-    const { termId } = body;
-    if (!termId) {
-      return ApiResponse.badRequest("termId is required");
-    }
-    if (termId !== activeTerm.id) {
-      return ApiResponse.badRequest("termId does not match active term");
-    }
-
-    const application = await applicationService.createApplication(user.id, termId);
-    return ApiResponse.ok(application);
-  } catch (error) {
-    console.error("Error creating application:", error);
-    return ApiResponse.serverError(error, "Failed to create application");
+  if (termId !== activeTerm.id) {
+    return RaftResponse.badRequest("termId does not match active term");
   }
-}
+
+  const application = await applicationService.getApplicationForUser(user.id, termId);
+  return RaftResponse.ok(application);
+});
+
+export const POST = withRaftRoute(async (request) => {
+  const { user, isUnauthorized } = await tryGetCurrentUser();
+  if (!user) return isUnauthorized;
+
+  const activeTerm = await applicationService.getActiveTerm();
+  if (!activeTerm) return RaftResponse.notFound("No active application period");
+  if (!isApplicationWindowOpen(activeTerm)) {
+    return RaftResponse.forbidden("The application period is closed.");
+  }
+
+  const body = await request.json();
+  const { termId } = body;
+  if (!termId) return RaftResponse.badRequest("termId is required");
+  if (termId !== activeTerm.id) return RaftResponse.badRequest("termId does not match active term");
+
+  const application = await applicationService.createApplication(user.id, termId);
+  return RaftResponse.ok(application);
+});

@@ -41,7 +41,7 @@ export function parseMembershipReceipt(body: string): MembershipReceiptParse {
 
   const custIdLine = /Cust ID:[^\n]*/i.exec(body)?.[0] ?? "";
   const receiptEmailAfterPlus = /\+([a-z0-9][a-z0-9._+%-]*@uwaterloo\.ca)/i.exec(
-    custIdLine,
+    custIdLine
   )?.[1];
   const receiptEmailPlain =
     /Cust ID:\s*([a-z][a-z0-9._%+-]*@uwaterloo\.ca)/i.exec(body)?.[1] ?? null;
@@ -87,7 +87,7 @@ export function throwIfParseFailed(parsed: MembershipReceiptParse): asserts pars
  */
 export function assertForwarderMatchesReceipt(
   forwarderFrom: string,
-  receiptEmail: string,
+  receiptEmail: string
 ): void {
   const forwarderEmail = parseUwaterlooEmailAddress(forwarderFrom);
 
@@ -107,7 +107,7 @@ export function assertForwarderMatchesReceipt(
  */
 export function assertReceiptWithinActiveTerm(
   transactionDateText: string,
-  termStartDate: string | null,
+  termStartDate: string | null
 ): void {
   if (termStartDate === null) {
     console.error("Active term has no start date");
@@ -130,7 +130,7 @@ export function assertReceiptWithinActiveTerm(
 
 export function dedupeRecipients(
   forwarderEmail: string | null,
-  receiptEmail: string | null,
+  receiptEmail: string | null
 ): string[] {
   const set = new Set<string>();
   if (forwarderEmail) set.add(forwarderEmail.toLowerCase());

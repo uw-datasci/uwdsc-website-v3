@@ -18,9 +18,7 @@ function valueToCsvCell(value: unknown): string {
  * Escapes a string for CSV: wraps in double quotes and escapes internal quotes if needed.
  */
 function escapeCsvCell(str: string): string {
-  return str.includes(",") || str.includes('"')
-    ? `"${str.replaceAll('"', '""')}"`
-    : str;
+  return str.includes(",") || str.includes('"') ? `"${str.replaceAll('"', '""')}"` : str;
 }
 
 /**
@@ -31,12 +29,10 @@ function escapeCsvCell(str: string): string {
 function buildCsv<T>(
   data: T[],
   headers: string[],
-  getValue: (row: T, key: string) => unknown,
+  getValue: (row: T, key: string) => unknown
 ): string {
   const rows = data.map((row) =>
-    headers
-      .map((key) => escapeCsvCell(valueToCsvCell(getValue(row, key))))
-      .join(","),
+    headers.map((key) => escapeCsvCell(valueToCsvCell(getValue(row, key)))).join(",")
   );
   return [headers.join(","), ...rows].join("\n");
 }
@@ -73,7 +69,7 @@ interface ExportToCsvConfig<T> {
 export function exportToCsv<T>(
   data: T[],
   config: ExportToCsvConfig<T>,
-  filename: string,
+  filename: string
 ): void {
   const csv = buildCsv(data, config.headers, config.getValue);
   downloadCsv(csv, filename);

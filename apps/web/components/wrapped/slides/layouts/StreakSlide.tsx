@@ -1,6 +1,11 @@
 import { motion } from "framer-motion";
 import { cn } from "@uwdsc/ui/lib/utils";
-import { tiltWarp, atkinsonHyperlegibleMono, displayFontClass as display, monoFontClass as mono } from "../../fonts";
+import {
+  tiltWarp,
+  atkinsonHyperlegibleMono,
+  displayFontClass as display,
+  monoFontClass as mono,
+} from "../../fonts";
 import type { StreakSlideData } from "../../types";
 import { Floating, slideItem, slideStagger } from "../motion";
 
@@ -29,15 +34,25 @@ export function StreakSlide({ slide }: StreakSlideProps) {
       className={cn(
         "flex h-full w-full flex-col items-center justify-center overflow-y-auto bg-[#9cd8ea] px-4 py-5 text-black sm:px-8 sm:py-6",
         tiltWarp.variable,
-        atkinsonHyperlegibleMono.variable,
+        atkinsonHyperlegibleMono.variable
       )}
     >
       <div className="relative z-10 flex h-full min-h-0 w-full max-w-104 flex-col items-center justify-center gap-4 pt-6 pb-2 sm:max-w-96 sm:gap-6 sm:pt-10 sm:pb-2">
         <motion.div variants={slideItem} className="text-center">
-          <h2 className={cn(display, "text-[2.2rem] leading-none tracking-tight text-black sm:text-[1.95rem]")}>
+          <h2
+            className={cn(
+              display,
+              "text-[2.2rem] leading-none tracking-tight text-black sm:text-[1.95rem]"
+            )}
+          >
             {slide.heading}
           </h2>
-          <p className={cn(display, "mt-1 text-[1.75rem] leading-none tracking-tight text-white sm:mt-1 sm:text-[1.5rem]")}>
+          <p
+            className={cn(
+              display,
+              "mt-1 text-[1.75rem] leading-none tracking-tight text-white sm:mt-1 sm:text-[1.5rem]"
+            )}
+          >
             {slide.subheading}
           </p>
         </motion.div>
@@ -50,7 +65,10 @@ export function StreakSlide({ slide }: StreakSlideProps) {
 
         <motion.div
           variants={slideItem}
-          className={cn(mono, "flex flex-col items-center gap-0.5 text-center text-[1.05rem] leading-snug text-black sm:text-[1rem]")}
+          className={cn(
+            mono,
+            "flex flex-col items-center gap-0.5 text-center text-[1.05rem] leading-snug text-black sm:text-[1rem]"
+          )}
         >
           {slide.captionLines.map((line) => (
             <p key={line} className="whitespace-nowrap">

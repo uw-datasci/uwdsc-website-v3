@@ -140,8 +140,7 @@ export class EventRepository extends BaseRepository {
 
     const condition =
       filter.kind === "in_window"
-        ? this
-          .sql`WHERE ${ref} BETWEEN buffered_start_time AND buffered_end_time`
+        ? this.sql`WHERE ${ref} BETWEEN buffered_start_time AND buffered_end_time`
         : this.sql`WHERE start_time > ${ref}`;
 
     const orderAndLimit =
@@ -175,10 +174,7 @@ export class EventRepository extends BaseRepository {
   /**
    * Check if a user has an attendance record for a given event
    */
-  async getAttendanceForUser(
-    eventId: string,
-    profileId: string,
-  ): Promise<boolean> {
+  async getAttendanceForUser(eventId: string, profileId: string): Promise<boolean> {
     try {
       const result = await this.sql<{ exists: boolean }[]>`
         SELECT EXISTS(

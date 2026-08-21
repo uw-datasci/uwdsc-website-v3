@@ -132,7 +132,7 @@ export default function ApplyPage() {
         setApplicationId(existing.id);
         const { generalAnswers, pos1Answers, pos2Answers, pos3Answers } = partitionDraftAnswers(
           existing,
-          positionsData,
+          positionsData
         );
         const pos1 = existing.position_selections.find((s) => s.priority === 1);
         const pos2 = existing.position_selections.find((s) => s.priority === 2);
@@ -226,7 +226,7 @@ export default function ApplyPage() {
           return {};
       }
     },
-    [form, positions, generalQuestions],
+    [form, positions, generalQuestions]
   );
 
   const goToStep = useCallback(
@@ -234,7 +234,7 @@ export default function ApplyPage() {
       setDirection(step > currentStep ? 1 : -1);
       setCurrentStep(step);
     },
-    [currentStep],
+    [currentStep]
   );
 
   const handleNext = useCallback(async () => {

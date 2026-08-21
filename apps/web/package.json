@@ -20,6 +20,7 @@
     "@hookform/resolvers": "^5.2.2",
     "@supabase/supabase-js": "^2.94.0",
     "@types/qrcode": "^1.5.6",
+    "@uw-datasci/raft": "^1.0.1",
     "@uwdsc/common": "workspace:*",
     "@uwdsc/core": "workspace:*",
     "@uwdsc/db": "workspace:*",

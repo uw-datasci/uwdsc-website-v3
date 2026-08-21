@@ -194,7 +194,7 @@ export function MembershipsTable({
     exportToCsv(
       data,
       { headers: [...MEMBERSHIP_CSV_HEADERS], getValue: getMembershipCsvValue },
-      `memberships-${new Date().toISOString().split("T")[0]}`,
+      `memberships-${new Date().toISOString().split("T")[0]}`
     );
   }, [table]);
 

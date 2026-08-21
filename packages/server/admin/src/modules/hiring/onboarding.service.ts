@@ -66,7 +66,7 @@ class OnboardingService {
       if (error instanceof ApiError) throw error;
       throw new ApiError(
         `Failed to get onboarding submission: ${(error as Error).message}`,
-        500,
+        500
       );
     }
   }
@@ -88,7 +88,7 @@ class OnboardingService {
       if (error instanceof ApiError) throw error;
       throw new ApiError(
         `Failed to save onboarding submission: ${(error as Error).message}`,
-        500,
+        500
       );
     }
   }
@@ -98,14 +98,14 @@ class OnboardingService {
    */
   async getTeamSubmissions(
     term_id: string,
-    subteam_id?: number,
+    subteam_id?: number
   ): Promise<OnboardingAdminRow[]> {
     try {
       return await this.repository.getTeamSubmissions(term_id, subteam_id);
     } catch (error) {
       throw new ApiError(
         `Failed to get onboarding submissions: ${(error as Error).message}`,
-        500,
+        500
       );
     }
   }

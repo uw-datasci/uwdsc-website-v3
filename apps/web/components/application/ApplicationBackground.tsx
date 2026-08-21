@@ -4,9 +4,7 @@ import { ReactNode } from "react";
 import Image from "next/image";
 import { useApplicationProgress } from "@/contexts/AppProgressContext";
 
-export function ApplicationBackground({
-  children,
-}: Readonly<{ children: ReactNode }>) {
+export function ApplicationBackground({ children }: Readonly<{ children: ReactNode }>) {
   const { progressValue } = useApplicationProgress();
 
   return (

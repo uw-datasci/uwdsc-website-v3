@@ -1,20 +1,17 @@
-import { ApiResponse, isApplicationWindowOpen } from "@uwdsc/common/utils";
+import { RaftResponse } from "@uw-datasci/raft";
+import { withRaftRoute } from "@uwdsc/core/http";
+import { isApplicationWindowOpen } from "@uwdsc/common/utils";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 import { applicationService } from "@uwdsc/core";
 
-export async function GET(): Promise<Response> {
-  try {
-    const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (!user) return isUnauthorized;
+export const GET = withRaftRoute(async () => {
+  const { user, isUnauthorized } = await tryGetCurrentUser();
+  if (!user) return isUnauthorized;
 
-    const term = await applicationService.getActiveTerm();
-    if (!term || !isApplicationWindowOpen(term)) {
-      return ApiResponse.notFound("No active application period");
-    }
-
-    return ApiResponse.ok(term);
-  } catch (error) {
-    console.error("Error fetching active term:", error);
-    return ApiResponse.serverError(error, "Failed to fetch active term");
+  const term = await applicationService.getActiveTerm();
+  if (!term || !isApplicationWindowOpen(term)) {
+    return RaftResponse.notFound("No active application period");
   }
-}
+
+  return RaftResponse.ok(term);
+});

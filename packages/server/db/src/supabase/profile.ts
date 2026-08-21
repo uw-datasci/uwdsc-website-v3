@@ -7,7 +7,7 @@ import { isProfileComplete } from "@uwdsc/common/utils";
  */
 export async function isProfileCompleteForMiddleware(
   supabase: SupabaseClient,
-  userId: string | undefined,
+  userId: string | undefined
 ): Promise<boolean> {
   if (!userId) return false;
 

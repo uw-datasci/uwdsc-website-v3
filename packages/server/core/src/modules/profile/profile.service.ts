@@ -39,7 +39,7 @@ class ProfileService {
     } catch (error) {
       throw new ApiError(
         `Failed to get wrapped profile stats: ${(error as Error).message}`,
-        500,
+        500
       );
     }
   }
@@ -49,7 +49,7 @@ class ProfileService {
    */
   async completeProfile(
     userId: string,
-    data: CompleteProfileData,
+    data: CompleteProfileData
   ): Promise<{ success: boolean; error?: string }> {
     try {
       data.is_math_soc_member = data.faculty === "math";
@@ -67,7 +67,7 @@ class ProfileService {
    */
   async updateProfile(
     userId: string,
-    data: ProfileUpdateData,
+    data: ProfileUpdateData
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const result = await this.repository.updateProfileByUser(userId, data);

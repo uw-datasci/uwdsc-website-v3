@@ -29,7 +29,7 @@ import {
   FACULTY_VALUES,
   ROLE_VALUES,
   ROLE_SELECT_OPTIONS,
-  isPresident,
+  isPres,
   roleRequiresSubteam,
 } from "@uwdsc/common/constants";
 import { Member, SubteamOption } from "@uwdsc/common/types";
@@ -74,7 +74,7 @@ export function EditMemberModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [subteams, setSubteams] = useState<SubteamOption[]>([]);
   const { user } = useAuth();
-  const canEditRole = isPresident(user?.role);
+  const canEditRole = isPres(user?.role);
 
   const form = useForm<EditMemberFormValues>({
     resolver: zodResolver(editMemberFormSchema),

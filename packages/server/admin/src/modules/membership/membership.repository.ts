@@ -54,7 +54,7 @@ export class MembershipRepository extends BaseRepository {
    * Current membership term and payment method for the profile, if a row exists.
    */
   async getMembershipByProfile(
-    profileId: string,
+    profileId: string
   ): Promise<{ term_id: string; payment_method: string | null } | null> {
     const result = await this.sql<{ term_id: string; payment_method: string | null }[]>`
       SELECT term_id, payment_method::text AS payment_method

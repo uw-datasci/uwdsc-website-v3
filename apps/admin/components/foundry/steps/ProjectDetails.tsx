@@ -15,10 +15,7 @@ import {
   Spinner,
 } from "@uwdsc/ui";
 import { FOUNDRY_DOMAIN } from "@/constants/foundry";
-import {
-  FOUNDRY_SUBDOMAIN_MAX_LEN,
-  type FoundryFormValues,
-} from "@/lib/schemas/foundry";
+import { FOUNDRY_SUBDOMAIN_MAX_LEN, type FoundryFormValues } from "@/lib/schemas/foundry";
 import type { GitHubTeam } from "@uwdsc/common/types";
 import { getGitHubTeams } from "@/lib/api/foundry";
 import { useEffect, useState } from "react";
@@ -40,10 +37,7 @@ export function ProjectDetails() {
         setTeamsError(null);
       } catch (error: unknown) {
         if (!mounted) return;
-        const message =
-          error instanceof Error
-            ? error.message
-            : "Failed to load GitHub teams";
+        const message = error instanceof Error ? error.message : "Failed to load GitHub teams";
         setTeams([]);
         setTeamsError(message);
       }
@@ -63,9 +57,7 @@ export function ProjectDetails() {
 
   return (
     <>
-      {teamsError && (
-        <p className="text-sm text-destructive mb-4">{teamsError}</p>
-      )}
+      {teamsError && <p className="text-sm text-destructive mb-4">{teamsError}</p>}
       <FormField
         control={form.control}
         name="projectName"
@@ -89,7 +81,7 @@ export function ProjectDetails() {
                   "flex h-9 min-w-0 w-full rounded-md border border-input bg-transparent shadow-xs transition-[color,box-shadow] outline-none",
                   "dark:bg-input/30",
                   "focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50",
-                  "aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
+                  "aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40"
                 )}
               >
                 <Input
@@ -108,9 +100,7 @@ export function ProjectDetails() {
                 </span>
               </div>
             </FormControl>
-            <FormDescription>
-              This will be the full hostname for your project
-            </FormDescription>
+            <FormDescription>This will be the full hostname for your project</FormDescription>
             <FormMessage />
           </FormItem>
         )}

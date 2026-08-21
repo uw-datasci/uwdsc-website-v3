@@ -55,8 +55,8 @@ export function AvailablePositions() {
         <div className="flex-1">
           <p className="font-semibold text-blue-200">Available Positions</p>
           <p className="text-sm text-blue-200/80">
-            Check out all available positions, their skillsets, and where your
-            strengths could make the biggest impact.
+            Check out all available positions, their skillsets, and where your strengths could
+            make the biggest impact.
           </p>
         </div>
       </motion.div>

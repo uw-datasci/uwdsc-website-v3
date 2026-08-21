@@ -43,7 +43,7 @@ export function isAdmin(role?: string | null): boolean {
  * President access is role-driven: a user is a president iff their `user_role` is `pres`,
  * independent of their exec_team membership/position.
  */
-export function isPresident(role?: string | null): boolean {
+export function isPres(role?: string | null): boolean {
   return role === "pres";
 }
 
@@ -67,17 +67,12 @@ export interface RoleClaims {
  * Prefer this over reaching into `app_metadata` directly so every guard, route, and
  * layout parses the claims the same way.
  */
-export function readRoleClaims(
-  appMetadata?: Record<string, unknown> | null,
-): RoleClaims {
+export function readRoleClaims(appMetadata?: Record<string, unknown> | null): RoleClaims {
   const role = typeof appMetadata?.role === "string" ? appMetadata.role : null;
   const rawSubteamId = appMetadata?.subteam_id;
   const subteamId =
-    typeof rawSubteamId === "number" && Number.isInteger(rawSubteamId)
-      ? rawSubteamId
-      : null;
-  const subteamName =
-    typeof appMetadata?.subteam === "string" ? appMetadata.subteam : null;
+    typeof rawSubteamId === "number" && Number.isInteger(rawSubteamId) ? rawSubteamId : null;
+  const subteamName = typeof appMetadata?.subteam === "string" ? appMetadata.subteam : null;
 
   return { role, subteamId, subteamName };
 }

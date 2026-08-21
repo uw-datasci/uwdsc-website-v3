@@ -10,9 +10,8 @@ export function VPConsideration() {
       <div className="flex-1">
         <p className="font-semibold text-amber-400">Duplicate Questions:</p>
         <p className="text-sm text-amber-200">
-          If you are applying for a VP Role, we will also consider you for an
-          exec role in the same sub-team. Make sure to clearly indicate your
-          preferences!
+          If you are applying for a VP Role, we will also consider you for an exec role in the
+          same sub-team. Make sure to clearly indicate your preferences!
         </p>
       </div>
     </div>

@@ -54,8 +54,8 @@ export function HeroApplyBadge() {
 
           {countdown && (
             <p className="font-mono text-xs sm:text-sm text-grey1 text-nowrap">
-              Closes in {pad(countdown.days)}d {pad(countdown.hours)}h{" "}
-              {pad(countdown.minutes)}m {pad(countdown.seconds)}s
+              Closes in {pad(countdown.days)}d {pad(countdown.hours)}h {pad(countdown.minutes)}m{" "}
+              {pad(countdown.seconds)}s
             </p>
           )}
           {inGrace && (

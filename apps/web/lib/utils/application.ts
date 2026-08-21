@@ -14,7 +14,7 @@ export function answerMaxLength(question: { max_length: number | null }): number
 
 function isAnswerComplete(
   answer: string | undefined,
-  question: { max_length: number | null },
+  question: { max_length: number | null }
 ): boolean {
   const trimmed = answer?.trim() ?? "";
   return trimmed.length >= 1 && trimmed.length <= answerMaxLength(question);
@@ -22,7 +22,7 @@ function isAnswerComplete(
 
 export function partitionDraftAnswers(
   existing: ApplicationWithDetails,
-  positionsData: PositionsWithQuestionsResponse,
+  positionsData: PositionsWithQuestionsResponse
 ): {
   generalAnswers: Record<string, string>;
   pos1Answers: Record<string, string>;
@@ -68,7 +68,7 @@ export function partitionDraftAnswers(
  */
 export function openPositionSelection(
   selection: { position_id: string } | undefined,
-  positionsData: PositionsWithQuestionsResponse,
+  positionsData: PositionsWithQuestionsResponse
 ): string {
   if (!selection) return "";
   const isOpen = positionsData.positions.some((p) => p.id === selection.position_id);
@@ -89,7 +89,7 @@ interface QuestionContext {
  */
 function pickAnswers(
   record: Record<string, string> | undefined,
-  questionIds: string[],
+  questionIds: string[]
 ): AnswerPair[] {
   if (!record) return [];
   const pairs: AnswerPair[] = [];
@@ -114,7 +114,7 @@ export function collectAllAnswers(
     position_3?: string;
     position_3_answers?: Record<string, string>;
   },
-  context: QuestionContext,
+  context: QuestionContext
 ): AnswerPair[] {
   const questionIdsFor = (positionId: string | undefined) =>
     positionId
@@ -124,7 +124,7 @@ export function collectAllAnswers(
   const pairs = [
     ...pickAnswers(
       values.general_answers,
-      context.generalQuestions.map((q) => q.id),
+      context.generalQuestions.map((q) => q.id)
     ),
     ...pickAnswers(values.position_1_answers, questionIdsFor(values.position_1)),
     ...pickAnswers(values.position_2_answers, questionIdsFor(values.position_2)),
@@ -155,7 +155,7 @@ export function buildPositionSelections(values: {
 export const isStepValid = (
   form: UseFormReturn<AppFormValues>,
   currentStep: number,
-  context: QuestionContext,
+  context: QuestionContext
 ): boolean => {
   const { errors } = form.formState;
   const { positions, generalQuestions } = context;
@@ -182,7 +182,7 @@ export const isStepValid = (
       // General - dynamic questions
       const generalAnswers = form.watch("general_answers") || {};
       const allAnswered = generalQuestions.every((q) =>
-        isAnswerComplete(generalAnswers[q.id], q),
+        isAnswerComplete(generalAnswers[q.id], q)
       );
       return !errors.general_answers && allAnswered;
     }
@@ -197,7 +197,7 @@ export const isStepValid = (
 
       const validatePositionAnswers = (
         positionId: string | undefined,
-        answers: Record<string, string>,
+        answers: Record<string, string>
       ): boolean => {
         if (!positionId) return true;
         const positionData = positions.find((p) => p.id === positionId);

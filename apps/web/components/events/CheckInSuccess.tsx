@@ -13,12 +13,7 @@ export function CheckInSuccess() {
         transition={{ type: "spring", bounce: 0.5 }}
         className="w-14 h-14 rounded-full bg-emerald-500 flex items-center justify-center text-white shadow-[0_0_20px_rgba(16,185,129,0.5)]"
       >
-        <svg
-          className="w-8 h-8"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -27,12 +22,8 @@ export function CheckInSuccess() {
           />
         </svg>
       </motion.div>
-      <p className="text-emerald-300 font-black tracking-[0.15em] mt-3">
-        CHECKED IN
-      </p>
-      <p className="text-emerald-400/80 text-xs mt-1.5 font-medium">
-        Show this to an exec
-      </p>
+      <p className="text-emerald-300 font-black tracking-[0.15em] mt-3">CHECKED IN</p>
+      <p className="text-emerald-400/80 text-xs mt-1.5 font-medium">Show this to an exec</p>
     </motion.div>
   );
 }

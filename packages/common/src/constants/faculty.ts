@@ -25,7 +25,7 @@ export const FACULTY_PROFILE_FORM_OPTIONS = Object.values(FACULTY_LABELS);
 
 /** Map faculty select label (e.g. `"Math"`) → API `Faculty` enum. */
 export const FACULTY_PROFILE_LABEL_TO_VALUE = Object.fromEntries(
-  (Object.keys(FACULTY_LABELS) as Faculty[]).map((k) => [FACULTY_LABELS[k], k]),
+  (Object.keys(FACULTY_LABELS) as Faculty[]).map((k) => [FACULTY_LABELS[k], k])
 ) as Record<string, Faculty>;
 
 /** Membership table faculty column filter: "all" plus one row per faculty. */

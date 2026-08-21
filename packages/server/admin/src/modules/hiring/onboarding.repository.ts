@@ -74,7 +74,7 @@ export class OnboardingRepository extends BaseRepository {
 
   async getTeamSubmissions(
     term_id: string,
-    subteam_id?: number,
+    subteam_id?: number
   ): Promise<OnboardingAdminRow[]> {
     const rows = await this.sql<OnboardingAdminRowDb[]>`
       SELECT

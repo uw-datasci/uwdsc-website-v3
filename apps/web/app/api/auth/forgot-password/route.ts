@@ -1,27 +1,22 @@
-import { ApiResponse } from "@uwdsc/common/utils";
+import { RaftResponse } from "@uw-datasci/raft";
+import { withRaftRoute } from "@uwdsc/core/http";
 import { createAuthService } from "@/lib/services";
-import { NextRequest } from "next/server";
 
-export async function POST(request: NextRequest): Promise<Response> {
-  try {
-    const body = await request.json();
-    const { email } = body;
+export const POST = withRaftRoute(async (request) => {
+  const body = await request.json();
+  const { email } = body;
 
-    if (!email) return ApiResponse.badRequest("Email is required");
+  if (!email) return RaftResponse.badRequest("Email is required");
 
-    const authService = await createAuthService();
-    const emailRedirectTo = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password-confirm`;
-    const result = await authService.forgotPassword(email, emailRedirectTo);
+  const authService = await createAuthService();
+  const emailRedirectTo = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password-confirm`;
+  const result = await authService.forgotPassword(email, emailRedirectTo);
 
-    if (!result.success) {
-      if (result.userNotFound) return ApiResponse.notFound(result.error);
-
-      return ApiResponse.badRequest(result.error, "Failed to send password reset email");
-    }
-
-    return ApiResponse.ok({ success: true, message: result.message });
-  } catch (error) {
-    console.error("Forgot password error:", error);
-    return ApiResponse.serverError(error, "An unexpected error occurred");
+  if (!result.success) {
+    return result.userNotFound
+      ? RaftResponse.notFound(result.error)
+      : RaftResponse.badRequest(result.error, "Failed to send password reset email");
   }
-}
+
+  return RaftResponse.ok({ success: true, message: result.message });
+});

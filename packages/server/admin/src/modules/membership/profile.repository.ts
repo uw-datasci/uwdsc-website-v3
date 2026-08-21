@@ -25,9 +25,7 @@ export class ProfileRepository extends BaseRepository {
         `;
       }
 
-      const limitCondition = options?.searchQuery
-        ? this.sql`LIMIT 10`
-        : this.sql``;
+      const limitCondition = options?.searchQuery ? this.sql`LIMIT 10` : this.sql``;
 
       const result = await this.sql<Member[]>`
       SELECT
@@ -152,7 +150,7 @@ export class ProfileRepository extends BaseRepository {
   async updateMemberById(
     profileId: string,
     data: Record<string, string | boolean | null>,
-    columns: string[],
+    columns: string[]
   ): Promise<boolean> {
     try {
       const result = await this.sql`
@@ -187,7 +185,7 @@ export class ProfileRepository extends BaseRepository {
   async updateRoleById(
     profileId: string,
     role: UserRole,
-    subteamId: number | null,
+    subteamId: number | null
   ): Promise<boolean> {
     try {
       const result = await this.sql`

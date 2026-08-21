@@ -29,8 +29,7 @@ export function NavLinks({ navLinks }: NavLinksProps) {
   };
 
   const isDark =
-    mounted &&
-    (theme === "dark" || (theme === "system" && systemTheme === "dark"));
+    mounted && (theme === "dark" || (theme === "system" && systemTheme === "dark"));
 
   const glassStyles = isDark
     ? {

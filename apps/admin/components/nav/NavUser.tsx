@@ -34,10 +34,8 @@ export function NavUser({ onSignOut }: NavUserProps) {
   if (!user) return null;
 
   const initials =
-    `${user.first_name?.[0] || ""}${user.last_name?.[0] || ""}`.toUpperCase() ||
-    "??";
-  const fullName =
-    `${user.first_name || ""} ${user.last_name || ""}`.trim() || "User";
+    `${user.first_name?.[0] || ""}${user.last_name?.[0] || ""}`.toUpperCase() || "??";
+  const fullName = `${user.first_name || ""} ${user.last_name || ""}`.trim() || "User";
 
   return (
     <SidebarMenu>
@@ -49,15 +47,11 @@ export function NavUser({ onSignOut }: NavUserProps) {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-full">
-                <AvatarFallback className="rounded-full">
-                  {initials}
-                </AvatarFallback>
+                <AvatarFallback className="rounded-full">{initials}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="truncate font-semibold max-w-full">
-                    {fullName}
-                  </span>
+                  <span className="truncate font-semibold max-w-full">{fullName}</span>
                   <Badge
                     variant="default"
                     className="text-[10px] h-4 px-1 py-0 uppercase shrink-0"
@@ -79,9 +73,7 @@ export function NavUser({ onSignOut }: NavUserProps) {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-full">
-                  <AvatarFallback className="rounded-full">
-                    {initials}
-                  </AvatarFallback>
+                  <AvatarFallback className="rounded-full">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">{fullName}</span>

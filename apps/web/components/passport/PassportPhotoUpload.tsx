@@ -1,13 +1,13 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Camera, X, Loader2 } from "lucide-react";
-import { Card, CardContent } from "@uwdsc/ui";
+import { useProfilePhotoUrl } from "@/hooks/useProfilePhotoUrl";
 
 interface PassportPhotoUploadProps {
   readonly initials: string;
-  readonly photoUrl?: string | null;
+  readonly photoKey?: string | null;
   readonly displayName: string;
   readonly onPhotoUpload: (file: File) => Promise<void>;
   readonly onPhotoDelete: () => Promise<void>;
@@ -19,17 +19,22 @@ const IMAGE_MAX_BYTES = IMAGE_MAX_MB * 1024 * 1024;
 
 export function PassportPhotoUpload({
   initials,
-  photoUrl,
+  photoKey,
   displayName,
   onPhotoUpload,
   onPhotoDelete,
 }: Readonly<PassportPhotoUploadProps>) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [currentPhoto, setCurrentPhoto] = useState<string | null>(photoUrl ?? null);
+  const resolvedPhotoUrl = useProfilePhotoUrl(photoKey);
+  const [previewPhoto, setPreviewPhoto] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
+  const currentPhoto = previewPhoto ?? resolvedPhotoUrl;
+
+  useEffect(() => {
+    setPreviewPhoto(null);
+  }, [photoKey]);
 
   const handlePhotoSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -52,7 +57,7 @@ export function PassportPhotoUpload({
     // Show preview immediately
     const reader = new FileReader();
     reader.onload = (e) => {
-      setCurrentPhoto(e.target?.result as string);
+      setPreviewPhoto(e.target?.result as string);
     };
     reader.readAsDataURL(file);
 
@@ -63,7 +68,7 @@ export function PassportPhotoUpload({
     } catch (err) {
       const message = err instanceof Error ? err.message : "Upload failed. Try again.";
       setError(message);
-      setCurrentPhoto(photoUrl ?? null);
+      setPreviewPhoto(null);
     } finally {
       setIsLoading(false);
     }
@@ -74,10 +79,6 @@ export function PassportPhotoUpload({
     }
   };
 
-  const handleDeleteClick = () => {
-    setShowDeleteConfirm(true);
-  };
-
   const handleConfirmDelete = async () => {
     setShowDeleteConfirm(false);
     setError(null);
@@ -85,17 +86,13 @@ export function PassportPhotoUpload({
 
     try {
       await onPhotoDelete();
-      setCurrentPhoto(null);
+      setPreviewPhoto(null);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Delete failed. Try again.";
       setError(message);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleCancel = () => {
-    setShowDeleteConfirm(false);
   };
 
   const handleAvatarClick = () => {
@@ -105,116 +102,96 @@ export function PassportPhotoUpload({
   };
 
   return (
-    <Card className="border-border bg-card">
-      <CardContent className="px-6">
-        <div className="flex items-center gap-3">
-          {/* Avatar */}
-          <div
-            className="relative flex-shrink-0"
-            onMouseEnter={() => setIsHovering(true)}
-            onMouseLeave={() => setIsHovering(false)}
-          >
-            <button
-              onClick={handleAvatarClick}
-              disabled={isLoading}
-              className="relative w-16 h-16 rounded-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background"
-              aria-label="Upload photo"
-            >
-              {currentPhoto ? (
-                <Image
-                  src={currentPhoto}
-                  alt={displayName}
-                  fill
-                  className={`object-cover transition-opacity duration-200 ${
-                    isLoading ? "opacity-40" : "opacity-100"
-                  }`}
-                />
-              ) : (
-                <div
-                  className={`w-full h-full flex items-center justify-center text-2xl font-bold bg-gradient-to-br from-slate-800 to-slate-900 text-slate-300 transition-opacity duration-200 ${
-                    isLoading ? "opacity-40" : "opacity-100"
-                  }`}
-                >
-                  {initials}
-                </div>
-              )}
-
-              {/* Loading Spinner Overlay */}
-              {isLoading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/10">
-                  <Loader2 className="w-4 h-4 text-slate-300 animate-spin" />
-                </div>
-              )}
-            </button>
-
-            {/* Camera Badge */}
-            {!isLoading && (
-              <button
-                onClick={handleAvatarClick}
-                disabled={isLoading}
-                className="absolute bottom-0 right-0 w-6 h-6 rounded-full flex items-center justify-center bg-slate-700 border border-slate-500 hover:border-slate-400 transition-colors"
-                aria-label="Change photo"
-              >
-                <Camera className="w-3 h-3 text-slate-300" />
-              </button>
-            )}
-
-            {/* Delete Badge */}
-            {currentPhoto && !isLoading && (
-              <button
-                onClick={handleDeleteClick}
-                className={`absolute top-0 right-0 w-5 h-5 rounded-full flex items-center justify-center bg-red-600 hover:bg-red-700 border border-red-400/50 transition-all ${
-                  isHovering ? "opacity-100" : "opacity-0 md:opacity-0"
-                } md:hover:opacity-100`}
-                aria-label="Delete photo"
-              >
-                <X className="w-2.5 h-2.5 text-white" />
-              </button>
-            )}
-          </div>
-
-          {/* Info and Actions */}
-          <div className="flex-1 min-w-0">
-            <h3 className="text-base font-bold text-foreground truncate">{displayName}</h3>
-            <p className="text-xs text-muted-foreground">
-              JPG or PNG, up to {IMAGE_MAX_MB}MB
-            </p>
-
-            {error && (
-              <p className="text-xs text-red-400 mt-2">{error}</p>
-            )}
-
-            {showDeleteConfirm && (
-              <div className="flex gap-2 mt-3">
-                <button
-                  onClick={handleCancel}
-                  className="text-xs px-2 py-1 bg-slate-700 hover:bg-slate-600 border border-slate-500 rounded transition-colors text-slate-200"
-                >
-                  Keep
-                </button>
-                <button
-                  onClick={handleConfirmDelete}
-                  disabled={isLoading}
-                  className="text-xs px-2 py-1 bg-red-600 hover:bg-red-700 border border-red-500 rounded transition-colors text-white disabled:opacity-50"
-                >
-                  Remove
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Hidden File Input */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept={IMAGE_ACCEPT}
-          onChange={handlePhotoSelect}
+    <div className="flex w-full flex-col items-center gap-2">
+      <div className="relative">
+        <button
+          type="button"
+          onClick={handleAvatarClick}
           disabled={isLoading}
-          className="hidden"
-          aria-hidden="true"
-        />
-      </CardContent>
-    </Card>
+          aria-label="Upload photo"
+          className="relative flex size-36 items-center justify-center overflow-hidden rounded-full border-4 border-zinc-600/70 bg-zinc-950 shadow-[0_0_0_6px_rgba(63,63,70,0.35)] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+        >
+          {currentPhoto ? (
+            <Image
+              src={currentPhoto}
+              alt={displayName}
+              fill
+              className={`object-cover transition-opacity duration-200 ${
+                isLoading ? "opacity-40" : "opacity-100"
+              }`}
+            />
+          ) : (
+            <span
+              className={`flex size-full items-center justify-center rounded-full bg-linear-to-br from-sky-950 via-blue-900 to-zinc-900 text-4xl font-semibold text-white transition-opacity duration-200 ${
+                isLoading ? "opacity-40" : "opacity-100"
+              }`}
+            >
+              {initials}
+            </span>
+          )}
+
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+              <Loader2 className="size-5 animate-spin text-zinc-200" />
+            </div>
+          )}
+        </button>
+
+        {!isLoading && (
+          <button
+            type="button"
+            onClick={handleAvatarClick}
+            className="absolute bottom-0.5 right-0.5 inline-flex size-8 items-center justify-center rounded-full border border-zinc-700 bg-black/80 text-zinc-100 transition hover:bg-zinc-900"
+            aria-label="Change photo"
+          >
+            <Camera className="size-3.5" />
+          </button>
+        )}
+
+        {currentPhoto && !isLoading && (
+          <button
+            type="button"
+            onClick={() => setShowDeleteConfirm(true)}
+            className="absolute right-0 top-0 inline-flex size-6 items-center justify-center rounded-full border border-red-400/50 bg-red-600 text-white transition hover:bg-red-700"
+            aria-label="Delete photo"
+          >
+            <X className="size-3" />
+          </button>
+        )}
+      </div>
+
+      {error && <p className="text-center text-xs text-red-400">{error}</p>}
+
+      {showDeleteConfirm && (
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setShowDeleteConfirm(false)}
+            className="rounded-md border border-zinc-600 bg-zinc-800 px-3 py-1 text-xs text-zinc-200 transition hover:bg-zinc-700"
+          >
+            Keep
+          </button>
+          <button
+            type="button"
+            onClick={handleConfirmDelete}
+            disabled={isLoading}
+            className="rounded-md border border-red-500 bg-red-600 px-3 py-1 text-xs text-white transition hover:bg-red-700 disabled:opacity-50"
+          >
+            Remove
+          </button>
+        </div>
+      )}
+
+      {/* Hidden File Input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept={IMAGE_ACCEPT}
+        onChange={handlePhotoSelect}
+        disabled={isLoading}
+        className="hidden"
+        aria-hidden="true"
+      />
+    </div>
   );
 }

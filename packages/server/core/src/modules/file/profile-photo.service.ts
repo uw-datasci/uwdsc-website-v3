@@ -59,4 +59,12 @@ export class ProfilePhotoService extends FileService {
       return null;
     }
   }
+
+  /**
+   * Get a signed URL for a known object key, skipping the folder listing.
+   * Use this when the key is already known (e.g. from `profiles.profile_photo_key`).
+   */
+  async getSignedUrlForKey(key: string): Promise<string | null> {
+    return this.repository.getSignedUrl(key);
+  }
 }

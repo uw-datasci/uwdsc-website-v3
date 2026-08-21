@@ -1,26 +1,35 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { QrCode, UserRound } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  PassportCard,
-  MembershipCta,
-  PassportProfile,
-  PassportPhotoUpload,
-} from "@/components/passport";
+import { PassportProfile, PassportPhotoUpload, PassportQRCode } from "@/components/passport";
 import { useAuth } from "@/contexts/AuthContext";
-import { getMembershipStatus } from "@/lib/api/profile";
-import { FACULTY_LABELS } from "@uwdsc/common/constants";
+import { getMembershipStatus, updateUserProfile } from "@/lib/api/profile";
+import { uploadProfilePhoto, deleteProfilePhoto } from "@/lib/api/profile-photo";
+import { FACULTY_LABELS, FACULTY_PROFILE_LABEL_TO_VALUE } from "@uwdsc/common/constants";
 import type { MembershipStatus } from "@uwdsc/common/types";
+import {
+  passportProfileEditSchema,
+  passportProfileEditDefaultValues,
+  type PassportProfileEditValues,
+} from "@/lib/schemas/profile";
 import { Spinner } from "@uwdsc/ui";
 
 export default function PassportPage() {
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, mutate } = useAuth();
   const [membershipStatus, setMembershipStatus] = useState<MembershipStatus | null>(null);
-  const [membershipLoading, setMembershipLoading] = useState(true);
   const [showQr, setShowQr] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const form = useForm<PassportProfileEditValues>({
+    resolver: zodResolver(passportProfileEditSchema),
+    defaultValues: passportProfileEditDefaultValues,
+    mode: "onTouched",
+  });
+  const { reset } = form;
 
   const demoStamps = [
     { label: "Hack Night", accent: "from-cyan-300 to-sky-500", mark: "DSC" },
@@ -32,10 +41,7 @@ export default function PassportPage() {
   ] as const;
 
   useEffect(() => {
-    getMembershipStatus()
-      .then(setMembershipStatus)
-      .catch(console.error)
-      .finally(() => setMembershipLoading(false));
+    getMembershipStatus().then(setMembershipStatus).catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -78,21 +84,9 @@ export default function PassportPage() {
     setIsEditing(false);
   };
 
-  const handlePhotoUpload = async () => {
+  const handlePhotoUpload = async (file: File) => {
     try {
-      // TODO: Implement actual API call
-      // const formData = new FormData();
-      // formData.append("photo", file);
-      // const response = await fetch("/api/profile/photo", {
-      //   method: "POST",
-      //   body: formData,
-      // });
-      // const data = await response.json();
-      // if (!response.ok) throw new Error(data.error || "Upload failed");
-      // await mutate();
-
-      // Simulate network delay for now
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await uploadProfilePhoto(file);
       await mutate();
     } catch (err) {
       throw err instanceof Error ? err : new Error("Upload failed");
@@ -101,16 +95,7 @@ export default function PassportPage() {
 
   const handlePhotoDelete = async () => {
     try {
-      // TODO: Implement actual API call
-      // const response = await fetch("/api/profile/photo", {
-      //   method: "DELETE",
-      // });
-      // const data = await response.json();
-      // if (!response.ok) throw new Error(data.error || "Delete failed");
-      // await mutate();
-
-      // Simulate network delay for now
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      await deleteProfilePhoto();
       await mutate();
     } catch (err) {
       throw err instanceof Error ? err : new Error("Delete failed");
@@ -129,7 +114,6 @@ export default function PassportPage() {
     [user?.first_name?.[0], user?.last_name?.[0]].filter(Boolean).join("").toUpperCase() || "?";
   const displayName =
     [user?.first_name, user?.last_name].filter(Boolean).join(" ") || "Unknown Member";
-  const isMember = Boolean(membershipStatus?.has_membership);
   const facultyLabel = user?.faculty == null ? undefined : FACULTY_LABELS[user.faculty];
   const detailBlocks = [
     { label: "Email", value: user?.email ?? "-" },
@@ -152,60 +136,61 @@ export default function PassportPage() {
               {showQr ? <UserRound className="size-4" /> : <QrCode className="size-4" />}
             </button>
 
-        <PassportPhotoUpload
-          initials={initials}
-          photoUrl={user?.profile_photo_url}
-          displayName={displayName}
-          onPhotoUpload={handlePhotoUpload}
-          onPhotoDelete={handlePhotoDelete}
-        />
-
-        <PassportProfile
-          isEditing={isEditing}
-          onEdit={() => setIsEditing(true)}
-          onCancel={handleCancel}
-          form={form}
-          onSubmit={onSubmit}
-          displayName={displayName}
-          email={user?.email ?? "-"}
-          watIam={user?.wat_iam ?? "-"}
-          facultyLabel={facultyLabel ?? "-"}
-          term={user?.term ?? "-"}
-        />
-
-          <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex min-w-0 items-center gap-3">
-                <div className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-violet-700 to-violet-900 text-sm font-semibold text-white">
-                  {initials}
+            <div className="h-44" style={{ perspective: 1200 }}>
+              <motion.div
+                className="relative h-full w-full"
+                style={{ transformStyle: "preserve-3d" }}
+                animate={{ rotateY: showQr ? 180 : 0 }}
+                transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+              >
+                <div
+                  className="absolute inset-0 flex items-center justify-center"
+                  style={{ backfaceVisibility: "hidden" }}
+                >
+                  <PassportPhotoUpload
+                    initials={initials}
+                    photoKey={user?.profile_photo_key}
+                    displayName={displayName}
+                    onPhotoUpload={handlePhotoUpload}
+                    onPhotoDelete={handlePhotoDelete}
+                  />
                 </div>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-white">{displayName}</p>
-                  <p className="truncate text-xs text-zinc-400">{user?.email ?? "No email"}</p>
+
+                <div
+                  className="absolute inset-0 flex items-center justify-center"
+                  style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+                >
+                  <div className="relative flex size-36 items-center justify-center overflow-hidden rounded-full border-4 border-zinc-600/70 bg-zinc-950 shadow-[0_0_0_6px_rgba(63,63,70,0.35)]">
+                    <div className="absolute inset-0 bg-linear-to-br from-sky-950 via-blue-900 to-zinc-900" />
+                    <span className="pointer-events-none absolute left-5 top-5 size-3.5 rounded-tl-sm border-l-2 border-t-2 border-white/20" />
+                    <span className="pointer-events-none absolute right-5 top-5 size-3.5 rounded-tr-sm border-r-2 border-t-2 border-white/20" />
+                    <span className="pointer-events-none absolute bottom-5 left-5 size-3.5 rounded-bl-sm border-b-2 border-l-2 border-white/20" />
+                    <span className="pointer-events-none absolute bottom-5 right-5 size-3.5 rounded-br-sm border-b-2 border-r-2 border-white/20" />
+                    <div className="relative">
+                      <PassportQRCode
+                        userId={user?.id ?? ""}
+                        membershipId={membershipStatus?.membership_id ?? null}
+                        size={96}
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="flex shrink-0 items-center gap-1.5">
-                <span className="rounded-full bg-violet-600 px-2.5 py-1 text-[10px] font-semibold text-white">
-                  {user?.exec_position_name ?? "Developer"}
-                </span>
-                {membershipLoading ? (
-                  <span className="rounded-full border border-emerald-500/35 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold text-emerald-300">
-                    Checking
-                  </span>
-                ) : (
-                  <span
-                    className={
-                      isMember
-                        ? "rounded-full border border-emerald-500/35 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold text-emerald-300"
-                        : "rounded-full border border-zinc-600 bg-zinc-800 px-2.5 py-1 text-[10px] font-semibold text-zinc-300"
-                    }
-                  >
-                    {isMember ? "Active Member" : "Not Paid"}
-                  </span>
-                )}
-              </div>
+              </motion.div>
             </div>
           </div>
+
+          <PassportProfile
+            isEditing={isEditing}
+            onEdit={() => setIsEditing(true)}
+            onCancel={handleCancel}
+            form={form}
+            onSubmit={onSubmit}
+            displayName={displayName}
+            email={user?.email ?? "-"}
+            watIam={user?.wat_iam ?? "-"}
+            facultyLabel={facultyLabel ?? "-"}
+            term={user?.term ?? "-"}
+          />
         </div>
 
         <div className="min-w-0 space-y-4">

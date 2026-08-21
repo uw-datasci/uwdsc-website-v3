@@ -33,6 +33,7 @@ export async function GET(): Promise<Response> {
       term: profile?.term ?? null,
       is_math_soc_member: profile?.is_math_soc_member ?? false,
       exec_position_name: profile?.exec_position_name ?? null,
+      profile_photo_key: profile?.profile_photo_key ?? null,
     };
     return ApiResponse.ok(data);
   } catch (error) {

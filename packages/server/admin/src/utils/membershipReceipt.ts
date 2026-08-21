@@ -11,8 +11,13 @@ const UWATERLOO_EMAIL = /^[a-z0-9._%+-]+@uwaterloo\.ca$/;
  */
 export function parseUwaterlooEmailAddress(address: string): string | null {
   const trimmed = address.trim();
-  const angle = /<([^>]+)>/.exec(trimmed)?.[1]?.trim() ?? trimmed;
-  const email = angle.toLowerCase();
+  let parsed = trimmed;
+  const open = trimmed.indexOf("<");
+  if (open !== -1) {
+    const close = trimmed.indexOf(">", open + 1);
+    if (close !== -1) parsed = trimmed.slice(open + 1, close).trim();
+  }
+  const email = parsed.toLowerCase();
   return UWATERLOO_EMAIL.test(email) ? email : null;
 }
 
@@ -20,9 +25,7 @@ export function parseUwaterlooEmailAddress(address: string): string | null {
  * Parses the transaction datetime from the receipt body (local shop time, America/Toronto).
  */
 function parseTransactionDate(text: string): Date {
-  const dt = DateTime.fromFormat(text.trim(), DATETIME_FORMAT, {
-    zone: "America/Toronto",
-  });
+  const dt = DateTime.fromFormat(text.trim(), DATETIME_FORMAT, { zone: "America/Toronto" });
 
   if (!dt.isValid) throw new ApiError("Could not parse transaction date from receipt", 400);
 

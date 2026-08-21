@@ -154,7 +154,7 @@ export default function PassportPage() {
 
         <PassportPhotoUpload
           initials={initials}
-          photoUrl={user?.profile_photo_key}
+          photoUrl={user?.profile_photo_url}
           displayName={displayName}
           onPhotoUpload={handlePhotoUpload}
           onPhotoDelete={handlePhotoDelete}

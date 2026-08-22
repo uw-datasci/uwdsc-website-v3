@@ -9,7 +9,10 @@ export const GET = withRaftRoute(async () => {
   if (!user) return isUnauthorized;
 
   const term = await applicationService.getActiveTerm();
-  if (!term || !isDateWindowOpen(term.application_release_date, term.application_hard_deadline)) {
+  if (
+    !term ||
+    !isDateWindowOpen(term.application_release_date, term.application_hard_deadline)
+  ) {
     return RaftResponse.notFound("No active application period");
   }
 

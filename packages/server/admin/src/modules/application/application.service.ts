@@ -8,7 +8,7 @@ import {
   type QuestionScope,
   type QuestionUpsertInput,
   type Term,
-  type TermScheduleInput
+  type TermScheduleInput,
 } from "@uwdsc/common/types";
 import { DEFAULT_QUESTION_PLACEHOLDER } from "@uwdsc/common/constants";
 import { ApplicationRepository } from "./application.repository";

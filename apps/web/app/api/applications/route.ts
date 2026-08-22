@@ -14,7 +14,9 @@ export const GET = withRaftRoute(async (request) => {
 
   const activeTerm = await applicationService.getActiveTerm();
   if (!activeTerm) return RaftResponse.notFound("No active application period");
-  if (!isDateWindowOpen(activeTerm.application_release_date, activeTerm.application_hard_deadline)) {
+  if (
+    !isDateWindowOpen(activeTerm.application_release_date, activeTerm.application_hard_deadline)
+  ) {
     return RaftResponse.forbidden("The application period is closed.");
   }
   if (termId !== activeTerm.id) {
@@ -31,14 +33,17 @@ export const POST = withRaftRoute(async (request) => {
 
   const activeTerm = await applicationService.getActiveTerm();
   if (!activeTerm) return RaftResponse.notFound("No active application period");
-  if (!isDateWindowOpen(activeTerm.application_release_date, activeTerm.application_hard_deadline)) {
+  if (
+    !isDateWindowOpen(activeTerm.application_release_date, activeTerm.application_hard_deadline)
+  ) {
     return RaftResponse.forbidden("The application period is closed.");
   }
 
   const body = await request.json();
   const { termId } = body;
   if (!termId) return RaftResponse.badRequest("termId is required");
-  if (termId !== activeTerm.id) return RaftResponse.badRequest("termId does not match active term");
+  if (termId !== activeTerm.id)
+    return RaftResponse.badRequest("termId does not match active term");
 
   const application = await applicationService.createApplication(user.id, termId);
   return RaftResponse.ok(application);

@@ -38,8 +38,8 @@ export const getAdminNavigation = (
           {
             name: "Settings",
             href: "/applications/settings",
-            icon: Settings
-          }
+            icon: Settings,
+          },
         ]
       : []),
     ...(isAdmin(role)

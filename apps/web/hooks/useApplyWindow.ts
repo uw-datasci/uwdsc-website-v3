@@ -8,7 +8,7 @@ const CLOSED: ApplyWindowOpenResponse = {
   open: false,
   softDeadline: null,
   hardDeadline: null,
-  termCode: null
+  termCode: null,
 };
 
 // On failure, fall back to "closed" so the Apply link and hero callout stay hidden.

@@ -11,7 +11,7 @@ import type {
   QuestionScope,
   QuestionUpsertInput,
   Term,
-  TermScheduleInput
+  TermScheduleInput,
 } from "@uwdsc/common/types";
 
 export class ApplicationRepository extends BaseRepository {

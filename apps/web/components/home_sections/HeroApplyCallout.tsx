@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { GlassSurface } from "@uwdsc/ui";
 import { formatTermCode } from "@uwdsc/common/utils";
 import { useApplyWindow } from "@/hooks/useApplyWindow";
@@ -10,10 +11,19 @@ const pad = (value: number) => String(value).padStart(2, "0");
 /**
  * "Applications Open" badge with a live countdown to the soft deadline.
  * Renders nothing while the window is closed, so the hero is unchanged.
+ * The window itself stays open through the hard deadline -- once the soft
+ * (advertised) deadline passes, the countdown naturally hits zero and the
+ * badge switches to a "closing now" label instead of disappearing.
  */
 export function HeroApplyBadge() {
   const { open, softDeadline, termCode } = useApplyWindow();
   const countdown = useCountdown(open ? softDeadline : null);
+
+  // useCountdown also returns null before its effect has run on mount, so a
+  // "not counting" state needs a mount flag to tell that apart from "elapsed".
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const inGrace = mounted && open && softDeadline !== null && countdown === null;
 
   if (!open) return null;
 
@@ -46,6 +56,11 @@ export function HeroApplyBadge() {
             <p className="font-mono text-xs sm:text-sm text-grey1 text-nowrap">
               Closes in {pad(countdown.days)}d {pad(countdown.hours)}h{" "}
               {pad(countdown.minutes)}m {pad(countdown.seconds)}s
+            </p>
+          )}
+          {inGrace && (
+            <p className="font-mono text-xs sm:text-sm text-grey1 text-nowrap">
+              Closing now — final submissions
             </p>
           )}
         </div>

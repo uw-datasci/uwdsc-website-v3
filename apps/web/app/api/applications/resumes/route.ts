@@ -1,4 +1,4 @@
-import { ApiResponse, isApplicationApiWindowOpen } from "@uwdsc/common/utils";
+import { ApiResponse, isApplicationWindowOpen } from "@uwdsc/common/utils";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 import { applicationService } from "@uwdsc/core";
 import { createResumeService } from "@/lib/services";
@@ -11,7 +11,7 @@ export async function GET(): Promise<Response> {
 
     const term = await applicationService.getActiveTerm();
     if (!term) return ApiResponse.notFound("No active application period");
-    if (!isApplicationApiWindowOpen(term)) {
+    if (!isApplicationWindowOpen(term)) {
       return ApiResponse.forbidden(
         "The application period is closed.",
         "The application period is closed.",
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     const term = await applicationService.getActiveTerm();
     if (!term) return ApiResponse.notFound("No active application period");
-    if (!isApplicationApiWindowOpen(term)) {
+    if (!isApplicationWindowOpen(term)) {
       return ApiResponse.forbidden(
         "The application period is closed.",
         "The application period is closed.",

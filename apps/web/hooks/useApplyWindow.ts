@@ -7,6 +7,7 @@ import type { ApplyWindowOpenResponse } from "@/types/application";
 const CLOSED: ApplyWindowOpenResponse = {
   open: false,
   softDeadline: null,
+  hardDeadline: null,
   termCode: null,
 };
 
@@ -40,6 +41,7 @@ export function useApplyWindow() {
   return {
     open: Boolean(data?.open),
     softDeadline: data?.softDeadline ?? null,
+    hardDeadline: data?.hardDeadline ?? null,
     termCode: data?.termCode ?? null,
     isLoading,
   };

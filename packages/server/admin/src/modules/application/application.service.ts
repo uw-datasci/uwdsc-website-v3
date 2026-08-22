@@ -7,6 +7,8 @@ import {
   type QuestionPositionOption,
   type QuestionScope,
   type QuestionUpsertInput,
+  type Term,
+  type TermScheduleInput,
 } from "@uwdsc/common/types";
 import { DEFAULT_QUESTION_PLACEHOLDER } from "@uwdsc/common/constants";
 import { ApplicationRepository } from "./application.repository";
@@ -158,6 +160,22 @@ class ApplicationService {
         `Failed to close available position: ${(error as Error).message}`,
         500,
       );
+    }
+  }
+
+  /**
+   * Update the active term's application schedule. President-only; callers
+   * must already have enforced `scope.isPresident` via the withPresAccess
+   * guard. Throws 404 if there is no active term.
+   */
+  async updateActiveTermSchedule(input: TermScheduleInput): Promise<Term> {
+    try {
+      const updated = await this.repository.updateActiveTermSchedule(input);
+      if (!updated) throw new ApiError("No active term to update", 404);
+      return updated;
+    } catch (error) {
+      if (error instanceof ApiError) throw error;
+      throw new ApiError(`Failed to update term schedule: ${(error as Error).message}`, 500);
     }
   }
 

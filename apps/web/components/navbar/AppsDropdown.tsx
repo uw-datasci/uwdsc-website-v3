@@ -69,7 +69,7 @@ function GridIcon() {
 
 export function AppsDropdown({ group }: AppsDropdownProps) {
   return (
-    <NavigationMenuItem className="relative mr-2 pl-8 before:absolute before:left-0 before:h-10 before:w-px before:bg-white/35">
+    <NavigationMenuItem className="relative mr-2 pl-8 before:absolute before:left-0 before:top-1/2 before:h-10 before:w-px before:-translate-y-1/2 before:bg-white/35">
       <NavigationMenuTrigger
         aria-label={group.label}
         className="h-10 w-10 rounded-full p-0 bg-transparent! hover:bg-transparent! focus:bg-transparent! focus-visible:bg-transparent! data-[state=open]:bg-transparent! hover:text-nav-hover-blue data-[state=open]:text-nav-hover-blue transition-colors"

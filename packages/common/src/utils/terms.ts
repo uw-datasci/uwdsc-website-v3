@@ -24,20 +24,13 @@ export function isReturningExecWindowOpen(term: Term | null, now: Date = new Dat
   return release <= n && n <= deadline;
 }
 
-/** Public exec apply page: release through soft deadline (inclusive). */
-export function isApplicationPageWindowOpen(
-  term: Term | null,
-  now: Date = new Date(),
-): boolean {
-  const release = toDateMs(term?.application_release_date ?? null);
-  const soft = toDateMs(term?.application_soft_deadline ?? null);
-  if (release === null || soft === null) return false;
-  const n = now.getTime();
-  return release <= n && n <= soft;
-}
-
-/** Application read/write APIs: release through hard deadline (inclusive). */
-export function isApplicationApiWindowOpen(term: Term | null, now: Date = new Date()): boolean {
+/**
+ * The application window for everything -- the /apply page, the public
+ * apply-open probe, and every application read/write API. The soft deadline
+ * is display-only (countdown, due-date label); the hard deadline is the
+ * actual cutoff, and gates access here.
+ */
+export function isApplicationWindowOpen(term: Term | null, now: Date = new Date()): boolean {
   const release = toDateMs(term?.application_release_date ?? null);
   const hard = toDateMs(term?.application_hard_deadline ?? null);
   if (release === null || hard === null) return false;

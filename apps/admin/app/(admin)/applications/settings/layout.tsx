@@ -3,7 +3,11 @@ import { isPresident } from "@uwdsc/common/constants";
 import { Card, CardDescription, CardHeader, CardTitle } from "@uwdsc/ui";
 import { createAuthService } from "@/lib/services";
 
-export default async function PositionsLayout({ children }: { readonly children: ReactNode }) {
+export default async function ApplicationSettingsLayout({
+  children,
+}: {
+  readonly children: ReactNode;
+}) {
   const authService = await createAuthService();
   const { user, error } = await authService.getCurrentUser();
   const userIsPresident =
@@ -15,7 +19,7 @@ export default async function PositionsLayout({ children }: { readonly children:
         <Card className="max-w-md">
           <CardHeader>
             <CardTitle>Access restricted</CardTitle>
-            <CardDescription>Only Presidents can manage application positions.</CardDescription>
+            <CardDescription>Only Presidents can manage application settings.</CardDescription>
           </CardHeader>
         </Card>
       </div>

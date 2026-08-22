@@ -10,6 +10,8 @@ import type {
   QuestionPositionOption,
   QuestionScope,
   QuestionUpsertInput,
+  Term,
+  TermScheduleInput,
 } from "@uwdsc/common/types";
 
 export class ApplicationRepository extends BaseRepository {
@@ -267,6 +269,28 @@ export class ApplicationRepository extends BaseRepository {
       RETURNING id
     `;
     return updated.length > 0;
+  }
+
+  /**
+   * Update the active term's application schedule (release date, soft
+   * deadline, hard deadline). Returns the persisted row -- the
+   * `sync_terms_hard_deadline` trigger may clamp the hard deadline up to
+   * `soft + 15 minutes`, so callers should trust the return value over the
+   * input. Returns null if there is no active term.
+   */
+  async updateActiveTermSchedule(data: TermScheduleInput): Promise<Term | null> {
+    const [row] = await this.sql<Term[]>`
+      UPDATE public.terms
+      SET application_release_date  = ${data.application_release_date},
+          application_soft_deadline = ${data.application_soft_deadline},
+          application_hard_deadline = ${data.application_hard_deadline}
+      WHERE is_active = true
+      RETURNING id, code, is_active, application_release_date,
+                application_soft_deadline, application_hard_deadline,
+                start_date, end_date, onboarding_due_date,
+                returning_exec_release_date, returning_exec_deadline, created_at
+    `;
+    return row ?? null;
   }
 
   async getAllQuestions(): Promise<AppQuestion[]> {

@@ -6,6 +6,7 @@
  */
 
 import type { Term } from "@uwdsc/common/types";
+import type { TermScheduleFormValues } from "@/lib/schemas/termSchedule";
 import { createApiError } from "./error";
 
 /**
@@ -22,4 +23,36 @@ export async function getAllTerms(): Promise<Term[]> {
   if (!response.ok) throw createApiError(data, response.status);
 
   return data;
+}
+
+/**
+ * Get the active term, if any.
+ *
+ * @returns Promise with the active term, or null if none is active
+ * @throws Error if request fails or unauthorized
+ */
+export async function getActiveTerm(): Promise<Term | null> {
+  const response = await fetch("/api/terms/active");
+  const data = await response.json();
+  if (!response.ok) throw createApiError(data, response.status);
+  return (data as { term: Term | null }).term;
+}
+
+/**
+ * Update the active term's application schedule (release date, soft
+ * deadline, hard deadline). President only.
+ *
+ * @throws Error if request fails, unauthorized, or there is no active term
+ */
+export async function updateActiveTermSchedule(
+  values: TermScheduleFormValues,
+): Promise<Term> {
+  const response = await fetch("/api/terms/active", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(values),
+  });
+  const data = await response.json();
+  if (!response.ok) throw createApiError(data, response.status);
+  return (data as { term: Term }).term;
 }

@@ -9,13 +9,16 @@ export async function GET(): Promise<Response> {
     const { user, isUnauthorized } = await tryGetCurrentUser();
     if (!user) return isUnauthorized;
 
-    const profilePhotoService = await createProfilePhotoService();
-    const url = await profilePhotoService.getProfilePhotoUrl(user.id);
+    const profile = await profileService.getProfileByUserId(user.id);
+    const key = profile?.profile_photo_key ?? null;
 
-    return ApiResponse.ok({
-      hasPhoto: Boolean(url),
-      url,
-    });
+    let url: string | null = null;
+    if (key) {
+      const profilePhotoService = await createProfilePhotoService();
+      url = await profilePhotoService.getSignedUrlForKey(key);
+    }
+
+    return ApiResponse.ok({ hasPhoto: Boolean(key), key, url });
   } catch (error) {
     console.error("Error fetching profile photo status:", error);
     return ApiResponse.serverError(error, "Failed to fetch profile photo status");
@@ -46,13 +49,7 @@ export async function POST(request: NextRequest): Promise<Response> {
       return ApiResponse.badRequest(updateResult.error, "Upload failed");
     }
 
-    const url = await profilePhotoService.getProfilePhotoUrl(user.id);
-
-    return ApiResponse.ok({
-      message: "Upload successful",
-      key: result.key,
-      url,
-    });
+    return ApiResponse.ok({ message: "Upload successful", key: result.key });
   } catch (error) {
     console.error("Error uploading profile photo:", error);
     return ApiResponse.serverError(error, "Failed to upload profile photo");

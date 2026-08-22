@@ -1,22 +1,6 @@
 import type { PassportProfileEditValues } from "@/lib/schemas/profile";
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Spinner,
-} from "@uwdsc/ui";
-import {
-  Calendar,
-  Check,
-  GraduationCap,
-  Hash,
-  Mail,
-  Pencil,
-  User,
-  X,
-} from "lucide-react";
+import { Button, Card, CardContent, CardHeader, CardTitle, Spinner } from "@uwdsc/ui";
+import { Calendar, Check, GraduationCap, Hash, Mail, Pencil, User, X } from "lucide-react";
 import type { UseFormReturn } from "react-hook-form";
 import { ProfileEditForm } from "./ProfileEditForm";
 
@@ -72,11 +56,12 @@ export function PassportProfile({
             </Button>
 
             <Button
+              variant="default"
               size="sm"
               type="submit"
               form="passport-profile-edit"
               disabled={form.formState.isSubmitting || !form.formState.isValid}
-              className="bg-cyan-400 text-black hover:bg-cyan-300"
+              className="gap-1.5"
             >
               {form.formState.isSubmitting ? (
                 <Spinner className="size-3.5" />

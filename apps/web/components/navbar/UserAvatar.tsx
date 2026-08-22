@@ -3,6 +3,7 @@
 import { User, LogOut, LogIn } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProfilePhotoUrl } from "@/hooks/useProfilePhotoUrl";
 import { signOut } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import {
@@ -19,6 +20,7 @@ import {
 
 export function UserAvatar() {
   const { user, isLoading, isAuthenticated, mutate } = useAuth();
+  const profilePhotoUrl = useProfilePhotoUrl(user?.profile_photo_key);
   const router = useRouter();
 
   const handleSignOut = async () => {
@@ -69,7 +71,7 @@ export function UserAvatar() {
     <NavigationMenuItem className="relative">
       <NavigationMenuTrigger className="h-10 w-10 rounded-full p-0 bg-transparent! hover:bg-transparent! focus:bg-transparent! focus-visible:bg-transparent! data-[state=open]:bg-transparent! hover:scale-105 transition-transform">
         <Avatar className="h-9 w-9">
-          <AvatarImage src={undefined} alt={fullName} />
+          <AvatarImage src={profilePhotoUrl ?? undefined} alt={fullName} />
           <AvatarFallback className="bg-nav-hover-blue text-primary-foreground">
             {initials}
           </AvatarFallback>

@@ -15,7 +15,7 @@ import { createApiError } from "./errors";
  * Upload a profile photo for the current user
  *
  * @param file - The image file to upload (JPG, PNG, or WEBP, up to 5MB)
- * @returns Promise with upload response containing the file key and signed URL
+ * @returns Promise with upload response containing the file key
  * @throws Error if upload fails (invalid file type, too large, unauthorized, etc.)
  */
 export async function uploadProfilePhoto(file: File): Promise<UploadProfilePhotoResponse> {

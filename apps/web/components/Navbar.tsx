@@ -53,7 +53,7 @@ export function Navbar() {
   const eventsGroup: NavGroup = {
     label: "Events",
     items: [
-      { href: "/calendar", label: "Event Calendar", icon: Calendar },
+      { href: "/calendar", label: "Calendar", icon: Calendar },
       { href: "/events", label: "Check In", icon: ClipboardCheck },
     ],
   };

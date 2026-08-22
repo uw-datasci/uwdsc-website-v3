@@ -117,8 +117,8 @@ function UnsupervisedMotif({ className }: MotifProps) {
 const MOTIFS: Record<ProjectTopic, (props: MotifProps) => React.JSX.Element> = {
   nlp: NlpMotif,
   "computer-vision": ComputerVisionMotif,
-  "recommendation-systems": RecommendationMotif,
-  "unsupervised-learning": UnsupervisedMotif,
+  recommendations: RecommendationMotif,
+  unsupervised: UnsupervisedMotif,
 };
 
 interface TopicMotifProps {

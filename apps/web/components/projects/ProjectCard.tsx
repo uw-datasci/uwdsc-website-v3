@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef } from "react";
+import { forwardRef, type KeyboardEvent } from "react";
 import { motion } from "framer-motion";
 import { Github, Users } from "lucide-react";
 import { PROJECT_TOPICS, type Project } from "@/constants/projects";
@@ -13,20 +13,33 @@ interface ProjectCardProps {
   readonly onOpen: () => void;
 }
 
-export const ProjectCard = forwardRef<HTMLButtonElement, ProjectCardProps>(function ProjectCard(
+export const ProjectCard = forwardRef<HTMLDivElement, ProjectCardProps>(function ProjectCard(
   { project, isActive, onOpen },
   ref,
 ) {
   const { motifClass } = PROJECT_TOPICS[project.topic];
 
+  // Only open when the card itself is focused — otherwise Enter/Space on the
+  // nested "View repo" link would bubble here and fire both actions at once.
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget) return;
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      onOpen();
+    }
+  };
+
   return (
-    <motion.button
+    <motion.div
       ref={ref}
-      type="button"
+      role="button"
+      tabIndex={0}
+      aria-label={`View details for ${project.title}`}
       layoutId={`project-shell-${project.id}`}
       onClick={onOpen}
+      onKeyDown={handleKeyDown}
       style={{ opacity: isActive ? 0 : 1, pointerEvents: isActive ? "none" : "auto" }}
-      className="group relative flex h-full flex-col items-start gap-4 overflow-hidden rounded-3xl border border-grey3 p-6 text-left duration-300 ease-in-out hover:border-grey2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      className="group relative flex h-full cursor-pointer flex-col items-start gap-4 overflow-hidden rounded-3xl border border-grey3 p-6 text-left duration-300 ease-in-out hover:border-grey2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
       <div className="bg-gradient-purple absolute inset-0 opacity-[0.07] transition-opacity duration-300 ease-in-out group-hover:opacity-15" />
 
@@ -56,11 +69,17 @@ export const ProjectCard = forwardRef<HTMLButtonElement, ProjectCardProps>(funct
           <Users className="h-4 w-4 shrink-0" aria-hidden="true" />
           {project.team.length} {project.team.length === 1 ? "member" : "members"}
         </span>
-        <span className="flex items-center gap-2 transition-colors duration-300 ease-in-out group-hover:text-grey1">
+        <a
+          href={project.repo}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(event) => event.stopPropagation()}
+          className="flex items-center gap-2 rounded-sm underline-offset-4 transition-colors duration-300 ease-in-out hover:text-white hover:underline focus-visible:text-white focus-visible:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background group-hover:text-grey1"
+        >
           <Github className="h-4 w-4 shrink-0" aria-hidden="true" />
           View repo
-        </span>
+        </a>
       </div>
-    </motion.button>
+    </motion.div>
   );
 });

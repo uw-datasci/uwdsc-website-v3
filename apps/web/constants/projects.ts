@@ -1,27 +1,26 @@
-export type ProjectTopic =
-  | "nlp"
-  | "computer-vision"
-  | "recommendation-systems"
-  | "unsupervised-learning";
+export type ProjectTopic = "nlp" | "computer-vision" | "recommendations" | "unsupervised";
 
-export type ProjectMember = {
+interface ProjectTopicMeta {
+  label: string;
+  badgeClass: string;
+  motifClass: string;
+}
+
+interface ProjectMember {
   name: string;
   role: string;
-};
+}
 
-export type Project = {
+export interface Project {
   id: string;
   title: string;
   topic: ProjectTopic;
   repo: string;
   description: string;
   team: ProjectMember[];
-};
+}
 
-export const PROJECT_TOPICS: Record<
-  ProjectTopic,
-  { label: string; badgeClass: string; motifClass: string }
-> = {
+export const PROJECT_TOPICS: Record<ProjectTopic, ProjectTopicMeta> = {
   nlp: {
     label: "NLP",
     badgeClass: "bg-violet-500/15 text-violet-300 border-violet-500/30",
@@ -32,12 +31,12 @@ export const PROJECT_TOPICS: Record<
     badgeClass: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
     motifClass: "text-emerald-400",
   },
-  "recommendation-systems": {
+  recommendations: {
     label: "Recommendation Systems",
     badgeClass: "bg-amber-500/15 text-amber-300 border-amber-500/30",
     motifClass: "text-amber-400",
   },
-  "unsupervised-learning": {
+  unsupervised: {
     label: "Unsupervised Learning",
     badgeClass: "bg-sky-500/15 text-sky-300 border-sky-500/30",
     motifClass: "text-sky-400",
@@ -78,7 +77,7 @@ export const PROJECTS: Project[] = [
   {
     id: "parcourslab",
     title: "ParcoursLab",
-    topic: "recommendation-systems",
+    topic: "recommendations",
     repo: "https://github.com/aaryanshroff/parcours-lab",
     description:
       "ParcoursLab is a natural-language based course recommendation system grounded in a human-curated skills database that builds a personalized learning roadmap for your career or university degree. It can both parse your resume and the posting for your dream job to help you identify and develop required skills, as well as curate just the right electives to get you into grad school for the field you want. Discover a more intelligent way to plan your degree than just a checklist, while still prioritizing transparency, agency, and human feedback.",
@@ -107,7 +106,7 @@ export const PROJECTS: Project[] = [
   {
     id: "shifting-lines",
     title: "Shifting Lines",
-    topic: "unsupervised-learning",
+    topic: "unsupervised",
     repo: "https://github.com/uw-datasci/Shifting-Lines-Visualizing-NHL-Role-Crossover",
     description:
       'Shifting Lines is a project that asks: are some NHL "defensemen" actually playing like forwards, and could teams be misusing talent by locking players into rigid roles? Inspired by a game where two defensemen scored back-to-back goals, it uses stats and clustering to group players by how they actually play rather than their official position.',
@@ -125,7 +124,7 @@ export const PROJECTS: Project[] = [
   {
     id: "viennalytics",
     title: "Viennalytics",
-    topic: "unsupervised-learning",
+    topic: "unsupervised",
     repo: "https://github.com/elphoun/viennalytics",
     description:
       "Viennalytics is a stylized chess analytics site that turns a huge archive of real games into something you can actually explore. It has two main parts: a written report with interactive charts that walks through interesting findings (which openings win most, how skill level affects results, which moves players tend to follow up with), and a live opening explorer where you can search any chess opening, see it played out on a chessboard, and instantly get its win rate, popularity, and engine evaluation.",
@@ -136,7 +135,7 @@ export const PROJECTS: Project[] = [
 /** Not used yet — kept so wiring up topic filter pills later is a small change. */
 export function filterProjectsByTopic(
   projects: Project[],
-  topic: ProjectTopic | "all",
+  topic: ProjectTopic | "all"
 ): Project[] {
   if (topic === "all") return projects;
   return projects.filter((project) => project.topic === topic);
@@ -146,13 +145,11 @@ export function getTopicCounts(projects: Project[]): Record<ProjectTopic, number
   const counts = {
     nlp: 0,
     "computer-vision": 0,
-    "recommendation-systems": 0,
-    "unsupervised-learning": 0,
+    recommendations: 0,
+    unsupervised: 0,
   } satisfies Record<ProjectTopic, number>;
 
-  for (const project of projects) {
-    counts[project.topic] += 1;
-  }
+  for (const project of projects) counts[project.topic] += 1;
 
   return counts;
 }

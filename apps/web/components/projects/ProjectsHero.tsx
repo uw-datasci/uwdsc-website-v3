@@ -18,7 +18,7 @@ export function ProjectsHero() {
     <div className="relative flex flex-col items-center text-center">
       <div className="bg-primary/20 pointer-events-none absolute left-1/2 top-0 -z-10 h-112 w-md -translate-x-1/2 -translate-y-1/3 rounded-full blur-[120px]" />
 
-      <h1 className="my-6 text-5xl font-bold text-white sm:text-6xl lg:text-7xl">Projects</h1>
+      <h1 className="my-14 text-5xl font-bold text-white sm:text-6xl lg:text-7xl">Projects</h1>
       <p className="mx-auto mb-14 max-w-2xl text-sm text-grey2 sm:text-lg">
         Student-led builds spanning NLP, computer vision, and beyond!
         <br />

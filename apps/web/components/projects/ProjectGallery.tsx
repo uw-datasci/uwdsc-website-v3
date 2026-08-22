@@ -12,7 +12,7 @@ interface ProjectGalleryProps {
 
 export function ProjectGallery({ projects }: ProjectGalleryProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
-  const cardRefs = useRef(new Map<string, HTMLButtonElement | null>());
+  const cardRefs = useRef(new Map<string, HTMLDivElement | null>());
 
   const activeProject = projects.find((project) => project.id === activeId) ?? null;
 

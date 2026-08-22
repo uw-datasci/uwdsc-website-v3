@@ -1,9 +1,8 @@
-import Link from "next/link";
 import SectionWrapper from "@/components/SectionWrapper";
-import { WorkshopsHero } from "@/components/workshops/WorkshopsHero";
 import { UpcomingWorkshop } from "@/components/workshops/UpcomingWorkshop";
-import { WhatWeTeach } from "@/components/workshops/WhatWeTeach";
+import { WhatWeDo } from "@/components/workshops/WhatWeDo";
 import { PastWorkshopsArchive } from "@/components/workshops/PastWorkshopsArchive";
+import { WorkshopsCta } from "@/components/workshops/WorkshopsCta";
 import { eventService } from "@uwdsc/core";
 
 export const dynamic = "force-dynamic";
@@ -22,29 +21,17 @@ export default async function WorkshopsPage() {
 
   return (
     <SectionWrapper className="pt-14 lg:pt-20">
-      <WorkshopsHero />
+      <h1 className="my-14 text-center text-5xl font-bold text-white sm:text-6xl lg:text-7xl">
+        Workshops
+      </h1>
 
-      {workshops.length === 0 ? (
-        <div className="mb-16 flex flex-col items-center gap-2 rounded-3xl border border-grey3 px-8 py-12 text-center">
-          <p className="text-lg font-medium text-white">
-            This term&apos;s workshop schedule is being finalized.
-          </p>
-          <p className="text-grey2">
-            Check the{" "}
-            <Link href="/calendar" className="text-white underline underline-offset-4">
-              calendar
-            </Link>{" "}
-            for everything else we&apos;ve got coming up.
-          </p>
-        </div>
-      ) : (
-        <div className="mb-16 flex flex-col gap-16">
-          {upcoming.length > 0 && <UpcomingWorkshop events={upcoming} />}
-          <PastWorkshopsArchive events={past} />
-        </div>
-      )}
+      <div className="flex flex-col gap-16">
+        <WhatWeDo />
+        {upcoming.length > 0 && <UpcomingWorkshop events={upcoming} />}
+        <PastWorkshopsArchive events={past} />
+      </div>
 
-      <WhatWeTeach />
+      <WorkshopsCta />
     </SectionWrapper>
   );
 }

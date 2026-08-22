@@ -1,12 +1,20 @@
-import type { LucideIcon } from "lucide-react";
-import { Binary, Brain, Database, LineChart, Network, Sparkles } from "lucide-react";
+export type PillarId =
+  | "python-pandas"
+  | "data-viz"
+  | "ml-foundations"
+  | "deep-learning"
+  | "real-data"
+  | "applied-projects";
 
 export interface WorkshopPillar {
-  id: string;
+  id: PillarId;
   title: string;
   blurb: string;
   topics: string[];
-  icon: LucideIcon;
+  /** Motif tint, e.g. "text-violet-400" — matches PROJECT_TOPICS' accent convention. */
+  motifClass: string;
+  /** Topic-chip tint. */
+  chipClass: string;
 }
 
 /**
@@ -18,49 +26,50 @@ export const WORKSHOP_PILLARS: WorkshopPillar[] = [
   {
     id: "python-pandas",
     title: "Python & Pandas",
-    blurb:
-      "The everyday toolkit: wrangling messy datasets, cleaning columns, and getting from raw CSV to something you can actually analyze.",
+    blurb: "Wrangle messy datasets and get from raw CSV to something you can analyze.",
     topics: ["Pandas", "NumPy", "Data cleaning", "Jupyter"],
-    icon: Binary,
+    motifClass: "text-violet-400",
+    chipClass: "bg-violet-500/10 text-violet-200/90",
   },
   {
     id: "data-viz",
     title: "Data Visualization & Storytelling",
-    blurb:
-      "Turning numbers into charts people understand — and charts into a narrative that actually makes a case.",
+    blurb: "Turn numbers into charts people understand, and charts into a real narrative.",
     topics: ["Matplotlib", "Seaborn", "Dashboards", "Presenting findings"],
-    icon: LineChart,
+    motifClass: "text-sky-400",
+    chipClass: "bg-sky-500/10 text-sky-200/90",
   },
   {
     id: "ml-foundations",
     title: "ML Foundations",
-    blurb:
-      "The core ideas behind machine learning: regression, classification, and how to know if a model is actually working.",
+    blurb: "Core ML ideas: regression, classification, and how to tell if a model works.",
     topics: ["Regression", "Classification", "scikit-learn", "Model evaluation"],
-    icon: Brain,
+    motifClass: "text-emerald-400",
+    chipClass: "bg-emerald-500/10 text-emerald-200/90",
   },
   {
     id: "deep-learning",
     title: "Deep Learning",
     blurb:
-      "Neural networks from first principles through to the architectures behind modern computer vision and NLP.",
+      "Neural networks from first principles to the architectures behind modern CV and NLP.",
     topics: ["Neural networks", "PyTorch", "Computer vision", "NLP"],
-    icon: Network,
+    motifClass: "text-amber-400",
+    chipClass: "bg-amber-500/10 text-amber-200/90",
   },
   {
     id: "real-data",
     title: "Working with Real Data",
-    blurb:
-      "Databases, APIs, and the unglamorous plumbing that gets data from the real world into a notebook.",
+    blurb: "Databases, APIs, and the plumbing that gets real-world data into a notebook.",
     topics: ["SQL", "APIs", "Web scraping", "Data pipelines"],
-    icon: Database,
+    motifClass: "text-rose-400",
+    chipClass: "bg-rose-500/10 text-rose-200/90",
   },
   {
     id: "applied-projects",
     title: "Applied Projects",
-    blurb:
-      "Workshops built around a real dataset and a real question — practicing the full pipeline end to end, not just the theory.",
+    blurb: "Built around a real dataset and question, practicing the full pipeline end to end.",
     topics: ["End-to-end projects", "Kaggle", "Reproducibility", "Team workflows"],
-    icon: Sparkles,
+    motifClass: "text-cyan-400",
+    chipClass: "bg-cyan-500/10 text-cyan-200/90",
   },
 ];

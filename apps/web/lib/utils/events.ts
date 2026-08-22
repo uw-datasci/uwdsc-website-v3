@@ -17,6 +17,28 @@ export function formatDateTime(value: string | Date): string {
 }
 
 /**
+ * Waterloo term label for a date: Jan-Apr Winter, May-Aug Spring, Sep-Dec Fall.
+ * Used to group the workshop archive by term.
+ */
+export function getTermLabel(value: string | Date): string {
+  try {
+    const date = value instanceof Date ? value : parseISO(value);
+    if (Number.isNaN(date.getTime())) return "";
+
+    const month = date.getMonth(); // 0-indexed
+    const year = date.getFullYear();
+    let term: string;
+    if (month <= 3) term = "Winter";
+    else if (month <= 7) term = "Spring";
+    else term = "Fall";
+
+    return `${term} ${year}`;
+  } catch {
+    return "";
+  }
+}
+
+/**
  * Convert an ISO date string to ICS format (YYYYMMDDTHHMMSSZ).
  */
 export function toICSDate(iso: string): string {

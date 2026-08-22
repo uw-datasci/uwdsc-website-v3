@@ -43,7 +43,7 @@ export function Navbar() {
   ];
 
   const whatWeDoGroup: NavGroup = {
-    label: "What We Do",
+    label: "Education",
     items: [
       { href: "/projects", label: "Projects", icon: FolderGit2 },
       { href: "/workshops", label: "Workshops", icon: GraduationCap },

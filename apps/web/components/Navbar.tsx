@@ -2,8 +2,10 @@
 
 import { NavLinks } from "./navbar/NavLinks";
 import { AppsDropdown } from "./navbar/AppsDropdown";
+import { TileDropdown } from "./navbar/TileDropdown";
 import { NavGroup, NavLinkItem } from "./navbar/types";
 import { UserAvatar } from "./navbar/UserAvatar";
+import { WrappedButton } from "./navbar/WrappedButton";
 import { MobileMenu } from "./navbar/MobileMenu";
 import { WrappedModal } from "./wrapped/WrappedModal";
 import { usePathname } from "next/navigation";
@@ -12,14 +14,16 @@ import { useApplyWindow } from "@/hooks/useApplyWindow";
 import Image from "next/image";
 import Link from "next/link";
 import { ADMIN_ROLES } from "@uwdsc/common/constants";
+import { GlassSurface, NavigationMenu, NavigationMenuList } from "@uwdsc/ui";
 import {
-  GlassSurface,
-  NavigationMenu,
-  NavigationMenuList,
-  Button,
-  NavigationMenuItem,
-} from "@uwdsc/ui";
-import { Calculator, Heart, LayoutDashboard } from "lucide-react";
+  Calculator,
+  Calendar,
+  ClipboardCheck,
+  FolderGit2,
+  GraduationCap,
+  Heart,
+  LayoutDashboard,
+} from "lucide-react";
 import { useState } from "react";
 
 const hideNavbarPaths = new Set(["/login", "/register", "/complete-profile"]);
@@ -32,14 +36,27 @@ export function Navbar() {
 
   const hideNavbar = hideNavbarPaths.has(pathname);
 
-  // Navigation links
   const navLinks: NavLinkItem[] = [
     { href: "/", label: "Home" },
-    { href: "/events", label: "Check-in" },
     { href: "/team", label: "Team" },
     ...(applyOpen ? [{ href: "/apply", label: "Apply", pulse: true }] : []),
-    { href: "/calendar", label: "Calendar" },
   ];
+
+  const whatWeDoGroup: NavGroup = {
+    label: "What We Do",
+    items: [
+      { href: "/projects", label: "Projects", icon: FolderGit2 },
+      { href: "/workshops", label: "Workshops", icon: GraduationCap },
+    ],
+  };
+
+  const eventsGroup: NavGroup = {
+    label: "Events",
+    items: [
+      { href: "/calendar", label: "Calendar", icon: Calendar },
+      { href: "/events", label: "Check In", icon: ClipboardCheck },
+    ],
+  };
 
   const isAdmin = Boolean(user?.role && ADMIN_ROLES.has(user.role));
   const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || "https://admin.uwdatascience.ca/";
@@ -100,19 +117,13 @@ export function Navbar() {
             <NavigationMenu viewport={false}>
               <NavigationMenuList className="gap-4">
                 <NavLinks navLinks={navLinks} />
-                {process.env.NODE_ENV !== "production" && (
-                  <NavigationMenuItem>
-                    <Button
-                      variant="ghost"
-                      onClick={() => setWrappedOpen(true)}
-                      className="h-10 flex flex-row items-center gap-2 px-4 rounded-md hover:bg-transparent dark:hover:bg-transparent hover:text-nav-hover-blue"
-                    >
-                      <span className="text-sm font-medium">Wrapped</span>
-                    </Button>
-                  </NavigationMenuItem>
-                )}
+                <TileDropdown group={whatWeDoGroup} layout="list" />
+                <TileDropdown group={eventsGroup} />
                 <AppsDropdown group={appsGroup} />
                 <UserAvatar />
+                {process.env.NODE_ENV !== "production" && (
+                  <WrappedButton onClick={() => setWrappedOpen(true)} />
+                )}
               </NavigationMenuList>
             </NavigationMenu>
           </GlassSurface>
@@ -120,7 +131,7 @@ export function Navbar() {
 
         {/* Mobile Menu */}
         <MobileMenu
-          navLinks={[...navLinks, appsGroup]}
+          navLinks={[...navLinks, whatWeDoGroup, eventsGroup, appsGroup]}
           user={user}
           onOpenWrapped={() => setWrappedOpen(true)}
         />

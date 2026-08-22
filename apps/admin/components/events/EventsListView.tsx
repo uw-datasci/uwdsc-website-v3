@@ -16,6 +16,7 @@ import {
 import type { EventWithAttendanceCount, Term } from "@uwdsc/common/types";
 import { formatDateTime, getEventTerm } from "@/lib/utils/events";
 import { DeleteEventDialog } from "@/components/events";
+import { EventCategoryBadge } from "./EventCategoryBadge";
 
 interface EventsListViewProps {
   readonly events: EventWithAttendanceCount[];
@@ -45,7 +46,10 @@ function EventCard({
     <Card>
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-semibold leading-tight">{event.name}</h3>
+          <div className="flex flex-col gap-1.5">
+            <h3 className="font-semibold leading-tight">{event.name}</h3>
+            <EventCategoryBadge category={event.category} />
+          </div>
           <div className="flex shrink-0 gap-1">
             <Button
               variant="ghost"
@@ -71,6 +75,12 @@ function EventCard({
         <p>
           <span className="font-medium text-foreground">Location:</span> {event.location}
         </p>
+        {event.category === "workshop" && (
+          <p>
+            <span className="font-medium text-foreground">Resources:</span>{" "}
+            {event.resources.length}
+          </p>
+        )}
         {new Date(event.end_time) < new Date() && (
           <p>
             <span className="font-medium text-foreground">Attendance:</span>{" "}
@@ -116,6 +126,7 @@ export function EventsListView({
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
+                <TableHead>Type</TableHead>
                 <TableHead>Start Time</TableHead>
                 <TableHead>End Time</TableHead>
                 <TableHead>Location</TableHead>
@@ -126,7 +137,7 @@ export function EventsListView({
             <TableBody>
               {events.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center text-muted-foreground">
                     No events yet. Create one to get started.
                   </TableCell>
                 </TableRow>
@@ -134,6 +145,9 @@ export function EventsListView({
                 events.map((event) => (
                   <TableRow key={event.id}>
                     <TableCell className="font-medium">{event.name}</TableCell>
+                    <TableCell>
+                      <EventCategoryBadge category={event.category} />
+                    </TableCell>
                     <TableCell>{formatDateTime(event.start_time)}</TableCell>
                     <TableCell>{formatDateTime(event.end_time)}</TableCell>
                     <TableCell>{event.location}</TableCell>

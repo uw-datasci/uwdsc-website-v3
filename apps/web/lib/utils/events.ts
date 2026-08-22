@@ -3,13 +3,16 @@ import type { Event } from "@uwdsc/common/types";
 import { formatEventDescription } from "@uwdsc/common/utils";
 
 /**
- * Format an ISO date string for display (e.g. "MMM d, yyyy h:mm a").
+ * Format an ISO date string (or Date from postgres.js) for display (e.g. "MMM d, yyyy h:mm a").
  */
-export function formatDateTime(iso: string): string {
+export function formatDateTime(value: string | Date): string {
   try {
-    return format(parseISO(iso), "MMM d, yyyy h:mm a");
+    const date = value instanceof Date ? value : parseISO(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+
+    return format(date, "MMM d, yyyy h:mm a");
   } catch {
-    return iso;
+    return String(value);
   }
 }
 

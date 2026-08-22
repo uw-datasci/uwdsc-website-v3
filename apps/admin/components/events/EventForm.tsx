@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -22,6 +22,7 @@ import {
   Input,
   Textarea,
   DateTimePicker,
+  renderSelectField,
 } from "@uwdsc/ui";
 import {
   createEventSchema,
@@ -35,6 +36,7 @@ import {
   utcIsoToPickerValue,
 } from "@/lib/utils/events";
 import type { Event } from "@uwdsc/common/types";
+import { ResourceLinkRow } from "./ResourceLinkRow";
 
 interface EventFormProps {
   open: boolean;
@@ -42,6 +44,12 @@ interface EventFormProps {
   event?: Event | null;
   onSuccess?: () => void;
 }
+
+const CATEGORY_OPTIONS = [
+  { value: "workshop", label: "Workshop" },
+  { value: "social", label: "Social" },
+  { value: "academic", label: "Academic" },
+];
 
 export function EventForm({ open, onOpenChange, event, onSuccess }: Readonly<EventFormProps>) {
   const isEdit = !!event;
@@ -56,8 +64,29 @@ export function EventForm({ open, onOpenChange, event, onSuccess }: Readonly<Eve
       image_url: null,
       start_time: "",
       end_time: "",
+      // `category` intentionally omitted: it's required with no default, so a new event starts
+      // with the dropdown showing its placeholder rather than a preselected (and easy to miss)
+      // value. Preselecting here would risk silently mis-tagging workshops as something else.
+      resources: [],
     },
   });
+
+  const category = useWatch({ control: form.control, name: "category" });
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "resources",
+  });
+
+  // Only workshops may carry resource links -- clear them (and re-validate) whenever the type
+  // is changed away from Workshop, so a stale link list can't be silently saved on a social or
+  // academic event.
+  useEffect(() => {
+    if (category !== "workshop" && form.getValues("resources").length > 0) {
+      form.setValue("resources", []);
+      form.clearErrors("resources");
+      void form.trigger();
+    }
+  }, [category, form]);
 
   useEffect(() => {
     if (open) {
@@ -69,6 +98,8 @@ export function EventForm({ open, onOpenChange, event, onSuccess }: Readonly<Eve
           image_url: event.image_url ?? null,
           start_time: event.start_time,
           end_time: event.end_time,
+          category: event.category,
+          resources: event.resources ?? [],
         });
       } else {
         form.reset({
@@ -78,6 +109,7 @@ export function EventForm({ open, onOpenChange, event, onSuccess }: Readonly<Eve
           image_url: null,
           start_time: "",
           end_time: "",
+          resources: [],
         });
       }
     }
@@ -102,7 +134,7 @@ export function EventForm({ open, onOpenChange, event, onSuccess }: Readonly<Eve
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[640px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEdit ? "Edit event" : "Create event"}</DialogTitle>
           <DialogDescription>{isEdit ? "Update" : "Add"} event details.</DialogDescription>
@@ -137,6 +169,16 @@ export function EventForm({ open, onOpenChange, event, onSuccess }: Readonly<Eve
                 )}
               />
             </div>
+            <FormField
+              control={form.control}
+              name="category"
+              render={renderSelectField({
+                label: "Event type",
+                placeholder: "Select event type",
+                required: true,
+                options: CATEGORY_OPTIONS,
+              })}
+            />
             <FormField
               control={form.control}
               name="description"
@@ -215,6 +257,39 @@ export function EventForm({ open, onOpenChange, event, onSuccess }: Readonly<Eve
               <p className="text-sm text-destructive">
                 {form.formState.errors.end_time.message}
               </p>
+            )}
+            {category === "workshop" && (
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <FormLabel>Resources</FormLabel>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="rounded-md"
+                    onClick={() => append({ id: crypto.randomUUID(), source: "", url: "" })}
+                  >
+                    <Plus className="mr-1.5 size-4" />
+                    Add resource
+                  </Button>
+                </div>
+                {fields.length === 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    No resources yet. Add slides, notebooks, or recap pages once they&apos;re
+                    ready.
+                  </p>
+                )}
+                <div className="flex flex-col gap-2">
+                  {fields.map((field, index) => (
+                    <ResourceLinkRow
+                      key={field.id}
+                      control={form.control}
+                      index={index}
+                      onRemove={() => remove(index)}
+                    />
+                  ))}
+                </div>
+              </div>
             )}
             <DialogFooter>
               <Button

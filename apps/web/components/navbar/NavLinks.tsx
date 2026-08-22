@@ -75,7 +75,7 @@ export function NavLinks({ navLinks }: NavLinksProps) {
           {isActive(link.href) && mounted && (
             <motion.div
               layoutId="glass-indicator"
-              className="absolute inset-0 rounded-full"
+              className="pointer-events-none absolute inset-0 rounded-full"
               style={glassStyles}
               transition={{
                 type: "spring",

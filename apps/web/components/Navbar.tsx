@@ -2,7 +2,7 @@
 
 import { NavLinks } from "./navbar/NavLinks";
 import { AppsDropdown } from "./navbar/AppsDropdown";
-import { EventsDropdown } from "./navbar/EventsDropdown";
+import { TileDropdown } from "./navbar/TileDropdown";
 import { NavGroup, NavLinkItem } from "./navbar/types";
 import { UserAvatar } from "./navbar/UserAvatar";
 import { WrappedButton } from "./navbar/WrappedButton";
@@ -15,7 +15,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { ADMIN_ROLES } from "@uwdsc/common/constants";
 import { GlassSurface, NavigationMenu, NavigationMenuList } from "@uwdsc/ui";
-import { Calculator, Calendar, ClipboardCheck, Heart, LayoutDashboard } from "lucide-react";
+import {
+  Calculator,
+  Calendar,
+  ClipboardCheck,
+  FolderGit2,
+  GraduationCap,
+  Heart,
+  LayoutDashboard,
+} from "lucide-react";
 import { useState } from "react";
 
 const hideNavbarPaths = new Set(["/login", "/register", "/complete-profile"]);
@@ -33,6 +41,14 @@ export function Navbar() {
     { href: "/team", label: "Team" },
     ...(applyOpen ? [{ href: "/apply", label: "Apply", pulse: true }] : []),
   ];
+
+  const whatWeDoGroup: NavGroup = {
+    label: "What We Do",
+    items: [
+      { href: "/projects", label: "Projects", icon: FolderGit2 },
+      { href: "/workshops", label: "Workshops", icon: GraduationCap },
+    ],
+  };
 
   const eventsGroup: NavGroup = {
     label: "Events",
@@ -101,7 +117,8 @@ export function Navbar() {
             <NavigationMenu viewport={false}>
               <NavigationMenuList className="gap-4">
                 <NavLinks navLinks={navLinks} />
-                <EventsDropdown group={eventsGroup} />
+                <TileDropdown group={whatWeDoGroup} layout="list" />
+                <TileDropdown group={eventsGroup} />
                 <AppsDropdown group={appsGroup} />
                 <UserAvatar />
                 {process.env.NODE_ENV !== "production" && (
@@ -114,7 +131,7 @@ export function Navbar() {
 
         {/* Mobile Menu */}
         <MobileMenu
-          navLinks={[...navLinks, eventsGroup, appsGroup]}
+          navLinks={[...navLinks, whatWeDoGroup, eventsGroup, appsGroup]}
           user={user}
           onOpenWrapped={() => setWrappedOpen(true)}
         />

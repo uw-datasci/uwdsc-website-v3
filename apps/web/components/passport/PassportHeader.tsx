@@ -1,12 +1,6 @@
 import type { ReactNode } from "react";
-import {
-  Avatar,
-  AvatarFallback,
-  Badge,
-  Card,
-  CardContent,
-  Skeleton,
-} from "@uwdsc/ui";
+import { Badge, Card, CardContent, Skeleton } from "@uwdsc/ui";
+import { QrCode } from "lucide-react";
 
 interface PassportHeaderProps {
   readonly initials: string;
@@ -48,36 +42,63 @@ export function PassportHeader({
   }
 
   return (
-    <Card className="overflow-hidden border-0 shadow-lg">
-      <div className="h-24 bg-linear-to-r from-primary/25 via-primary/10 to-background" />
-      <CardContent>
-        <div className="flex items-start gap-4">
-          <Avatar className="size-16 shrink-0 border-4 border-background">
-            <AvatarFallback className="bg-primary/15 text-primary text-xl font-bold">
+    <Card className="overflow-hidden rounded-2xl border border-white/15 bg-[#121212] text-white shadow-2xl">
+      <CardContent className="space-y-4 p-4">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-[#3f5a73] via-[#2f4a61] to-[#13263b] p-3">
+            <div className="flex h-28 items-center justify-center rounded-lg border border-white/20 bg-black/20 text-3xl font-bold text-white/90">
               {initials}
-            </AvatarFallback>
-          </Avatar>
-
-          <div className="flex min-w-0 flex-1 items-start justify-between gap-3 pt-1">
-            <div className="min-w-0">
-              <h1 className="text-xl font-bold truncate">{displayName}</h1>
-              <p className="text-sm text-muted-foreground mt-0.5 truncate">
-                {email}
-              </p>
             </div>
-            <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 pt-0.5">
-              {execPositionLabel ? (
-                <Badge
-                  className="max-w-[min(100%,16rem)] truncate rounded-full px-3 text-sm font-medium shadow-sm"
-                  title={execPositionLabel}
-                >
-                  {execPositionLabel}
-                </Badge>
-              ) : null}
-              {membershipBadge}
+          </div>
+
+          <div className="rounded-xl border border-white/10 bg-white p-3">
+            <div className="grid h-28 grid-cols-6 grid-rows-6 gap-1">
+              {Array.from({ length: 36 }).map((_, index) => (
+                <div
+                  key={index}
+                  className={
+                    (index + (index % 2 === 0 ? 1 : 0)) % 3 === 0
+                      ? "rounded-[2px] bg-black"
+                      : "rounded-[2px] bg-white"
+                  }
+                />
+              ))}
             </div>
           </div>
         </div>
+
+        <div className="flex items-center justify-between rounded-lg border border-white/10 bg-black/25 px-3 py-2">
+          <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-white/85">
+            <QrCode className="size-3.5" />
+            My Passport
+          </div>
+          <div className="truncate text-xs text-white/60">DSC Passport</div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          <div className="rounded-lg border border-white/10 bg-black/35 px-3 py-2">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-white/55">Member</p>
+            <p className="truncate text-sm font-semibold text-white/95">{displayName}</p>
+          </div>
+          <div className="rounded-lg border border-white/10 bg-black/35 px-3 py-2">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-white/55">Status</p>
+            <div className="mt-1">{membershipBadge}</div>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-white/10 bg-black/35 px-3 py-2">
+          <p className="text-[10px] uppercase tracking-[0.15em] text-white/55">Email</p>
+          <p className="truncate text-xs text-white/80">{email}</p>
+        </div>
+
+        {execPositionLabel ? (
+          <Badge
+            className="w-fit max-w-full truncate rounded-full border border-fuchsia-300/45 bg-fuchsia-400/20 px-3 text-xs text-fuchsia-100"
+            title={execPositionLabel}
+          >
+            {execPositionLabel}
+          </Badge>
+        ) : null}
       </CardContent>
     </Card>
   );

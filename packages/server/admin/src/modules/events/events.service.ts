@@ -9,6 +9,7 @@ const UPDATE_EVENT_COLUMNS = [
   "image_url",
   "start_time",
   "end_time",
+  "category",
 ] as const;
 
 class EventService {
@@ -45,14 +46,18 @@ class EventService {
     data: UpdateEventData
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      const { filteredData, columns } = filterPartialUpdate(data, UPDATE_EVENT_COLUMNS);
+      // `resources` is jsonb and can't flow through the dynamic sql(data, ...columns) helper
+      // (see EventRepository.updateEventById), so it's carved out and applied separately.
+      const { resources, ...rest } = data;
+      const { filteredData, columns } = filterPartialUpdate(rest, UPDATE_EVENT_COLUMNS);
 
-      if (columns.length === 0) return { success: true };
+      if (columns.length === 0 && resources === undefined) return { success: true };
 
       const result = await this.repository.updateEventById(
         eventId,
         filteredData as Record<string, string | null>,
-        columns
+        columns,
+        resources
       );
 
       if (!result) {

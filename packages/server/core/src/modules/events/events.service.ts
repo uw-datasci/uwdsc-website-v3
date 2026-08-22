@@ -1,6 +1,12 @@
 import { EventRepository } from "./events.repository";
 import type { EventTimeFilter, GetEventsByTimeRangeOptions } from "../../types/events";
-import { ApiError, Event, EventWithAttendanceCount, WrappedEvent } from "@uwdsc/common/types";
+import {
+  ApiError,
+  Event,
+  EventCategory,
+  EventWithAttendanceCount,
+  WrappedEvent,
+} from "@uwdsc/common/types";
 
 function toTimeFilter(options: GetEventsByTimeRangeOptions): EventTimeFilter {
   const { range, limit, asOf } = options;
@@ -90,6 +96,17 @@ class EventService {
    */
   async getEventsByTimeRange(options: GetEventsByTimeRangeOptions): Promise<Event[]> {
     return this.getEvents(toTimeFilter(options));
+  }
+
+  /**
+   * Get all events tagged with a given category (e.g. all workshops, past and upcoming).
+   */
+  async getEventsByCategory(category: EventCategory): Promise<Event[]> {
+    try {
+      return await this.repository.getEventsByCategory(category);
+    } catch (error) {
+      throw new ApiError(`Failed to get events by category: ${(error as Error).message}`, 500);
+    }
   }
 
   /**

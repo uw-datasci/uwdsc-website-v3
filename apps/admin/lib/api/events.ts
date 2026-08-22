@@ -148,3 +148,31 @@ export async function getFeedSubscriberCount(): Promise<number> {
 
   return data.count as number;
 }
+
+export interface LinkCheckResult {
+  status: "ok" | "unknown" | "unreachable";
+  detail: string;
+}
+
+/**
+ * Advisory-only reachability probe for a workshop resource link. Never throws on a bad/
+ * unreachable URL -- that's a normal `"unreachable"`/`"unknown"` result, not an API error.
+ * Only throws if the request itself fails (auth, network).
+ *
+ * @param url - The URL to probe
+ * @returns Promise with the reachability hint
+ * @throws Error if the request fails or is unauthorized
+ */
+export async function checkResourceLink(url: string): Promise<LinkCheckResult> {
+  const response = await fetch("/api/events/link-check", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) throw createApiError(data, response.status);
+
+  return data;
+}

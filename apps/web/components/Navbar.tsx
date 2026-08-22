@@ -42,8 +42,7 @@ export function Navbar() {
   ];
 
   const isAdmin = Boolean(user?.role && ADMIN_ROLES.has(user.role));
-  const adminUrl =
-    process.env.NEXT_PUBLIC_ADMIN_URL || "https://admin.uwdatascience.ca/";
+  const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || "https://admin.uwdatascience.ca/";
 
   // External UWDSC applications, shown in the apps launcher dropdown
   const appsGroup: NavGroup = {

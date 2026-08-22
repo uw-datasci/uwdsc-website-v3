@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { isPresident } from "@uwdsc/common/constants";
+import { isPres } from "@uwdsc/common/constants";
 import { onboardingService } from "@uwdsc/admin";
-import { isOnboardingWindowOpen, isReturningExecWindowOpen } from "@uwdsc/common/utils";
+import { isDateWindowOpen } from "@uwdsc/common/utils";
 import { Card, CardDescription, CardHeader, CardTitle } from "@uwdsc/ui";
 import { ChevronRight, ClipboardCheck, ClipboardList, UserCheck } from "lucide-react";
 import { createAuthService } from "@/lib/services";
@@ -9,43 +9,46 @@ import { createAuthService } from "@/lib/services";
 export default async function LogisticsPage() {
   const authService = await createAuthService();
   const { user } = await authService.getCurrentUser();
-  const userIsPresident = isPresident(user?.app_metadata?.role as string | undefined);
+  const userIsPresident = isPres(user?.app_metadata?.role as string | undefined);
 
   const term = await onboardingService.getActiveTerm();
-  const showOnboarding = isOnboardingWindowOpen(term);
-  const showReturning = isReturningExecWindowOpen(term);
+  const showOnboarding = isDateWindowOpen(term?.start_date, term?.onboarding_due_date);
+  const showReturning = isDateWindowOpen(
+    term?.returning_exec_release_date,
+    term?.returning_exec_deadline
+  );
 
   const links = [
     ...(showOnboarding
       ? [
-        {
-          href: "/logistics/onboarding" as const,
-          title: "Exec onboarding",
-          description: "Submit your profile, headshot, and preferences for the current term.",
-          icon: ClipboardList,
-        },
-      ]
+          {
+            href: "/logistics/onboarding" as const,
+            title: "Exec onboarding",
+            description: "Submit your profile, headshot, and preferences for the current term.",
+            icon: ClipboardList,
+          },
+        ]
       : []),
     ...(showReturning
       ? [
-        {
-          href: "/logistics/returning" as const,
-          title: "Returning exec form",
-          description:
-            "Let us know if you plan to return next term and share role preferences.",
-          icon: UserCheck,
-        },
-      ]
+          {
+            href: "/logistics/returning" as const,
+            title: "Returning exec form",
+            description:
+              "Let us know if you plan to return next term and share role preferences.",
+            icon: UserCheck,
+          },
+        ]
       : []),
     ...(userIsPresident
       ? [
-        {
-          href: "/logistics/onboarding-review" as const,
-          title: "Onboarding review",
-          description: "Review team submissions and export headshots.",
-          icon: ClipboardCheck,
-        },
-      ]
+          {
+            href: "/logistics/onboarding-review" as const,
+            title: "Onboarding review",
+            description: "Review team submissions and export headshots.",
+            icon: ClipboardCheck,
+          },
+        ]
       : []),
   ];
 

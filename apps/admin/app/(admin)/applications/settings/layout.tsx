@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { isPresident } from "@uwdsc/common/constants";
+import { isPres } from "@uwdsc/common/constants";
 import { Card, CardDescription, CardHeader, CardTitle } from "@uwdsc/ui";
 import { createAuthService } from "@/lib/services";
 
@@ -11,7 +11,7 @@ export default async function ApplicationSettingsLayout({
   const authService = await createAuthService();
   const { user, error } = await authService.getCurrentUser();
   const userIsPresident =
-    !error && !!user && isPresident(user.app_metadata?.role as string | undefined);
+    !error && !!user && isPres(user.app_metadata?.role as string | undefined);
 
   if (!userIsPresident) {
     return (

@@ -20,10 +20,7 @@ class ApplicationService {
     try {
       return await this.repository.getActiveTerm();
     } catch (error) {
-      throw new ApiError(
-        `Failed to get active term: ${(error as Error).message}`,
-        500,
-      );
+      throw new ApiError(`Failed to get active term: ${(error as Error).message}`, 500);
     }
   }
 
@@ -31,10 +28,7 @@ class ApplicationService {
     try {
       return await this.repository.getAllTerms();
     } catch (error) {
-      throw new ApiError(
-        `Failed to get all terms: ${(error as Error).message}`,
-        500,
-      );
+      throw new ApiError(`Failed to get all terms: ${(error as Error).message}`, 500);
     }
   }
 
@@ -81,7 +75,7 @@ class ApplicationService {
     } catch (error) {
       throw new ApiError(
         `Failed to get positions with questions: ${(error as Error).message}`,
-        500,
+        500
       );
     }
   }
@@ -92,26 +86,17 @@ class ApplicationService {
     } catch (error) {
       throw new ApiError(
         `Failed to get profile for autofill: ${(error as Error).message}`,
-        500,
+        500
       );
     }
   }
 
-  async createApplication(
-    userId: string,
-    termId: string,
-  ): Promise<ApplicationWithDetails> {
+  async createApplication(userId: string, termId: string): Promise<ApplicationWithDetails> {
     try {
-      const existing = await this.repository.getApplicationByUserAndTerm(
-        userId,
-        termId,
-      );
+      const existing = await this.repository.getApplicationByUserAndTerm(userId, termId);
       if (existing) {
         if (existing.status === "draft") return existing;
-        throw new ApiError(
-          "You have already submitted an application for this term",
-          400,
-        );
+        throw new ApiError("You have already submitted an application for this term", 400);
       }
 
       const profile = await this.repository.getProfileForAutofill(userId);
@@ -133,31 +118,25 @@ class ApplicationService {
       };
     } catch (error) {
       if (error instanceof ApiError) throw error;
-      throw new ApiError(
-        `Failed to create application: ${(error as Error).message}`,
-        500,
-      );
+      throw new ApiError(`Failed to create application: ${(error as Error).message}`, 500);
     }
   }
 
   async getApplicationForUser(
     userId: string,
-    termId: string,
+    termId: string
   ): Promise<ApplicationWithDetails | null> {
     try {
       return await this.repository.getApplicationByUserAndTerm(userId, termId);
     } catch (error) {
-      throw new ApiError(
-        `Failed to get application: ${(error as Error).message}`,
-        500,
-      );
+      throw new ApiError(`Failed to get application: ${(error as Error).message}`, 500);
     }
   }
 
   async updateApplication(
     applicationId: string,
     userId: string,
-    data: ApplicationUpdatePayload,
+    data: ApplicationUpdatePayload
   ): Promise<ApplicationWithDetails | null> {
     try {
       const { position_selections, answers, ...applicationData } = data;
@@ -169,15 +148,12 @@ class ApplicationService {
       const app = await this.repository.updateApplication(
         applicationId,
         userId,
-        applicationData,
+        applicationData
       );
       if (!app) return null;
 
       if (position_selections && position_selections.length > 0) {
-        await this.repository.upsertPositionSelections(
-          applicationId,
-          position_selections,
-        );
+        await this.repository.upsertPositionSelections(applicationId, position_selections);
       }
       if (answers && answers.length > 0) {
         await this.repository.upsertAnswers(applicationId, answers);
@@ -185,31 +161,22 @@ class ApplicationService {
 
       return this.repository.getApplicationByUserAndTerm(userId, app.term_id);
     } catch (error) {
-      throw new ApiError(
-        `Failed to update application: ${(error as Error).message}`,
-        500,
-      );
+      throw new ApiError(`Failed to update application: ${(error as Error).message}`, 500);
     }
   }
 
   private async validateAnswerLengths(
-    answers: NonNullable<ApplicationUpdatePayload["answers"]>,
+    answers: NonNullable<ApplicationUpdatePayload["answers"]>
   ): Promise<void> {
     const questionRows = await this.repository.getQuestionsForPositions();
     const questionMaxLengthById = new Map(
-      questionRows.map((row) => [row.id, row.max_length] as const),
+      questionRows.map((row) => [row.id, row.max_length] as const)
     );
 
     for (const answer of answers) {
       const maxLength = questionMaxLengthById.get(answer.question_id);
-      if (
-        typeof maxLength === "number" &&
-        answer.answer_text.length > maxLength
-      ) {
-        throw new ApiError(
-          `Answer exceeds max length (${maxLength} characters)`,
-          400,
-        );
+      if (typeof maxLength === "number" && answer.answer_text.length > maxLength) {
+        throw new ApiError(`Answer exceeds max length (${maxLength} characters)`, 400);
       }
     }
   }

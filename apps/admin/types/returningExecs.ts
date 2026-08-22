@@ -1,7 +1,4 @@
-import type {
-  ReturningExecListItem,
-  ReturningExecOwnSubmission,
-} from "@uwdsc/common/types";
+import type { ReturningExecListItem, ReturningExecOwnSubmission } from "@uwdsc/common/types";
 import type { PositionReviewScopeDto } from "./applications";
 
 export interface ReturningExecsResponse {

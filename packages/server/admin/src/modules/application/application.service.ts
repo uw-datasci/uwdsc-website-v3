@@ -66,14 +66,14 @@ class ApplicationService {
     if (scope.isPresident) return true;
     return this.repository.canAccessApplicationByPositionIds(
       applicationId,
-      scope.vpPositionIds,
+      scope.vpPositionIds
     );
   }
 
-  async updatePositionSelectionReviewStatus(
+  async updatePositionStatus(
     scope: QuestionScope,
     selectionId: string,
-    status: ApplicationReviewStatus,
+    status: ApplicationReviewStatus
   ): Promise<void> {
     const row = await this.repository.getPositionSelectionRow(selectionId);
     if (!row) {
@@ -96,7 +96,7 @@ class ApplicationService {
     if (!this.VP_REVIEW_STATUS_SET.has(row.status)) {
       throw new ApiError(
         "This selection is past VP review; update it from Hiring instead",
-        400,
+        400
       );
     }
 
@@ -107,7 +107,7 @@ class ApplicationService {
       if (error instanceof ApiError) throw error;
       throw new ApiError(
         `Failed to update position review status: ${(error as Error).message}`,
-        500,
+        500
       );
     }
   }
@@ -135,7 +135,7 @@ class ApplicationService {
     } catch (error) {
       throw new ApiError(
         `Failed to open position for applications: ${(error as Error).message}`,
-        500,
+        500
       );
     }
   }
@@ -158,7 +158,7 @@ class ApplicationService {
       if (error instanceof ApiError) throw error;
       throw new ApiError(
         `Failed to close available position: ${(error as Error).message}`,
-        500,
+        500
       );
     }
   }
@@ -205,7 +205,7 @@ class ApplicationService {
     } catch (error) {
       throw new ApiError(
         `Failed to create application question: ${(error as Error).message}`,
-        500,
+        500
       );
     }
   }
@@ -213,7 +213,7 @@ class ApplicationService {
   async updateQuestion(
     scope: QuestionScope,
     positionQuestionId: number,
-    data: QuestionUpsertInput,
+    data: QuestionUpsertInput
   ): Promise<AppQuestion | null> {
     const linkedPositionId =
       await this.repository.getPositionQuestionPositionId(positionQuestionId);
@@ -230,7 +230,7 @@ class ApplicationService {
     } catch (error) {
       throw new ApiError(
         `Failed to update application question: ${(error as Error).message}`,
-        500,
+        500
       );
     }
   }
@@ -247,7 +247,7 @@ class ApplicationService {
     } catch (error) {
       throw new ApiError(
         `Failed to delete application question: ${(error as Error).message}`,
-        500,
+        500
       );
     }
   }

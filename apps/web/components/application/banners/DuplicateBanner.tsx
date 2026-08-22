@@ -10,8 +10,8 @@ export function DuplicateBanner() {
       <div className="flex-1">
         <p className="font-semibold text-cyan-400">Duplicate Questions:</p>
         <p className="text-sm text-cyan-100">
-          If any roles have overlapping questions, please only answer one and
-          put &apos;N/A&apos; for the overlapping
+          If any roles have overlapping questions, please only answer one and put
+          &apos;N/A&apos; for the overlapping
         </p>
       </div>
     </div>

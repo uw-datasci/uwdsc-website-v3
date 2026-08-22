@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
       },
       isAuthenticated: !!data,
     }),
-    [data, isLoading, error, mutate],
+    [data, isLoading, error, mutate]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

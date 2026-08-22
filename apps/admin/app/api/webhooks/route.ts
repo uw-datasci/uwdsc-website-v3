@@ -1,7 +1,7 @@
-import { NextRequest } from "next/server";
 import { headers } from "next/headers";
 import { ApiError } from "@uwdsc/common/types";
-import { ApiResponse } from "@uwdsc/common/utils";
+import { RaftClient, RaftResponse } from "@uw-datasci/raft";
+import { withRaftRoute } from "@uwdsc/core/http";
 import { discordService, membershipService, webhookService } from "@uwdsc/admin";
 import { applicationService } from "@uwdsc/core";
 import { Webhook } from "svix";
@@ -14,12 +14,15 @@ import { WebhookEventPayload } from "resend";
  * Always returns HTTP 200 so Resend does not retry (at-least-once delivery; non-2xx triggers backoff).
  * Use `success` in the JSON body to distinguish handled failures from processed receipts.
  */
-export async function POST(request: NextRequest): Promise<Response> {
+export const POST = withRaftRoute(async (request) => {
   const WEBHOOK_SECRET = process.env.RESEND_WEBHOOK_SECRET;
 
   if (!WEBHOOK_SECRET) {
     console.error("[Webhook] Missing RESEND_WEBHOOK_SECRET");
-    return ApiResponse.ok({ success: false, reason: "missing_webhook_secret" });
+    return RaftResponse.ok({
+      success: false,
+      reason: "missing_webhook_secret",
+    });
   }
 
   try {
@@ -29,7 +32,10 @@ export async function POST(request: NextRequest): Promise<Response> {
     const svix_signature = headerPayload.get("svix-signature");
 
     if (!svix_id || !svix_timestamp || !svix_signature) {
-      return ApiResponse.ok({ success: false, reason: "missing_svix_headers" });
+      return RaftResponse.ok({
+        success: false,
+        reason: "missing_svix_headers",
+      });
     }
 
     const payload = await request.json();
@@ -47,11 +53,11 @@ export async function POST(request: NextRequest): Promise<Response> {
       }) as WebhookEventPayload;
     } catch (err) {
       console.error("[Webhook] Error verifying webhook:", err);
-      return ApiResponse.ok({ success: false, reason: "invalid_signature" });
+      return RaftResponse.ok({ success: false, reason: "invalid_signature" });
     }
 
     if (evt.type !== "email.received") {
-      return ApiResponse.ok({
+      return RaftResponse.ok({
         success: false,
         reason: "invalid_event_type",
         event: evt.type,
@@ -59,12 +65,12 @@ export async function POST(request: NextRequest): Promise<Response> {
     }
 
     const target = webhookService.resolveInboundTarget(evt.data.to);
-    if (!target) return ApiResponse.ok({ success: false, reason: "wrong_recipient" });
+    if (!target) return RaftResponse.ok({ success: false, reason: "wrong_recipient" });
 
     const contents = await webhookService.getReceivedEmail(evt.data.email_id);
     if (!contents.ok) {
       console.error("[Webhook]", contents.message);
-      return ApiResponse.ok({
+      return RaftResponse.ok({
         success: false,
         reason: contents.reason,
         message: contents.message,
@@ -79,7 +85,7 @@ export async function POST(request: NextRequest): Promise<Response> {
         await membershipService.processEmailReceipt(
           contents.email,
           activeTerm.start_date,
-          evt.data.from,
+          evt.data.from
         );
         break;
       }
@@ -93,14 +99,14 @@ export async function POST(request: NextRequest): Promise<Response> {
       }
     }
 
-    return ApiResponse.ok({
+    return RaftResponse.ok({
       success: true,
       event: evt.type,
       emailId: evt.data.email_id,
     });
   } catch (error) {
     if (error instanceof ApiError) {
-      return ApiResponse.ok({
+      return RaftResponse.ok({
         success: false,
         reason: "processing_error",
         message: error.message,
@@ -108,10 +114,15 @@ export async function POST(request: NextRequest): Promise<Response> {
       });
     }
     console.error("[Webhook] Failed to process request:", error);
-    return ApiResponse.ok({
+    await RaftClient.getInstance().reportError(
+      error instanceof Error ? error : new Error(String(error)),
+      { route: "webhooks" },
+      "error"
+    );
+    return RaftResponse.ok({
       success: false,
       reason: "unexpected_error",
       message: error instanceof Error ? error.message : "Unknown error",
     });
   }
-}
+});

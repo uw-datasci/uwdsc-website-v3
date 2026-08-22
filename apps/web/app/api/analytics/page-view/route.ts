@@ -1,47 +1,39 @@
-import { ApiResponse } from "@uwdsc/common/utils";
+import { RaftResponse } from "@uw-datasci/raft";
+import { withRaftRoute } from "@uwdsc/core/http";
 import { createSupabaseServerClient } from "@uwdsc/db";
 import { cookies } from "next/headers";
-import { NextRequest } from "next/server";
 
-const UUID_REGEX =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-export async function POST(request: NextRequest): Promise<Response> {
-  try {
-    const body = (await request.json()) as { path?: string; visitor_id?: string };
-    const { path, visitor_id: visitorId } = body;
+export const POST = withRaftRoute(async (request) => {
+  const body = (await request.json()) as { path?: string; visitor_id?: string };
+  const { path, visitor_id: visitorId } = body;
 
-    if (!path?.startsWith("/")) {
-      return ApiResponse.badRequest("Invalid path");
-    }
+  if (!path?.startsWith("/")) return RaftResponse.badRequest("Invalid path");
 
-    if (!visitorId || !UUID_REGEX.test(visitorId)) {
-      return ApiResponse.badRequest("Invalid visitor_id");
-    }
-
-    const cookieStore = await cookies();
-    const supabase = createSupabaseServerClient({
-      getAll() {
-        return cookieStore.getAll();
-      },
-      set(name: string, value: string, options?) {
-        cookieStore.set(name, value, options);
-      },
-    });
-
-    const { error } = await supabase.rpc("log_page_view", {
-      p_path: path,
-      p_visitor_id: visitorId,
-    });
-
-    if (error) {
-      console.error("Failed to log page view:", error);
-      return ApiResponse.serverError(error, "Failed to log page view");
-    }
-
-    return ApiResponse.ok({ success: true });
-  } catch (error: unknown) {
-    console.error("Page view logging error:", error);
-    return ApiResponse.serverError(error, "Failed to log page view");
+  if (!visitorId || !UUID_REGEX.test(visitorId)) {
+    return RaftResponse.badRequest("Invalid visitor_id");
   }
-}
+
+  const cookieStore = await cookies();
+  const supabase = createSupabaseServerClient({
+    getAll() {
+      return cookieStore.getAll();
+    },
+    set(name: string, value: string, options?) {
+      cookieStore.set(name, value, options);
+    },
+  });
+
+  const { error } = await supabase.rpc("log_page_view", {
+    p_path: path,
+    p_visitor_id: visitorId,
+  });
+
+  if (error) {
+    console.error("Failed to log page view:", error);
+    return RaftResponse.serverError(error, "Failed to log page view");
+  }
+
+  return RaftResponse.ok({ success: true });
+});

@@ -36,7 +36,7 @@ export function ResetPasswordForm() {
       setAuthError(
         error instanceof Error
           ? error.message
-          : "An unexpected error occurred. Please try again.",
+          : "An unexpected error occurred. Please try again."
       );
     } finally {
       setIsLoading(false);
@@ -74,9 +74,7 @@ export function ResetPasswordForm() {
             })}
           />
         </div>
-        {authError && (
-          <div className="text-red-400 text-base mt-3">{authError}</div>
-        )}
+        {authError && <div className="text-red-400 text-base mt-3">{authError}</div>}
         <div className="mt-6">
           <Button
             size="lg"

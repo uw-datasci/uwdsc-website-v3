@@ -22,9 +22,7 @@ interface PositionsManagementForbiddenProps {
   readonly message: string;
 }
 
-export function PositionsManagementForbidden({
-  message,
-}: PositionsManagementForbiddenProps) {
+export function PositionsManagementForbidden({ message }: PositionsManagementForbiddenProps) {
   return (
     <Card className="border-destructive/30 bg-destructive/5">
       <CardHeader>
@@ -40,10 +38,7 @@ interface PositionsManagementErrorProps {
   readonly onRetry: () => void;
 }
 
-export function PositionsManagementError({
-  message,
-  onRetry,
-}: PositionsManagementErrorProps) {
+export function PositionsManagementError({ message, onRetry }: PositionsManagementErrorProps) {
   return (
     <Card className="border-destructive/30">
       <CardHeader>

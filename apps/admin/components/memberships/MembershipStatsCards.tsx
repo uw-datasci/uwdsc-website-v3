@@ -20,9 +20,7 @@ export function MembershipStatsCards({
   const [hoveredCard, setHoveredCard] = useState<MembershipFilter | null>(null);
 
   const paidPercentage =
-    stats.total_users > 0
-      ? ((stats.paid_users / stats.total_users) * 100).toFixed(1)
-      : "0.0";
+    stats.total_users > 0 ? ((stats.paid_users / stats.total_users) * 100).toFixed(1) : "0.0";
 
   const mathSocPercentage =
     stats.paid_users > 0
@@ -37,10 +35,7 @@ export function MembershipStatsCards({
     <div className="grid gap-4 md:grid-cols-3 mb-8 w-full">
       {/* Total Users */}
       <Card
-        className={cn(
-          cardBaseStyles,
-          activeFilter === "all" && activeCardStyles,
-        )}
+        className={cn(cardBaseStyles, activeFilter === "all" && activeCardStyles)}
         onClick={() => onFilterChange("all")}
         onMouseEnter={() => setHoveredCard("all")}
         onMouseLeave={() => setHoveredCard(null)}
@@ -72,10 +67,7 @@ export function MembershipStatsCards({
 
       {/* Paid Users */}
       <Card
-        className={cn(
-          cardBaseStyles,
-          activeFilter === "paid" && activeCardStyles,
-        )}
+        className={cn(cardBaseStyles, activeFilter === "paid" && activeCardStyles)}
         onClick={() => onFilterChange("paid")}
         onMouseEnter={() => setHoveredCard("paid")}
         onMouseLeave={() => setHoveredCard(null)}
@@ -86,9 +78,7 @@ export function MembershipStatsCards({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{stats.paid_users}</div>
-          <p className="text-xs text-muted-foreground">
-            {paidPercentage}% of total users
-          </p>
+          <p className="text-xs text-muted-foreground">{paidPercentage}% of total users</p>
         </CardContent>
         <AnimatePresence>
           {hoveredCard === "paid" && (
@@ -109,25 +99,18 @@ export function MembershipStatsCards({
 
       {/* MathSoc Members */}
       <Card
-        className={cn(
-          cardBaseStyles,
-          activeFilter === "paid-mathsoc" && activeCardStyles,
-        )}
+        className={cn(cardBaseStyles, activeFilter === "paid-mathsoc" && activeCardStyles)}
         onClick={() => onFilterChange("paid-mathsoc")}
         onMouseEnter={() => setHoveredCard("paid-mathsoc")}
         onMouseLeave={() => setHoveredCard(null)}
       >
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <CardTitle className="text-sm font-medium">
-            Paid MathSoc Members
-          </CardTitle>
+          <CardTitle className="text-sm font-medium">Paid MathSoc Members</CardTitle>
           <GraduationCap className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{stats.math_soc_members}</div>
-          <p className="text-xs text-muted-foreground">
-            {mathSocPercentage}% of paid users
-          </p>
+          <p className="text-xs text-muted-foreground">{mathSocPercentage}% of paid users</p>
         </CardContent>
         <AnimatePresence>
           {hoveredCard === "paid-mathsoc" && (

@@ -42,9 +42,7 @@ export function EventDetailsDialog({
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>{event.name}</DialogTitle>
-          <DialogDescription>
-            Event schedule, location, and description.
-          </DialogDescription>
+          <DialogDescription>Event schedule, location, and description.</DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-8 text-sm pt-4">
           <div className="flex flex-col gap-3 text-muted-foreground">

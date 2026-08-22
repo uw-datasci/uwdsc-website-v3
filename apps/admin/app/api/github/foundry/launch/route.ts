@@ -1,9 +1,6 @@
-import { ApiResponse } from "@uwdsc/common/utils";
+import { RaftResponse } from "@uw-datasci/raft";
 import { withAdmin } from "@/guards/withAdmin";
-import {
-  foundryFormSchema,
-  type FoundryFormValues,
-} from "@/lib/schemas/foundry";
+import { foundryFormSchema, type FoundryFormValues } from "@/lib/schemas/foundry";
 import { githubService } from "@uwdsc/admin";
 
 /**
@@ -13,23 +10,10 @@ import { githubService } from "@uwdsc/admin";
  * Admin only.
  */
 export const POST = withAdmin(async (request) => {
-  try {
-    const body = (await request.json()) as FoundryFormValues;
-    const parsed = foundryFormSchema.safeParse(body);
+  const body = (await request.json()) as FoundryFormValues;
+  const parsed = foundryFormSchema.safeParse(body);
+  if (!parsed.success) return RaftResponse.badRequest(parsed.error.issues[0]?.message);
 
-    if (!parsed.success) {
-      return ApiResponse.badRequest(
-        parsed.error.issues[0]?.message ?? "Invalid Foundry payload",
-      );
-    }
-
-    await githubService.launchFoundryProject(parsed.data);
-    return ApiResponse.ok({
-      success: true,
-      message: "Foundry workflow dispatched successfully",
-    });
-  } catch (error: unknown) {
-    console.error("Error launching Foundry workflow:", error);
-    return ApiResponse.serverError(error, "Failed to launch Foundry workflow");
-  }
+  await githubService.launchFoundryProject(parsed.data);
+  return RaftResponse.ok({ success: true, message: "Workflow dispatched successfully" });
 });

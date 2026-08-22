@@ -19,25 +19,19 @@ export default function NexusPage() {
     <div className="mt-8 flex flex-col gap-4 max-w-5xl w-full">
       <h1 className="text-3xl font-bold tracking-tight">Nexus</h1>
       <p className="text-muted-foreground">
-        Welcome to the Nexus developer portal. Here you can access all developer
-        tools and configurations.
+        Welcome to the Nexus developer portal. Here you can access all developer tools and
+        configurations.
       </p>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mt-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-sm font-medium">
-              Calendar Subscribers
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Calendar Subscribers</CardTitle>
             <CalendarDays className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {error ? "—" : (subscriberCount ?? "…")}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Unique IPs in the last 30 days
-            </p>
+            <div className="text-2xl font-bold">{error ? "—" : (subscriberCount ?? "…")}</div>
+            <p className="text-xs text-muted-foreground">Unique IPs in the last 30 days</p>
           </CardContent>
         </Card>
       </div>

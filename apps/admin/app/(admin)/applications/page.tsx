@@ -20,14 +20,14 @@ function withUpdatedPositionSelection(
   apps: ApplicationListItem[],
   applicationId: string,
   selectionId: string,
-  status: ApplicationReviewStatus,
+  status: ApplicationReviewStatus
 ): ApplicationListItem[] {
   return apps.map((app) => {
     if (app.id === applicationId) {
       return {
         ...app,
         position_selections: app.position_selections.map((s) =>
-          s.id === selectionId ? { ...s, status } : s,
+          s.id === selectionId ? { ...s, status } : s
         ),
       };
     }
@@ -63,7 +63,7 @@ export default function ApplicationsPage() {
         setApplications(list);
         setStatusCounts(statusCounts);
         setFilteredApplications(
-          list.filter((app) => app.status === SUBMITTED_SUBMISSION_STATUS_FILTER),
+          list.filter((app) => app.status === SUBMITTED_SUBMISSION_STATUS_FILTER)
         );
         setPositionReview(pr);
       } catch (err) {
@@ -79,7 +79,7 @@ export default function ApplicationsPage() {
   // Currently selected application
   const selectedApplication = useMemo(
     () => applications.find((a) => a.id === selectedId) ?? null,
-    [applications, selectedId],
+    [applications, selectedId]
   );
 
   // Handle selection - open sheet on mobile only
@@ -90,7 +90,7 @@ export default function ApplicationsPage() {
 
   const handlePositionReviewStatusChange = async (
     selectionId: string,
-    status: ApplicationReviewStatus,
+    status: ApplicationReviewStatus
   ) => {
     if (!selectedApplication) return;
     const selection = selectedApplication.position_selections.find((s) => s.id === selectionId);
@@ -100,7 +100,7 @@ export default function ApplicationsPage() {
       setPositionReviewUpdatingId(selectionId);
       await updatePositionSelectionReviewStatus(selectionId, status);
       setApplications((prev) =>
-        withUpdatedPositionSelection(prev, selectedApplication.id, selectionId, status),
+        withUpdatedPositionSelection(prev, selectedApplication.id, selectionId, status)
       );
       toast.success("Position status updated");
     } catch (err) {

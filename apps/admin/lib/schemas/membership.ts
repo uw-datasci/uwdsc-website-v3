@@ -1,9 +1,5 @@
 import { z } from "zod";
-import {
-  FACULTY_VALUES,
-  ROLE_VALUES,
-  roleRequiresSubteam,
-} from "@uwdsc/common/constants";
+import { FACULTY_VALUES, ROLE_VALUES, roleRequiresSubteam } from "@uwdsc/common/constants";
 
 /**
  * Schema for marking a member as paid

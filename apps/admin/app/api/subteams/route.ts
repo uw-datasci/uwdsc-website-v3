@@ -1,4 +1,4 @@
-import { ApiResponse } from "@uwdsc/common/utils";
+import { RaftResponse } from "@uw-datasci/raft";
 import { teamService } from "@uwdsc/core";
 import { withAuth } from "@/guards/withAuth";
 
@@ -8,11 +8,6 @@ import { withAuth } from "@/guards/withAuth";
  * member role/subteam editor. Admin/exec only.
  */
 export const GET = withAuth(async () => {
-  try {
-    const subteams = await teamService.getSubteams();
-    return ApiResponse.ok(subteams);
-  } catch (error: unknown) {
-    console.error("Error fetching subteams:", error);
-    return ApiResponse.serverError(error, "Failed to fetch subteams");
-  }
+  const subteams = await teamService.getSubteams();
+  return RaftResponse.ok(subteams);
 });

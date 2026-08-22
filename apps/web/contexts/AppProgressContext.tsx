@@ -11,23 +11,14 @@ interface AppProgressContextType {
   setProgressValue: (value: number) => void;
 }
 
-const AppProgressContext = createContext<AppProgressContextType | undefined>(
-  undefined,
-);
+const AppProgressContext = createContext<AppProgressContextType | undefined>(undefined);
 
 export function AppProgressProvider({ children }: AppProgressProvider) {
   const [progressValue, setProgressValue] = useState(-1);
 
-  const value = useMemo(
-    () => ({ progressValue, setProgressValue }),
-    [progressValue],
-  );
+  const value = useMemo(() => ({ progressValue, setProgressValue }), [progressValue]);
 
-  return (
-    <AppProgressContext.Provider value={value}>
-      {children}
-    </AppProgressContext.Provider>
-  );
+  return <AppProgressContext.Provider value={value}>{children}</AppProgressContext.Provider>;
 }
 
 export function useApplicationProgress() {

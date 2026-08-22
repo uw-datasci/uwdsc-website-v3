@@ -61,10 +61,7 @@ function CountingNumber({
   React.useEffect(() => {
     const unsubscribe = springVal.on("change", (latest) => {
       if (localRef.current) {
-        let formatted =
-          decimals > 0
-            ? latest.toFixed(decimals)
-            : Math.round(latest).toString();
+        let formatted = decimals > 0 ? latest.toFixed(decimals) : Math.round(latest).toString();
 
         if (decimals > 0) {
           formatted = formatted.replace(".", decimalSeparator);
@@ -74,9 +71,7 @@ function CountingNumber({
           const finalIntLength = Math.floor(Math.abs(number)).toString().length;
           const [intPart, fracPart] = formatted.split(decimalSeparator);
           const paddedInt = intPart?.padStart(finalIntLength, "0") ?? "";
-          formatted = fracPart
-            ? `${paddedInt}${decimalSeparator}${fracPart}`
-            : paddedInt;
+          formatted = fracPart ? `${paddedInt}${decimalSeparator}${fracPart}` : paddedInt;
         }
 
         localRef.current.textContent = formatted;
@@ -92,12 +87,7 @@ function CountingNumber({
     : "0" + (decimals > 0 ? decimalSeparator + "0".repeat(decimals) : "");
 
   return (
-    <span
-      ref={localRef}
-      data-slot="counting-number"
-      className={className}
-      {...props}
-    >
+    <span ref={localRef} data-slot="counting-number" className={className} {...props}>
       {initialText}
     </span>
   );

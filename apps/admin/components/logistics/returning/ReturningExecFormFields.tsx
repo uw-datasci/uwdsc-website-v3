@@ -67,7 +67,7 @@ function clearFollowUpFields(form: UseFormReturn<ReturningExecFormValues>) {
 function filterPositionOptions(
   options: SelectOption[],
   excludeIds: readonly string[],
-  currentValue: string,
+  currentValue: string
 ): SelectOption[] {
   const excluded = new Set(excludeIds.filter((id) => Boolean(id) && id !== currentValue));
   return options.filter((opt) => !excluded.has(opt.value));
@@ -77,7 +77,7 @@ function buildOptionalRoleSelect(
   followUpDisabled: boolean,
   locked: boolean,
   lockPlaceholder: string,
-  options: SelectOption[],
+  options: SelectOption[]
 ) {
   const disabled = followUpDisabled || locked;
   return {
@@ -145,25 +145,25 @@ export function ReturningExecFormFields({
   const secondRoleOptions = filterPositionOptions(
     optionalPositionOptions,
     [firstChoice],
-    secondChoice,
+    secondChoice
   );
   const thirdRoleOptions = filterPositionOptions(
     secondRoleOptions,
     [secondChoice],
-    thirdChoice,
+    thirdChoice
   );
 
   const secondRole = buildOptionalRoleSelect(
     followUpDisabled,
     !firstChoice,
     "Select a first choice first",
-    secondRoleOptions,
+    secondRoleOptions
   );
   const thirdRole = buildOptionalRoleSelect(
     followUpDisabled,
     !firstChoice || !secondChoice,
     "Select a second choice first",
-    thirdRoleOptions,
+    thirdRoleOptions
   );
 
   const inPersonQuestionLabel =
@@ -346,7 +346,7 @@ export function ReturningExecFormFields({
                 key={`details-${followUpKey}`}
                 className={cn(
                   "flex min-h-0 flex-1 flex-col gap-4",
-                  followUpDisabled && "opacity-50",
+                  followUpDisabled && "opacity-50"
                 )}
               >
                 <div className="shrink-0">

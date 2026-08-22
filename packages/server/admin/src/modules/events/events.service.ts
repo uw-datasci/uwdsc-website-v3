@@ -22,7 +22,7 @@ class EventService {
    * Create a new event
    */
   async createEvent(
-    data: CreateEventData,
+    data: CreateEventData
   ): Promise<{ success: boolean; event?: Event; error?: string }> {
     try {
       const event = await this.repository.createEvent(data);
@@ -42,7 +42,7 @@ class EventService {
    */
   async updateEvent(
     eventId: string,
-    data: UpdateEventData,
+    data: UpdateEventData
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const { filteredData, columns } = filterPartialUpdate(data, UPDATE_EVENT_COLUMNS);
@@ -52,7 +52,7 @@ class EventService {
       const result = await this.repository.updateEventById(
         eventId,
         filteredData as Record<string, string | null>,
-        columns,
+        columns
       );
 
       if (!result) {

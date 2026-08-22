@@ -3,26 +3,87 @@ import { DateTime } from "luxon";
 import type { MembershipReceiptParse } from "../types/webhook";
 
 const DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+const UWATERLOO_DOMAIN = "@uwaterloo.ca";
+const EMAIL_LOCAL_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789._%+-";
 
-const UWATERLOO_EMAIL = /^[a-z0-9._%+-]+@uwaterloo\.ca$/;
+function isEmailLocalChar(char: string): boolean {
+  return char.length === 1 && EMAIL_LOCAL_CHARS.includes(char);
+}
+
+function isUwaterlooEmail(email: string): boolean {
+  const lower = email.toLowerCase();
+  if (!lower.endsWith(UWATERLOO_DOMAIN)) return false;
+
+  const local = lower.slice(0, -UWATERLOO_DOMAIN.length);
+  if (local.length === 0 || !isEmailLocalChar(local[0]!)) return false;
+
+  for (const char of local) if (!isEmailLocalChar(char)) return false;
+
+  return true;
+}
+
+function findCustIdLine(body: string): string {
+  const lower = body.toLowerCase();
+  const idx = lower.indexOf("cust id:");
+  if (idx === -1) return "";
+
+  const lineEnd = body.indexOf("\n", idx);
+  return lineEnd === -1 ? body.slice(idx) : body.slice(idx, lineEnd);
+}
+
+function extractUwaterlooEmailFromText(text: string, searchFrom: number): string | null {
+  const lower = text.toLowerCase();
+  const domainIdx = lower.indexOf(UWATERLOO_DOMAIN, searchFrom);
+  if (domainIdx === -1) return null;
+
+  let start = domainIdx - 1;
+  while (start >= searchFrom && isEmailLocalChar(lower[start]!)) start--;
+
+  start++;
+
+  const email = lower.slice(start, domainIdx + UWATERLOO_DOMAIN.length);
+  return isUwaterlooEmail(email) ? email : null;
+}
+
+function extractReceiptEmail(body: string): string | null {
+  const custIdLine = findCustIdLine(body);
+
+  const plusIdx = custIdLine.indexOf("+");
+  if (plusIdx !== -1) {
+    const afterPlus = extractUwaterlooEmailFromText(custIdLine, plusIdx + 1);
+    if (afterPlus) return afterPlus;
+  }
+
+  const lower = body.toLowerCase();
+  const custIdx = lower.indexOf("cust id:");
+  if (custIdx === -1) return null;
+
+  let searchFrom = custIdx + "cust id:".length;
+  while (searchFrom < body.length && /\s/.test(body[searchFrom]!)) searchFrom++;
+
+  return extractUwaterlooEmailFromText(body, searchFrom);
+}
 
 /**
  * Extracts a normalized @uwaterloo.ca address from a Resend `from` / envelope field.
  */
 export function parseUwaterlooEmailAddress(address: string): string | null {
   const trimmed = address.trim();
-  const angle = /<([^>]+)>/.exec(trimmed)?.[1]?.trim() ?? trimmed;
-  const email = angle.toLowerCase();
-  return UWATERLOO_EMAIL.test(email) ? email : null;
+  let parsed = trimmed;
+  const open = trimmed.indexOf("<");
+  if (open !== -1) {
+    const close = trimmed.indexOf(">", open + 1);
+    if (close !== -1) parsed = trimmed.slice(open + 1, close).trim();
+  }
+  const email = parsed.toLowerCase();
+  return isUwaterlooEmail(email) ? email : null;
 }
 
 /**
  * Parses the transaction datetime from the receipt body (local shop time, America/Toronto).
  */
 function parseTransactionDate(text: string): Date {
-  const dt = DateTime.fromFormat(text.trim(), DATETIME_FORMAT, {
-    zone: "America/Toronto",
-  });
+  const dt = DateTime.fromFormat(text.trim(), DATETIME_FORMAT, { zone: "America/Toronto" });
 
   if (!dt.isValid) throw new ApiError("Could not parse transaction date from receipt", 400);
 
@@ -39,13 +100,7 @@ export function parseMembershipReceipt(body: string): MembershipReceiptParse {
   const hasCorrectItem = /UW Data Science Club Membership/i.test(body);
   const isApproved = /Transaction Approved/i.test(body);
 
-  const custIdLine = /Cust ID:[^\n]*/i.exec(body)?.[0] ?? "";
-  const receiptEmailAfterPlus = /\+([a-z0-9][a-z0-9._+%-]*@uwaterloo\.ca)/i.exec(
-    custIdLine,
-  )?.[1];
-  const receiptEmailPlain =
-    /Cust ID:\s*([a-z][a-z0-9._%+-]*@uwaterloo\.ca)/i.exec(body)?.[1] ?? null;
-  const receiptEmail = (receiptEmailAfterPlus ?? receiptEmailPlain)?.toLowerCase() ?? null;
+  const receiptEmail = extractReceiptEmail(body);
 
   const transactionDateText = /(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})/.exec(body)?.[1] ?? null;
 
@@ -87,7 +142,7 @@ export function throwIfParseFailed(parsed: MembershipReceiptParse): asserts pars
  */
 export function assertForwarderMatchesReceipt(
   forwarderFrom: string,
-  receiptEmail: string,
+  receiptEmail: string
 ): void {
   const forwarderEmail = parseUwaterlooEmailAddress(forwarderFrom);
 
@@ -107,7 +162,7 @@ export function assertForwarderMatchesReceipt(
  */
 export function assertReceiptWithinActiveTerm(
   transactionDateText: string,
-  termStartDate: string | null,
+  termStartDate: string | null
 ): void {
   if (termStartDate === null) {
     console.error("Active term has no start date");
@@ -130,7 +185,7 @@ export function assertReceiptWithinActiveTerm(
 
 export function dedupeRecipients(
   forwarderEmail: string | null,
-  receiptEmail: string | null,
+  receiptEmail: string | null
 ): string[] {
   const set = new Set<string>();
   if (forwarderEmail) set.add(forwarderEmail.toLowerCase());

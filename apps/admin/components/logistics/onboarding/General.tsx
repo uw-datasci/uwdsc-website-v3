@@ -34,9 +34,7 @@ export function General({ form }: GeneralProps) {
           {/* Socials + consent card */}
           <Card className="h-full border-border bg-card">
             <CardHeader>
-              <CardTitle className="flex items-center text-xl">
-                Socials
-              </CardTitle>
+              <CardTitle className="flex items-center text-xl">Socials</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6 h-full flex flex-col">
               <FormField
@@ -83,9 +81,7 @@ export function General({ form }: GeneralProps) {
           {/* Technical Background*/}
           <Card className="border-border bg-card">
             <CardHeader>
-              <CardTitle className="flex items-center text-xl">
-                Technical Background
-              </CardTitle>
+              <CardTitle className="flex items-center text-xl">Technical Background</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6 h-full flex flex-col">
               <FormField
@@ -94,13 +90,7 @@ export function General({ form }: GeneralProps) {
                 render={({ field }) =>
                   renderScaleField({
                     label: "Data Science Competency",
-                    labels: [
-                      "None",
-                      "Beginner",
-                      "Intermediate",
-                      "Advanced",
-                      "Expert",
-                    ],
+                    labels: ["None", "Beginner", "Intermediate", "Advanced", "Expert"],
                     required: true,
                   })({
                     field: {
@@ -117,9 +107,7 @@ export function General({ form }: GeneralProps) {
         {/* Additional Comments */}
         <Card className="border-border bg-card">
           <CardHeader>
-            <CardTitle className="flex items-center text-xl">
-              Additional Comments
-            </CardTitle>
+            <CardTitle className="flex items-center text-xl">Additional Comments</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <FormField

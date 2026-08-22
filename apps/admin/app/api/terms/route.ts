@@ -1,4 +1,4 @@
-import { ApiResponse } from "@uwdsc/common/utils";
+import { RaftResponse } from "@uw-datasci/raft";
 import { applicationService } from "@uwdsc/core";
 import { withAuth } from "@/guards/withAuth";
 
@@ -8,11 +8,6 @@ import { withAuth } from "@/guards/withAuth";
  * Admin/exec only.
  */
 export const GET = withAuth(async () => {
-  try {
-    const terms = await applicationService.getAllTerms();
-    return ApiResponse.ok(terms);
-  } catch (error: unknown) {
-    console.error("Error fetching terms:", error);
-    return ApiResponse.serverError(error, "Failed to fetch terms");
-  }
+  const terms = await applicationService.getAllTerms();
+  return RaftResponse.ok(terms);
 });

@@ -186,7 +186,9 @@ export function renderTextField(opts: TextFieldOptions) {
  * order; options without a group render ungrouped, in their original position.
  */
 function renderSelectOptions(options: SelectOption[], itemClassName?: string) {
-  const hasGroups = options.some((option) => typeof option !== "string" && option.group != null);
+  const hasGroups = options.some(
+    (option) => typeof option !== "string" && option.group != null
+  );
   if (!hasGroups) {
     return options.map((option) => {
       const value = typeof option === "string" ? option : option.value;
@@ -356,7 +358,7 @@ export function renderTextAreaField(opts: TextAreaFieldOptions) {
         placeholder={placeholder}
         className={cn(
           className,
-          stretchToParent && "max-h-36 min-h-20 flex-1 basis-0 self-stretch field-sizing-fixed",
+          stretchToParent && "max-h-36 min-h-20 flex-1 basis-0 self-stretch field-sizing-fixed"
         )}
       />
     );
@@ -541,7 +543,7 @@ export function renderMultiSelectDropdownField(opts: MultiSelectDropdownFieldOpt
                   "disabled:cursor-not-allowed disabled:opacity-50",
                   "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
                   !value.length && "text-muted-foreground",
-                  triggerClassName,
+                  triggerClassName
                 )}
               >
                 <span className="min-w-0 flex-1 truncate">
@@ -554,7 +556,7 @@ export function renderMultiSelectDropdownField(opts: MultiSelectDropdownFieldOpt
           <PopoverContent
             className={cn(
               "w-(--radix-popover-trigger-width) p-1 text-popover-foreground",
-              contentClassName,
+              contentClassName
             )}
             align="start"
           >
@@ -565,7 +567,7 @@ export function renderMultiSelectDropdownField(opts: MultiSelectDropdownFieldOpt
                   className={cn(
                     "flex w-full cursor-pointer items-center gap-2 rounded-sm py-1.5 pr-2 pl-2 text-sm outline-none select-none",
                     "hover:bg-accent hover:text-accent-foreground",
-                    "focus-within:bg-accent focus-within:text-accent-foreground",
+                    "focus-within:bg-accent focus-within:text-accent-foreground"
                   )}
                 >
                   <Checkbox

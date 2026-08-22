@@ -40,7 +40,7 @@ function useErrorDetail(
   errorId: string | null,
   group: RaftErrorGroup | null,
   filters: RaftGroupFilters,
-  onResolvedChange: () => void,
+  onResolvedChange: () => void
 ): ErrorDetailState {
   const [error, setError] = useState<RaftError | null>(null);
   const [occurrences, setOccurrences] = useState<RaftError[]>([]);
@@ -97,7 +97,7 @@ function useErrorDetail(
       const updated = await setRaftErrorResolved(error.id, !error.resolved);
       setError(updated);
       setOccurrences((current) =>
-        current.map((item) => (item.id === updated.id ? updated : item)),
+        current.map((item) => (item.id === updated.id ? updated : item))
       );
       onResolvedChange();
     } catch (err) {
@@ -124,7 +124,7 @@ export function ErrorDetailSheet({
     errorId,
     group,
     filters,
-    onResolvedChange,
+    onResolvedChange
   );
 
   return (

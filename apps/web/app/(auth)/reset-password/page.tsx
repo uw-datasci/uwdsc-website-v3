@@ -31,8 +31,8 @@ export default function ResetPasswordPage() {
               </h2>
               <div className="flex flex-col gap-8 leading-loose text-xl text-center md:text-start">
                 <p>
-                  Choose a new password for your account. It needs to be at
-                  least 8 characters long.
+                  Choose a new password for your account. It needs to be at least 8 characters
+                  long.
                 </p>
               </div>
             </div>

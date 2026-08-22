@@ -1,71 +1,49 @@
-import { ApiResponse, isApplicationWindowOpen } from "@uwdsc/common/utils";
+import { RaftResponse } from "@uw-datasci/raft";
+import { withRaftRoute } from "@uwdsc/core/http";
+import { isDateWindowOpen } from "@uwdsc/common/utils";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 import { applicationService } from "@uwdsc/core";
 import { createResumeService } from "@/lib/services";
-import { NextRequest } from "next/server";
 
-export async function GET(): Promise<Response> {
-  try {
-    const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (!user) return isUnauthorized;
+export const GET = withRaftRoute(async () => {
+  const { user, isUnauthorized } = await tryGetCurrentUser();
+  if (!user) return isUnauthorized;
 
-    const term = await applicationService.getActiveTerm();
-    if (!term) return ApiResponse.notFound("No active application period");
-    if (!isApplicationWindowOpen(term)) {
-      return ApiResponse.forbidden(
-        "The application period is closed.",
-        "The application period is closed.",
-      );
-    }
-
-    const resumeService = await createResumeService();
-    const url = await resumeService.getResumeUrl(user.id);
-
-    return ApiResponse.ok({
-      hasResume: Boolean(url),
-      url,
-    });
-  } catch (error) {
-    console.error("Error fetching resume status:", error);
-    return ApiResponse.serverError(error, "Failed to fetch resume status");
+  const term = await applicationService.getActiveTerm();
+  if (!term) return RaftResponse.notFound("No active application period");
+  if (!isDateWindowOpen(term.application_release_date, term.application_hard_deadline)) {
+    return RaftResponse.forbidden("The application period is closed.");
   }
-}
 
-export async function POST(request: NextRequest): Promise<Response> {
-  try {
-    const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (!user) return isUnauthorized;
+  const resumeService = await createResumeService();
+  const url = await resumeService.getResumeUrl(user.id);
 
-    const term = await applicationService.getActiveTerm();
-    if (!term) return ApiResponse.notFound("No active application period");
-    if (!isApplicationWindowOpen(term)) {
-      return ApiResponse.forbidden(
-        "The application period is closed.",
-        "The application period is closed.",
-      );
-    }
+  return RaftResponse.ok({ hasResume: Boolean(url), url });
+});
 
-    const formData = await request.formData();
-    const file = formData.get("file") as File | null;
+export const POST = withRaftRoute(async (request) => {
+  const { user, isUnauthorized } = await tryGetCurrentUser();
+  if (!user) return isUnauthorized;
 
-    if (!file || !(file instanceof File)) {
-      return ApiResponse.badRequest("No file provided");
-    }
-
-    const resumeService = await createResumeService();
-    const result = await resumeService.uploadResume({ file, userId: user.id });
-
-    if (!result.success) {
-      return ApiResponse.badRequest(result.error, "Upload failed");
-    }
-
-    return ApiResponse.ok({
-      message: "Upload successful",
-      key: result.key,
-      url: result.key,
-    });
-  } catch (error) {
-    console.error("Error uploading resume:", error);
-    return ApiResponse.serverError(error, "Failed to upload resume");
+  const term = await applicationService.getActiveTerm();
+  if (!term) return RaftResponse.notFound("No active application period");
+  if (!isDateWindowOpen(term.application_release_date, term.application_hard_deadline)) {
+    return RaftResponse.forbidden("The application period is closed.");
   }
-}
+
+  const formData = await request.formData();
+  const file = formData.get("file") as File | null;
+
+  if (!file || !(file instanceof File)) return RaftResponse.badRequest("No file provided");
+
+  const resumeService = await createResumeService();
+  const result = await resumeService.uploadResume({ file, userId: user.id });
+
+  if (!result.success) return RaftResponse.badRequest(result.error, "Upload failed");
+
+  return RaftResponse.ok({
+    message: "Upload successful",
+    key: result.key,
+    url: result.key,
+  });
+});

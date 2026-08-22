@@ -7,8 +7,7 @@ export type TimeRef = { asOf?: Date };
  * - after_start: start_time is after reference time (optionally limited)
  */
 export type EventTimeFilter =
-  | (TimeRef & { kind: "in_window" })
-  | (TimeRef & { kind: "after_start"; limit?: number });
+  (TimeRef & { kind: "in_window" }) | (TimeRef & { kind: "after_start"; limit?: number });
 
 /** Options for getEventsByTimeRange (service layer); maps to EventTimeFilter. */
 export type GetEventsByTimeRangeOptions = {

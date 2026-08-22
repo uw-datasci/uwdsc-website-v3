@@ -54,7 +54,7 @@ export type HiringRowActionStatus = (typeof HIRING_ROW_ACTION_ORDER)[number];
 
 /** Which president row actions appear for a selection, based on its current review status. */
 export function getHiringStatusOptions(
-  status: ApplicationReviewStatus,
+  status: ApplicationReviewStatus
 ): HiringRowActionStatus[] {
   switch (status) {
     case "Wanted":

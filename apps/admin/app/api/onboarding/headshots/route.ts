@@ -1,39 +1,19 @@
-import { ApiResponse } from "@uwdsc/common/utils";
+import { RaftResponse } from "@uw-datasci/raft";
 import { createHeadshotService } from "@/lib/services";
 import { withAuth } from "@/guards/withAuth";
 
 export const POST = withAuth(async (request, _context, user) => {
-  try {
-    const formData = await request.formData();
-    const file = formData.get("file") as File | null;
-    const fullName = formData.get("fullName") as string | null;
+  const formData = await request.formData();
+  const file = formData.get("file") as File | null;
+  const fullName = formData.get("fullName") as string | null;
 
-    if (!file || !(file instanceof File)) {
-      return ApiResponse.badRequest("No file provided");
-    }
+  if (!file || !(file instanceof File)) return RaftResponse.badRequest("No file provided");
+  if (!fullName?.trim()) return RaftResponse.badRequest("fullName is required");
 
-    if (!fullName?.trim()) {
-      return ApiResponse.badRequest("fullName is required");
-    }
+  const headshotService = await createHeadshotService();
+  const result = await headshotService.uploadHeadshot({ file, userId: user.id, fullName });
 
-    const headshotService = await createHeadshotService();
-    const result = await headshotService.uploadHeadshot({
-      file,
-      userId: user.id,
-      fullName,
-    });
+  if (!result.success) return RaftResponse.badRequest(result.error, "Upload failed");
 
-    if (!result.success) {
-      return ApiResponse.badRequest(result.error, "Upload failed");
-    }
-
-    return ApiResponse.ok({
-      message: "Upload successful",
-      key: result.key,
-      url: result.key,
-    });
-  } catch (error) {
-    console.error("Error uploading headshot:", error);
-    return ApiResponse.serverError(error, "Failed to upload headshot");
-  }
+  return RaftResponse.ok({ message: "Upload successful", key: result.key, url: result.key });
 });

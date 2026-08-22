@@ -41,7 +41,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
       setAuthError(
         error instanceof Error
           ? error.message
-          : "An unexpected error occurred. Please try again",
+          : "An unexpected error occurred. Please try again"
       );
     } finally {
       setIsLoading(false);
@@ -89,9 +89,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             })}
           />
         </div>
-        {authError && (
-          <div className="text-red-400 text-base mt-3">{authError}</div>
-        )}
+        {authError && <div className="text-red-400 text-base mt-3">{authError}</div>}
         <div className="flex flex-col gap-1 items-start justify-between mt-6">
           <Button
             size="lg"

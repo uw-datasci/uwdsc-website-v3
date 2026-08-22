@@ -11,7 +11,7 @@ export function withAuth(request: NextRequest, response: NextResponse, user: Use
   if (user) {
     const target = safeRedirect(request.nextUrl.searchParams.get("redirect"));
     return NextResponse.redirect(
-      target.startsWith("/") ? new URL(target, request.url) : new URL(target),
+      target.startsWith("/") ? new URL(target, request.url) : new URL(target)
     );
   }
 

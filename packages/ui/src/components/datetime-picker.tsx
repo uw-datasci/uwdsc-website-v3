@@ -17,8 +17,7 @@ import {
 
 function parseValue(value: string | Date | null | undefined): Date | undefined {
   if (value == null || value === "") return undefined;
-  if (value instanceof Date)
-    return Number.isNaN(value.getTime()) ? undefined : value;
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? undefined : value;
   const parsed = new Date(value);
   return Number.isNaN(parsed.getTime()) ? undefined : parsed;
 }
@@ -49,7 +48,7 @@ export function DateTimePicker({
     (newDate: Date | undefined) => {
       onChange?.(newDate ? newDate.toISOString() : "");
     },
-    [onChange],
+    [onChange]
   );
 
   const handleDateSelect = (selectedDate: Date | undefined) => {
@@ -58,23 +57,16 @@ export function DateTimePicker({
     }
   };
 
-  const handleTimeChange = (
-    type: "hour" | "minute" | "ampm",
-    value: string,
-  ) => {
+  const handleTimeChange = (type: "hour" | "minute" | "ampm", value: string) => {
     const base = date ?? new Date();
     const newDate = new Date(base);
     if (type === "hour") {
-      newDate.setHours(
-        (Number.parseInt(value, 10) % 12) + (newDate.getHours() >= 12 ? 12 : 0),
-      );
+      newDate.setHours((Number.parseInt(value, 10) % 12) + (newDate.getHours() >= 12 ? 12 : 0));
     } else if (type === "minute") {
       newDate.setMinutes(Number.parseInt(value, 10));
     } else if (type === "ampm") {
       const currentHours = newDate.getHours();
-      newDate.setHours(
-        value === "PM" ? (currentHours % 12) + 12 : currentHours % 12,
-      );
+      newDate.setHours(value === "PM" ? (currentHours % 12) + 12 : currentHours % 12);
     }
     updateDate(newDate);
   };
@@ -88,15 +80,11 @@ export function DateTimePicker({
           className={cn(
             "w-full justify-start text-left font-normal rounded-md",
             !date && "text-muted-foreground",
-            className,
+            className
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? (
-            format(date, "MM/dd/yyyy hh:mm aa")
-          ) : (
-            <span>{placeholder}</span>
-          )}
+          {date ? format(date, "MM/dd/yyyy hh:mm aa") : <span>{placeholder}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
@@ -112,11 +100,7 @@ export function DateTimePicker({
                   <Button
                     key={hour}
                     size="icon"
-                    variant={
-                      date && date.getHours() % 12 === hour % 12
-                        ? "default"
-                        : "ghost"
-                    }
+                    variant={date && date.getHours() % 12 === hour % 12 ? "default" : "ghost"}
                     className="sm:w-full shrink-0 aspect-square"
                     onClick={() => handleTimeChange("hour", hour.toString())}
                   >
@@ -132,13 +116,9 @@ export function DateTimePicker({
                   <Button
                     key={minute}
                     size="icon"
-                    variant={
-                      date?.getMinutes() === minute ? "default" : "ghost"
-                    }
+                    variant={date?.getMinutes() === minute ? "default" : "ghost"}
                     className="sm:w-full shrink-0 aspect-square"
-                    onClick={() =>
-                      handleTimeChange("minute", minute.toString())
-                    }
+                    onClick={() => handleTimeChange("minute", minute.toString())}
                   >
                     {minute}
                   </Button>

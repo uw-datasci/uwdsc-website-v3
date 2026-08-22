@@ -25,7 +25,7 @@ export async function getAllApplications(): Promise<ApplicationsListResponse> {
 
 export async function updatePositionSelectionReviewStatus(
   selectionId: string,
-  status: ApplicationReviewStatus,
+  status: ApplicationReviewStatus
 ): Promise<void> {
   const response = await fetch(`/api/applications/review/${selectionId}`, {
     method: "PATCH",

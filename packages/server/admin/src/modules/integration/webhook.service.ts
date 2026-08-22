@@ -72,7 +72,7 @@ class WebhookService {
   async getReceivedEmailForRecipient(
     receivingEmailId: string,
     webhookTo: string[],
-    recipient: string,
+    recipient: string
   ): Promise<GetReceivedEmailContentsResult> {
     if (!this.verifyRecipient(webhookTo, recipient)) {
       return {

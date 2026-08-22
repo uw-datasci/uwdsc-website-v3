@@ -1,7 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Badge, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@uwdsc/ui";
+import {
+  Badge,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@uwdsc/ui";
 import { Search } from "lucide-react";
 import type { ReturningExecListItem } from "@uwdsc/common/types";
 
@@ -32,9 +40,7 @@ export function ReturningExecsHeader({
     return submissions.filter((sub) => {
       const matchesPosition =
         positionFilter === "all" ||
-        sub.position_selections.some(
-          (sel) => sel.position_name === positionFilter,
-        );
+        sub.position_selections.some((sel) => sel.position_name === positionFilter);
       const matchesName = !query || sub.full_name.toLowerCase().includes(query);
       return matchesPosition && matchesName;
     });
@@ -58,7 +64,8 @@ export function ReturningExecsHeader({
           {filtered.length} submission{filtered.length === 1 ? "" : "s"}
           {positionFilter !== "all" && (
             <span>
-              {" "}for <span className="font-medium">{positionFilter}</span>
+              {" "}
+              for <span className="font-medium">{positionFilter}</span>
             </span>
           )}
         </p>

@@ -82,7 +82,7 @@ export function FooterSocialLinks() {
               asChild
               className={cn(
                 "text-muted-foreground transition-colors hover:bg-transparent dark:hover:bg-transparent",
-                social.hoverClassName,
+                social.hoverClassName
               )}
             >
               <Link

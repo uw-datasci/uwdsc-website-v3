@@ -1,8 +1,7 @@
 export type ForwardSupportFailureReason = "missing_discord_webhook" | "forward_failed";
 
 export type ForwardSupportResult =
-  | { ok: true }
-  | { ok: false; reason: ForwardSupportFailureReason };
+  { ok: true } | { ok: false; reason: ForwardSupportFailureReason };
 
 export interface ForwardSupportToDiscordParams {
   subject: string;

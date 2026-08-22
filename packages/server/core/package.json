@@ -9,8 +9,9 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.94.0",
-    "@uwdsc/db": "workspace:*",
-    "@uwdsc/common": "workspace:*"
+    "@uw-datasci/raft": "^1.0.1",
+    "@uwdsc/common": "workspace:*",
+    "@uwdsc/db": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20",
@@ -20,6 +21,7 @@
     "typescript": "^5"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./http": "./src/http/index.ts"
   }
 }

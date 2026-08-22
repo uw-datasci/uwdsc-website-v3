@@ -71,7 +71,7 @@ export function createSupabaseMiddlewareClient<NextRequest = any, NextResponse =
     cookies: {
       set: (params: { name: string; value: string; [key: string]: any }) => void;
     };
-  },
+  }
 ) {
   return createServerClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
     cookieOptions: sharedCookieOptions,
@@ -104,7 +104,7 @@ export function createSupabaseServiceRoleClient() {
   if (!serviceRoleKey) {
     throw new Error(
       "SUPABASE_SECRET_KEY environment variable is not set. " +
-        "This is required for admin operations that bypass RLS.",
+        "This is required for admin operations that bypass RLS."
     );
   }
 

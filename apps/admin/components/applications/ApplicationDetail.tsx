@@ -42,7 +42,7 @@ interface ApplicationDetailProps {
   positionReview?: PositionReviewScopeDto | null;
   onPositionReviewStatusChange?: (
     selectionId: string,
-    status: ApplicationReviewStatus,
+    status: ApplicationReviewStatus
   ) => void | Promise<void>;
   positionReviewUpdatingId?: string | null;
 }
@@ -242,7 +242,7 @@ export function ApplicationDetail({
                       onValueChange={(value) => {
                         onPositionReviewStatusChange?.(
                           sel.id,
-                          value as ApplicationReviewStatus,
+                          value as ApplicationReviewStatus
                         );
                       }}
                       disabled={positionReviewUpdatingId === sel.id}
@@ -250,7 +250,7 @@ export function ApplicationDetail({
                       <SelectTrigger
                         className={cn(
                           "h-8 w-[11.5rem] shrink-0 text-xs font-medium",
-                          reviewStatusBadgeClassName(sel.status),
+                          reviewStatusBadgeClassName(sel.status)
                         )}
                       >
                         <SelectValue placeholder="Update review status" />
@@ -270,7 +270,7 @@ export function ApplicationDetail({
                       variant="outline"
                       className={cn(
                         "shrink-0 text-xs font-medium max-w-[11.5rem] truncate",
-                        reviewStatusBadgeClassName(sel.status),
+                        reviewStatusBadgeClassName(sel.status)
                       )}
                       title={sel.status}
                     >
@@ -311,7 +311,7 @@ export function ApplicationDetail({
               <AnswerSection
                 heading="General"
                 answers={application.answers.filter(
-                  (answer) => answer.position_names.length === 0,
+                  (answer) => answer.position_names.length === 0
                 )}
               />
               {sortPositionsByPriority(application.position_selections).map((selection) => (
@@ -319,7 +319,7 @@ export function ApplicationDetail({
                   key={selection.id}
                   heading={selection.position_name}
                   answers={application.answers.filter((answer) =>
-                    answer.position_names.includes(selection.position_name),
+                    answer.position_names.includes(selection.position_name)
                   )}
                   numbered
                 />

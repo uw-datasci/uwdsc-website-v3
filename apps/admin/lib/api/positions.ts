@@ -8,9 +8,7 @@ export async function getManagablePositions(): Promise<ManagablePosition[]> {
   return (data as { positions: ManagablePosition[] }).positions;
 }
 
-export async function openPosition(
-  positionId: number,
-): Promise<{ availableId: number }> {
+export async function openPosition(positionId: number): Promise<{ availableId: number }> {
   const response = await fetch("/api/applications/positions", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

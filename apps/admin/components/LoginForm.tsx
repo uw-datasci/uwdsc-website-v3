@@ -10,11 +10,7 @@ import { ALUM_ROLE, RETURNING_EXEC_PATH } from "@uwdsc/common/constants";
 import { safeRedirect } from "@uwdsc/common/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { signIn } from "@/lib/api/auth";
-import {
-  LoginFormValues,
-  loginSchema,
-  loginDefaultValues,
-} from "@/lib/schemas/login";
+import { LoginFormValues, loginSchema, loginDefaultValues } from "@/lib/schemas/login";
 
 export function LoginForm() {
   const router = useRouter();
@@ -36,7 +32,10 @@ export function LoginForm() {
     setLoginError(null);
 
     try {
-      const result = await signIn({ email: data.email, password: data.password });
+      const result = await signIn({
+        email: data.email,
+        password: data.password,
+      });
       await mutate();
       const role = result.user?.app_metadata?.role as string | undefined;
       const fallback = role === ALUM_ROLE ? RETURNING_EXEC_PATH : "/members";
@@ -44,19 +43,16 @@ export function LoginForm() {
       router.push(target);
       router.refresh();
     } catch (err) {
-      const raw =
-        err instanceof Error ? err.message : "Something went wrong. Try again.";
+      const raw = err instanceof Error ? err.message : "Something went wrong. Try again.";
       const needsVerification = Boolean(
         err &&
-          typeof err === "object" &&
-          "details" in err &&
-          (err as { details?: { needsVerification?: boolean } }).details
-            ?.needsVerification,
+        typeof err === "object" &&
+        "details" in err &&
+        (err as { details?: { needsVerification?: boolean } }).details?.needsVerification
       );
       const lower = raw.toLowerCase();
       const message =
-        lower.includes("invalid login credentials") ||
-        lower.includes("invalid credentials")
+        lower.includes("invalid login credentials") || lower.includes("invalid credentials")
           ? "Incorrect email or password. Check your details and try again."
           : raw;
       setLoginError({ message, needsVerification });
@@ -70,9 +66,7 @@ export function LoginForm() {
       <div className="w-full max-w-md space-y-8 rounded-lg border bg-card p-8 shadow-lg">
         <div className="space-y-2 text-center">
           <h1 className="text-3xl font-bold">Admin Login</h1>
-          <p className="text-muted-foreground">
-            Sign in to access the admin dashboard
-          </p>
+          <p className="text-muted-foreground">Sign in to access the admin dashboard</p>
         </div>
 
         <Form {...form}>
@@ -83,23 +77,18 @@ export function LoginForm() {
                 aria-live="polite"
                 className="flex gap-3 rounded-lg border border-destructive/80 bg-destructive/10 p-4 text-sm text-destructive"
               >
-                <AlertCircle
-                  className="mt-0.5 h-5 w-5 shrink-0"
-                  aria-hidden
-                />
+                <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />
                 <div className="min-w-0 space-y-1">
                   <p className="font-semibold leading-tight">
                     {loginError.needsVerification
                       ? "Email not verified"
                       : "Could not sign you in"}
                   </p>
-                  <p className="leading-snug text-destructive/95">
-                    {loginError.message}
-                  </p>
+                  <p className="leading-snug text-destructive/95">{loginError.message}</p>
                   {loginError.needsVerification && (
                     <p className="pt-1 text-xs leading-snug text-destructive/85">
-                      Open the verification link we sent to your inbox, then try
-                      signing in again.
+                      Open the verification link we sent to your inbox, then try signing in
+                      again.
                     </p>
                   )}
                 </div>

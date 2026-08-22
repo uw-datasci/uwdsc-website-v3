@@ -7,10 +7,7 @@ import { CLUB_STATS } from "@/constants/home";
 export default function ClubStats() {
   return (
     <SectionWrapper>
-      <SectionTitle
-        mb="mb-8 lg:mb-12"
-        className="text-xl md:text-2xl! text-nowrap"
-      >
+      <SectionTitle mb="mb-8 lg:mb-12" className="text-xl md:text-2xl! text-nowrap">
         Club Stats
       </SectionTitle>
       <div className="grid gap-14 md:grid-cols-3">

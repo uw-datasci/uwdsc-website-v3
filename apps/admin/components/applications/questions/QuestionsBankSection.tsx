@@ -33,9 +33,9 @@ export function QuestionsBankSection({
   onView,
   onRequestDelete,
 }: QuestionsBankSectionProps) {
-  const [presidentFiltersSelected, setPresidentFiltersSelected] = useState<
-    Set<string>
-  >(new Set(["all"]));
+  const [presidentFiltersSelected, setPresidentFiltersSelected] = useState<Set<string>>(
+    new Set(["all"])
+  );
 
   const ownQuestions = questions.filter((q) => q.can_edit);
   const otherQuestions = questions.filter((q) => !q.can_edit);
@@ -53,10 +53,7 @@ export function QuestionsBankSection({
   }, [positions]);
 
   const presidentFilteredQuestions = useMemo(() => {
-    if (
-      presidentFiltersSelected.size === 0 ||
-      presidentFiltersSelected.has("all")
-    ) {
+    if (presidentFiltersSelected.size === 0 || presidentFiltersSelected.has("all")) {
       return questions;
     }
 
@@ -65,7 +62,7 @@ export function QuestionsBankSection({
       Array.from(presidentFiltersSelected)
         .filter((key) => key.startsWith("position:"))
         .map((key) => Number(key.replace("position:", "")))
-        .filter((id) => !Number.isNaN(id)),
+        .filter((id) => !Number.isNaN(id))
     );
 
     return questions.filter((q) => {
@@ -101,8 +98,8 @@ export function QuestionsBankSection({
     <>
       {positions.length === 0 && (
         <p className="text-sm text-muted-foreground">
-          No application positions are linked to your scope. You cannot add
-          questions until positions are configured.
+          No application positions are linked to your scope. You cannot add questions until
+          positions are configured.
         </p>
       )}
 
@@ -121,8 +118,8 @@ export function QuestionsBankSection({
               </Button>
             </div>
             <CardDescription>
-              Each row is a question tied to an open role. Same question text
-              can exist per position; edits here affect future applications.
+              Each row is a question tied to an open role. Same question text can exist per
+              position; edits here affect future applications.
             </CardDescription>
             <div className="flex flex-wrap gap-2 pt-1">
               {presidentFilters.map((filter) => {
@@ -131,9 +128,7 @@ export function QuestionsBankSection({
                   <Toggle
                     key={filter.key}
                     pressed={isSelected}
-                    onPressedChange={(pressed) =>
-                      onPresidentFilterToggle(filter.key, pressed)
-                    }
+                    onPressedChange={(pressed) => onPresidentFilterToggle(filter.key, pressed)}
                     variant="outline"
                     size="sm"
                     className={
@@ -164,9 +159,7 @@ export function QuestionsBankSection({
           <Card>
             <CardHeader className="pb-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <CardTitle className="text-base">
-                  Your subteam questions
-                </CardTitle>
+                <CardTitle className="text-base">Your subteam questions</CardTitle>
                 <Button
                   type="button"
                   size="icon"
@@ -177,8 +170,7 @@ export function QuestionsBankSection({
                 </Button>
               </div>
               <CardDescription>
-                Questions assigned to your VP scope. You can create, edit, and
-                delete these.
+                Questions assigned to your VP scope. You can create, edit, and delete these.
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-0">
@@ -194,12 +186,9 @@ export function QuestionsBankSection({
 
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">
-                Other subteam questions
-              </CardTitle>
+              <CardTitle className="text-base">Other subteam questions</CardTitle>
               <CardDescription>
-                Visible for context only. Questions outside your VP scope are
-                read-only.
+                Visible for context only. Questions outside your VP scope are read-only.
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-0">

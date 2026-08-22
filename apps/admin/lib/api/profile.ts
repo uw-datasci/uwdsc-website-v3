@@ -5,17 +5,9 @@
  * Components should use these functions instead of making direct fetch calls.
  */
 
-import type {
-  EditMemberFormValues,
-  InviteMemberFormValues,
-} from "@/lib/schemas/membership";
+import type { EditMemberFormValues, InviteMemberFormValues } from "@/lib/schemas/membership";
 import { createApiError } from "./error";
-import {
-  Member,
-  MembershipStats,
-  MembershipStatus,
-  UserRole,
-} from "@uwdsc/common/types";
+import { Member, MembershipStats, MembershipStatus, UserRole } from "@uwdsc/common/types";
 
 /**
  * Get all user profiles
@@ -113,7 +105,7 @@ export async function markMemberAsPaid(
     payment_location: string;
     verifier: string;
     event_id?: string;
-  },
+  }
 ): Promise<{ checked_in: boolean; check_in_error?: string }> {
   const response = await fetch(`/api/members/${memberId}`, {
     method: "PATCH",
@@ -143,7 +135,7 @@ export async function markMemberAsPaid(
  */
 export async function updateMember(
   memberId: string,
-  memberData: EditMemberFormValues,
+  memberData: EditMemberFormValues
 ): Promise<void> {
   const response = await fetch(`/api/members/${memberId}`, {
     method: "PATCH",
@@ -171,7 +163,7 @@ export async function updateMember(
 export async function updateMemberRole(
   memberId: string,
   role: UserRole,
-  subteamId: number | null,
+  subteamId: number | null
 ): Promise<void> {
   const response = await fetch(`/api/members/${memberId}/role`, {
     method: "PATCH",

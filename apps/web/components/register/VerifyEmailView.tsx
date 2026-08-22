@@ -11,10 +11,7 @@ interface VerifyEmailViewProps {
   readonly loginHref?: string;
 }
 
-export function VerifyEmailView({
-  email,
-  loginHref = "/login",
-}: VerifyEmailViewProps) {
+export function VerifyEmailView({ email, loginHref = "/login" }: VerifyEmailViewProps) {
   const [resendStatus, setResendStatus] = useState("");
   const [isResending, setIsResending] = useState(false);
 
@@ -30,9 +27,7 @@ export function VerifyEmailView({
       setResendStatus("Verification email resent successfully.");
     } catch (error: unknown) {
       setResendStatus(
-        error instanceof Error
-          ? error.message
-          : "Failed to resend verification email.",
+        error instanceof Error ? error.message : "Failed to resend verification email."
       );
     } finally {
       setIsResending(false);
@@ -43,10 +38,7 @@ export function VerifyEmailView({
     <div className="w-full flex flex-col items-center justify-center text-center text-white">
       <div className="relative mb-8">
         <div className="absolute inset-0 bg-purple-500/20 blur-3xl rounded-full animate-pulse" />
-        <Mail
-          className="w-24 h-24 text-purple-500 animate-bounce"
-          strokeWidth={1.5}
-        />
+        <Mail className="w-24 h-24 text-purple-500 animate-bounce" strokeWidth={1.5} />
       </div>
       <h1 className="gradient-text bg-linear-to-b from-white to-[#ffffff20] text-7xl md:text-8xl font-medium pb-2">
         Verify Email
@@ -83,9 +75,7 @@ export function VerifyEmailView({
         {resendStatus && (
           <p
             className={`mt-2 text-sm ${
-              resendStatus.includes("successfully")
-                ? "text-green-400"
-                : "text-red-400"
+              resendStatus.includes("successfully") ? "text-green-400" : "text-red-400"
             }`}
           >
             {resendStatus}

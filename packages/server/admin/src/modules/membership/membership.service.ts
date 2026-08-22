@@ -35,7 +35,7 @@ class MembershipService {
    */
   async markMemberAsPaid(
     profileId: string,
-    data: MarkAsPaidData,
+    data: MarkAsPaidData
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const result = await this.repository.markAsPaid(profileId, data);
@@ -54,7 +54,7 @@ class MembershipService {
   async processEmailReceipt(
     email: GetReceivingEmailResponseSuccess,
     termStartDate: string | null,
-    forwarderFrom: string,
+    forwarderFrom: string
   ): Promise<void> {
     let recipientEmails: string[] = [];
 
@@ -87,9 +87,11 @@ class MembershipService {
       ) {
         if (recipientEmails.length > 0) {
           await emailService
-            .sendMembershipReceiptNotice(recipientEmails, { kind: "already_verified" })
+            .sendMembershipReceiptNotice(recipientEmails, {
+              kind: "already_verified",
+            })
             .catch((e) =>
-              console.error("[MembershipService] Already-verified notice email failed:", e),
+              console.error("[MembershipService] Already-verified notice email failed:", e)
             );
         }
         return;
@@ -121,7 +123,7 @@ class MembershipService {
       if (error instanceof ApiError) throw error;
       throw new ApiError(
         `Failed to process membership payment email: ${(error as Error).message}`,
-        500,
+        500
       );
     }
   }

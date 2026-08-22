@@ -40,7 +40,7 @@ import {
 } from "@/components/application/steps";
 import { STEP_NAMES } from "@/constants/application";
 import type { GeneralQuestion, PositionWithQuestions, Term } from "@uwdsc/common/types";
-import { formatTermCode, getNextTermCode } from "@uwdsc/common/utils";
+import { formatTermCode, getNextTermCode, isApplicationWindowOpen } from "@uwdsc/common/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { Loader2, MoveLeft, MoveRight, User } from "lucide-react";
 import { Button, Card, CardHeader, CardTitle, CardContent } from "@uwdsc/ui";
@@ -260,9 +260,7 @@ export default function ApplyPage() {
 
   const renderButton = () => {
     const isLastStep = currentStep === 4;
-    const isPastHardDeadline = Boolean(
-      currentTerm && new Date() > new Date(currentTerm.application_hard_deadline),
-    );
+    const isPastHardDeadline = !isApplicationWindowOpen(currentTerm);
     const isValid =
       isStepValid(form, currentStep, {
         positions,

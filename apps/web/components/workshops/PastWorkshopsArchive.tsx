@@ -11,33 +11,44 @@ import { formatEventDescription } from "@uwdsc/common/utils";
 import { formatDateTime, getTermLabel } from "@/lib/utils/events";
 
 interface PastWorkshopsArchiveProps {
-  /** Past workshops (end_time already elapsed), most recent first. May be empty -- e.g. the
-   *  club's first-ever workshop is still upcoming. */
   readonly events: Event[];
 }
 
-/** Infers a display kind from a resource URL. Must not throw -- old rows predate zod validation. */
-function getResourceKind(url: string): { Icon: LucideIcon; host: string } {
+interface ResourceKind {
+  Icon: LucideIcon;
+  host: string;
+  href: string | null;
+}
+
+function isHost(host: string, domain: string): boolean {
+  return host === domain || host.endsWith(`.${domain}`);
+}
+
+function getResourceKind(url: string): ResourceKind {
   try {
     const parsed = new URL(url);
-    const host = parsed.hostname.replace(/^www\./, "");
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+      return { Icon: ExternalLink, host: "", href: null };
+    }
+
+    const host = parsed.hostname.toLowerCase().replace(/^www\./, "");
+    const link = { host, href: parsed.href };
 
     if (
-      host.endsWith("notion.site") ||
-      host === "notion.so" ||
-      host.endsWith(".pdf") ||
-      parsed.pathname.endsWith(".pdf") ||
-      host.includes("docs.google.com") ||
-      host.includes("drive.google.com")
+      isHost(host, "notion.site") ||
+      isHost(host, "notion.so") ||
+      parsed.pathname.toLowerCase().endsWith(".pdf") ||
+      isHost(host, "docs.google.com") ||
+      isHost(host, "drive.google.com")
     ) {
-      return { Icon: FileText, host };
+      return { Icon: FileText, ...link };
     }
-    if (host.includes("colab.research.google.com") || host.includes("github.com")) {
-      return { Icon: Code, host };
+    if (isHost(host, "colab.research.google.com") || isHost(host, "github.com")) {
+      return { Icon: Code, ...link };
     }
-    return { Icon: ExternalLink, host };
+    return { Icon: ExternalLink, ...link };
   } catch {
-    return { Icon: ExternalLink, host: "" };
+    return { Icon: ExternalLink, host: "", href: null };
   }
 }
 
@@ -222,7 +233,16 @@ function ResourceLink({
   delay,
 }: Readonly<{ resource: EventResource; delay: number }>) {
   const reduceMotion = useReducedMotion();
-  const { Icon, host } = getResourceKind(resource.url);
+  const { Icon, host, href } = getResourceKind(resource.url);
+
+  const row = "flex items-center gap-2 rounded-lg bg-grey3/20 px-4 py-3 text-white";
+  const body = (
+    <>
+      <Icon className="size-4 shrink-0" aria-hidden="true" />
+      <span className="flex-1 truncate">{resource.source}</span>
+      {host && <span className="shrink-0 text-xs text-grey2">{host}</span>}
+    </>
+  );
 
   return (
     <motion.li
@@ -230,16 +250,20 @@ function ResourceLink({
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.2, delay: reduceMotion ? 0 : delay }}
     >
-      <a
-        href={resource.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center gap-2 rounded-lg bg-grey3/20 px-4 py-3 text-white transition-colors duration-200 hover:bg-grey3/30 hover:text-nav-hover-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <Icon className="size-4 shrink-0" aria-hidden="true" />
-        <span className="flex-1 truncate">{resource.source}</span>
-        {host && <span className="shrink-0 text-xs text-grey2">{host}</span>}
-      </a>
+      {href ? (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`${row} transition-colors duration-200 hover:bg-grey3/30 hover:text-nav-hover-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
+        >
+          {body}
+        </a>
+      ) : (
+        <div className={`${row} opacity-60`} title="This link is unavailable">
+          {body}
+        </div>
+      )}
     </motion.li>
   );
 }

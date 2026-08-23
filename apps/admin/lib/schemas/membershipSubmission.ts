@@ -9,6 +9,8 @@ export const reviewSubmissionSchema = z
   .object({
     decision: z.enum(["approved", "rejected"]),
     reason: z.string().trim().optional(),
+    // Optional: when approving during an active event, also check the member in.
+    event_id: z.string().uuid().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.decision === "rejected" && !data.reason) {

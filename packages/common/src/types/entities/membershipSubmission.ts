@@ -95,4 +95,11 @@ export interface ReviewSubmissionData {
   decision: ReviewDecision;
   /** Required and non-empty when `decision` is `"rejected"`. */
   reason?: string;
+  /** When approving during an active event, also check the member into it. */
+  event_id?: string;
+}
+
+export interface ReviewSubmissionResult {
+  checked_in: boolean;
+  check_in_error?: string;
 }

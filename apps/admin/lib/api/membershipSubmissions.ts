@@ -6,6 +6,7 @@
 
 import type {
   ReviewSubmissionData,
+  ReviewSubmissionResult,
   SubmissionReviewItem,
   SubmissionStatus,
 } from "@uwdsc/common/types";
@@ -36,13 +37,15 @@ export async function getMembershipSubmissions(options?: {
 export async function reviewMembershipSubmission(
   submissionId: string,
   payload: ReviewSubmissionData
-): Promise<void> {
+): Promise<ReviewSubmissionResult> {
   const response = await fetch(`/api/membership/submissions/${submissionId}/review`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
-  const data = await parseJsonResponse(response);
+  const data = await parseJsonResponse<ReviewSubmissionResult>(response);
 
   if (!response.ok) throw createApiError(data, response.status);
+
+  return data;
 }

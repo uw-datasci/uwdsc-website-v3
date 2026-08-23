@@ -23,12 +23,13 @@ import {
 } from "@uwdsc/ui";
 import { reviewMembershipSubmission } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
-import type { SubmissionReviewItem, SubmissionStatus } from "@uwdsc/common/types";
+import type { Event, SubmissionReviewItem, SubmissionStatus } from "@uwdsc/common/types";
 import { RejectSubmissionModal } from "./RejectSubmissionModal";
 import { SubmissionReviewDrawer } from "./SubmissionReviewDrawer";
 
 interface SubmissionsTableProps {
   readonly submissions: SubmissionReviewItem[];
+  readonly activeEvent?: Event | null;
   readonly onRefresh: () => void;
 }
 
@@ -54,7 +55,11 @@ function formatDate(value: string): string {
   });
 }
 
-export function SubmissionsTable({ submissions, onRefresh }: SubmissionsTableProps) {
+export function SubmissionsTable({
+  submissions,
+  activeEvent,
+  onRefresh,
+}: SubmissionsTableProps) {
   const { user } = useAuth();
   const [statusFilter, setStatusFilter] = useState<string>("pending");
   const [search, setSearch] = useState("");
@@ -62,6 +67,8 @@ export function SubmissionsTable({ submissions, onRefresh }: SubmissionsTablePro
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Defaults on when an event is running, matching MarkAsPaidModal.
+  const [checkIn, setCheckIn] = useState(true);
 
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -87,9 +94,24 @@ export function SubmissionsTable({ submissions, onRefresh }: SubmissionsTablePro
   const handleApprove = async () => {
     if (!selected) return;
     setIsSubmitting(true);
+    // Only check in when there's an active event and the exec left it enabled.
+    const eventToCheckInto = checkIn ? activeEvent : null;
     try {
-      await reviewMembershipSubmission(selected.id, { decision: "approved" });
-      toast.success("Submission approved");
+      const { checked_in, check_in_error } = await reviewMembershipSubmission(selected.id, {
+        decision: "approved",
+        event_id: eventToCheckInto?.id,
+      });
+
+      if (eventToCheckInto && checked_in) {
+        toast.success(`Membership verified and checked in to ${eventToCheckInto.name}`);
+      } else if (eventToCheckInto) {
+        // Approval succeeded but the check-in didn't — make both clear.
+        toast.success("Membership verified");
+        toast.warning(check_in_error ?? "Couldn't check the member in");
+      } else {
+        toast.success("Membership verified");
+      }
+
       setDrawerOpen(false);
       onRefresh();
     } catch (error) {
@@ -213,6 +235,9 @@ export function SubmissionsTable({ submissions, onRefresh }: SubmissionsTablePro
         onReject={() => setRejectOpen(true)}
         isSelf={isSelf}
         isSubmitting={isSubmitting}
+        activeEvent={activeEvent}
+        checkIn={checkIn}
+        onCheckInChange={setCheckIn}
       />
 
       <RejectSubmissionModal

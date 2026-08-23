@@ -33,11 +33,16 @@ class SubmissionReviewService {
     );
   }
 
+  /**
+   * Record an approve/reject decision. Returns the submission's `profile_id` so
+   * the caller can act on the member (e.g. check them into an active event)
+   * without a second lookup.
+   */
   async review(
     submissionId: string,
     reviewerId: string,
     data: ReviewSubmissionData
-  ): Promise<void> {
+  ): Promise<string> {
     const submission = await this.repository.getSubmissionForReview(submissionId);
     if (!submission) throw new ApiError("Submission not found", 404);
 
@@ -51,10 +56,11 @@ class SubmissionReviewService {
       const reason = data.reason?.trim();
       if (!reason) throw new ApiError("A reason is required to reject a submission.", 400);
       await this.repository.reject(submissionId, reviewerId, reason);
-      return;
+      return submission.profile_id;
     }
 
     await this.repository.approve(submissionId, reviewerId);
+    return submission.profile_id;
   }
 }
 

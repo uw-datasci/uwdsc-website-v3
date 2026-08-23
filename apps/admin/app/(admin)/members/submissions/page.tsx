@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { SubmissionsTable } from "@/components/memberships/submissions";
-import { getMembershipSubmissions } from "@/lib/api";
-import type { SubmissionReviewItem } from "@uwdsc/common/types";
+import { getActiveEvent, getMembershipSubmissions } from "@/lib/api";
+import type { Event, SubmissionReviewItem } from "@uwdsc/common/types";
 import { Spinner } from "@uwdsc/ui";
 
 export default function MembershipSubmissionsPage() {
   const [submissions, setSubmissions] = useState<SubmissionReviewItem[]>([]);
+  const [activeEvent, setActiveEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,7 +18,13 @@ export default function MembershipSubmissionsPage() {
       setError(null);
       // Fetch every status: the table filters client-side so switching the
       // status filter doesn't re-mint every signed proof URL.
-      setSubmissions(await getMembershipSubmissions());
+      const [submissionsData, activeEventData] = await Promise.all([
+        getMembershipSubmissions(),
+        getActiveEvent(),
+      ]);
+
+      setSubmissions(submissionsData);
+      setActiveEvent(activeEventData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load submissions");
     } finally {
@@ -48,7 +55,11 @@ export default function MembershipSubmissionsPage() {
       {!loading && error ? <p className="text-sm text-destructive">{error}</p> : null}
 
       {!loading && !error ? (
-        <SubmissionsTable submissions={submissions} onRefresh={fetchData} />
+        <SubmissionsTable
+          submissions={submissions}
+          activeEvent={activeEvent}
+          onRefresh={fetchData}
+        />
       ) : null}
     </div>
   );

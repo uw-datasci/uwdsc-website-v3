@@ -1,16 +1,17 @@
 "use client";
 
-import { Check, ExternalLink, FileText, Loader2, X } from "lucide-react";
+import { CalendarCheck, Check, ExternalLink, FileText, Loader2, X } from "lucide-react";
 import {
   Badge,
   Button,
+  Checkbox,
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
 } from "@uwdsc/ui";
-import type { SubmissionReviewItem } from "@uwdsc/common/types";
+import type { Event, SubmissionReviewItem } from "@uwdsc/common/types";
 
 interface SubmissionReviewDrawerProps {
   readonly submission: SubmissionReviewItem | null;
@@ -20,6 +21,10 @@ interface SubmissionReviewDrawerProps {
   readonly onReject: () => void;
   readonly isSelf: boolean;
   readonly isSubmitting: boolean;
+  /** Active event, if one is running — enables the check-in option on approval. */
+  readonly activeEvent?: Event | null;
+  readonly checkIn: boolean;
+  readonly onCheckInChange: (checked: boolean) => void;
 }
 
 function formatDate(value: string | null): string {
@@ -59,6 +64,9 @@ export function SubmissionReviewDrawer({
   onReject,
   isSelf,
   isSubmitting,
+  activeEvent,
+  checkIn,
+  onCheckInChange,
 }: SubmissionReviewDrawerProps) {
   if (!submission) return null;
 
@@ -196,6 +204,32 @@ export function SubmissionReviewDrawer({
                 ))}
               </ul>
             </div>
+          ) : null}
+
+          {/* Only an approval grants membership, so check-in rides along with it. */}
+          {!isSelf && activeEvent && isPending ? (
+            <label
+              htmlFor="submission-checkin"
+              className="flex w-full cursor-pointer items-start gap-3 rounded-lg border border-primary/40 bg-primary/5 p-3 transition-colors hover:bg-primary/10"
+            >
+              <Checkbox
+                id="submission-checkin"
+                checked={checkIn}
+                onCheckedChange={(value) => onCheckInChange(value === true)}
+                className="mt-0.5"
+              />
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-1.5 text-sm font-medium">
+                  <CalendarCheck className="h-4 w-4 text-primary" />
+                  Check in to active event
+                </div>
+                <p className="text-sm text-muted-foreground">{activeEvent.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  Applies when you approve. Leave unchecked if the member isn&apos;t at the
+                  event.
+                </p>
+              </div>
+            </label>
           ) : null}
 
           {isSelf ? (

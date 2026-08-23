@@ -10,5 +10,6 @@ export * from "./modules/hiring/hiring.service";
 export * from "./modules/hiring/onboarding.service";
 export * from "./modules/membership/profile.service";
 export * from "./modules/membership/membership.service";
+export * from "./modules/membership/submission.service";
 export * from "./modules/integration/webhook.service";
 export * from "./modules/raft/raft.service";

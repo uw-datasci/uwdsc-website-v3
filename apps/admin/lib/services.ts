@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { cookies } from "next/headers";
 import { createSupabaseServerClient } from "@uwdsc/db";
-import { AuthService, ResumeService } from "@uwdsc/core";
+import { AuthService, MembershipProofService, ResumeService } from "@uwdsc/core";
 import { HeadshotService } from "@uwdsc/admin";
 
 /**
@@ -43,4 +43,13 @@ export async function createResumeService() {
 export async function createHeadshotService() {
   const supabase = await createSupabaseClient();
   return new HeadshotService(supabase);
+}
+
+/**
+ * Create MembershipProofService with server-side Supabase client
+ * Uses the private "membership-proofs" bucket.
+ */
+export async function createMembershipProofService() {
+  const supabase = await createSupabaseClient();
+  return new MembershipProofService(supabase);
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { User, LogOut, LogIn } from "lucide-react";
+import { User, LogOut, LogIn, Receipt } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { signOut } from "@/lib/api";
@@ -97,6 +97,17 @@ export function UserAvatar() {
                 >
                   <User className="h-4 w-4 shrink-0" />
                   <span className="text-sm font-medium leading-normal">My Passport</span>
+                </Link>
+              </NavigationMenuLink>
+            </li>
+            <li>
+              <NavigationMenuLink asChild>
+                <Link
+                  href="/membership"
+                  className="flex flex-row items-center gap-3 rounded-md p-3 no-underline outline-none transition-colors hover:bg-muted/75 focus:bg-muted/75"
+                >
+                  <Receipt className="h-4 w-4 shrink-0" />
+                  <span className="text-sm font-medium leading-normal">Membership</span>
                 </Link>
               </NavigationMenuLink>
             </li>

@@ -269,6 +269,15 @@ export function MobileMenu({ navLinks, user, onOpenWrapped }: Readonly<MobileMen
                         <Link href="/passport">My Passport</Link>
                       </Button>
                     </SheetClose>
+                    <SheetClose asChild>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-base py-2 px-4 h-auto font-medium hover:bg-accent/50 transition-colors rounded-lg"
+                        asChild
+                      >
+                        <Link href="/membership">Membership</Link>
+                      </Button>
+                    </SheetClose>
                     <Separator className="my-1" />
                     <Button
                       variant="ghost"

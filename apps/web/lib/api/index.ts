@@ -15,3 +15,6 @@ export * from "./resume";
 
 // Export events (public calendar)
 export * from "./events";
+
+// Export membership proof-of-payment submission
+export * from "./membership";

@@ -50,7 +50,7 @@ export class FileRepository {
       .from(this.bucketName)
       .upload(options.objectKey, buffer, {
         contentType: options.contentType,
-        upsert: true,
+        upsert: options.upsert ?? true,
       });
 
     if (error) {

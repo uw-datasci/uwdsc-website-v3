@@ -9,7 +9,7 @@ export class MembershipRepository extends BaseRepository {
     try {
       const result = await this.sql<MembershipRow[]>`
         SELECT id, profile_id
-        FROM public.memberships
+        FROM membership.memberships
         WHERE profile_id = ${profileId}
           AND term_id = (SELECT id FROM public.terms WHERE is_active = true LIMIT 1)
         LIMIT 1

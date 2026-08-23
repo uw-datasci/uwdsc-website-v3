@@ -9,6 +9,7 @@ import {
   Package,
   Library,
   Mail,
+  ReceiptText,
   Settings,
   UserCheck,
   Users,
@@ -54,7 +55,16 @@ export const getAdminNavigation = (
   ];
 
   return [
-    { name: "Members", href: "/members", icon: Users },
+    {
+      name: "Members",
+      href: "/members",
+      icon: Users,
+      subItems: [
+        { name: "All members", href: "/members", icon: Users },
+        // Open to every exec: the online review queue is not admin-only.
+        { name: "Submissions", href: "/members/submissions", icon: ReceiptText },
+      ],
+    },
     {
       name: "Applications",
       href: "/applications",

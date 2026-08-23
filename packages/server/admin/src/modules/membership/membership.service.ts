@@ -11,12 +11,15 @@ import {
 } from "../../utils/membershipReceipt";
 import { emailService } from "../email/email.service";
 import { profileService } from "./profile.service";
+import { EmailReceiptRepository } from "./emailReceipt.repository";
 
 class MembershipService {
   private readonly repository: MembershipRepository;
+  private readonly receiptRepository: EmailReceiptRepository;
 
   constructor() {
     this.repository = new MembershipRepository();
+    this.receiptRepository = new EmailReceiptRepository();
   }
 
   /**
@@ -50,6 +53,11 @@ class MembershipService {
 
   /**
    * Process a membership payment email.
+   *
+   * The forwarded email is archived before anything else, so a receipt is never
+   * lost to a parse failure or an unrecognised sender. A clean receipt lands in
+   * the same review queue the web form writes to, already approved; anything
+   * else lands there as `pending` for an exec to judge.
    */
   async processEmailReceipt(
     email: GetReceivingEmailResponseSuccess,
@@ -57,6 +65,25 @@ class MembershipService {
     forwarderFrom: string
   ): Promise<void> {
     let recipientEmails: string[] = [];
+
+    // Archive first. Resend delivers at-least-once, so a replay is a no-op.
+    await this.receiptRepository
+      .recordReceipt({
+        resendEmailId: email.id,
+        fromAddress: forwarderFrom,
+        toAddress: email.to?.[0] ?? null,
+        subject: email.subject ?? null,
+        receivedAt: email.created_at ?? null,
+        textBody: email.text,
+        htmlBody: email.html,
+        rawPayload: email,
+      })
+      .catch((e) => {
+        // Archiving is not worth failing the webhook over -- verification still
+        // has to run.
+        console.error("[MembershipService] Failed to archive inbound email:", e);
+        return null;
+      });
 
     try {
       const body = email.text;
@@ -85,6 +112,8 @@ class MembershipService {
         existing.term_id === targetTermId &&
         existing.payment_method === "online"
       ) {
+        await this.linkReceipt(email.id, profile.id, targetTermId, profile, "approved");
+
         if (recipientEmails.length > 0) {
           await emailService
             .sendMembershipReceiptNotice(recipientEmails, {
@@ -108,12 +137,22 @@ class MembershipService {
         throw new ApiError(markResult.error ?? "Failed to mark member as paid", 400);
       }
 
+      // Approving here also settles any pending web-form submission for the same
+      // term: the member paid and forwarded proof, so there is nothing left to review.
+      await this.linkReceipt(email.id, profile.id, targetTermId, profile, "approved");
+
       if (recipientEmails.length > 0) {
         await emailService
           .sendMembershipReceiptNotice(recipientEmails, { kind: "welcome" })
           .catch((e) => console.error("[MembershipService] Success notice email failed:", e));
       }
     } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+
+      // Best-effort: if the sender maps to a real account, leave a pending
+      // submission an exec can act on rather than dropping the receipt.
+      await this.quarantineFailedReceipt(email.id, forwarderFrom, message);
+
       if (recipientEmails.length > 0) {
         await emailService
           .sendMembershipReceiptNotice(recipientEmails, { kind: "failure" })
@@ -121,10 +160,103 @@ class MembershipService {
       }
 
       if (error instanceof ApiError) throw error;
-      throw new ApiError(
-        `Failed to process membership payment email: ${(error as Error).message}`,
-        500
+      throw new ApiError(`Failed to process membership payment email: ${message}`, 500);
+    }
+  }
+
+  /** Attach an archived receipt to a submission in the review queue. */
+  private async linkReceipt(
+    resendEmailId: string,
+    profileId: string,
+    termId: string,
+    profile: {
+      first_name: string | null;
+      last_name: string | null;
+      wat_iam: string | null;
+      email: string;
+    },
+    status: "approved" | "pending"
+  ): Promise<void> {
+    try {
+      const submissionId = await this.receiptRepository.upsertEmailSubmission({
+        profileId,
+        termId,
+        firstName: profile.first_name ?? "",
+        lastName: profile.last_name ?? "",
+        watIam: profile.wat_iam ?? "",
+        contactEmail: profile.email,
+        status,
+      });
+
+      await this.receiptRepository.finalizeReceipt(
+        resendEmailId,
+        status === "approved" ? "parsed" : "failed",
+        null,
+        profileId,
+        submissionId
       );
+    } catch (e) {
+      console.error("[MembershipService] Failed to link email receipt to submission:", e);
+    }
+  }
+
+  /**
+   * A receipt we could not verify. If the forwarder maps to an account, put a
+   * pending submission in the queue; otherwise the archived receipt stands alone.
+   */
+  private async quarantineFailedReceipt(
+    resendEmailId: string,
+    forwarderFrom: string,
+    parseError: string
+  ): Promise<void> {
+    try {
+      const forwarderEmail = parseUwaterlooEmailAddress(forwarderFrom);
+      const profile = forwarderEmail
+        ? await profileService.getProfileByEmail(forwarderEmail)
+        : null;
+
+      if (!profile) {
+        await this.receiptRepository.finalizeReceipt(
+          resendEmailId,
+          "failed",
+          parseError,
+          null,
+          null
+        );
+        return;
+      }
+
+      const termId = await this.repository.resolveTargetTermIdForProfile(profile.id);
+      if (!termId) {
+        await this.receiptRepository.finalizeReceipt(
+          resendEmailId,
+          "failed",
+          parseError,
+          profile.id,
+          null
+        );
+        return;
+      }
+
+      const submissionId = await this.receiptRepository.upsertEmailSubmission({
+        profileId: profile.id,
+        termId,
+        firstName: profile.first_name ?? "",
+        lastName: profile.last_name ?? "",
+        watIam: profile.wat_iam ?? "",
+        contactEmail: profile.email,
+        status: "pending",
+      });
+
+      await this.receiptRepository.finalizeReceipt(
+        resendEmailId,
+        "failed",
+        parseError,
+        profile.id,
+        submissionId
+      );
+    } catch (e) {
+      console.error("[MembershipService] Failed to quarantine email receipt:", e);
     }
   }
 }

@@ -57,8 +57,15 @@ export class FileService {
 
   /**
    * Validate and upload a file to the given object key within the bucket.
+   *
+   * `options.upsert` defaults to `true`; pass `false` for generated keys where
+   * an existing object at the same key would be a bug rather than a replacement.
    */
-  async upload(data: FileUploadData, objectKey: string): Promise<UploadResult | UploadError> {
+  async upload(
+    data: FileUploadData,
+    objectKey: string,
+    options?: { upsert?: boolean }
+  ): Promise<UploadResult | UploadError> {
     const validationError = this.validateFile(data.file);
     if (validationError) return validationError;
 
@@ -68,6 +75,7 @@ export class FileService {
         userId: data.userId,
         objectKey,
         contentType: data.file.type,
+        upsert: options?.upsert,
       });
 
       return { success: true, key };

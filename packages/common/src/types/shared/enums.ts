@@ -25,3 +25,9 @@ export type ApplicationReviewStatus =
 export type MembershipFilter = "all" | "paid" | "paid-mathsoc";
 
 export type TermType = "study" | "coop";
+
+export type SubmissionStatus = "pending" | "approved" | "rejected";
+
+export type SubmissionSource = "web_form" | "email";
+
+export type ReviewDecision = "approved" | "rejected";

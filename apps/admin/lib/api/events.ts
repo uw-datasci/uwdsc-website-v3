@@ -5,10 +5,7 @@
  * Components should use these functions instead of making direct fetch calls.
  */
 
-import type {
-  CreateEventFormValues,
-  UpdateEventFormValues,
-} from "@/lib/schemas/event";
+import type { CreateEventFormValues, UpdateEventFormValues } from "@/lib/schemas/event";
 import { createApiError } from "./error";
 import { Event, EventWithAttendanceCount } from "@uwdsc/common/types";
 
@@ -19,9 +16,7 @@ import { Event, EventWithAttendanceCount } from "@uwdsc/common/types";
  * @returns Promise with array of all events
  * @throws Error if request fails or unauthorized
  */
-export async function getAllEvents(options?: {
-  activeOnly?: boolean;
-}): Promise<Event[]> {
+export async function getAllEvents(options?: { activeOnly?: boolean }): Promise<Event[]> {
   const url = options?.activeOnly ? "/api/events?active=true" : "/api/events";
   const response = await fetch(url);
 
@@ -38,9 +33,7 @@ export async function getAllEvents(options?: {
  * @returns Promise with array of all events including attendance_count
  * @throws Error if request fails or unauthorized
  */
-export async function getAllEventsWithAttendance(): Promise<
-  EventWithAttendanceCount[]
-> {
+export async function getAllEventsWithAttendance(): Promise<EventWithAttendanceCount[]> {
   const response = await fetch("/api/events?withAttendance=true");
 
   const data = await response.json();
@@ -86,9 +79,7 @@ export async function getEventById(eventId: string): Promise<Event> {
  * @returns Promise with the created event
  * @throws Error if request fails or unauthorized
  */
-export async function createEvent(
-  eventData: CreateEventFormValues,
-): Promise<Event> {
+export async function createEvent(eventData: CreateEventFormValues): Promise<Event> {
   const response = await fetch("/api/events", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -112,7 +103,7 @@ export async function createEvent(
  */
 export async function updateEvent(
   eventId: string,
-  eventData: UpdateEventFormValues,
+  eventData: UpdateEventFormValues
 ): Promise<void> {
   const response = await fetch(`/api/events/${eventId}`, {
     method: "PATCH",
@@ -156,4 +147,32 @@ export async function getFeedSubscriberCount(): Promise<number> {
   if (!response.ok) throw createApiError(data, response.status);
 
   return data.count as number;
+}
+
+export interface LinkCheckResult {
+  status: "ok" | "unknown" | "unreachable";
+  detail: string;
+}
+
+/**
+ * Advisory-only reachability probe for a workshop resource link. Never throws on a bad/
+ * unreachable URL -- that's a normal `"unreachable"`/`"unknown"` result, not an API error.
+ * Only throws if the request itself fails (auth, network).
+ *
+ * @param url - The URL to probe
+ * @returns Promise with the reachability hint
+ * @throws Error if the request fails or is unauthorized
+ */
+export async function checkResourceLink(url: string): Promise<LinkCheckResult> {
+  const response = await fetch("/api/events/link-check", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) throw createApiError(data, response.status);
+
+  return data;
 }

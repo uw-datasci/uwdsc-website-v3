@@ -15,9 +15,7 @@ import { createApiError } from "./error";
  * @returns Promise with the Resend message id
  * @throws Error if request fails or unauthorized
  */
-export async function sendCampaign(
-  data: SendCampaignFormValues,
-): Promise<{ id: string }> {
+export async function sendCampaign(data: SendCampaignFormValues): Promise<{ id: string }> {
   const response = await fetch("/api/emails/campaigns", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

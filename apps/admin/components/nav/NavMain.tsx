@@ -63,10 +63,7 @@ export function NavMain({ items }: NavMainProps) {
                   <SidebarMenuItem key={item.name}>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <SidebarMenuButton
-                          tooltip={item.name}
-                          isActive={!!isActive}
-                        >
+                        <SidebarMenuButton tooltip={item.name} isActive={!!isActive}>
                           <item.icon />
                           <span>{item.name}</span>
                           <ChevronRight className="ml-auto transition-transform duration-200" />
@@ -119,15 +116,8 @@ export function NavMain({ items }: NavMainProps) {
                 >
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
-                      <SidebarMenuButton
-                        asChild
-                        tooltip={item.name}
-                        isActive={!!isActive}
-                      >
-                        <Link
-                          href={item.href || "#"}
-                          onClick={closeSidebarOnMobile}
-                        >
+                      <SidebarMenuButton asChild tooltip={item.name} isActive={!!isActive}>
+                        <Link href={item.href || "#"} onClick={closeSidebarOnMobile}>
                           <item.icon />
                           <span>{item.name}</span>
                         </Link>
@@ -142,14 +132,8 @@ export function NavMain({ items }: NavMainProps) {
                       <SidebarMenuSub>
                         {item.subItems.map((subItem) => (
                           <SidebarMenuSubItem key={subItem.name}>
-                            <SidebarMenuSubButton
-                              asChild
-                              isActive={pathname === subItem.href}
-                            >
-                              <Link
-                                href={subItem.href}
-                                onClick={closeSidebarOnMobile}
-                              >
+                            <SidebarMenuSubButton asChild isActive={pathname === subItem.href}>
+                              <Link href={subItem.href} onClick={closeSidebarOnMobile}>
                                 {subItem.icon && <subItem.icon />}
                                 <span>{subItem.name}</span>
                               </Link>
@@ -165,15 +149,8 @@ export function NavMain({ items }: NavMainProps) {
 
             return (
               <SidebarMenuItem key={item.name}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={!!isActive}
-                  tooltip={item.name}
-                >
-                  <Link
-                    href={item.href as string}
-                    onClick={closeSidebarOnMobile}
-                  >
+                <SidebarMenuButton asChild isActive={!!isActive} tooltip={item.name}>
+                  <Link href={item.href as string} onClick={closeSidebarOnMobile}>
                     <item.icon />
                     <span>{item.name}</span>
                   </Link>

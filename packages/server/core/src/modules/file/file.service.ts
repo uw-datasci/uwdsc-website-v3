@@ -14,7 +14,7 @@ export class FileService {
   constructor(
     supabaseClient: SupabaseClient,
     bucketName: string,
-    validationConfig: FileValidationConfig,
+    validationConfig: FileValidationConfig
   ) {
     this.repository = new FileRepository(supabaseClient, bucketName);
     this.validationConfig = validationConfig;
@@ -52,17 +52,19 @@ export class FileService {
    */
   protected resolveFileName(file: File): string {
     const extension = this.validationConfig.mimeToExtension?.(file.type);
-    return extension
-      ? `${file.name.replace(/\.[^.]+$/, "")}.${extension}`
-      : file.name;
+    return extension ? `${file.name.replace(/\.[^.]+$/, "")}.${extension}` : file.name;
   }
 
   /**
    * Validate and upload a file to the given object key within the bucket.
+   *
+   * `options.upsert` defaults to `true`; pass `false` for generated keys where
+   * an existing object at the same key would be a bug rather than a replacement.
    */
   async upload(
     data: FileUploadData,
     objectKey: string,
+    options?: { upsert?: boolean }
   ): Promise<UploadResult | UploadError> {
     const validationError = this.validateFile(data.file);
     if (validationError) return validationError;
@@ -73,6 +75,7 @@ export class FileService {
         userId: data.userId,
         objectKey,
         contentType: data.file.type,
+        upsert: options?.upsert,
       });
 
       return { success: true, key };

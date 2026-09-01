@@ -27,9 +27,7 @@ export async function getGitHubTeams(): Promise<GitHubTeam[]> {
  * @returns Promise with array of template repos
  * @throws Error if request fails or unauthorized
  */
-export async function getGitHubTemplateRepos(): Promise<
-  GitHubTemplateOption[]
-> {
+export async function getGitHubTemplateRepos(): Promise<GitHubTemplateOption[]> {
   const response = await fetch("/api/github/templates");
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);
@@ -43,7 +41,7 @@ export async function getGitHubTemplateRepos(): Promise<
  * @throws Error if dispatch fails or unauthorized
  */
 export async function launchFoundryProject(
-  payload: FoundryFormValues,
+  payload: FoundryFormValues
 ): Promise<{ success: boolean; message: string }> {
   const response = await fetch("/api/github/foundry/launch", {
     method: "POST",

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { cookies } from "next/headers";
 import { createSupabaseServerClient } from "@uwdsc/db";
-import { AuthService, ResumeService } from "@uwdsc/core";
+import { AuthService, MembershipProofService, ResumeService } from "@uwdsc/core";
 
 /**
  * Create a Supabase client with Next.js server-side cookies
@@ -33,4 +33,13 @@ export async function createAuthService() {
 export async function createResumeService() {
   const supabase = await createSupabaseClient();
   return new ResumeService(supabase);
+}
+
+/**
+ * Create MembershipProofService with server-side Supabase client
+ * Uses the private "membership-proofs" bucket.
+ */
+export async function createMembershipProofService() {
+  const supabase = await createSupabaseClient();
+  return new MembershipProofService(supabase);
 }

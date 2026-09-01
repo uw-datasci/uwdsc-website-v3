@@ -18,7 +18,7 @@ export class ApplicationRepository extends BaseRepository {
   private mapApplicationsWithDetails(
     applications: Application[],
     selections: (PositionSelectionWithName & { application_id: string })[],
-    answers: (AnswerWithQuestion & { application_id: string })[],
+    answers: (AnswerWithQuestion & { application_id: string })[]
   ): ApplicationListItem[] {
     const selectionsMap = new Map<string, PositionSelectionWithName[]>();
     for (const sel of selections) {
@@ -136,7 +136,7 @@ export class ApplicationRepository extends BaseRepository {
 
   async canAccessApplicationByPositionIds(
     applicationId: string,
-    positionIds: readonly number[],
+    positionIds: readonly number[]
   ): Promise<boolean> {
     if (positionIds.length === 0) return false;
 
@@ -172,7 +172,7 @@ export class ApplicationRepository extends BaseRepository {
 
   async updatePositionSelectionStatus(
     selectionId: string,
-    status: ApplicationReviewStatus,
+    status: ApplicationReviewStatus
   ): Promise<boolean> {
     const updated = await this.sql<{ id: string }[]>`
       UPDATE hiring.application_position_selections
@@ -383,7 +383,7 @@ export class ApplicationRepository extends BaseRepository {
 
   async updateQuestion(
     positionQuestionId: number,
-    data: QuestionUpsertInput,
+    data: QuestionUpsertInput
   ): Promise<AppQuestion | null> {
     const pqRows = await this.sql<{ question_id: number }[]>`
       SELECT question_id

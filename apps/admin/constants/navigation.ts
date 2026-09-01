@@ -9,11 +9,12 @@ import {
   Package,
   Library,
   Mail,
+  ReceiptText,
   Settings,
   UserCheck,
   Users,
 } from "lucide-react";
-import { isAdmin, isPresident } from "@uwdsc/common/constants";
+import { isAdmin, isPres } from "@uwdsc/common/constants";
 
 export const getAdminNavigation = (
   _position: string | null,
@@ -21,7 +22,7 @@ export const getAdminNavigation = (
   logisticsWindows?: {
     onboardingOpen: boolean;
     returningExecOpen: boolean;
-  },
+  }
 ) => {
   const onboardingOpen = logisticsWindows?.onboardingOpen ?? false;
   const returningExecOpen = logisticsWindows?.returningExecOpen ?? false;
@@ -32,7 +33,7 @@ export const getAdminNavigation = (
       href: "/applications/questions",
       icon: CircleHelp,
     },
-    ...(isPresident(role)
+    ...(isPres(role)
       ? [
           { name: "Hiring", href: "/applications/hiring", icon: UserCheck },
           {
@@ -54,7 +55,16 @@ export const getAdminNavigation = (
   ];
 
   return [
-    { name: "Members", href: "/members", icon: Users },
+    {
+      name: "Members",
+      href: "/members",
+      icon: Users,
+      subItems: [
+        { name: "All members", href: "/members", icon: Users },
+        // Open to every exec: the online review queue is not admin-only.
+        { name: "Submissions", href: "/members/submissions", icon: ReceiptText },
+      ],
+    },
     {
       name: "Applications",
       href: "/applications",
@@ -77,7 +87,7 @@ export const getAdminNavigation = (
               },
             ]
           : []),
-        ...(isPresident(role)
+        ...(isPres(role)
           ? [
               {
                 name: "Onboarding review",

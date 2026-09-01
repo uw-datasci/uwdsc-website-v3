@@ -48,6 +48,9 @@ importers:
       '@tanstack/react-table':
         specifier: ^8.21.3
         version: 8.21.3(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@uw-datasci/raft':
+        specifier: ^1.0.1
+        version: 1.0.1(next@16.2.12(@babel/core@7.29.7)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))
       '@uwdsc/admin':
         specifier: workspace:*
         version: link:../../packages/server/admin
@@ -154,6 +157,9 @@ importers:
       '@types/qrcode':
         specifier: ^1.5.6
         version: 1.5.6
+      '@uw-datasci/raft':
+        specifier: ^1.0.1
+        version: 1.0.1(next@16.2.12(@babel/core@7.29.7)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))
       '@uwdsc/common':
         specifier: workspace:*
         version: link:../../packages/common
@@ -244,10 +250,6 @@ importers:
         version: 5.9.3
 
   packages/common:
-    dependencies:
-      next:
-        specifier: ^16.1.6
-        version: 16.2.12(@babel/core@7.29.7)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
     devDependencies:
       '@types/node':
         specifier: ^20
@@ -367,6 +369,9 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.94.0
         version: 2.111.0
+      '@uw-datasci/raft':
+        specifier: ^1.0.1
+        version: 1.0.1(next@16.2.12(@babel/core@7.29.7)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))
       '@uwdsc/common':
         specifier: workspace:*
         version: link:../../common
@@ -2366,6 +2371,12 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@uw-datasci/raft@1.0.1':
+    resolution: {integrity: sha512-lfO588eR41f3bOspMW2AB4+FyYfApr3nGN4H5JQ2iHHP1+j/jQlN65N4ME2coA6uWyC5kRq8Is+CBGMcUDSOfw==, tarball: https://npm.pkg.github.com/download/@uw-datasci/raft/1.0.1/61068670ab2fa9b5c5577420bcb860c293065aff}
+    engines: {node: '>=20'}
+    peerDependencies:
+      next: ^16
+
   '@vercel/analytics@1.6.1':
     resolution: {integrity: sha512-oH9He/bEM+6oKlv3chWuOOcp8Y6fo6/PSro8hEkgCW3pu9/OiCXiUpRUogDh3Fs3LH2sosDrx8CxeOLBEE+afg==}
     peerDependencies:
@@ -3021,6 +3032,7 @@ packages:
   eslint@9.39.5:
     resolution: {integrity: sha512-DgZS62aPLXKlnxILS/AYCoRvHaZeXceIzlXPkkGGzJWSow1aEk0lbTlxUSlyjC8jcaKxAdOnTDz+o1JFSBsyjw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
     peerDependencies:
       jiti: '*'
@@ -4277,6 +4289,9 @@ packages:
     resolution: {integrity: sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA==}
     engines: {node: '>=10'}
     hasBin: true
+
+  server-only@0.0.1:
+    resolution: {integrity: sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA==}
 
   set-blocking@2.0.0:
     resolution: {integrity: sha512-KiKBS8AnWGEyLzofFfmvKwpdPzqiy16LvQfK3yv/fVH7Bj13/wl3JSR1J+rfgRE9q7xUJK4qvgS8raSOeLUehw==}
@@ -6366,6 +6381,14 @@ snapshots:
 
   '@unrs/resolver-binding-win32-x64-msvc@1.12.2':
     optional: true
+
+  '@uw-datasci/raft@1.0.1(next@16.2.12(@babel/core@7.29.7)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))':
+    dependencies:
+      next: 16.2.12(@babel/core@7.29.7)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      pg: 8.22.0
+      server-only: 0.0.1
+    transitivePeerDependencies:
+      - pg-native
 
   '@vercel/analytics@1.6.1(next@16.2.12(@babel/core@7.29.7)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
     optionalDependencies:
@@ -8549,6 +8572,8 @@ snapshots:
   semver@6.3.1: {}
 
   semver@7.8.5: {}
+
+  server-only@0.0.1: {}
 
   set-blocking@2.0.0: {}
 

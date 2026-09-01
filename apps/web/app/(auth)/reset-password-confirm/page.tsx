@@ -30,7 +30,7 @@ function ResetPasswordConfirmContent() {
       router.replace("/reset-password");
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "An unexpected error occurred. Please try again.",
+        err instanceof Error ? err.message : "An unexpected error occurred. Please try again."
       );
       setIsLoading(false);
     }
@@ -103,7 +103,11 @@ function ResetPasswordConfirmContent() {
 function ResetPasswordConfirmFallback() {
   return (
     <div className="bg-black w-full min-h-screen flex flex-col items-center justify-center px-12 py-8">
-      <Loader2 className="h-10 w-10 animate-spin text-white" strokeWidth={2} aria-label="Loading" />
+      <Loader2
+        className="h-10 w-10 animate-spin text-white"
+        strokeWidth={2}
+        aria-label="Loading"
+      />
     </div>
   );
 }

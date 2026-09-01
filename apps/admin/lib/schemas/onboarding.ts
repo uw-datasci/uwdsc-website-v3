@@ -9,7 +9,7 @@ export const onboardingSchema = z
       .email("A valid gmail is required")
       .refine(
         (email) => email.toLowerCase().endsWith("@gmail.com"),
-        "Please use a personal gmail address",
+        "Please use a personal gmail address"
       ),
     role_id: z.number().int({ message: "Please select a role" }),
     in_waterloo: z.string().min(1, "Please indicate your location next term"),

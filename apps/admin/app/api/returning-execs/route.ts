@@ -1,7 +1,7 @@
-import { ApiResponse } from "@uwdsc/common/utils";
+import { RaftResponse } from "@uw-datasci/raft";
 import { isAdmin } from "@uwdsc/common/constants";
 import { returningExecService } from "@uwdsc/admin";
-import { withVpAccess } from "@/guards/withVpAccess";
+import { withAdmin } from "@/guards/withAdmin";
 import type { QuestionScope } from "@uwdsc/common/types";
 
 /**
@@ -9,17 +9,14 @@ import type { QuestionScope } from "@uwdsc/common/types";
  * Returns all returning-exec submissions for the active term.
  * Requires admin role + VP or president scope.
  */
-export const GET = withVpAccess(async (_request, _context, user, scope: QuestionScope) => {
-  if (!isAdmin(user.app_metadata?.role)) {
-    return ApiResponse.unauthorized(
-      "Only users with the admin role can view returning exec submissions",
-    );
-  }
+export const GET = withAdmin(
+  async (_request, _context, user, scope: QuestionScope) => {
+    if (!isAdmin(user.app_metadata?.role)) {
+      return RaftResponse.unauthorized("You cannot perform this action");
+    }
 
-  try {
-    const { submissions } =
-      await returningExecService.getAllSubmissionsForActiveTerm();
-    return ApiResponse.ok({
+    const { submissions } = await returningExecService.getAllSubmissionsForActiveTerm();
+    return RaftResponse.ok({
       submissions,
       positionReview: {
         canUse: true,
@@ -28,8 +25,6 @@ export const GET = withVpAccess(async (_request, _context, user, scope: Question
         vpExecPositionIds: scope.vpExecPositionIds,
       },
     });
-  } catch (error) {
-    console.error("Error fetching returning exec submissions:", error);
-    return ApiResponse.serverError(error, "Failed to fetch submissions");
-  }
-});
+  },
+  { scope: true }
+);

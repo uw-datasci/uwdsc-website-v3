@@ -47,18 +47,11 @@ export function Positions({ form, positions }: PositionsProps) {
   const position2Data = position2 ? getPositionData(position2) : undefined;
   const position3Data = position3 ? getPositionData(position3) : undefined;
 
-  const getAvailablePositions = (
-    currentPosition?: string,
-    includeNone: boolean = false,
-  ) => {
+  const getAvailablePositions = (currentPosition?: string, includeNone: boolean = false) => {
     const selected = new Set(
-      [position1, position2, position3].filter(
-        (p) => p && p !== currentPosition,
-      ),
+      [position1, position2, position3].filter((p) => p && p !== currentPosition)
     );
-    const available = positions
-      .filter((p) => !selected.has(p.id))
-      .map((p) => p.name);
+    const available = positions.filter((p) => !selected.has(p.id)).map((p) => p.name);
 
     if (includeNone) {
       return ["None (Remove selection)", ...available];
@@ -77,12 +70,9 @@ export function Positions({ form, positions }: PositionsProps) {
    * in the same record.
    */
   const clearAnswersOnChange = (
-    answersField:
-      | "position_1_answers"
-      | "position_2_answers"
-      | "position_3_answers",
+    answersField: "position_1_answers" | "position_2_answers" | "position_3_answers",
     nextId: string,
-    currentId: string | undefined,
+    currentId: string | undefined
   ) => {
     if (nextId === currentId) return;
     form.setValue(answersField, {});
@@ -97,13 +87,11 @@ export function Positions({ form, positions }: PositionsProps) {
       <div className="mb-5 flex flex-col gap-3 px-4">
         <div className="flex items-center">
           <Users className="mr-2 h-5 w-5 text-blue-300" />
-          <h2 className="text-xl font-semibold text-white">
-            Position Preferences
-          </h2>
+          <h2 className="text-xl font-semibold text-white">Position Preferences</h2>
         </div>
         <p className="mb-2 block text-base text-white">
-          Please select <b>at least 1 and up to 3</b> positions you are
-          interested in, and answer the corresponding questions.
+          Please select <b>at least 1 and up to 3</b> positions you are interested in, and
+          answer the corresponding questions.
         </p>
       </div>
 
@@ -134,15 +122,10 @@ export function Positions({ form, positions }: PositionsProps) {
                     ...field,
                     onChange: (value: string) => {
                       const nextId = getPositionId(value);
-                      clearAnswersOnChange(
-                        "position_1_answers",
-                        nextId,
-                        field.value,
-                      );
+                      clearAnswersOnChange("position_1_answers", nextId, field.value);
                       field.onChange(nextId);
                     },
-                    value:
-                      positions.find((p) => p.id === field.value)?.name || "",
+                    value: positions.find((p) => p.id === field.value)?.name || "",
                   },
                 })
               }
@@ -164,9 +147,7 @@ export function Positions({ form, positions }: PositionsProps) {
             <CardTitle className="flex items-center text-xl">
               <Briefcase className="mr-2 h-5 w-5 text-blue-300" />
               Position #2{" "}
-              <span className="ml-2 text-sm font-normal text-gray-400">
-                (Optional)
-              </span>
+              <span className="ml-2 text-sm font-normal text-gray-400">(Optional)</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -188,15 +169,10 @@ export function Positions({ form, positions }: PositionsProps) {
                     ...field,
                     onChange: (value: string) => {
                       const nextId = getPositionId(value);
-                      clearAnswersOnChange(
-                        "position_2_answers",
-                        nextId,
-                        field.value,
-                      );
+                      clearAnswersOnChange("position_2_answers", nextId, field.value);
                       field.onChange(nextId);
                     },
-                    value:
-                      positions.find((p) => p.id === field.value)?.name || "",
+                    value: positions.find((p) => p.id === field.value)?.name || "",
                   },
                 })
               }
@@ -218,9 +194,7 @@ export function Positions({ form, positions }: PositionsProps) {
             <CardTitle className="flex items-center text-xl">
               <Briefcase className="mr-2 h-5 w-5 text-blue-300" />
               Position #3{" "}
-              <span className="ml-2 text-sm font-normal text-gray-400">
-                (Optional)
-              </span>
+              <span className="ml-2 text-sm font-normal text-gray-400">(Optional)</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -242,15 +216,10 @@ export function Positions({ form, positions }: PositionsProps) {
                     ...field,
                     onChange: (value: string) => {
                       const nextId = getPositionId(value);
-                      clearAnswersOnChange(
-                        "position_3_answers",
-                        nextId,
-                        field.value,
-                      );
+                      clearAnswersOnChange("position_3_answers", nextId, field.value);
                       field.onChange(nextId);
                     },
-                    value:
-                      positions.find((p) => p.id === field.value)?.name || "",
+                    value: positions.find((p) => p.id === field.value)?.name || "",
                   },
                 })
               }

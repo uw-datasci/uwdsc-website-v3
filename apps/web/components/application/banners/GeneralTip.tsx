@@ -10,8 +10,8 @@ export function GeneralTip() {
       <div className="flex-1">
         <p className="font-semibold text-cyan-400">Tip:</p>
         <p className="text-sm text-cyan-100">
-          Be specific about your experiences and connect them directly to the
-          positions you&apos;re applying for.
+          Be specific about your experiences and connect them directly to the positions
+          you&apos;re applying for.
           <br />
           Show how your unique background will benefit DSC!
         </p>

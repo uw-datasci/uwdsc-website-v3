@@ -49,9 +49,7 @@ export function TechStack() {
           error instanceof Error
             ? error.message
             : "Failed to load project templates from GitHub.";
-        setTemplatesError(
-          message || "Failed to load project templates from GitHub.",
-        );
+        setTemplatesError(message || "Failed to load project templates from GitHub.");
       }
       if (mounted) setTemplatesLoading(false);
     })();
@@ -75,9 +73,7 @@ export function TechStack() {
     label: t.value,
   }));
 
-  const projectTypeSelectKey = templatesLoading
-    ? "loading"
-    : `templates:${templates.length}`;
+  const projectTypeSelectKey = templatesLoading ? "loading" : `templates:${templates.length}`;
 
   if (templatesLoading) {
     return (
@@ -116,9 +112,7 @@ export function TechStack() {
       </div>
 
       {!templatesLoading && !templatesError && templates.length === 0 && (
-        <p className="text-sm text-muted-foreground">
-          No GitHub templates found.
-        </p>
+        <p className="text-sm text-muted-foreground">No GitHub templates found.</p>
       )}
 
       <FormField
@@ -164,18 +158,12 @@ export function TechStack() {
                         "flex cursor-pointer gap-3 rounded-lg border p-3 transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring",
                         isSelected
                           ? "border-primary bg-primary/10 shadow-sm"
-                          : "border-border hover:bg-muted/40",
+                          : "border-border hover:bg-muted/40"
                       )}
                     >
-                      <RadioGroupItem
-                        id={optionId}
-                        value={opt.value}
-                        className="mt-0.5"
-                      />
+                      <RadioGroupItem id={optionId} value={opt.value} className="mt-0.5" />
                       <div className="flex flex-col gap-0.5 text-left">
-                        <span className="text-sm font-medium leading-none">
-                          {opt.label}
-                        </span>
+                        <span className="text-sm font-medium leading-none">{opt.label}</span>
                         <span className="text-xs text-muted-foreground leading-snug">
                           {opt.description}
                         </span>
@@ -218,18 +206,12 @@ export function TechStack() {
                         "flex cursor-pointer gap-3 rounded-lg border p-3 transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring",
                         isSelected
                           ? "border-primary bg-primary/10 shadow-sm"
-                          : "border-border hover:bg-muted/40",
+                          : "border-border hover:bg-muted/40"
                       )}
                     >
-                      <RadioGroupItem
-                        id={optionId}
-                        value={opt.value}
-                        className="mt-0.5"
-                      />
+                      <RadioGroupItem id={optionId} value={opt.value} className="mt-0.5" />
                       <div className="flex flex-col gap-0.5 text-left">
-                        <span className="text-sm font-medium leading-none">
-                          {opt.label}
-                        </span>
+                        <span className="text-sm font-medium leading-none">{opt.label}</span>
                         <span className="text-xs text-muted-foreground leading-snug">
                           {opt.description}
                         </span>

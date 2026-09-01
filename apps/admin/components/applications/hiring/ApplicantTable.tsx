@@ -29,7 +29,7 @@ interface ApplicantTableProps {
   onSelectionStatusChange: (
     selectionId: string,
     status: ApplicationReviewStatus,
-    source?: "application" | "returning_exec",
+    source?: "application" | "returning_exec"
   ) => Promise<void>;
 }
 
@@ -89,12 +89,8 @@ export function ApplicantTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className={`min-w-[240px] ${headCell}`}>
-                Applicant
-              </TableHead>
-              <TableHead className={`min-w-[280px] ${headCell}`}>
-                Positions
-              </TableHead>
+              <TableHead className={`min-w-[240px] ${headCell}`}>Applicant</TableHead>
+              <TableHead className={`min-w-[280px] ${headCell}`}>Positions</TableHead>
               <TableHead className={`w-[140px] ${headCell}`}>Status</TableHead>
               <TableHead className={`w-14 ${headCell}`}>
                 <span className="sr-only">Actions</span>
@@ -103,19 +99,18 @@ export function ApplicantTable({
           </TableHeader>
           <TableBody>
             {applicants.map((applicant) => {
-              const sortedSelections = sortPositionsByPriority(
-                applicant.position_selections,
-              );
+              const sortedSelections = sortPositionsByPriority(applicant.position_selections);
               return (
                 <TableRow key={applicant.id}>
                   <TableCell className={bodyCell}>
                     <div className="flex max-w-[320px] flex-col gap-0.5">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium leading-tight">
-                          {applicant.full_name}
-                        </span>
+                        <span className="font-medium leading-tight">{applicant.full_name}</span>
                         {applicant.source === "returning_exec" && (
-                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0">
+                          <Badge
+                            variant="secondary"
+                            className="text-[10px] px-1.5 py-0 shrink-0"
+                          >
                             Returning
                           </Badge>
                         )}
@@ -128,10 +123,7 @@ export function ApplicantTable({
                   <TableCell className={bodyCell}>
                     <div className={cn("flex flex-col", SELECTION_STACK_GAP)}>
                       {sortedSelections.map((selection) => (
-                        <SelectionRow
-                          key={selection.id}
-                          selection={selection}
-                        />
+                        <SelectionRow key={selection.id} selection={selection} />
                       ))}
                     </div>
                   </TableCell>
@@ -143,7 +135,7 @@ export function ApplicantTable({
                             variant="outline"
                             className={cn(
                               "shrink-0 text-xs font-medium",
-                              reviewStatusBadgeClassName(selection.status),
+                              reviewStatusBadgeClassName(selection.status)
                             )}
                           >
                             {selection.status}

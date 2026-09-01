@@ -1,31 +1,20 @@
-import { ApiResponse } from "@uwdsc/common/utils";
+import { RaftResponse } from "@uw-datasci/raft";
+import { withRaftRoute } from "@uwdsc/core/http";
 import { createAuthService } from "@/lib/services";
-import { NextRequest } from "next/server";
 
-export async function POST(request: NextRequest): Promise<Response> {
-  try {
-    const body = await request.json();
-    const { email } = body;
+export const POST = withRaftRoute(async (request) => {
+  const body = await request.json();
+  const { email } = body;
 
-    if (!email) return ApiResponse.badRequest("Email is required");
+  if (!email) return RaftResponse.badRequest("Email is required");
 
-    const authService = await createAuthService();
-    const emailRedirectTo = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback?next=/complete-profile`;
-    const result = await authService.resendVerificationEmail(
-      email,
-      emailRedirectTo,
-    );
+  const authService = await createAuthService();
+  const emailRedirectTo = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback?next=/complete-profile`;
+  const result = await authService.resendVerificationEmail(email, emailRedirectTo);
 
-    if (!result.success) {
-      return ApiResponse.badRequest(
-        result.error,
-        "Failed to resend verification email",
-      );
-    }
-
-    return ApiResponse.ok({ success: true, message: result.message });
-  } catch (error) {
-    console.error("Resend verification error:", error);
-    return ApiResponse.serverError(error, "An unexpected error occurred");
+  if (!result.success) {
+    return RaftResponse.badRequest(result.error, "Failed to resend verification email");
   }
-}
+
+  return RaftResponse.ok({ success: true, message: result.message });
+});

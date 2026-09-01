@@ -1,16 +1,15 @@
 import { z } from "zod";
-import {
-  FACULTY_VALUES,
-  ROLE_VALUES,
-  roleRequiresSubteam,
-} from "@uwdsc/common/constants";
+import { FACULTY_VALUES, ROLE_VALUES, roleRequiresSubteam } from "@uwdsc/common/constants";
 
 /**
  * Schema for marking a member as paid
  * Used by admins to record payment information
  */
 export const markAsPaidSchema = z.object({
-  payment_method: z.enum(["cash", "online", "math_soc"], {
+  // Online payments are no longer recorded here -- they go through the
+  // proof-of-payment submission queue (/members/submissions), which is what
+  // writes `online` memberships. This modal covers in-person payments only.
+  payment_method: z.enum(["cash", "math_soc"], {
     message: "Payment method is required",
   }),
   payment_location: z.string().trim().min(1, "Payment location is required"),

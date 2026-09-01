@@ -41,9 +41,7 @@ export function HiringHeader({
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
         <div className="flex flex-col gap-1">
-          <span className="text-xs font-medium text-muted-foreground">
-            Search
-          </span>
+          <span className="text-xs font-medium text-muted-foreground">Search</span>
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -57,9 +55,7 @@ export function HiringHeader({
 
         {showSubteamFilter ? (
           <div className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground">
-              Subteam
-            </span>
+            <span className="text-xs font-medium text-muted-foreground">Subteam</span>
             <Select value={subteamFilter} onValueChange={onSubteamFilterChange}>
               <SelectTrigger size="sm" className="h-8 w-52 min-w-0">
                 <Layers className="size-3.5 shrink-0 text-muted-foreground" />

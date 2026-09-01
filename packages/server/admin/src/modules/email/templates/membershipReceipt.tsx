@@ -34,7 +34,12 @@ export function getMembershipReceiptSubject(kind: MembershipReceiptNoticeKind): 
 
 function membershipReceiptMainSection(
   kind: MembershipReceiptNoticeKind,
-  bodyTextStyle: { color: string; lineHeight: "1.6"; margin: string; fontSize: string },
+  bodyTextStyle: {
+    color: string;
+    lineHeight: "1.6";
+    margin: string;
+    fontSize: string;
+  }
 ): ReactElement {
   switch (kind) {
     case "welcome":

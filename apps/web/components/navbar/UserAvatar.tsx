@@ -1,6 +1,6 @@
 "use client";
 
-import { User, LogOut, LogIn } from "lucide-react";
+import { User, LogOut, LogIn, Receipt } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { signOut } from "@/lib/api";
@@ -61,9 +61,7 @@ export function UserAvatar() {
       : "??";
 
   const fullName =
-    user?.first_name && user?.last_name
-      ? `${user.first_name} ${user.last_name}`
-      : "User";
+    user?.first_name && user?.last_name ? `${user.first_name} ${user.last_name}` : "User";
 
   return (
     <NavigationMenuItem className="relative">
@@ -88,9 +86,7 @@ export function UserAvatar() {
             <li className="px-3 py-2 border-b border-border/50">
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium leading-none">{fullName}</p>
-                <p className="text-xs leading-none text-muted-foreground">
-                  {user?.email}
-                </p>
+                <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
               </div>
             </li>
             <li>
@@ -100,9 +96,18 @@ export function UserAvatar() {
                   className="flex flex-row items-center gap-3 rounded-md p-3 no-underline outline-none transition-colors hover:bg-muted/75 focus:bg-muted/75"
                 >
                   <User className="h-4 w-4 shrink-0" />
-                  <span className="text-sm font-medium leading-normal">
-                    My Passport
-                  </span>
+                  <span className="text-sm font-medium leading-normal">My Passport</span>
+                </Link>
+              </NavigationMenuLink>
+            </li>
+            <li>
+              <NavigationMenuLink asChild>
+                <Link
+                  href="/membership"
+                  className="flex flex-row items-center gap-3 rounded-md p-3 no-underline outline-none transition-colors hover:bg-muted/75 focus:bg-muted/75"
+                >
+                  <Receipt className="h-4 w-4 shrink-0" />
+                  <span className="text-sm font-medium leading-normal">Membership</span>
                 </Link>
               </NavigationMenuLink>
             </li>
@@ -114,9 +119,7 @@ export function UserAvatar() {
                 className="w-full h-auto flex flex-row items-center justify-start gap-3 p-3 hover:bg-muted/75! hover:text-destructive focus:bg-muted/75 focus:text-destructive rounded-md"
               >
                 <LogOut className="h-4 w-4 shrink-0" />
-                <span className="text-sm font-medium leading-normal">
-                  Log out
-                </span>
+                <span className="text-sm font-medium leading-normal">Log out</span>
               </Button>
             </li>
           </ul>

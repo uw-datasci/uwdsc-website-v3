@@ -1,5 +1,10 @@
 import { BaseRepository } from "@uwdsc/db/base.repository";
-import { Event, EventWithAttendanceCount, WrappedEvent } from "@uwdsc/common/types";
+import {
+  Event,
+  EventCategory,
+  EventWithAttendanceCount,
+  WrappedEvent,
+} from "@uwdsc/common/types";
 import type { EventTimeFilter } from "../../types/events";
 
 export class EventRepository extends BaseRepository {
@@ -33,7 +38,9 @@ export class EventRepository extends BaseRepository {
           start_time,
           end_time,
           buffered_start_time,
-          buffered_end_time
+          buffered_end_time,
+          category,
+          resources
         FROM events.events
         ORDER BY start_time DESC
       `;
@@ -61,6 +68,8 @@ export class EventRepository extends BaseRepository {
           e.end_time,
           e.buffered_start_time,
           e.buffered_end_time,
+          e.category,
+          e.resources,
           (SELECT COUNT(*)::int FROM events.attendance a WHERE a.event_id = e.id) AS attendance_count
         FROM events.events e
         ORDER BY e.start_time DESC
@@ -89,6 +98,8 @@ export class EventRepository extends BaseRepository {
           e.end_time,
           e.buffered_start_time,
           e.buffered_end_time,
+          e.category,
+          e.resources,
           COUNT(a.profile_id)::int AS attendance_count,
           COALESCE(BOOL_OR(a.profile_id = ${profileId}), false) AS attended_by_user
         FROM events.events e
@@ -119,7 +130,9 @@ export class EventRepository extends BaseRepository {
           start_time,
           end_time,
           buffered_start_time,
-          buffered_end_time
+          buffered_end_time,
+          category,
+          resources
         FROM events.events
         WHERE id = ${eventId}
         LIMIT 1
@@ -140,8 +153,7 @@ export class EventRepository extends BaseRepository {
 
     const condition =
       filter.kind === "in_window"
-        ? this
-          .sql`WHERE ${ref} BETWEEN buffered_start_time AND buffered_end_time`
+        ? this.sql`WHERE ${ref} BETWEEN buffered_start_time AND buffered_end_time`
         : this.sql`WHERE start_time > ${ref}`;
 
     const orderAndLimit =
@@ -160,7 +172,9 @@ export class EventRepository extends BaseRepository {
           start_time,
           end_time,
           buffered_start_time,
-          buffered_end_time
+          buffered_end_time,
+          category,
+          resources
         FROM events.events
         ${condition}
         ${orderAndLimit}
@@ -173,12 +187,40 @@ export class EventRepository extends BaseRepository {
   }
 
   /**
+   * Get all events of a given category, newest start_time first. Used by the
+   * public /workshops page (and any future per-category listing) — backed by
+   * idx_events_category.
+   */
+  async getEventsByCategory(category: EventCategory): Promise<Event[]> {
+    try {
+      const result = await this.sql<Event[]>`
+        SELECT
+          id,
+          name,
+          description,
+          location,
+          image_url,
+          start_time,
+          end_time,
+          buffered_start_time,
+          buffered_end_time,
+          category,
+          resources
+        FROM events.events
+        WHERE category = ${category}
+        ORDER BY start_time DESC
+      `;
+      return result;
+    } catch (error: unknown) {
+      console.error("Error fetching events by category:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Check if a user has an attendance record for a given event
    */
-  async getAttendanceForUser(
-    eventId: string,
-    profileId: string,
-  ): Promise<boolean> {
+  async getAttendanceForUser(eventId: string, profileId: string): Promise<boolean> {
     try {
       const result = await this.sql<{ exists: boolean }[]>`
         SELECT EXISTS(

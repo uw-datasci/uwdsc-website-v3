@@ -21,7 +21,7 @@ import {
 } from "@/lib/schemas/onboarding";
 import { useForm } from "react-hook-form";
 import { ExecPosition, Onboarding, Term } from "@uwdsc/common/types";
-import { isOnboardingWindowOpen } from "@uwdsc/common/utils";
+import { isDateWindowOpen } from "@uwdsc/common/utils";
 
 export default function LogisticsOnboardingPage() {
   const router = useRouter();
@@ -49,7 +49,7 @@ export default function LogisticsOnboardingPage() {
         last_name?: string | null;
         email?: string | null;
         position_id?: number | null;
-      } | null,
+      } | null
     ) => {
       if (!user) return;
 
@@ -71,7 +71,7 @@ export default function LogisticsOnboardingPage() {
         form.setValue("email", email, { shouldDirty: false });
       }
     },
-    [form],
+    [form]
   );
 
   const mapSubmissionToForm = useCallback(
@@ -80,7 +80,7 @@ export default function LogisticsOnboardingPage() {
       user: {
         first_name?: string | null;
         last_name?: string | null;
-      } | null,
+      } | null
     ): OnboardingFormValues => {
       const firstName = user?.first_name?.trim() ?? "";
       const lastName = user?.last_name?.trim() ?? "";
@@ -101,7 +101,7 @@ export default function LogisticsOnboardingPage() {
         anything_else: submission.anything_else ?? "",
       };
     },
-    [],
+    []
   );
 
   useEffect(() => {
@@ -116,7 +116,7 @@ export default function LogisticsOnboardingPage() {
 
         const typedCurrentUser = currentUser;
 
-        if (!isOnboardingWindowOpen(term)) {
+        if (!isDateWindowOpen(term?.start_date, term?.onboarding_due_date)) {
           router.replace("/logistics");
           return;
         }
@@ -176,7 +176,7 @@ export default function LogisticsOnboardingPage() {
             anything_else: values.anything_else ?? null,
           },
           headshotFile,
-          fullName,
+          fullName
         );
         setHasSubmission(true);
         setIsEditing(false);
@@ -188,7 +188,7 @@ export default function LogisticsOnboardingPage() {
         setIsSubmitting(false);
       }
     },
-    [currentTerm, headshotFile, currentUserFullName],
+    [currentTerm, headshotFile, currentUserFullName]
   );
 
   const isFormLocked = hasSubmission && !isEditing;

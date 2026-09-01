@@ -32,7 +32,7 @@ function remaining(targetMs: number): Countdown | null {
  * or already elapsed. Deliberately computes nothing during render — the server
  * has no stable "now", so a render-time value would mismatch on hydration.
  */
-export function useCountdown(targetIso: string | null): Countdown | null {
+export function useCountdown(targetIso: string | Date | null): Countdown | null {
   const [countdown, setCountdown] = useState<Countdown | null>(null);
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export function useCountdown(targetIso: string | null): Countdown | null {
       return;
     }
 
-    const targetMs = Date.parse(targetIso);
+    const targetMs = new Date(targetIso).getTime();
     if (Number.isNaN(targetMs)) {
       setCountdown(null);
       return;

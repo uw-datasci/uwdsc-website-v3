@@ -210,7 +210,7 @@ export class HiringRepository extends BaseRepository {
 
   async updatePositionSelectionStatus(
     selectionId: string,
-    status: ApplicationReviewStatus,
+    status: ApplicationReviewStatus
   ): Promise<boolean> {
     const updated = await this.sql<{ id: string }[]>`
       UPDATE hiring.application_position_selections
@@ -251,7 +251,11 @@ export class HiringRepository extends BaseRepository {
    * left a stale subteam behind would too.
    */
   async finalizeRoles(
-    newTeamRoles: { profileId: string; role: UserRole; subteamId: number | null }[],
+    newTeamRoles: {
+      profileId: string;
+      role: UserRole;
+      subteamId: number | null;
+    }[]
   ): Promise<{ demoted: number }> {
     const profileIds = newTeamRoles.map((m) => m.profileId);
 

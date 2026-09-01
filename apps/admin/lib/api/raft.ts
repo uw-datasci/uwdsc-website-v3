@@ -35,10 +35,10 @@ export async function getRaftOverview(filters: RaftGroupFilters = {}): Promise<R
 }
 
 export async function getRaftErrorGroups(
-  filters: RaftGroupFilters = {},
+  filters: RaftGroupFilters = {}
 ): Promise<RaftErrorGroupsResponse> {
   const response = await fetch(
-    `/api/raft/errors${buildRaftQueryParams({ ...filters, mode: "groups" })}`,
+    `/api/raft/errors${buildRaftQueryParams({ ...filters, mode: "groups" })}`
   );
   const data = await response.json();
 
@@ -48,10 +48,10 @@ export async function getRaftErrorGroups(
 }
 
 export async function getRaftOccurrences(
-  filters: RaftGroupFilters,
+  filters: RaftGroupFilters
 ): Promise<RaftErrorsResponse> {
   const response = await fetch(
-    `/api/raft/errors${buildRaftQueryParams({ ...filters, mode: "occurrences" })}`,
+    `/api/raft/errors${buildRaftQueryParams({ ...filters, mode: "occurrences" })}`
   );
   const data = await response.json();
 

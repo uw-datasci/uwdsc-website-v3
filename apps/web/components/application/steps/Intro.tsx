@@ -20,20 +20,14 @@ export function Intro({
   return (
     <div className="space-y-6">
       <div className="space-y-4">
-        <h2 className="text-2xl font-semibold">
-          Welcome to the UWDSC Exec Applications!
-        </h2>
+        <h2 className="text-2xl font-semibold">Welcome to the UWDSC Exec Applications!</h2>
         <CardDescription className="text-base text-gray-300 leading-relaxed">
-          We&apos;re excited that you&apos;re interested in joining our
-          community! This application will take you through several sections:
+          We&apos;re excited that you&apos;re interested in joining our community! This
+          application will take you through several sections:
         </CardDescription>
         <ul className="ml-6 space-y-2 list-disc text-gray-300">
-          <li>
-            Personal Details - Your personal information and academic background
-          </li>
-          <li>
-            General - Tell us about yourself and why you want to join UWDSC
-          </li>
+          <li>Personal Details - Your personal information and academic background</li>
+          <li>General - Tell us about yourself and why you want to join UWDSC</li>
           <li>Positions - Questions about your desired roles</li>
           <li>Resume Upload - Share your resume with us</li>
         </ul>

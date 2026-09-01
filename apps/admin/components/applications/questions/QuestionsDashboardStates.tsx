@@ -22,9 +22,7 @@ interface QuestionsDashboardForbiddenProps {
   readonly message: string;
 }
 
-export function QuestionsDashboardForbidden({
-  message,
-}: QuestionsDashboardForbiddenProps) {
+export function QuestionsDashboardForbidden({ message }: QuestionsDashboardForbiddenProps) {
   return (
     <Card className="border-destructive/30 bg-destructive/5">
       <CardHeader>
@@ -40,10 +38,7 @@ interface QuestionsDashboardErrorProps {
   readonly onRetry: () => void;
 }
 
-export function QuestionsDashboardError({
-  message,
-  onRetry,
-}: QuestionsDashboardErrorProps) {
+export function QuestionsDashboardError({ message, onRetry }: QuestionsDashboardErrorProps) {
   return (
     <Card className="border-destructive/30">
       <CardHeader>

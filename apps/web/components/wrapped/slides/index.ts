@@ -120,9 +120,17 @@ export const WRAPPED_SLIDES: readonly WrappedSlideData[] = [
     id: "awards",
     layout: "awards",
     awards: [
-      { id: "award-chronically-online", title: "Chronically Online", topPercent: "Top 10%" },
+      {
+        id: "award-chronically-online",
+        title: "Chronically Online",
+        topPercent: "Top 10%",
+      },
       { id: "award-super-fan", title: "DSC Super Fan", topPercent: "Top 10%" },
-      { id: "award-password-resets", title: "Most Password Resets", topPercent: "Top 10%" },
+      {
+        id: "award-password-resets",
+        title: "Most Password Resets",
+        topPercent: "Top 10%",
+      },
     ],
   },
   {

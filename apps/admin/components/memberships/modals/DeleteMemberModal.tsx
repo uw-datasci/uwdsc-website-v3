@@ -43,8 +43,7 @@ export function DeleteMemberModal({
       onSuccess?.();
     } catch (error) {
       onOpenChange(false);
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to delete member";
+      const errorMessage = error instanceof Error ? error.message : "Failed to delete member";
       toast.error(errorMessage);
     } finally {
       setIsDeleting(false);
@@ -58,25 +57,15 @@ export function DeleteMemberModal({
           <DialogTitle>Delete member</DialogTitle>
           <DialogDescription>
             Are you sure you want to delete{" "}
-            <span className="font-semibold">
-              {getMemberDisplayName(member)}
-            </span>{" "}
-            ? This action cannot be undone.
+            <span className="font-semibold">{getMemberDisplayName(member)}</span> ? This action
+            cannot be undone.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isDeleting}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isDeleting}>
             Cancel
           </Button>
-          <Button
-            variant="destructive"
-            onClick={handleDelete}
-            disabled={isDeleting}
-          >
+          <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
             {isDeleting ? "Deleting..." : "Delete"}
           </Button>
         </DialogFooter>

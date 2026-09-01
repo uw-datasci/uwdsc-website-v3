@@ -30,11 +30,7 @@ export function QuestionsTable({
   emptyMessage = "No questions yet. Add one to get started.",
 }: QuestionsTableProps) {
   if (questions.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground py-6 text-center">
-        {emptyMessage}
-      </p>
-    );
+    return <p className="text-sm text-muted-foreground py-6 text-center">{emptyMessage}</p>;
   }
 
   return (
@@ -45,18 +41,14 @@ export function QuestionsTable({
             <TableHead className="min-w-[140px] pl-4">Position</TableHead>
             <TableHead>Question</TableHead>
             <TableHead className="w-[110px] pr-6">Type</TableHead>
-            <TableHead className="w-[140px] pl-6 text-center">
-              Actions
-            </TableHead>
+            <TableHead className="w-[140px] pl-6 text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {questions.map((q) => (
             <TableRow key={q.position_question_id}>
               <TableCell className="align-top pl-4 text-sm font-medium">
-                {q.position_name ?? (
-                  <span className="text-muted-foreground">General</span>
-                )}
+                {q.position_name ?? <span className="text-muted-foreground">General</span>}
               </TableCell>
               <TableCell className="align-top max-w-md">
                 <span

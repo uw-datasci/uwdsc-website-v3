@@ -394,14 +394,14 @@ export function MonthlyEventCalendar({
                         key={`date-${i}`}
                         className={cn(
                           "col-span-1 flex justify-start px-1.5 pt-1 pb-0 pointer-events-none text-sm",
-                          !isCurrentMonth && "text-muted-foreground",
+                          !isCurrentMonth && "text-muted-foreground"
                         )}
                         style={{ gridColumnStart: i + 1, gridRowStart: 1 }}
                       >
                         <div
                           className={cn(
                             "flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs",
-                            isToday && "bg-primary text-primary-foreground font-medium",
+                            isToday && "bg-primary text-primary-foreground font-medium"
                           )}
                         >
                           {format(date, "d")}
@@ -415,7 +415,7 @@ export function MonthlyEventCalendar({
                     const { event, startIndex, span, lane } = layout;
                     const isMultiDay = !isSameDay(
                       parseISO(event.start_time),
-                      parseISO(event.end_time),
+                      parseISO(event.end_time)
                     );
 
                     return (
@@ -436,7 +436,7 @@ export function MonthlyEventCalendar({
                           }}
                           className={cn(
                             "w-full flex flex-col items-start overflow-hidden rounded border border-primary/20 bg-primary/10 px-1 sm:px-1.5 py-0.5 text-left transition-colors hover:bg-primary/20",
-                            onEventClick ? "cursor-pointer" : "cursor-default",
+                            onEventClick ? "cursor-pointer" : "cursor-default"
                           )}
                           title={`${event.name} - ${formatEventTime(event.start_time)} to ${formatEventTime(event.end_time)}`}
                         >

@@ -1,48 +1,28 @@
-import { ApiError } from "@uwdsc/common/types";
-import { ApiResponse, isApplicationWindowOpen } from "@uwdsc/common/utils";
+import { isDateWindowOpen } from "@uwdsc/common/utils";
+import { RaftResponse } from "@uw-datasci/raft";
+import { withRaftRoute, type RouteContext } from "@uwdsc/core/http";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 import { applicationService } from "@uwdsc/core";
-import { NextRequest } from "next/server";
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-): Promise<Response> {
-  try {
+export const PATCH = withRaftRoute(
+  async (request, { params }: RouteContext<{ id: string }>) => {
     const { user, isUnauthorized } = await tryGetCurrentUser();
     if (!user) return isUnauthorized;
 
     const term = await applicationService.getActiveTerm();
-    if (!term) return ApiResponse.notFound("No active application period");
-    if (!isApplicationWindowOpen(term)) {
-      return ApiResponse.forbidden(
-        "The application period is closed.",
-        "The application period is closed.",
-      );
+    if (!term) return RaftResponse.notFound("No active application period");
+    if (!isDateWindowOpen(term.application_release_date, term.application_hard_deadline)) {
+      return RaftResponse.forbidden("The application period is closed.");
     }
 
     const { id } = await params;
-    if (!id) return ApiResponse.badRequest("Application ID is required");
+    if (!id) return RaftResponse.badRequest("Application ID is required");
 
     const body = await request.json();
     const application = await applicationService.updateApplication(id, user.id, body);
 
-    if (!application) {
-      return ApiResponse.notFound("Application not found or cannot be updated");
-    }
+    if (!application) return RaftResponse.notFound("Application failed to update");
 
-    return ApiResponse.ok(application);
-  } catch (error) {
-    if (error instanceof ApiError) {
-      if (error.statusCode === 403) {
-        return ApiResponse.forbidden(error.message, error.code ?? error.message);
-      }
-      return ApiResponse.json(
-        { error: error.message, message: error.message },
-        error.statusCode,
-      );
-    }
-    console.error("Error updating application:", error);
-    return ApiResponse.serverError(error, "Failed to update application");
+    return RaftResponse.ok(application);
   }
-}
+);

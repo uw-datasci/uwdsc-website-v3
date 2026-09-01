@@ -13,10 +13,7 @@ import {
 export default function PastEvents() {
   return (
     <SectionWrapper>
-      <SectionTitle
-        mb="mb-8 lg:mb-12"
-        className="text-xl md:text-2xl! text-nowrap"
-      >
+      <SectionTitle mb="mb-8 lg:mb-12" className="text-xl md:text-2xl! text-nowrap">
         Past Events
       </SectionTitle>
       <Carousel

@@ -9,12 +9,7 @@ interface TypingProps {
   className?: string;
 }
 
-export function Typing({
-  text,
-  speed = 75,
-  caretSize,
-  className = "",
-}: Readonly<TypingProps>) {
+export function Typing({ text, speed = 75, caretSize, className = "" }: Readonly<TypingProps>) {
   const [displayedText, setDisplayedText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [prevText, setPrevText] = useState(text);

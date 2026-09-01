@@ -9,11 +9,11 @@ export { DATABASE_OPTIONS } from "@/constants/foundry";
 export type { DatabaseValue } from "@/constants/foundry";
 
 const postgresProviderEnum = z.enum(
-  POSTGRES_PROVIDER_OPTIONS.map((o) => o.value) as [string, ...string[]],
+  POSTGRES_PROVIDER_OPTIONS.map((o) => o.value) as [string, ...string[]]
 );
 
 const mongoClientEnum = z.enum(
-  MONGO_CLIENT_OPTIONS.map((o) => o.value) as [string, ...string[]],
+  MONGO_CLIENT_OPTIONS.map((o) => o.value) as [string, ...string[]]
 );
 
 const databaseEnum = z.enum(DATABASE_OPTIONS.map((d) => d.value) as [string, ...string[]]);
@@ -26,11 +26,11 @@ const subdomainLabelSchema = z
   .trim()
   .max(
     FOUNDRY_SUBDOMAIN_MAX_LEN,
-    `Subdomain label must be ${FOUNDRY_SUBDOMAIN_MAX_LEN} characters or fewer`,
+    `Subdomain label must be ${FOUNDRY_SUBDOMAIN_MAX_LEN} characters or fewer`
   )
   .refine(
     (s) => s === "" || /^[a-z0-9](?:[a-z0-9-]{0,28}[a-z0-9])?$/.test(s),
-    "Use lowercase letters, numbers, and hyphens only (e.g. my-app)",
+    "Use lowercase letters, numbers, and hyphens only (e.g. my-app)"
   );
 
 /** Empty string = no selection (matches team dropdown); refine requires a real choice. */
@@ -44,7 +44,7 @@ function refineDatabaseStack(
     postgresProvider?: string;
     mongoClient?: string;
   },
-  ctx: z.RefinementCtx,
+  ctx: z.RefinementCtx
 ) {
   if (data.database === "postgres") {
     if (data.postgresProvider == null) {

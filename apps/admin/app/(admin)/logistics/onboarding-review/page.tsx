@@ -41,9 +41,7 @@ export default function LogisticsOnboardingReviewPage() {
           setError((err as Error).message);
           return;
         }
-        setError(
-          err instanceof Error ? err.message : "Failed to load onboarding data",
-        );
+        setError(err instanceof Error ? err.message : "Failed to load onboarding data");
       } finally {
         setLoading(false);
       }
@@ -85,11 +83,7 @@ export default function LogisticsOnboardingReviewPage() {
 
       <div className="flex gap-4 flex-1 min-h-0">
         <Card className="w-full md:w-[350px] md:min-w-[350px] shrink-0 overflow-hidden p-0">
-          <OnboardingList
-            rows={filteredRows}
-            selectedId={selectedId}
-            onSelect={handleSelect}
-          />
+          <OnboardingList rows={filteredRows} selectedId={selectedId} onSelect={handleSelect} />
         </Card>
 
         <Card className="hidden md:flex flex-1 overflow-hidden p-0">
@@ -97,10 +91,7 @@ export default function LogisticsOnboardingReviewPage() {
         </Card>
 
         <Sheet open={mobileDetailOpen} onOpenChange={setMobileDetailOpen}>
-          <SheetContent
-            side="bottom"
-            className="md:hidden h-[85vh] p-0 rounded-t-xl"
-          >
+          <SheetContent side="bottom" className="md:hidden h-[85vh] p-0 rounded-t-xl">
             <SheetTitle className="sr-only">Onboarding Details</SheetTitle>
             <OnboardingDetail row={selectedRow} />
           </SheetContent>

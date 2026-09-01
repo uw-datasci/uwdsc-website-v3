@@ -66,16 +66,14 @@ export function FinalizeRolesDialog({
       setFinalizing(true);
       const { summary } = await finalizeRoles({ when2MeetLink: trimmed });
       toast.success(
-        `Roles finalized: ${summary.promoted_to_pres} pres, ${summary.promoted_to_admin} admin, ${summary.promoted_to_exec} exec, ${summary.demoted_to_alum} demoted to alum`,
+        `Roles finalized: ${summary.promoted_to_pres} pres, ${summary.promoted_to_admin} admin, ${summary.promoted_to_exec} exec, ${summary.demoted_to_alum} demoted to alum`
       );
       setOpen(false);
       resetForm();
       onFinalized();
     } catch (err) {
       console.error("Error finalizing roles:", err);
-      toast.error(
-        err instanceof Error ? err.message : "Failed to finalize roles",
-      );
+      toast.error(err instanceof Error ? err.message : "Failed to finalize roles");
     } finally {
       setFinalizing(false);
     }
@@ -90,23 +88,23 @@ export function FinalizeRolesDialog({
         <DialogHeader>
           <DialogTitle>Finalize Team</DialogTitle>
           <DialogDescription>
-            This will update user roles for the exec team for next term. This
-            action affects all current exec and admin members.
+            This will update user roles for the exec team for next term. This action affects all
+            current exec and admin members.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-2 rounded-md bg-muted/50 p-4 text-sm">
           <p>
-            <strong>{presCount}</strong> member{presCount === 1 ? "" : "s"} will
-            be set to <strong>pres</strong> (Presidents)
+            <strong>{presCount}</strong> member{presCount === 1 ? "" : "s"} will be set to{" "}
+            <strong>pres</strong> (Presidents)
           </p>
           <p>
-            <strong>{adminCount}</strong> member{adminCount === 1 ? "" : "s"}{" "}
-            will be set to <strong>admin</strong> (VPs)
+            <strong>{adminCount}</strong> member{adminCount === 1 ? "" : "s"} will be set to{" "}
+            <strong>admin</strong> (VPs)
           </p>
           <p>
-            <strong>{execCount}</strong> member{execCount === 1 ? "" : "s"} will
-            be set to <strong>exec</strong>
+            <strong>{execCount}</strong> member{execCount === 1 ? "" : "s"} will be set to{" "}
+            <strong>exec</strong>
           </p>
           <p className="text-muted-foreground">
             All other current execs, admins, and presidents will be demoted to{" "}

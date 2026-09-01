@@ -94,7 +94,7 @@ export class ApplicationRepository extends BaseRepository {
 
   async getApplicationByUserAndTerm(
     profileId: string,
-    termId: string,
+    termId: string
   ): Promise<ApplicationWithDetails | null> {
     const apps = await this.sql<Application[]>`
       SELECT
@@ -177,7 +177,7 @@ export class ApplicationRepository extends BaseRepository {
   async updateApplication(
     id: string,
     userId: string,
-    data: UpdateApplicationData,
+    data: UpdateApplicationData
   ): Promise<Application | null> {
     const result = await this.sql<Application[]>`
       UPDATE hiring.applications
@@ -202,7 +202,7 @@ export class ApplicationRepository extends BaseRepository {
 
   async upsertPositionSelections(
     applicationId: string,
-    selections: PositionSelectionInput[],
+    selections: PositionSelectionInput[]
   ): Promise<void> {
     await this.sql`
       DELETE FROM hiring.application_position_selections
@@ -218,10 +218,7 @@ export class ApplicationRepository extends BaseRepository {
     }
   }
 
-  async upsertAnswers(
-    applicationId: string,
-    answers: AnswerInput[],
-  ): Promise<void> {
+  async upsertAnswers(applicationId: string, answers: AnswerInput[]): Promise<void> {
     await this.sql`
       DELETE FROM hiring.answers
       WHERE application_id = ${applicationId}

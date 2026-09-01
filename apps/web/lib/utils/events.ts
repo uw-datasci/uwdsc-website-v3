@@ -3,13 +3,38 @@ import type { Event } from "@uwdsc/common/types";
 import { formatEventDescription } from "@uwdsc/common/utils";
 
 /**
- * Format an ISO date string for display (e.g. "MMM d, yyyy h:mm a").
+ * Format an ISO date string (or Date from postgres.js) for display (e.g. "MMM d, yyyy h:mm a").
  */
-export function formatDateTime(iso: string): string {
+export function formatDateTime(value: string | Date): string {
   try {
-    return format(parseISO(iso), "MMM d, yyyy h:mm a");
+    const date = value instanceof Date ? value : parseISO(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+
+    return format(date, "MMM d, yyyy h:mm a");
   } catch {
-    return iso;
+    return String(value);
+  }
+}
+
+/**
+ * Waterloo term label for a date: Jan-Apr Winter, May-Aug Spring, Sep-Dec Fall.
+ * Used to group the workshop archive by term.
+ */
+export function getTermLabel(value: string | Date): string {
+  try {
+    const date = value instanceof Date ? value : parseISO(value);
+    if (Number.isNaN(date.getTime())) return "";
+
+    const month = date.getMonth(); // 0-indexed
+    const year = date.getFullYear();
+    let term: string;
+    if (month <= 3) term = "Winter";
+    else if (month <= 7) term = "Spring";
+    else term = "Fall";
+
+    return `${term} ${year}`;
+  } catch {
+    return "";
   }
 }
 

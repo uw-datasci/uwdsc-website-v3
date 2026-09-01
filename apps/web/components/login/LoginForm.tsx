@@ -1,9 +1,5 @@
 "use client";
-import {
-  LoginFormValues,
-  loginSchema,
-  loginDefaultValues,
-} from "@/lib/schemas/login";
+import { LoginFormValues, loginSchema, loginDefaultValues } from "@/lib/schemas/login";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
@@ -57,9 +53,7 @@ export function LoginForm() {
         setUserEmail(err.details.email);
         setShowVerifyModal(true);
       } else {
-        setAuthError(
-          err.message ?? "An unexpected error occurred. Please try again.",
-        );
+        setAuthError(err.message ?? "An unexpected error occurred. Please try again.");
       }
     } finally {
       setIsLoading(false);
@@ -69,10 +63,7 @@ export function LoginForm() {
   return (
     <>
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-4"
-        >
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <FormField
             control={form.control}
             name="email"
@@ -96,9 +87,7 @@ export function LoginForm() {
           />
 
           {/* Show Authentication error */}
-          {authError && (
-            <div className="text-red-400 text-base">{authError}</div>
-          )}
+          {authError && <div className="text-red-400 text-base">{authError}</div>}
           <div>
             <Button
               size="lg"

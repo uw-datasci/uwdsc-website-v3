@@ -117,7 +117,7 @@ export function useQuestionsDashboard() {
       });
       setDialogOpen(true);
     },
-    [form],
+    [form]
   );
 
   const openView = useCallback(
@@ -135,7 +135,7 @@ export function useQuestionsDashboard() {
       });
       setDialogOpen(true);
     },
-    [form],
+    [form]
   );
 
   const submitQuestion = useCallback(
@@ -160,7 +160,7 @@ export function useQuestionsDashboard() {
         setSaving(false);
       }
     },
-    [dialogMode, editing, load],
+    [dialogMode, editing, load]
   );
 
   const confirmDelete = useCallback(async () => {

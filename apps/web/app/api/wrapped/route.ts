@@ -1,39 +1,37 @@
-import { ApiResponse } from "@uwdsc/common/utils";
+import { RaftResponse } from "@uw-datasci/raft";
+import { withRaftRoute } from "@uwdsc/core/http";
 import { eventService, profileService } from "@uwdsc/core";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 import { WRAPPED_SLIDES } from "@/components/wrapped/slides";
 import type { WrappedEvent } from "@uwdsc/common/types";
 import type { HeroSlideData, WrappedSlideData } from "@/components/wrapped/types";
 
+// TODO: refactor functions into appropriate files (service layers, utils, etc.)
+
 /**
  * GET /api/wrapped
  * Authenticated endpoint for DSC Wrapped slide data.
  */
-export async function GET(): Promise<Response> {
-  try {
-    const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (!user) return isUnauthorized;
+export const GET = withRaftRoute(async () => {
+  const { user, isUnauthorized } = await tryGetCurrentUser();
+  if (!user) return isUnauthorized;
 
-    const [events, profileStats] = await Promise.all([
-      eventService.getWrappedEventStats(user.id),
-      profileService.getWrappedProfileStats(user.id),
-    ]);
+  const [events, profileStats] = await Promise.all([
+    eventService.getWrappedEventStats(user.id),
+    profileService.getWrappedProfileStats(user.id),
+  ]);
 
-    return ApiResponse.ok({
-      slides: buildWrappedSlides({
-        events,
-        memberSince: profileStats?.created_at,
-        passwordResetCount: profileStats?.password_reset_count ?? 0,
-        minutesOnWebsite: profileStats?.minutes_on_website ?? 0,
-        isChronicallyOnline: profileStats?.is_chronically_online ?? false,
-        isDscFan: profileStats?.is_dsc_fan ?? false,
-      }),
-    });
-  } catch (error: unknown) {
-    console.error("Error fetching wrapped slides:", error);
-    return ApiResponse.serverError(error, "Failed to fetch wrapped slides");
-  }
-}
+  return RaftResponse.ok({
+    slides: buildWrappedSlides({
+      events,
+      memberSince: profileStats?.created_at,
+      passwordResetCount: profileStats?.password_reset_count ?? 0,
+      minutesOnWebsite: profileStats?.minutes_on_website ?? 0,
+      isChronicallyOnline: profileStats?.is_chronically_online ?? false,
+      isDscFan: profileStats?.is_dsc_fan ?? false,
+    }),
+  });
+});
 
 /** Swatch colors cycled across the nutshell rows, matching the Figma palette. */
 const NUTSHELL_COLORS = ["#9cd8ea", "#ff8f64", "#ff7075", "#ccda96", "#e6c6e0"];
@@ -136,7 +134,7 @@ function buildHeroSlide(
     minutesOnWebsite: number;
     isChronicallyOnline: boolean;
     isDscFan: boolean;
-  },
+  }
 ): HeroSlideData | null {
   switch (slide.id) {
     case "top-event":

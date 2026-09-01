@@ -48,7 +48,7 @@ function wallClockInZoneToUtcIso(
   hours: number,
   minutes: number,
   seconds: number,
-  timeZone: string,
+  timeZone: string
 ): string {
   const utcGuess = Date.UTC(year, month, day, hours, minutes, seconds);
   const formatter = new Intl.DateTimeFormat("en-US", {
@@ -67,7 +67,7 @@ function wallClockInZoneToUtcIso(
     const values = Object.fromEntries(
       zonedParts
         .filter((part) => part.type !== "literal")
-        .map((part) => [part.type, Number(part.value)]),
+        .map((part) => [part.type, Number(part.value)])
     ) as Record<Intl.DateTimeFormatPartTypes, number>;
 
     const asUtc = Date.UTC(
@@ -76,7 +76,7 @@ function wallClockInZoneToUtcIso(
       values.day,
       values.hour % 24,
       values.minute,
-      values.second,
+      values.second
     );
     return asUtc - utcMs;
   };
@@ -104,7 +104,7 @@ export function utcIsoToPickerValue(iso: string): string {
     parts.day,
     parts.hour,
     parts.minute,
-    parts.second,
+    parts.second
   ).toISOString();
 }
 
@@ -120,7 +120,7 @@ export function pickerValueToUtcIso(pickerIso: string): string {
     pickerDate.getHours(),
     pickerDate.getMinutes(),
     pickerDate.getSeconds(),
-    EVENT_TIMEZONE,
+    EVENT_TIMEZONE
   );
 }
 
@@ -303,7 +303,7 @@ export type EventCsvHeader = (typeof EVENT_CSV_HEADERS)[number];
 export function getEventCsvValue(
   row: EventWithAttendanceCount,
   key: string,
-  terms: Term[],
+  terms: Term[]
 ): unknown {
   switch (key as EventCsvHeader) {
     case "name":
@@ -316,8 +316,7 @@ export function getEventCsvValue(
       return row.location;
     case "attendance": {
       if (new Date(row.end_time) >= new Date()) return "";
-      if (row.attendance_count === 0 && getEventTerm(row, terms) === null)
-        return "N/A";
+      if (row.attendance_count === 0 && getEventTerm(row, terms) === null) return "N/A";
       return row.attendance_count;
     }
     case "term": {

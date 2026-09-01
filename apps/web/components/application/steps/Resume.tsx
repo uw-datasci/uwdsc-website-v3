@@ -40,8 +40,7 @@ export function Resume({ form }: ResumeProps) {
       }
 
       const allowed = ["application/pdf", "application/msword"];
-      const docx =
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+      const docx = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
       if (!allowed.includes(file.type) && file.type !== docx) {
         setUploadError("Allowed formats: PDF, DOC, DOCX");
         return;
@@ -59,7 +58,7 @@ export function Resume({ form }: ResumeProps) {
         e.target.value = "";
       }
     },
-    [form],
+    [form]
   );
 
   const resumeKey = form.watch("resumeKey");
@@ -137,9 +136,7 @@ export function Resume({ form }: ResumeProps) {
                       disabled={isUploading}
                     />
                     {statusIcon}
-                    <span className="mt-2 text-sm text-slate-300">
-                      {statusLabel}
-                    </span>
+                    <span className="mt-2 text-sm text-slate-300">{statusLabel}</span>
                     <span className="mt-1 text-xs text-slate-500">
                       PDF, DOC, or DOCX (max {MAX_SIZE_MB} MB)
                     </span>
@@ -148,12 +145,10 @@ export function Resume({ form }: ResumeProps) {
                 </div>
               </FormControl>
               <FormDescription>
-                Upload your resume as a PDF or Word document. It will be shared
-                with the selection committee.
+                Upload your resume as a PDF or Word document. It will be shared with the
+                selection committee.
               </FormDescription>
-              {uploadError && (
-                <p className="text-sm text-destructive">{uploadError}</p>
-              )}
+              {uploadError && <p className="text-sm text-destructive">{uploadError}</p>}
               <FormMessage />
             </FormItem>
           )}

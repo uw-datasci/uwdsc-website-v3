@@ -64,6 +64,7 @@ interface MembershipsTableProps {
 
 const MEMBERSHIP_CSV_HEADERS = [
   "name",
+  "email",
   "wat_iam",
   "user_role",
   "has_paid",

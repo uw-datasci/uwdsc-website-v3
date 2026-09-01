@@ -1,5 +1,5 @@
 import { ApiResponse } from "@uwdsc/common/utils";
-import { isAdmin } from "@uwdsc/common/constants";
+import { isAdmin, readRoleClaims } from "@uwdsc/common/constants";
 import { applicationService } from "@uwdsc/admin";
 import { withAuth } from "@/guards/withAuth";
 import { createAuthService, createResumeService } from "@/lib/services";
@@ -18,9 +18,9 @@ export const GET = withAuth(async (_request, _context, user) => {
       createAuthService(),
     ]);
 
-    const portalRole = user.app_metadata?.role as string | undefined;
-    const scope = await authService.getScopeForUser(user.id, portalRole);
-    const canUsePositionReview = isAdmin(portalRole);
+    const claims = readRoleClaims(user.app_metadata);
+    const scope = await authService.getScopeForUser(claims);
+    const canUsePositionReview = isAdmin(claims.role);
 
     // Hydrate resume_url with signed URLs from private storage bucket
     const applicationsWithResumes = await Promise.all(

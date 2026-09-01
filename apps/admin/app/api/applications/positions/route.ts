@@ -21,7 +21,8 @@ export const GET = withPresAccess(async () => {
 
 /**
  * POST /api/applications/positions
- * Open an exec position for applications. President only.
+ * Open an exec position for applications. Idempotent -- re-opening a
+ * previously-closed role reuses its existing apa id. President only.
  */
 export const POST = withPresAccess(async (request) => {
   try {
@@ -33,7 +34,7 @@ export const POST = withPresAccess(async (request) => {
       );
     }
 
-    const created = await applicationService.addAvailablePosition(
+    const created = await applicationService.openAvailablePosition(
       parsed.data.positionId,
     );
     return ApiResponse.ok({ success: true, availableId: created.id });

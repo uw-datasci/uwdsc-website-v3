@@ -14,3 +14,9 @@ export type Subteam = {
   name: string;
   members: ExecMember[];
 };
+
+/** `{ id, name }` row from `org.subteams`, for pickers and filters. */
+export type SubteamOption = {
+  id: number;
+  name: string;
+};

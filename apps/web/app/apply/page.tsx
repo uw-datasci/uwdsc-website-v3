@@ -20,6 +20,7 @@ import {
   buildPositionSelections,
   collectAllAnswers,
   isStepValid,
+  openPositionSelection,
   partitionDraftAnswers,
 } from "@/lib/utils/application";
 import { useApplicationStepStorage } from "@/hooks/useApplicationStepStorage";
@@ -38,8 +39,8 @@ import {
   Submitted,
 } from "@/components/application/steps";
 import { STEP_NAMES } from "@/constants/application";
-import type { PositionWithQuestions, Term } from "@uwdsc/common/types";
-import { formatTermCode, getNextTermCode } from "@uwdsc/common/utils";
+import type { GeneralQuestion, PositionWithQuestions, Term } from "@uwdsc/common/types";
+import { formatTermCode, getNextTermCode, isApplicationWindowOpen } from "@uwdsc/common/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { Loader2, MoveLeft, MoveRight, User } from "lucide-react";
 import { Button, Card, CardHeader, CardTitle, CardContent } from "@uwdsc/ui";
@@ -62,17 +63,7 @@ const slideVariants = {
 export default function ApplyPage() {
   const [currentTerm, setCurrentTerm] = useState<Term | null>(null);
   const [positions, setPositions] = useState<PositionWithQuestions[]>([]);
-  const [generalQuestionIds, setGeneralQuestionIds] = useState<string[]>([]);
-  const [generalQuestions, setGeneralQuestions] = useState<
-    {
-      id: string;
-      question_text: string;
-      type: "text" | "textarea";
-      sort_order: number;
-      placeholder: string | null;
-      max_length: number | null;
-    }[]
-  >([]);
+  const [generalQuestions, setGeneralQuestions] = useState<GeneralQuestion[]>([]);
   const [applicationId, setApplicationId] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [direction, setDirection] = useState<number>(1);
@@ -105,7 +96,6 @@ export default function ApplyPage() {
           getProfileAutofill(),
         ]);
         setPositions(positionsData.positions);
-        setGeneralQuestionIds(positionsData.generalQuestions.map((q) => q.id));
         setGeneralQuestions(positionsData.generalQuestions);
 
         const fullName =
@@ -157,11 +147,14 @@ export default function ApplyPage() {
           location: existing.location ?? "",
           club_experience: existing.club_experience ?? undefined,
           general_answers: generalAnswers,
-          position_1: pos1?.position_id ?? "",
+          // Drop a saved pick if that position has since been closed -- otherwise
+          // the select renders blank (its name isn't in the open options list)
+          // while the form still silently holds the stale id.
+          position_1: openPositionSelection(pos1, positionsData),
           position_1_answers: pos1Answers,
-          position_2: pos2?.position_id ?? "",
+          position_2: openPositionSelection(pos2, positionsData),
           position_2_answers: pos2Answers,
-          position_3: pos3?.position_id ?? "",
+          position_3: openPositionSelection(pos3, positionsData),
           position_3_answers: pos3Answers,
           linkedin_url: existing.linkedin_url ?? "",
           github_url: existing.github_url ?? "",
@@ -215,11 +208,13 @@ export default function ApplyPage() {
             club_experience: values.club_experience,
           };
         case 2:
-          return { answers: collectAllAnswers(values) };
+          return {
+            answers: collectAllAnswers(values, { positions, generalQuestions }),
+          };
         case 3:
           return {
             position_selections: buildPositionSelections(values),
-            answers: collectAllAnswers(values),
+            answers: collectAllAnswers(values, { positions, generalQuestions }),
           };
         case 4:
           return {
@@ -231,7 +226,7 @@ export default function ApplyPage() {
           return {};
       }
     },
-    [form],
+    [form, positions, generalQuestions],
   );
 
   const goToStep = useCallback(
@@ -265,13 +260,11 @@ export default function ApplyPage() {
 
   const renderButton = () => {
     const isLastStep = currentStep === 4;
-    const isPastHardDeadline = Boolean(
-      currentTerm && new Date() > new Date(currentTerm.application_hard_deadline),
-    );
+    const isPastHardDeadline = !isApplicationWindowOpen(currentTerm);
     const isValid =
       isStepValid(form, currentStep, {
         positions,
-        generalQuestionIds,
+        generalQuestions,
       }) || false;
     const isButtonDisabled = !isValid || isLoading || (isLastStep && isPastHardDeadline);
 

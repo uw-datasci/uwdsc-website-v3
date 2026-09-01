@@ -18,5 +18,4 @@ export interface FoundryLaunchPayload {
   postgresProvider?: string;
   mongoClient?: string;
   extras: { redis: boolean; s3: boolean };
-  description: string;
 }

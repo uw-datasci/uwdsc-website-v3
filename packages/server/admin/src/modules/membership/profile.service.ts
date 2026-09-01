@@ -8,6 +8,7 @@ import {
   UserRole,
 } from "@uwdsc/common/types";
 import { filterPartialUpdate } from "@uwdsc/common/utils";
+import { roleRequiresSubteam } from "@uwdsc/common/constants";
 
 const UPDATE_MEMBER_COLUMNS = [
   "first_name",
@@ -123,14 +124,37 @@ class ProfileService {
   }
 
   /**
-   * Update a member's role (president-only; enforced by the API route guard).
+   * Update a member's role and subteam (president-only; enforced by the API route guard).
+   *
+   * `member` and `alum` carry no subteam; `exec`, `admin`, and `pres` must have one.
+   * The same rule is enforced by the `user_roles_subteam_matches_role` check constraint —
+   * checking it here turns a constraint violation into a clean 400.
    */
   async updateMemberRole(
     profileId: string,
     role: UserRole,
+    subteamId: number | null,
   ): Promise<{ success: boolean; error?: string }> {
+    if (!roleRequiresSubteam(role) && subteamId !== null) {
+      return {
+        success: false,
+        error: `The ${role} role cannot be assigned a subteam.`,
+      };
+    }
+
+    if (roleRequiresSubteam(role) && subteamId === null) {
+      return {
+        success: false,
+        error: `The ${role} role requires a subteam.`,
+      };
+    }
+
     try {
-      const result = await this.repository.updateRoleById(profileId, role);
+      const result = await this.repository.updateRoleById(
+        profileId,
+        role,
+        subteamId,
+      );
 
       if (!result) {
         return {

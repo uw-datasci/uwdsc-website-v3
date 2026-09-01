@@ -32,7 +32,7 @@ import {
 import { launchFoundryProject } from "@/lib/api/foundry";
 import { FOUNDRY_STEPS } from "@/constants/foundry";
 import { FOUNDRY_STEP_FIELDS, isFoundryStepValid } from "@/lib/utils/foundry";
-import { ProjectDetails, TechStack, Description, Introduction } from "./steps";
+import { ProjectDetails, TechStack, Introduction } from "./steps";
 
 type SubmitState = "idle" | "submitting" | "success" | "error";
 
@@ -120,9 +120,7 @@ function StateCard({
           </div>
           <div className="flex flex-col gap-1">
             <p className="text-lg font-semibold">{title}</p>
-            <p className="text-sm text-muted-foreground max-w-sm">
-              {description}
-            </p>
+            <p className="text-sm text-muted-foreground max-w-sm">{description}</p>
           </div>
           {actions}
         </CardContent>
@@ -173,10 +171,6 @@ export function FoundryForm() {
     control: form.control,
     name: "mongoClient",
   });
-  const watchedDescription = useWatch({
-    control: form.control,
-    name: "description",
-  });
 
   const isCurrentStepValid = useMemo(() => {
     return isFoundryStepValid(
@@ -188,7 +182,6 @@ export function FoundryForm() {
         database: watchedDatabase,
         postgresProvider: watchedPostgresProvider,
         mongoClient: watchedMongoClient,
-        description: watchedDescription,
       },
       step,
     );
@@ -200,7 +193,6 @@ export function FoundryForm() {
     watchedDatabase,
     watchedPostgresProvider,
     watchedMongoClient,
-    watchedDescription,
     step,
   ]);
   const goNext = async () => {
@@ -222,9 +214,7 @@ export function FoundryForm() {
       await launchFoundryProject(data);
       setSubmitState("success");
     } catch (err) {
-      setErrorMessage(
-        err instanceof Error ? err.message : "An unexpected error occurred.",
-      );
+      setErrorMessage(err instanceof Error ? err.message : "An unexpected error occurred.");
       setSubmitState("error");
     }
   };
@@ -245,8 +235,6 @@ export function FoundryForm() {
         return <ProjectDetails />;
       case 3:
         return <TechStack />;
-      case 4:
-        return <Description />;
       default:
         return null;
     }
@@ -377,9 +365,7 @@ export function FoundryForm() {
                 <div key={s.id} className="flex-1">
                   <p
                     className={`text-xs transition-colors ${
-                      step === s.id
-                        ? "text-foreground font-medium"
-                        : "text-muted-foreground"
+                      step === s.id ? "text-foreground font-medium" : "text-muted-foreground"
                     }`}
                   >
                     {s.title}
@@ -410,12 +396,7 @@ export function FoundryForm() {
               </CardContent>
 
               <CardFooter className="flex justify-between pt-4">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={goBack}
-                  disabled={step === 1}
-                >
+                <Button type="button" variant="ghost" onClick={goBack} disabled={step === 1}>
                   <ChevronLeft className="size-4" />
                   Back
                 </Button>

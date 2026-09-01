@@ -7,7 +7,10 @@ import {
   type QuestionPositionOption,
   type QuestionScope,
   type QuestionUpsertInput,
+  type Term,
+  type TermScheduleInput,
 } from "@uwdsc/common/types";
+import { DEFAULT_QUESTION_PLACEHOLDER } from "@uwdsc/common/constants";
 import { ApplicationRepository } from "./application.repository";
 
 class ApplicationService {
@@ -122,15 +125,13 @@ class ApplicationService {
     }
   }
 
-  /** Open a position for applications by adding it to application_positions_available. */
-  async addAvailablePosition(execPositionId: number): Promise<{ id: number }> {
-    const existing = await this.repository.getAvailablePositionByExecPositionId(execPositionId);
-    if (existing) {
-      throw new ApiError("This position is already open for applications", 409);
-    }
-
+  /**
+   * Open a position for applications. Idempotent (upsert), so re-opening a
+   * previously-closed role reuses its existing apa id instead of erroring.
+   */
+  async openAvailablePosition(execPositionId: number): Promise<{ id: number }> {
     try {
-      return await this.repository.addAvailablePosition(execPositionId);
+      return await this.repository.openAvailablePosition(execPositionId);
     } catch (error) {
       throw new ApiError(
         `Failed to open position for applications: ${(error as Error).message}`,
@@ -140,28 +141,41 @@ class ApplicationService {
   }
 
   /**
-   * Close a position for applications. Blocked if any applicant has already
-   * selected it, to avoid orphaning submitted application data.
+   * Close a position for applications. This is a soft close (`is_open =
+   * false`), not a delete, so it never disturbs applicants who already
+   * selected the role -- their `application_position_selections` and the
+   * role's `position_questions` are left exactly as they were. The role just
+   * stops appearing as an option for new applicants going forward.
    *
    * Only affects the external application. Returning-exec role preferences
    * reference `org.exec_positions` directly and are intentionally unaffected.
    */
-  async removeAvailablePosition(availableId: number): Promise<void> {
-    const selectionCount =
-      await this.repository.getSelectionCountForAvailablePosition(availableId);
-    if (selectionCount > 0) {
-      throw new ApiError("Cannot remove a position that applicants have already selected", 409);
-    }
-
+  async closeAvailablePosition(availableId: number): Promise<void> {
     try {
-      const removed = await this.repository.removeAvailablePosition(availableId);
-      if (!removed) throw new ApiError("Position not found", 404);
+      const closed = await this.repository.closeAvailablePosition(availableId);
+      if (!closed) throw new ApiError("Position not found", 404);
     } catch (error) {
       if (error instanceof ApiError) throw error;
       throw new ApiError(
-        `Failed to remove available position: ${(error as Error).message}`,
+        `Failed to close available position: ${(error as Error).message}`,
         500,
       );
+    }
+  }
+
+  /**
+   * Update the active term's application schedule. President-only; callers
+   * must already have enforced `scope.isPresident` via the withPresAccess
+   * guard. Throws 404 if there is no active term.
+   */
+  async updateActiveTermSchedule(input: TermScheduleInput): Promise<Term> {
+    try {
+      const updated = await this.repository.updateActiveTermSchedule(input);
+      if (!updated) throw new ApiError("No active term to update", 404);
+      return updated;
+    } catch (error) {
+      if (error instanceof ApiError) throw error;
+      throw new ApiError(`Failed to update term schedule: ${(error as Error).message}`, 500);
     }
   }
 
@@ -184,7 +198,10 @@ class ApplicationService {
       throw new ApiError("You can only create questions for your VP position scope", 403);
     }
     try {
-      return await this.repository.createQuestion(data);
+      return await this.repository.createQuestion({
+        ...data,
+        placeholder: data.placeholder?.trim() || DEFAULT_QUESTION_PLACEHOLDER,
+      });
     } catch (error) {
       throw new ApiError(
         `Failed to create application question: ${(error as Error).message}`,

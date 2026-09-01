@@ -6,10 +6,10 @@ import {
   ClipboardCheck,
   Code2,
   FileText,
-  ListChecks,
   Package,
   Library,
   Mail,
+  Settings,
   UserCheck,
   Users,
 } from "lucide-react";
@@ -25,7 +25,6 @@ export const getAdminNavigation = (
 ) => {
   const onboardingOpen = logisticsWindows?.onboardingOpen ?? false;
   const returningExecOpen = logisticsWindows?.returningExecOpen ?? false;
-
   const applicationSubItems = [
     {
       name: "Questions",
@@ -36,9 +35,9 @@ export const getAdminNavigation = (
       ? [
           { name: "Hiring", href: "/applications/hiring", icon: UserCheck },
           {
-            name: "Positions",
-            href: "/applications/positions",
-            icon: ListChecks,
+            name: "Settings",
+            href: "/applications/settings",
+            icon: Settings,
           },
         ]
       : []),

@@ -21,6 +21,7 @@ export interface Member {
   term: string | null;
   is_math_soc_member: boolean;
   user_role: UserRole;
+  subteam_id: number | null;
   has_paid: boolean;
   payment_method: PaymentMethod | null;
   payment_location: string | null;

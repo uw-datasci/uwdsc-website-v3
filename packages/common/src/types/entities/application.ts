@@ -125,3 +125,15 @@ export interface ManagablePosition {
   available_id: number | null;
   is_available: boolean;
 }
+
+/**
+ * Payload for updating the active term's application schedule from
+ * `/applications/settings`. The soft deadline is display-only (countdown,
+ * due-date pill); the hard deadline gates the apply page and every
+ * application API.
+ */
+export interface TermScheduleInput {
+  application_release_date: string;
+  application_soft_deadline: string;
+  application_hard_deadline: string;
+}

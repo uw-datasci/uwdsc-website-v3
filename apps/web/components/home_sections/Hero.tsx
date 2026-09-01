@@ -8,6 +8,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CountingNumber, GlassSurface, HeroSplineBackground } from "@uwdsc/ui";
 import { Profile } from "@uwdsc/common/types";
+import { HeroApplyBadge } from "./HeroApplyCallout";
+import { useApplyWindow } from "@/hooks/useApplyWindow";
 
 interface HeroProps {
   user: Profile | null;
@@ -18,6 +20,21 @@ export default function Hero({ user, mutate }: Readonly<HeroProps>) {
   const [memberCount, setMemberCount] = useState(0);
   const [eventCount, setEventCount] = useState(0);
   const router = useRouter();
+  const { open: applyOpen } = useApplyWindow();
+
+  // While applications are open, applying is the primary action for a signed-in
+  // member. Signed-out visitors still go to /register — /apply needs a session
+  // (its term lookup 401s), so registering is the real first step.
+  const showApplyCta = applyOpen && Boolean(user);
+  let ctaHref = "/register";
+  let ctaLabel = "Sign up →";
+  if (showApplyCta) {
+    ctaHref = "/apply";
+    ctaLabel = "Apply now →";
+  } else if (user) {
+    ctaHref = "/events";
+    ctaLabel = "Check in for an event →";
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -85,6 +102,7 @@ export default function Hero({ user, mutate }: Readonly<HeroProps>) {
 
       {/* Title + Description */}
       <div className="z-10 mt-20 flex max-w-4xl flex-col gap-6 px-8 sm:gap-10 text-center">
+        <HeroApplyBadge />
         <h1 className="text-3xl font-bold sm:text-5xl md:text-6xl xl:text-7xl leading-normal tracking-wide">
           University of Waterloo <br /> Data Science Club
         </h1>
@@ -120,7 +138,7 @@ export default function Hero({ user, mutate }: Readonly<HeroProps>) {
         </div>
       )}
 
-      {/* Check-in button */}
+      {/* Primary CTA — applying takes over from check-in while apps are open */}
       <div className={`z-10 w-fit lg:mt-10`}>
         <GlassSurface
           width="100%"
@@ -129,10 +147,10 @@ export default function Hero({ user, mutate }: Readonly<HeroProps>) {
           className={`${user ? "px-4 py-2" : "px-3 py-1"} md:px-6 md:py-3 overflow-visible! hover:cursor-pointer hover:scale-105 transition-transform duration-200`}
         >
           <Link
-            href={user ? "/events" : "/register"}
+            href={ctaHref}
             className="text-base md:text-xl font-medium flex items-center w-full justify-center hover:cursor-pointer"
           >
-            {user ? "Check in for an event →" : "Sign up →"}
+            {ctaLabel}
           </Link>
         </GlassSurface>
       </div>

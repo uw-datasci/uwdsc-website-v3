@@ -9,13 +9,16 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { renderTextField, Form, FormField, Button } from "@uwdsc/ui";
-import { Loader2, Mail } from "lucide-react";
+import { Loader2, Mail, UserX } from "lucide-react";
 import Link from "next/link";
 import { forgotPassword } from "@/lib/api/auth";
+
+type ForgotPasswordStatus = "form" | "success" | "notFound";
 
 export function ForgotPasswordForm() {
   const [authError, setAuthError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState<ForgotPasswordStatus>("form");
   const [submittedEmail, setSubmittedEmail] = useState<string>("");
 
   const form = useForm<ForgotPasswordFormValues>({
@@ -31,7 +34,16 @@ export function ForgotPasswordForm() {
     try {
       await forgotPassword(data.email);
       setSubmittedEmail(data.email);
+      setStatus("success");
     } catch (error: unknown) {
+      const err = error as Error & { status?: number };
+
+      if (err.status === 404) {
+        setSubmittedEmail(data.email);
+        setStatus("notFound");
+        return;
+      }
+
       setAuthError(
         error instanceof Error
           ? error.message
@@ -42,24 +54,18 @@ export function ForgotPasswordForm() {
     }
   };
 
-  if (submittedEmail) {
+  if (status === "success") {
     return (
       <div className="flex flex-col gap-6 items-center text-center">
         <div className="relative">
           <div className="absolute inset-0 bg-purple-500/20 blur-2xl rounded-full animate-pulse" />
-          <Mail
-            className="w-16 h-16 text-purple-500 animate-bounce"
-            strokeWidth={1.5}
-          />
+          <Mail className="w-16 h-16 text-purple-500 animate-bounce" strokeWidth={1.5} />
         </div>
         <div className="flex flex-col gap-2">
           <h3 className="text-2xl font-semibold text-white">Check your inbox</h3>
           <p className="text-gray-300 text-base">
-            If an account exists for{" "}
-            <span className="font-semibold text-purple-400">
-              {submittedEmail}
-            </span>
-            , we&apos;ve sent a password reset link.
+            We&apos;ve sent a password reset link to{" "}
+            <span className="font-semibold text-purple-400">{submittedEmail}</span>.
           </p>
         </div>
         <Button
@@ -74,12 +80,50 @@ export function ForgotPasswordForm() {
     );
   }
 
+  if (status === "notFound") {
+    return (
+      <div className="flex flex-col gap-6 items-center text-center">
+        <div className="relative">
+          <div className="absolute inset-0 bg-red-500/20 blur-2xl rounded-full" />
+          <UserX className="w-16 h-16 text-red-400" strokeWidth={1.5} />
+        </div>
+        <div className="flex flex-col gap-2">
+          <h3 className="text-2xl font-semibold text-white">No account found</h3>
+          <p className="text-gray-300 text-base">
+            We couldn&apos;t find an account for{" "}
+            <span className="font-semibold text-red-400">{submittedEmail}</span>. Check the
+            email address or create a new account.
+          </p>
+        </div>
+        <div className="flex flex-col gap-2 items-center">
+          <Button
+            variant="link"
+            size="sm"
+            asChild
+            className="text-purple-400 hover:text-purple-300 transition-colors text-sm font-medium p-0"
+          >
+            <Link href="/register">Create an account</Link>
+          </Button>
+          <Button
+            variant="link"
+            size="sm"
+            onClick={() => {
+              setStatus("form");
+              setSubmittedEmail("");
+              setAuthError("");
+            }}
+            className="text-gray-400/60 hover:text-gray-200 transition-colors text-sm font-medium p-0"
+          >
+            Try a different email
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="flex flex-col gap-4"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <FormField
           control={form.control}
           name="email"
@@ -91,9 +135,7 @@ export function ForgotPasswordForm() {
           })}
         />
 
-        {authError && (
-          <div className="text-red-400 text-base">{authError}</div>
-        )}
+        {authError && <div className="text-red-400 text-base">{authError}</div>}
         <div>
           <Button
             size="lg"

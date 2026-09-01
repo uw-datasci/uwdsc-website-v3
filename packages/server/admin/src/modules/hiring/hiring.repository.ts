@@ -228,6 +228,7 @@ export class HiringRepository extends BaseRepository {
         a.full_name,
         ep.name AS position_name,
         ep.is_vp,
+        ep.subteam_id,
         st.name AS subteam_name,
         u.email
       FROM hiring.application_position_selections aps
@@ -241,8 +242,16 @@ export class HiringRepository extends BaseRepository {
     `;
   }
 
+  /**
+   * Promote the incoming team and demote everyone they replace, in one transaction.
+   *
+   * `role` and `subteam_id` are always written together: the
+   * `user_roles_subteam_matches_role` check constraint is evaluated per row per
+   * statement, so a promotion that set only the role would fail, and a demotion that
+   * left a stale subteam behind would too.
+   */
   async finalizeRoles(
-    newTeamRoles: { profileId: string; role: UserRole }[],
+    newTeamRoles: { profileId: string; role: UserRole; subteamId: number | null }[],
   ): Promise<{ demoted: number }> {
     const profileIds = newTeamRoles.map((m) => m.profileId);
 
@@ -250,10 +259,11 @@ export class HiringRepository extends BaseRepository {
       const tx = txRaw as unknown as Sql;
 
       // Promote new team members (every account already has a user_roles row)
-      for (const { profileId, role } of newTeamRoles) {
+      for (const { profileId, role, subteamId } of newTeamRoles) {
         await tx`
           UPDATE user_roles
-          SET role = ${role}
+          SET role = ${role},
+              subteam_id = ${subteamId}
           WHERE id = ${profileId}
         `;
       }
@@ -263,7 +273,8 @@ export class HiringRepository extends BaseRepository {
       if (profileIds.length > 0) {
         const result = await tx`
           UPDATE user_roles
-          SET role = 'alum'
+          SET role = 'alum',
+              subteam_id = NULL
           WHERE role IN ('exec', 'admin', 'pres')
             AND id NOT IN ${tx(profileIds)}
           RETURNING id
@@ -273,7 +284,8 @@ export class HiringRepository extends BaseRepository {
         // No new team - demote everyone
         const result = await tx`
           UPDATE user_roles
-          SET role = 'alum'
+          SET role = 'alum',
+              subteam_id = NULL
           WHERE role IN ('exec', 'admin', 'pres')
           RETURNING id
         `;

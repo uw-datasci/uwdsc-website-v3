@@ -1,6 +1,14 @@
 import { CompleteProfileData, Profile, ProfileUpdateData } from "@uwdsc/common/types";
 import { BaseRepository } from "@uwdsc/db/base.repository";
 
+export interface WrappedProfileStats {
+  created_at: string;
+  password_reset_count: number;
+  minutes_on_website: number;
+  is_chronically_online: boolean;
+  is_dsc_fan: boolean;
+}
+
 export class ProfileRepository extends BaseRepository {
   /**
    * Total number of profiles (registered users).
@@ -130,6 +138,39 @@ export class ProfileRepository extends BaseRepository {
       return result.length > 0;
     } catch (error: unknown) {
       console.error("Error updating profile photo key:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get profile fields needed for DSC Wrapped.
+   */
+  async getWrappedProfileStats(userId: string): Promise<WrappedProfileStats | null> {
+    try {
+      const result = await this.sql<
+        Pick<WrappedProfileStats, "created_at" | "password_reset_count">[]
+      >`
+        SELECT
+          created_at,
+          password_reset_count
+        FROM profiles
+        WHERE id = ${userId}
+        LIMIT 1
+      `;
+
+      const profileStats = result[0];
+      if (!profileStats) return null;
+
+      return {
+        ...profileStats,
+        // TODO(wrapped-activity): Replace these hard-coded values with
+        // website-activity and top-percentile queries.
+        minutes_on_website: 0,
+        is_chronically_online: false,
+        is_dsc_fan: false,
+      };
+    } catch (error: unknown) {
+      console.error("Error fetching wrapped profile stats:", error);
       throw error;
     }
   }

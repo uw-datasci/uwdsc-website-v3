@@ -1,7 +1,7 @@
 import { AuthRepository } from "./auth.repository";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { ApiError, type QuestionScope, LoginData, RegisterData } from "@uwdsc/common/types";
-import { isPresident } from "@uwdsc/common/constants";
+import { isAdmin, isPresident, type RoleClaims } from "@uwdsc/common/constants";
 
 const DUPLICATE_EMAIL_MESSAGE =
   "An account with this email already exists. Please sign in instead.";
@@ -239,6 +239,16 @@ export class AuthService {
    */
   async forgotPassword(email: string, emailRedirectTo: string) {
     try {
+      const userExists = await this.repository.authUserExistsByEmail(email);
+
+      if (!userExists) {
+        return {
+          success: false,
+          userNotFound: true,
+          error: "No account found with this email address.",
+        };
+      }
+
       const { error } = await this.repository.resetPasswordForEmail(email, emailRedirectTo);
 
       if (error) {
@@ -284,49 +294,40 @@ export class AuthService {
   }
 
   /**
-   * Resolve VP / Presidents scope for application-question CRUD (admin).
-   * Presidents see all positions; other VPs see roles in their subteam(s) (all APA rows whose
-   * exec position shares a subteam with any VP role they hold).
+   * Resolve VP / Presidents scope for application-question CRUD and role-preference review.
    *
-   * President status is driven purely by `user_role === "pres"` (see `isPresident`), not by
-   * exec_team membership — pass the caller's `app_metadata.role` so it can be resolved.
+   * Scope comes entirely from the caller's role claims (`user_roles.role` +
+   * `user_roles.subteam_id`, mirrored into Supabase `app_metadata` by the `on_role_upsert`
+   * trigger) — `org.exec_team` is display data and is deliberately not consulted here.
+   *
+   * Presidents are unscoped: every consumer short-circuits on `scope.isPresident` before
+   * consulting the arrays, so returning empty arrays for them is correct and avoids two
+   * pointless queries. A VP whose subteam is somehow null gets an empty scope rather than
+   * a wide one.
    */
-  async getScopeForUser(userId: string, role?: string | null): Promise<QuestionScope> {
-    const [roles, vpPositionIds, vpExecPositionIds] = await Promise.all([
-      this.repository.getExecTeamVpRolesForProfile(userId),
-      this.repository.getVpApplicationPositionIdsForProfile(userId),
-      this.repository.getVpExecPositionIdsForProfile(userId),
+  async getScopeForUser(claims: RoleClaims): Promise<QuestionScope> {
+    const scopeIsPresident = isPresident(claims.role);
+    const isVp = isAdmin(claims.role) && !scopeIsPresident;
+
+    if (!isVp || claims.subteamId === null) {
+      return {
+        isPresident: scopeIsPresident,
+        vpSubteamNames: [],
+        vpSubteamIds: [],
+        vpPositionIds: [],
+        vpExecPositionIds: [],
+      };
+    }
+
+    const [vpPositionIds, vpExecPositionIds] = await Promise.all([
+      this.repository.getApplicationPositionIdsForSubteam(claims.subteamId),
+      this.repository.getExecPositionIdsForSubteam(claims.subteamId),
     ]);
 
-    const hasVpExecRole = roles.some((r) => r.is_vp);
-    const scopeIsPresident = isPresident(role);
-    const vpSubteamNames = Array.from(
-      new Set(
-        roles
-          .filter(
-            (r) =>
-              r.is_vp &&
-              r.subteam_name !== null &&
-              r.subteam_name.trim().length > 0 &&
-              r.subteam_name !== "Presidents",
-          )
-          .map((r) => r.subteam_name as string),
-      ),
-    );
-
-    const vpSubteamIds = Array.from(
-      new Set(
-        roles
-          .filter((r) => r.is_vp && r.subteam_id !== null && r.subteam_name !== "Presidents")
-          .map((r) => r.subteam_id as number),
-      ),
-    );
-
     return {
-      hasVpExecRole,
-      isPresident: scopeIsPresident,
-      vpSubteamNames,
-      vpSubteamIds,
+      isPresident: false,
+      vpSubteamNames: claims.subteamName ? [claims.subteamName] : [],
+      vpSubteamIds: [claims.subteamId],
       vpPositionIds,
       vpExecPositionIds,
     };

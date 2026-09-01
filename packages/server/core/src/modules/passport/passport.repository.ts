@@ -9,7 +9,7 @@ export class PassportRepository extends BaseRepository {
     try {
       const result = await this.sql<ScannedMembership[]>`
         SELECT id, profile_id
-        FROM public.memberships
+        FROM membership.memberships
         WHERE id = ${membershipId}
           AND term_id = (SELECT id FROM public.terms WHERE is_active = true LIMIT 1)
         LIMIT 1

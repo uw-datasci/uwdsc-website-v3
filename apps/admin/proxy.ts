@@ -7,6 +7,7 @@ import {
   ALUM_ROLE,
   RETURNING_EXEC_PATH,
   WEB_COMPLETE_PROFILE_PATH,
+  readRoleClaims,
 } from "@uwdsc/common/constants";
 import { safeRedirect } from "@uwdsc/common/utils";
 
@@ -49,7 +50,7 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const role = user?.app_metadata.role as string | undefined;
+  const { role } = readRoleClaims(user?.app_metadata);
   const isAdmin = ADMIN_ROLES.has(role ?? "");
   const isAlum = role === ALUM_ROLE;
   const isLoginRoute = pathname == LOGIN_ROUTE;

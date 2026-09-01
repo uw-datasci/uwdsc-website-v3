@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import { Pause, Play } from "lucide-react";
 import { cn } from "@uwdsc/ui/lib/utils";
 import { WRAPPED_SLIDES } from "./slides";
@@ -128,6 +128,7 @@ export function WrappedStory({
   if (count === 0 || !slide) return null;
 
   return (
+    <MotionConfig reducedMotion="user">
     <div className="relative h-full w-full overflow-hidden">
       {/* Progress bar — one segment per slide, story-style. The active segment
           fills with the live timer progress; others are full/empty. */}
@@ -227,7 +228,7 @@ export function WrappedStory({
       />
 
       {/* Control hints — gesture + keybind. Auto-fades, returns while paused. */}
-      <AnimatePresence>
+      {/* <AnimatePresence>
         {(showHints || paused) && (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
@@ -242,7 +243,8 @@ export function WrappedStory({
             </p>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
     </div>
+    </MotionConfig>
   );
 }

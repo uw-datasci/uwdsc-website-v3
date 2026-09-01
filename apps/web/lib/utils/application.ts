@@ -1,7 +1,24 @@
 import type { PositionsWithQuestionsResponse } from "@/types/application";
 import { AppFormValues } from "@/lib/schemas/application";
 import { UseFormReturn } from "react-hook-form";
-import type { ApplicationWithDetails, PositionWithQuestions } from "@uwdsc/common/types";
+import { DEFAULT_ANSWER_MAX_LENGTH } from "@uwdsc/common/constants";
+import type {
+  ApplicationWithDetails,
+  GeneralQuestion,
+  PositionWithQuestions,
+} from "@uwdsc/common/types";
+
+export function answerMaxLength(question: { max_length: number | null }): number {
+  return question.max_length ?? DEFAULT_ANSWER_MAX_LENGTH;
+}
+
+function isAnswerComplete(
+  answer: string | undefined,
+  question: { max_length: number | null },
+): boolean {
+  const trimmed = answer?.trim() ?? "";
+  return trimmed.length >= 1 && trimmed.length <= answerMaxLength(question);
+}
 
 export function partitionDraftAnswers(
   existing: ApplicationWithDetails,
@@ -39,28 +56,84 @@ export function partitionDraftAnswers(
   return { generalAnswers, pos1Answers, pos2Answers, pos3Answers };
 }
 
-type AnswerPair = { question_id: string; answer_text: string };
-
-function recordToAnswerPairs(record: Record<string, string> | undefined): AnswerPair[] {
-  if (!record) return [];
-  return Object.entries(record)
-    .filter(([, text]) => text)
-    .map(([question_id, answer_text]) => ({ question_id, answer_text }));
+/**
+ * Resolve a saved position selection to a form value, dropping it if the
+ * position is no longer open. `positionsData.positions` only lists positions
+ * currently open for applications, so a role closed after the draft was
+ * saved won't be found here -- restoring its id verbatim would leave the
+ * select showing blank (its name isn't in the options list) while the form
+ * still silently held a stale id. Returning "" instead makes the field
+ * genuinely empty, so the required-field validation catches it and the
+ * applicant has to pick an open role.
+ */
+export function openPositionSelection(
+  selection: { position_id: string } | undefined,
+  positionsData: PositionsWithQuestionsResponse,
+): string {
+  if (!selection) return "";
+  const isOpen = positionsData.positions.some((p) => p.id === selection.position_id);
+  return isOpen ? selection.position_id : "";
 }
 
-/** Collect general + position answers into a single array for API payloads. */
-export function collectAllAnswers(values: {
-  general_answers?: Record<string, string>;
-  position_1_answers?: Record<string, string>;
-  position_2_answers?: Record<string, string>;
-  position_3_answers?: Record<string, string>;
-}): AnswerPair[] {
-  return [
-    ...recordToAnswerPairs(values.general_answers),
-    ...recordToAnswerPairs(values.position_1_answers),
-    ...recordToAnswerPairs(values.position_2_answers),
-    ...recordToAnswerPairs(values.position_3_answers),
+type AnswerPair = { question_id: string; answer_text: string };
+
+interface QuestionContext {
+  positions: PositionWithQuestions[];
+  generalQuestions: GeneralQuestion[];
+}
+
+/**
+ * Pick only the answers belonging to `questionIds`. Answers left behind by a
+ * previously selected position stay in form state under their own question ids,
+ * so keying off the expected ids drops them.
+ */
+function pickAnswers(
+  record: Record<string, string> | undefined,
+  questionIds: string[],
+): AnswerPair[] {
+  if (!record) return [];
+  const pairs: AnswerPair[] = [];
+  for (const question_id of questionIds) {
+    const answer_text = record[question_id];
+    if (answer_text) pairs.push({ question_id, answer_text });
+  }
+  return pairs;
+}
+
+/**
+ * Collect general + position answers into a single array for API payloads,
+ * scoped to the questions of the currently selected positions.
+ */
+export function collectAllAnswers(
+  values: {
+    general_answers?: Record<string, string>;
+    position_1?: string;
+    position_1_answers?: Record<string, string>;
+    position_2?: string;
+    position_2_answers?: Record<string, string>;
+    position_3?: string;
+    position_3_answers?: Record<string, string>;
+  },
+  context: QuestionContext,
+): AnswerPair[] {
+  const questionIdsFor = (positionId: string | undefined) =>
+    positionId
+      ? (context.positions.find((p) => p.id === positionId)?.questions ?? []).map((q) => q.id)
+      : [];
+
+  const pairs = [
+    ...pickAnswers(
+      values.general_answers,
+      context.generalQuestions.map((q) => q.id),
+    ),
+    ...pickAnswers(values.position_1_answers, questionIdsFor(values.position_1)),
+    ...pickAnswers(values.position_2_answers, questionIdsFor(values.position_2)),
+    ...pickAnswers(values.position_3_answers, questionIdsFor(values.position_3)),
   ];
+
+  // hiring.answers has no unique constraint on (application_id, question_id),
+  // so duplicates would insert as extra rows.
+  return [...new Map(pairs.map((p) => [p.question_id, p])).values()];
 }
 
 /** Build position_selections array from form position_1/2/3. */
@@ -76,21 +149,16 @@ export function buildPositionSelections(values: {
   return list;
 }
 
-interface ValidationContext {
-  positions: PositionWithQuestions[];
-  generalQuestionIds: string[];
-}
-
 /**
  * Checks if the current step in the application form is valid
  */
 export const isStepValid = (
   form: UseFormReturn<AppFormValues>,
   currentStep: number,
-  context: ValidationContext,
+  context: QuestionContext,
 ): boolean => {
   const { errors } = form.formState;
-  const { positions, generalQuestionIds } = context;
+  const { positions, generalQuestions } = context;
 
   switch (currentStep) {
     case 1: // Personal Details
@@ -113,11 +181,8 @@ export const isStepValid = (
     case 2: {
       // General - dynamic questions
       const generalAnswers = form.watch("general_answers") || {};
-      const allAnswered = generalQuestionIds.every(
-        (id) =>
-          generalAnswers[id] &&
-          generalAnswers[id].trim().length >= 1 &&
-          generalAnswers[id].trim().length <= 1000,
+      const allAnswered = generalQuestions.every((q) =>
+        isAnswerComplete(generalAnswers[q.id], q),
       );
       return !errors.general_answers && allAnswered;
     }
@@ -137,10 +202,9 @@ export const isStepValid = (
         if (!positionId) return true;
         const positionData = positions.find((p) => p.id === positionId);
         if (!positionData) return false;
-        return positionData.questions.every((q) => {
-          const answer = answers[q.id];
-          return answer && answer.trim().length >= 1 && answer.trim().length <= 1000;
-        });
+        // Check each expected question id rather than counting entries: answers
+        // left over from a previously selected position inflate the count.
+        return positionData.questions.every((q) => isAnswerComplete(answers[q.id], q));
       };
 
       return (

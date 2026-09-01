@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -8,6 +8,7 @@ import {
   PassportPhotoUpload,
   PassportQRButton,
   PassportStamps,
+  PassportScanHandler,
   type PassportStampData,
 } from "@/components/passport";
 import { useAuth } from "@/contexts/AuthContext";
@@ -122,44 +123,49 @@ export default function PassportPage() {
 
   return (
     <main className="flex min-h-dvh flex-col items-center bg-[#000000] px-4 pb-14 pt-24 lg:px-8 lg:pt-32">
-      <section className="grid w-full max-w-5xl gap-4 lg:grid-cols-[minmax(320px,390px)_minmax(0,1fr)] lg:gap-6">
-        <div className="space-y-4 lg:sticky lg:top-30 lg:self-start lg:w-full lg:max-w-97.5">
-          <div className="relative rounded-3xl border border-zinc-800 bg-[#0f0f11] p-4">
-            <PassportQRButton
-              userId={user?.id ?? ""}
-              membershipId={membershipStatus?.membership_id ?? null}
-              className="absolute left-3 top-3 z-10"
-            />
-
-            <div className="flex h-44 items-center justify-center">
-              <PassportPhotoUpload
-                initials={initials}
-                photoKey={user?.profile_photo_key}
-                displayName={displayName}
-                onPhotoUpload={handlePhotoUpload}
-                onPhotoDelete={handlePhotoDelete}
+      <div className="w-full max-w-5xl space-y-4">
+        <Suspense fallback={null}>
+          <PassportScanHandler />
+        </Suspense>
+        <section className="grid gap-4 lg:grid-cols-[minmax(320px,390px)_minmax(0,1fr)] lg:gap-6">
+          <div className="space-y-4 lg:sticky lg:top-30 lg:self-start lg:w-full lg:max-w-97.5">
+            <div className="relative rounded-3xl border border-zinc-800 bg-[#0f0f11] p-4">
+              <PassportQRButton
+                userId={user?.id ?? ""}
+                membershipId={membershipStatus?.membership_id ?? null}
+                className="absolute left-3 top-3 z-10"
               />
+
+              <div className="flex h-44 items-center justify-center">
+                <PassportPhotoUpload
+                  initials={initials}
+                  photoKey={user?.profile_photo_key}
+                  displayName={displayName}
+                  onPhotoUpload={handlePhotoUpload}
+                  onPhotoDelete={handlePhotoDelete}
+                />
+              </div>
             </div>
+
+            <PassportProfile
+              isEditing={isEditing}
+              onEdit={() => setIsEditing(true)}
+              onCancel={handleCancel}
+              form={form}
+              onSubmit={onSubmit}
+              displayName={displayName}
+              email={user?.email ?? "-"}
+              watIam={user?.wat_iam ?? "-"}
+              facultyLabel={facultyLabel ?? "-"}
+              term={user?.term ?? "-"}
+            />
           </div>
 
-          <PassportProfile
-            isEditing={isEditing}
-            onEdit={() => setIsEditing(true)}
-            onCancel={handleCancel}
-            form={form}
-            onSubmit={onSubmit}
-            displayName={displayName}
-            email={user?.email ?? "-"}
-            watIam={user?.wat_iam ?? "-"}
-            facultyLabel={facultyLabel ?? "-"}
-            term={user?.term ?? "-"}
-          />
-        </div>
-
-        <div className="min-w-0 lg:h-full">
-          <PassportStamps stamps={demoStamps} />
-        </div>
-      </section>
+          <div className="min-w-0 lg:h-full">
+            <PassportStamps stamps={demoStamps} />
+          </div>
+        </section>
+      </div>
     </main>
   );
 }

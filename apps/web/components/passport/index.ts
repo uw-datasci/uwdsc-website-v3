@@ -6,3 +6,4 @@ export * from "./PassportQRCode";
 export * from "./PassportQRButton";
 export * from "./PassportPhotoUpload";
 export * from "./PassportStamps";
+export * from "./PassportScanHandler";

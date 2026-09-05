@@ -26,7 +26,6 @@ export const getAdminNavigation = (
 ) => {
   const onboardingOpen = logisticsWindows?.onboardingOpen ?? false;
   const returningExecOpen = logisticsWindows?.returningExecOpen ?? false;
-
   const applicationSubItems = [
     {
       name: "Questions",

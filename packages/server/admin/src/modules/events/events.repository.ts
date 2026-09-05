@@ -50,9 +50,9 @@ export class EventRepository extends BaseRepository {
    * @param eventId - The event UUID
    * @param data - Fields to update
    * @param columns - Column names to update (must match keys in data)
-   * @param resources - New resources array, if the caller wants to replace it. `jsonb` can't
-   *   round-trip through the dynamic `sql(data, ...columns)` helper below (postgres.js infers a
-   *   plain JS array as a Postgres array, not json), so it's applied as its own SET clause.
+   * @param resources - New resources array, if the caller wants to replace it. A bare JS array
+   *   would be inferred as a Postgres array rather than json, so it goes through `sql.json()`
+   *   before joining the other columns in the dynamic `sql(values, ...columns)` helper.
    */
   async updateEventById(
     eventId: string,
@@ -61,22 +61,20 @@ export class EventRepository extends BaseRepository {
     resources?: EventResource[]
   ): Promise<boolean> {
     try {
-      const result =
-        resources !== undefined
-          ? await this.sql`
-              UPDATE events.events
-              SET ${columns.length > 0 ? this.sql`${this.sql(data, ...columns)},` : this.sql``}
-                  resources = ${this.sql.json(toJsonValue(resources))},
-                  updated_at = NOW()
-              WHERE id = ${eventId}
-              RETURNING id
-            `
-          : await this.sql`
-              UPDATE events.events
-              SET ${this.sql(data, ...columns)}, updated_at = NOW()
-              WHERE id = ${eventId}
-              RETURNING id
-            `;
+      const values: Record<string, string | null | ReturnType<Sql["json"]>> = { ...data };
+      const updateColumns = [...columns];
+
+      if (resources !== undefined) {
+        values.resources = this.sql.json(toJsonValue(resources));
+        updateColumns.push("resources");
+      }
+
+      const result = await this.sql`
+        UPDATE events.events
+        SET ${this.sql(values, ...updateColumns)}, updated_at = NOW()
+        WHERE id = ${eventId}
+        RETURNING id
+      `;
 
       return result.length > 0;
     } catch (error: unknown) {

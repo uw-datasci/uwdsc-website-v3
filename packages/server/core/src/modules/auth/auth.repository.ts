@@ -127,7 +127,7 @@ export class AuthRepository extends BaseRepository {
           WHERE id = ${userId}
         `;
         await this.sql`
-          UPDATE public.memberships
+          UPDATE membership.memberships
           SET password_reset_count = password_reset_count + 1,
               updated_at = now()
           WHERE profile_id = ${userId}

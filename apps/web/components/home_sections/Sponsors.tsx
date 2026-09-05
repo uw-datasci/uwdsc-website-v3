@@ -29,10 +29,7 @@ export default function Sponsors() {
               />
             </Link>
           ) : (
-            <div
-              key={sponsor.name}
-              className="flex items-center justify-center"
-            >
+            <div key={sponsor.name} className="flex items-center justify-center">
               <Image
                 src={sponsor.logo}
                 alt={sponsor.name}

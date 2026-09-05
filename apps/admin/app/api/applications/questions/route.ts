@@ -1,20 +1,19 @@
-import { ApiError } from "@uwdsc/common/types";
-import { ApiResponse } from "@uwdsc/common/utils";
+import { RaftResponse } from "@uw-datasci/raft";
 import { applicationService } from "@uwdsc/admin";
-import { withVpAccess } from "@/guards/withVpAccess";
+import { withAdmin } from "@/guards/withAdmin";
 import { questionSchema } from "@/lib/schemas/questions";
 
 /**
  * GET /api/applications/questions
  * List all questions within the VP's allowed scope.
  */
-export const GET = withVpAccess(async (_request, _context, _user, scope) => {
-  try {
+export const GET = withAdmin(
+  async (_request, _context, _user, scope) => {
     const [questions, positions] = await Promise.all([
       applicationService.getQuestionsForScope(scope),
       applicationService.getPositionOptionsForScope(scope),
     ]);
-    return ApiResponse.ok({
+    return RaftResponse.ok({
       questions,
       positions,
       scope: {
@@ -22,39 +21,22 @@ export const GET = withVpAccess(async (_request, _context, _user, scope) => {
         vpSubteamNames: scope.vpSubteamNames,
       },
     });
-  } catch (error: unknown) {
-    console.error("Error fetching scoped application questions:", error);
-    return ApiResponse.serverError(error, "Failed to fetch questions");
-  }
-});
+  },
+  { scope: true }
+);
 
 /**
  * POST /api/applications/questions
  * Create a new question mapped to an allowed position.
  */
-export const POST = withVpAccess(async (request, _context, _user, scope) => {
-  try {
+export const POST = withAdmin(
+  async (request, _context, _user, scope) => {
     const body = await request.json();
     const parsed = questionSchema.safeParse(body);
-    if (!parsed.success) {
-      return ApiResponse.badRequest(
-        parsed.error.issues[0]?.message ?? "Invalid question payload",
-      );
-    }
+    if (!parsed.success) return RaftResponse.badRequest(parsed.error.issues[0]?.message);
 
     const created = await applicationService.createQuestion(scope, parsed.data);
-    return ApiResponse.ok({ success: true, question: created });
-  } catch (error: unknown) {
-    if (error instanceof ApiError) {
-      if (error.statusCode === 403) {
-        return ApiResponse.forbidden(error.message, error.code ?? error.message);
-      }
-      return ApiResponse.json(
-        { error: error.message, message: error.message },
-        error.statusCode,
-      );
-    }
-    console.error("Error creating scoped application question:", error);
-    return ApiResponse.serverError(error, "Failed to create question");
-  }
-});
+    return RaftResponse.ok({ success: true, question: created });
+  },
+  { scope: true }
+);

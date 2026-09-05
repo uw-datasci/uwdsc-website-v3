@@ -1,7 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { cookies } from "next/headers";
 import { createSupabaseServerClient } from "@uwdsc/db";
-import { AuthService, ResumeService, ProfilePhotoService } from "@uwdsc/core";
+import {
+  AuthService,
+  MembershipProofService,
+  ProfilePhotoService,
+  ResumeService,
+} from "@uwdsc/core";
 
 /**
  * Create a Supabase client with Next.js server-side cookies
@@ -41,4 +46,13 @@ export async function createResumeService() {
 export async function createProfilePhotoService() {
   const supabase = await createSupabaseClient();
   return new ProfilePhotoService(supabase);
+}
+
+/**
+ * Create MembershipProofService with server-side Supabase client
+ * Uses the private "membership-proofs" bucket.
+ */
+export async function createMembershipProofService() {
+  const supabase = await createSupabaseClient();
+  return new MembershipProofService(supabase);
 }

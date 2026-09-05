@@ -7,7 +7,7 @@ import { Member, OnboardingAdminRow } from "@uwdsc/common/types";
 export function globalMembershipFilter(
   row: { original: Member },
   columnId: string,
-  filterValue: string,
+  filterValue: string
 ): boolean {
   const search = filterValue.toLowerCase();
   const name = [row.original.first_name, row.original.last_name]
@@ -16,9 +16,7 @@ export function globalMembershipFilter(
     .toLowerCase();
   const email = (row.original.email ?? "").toLowerCase();
   const watiam = (row.original.wat_iam ?? "").toLowerCase();
-  return (
-    name.includes(search) || email.includes(search) || watiam.includes(search)
-  );
+  return name.includes(search) || email.includes(search) || watiam.includes(search);
 }
 
 /**
@@ -28,7 +26,7 @@ export function globalMembershipFilter(
 export function globalOnboardingFilter(
   row: { original: OnboardingAdminRow },
   columnId: string,
-  filterValue: string,
+  filterValue: string
 ): boolean {
   const search = filterValue.toLowerCase();
   const name = [row.original.first_name, row.original.last_name]

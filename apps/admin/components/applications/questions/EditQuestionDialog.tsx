@@ -75,11 +75,7 @@ export function EditQuestionDialog({
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {isViewing
-              ? "View question"
-              : isEditing
-                ? "Edit question"
-                : "New question"}
+            {isViewing ? "View question" : isEditing ? "Edit question" : "New question"}
           </DialogTitle>
           <DialogDescription>
             {isViewing
@@ -92,11 +88,7 @@ export function EditQuestionDialog({
 
         <Form {...form}>
           <form
-            onSubmit={
-              isViewing
-                ? (e) => e.preventDefault()
-                : form.handleSubmit(onSubmit)
-            }
+            onSubmit={isViewing ? (e) => e.preventDefault() : form.handleSubmit(onSubmit)}
             className="space-y-4"
           >
             <fieldset disabled={isViewing} className="space-y-4">
@@ -179,9 +171,7 @@ export function EditQuestionDialog({
                           </FormControl>
                           <SelectContent>
                             {isPresident && (
-                              <SelectItem value="none">
-                                General (all roles)
-                              </SelectItem>
+                              <SelectItem value="none">General (all roles)</SelectItem>
                             )}
                             {positions.map((p) => (
                               <SelectItem key={p.id} value={String(p.id)}>

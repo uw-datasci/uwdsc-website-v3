@@ -1,18 +1,11 @@
-import { ApiResponse } from "@uwdsc/common/utils";
+import { RaftResponse } from "@uw-datasci/raft";
+import { withRaftRoute } from "@uwdsc/core/http";
 import { createAuthService } from "@/lib/services";
 
-export async function POST(): Promise<Response> {
-  try {
-    const authService = await createAuthService();
-    const result = await authService.signOut();
+export const POST = withRaftRoute(async () => {
+  const authService = await createAuthService();
+  const result = await authService.signOut();
+  if (!result.success) return RaftResponse.badRequest(result.error, "Sign out failed");
 
-    if (!result.success) {
-      return ApiResponse.badRequest(result.error, "Sign out failed");
-    }
-
-    return ApiResponse.ok({ success: true, message: result.message });
-  } catch (error) {
-    console.error("Signout error:", error);
-    return ApiResponse.serverError(error, "An unexpected error occurred");
-  }
-}
+  return RaftResponse.ok({ success: true, message: result.message });
+});

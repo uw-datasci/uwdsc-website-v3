@@ -42,7 +42,11 @@ function getMemberDisplayName(member: Member): string {
   return name || member.email;
 }
 
-const PAYMENT_METHOD_OPTIONS = ["cash", "online", "math_soc"];
+// In-person methods only; `online` is handled by the submission review queue.
+const PAYMENT_METHOD_OPTIONS = [
+  { value: "cash", label: "Cash" },
+  { value: "math_soc", label: "MathSoc" },
+];
 
 export function MarkAsPaidModal({
   open,

@@ -22,14 +22,14 @@ function withUpdatedSelection(
   submissions: ReturningExecListItem[],
   submissionId: string,
   selectionId: string,
-  status: ApplicationReviewStatus,
+  status: ApplicationReviewStatus
 ): ReturningExecListItem[] {
   return submissions.map((sub) => {
     if (sub.id !== submissionId) return sub;
     return {
       ...sub,
       position_selections: sub.position_selections.map((s) =>
-        s.id === selectionId ? { ...s, status } : s,
+        s.id === selectionId ? { ...s, status } : s
       ),
     };
   });
@@ -74,7 +74,7 @@ export default function ReturningExecsPage() {
 
   const selectedSubmission = useMemo(
     () => submissions.find((s) => s.id === selectedId) ?? null,
-    [submissions, selectedId],
+    [submissions, selectedId]
   );
 
   const handleSelect = (id: string) => {
@@ -84,7 +84,7 @@ export default function ReturningExecsPage() {
 
   const handleSelectionStatusChange = async (
     selectionId: string,
-    status: ApplicationReviewStatus,
+    status: ApplicationReviewStatus
   ) => {
     if (!selectedSubmission) return;
     const selection = selectedSubmission.position_selections.find((s) => s.id === selectionId);
@@ -94,7 +94,7 @@ export default function ReturningExecsPage() {
       setUpdatingSelectionId(selectionId);
       await updateReturningExecSelectionStatus(selectionId, status);
       setSubmissions((prev) =>
-        withUpdatedSelection(prev, selectedSubmission.id, selectionId, status),
+        withUpdatedSelection(prev, selectedSubmission.id, selectionId, status)
       );
       toast.success("Status updated");
     } catch (err) {

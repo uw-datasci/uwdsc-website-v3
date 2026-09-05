@@ -25,7 +25,7 @@ type ViewMode = "list" | "calendar";
 function filterEventsByTerm(
   events: EventWithAttendanceCount[],
   termId: string,
-  terms: Term[],
+  terms: Term[]
 ): EventWithAttendanceCount[] {
   if (termId === "all") return events;
   if (termId === "other") {
@@ -108,7 +108,7 @@ export default function EventsPage() {
         headers: [...EVENT_CSV_HEADERS],
         getValue: (row, key) => getEventCsvValue(row, key, terms),
       },
-      `events-${new Date().toISOString().split("T")[0]}`,
+      `events-${new Date().toISOString().split("T")[0]}`
     );
   }, [filteredEvents, terms]);
 

@@ -38,8 +38,7 @@ export function DeleteEventDialog({
       onConfirm?.();
       onSuccess?.();
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Failed to delete event";
+      const message = err instanceof Error ? err.message : "Failed to delete event";
       toast.error(message);
     } finally {
       setIsDeleting(false);
@@ -62,8 +61,7 @@ export function DeleteEventDialog({
             <DialogTitle>Delete event</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete{" "}
-              <span className="font-semibold">{event.name}</span>? This action
-              cannot be undone.
+              <span className="font-semibold">{event.name}</span>? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

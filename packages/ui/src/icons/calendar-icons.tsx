@@ -1,8 +1,6 @@
 import * as React from "react";
 
-export function GoogleCalendarIcon({
-  className,
-}: Readonly<{ className?: string }>) {
+export function GoogleCalendarIcon({ className }: Readonly<{ className?: string }>) {
   return (
     <svg
       className={className}
@@ -31,9 +29,7 @@ export function GoogleCalendarIcon({
   );
 }
 
-export function AppleCalendarIcon({
-  className,
-}: Readonly<{ className?: string }>) {
+export function AppleCalendarIcon({ className }: Readonly<{ className?: string }>) {
   return (
     <svg
       className={className}
@@ -47,9 +43,7 @@ export function AppleCalendarIcon({
   );
 }
 
-export function OutlookCalendarIcon({
-  className,
-}: Readonly<{ className?: string }>) {
+export function OutlookCalendarIcon({ className }: Readonly<{ className?: string }>) {
   return (
     <svg
       className={className}

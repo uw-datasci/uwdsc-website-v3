@@ -7,14 +7,12 @@ export const metadata: Metadata = {
   keywords: "data science, calendar, events, workshops, uwaterloo",
   openGraph: {
     title: "Calendar | UWaterloo Data Science Club",
-    description:
-      "View upcoming UWaterloo Data Science Club events and workshops",
+    description: "View upcoming UWaterloo Data Science Club events and workshops",
     images: ["/meta/og-image.png"],
   },
   twitter: {
     card: "summary",
-    description:
-      "View upcoming UWaterloo Data Science Club events and workshops",
+    description: "View upcoming UWaterloo Data Science Club events and workshops",
     images: ["/meta/og-image.png"],
   },
 };

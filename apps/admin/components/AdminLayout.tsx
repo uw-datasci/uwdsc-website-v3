@@ -22,7 +22,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getAllExecPositions, getActiveTerm } from "@/lib/api/onboarding";
 import { getAdminNavigation } from "@/constants/navigation";
-import { isOnboardingWindowOpen, isReturningExecWindowOpen } from "@uwdsc/common/utils";
+import { isDateWindowOpen } from "@uwdsc/common/utils";
 
 interface AdminLayoutProps {
   readonly children: React.ReactNode;
@@ -59,8 +59,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         const term = await getActiveTerm();
         if (cancelled) return;
         setLogisticsWindows({
-          onboardingOpen: isOnboardingWindowOpen(term),
-          returningExecOpen: isReturningExecWindowOpen(term),
+          onboardingOpen: isDateWindowOpen(term?.start_date, term?.onboarding_due_date),
+          returningExecOpen: isDateWindowOpen(
+            term?.returning_exec_release_date,
+            term?.returning_exec_deadline
+          ),
         });
       } catch {
         if (!cancelled) {

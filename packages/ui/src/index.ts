@@ -39,4 +39,4 @@ export * from "./components/spinner";
 export * from "./components/galaxy-hero";
 export * from "./components/chart";
 
-export * from "./components/switch"
+export * from "./components/switch";

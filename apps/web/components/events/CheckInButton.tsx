@@ -39,12 +39,8 @@ export function CheckInButton({
       asChild
       className={`relative w-full h-12 sm:h-14 rounded-lg sm:rounded-xl font-black tracking-widest sm:tracking-[0.15em] overflow-hidden text-xs sm:text-sm ${buttonClassName}`}
     >
-      <motion.button
-        whileTap={hasMembership && !checkingIn ? { scale: 0.98 } : {}}
-      >
-        <div className="relative z-10 flex items-center justify-center">
-          {buttonLabel}
-        </div>
+      <motion.button whileTap={hasMembership && !checkingIn ? { scale: 0.98 } : {}}>
+        <div className="relative z-10 flex items-center justify-center">{buttonLabel}</div>
       </motion.button>
     </Button>
   );

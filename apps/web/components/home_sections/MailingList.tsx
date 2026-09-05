@@ -96,19 +96,14 @@ export default function MailingList() {
                       className="w-auto! absolute right-2 top-1.75 md:top-2.25 bottom-1 rounded- bg-gradient-purple md:text-lg font-bold p-4 md:p-6"
                     >
                       {loading ? (
-                        <Loader2
-                          className="w-5 h-5 animate-spin"
-                          strokeWidth={3}
-                        />
+                        <Loader2 className="w-5 h-5 animate-spin" strokeWidth={3} />
                       ) : (
                         "Submit"
                       )}
                     </Button>
                   </div>
 
-                  {error && (
-                    <InputFeedback state="error">{error}</InputFeedback>
-                  )}
+                  {error && <InputFeedback state="error">{error}</InputFeedback>}
                   {success && (
                     <InputFeedback state="success">
                       Success! Thank you for joining our mailing list.

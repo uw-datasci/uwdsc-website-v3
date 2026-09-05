@@ -1,5 +1,5 @@
 import { createAuthService } from "@/lib/services";
-import { ApiResponse } from "@uwdsc/common/utils";
+import { RaftResponse } from "@uw-datasci/raft";
 import type { AuthResult } from "@/types/route-utils";
 
 /**
@@ -20,7 +20,7 @@ export async function tryGetCurrentUser(): Promise<AuthResult> {
   if (userError || !user) {
     return {
       user: null,
-      isUnauthorized: ApiResponse.unauthorized("Authentication required"),
+      isUnauthorized: RaftResponse.unauthorized("Authentication required"),
     };
   }
 

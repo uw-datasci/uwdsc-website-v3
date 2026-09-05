@@ -40,7 +40,7 @@ export async function getActiveTerm(): Promise<Term> {
 
 export async function getOnboardingSubmission(termId: string): Promise<Onboarding | null> {
   const response = await fetch(
-    `/api/onboarding/submission?termId=${encodeURIComponent(termId)}`,
+    `/api/onboarding/submission?termId=${encodeURIComponent(termId)}`
   );
   const data = await parseJsonResponse<Onboarding | null>(response);
 
@@ -52,7 +52,7 @@ export async function getOnboardingSubmission(termId: string): Promise<Onboardin
 export async function submitOnboardingForm(
   payload: OnboardingData,
   headshotFile: File | null,
-  fullName: string,
+  fullName: string
 ): Promise<Onboarding> {
   let headshotUrl = payload.headshot_url ?? null;
 
@@ -95,7 +95,7 @@ export async function getTeamOnboarding(termId: string): Promise<OnboardingAdmin
 
 export async function downloadTeamHeadshots(termId: string): Promise<Blob> {
   const response = await fetch(
-    `/api/onboarding/headshots/export?termId=${encodeURIComponent(termId)}`,
+    `/api/onboarding/headshots/export?termId=${encodeURIComponent(termId)}`
   );
 
   if (!response.ok) {

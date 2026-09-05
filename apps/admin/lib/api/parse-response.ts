@@ -15,7 +15,7 @@ function messageFromPlainText(status: number, text: string): string {
  * Parse a fetch Response body as JSON when possible; otherwise throw a readable error.
  */
 export async function parseJsonResponse<T = Record<string, unknown>>(
-  response: Response,
+  response: Response
 ): Promise<T> {
   const text = await response.text();
   if (!text) {

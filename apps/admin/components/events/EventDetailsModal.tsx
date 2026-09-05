@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, Clock, Timer, MapPin } from "lucide-react";
+import { Pencil, Clock, Timer, MapPin, ExternalLink } from "lucide-react";
 import {
   Button,
   Dialog,
@@ -14,6 +14,7 @@ import type { Event } from "@uwdsc/common/types";
 import { formatEventDescription } from "@uwdsc/common/utils";
 import { formatDateTime } from "@/lib/utils/events";
 import { DeleteEventDialog } from "./DeleteEventModal";
+import { EventCategoryBadge } from "./EventCategoryBadge";
 
 interface EventDetailsDialogProps {
   readonly event: Event | null;
@@ -41,10 +42,11 @@ export function EventDetailsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>{event.name}</DialogTitle>
-          <DialogDescription>
-            Event schedule, location, and description.
-          </DialogDescription>
+          <DialogTitle className="flex items-center gap-2">
+            {event.name}
+            <EventCategoryBadge category={event.category} />
+          </DialogTitle>
+          <DialogDescription>Event schedule, location, and description.</DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-8 text-sm pt-4">
           <div className="flex flex-col gap-3 text-muted-foreground">
@@ -68,6 +70,30 @@ export function EventDetailsDialog({
             </p>
           </div>
         </div>
+        {event.category === "workshop" && (
+          <div className="text-sm">
+            <span className="font-medium text-muted-foreground">Resources:</span>
+            {event.resources.length === 0 ? (
+              <p className="mt-1 text-muted-foreground">None added yet.</p>
+            ) : (
+              <ul className="mt-1 flex flex-col gap-1">
+                {event.resources.map((resource) => (
+                  <li key={resource.id}>
+                    <a
+                      href={resource.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 text-primary hover:underline"
+                    >
+                      <ExternalLink className="size-3.5 shrink-0" />
+                      {resource.source}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
 
         <DialogFooter>
           <Button variant="ghost" size="icon" aria-label="Edit event" onClick={handleEdit}>

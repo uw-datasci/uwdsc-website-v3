@@ -65,7 +65,7 @@ export async function createApplication(termId: string): Promise<ApplicationWith
 
 export async function updateApplication(
   id: string,
-  payload: ApplicationUpdatePayload,
+  payload: ApplicationUpdatePayload
 ): Promise<ApplicationWithDetails> {
   const response = await fetch(`/api/applications/${id}`, {
     method: "PATCH",

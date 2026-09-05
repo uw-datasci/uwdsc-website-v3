@@ -5,10 +5,7 @@ import { FileValidationConfig } from "@uwdsc/common/types";
  */
 function getExtensionFromMime(mime: string): string | null {
   if (mime === "application/pdf") return "pdf";
-  if (
-    mime ===
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-  ) {
+  if (mime === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
     return "docx";
   }
   if (mime === "application/msword") return "doc";

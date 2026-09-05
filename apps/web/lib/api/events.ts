@@ -30,7 +30,7 @@ export async function getCheckInStatus(eventId: string): Promise<{ checkedIn: bo
 }
 
 export async function checkInToEvent(
-  eventId: string,
+  eventId: string
 ): Promise<{ success: boolean; message: string }> {
   const response = await fetch(`/api/events/${eventId}/checkin`, {
     method: "POST",

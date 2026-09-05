@@ -7,7 +7,7 @@ import {
   OnboardingData,
   OnboardingAdminRow,
 } from "@uwdsc/common/types";
-import { isOnboardingWindowOpen } from "@uwdsc/common/utils";
+import { isDateWindowOpen } from "@uwdsc/common/utils";
 
 class OnboardingService {
   private readonly repository: OnboardingRepository;
@@ -58,7 +58,7 @@ class OnboardingService {
       if (!active) throw new ApiError("No active term found", 400);
       if (active.id !== term_id) throw new ApiError("Invalid term", 400);
 
-      if (!isOnboardingWindowOpen(active)) {
+      if (!isDateWindowOpen(active.start_date, active.onboarding_due_date)) {
         throw new ApiError("Exec onboarding is not open for the active term", 403);
       }
       return await this.repository.getSubmission(profile_id, term_id);
@@ -66,7 +66,7 @@ class OnboardingService {
       if (error instanceof ApiError) throw error;
       throw new ApiError(
         `Failed to get onboarding submission: ${(error as Error).message}`,
-        500,
+        500
       );
     }
   }
@@ -80,7 +80,7 @@ class OnboardingService {
       if (!active) throw new ApiError("No active term found", 400);
       if (active.id !== data.term_id) throw new ApiError("Invalid term", 400);
 
-      if (!isOnboardingWindowOpen(active)) {
+      if (!isDateWindowOpen(active.start_date, active.onboarding_due_date)) {
         throw new ApiError("Exec onboarding is not open for the active term", 403);
       }
       return await this.repository.saveSubmission(data, profile_id);
@@ -88,7 +88,7 @@ class OnboardingService {
       if (error instanceof ApiError) throw error;
       throw new ApiError(
         `Failed to save onboarding submission: ${(error as Error).message}`,
-        500,
+        500
       );
     }
   }
@@ -98,14 +98,14 @@ class OnboardingService {
    */
   async getTeamSubmissions(
     term_id: string,
-    subteam_id?: number,
+    subteam_id?: number
   ): Promise<OnboardingAdminRow[]> {
     try {
       return await this.repository.getTeamSubmissions(term_id, subteam_id);
     } catch (error) {
       throw new ApiError(
         `Failed to get onboarding submissions: ${(error as Error).message}`,
-        500,
+        500
       );
     }
   }

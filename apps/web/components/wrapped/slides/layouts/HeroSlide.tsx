@@ -30,7 +30,7 @@ export function HeroSlide({ slide }: HeroSlideProps) {
       className={cn(
         "flex h-full w-full flex-col items-center justify-center gap-4 px-8 text-center",
         slide.background,
-        slide.foreground ?? "text-white",
+        slide.foreground ?? "text-white"
       )}
     >
       {slide.eyebrow && (

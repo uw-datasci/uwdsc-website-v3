@@ -2,7 +2,7 @@ import type { HiringApplicant, HiringPositionSelection } from "../types/entities
 
 /** Stable sort: lower `priority` first (1 = top choice). Returns a new array. */
 export function sortPositionsByPriority<T extends { priority: number }>(
-  selections: readonly T[],
+  selections: readonly T[]
 ): T[] {
   return selections.slice().sort((a, b) => a.priority - b.priority);
 }

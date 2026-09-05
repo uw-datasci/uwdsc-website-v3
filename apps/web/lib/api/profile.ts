@@ -33,7 +33,7 @@ export async function getProfile(): Promise<Profile> {
  * @throws Error if update fails
  */
 export async function updateUserProfile(
-  profileData: ProfileUpdateData,
+  profileData: ProfileUpdateData
 ): Promise<{ success: boolean }> {
   const response = await fetch("/api/profile", {
     method: "PATCH",
@@ -53,7 +53,7 @@ export async function updateUserProfile(
  * @throws Error if update fails
  */
 export async function completeProfile(
-  profileData: CompleteProfilePayload,
+  profileData: CompleteProfilePayload
 ): Promise<{ success: boolean }> {
   const response = await fetch("/api/profile", {
     method: "PUT",

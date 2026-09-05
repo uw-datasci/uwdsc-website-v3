@@ -10,4 +10,5 @@ export interface FileUploadOptions {
   userId: string;
   objectKey: string;
   contentType: string;
+  upsert?: boolean;
 }

@@ -17,7 +17,7 @@ export class ReturningExecRepository extends BaseRepository {
 
   async getSubmission(
     profile_id: string,
-    term_id: string,
+    term_id: string
   ): Promise<ReturningExecOwnSubmission | null> {
     const rows = await this.sql<ReturningExecRow[]>`
       SELECT * FROM hiring.returning_exec_submissions
@@ -33,7 +33,7 @@ export class ReturningExecRepository extends BaseRepository {
 
   async upsertSubmission(
     profile_id: string,
-    data: ReturningExecSubmissionData,
+    data: ReturningExecSubmissionData
   ): Promise<ReturningExecOwnSubmission> {
     const {
       position_selections,
@@ -87,7 +87,7 @@ export class ReturningExecRepository extends BaseRepository {
             submission_id: row.id,
             position_id: s.position_id,
             priority: s.priority,
-          })),
+          }))
         )}
       `;
     }
@@ -224,7 +224,7 @@ export class ReturningExecRepository extends BaseRepository {
 
   async updateSelectionStatus(
     selectionId: string,
-    status: ApplicationReviewStatus,
+    status: ApplicationReviewStatus
   ): Promise<void> {
     await this.sql`
       UPDATE hiring.returning_exec_position_selections
@@ -265,7 +265,12 @@ export class ReturningExecRepository extends BaseRepository {
     { id: number; name: string; is_vp: boolean; subteam_name: string | null }[]
   > {
     return this.sql<
-      { id: number; name: string; is_vp: boolean; subteam_name: string | null }[]
+      {
+        id: number;
+        name: string;
+        is_vp: boolean;
+        subteam_name: string | null;
+      }[]
     >`
       SELECT ep.id, ep.name, ep.is_vp, st.name AS subteam_name
       FROM org.exec_positions ep
@@ -317,7 +322,7 @@ export class ReturningExecRepository extends BaseRepository {
   }
 
   private async getSelectionsForSubmission(
-    submission_id: string,
+    submission_id: string
   ): Promise<ReturningExecPositionSelection[]> {
     return this.sql<ReturningExecPositionSelection[]>`
       SELECT

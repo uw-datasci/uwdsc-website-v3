@@ -9,9 +9,7 @@ export async function getScopedQuestions(): Promise<QuestionsListResponse> {
   return data as QuestionsListResponse;
 }
 
-export async function createQuestion(
-  payload: QuestionFormValues,
-): Promise<Question> {
+export async function createQuestion(payload: QuestionFormValues): Promise<Question> {
   const response = await fetch("/api/applications/questions", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -24,30 +22,22 @@ export async function createQuestion(
 
 export async function updateQuestion(
   positionQuestionId: number,
-  payload: QuestionFormValues,
+  payload: QuestionFormValues
 ): Promise<Question> {
-  const response = await fetch(
-    `/api/applications/questions/${positionQuestionId}`,
-    {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    },
-  );
+  const response = await fetch(`/api/applications/questions/${positionQuestionId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
   const data = (await response.json()) as { question: Question };
   if (!response.ok) throw createApiError(data, response.status);
   return data.question;
 }
 
-export async function deleteQuestion(
-  positionQuestionId: number,
-): Promise<void> {
-  const response = await fetch(
-    `/api/applications/questions/${positionQuestionId}`,
-    {
-      method: "DELETE",
-    },
-  );
+export async function deleteQuestion(positionQuestionId: number): Promise<void> {
+  const response = await fetch(`/api/applications/questions/${positionQuestionId}`, {
+    method: "DELETE",
+  });
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);
 }

@@ -29,7 +29,7 @@ interface ReturningExecDetailProps {
   positionReview?: PositionReviewScopeDto | null;
   onSelectionStatusChange?: (
     selectionId: string,
-    status: ApplicationReviewStatus,
+    status: ApplicationReviewStatus
   ) => void | Promise<void>;
   updatingSelectionId?: string | null;
 }
@@ -210,7 +210,7 @@ interface ReturningExecPositionSelectionCardProps {
   readonly positionReview: PositionReviewScopeDto | null | undefined;
   readonly onSelectionStatusChange?: (
     selectionId: string,
-    status: ApplicationReviewStatus,
+    status: ApplicationReviewStatus
   ) => void | Promise<void>;
   readonly updatingSelectionId: string | null | undefined;
 }
@@ -241,7 +241,7 @@ function ReturningExecPositionSelectionCard({
         <SelectTrigger
           className={cn(
             "h-8 w-[11.5rem] shrink-0 text-xs font-medium",
-            reviewStatusBadgeClassName(sel.status),
+            reviewStatusBadgeClassName(sel.status)
           )}
         >
           <SelectValue placeholder="Update status" />
@@ -261,7 +261,7 @@ function ReturningExecPositionSelectionCard({
         variant="outline"
         className={cn(
           "shrink-0 text-xs font-medium max-w-[11.5rem] truncate",
-          reviewStatusBadgeClassName(sel.status),
+          reviewStatusBadgeClassName(sel.status)
         )}
         title={sel.status}
       >

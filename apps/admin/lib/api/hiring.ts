@@ -22,7 +22,7 @@ export async function getHiringApplicants(): Promise<HiringApplicantsResponse> {
 export async function updateSelectionStatus(
   selectionId: string,
   status: ApplicationReviewStatus,
-  source?: "application" | "returning_exec",
+  source?: "application" | "returning_exec"
 ): Promise<void> {
   const response = await fetch(`/api/applications/hiring/selections/${selectionId}`, {
     method: "PATCH",

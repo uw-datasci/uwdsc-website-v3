@@ -51,7 +51,7 @@ interface ApplicantRowActionsMenuProps {
   onConfirmStatus: (
     selectionId: string,
     status: ApplicationReviewStatus,
-    source?: "application" | "returning_exec",
+    source?: "application" | "returning_exec"
   ) => Promise<void>;
 }
 
@@ -75,7 +75,7 @@ export function ApplicantRowActionsMenu({
 
   const copy = useMemo(
     () => (pending ? HIRING_ROW_ACTION_CONFIRM_COPY[pending] : null),
-    [pending],
+    [pending]
   );
 
   const openConfirm = useCallback((status: HiringRowActionStatus) => {

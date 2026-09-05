@@ -21,7 +21,7 @@ const STEP2_SCHEMA = foundryFormObjectSchema.pick({
  */
 export const isFoundryStepValid = (
   values: Partial<FoundryFormValues>,
-  currentStep: number,
+  currentStep: number
 ): boolean => {
   switch (currentStep) {
     // Step 1 (Introduction) has no required fields.

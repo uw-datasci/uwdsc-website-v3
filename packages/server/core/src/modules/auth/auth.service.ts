@@ -1,7 +1,7 @@
 import { AuthRepository } from "./auth.repository";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { ApiError, type QuestionScope, LoginData, RegisterData } from "@uwdsc/common/types";
-import { isAdmin, isPresident, type RoleClaims } from "@uwdsc/common/constants";
+import { isAdmin, isPres, type RoleClaims } from "@uwdsc/common/constants";
 
 const DUPLICATE_EMAIL_MESSAGE =
   "An account with this email already exists. Please sign in instead.";
@@ -186,7 +186,7 @@ export class AuthService {
     } catch (error) {
       throw new ApiError(
         `Failed to resend verification email: ${(error as Error).message}`,
-        500,
+        500
       );
     }
   }
@@ -209,7 +209,7 @@ export class AuthService {
     } catch (error) {
       throw new ApiError(
         `Failed to exchange code for session: ${(error as Error).message}`,
-        500,
+        500
       );
     }
   }
@@ -265,7 +265,7 @@ export class AuthService {
     } catch (error) {
       throw new ApiError(
         `Failed to send password reset email: ${(error as Error).message}`,
-        500,
+        500
       );
     }
   }
@@ -306,7 +306,7 @@ export class AuthService {
    * a wide one.
    */
   async getScopeForUser(claims: RoleClaims): Promise<QuestionScope> {
-    const scopeIsPresident = isPresident(claims.role);
+    const scopeIsPresident = isPres(claims.role);
     const isVp = isAdmin(claims.role) && !scopeIsPresident;
 
     if (!isVp || claims.subteamId === null) {

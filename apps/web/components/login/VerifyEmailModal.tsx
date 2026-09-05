@@ -41,9 +41,7 @@ export function VerifyEmailModal({
       setResendStatus("Verification email resent successfully.");
     } catch (error: unknown) {
       setResendStatus(
-        error instanceof Error
-          ? error.message
-          : "Failed to resend verification email.",
+        error instanceof Error ? error.message : "Failed to resend verification email."
       );
     } finally {
       setIsLoading(false);
@@ -57,10 +55,7 @@ export function VerifyEmailModal({
           <div className="flex justify-center mb-4">
             <div className="relative">
               <div className="absolute inset-0 bg-purple-500/20 blur-2xl rounded-full animate-pulse" />
-              <Mail
-                className="w-16 h-16 text-purple-500 animate-bounce"
-                strokeWidth={1.5}
-              />
+              <Mail className="w-16 h-16 text-purple-500 animate-bounce" strokeWidth={1.5} />
             </div>
           </div>
           <DialogTitle className="text-2xl text-center text-white">
@@ -93,9 +88,7 @@ export function VerifyEmailModal({
           {resendStatus && (
             <p
               className={`text-sm text-center ${
-                resendStatus.includes("successfully")
-                  ? "text-green-400"
-                  : "text-red-400"
+                resendStatus.includes("successfully") ? "text-green-400" : "text-red-400"
               }`}
             >
               {resendStatus}

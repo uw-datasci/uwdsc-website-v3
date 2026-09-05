@@ -3,24 +3,14 @@
 
 export type UserRole = "member" | "exec" | "admin" | "pres" | "alum";
 
-export type Faculty =
-  | "math"
-  | "engineering"
-  | "science"
-  | "arts"
-  | "health"
-  | "environment";
+export type Faculty = "math" | "engineering" | "science" | "arts" | "health" | "environment";
 
 export type PaymentMethod = "cash" | "online" | "math_soc";
 
 export type ApplicationInputType = "text" | "textarea";
 
 export type ApplicationStatus =
-  | "draft"
-  | "submitted"
-  | "under_review"
-  | "accepted"
-  | "rejected";
+  "draft" | "submitted" | "under_review" | "accepted" | "rejected";
 
 export type ApplicationReviewStatus =
   | "In Review"
@@ -35,3 +25,9 @@ export type ApplicationReviewStatus =
 export type MembershipFilter = "all" | "paid" | "paid-mathsoc";
 
 export type TermType = "study" | "coop";
+
+export type SubmissionStatus = "pending" | "approved" | "rejected";
+
+export type SubmissionSource = "web_form" | "email";
+
+export type ReviewDecision = "approved" | "rejected";

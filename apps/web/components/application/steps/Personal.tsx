@@ -143,8 +143,7 @@ export function Personal({ form }: PersonalProps) {
                 control={form.control}
                 name="club_experience"
                 render={renderRadioField({
-                  label:
-                    "Have you been a member of UW Data Science Club before?",
+                  label: "Have you been a member of UW Data Science Club before?",
                   required: true,
                 })}
               />

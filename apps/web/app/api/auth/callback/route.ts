@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import { withRaftRoute } from "@uwdsc/core/http";
 import { createAuthService } from "@/lib/services";
 
 /**
@@ -11,7 +12,7 @@ import { createAuthService } from "@/lib/services";
  * to a client-side buffer page so enterprise email scanners can't consume the
  * single-use token before the user opens the email.
  */
-export async function GET(request: NextRequest): Promise<Response> {
+export const GET = withRaftRoute(async (request) => {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
   const token_hash = requestUrl.searchParams.get("token_hash");
@@ -19,31 +20,24 @@ export async function GET(request: NextRequest): Promise<Response> {
   const next = requestUrl.searchParams.get("next") ?? "/complete-profile";
 
   const authService = await createAuthService();
+  const redirectToLoginError = (error: string) => {
+    const url = new URL(`/login?error=${encodeURIComponent(error)}`, requestUrl.origin);
+    return NextResponse.redirect(url);
+  };
+
+  let error: string | null = null;
 
   if (code) {
-    const { error } = await authService.exchangeCodeForSession(code);
-    if (error) {
-      console.error("Error exchanging code for session:", error);
-      return NextResponse.redirect(
-        new URL(`/login?error=${encodeURIComponent(error)}`, requestUrl.origin),
-      );
-    }
+    error = (await authService.exchangeCodeForSession(code)).error;
+    if (error) console.error("Error exchanging code for session:", error);
   } else if (token_hash && type && (type === "signup" || type === "email")) {
-    const { error } = await authService.verifyOtp({ token_hash, type: type });
-    if (error) {
-      console.error("Error verifying OTP:", error);
-      return NextResponse.redirect(
-        new URL(`/login?error=${encodeURIComponent(error)}`, requestUrl.origin),
-      );
-    }
+    error = (await authService.verifyOtp({ token_hash, type })).error;
+    if (error) console.error("Error verifying OTP:", error);
   } else {
-    return NextResponse.redirect(
-      new URL(
-        "/login?error=" + encodeURIComponent("Missing verification code or token"),
-        requestUrl.origin,
-      ),
-    );
+    return redirectToLoginError("Missing verification code or token");
   }
 
+  if (error) return redirectToLoginError(error);
+
   return NextResponse.redirect(new URL(next, requestUrl.origin));
-}
+});

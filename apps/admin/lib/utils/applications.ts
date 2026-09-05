@@ -1,7 +1,4 @@
-import type {
-  ApplicationReviewStatus,
-  HiringApplicant,
-} from "@uwdsc/common/types";
+import type { ApplicationReviewStatus, HiringApplicant } from "@uwdsc/common/types";
 
 // --- Review status badge (applications / hiring tables) ---
 
@@ -9,9 +6,7 @@ import type {
  * Tailwind classes for `Badge variant="outline"` by application review status.
  * Matches hiring applicant status styling (admin applications flow).
  */
-export function reviewStatusBadgeClassName(
-  status: ApplicationReviewStatus,
-): string {
+export function reviewStatusBadgeClassName(status: ApplicationReviewStatus): string {
   switch (status) {
     case "In Review":
       return "border-border bg-muted/60 text-muted-foreground";
@@ -68,12 +63,10 @@ function collectSubteamNames(applicants: readonly HiringApplicant[]): {
 
 /** Options for the subteam filter select (includes "All subteams"). */
 export function buildHiringSubteamOptions(
-  applicants: readonly HiringApplicant[],
+  applicants: readonly HiringApplicant[]
 ): HiringSubteamOption[] {
   const { names, hasNone } = collectSubteamNames(applicants);
-  const options: HiringSubteamOption[] = [
-    { value: HIRING_SUBTEAM_ALL, label: "All subteams" },
-  ];
+  const options: HiringSubteamOption[] = [{ value: HIRING_SUBTEAM_ALL, label: "All subteams" }];
   if (hasNone) {
     options.push({ value: HIRING_SUBTEAM_NONE, label: "No subteam" });
   }
@@ -86,7 +79,7 @@ export function buildHiringSubteamOptions(
 /** Keep applicants that have at least one selection in the subteam filter, preserving all their selections. */
 export function filterApplicantsBySubteam(
   applicants: readonly HiringApplicant[],
-  filter: string,
+  filter: string
 ): HiringApplicant[] {
   if (filter === HIRING_SUBTEAM_ALL) {
     return [...applicants];
@@ -97,7 +90,5 @@ export function filterApplicantsBySubteam(
     }
     return s.subteam_name === filter;
   };
-  return applicants.filter((app) =>
-    app.position_selections.some(matchesFilter),
-  );
+  return applicants.filter((app) => app.position_selections.some(matchesFilter));
 }

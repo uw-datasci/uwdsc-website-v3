@@ -19,7 +19,7 @@ export async function proxy(request: NextRequest) {
 
   const isComplete = await isProfileComplete(supabase, user?.id);
   const completeProfileResponse = NextResponse.redirect(
-    new URL(WEB_COMPLETE_PROFILE_PATH, request.url),
+    new URL(WEB_COMPLETE_PROFILE_PATH, request.url)
   );
 
   switch (true) {

@@ -43,11 +43,16 @@ export function ContactForm() {
         message: data.message,
       });
       setSubmitSuccess(true);
-      form.reset({ name: data.name, email: data.email, subject: "", message: "" });
+      form.reset({
+        name: data.name,
+        email: data.email,
+        subject: "",
+        message: "",
+      });
     } catch (error: unknown) {
       const err = error as { error?: string; message?: string };
       setSubmitError(
-        err?.error ?? err?.message ?? "An unexpected error occurred. Please try again.",
+        err?.error ?? err?.message ?? "An unexpected error occurred. Please try again."
       );
     } finally {
       setIsLoading(false);

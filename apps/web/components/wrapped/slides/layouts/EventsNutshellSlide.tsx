@@ -52,7 +52,7 @@ export function EventsNutshellSlide({ slide }: EventsNutshellSlideProps) {
       className={cn(
         "flex h-full w-full flex-col items-center justify-center gap-5 overflow-y-auto bg-[#ffca82] px-6 py-6 text-black",
         tiltWarp.variable,
-        atkinsonHyperlegibleMono.variable,
+        atkinsonHyperlegibleMono.variable
       )}
     >
       <div className="relative z-10 flex h-full flex-col px-2 pt-14 pb-2">
@@ -159,7 +159,7 @@ export function EventsNutshellSlide({ slide }: EventsNutshellSlideProps) {
           variants={slideItem}
           className={cn(
             display,
-            "relative text-center text-[1.95rem] leading-none tracking-tight text-black",
+            "relative text-center text-[1.95rem] leading-none tracking-tight text-black"
           )}
         >
           {slide.heading}
@@ -169,10 +169,7 @@ export function EventsNutshellSlide({ slide }: EventsNutshellSlideProps) {
           {slide.events.length === 0 ? (
             <motion.li
               variants={slideItem}
-              className={cn(
-                display,
-                "flex flex-1 items-center justify-center text-4xl",
-              )}
+              className={cn(display, "flex flex-1 items-center justify-center text-4xl")}
             >
               Oopsies!
             </motion.li>
@@ -186,7 +183,7 @@ export function EventsNutshellSlide({ slide }: EventsNutshellSlideProps) {
               <span
                 className={cn(
                   display,
-                  "text-left text-[1.8rem] leading-none tracking-tight text-black",
+                  "text-left text-[1.8rem] leading-none tracking-tight text-black"
                 )}
               >{`#${i + 1}`}</span>
               <SlideVisualSwatch
@@ -195,19 +192,14 @@ export function EventsNutshellSlide({ slide }: EventsNutshellSlideProps) {
                 className="rounded-none object-cover"
               />
               <div className="min-w-0">
-                <p
-                  className={cn(
-                    display,
-                    "truncate text-[1rem] leading-none text-black",
-                  )}
-                >
+                <p className={cn(display, "truncate text-[1rem] leading-none text-black")}>
                   {event.name}
                 </p>
                 {event.description ? (
                   <p
                     className={cn(
                       mono,
-                      "mt-1 truncate text-[0.7rem] leading-none text-black/75",
+                      "mt-1 truncate text-[0.7rem] leading-none text-black/75"
                     )}
                   >
                     {event.description}
@@ -256,16 +248,14 @@ export function EventsNutshellSlide({ slide }: EventsNutshellSlideProps) {
           className="mt-2 flex items-end justify-between text-black"
         >
           <div className="flex items-center gap-2">
-            <CountUpText
-              className={cn(display, "text-2xl leading-none tracking-tight")}
-            >
+            <CountUpText className={cn(display, "text-2xl leading-none tracking-tight")}>
               {slide.statValue}
             </CountUpText>
           </div>
           <p
             className={cn(
               display,
-              "max-w-[70%] text-right text-[0.68rem] leading-none tracking-[0.12em]",
+              "max-w-[70%] text-right text-[0.68rem] leading-none tracking-[0.12em]"
             )}
           >
             {slide.statCaption}

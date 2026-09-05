@@ -15,7 +15,7 @@ function renderAnswerLine(line: string): ReactNode {
     nodes.push(
       <strong key={key++} className="font-semibold text-white">
         {m[1]}
-      </strong>,
+      </strong>
     );
     last = m.index + m[0].length;
   }

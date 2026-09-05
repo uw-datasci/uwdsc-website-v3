@@ -42,7 +42,7 @@ class EmailService {
       throw new ApiError(
         "RESEND_CAMPAIGN_SEGMENT_ID is not set. Create a segment in Resend and add its id for marketing broadcasts.",
         500,
-        "Configuration error",
+        "Configuration error"
       );
     }
   }
@@ -73,7 +73,7 @@ class EmailService {
       console.error("Resend transactional email error:", error);
       throw new ApiError(
         this.resendErrorMessage(error) ?? "Failed to send transactional email",
-        500,
+        500
       );
     }
   }
@@ -164,8 +164,8 @@ class EmailService {
         this.resend.contacts.segments.remove({
           email,
           segmentId: this.campaignSegmentId,
-        }),
-      ),
+        })
+      )
     );
   }
 
@@ -191,7 +191,7 @@ class EmailService {
    * Add new broadcast types as public wrappers that render HTML and call this method.
    */
   private async sendMarketingSegmentBroadcast(
-    params: SendMarketingSegmentBroadcastParams,
+    params: SendMarketingSegmentBroadcastParams
   ): Promise<MarketingSegmentBroadcastResult | null> {
     const {
       subject,
@@ -237,7 +237,7 @@ class EmailService {
       when2MeetLink: string;
       termLabel: string;
       discordLink: string;
-    },
+    }
   ): Promise<MarketingSegmentBroadcastResult | null> {
     const { when2MeetLink, termLabel, discordLink } = options;
     const emailHtml = await render(
@@ -245,7 +245,7 @@ class EmailService {
         termLabel,
         when2MeetLink,
         discordLink,
-      }),
+      })
     );
     return this.sendMarketingSegmentBroadcast({
       subject: getExecWelcomeSubject(termLabel),
@@ -261,7 +261,7 @@ class EmailService {
   async sendCampaignEmail(
     subject: string,
     body: string,
-    recipientEmails: string[],
+    recipientEmails: string[]
   ): Promise<MarketingSegmentBroadcastResult> {
     const emailHtml = await render(createElement(CampaignEmail, { subject, body }));
     const result = await this.sendMarketingSegmentBroadcast({
@@ -274,7 +274,7 @@ class EmailService {
       throw new ApiError(
         "No recipients found for the selected audiences",
         400,
-        "Validation error",
+        "Validation error"
       );
     }
     return result;
@@ -291,7 +291,7 @@ class EmailService {
       positionName: string;
       offerTermLabel?: string;
       offerAcceptByDateLabel?: string;
-    },
+    }
   ): Promise<void> {
     const { type, applicantName, positionName, offerTermLabel, offerAcceptByDateLabel } =
       options;
@@ -303,7 +303,7 @@ class EmailService {
         positionName,
         offerTermLabel,
         offerAcceptByDateLabel,
-      }),
+      })
     );
 
     await this.sendTransactionalEmail({ to: [recipientEmail], subject, html });
@@ -314,7 +314,7 @@ class EmailService {
    */
   async sendMembershipReceiptNotice(
     recipientEmails: string[],
-    options: { kind: MembershipReceiptNoticeKind },
+    options: { kind: MembershipReceiptNoticeKind }
   ): Promise<void> {
     if (recipientEmails.length === 0) return;
 

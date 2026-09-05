@@ -1,5 +1,5 @@
 import { onboardingService } from "@uwdsc/admin";
-import { isOnboardingWindowOpen } from "@uwdsc/common/utils";
+import { isDateWindowOpen } from "@uwdsc/common/utils";
 
 /**
  * While the active term's exec onboarding window is open, execs may use the admin app
@@ -7,5 +7,5 @@ import { isOnboardingWindowOpen } from "@uwdsc/common/utils";
  */
 export async function graceDuringOnboarding(): Promise<boolean> {
   const term = await onboardingService.getActiveTerm();
-  return isOnboardingWindowOpen(term);
+  return isDateWindowOpen(term?.start_date, term?.onboarding_due_date);
 }

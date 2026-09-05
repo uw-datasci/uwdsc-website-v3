@@ -10,11 +10,7 @@ interface OnboardingListProps {
   readonly onSelect: (id: string) => void;
 }
 
-export function OnboardingList({
-  rows,
-  selectedId,
-  onSelect,
-}: OnboardingListProps) {
+export function OnboardingList({ rows, selectedId, onSelect }: OnboardingListProps) {
   if (rows.length === 0) {
     return (
       <div className="flex items-center justify-center h-full p-6">
@@ -27,11 +23,8 @@ export function OnboardingList({
     <ScrollArea className="h-full">
       <div className="flex flex-col gap-1 p-2">
         {rows.map((row) => {
-          const name =
-            [row.first_name, row.last_name].filter(Boolean).join(" ") ||
-            "Unknown";
-          const position =
-            row.submission_role_name || row.exec_position_name || row.user_role;
+          const name = [row.first_name, row.last_name].filter(Boolean).join(" ") || "Unknown";
+          const position = row.submission_role_name || row.exec_position_name || row.user_role;
           const submitted = !!row.submission;
 
           return (
@@ -42,13 +35,11 @@ export function OnboardingList({
                 "w-full text-left rounded-lg border p-3 transition-colors hover:bg-accent/50 cursor-pointer",
                 selectedId === row.profile_id
                   ? "border-primary bg-accent"
-                  : "border-transparent",
+                  : "border-transparent"
               )}
             >
               <div className="flex items-start justify-between gap-2 mb-1">
-                <span className="font-medium text-sm leading-tight truncate">
-                  {name}
-                </span>
+                <span className="font-medium text-sm leading-tight truncate">{name}</span>
                 {submitted ? (
                   <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
                 ) : (
@@ -57,9 +48,7 @@ export function OnboardingList({
               </div>
 
               {row.email && (
-                <p className="text-xs text-muted-foreground truncate mb-1">
-                  {row.email}
-                </p>
+                <p className="text-xs text-muted-foreground truncate mb-1">{row.email}</p>
               )}
 
               <div className="flex flex-wrap gap-1">

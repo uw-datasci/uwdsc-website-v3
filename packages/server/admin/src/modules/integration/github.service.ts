@@ -47,7 +47,7 @@ class GitHubService {
       if (!res.ok) {
         const body = await res.text().catch(() => "");
         throw new Error(
-          `GitHub teams request failed (${res.status} ${res.statusText}) ${body}`,
+          `GitHub teams request failed (${res.status} ${res.statusText}) ${body}`
         );
       }
 
@@ -73,9 +73,7 @@ class GitHubService {
         .map(({ slug, name }) => ({ slug, name }));
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Unknown error";
-      throw new Error(
-        `GitHub teams request failed for org="${this.org}": ${message}`,
-      );
+      throw new Error(`GitHub teams request failed for org="${this.org}": ${message}`);
     }
   }
 
@@ -98,7 +96,7 @@ class GitHubService {
       if (!res.ok) {
         const body = await res.text().catch(() => "");
         throw new Error(
-          `GitHub template repos request failed (${res.status} ${res.statusText}) ${body}`,
+          `GitHub template repos request failed (${res.status} ${res.statusText}) ${body}`
         );
       }
 
@@ -126,9 +124,7 @@ class GitHubService {
         .filter((r): r is GitHubOrgTemplateRepo => r !== null);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Unknown error";
-      throw new Error(
-        `GitHub template repos request failed for org="${this.org}": ${message}`,
-      );
+      throw new Error(`GitHub template repos request failed for org="${this.org}": ${message}`);
     }
   }
 
@@ -168,16 +164,13 @@ class GitHubService {
 
         if (!res.ok) {
           const body = await res.text().catch(() => "");
-          throw new Error(
-            `Workflow dispatch failed (${res.status} ${res.statusText}) ${body}`,
-          );
+          throw new Error(`Workflow dispatch failed (${res.status} ${res.statusText}) ${body}`);
         }
         return;
       } catch (error: unknown) {
-        const message =
-          error instanceof Error ? error.message : "Unknown error";
+        const message = error instanceof Error ? error.message : "Unknown error";
         throw new Error(
-          `Failed to launch Foundry workflow for repo="${this.foundryRepo}": ${message}`,
+          `Failed to launch Foundry workflow for repo="${this.foundryRepo}": ${message}`
         );
       }
     }
@@ -200,14 +193,12 @@ class GitHubService {
 
       if (!res.ok) {
         const body = await res.text().catch(() => "");
-        throw new Error(
-          `Repository dispatch failed (${res.status} ${res.statusText}) ${body}`,
-        );
+        throw new Error(`Repository dispatch failed (${res.status} ${res.statusText}) ${body}`);
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Unknown error";
       throw new Error(
-        `Failed to launch Foundry dispatch for repo="${this.foundryRepo}": ${message}`,
+        `Failed to launch Foundry dispatch for repo="${this.foundryRepo}": ${message}`
       );
     }
   }

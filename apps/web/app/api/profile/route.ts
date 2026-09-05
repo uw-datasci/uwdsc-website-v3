@@ -4,75 +4,59 @@ import {
   trimBaseProfilePayload,
 } from "@/lib/api/utils";
 import { profileService } from "@uwdsc/core";
-import { ApiResponse, isProfileComplete } from "@uwdsc/common/utils";
-import { NextRequest } from "next/server";
+import { RaftResponse } from "@uw-datasci/raft";
+import { withRaftRoute } from "@uwdsc/core/http";
+import { isProfileComplete } from "@uwdsc/common/utils";
 
-export async function GET(): Promise<Response> {
-  try {
-    const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (!user) return isUnauthorized;
+export const GET = withRaftRoute(async () => {
+  const { user, isUnauthorized } = await tryGetCurrentUser();
+  if (!user) return isUnauthorized;
 
-    const profile = await profileService.getProfileByUserId(user.id);
-    if (!profile) return ApiResponse.notFound("Profile not found");
+  const profile = await profileService.getProfileByUserId(user.id);
+  if (!profile) return RaftResponse.notFound("Profile not found");
 
-    const isComplete = isProfileComplete(profile);
-    return ApiResponse.ok({ profile, isComplete });
-  } catch (error) {
-    console.error("Error fetching profile:", error);
-    return ApiResponse.serverError(error, "Failed to fetch profile");
-  }
-}
+  const isComplete = isProfileComplete(profile);
+  return RaftResponse.ok({ profile, isComplete });
+});
 
 // PUT - complete profile (post-verification); requires heard_from_where
-export async function PUT(request: NextRequest): Promise<Response> {
-  try {
-    const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (!user) return isUnauthorized;
+export const PUT = withRaftRoute(async (request) => {
+  const { user, isUnauthorized } = await tryGetCurrentUser();
+  if (!user) return isUnauthorized;
 
-    const body = (await request.json()) as Record<string, unknown>;
-    const validationError = validateBaseProfileFields(body);
-    if (validationError) return ApiResponse.badRequest(validationError.error);
+  const body = (await request.json()) as Record<string, unknown>;
+  const validationError = validateBaseProfileFields(body);
+  if (validationError) return RaftResponse.badRequest(validationError.error);
 
-    if (typeof body.heard_from_where !== "string" || !body.heard_from_where.trim()) {
-      return ApiResponse.badRequest("heard_from_where is required and must be non-empty");
-    }
-
-    const base = trimBaseProfilePayload(body);
-    const result = await profileService.completeProfile(user.id, {
-      ...base,
-      heard_from_where: body.heard_from_where.trim(),
-      is_math_soc_member: base.faculty === "math",
-    });
-    if (!result.success) {
-      return ApiResponse.badRequest("Failed to complete profile", result.error);
-    }
-
-    return ApiResponse.ok({ success: true });
-  } catch (error) {
-    console.error("Error completing profile:", error);
-    return ApiResponse.serverError(error, "Failed to complete profile");
+  if (typeof body.heard_from_where !== "string" || !body.heard_from_where.trim()) {
+    return RaftResponse.badRequest("heard_from_where is required and must be non-empty");
   }
-}
+
+  const base = trimBaseProfilePayload(body);
+  const result = await profileService.completeProfile(user.id, {
+    ...base,
+    heard_from_where: body.heard_from_where.trim(),
+    is_math_soc_member: base.faculty === "math",
+  });
+  if (!result.success) {
+    return RaftResponse.badRequest("Failed to complete profile", result.error);
+  }
+
+  return RaftResponse.ok({ success: true });
+});
 
 // PATCH - update profile; no heard_from_where
-export async function PATCH(request: NextRequest): Promise<Response> {
-  try {
-    const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (!user) return isUnauthorized;
+export const PATCH = withRaftRoute(async (request) => {
+  const { user, isUnauthorized } = await tryGetCurrentUser();
+  if (!user) return isUnauthorized;
 
-    const body = (await request.json()) as Record<string, unknown>;
-    const validationError = validateBaseProfileFields(body);
-    if (validationError) return ApiResponse.badRequest(validationError.error);
+  const body = (await request.json()) as Record<string, unknown>;
+  const validationError = validateBaseProfileFields(body);
+  if (validationError) return RaftResponse.badRequest(validationError.error);
 
-    const base = trimBaseProfilePayload(body);
-    const result = await profileService.updateProfile(user.id, base);
-    if (!result.success) {
-      return ApiResponse.badRequest("Failed to update profile", result.error);
-    }
+  const base = trimBaseProfilePayload(body);
+  const result = await profileService.updateProfile(user.id, base);
+  if (!result.success) return RaftResponse.badRequest("Failed to update profile", result.error);
 
-    return ApiResponse.ok({ success: true });
-  } catch (error) {
-    console.error("Error updating profile:", error);
-    return ApiResponse.serverError(error, "Failed to update profile");
-  }
-}
+  return RaftResponse.ok({ success: true });
+});

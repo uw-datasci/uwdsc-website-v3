@@ -28,7 +28,7 @@ class DiscordService {
   private buildSupportEmbed(
     subject: string,
     textBody: string,
-    senderName: string,
+    senderName: string
   ): DiscordSupportEmbed {
     return {
       title: this.truncate(subject, 256),
@@ -43,7 +43,7 @@ class DiscordService {
    * Post a support message to the Discord webhook.
    */
   async forwardSupportToDiscord(
-    params: ForwardSupportToDiscordParams,
+    params: ForwardSupportToDiscordParams
   ): Promise<ForwardSupportResult> {
     if (!this.webhookUrl) {
       return { ok: false, reason: "missing_discord_webhook" };
@@ -52,7 +52,7 @@ class DiscordService {
     const embed = this.buildSupportEmbed(
       params.subject,
       params.textBody,
-      this.parseSenderName(params.fromRaw),
+      this.parseSenderName(params.fromRaw)
     );
 
     try {
@@ -74,17 +74,21 @@ class DiscordService {
    */
   async processSupportEmail(
     email: GetReceivingEmailResponseSuccess,
-    forwarderFrom: string,
+    forwarderFrom: string
   ): Promise<void> {
     const subject = email.subject ?? "(no subject)";
     const textBody = email.text ?? (email.html ? "(html-only)" : "(no body)");
     const fromRaw = forwarderFrom ?? (Array.isArray(email.from) ? email.from.join(", ") : "");
 
-    const result = await this.forwardSupportToDiscord({ subject, textBody, fromRaw });
+    const result = await this.forwardSupportToDiscord({
+      subject,
+      textBody,
+      fromRaw,
+    });
 
     if (!result.ok && result.reason === "missing_discord_webhook") {
       console.warn(
-        "[DiscordService] Missing SUPPORT_DISCORD_WEBHOOK_URL, skipping Discord notify",
+        "[DiscordService] Missing SUPPORT_DISCORD_WEBHOOK_URL, skipping Discord notify"
       );
     }
   }

@@ -32,7 +32,7 @@ export function ReturningExecList({
             onClick={() => onSelect(sub.id)}
             className={cn(
               "w-full text-left rounded-lg border p-3 transition-colors hover:bg-accent/50 cursor-pointer",
-              selectedId === sub.id ? "bg-accent border-primary/30" : "border-transparent",
+              selectedId === sub.id ? "bg-accent border-primary/30" : "border-transparent"
             )}
           >
             <div className="min-w-0 mb-1">
@@ -47,7 +47,7 @@ export function ReturningExecList({
                     variant="outline"
                     className={cn(
                       "max-w-full truncate px-1.5 py-0 text-[10px] font-medium",
-                      reviewStatusBadgeClassName(sel.status),
+                      reviewStatusBadgeClassName(sel.status)
                     )}
                     title={`${sel.position_name}: ${sel.status}`}
                   >

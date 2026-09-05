@@ -25,9 +25,7 @@ export class ProfileRepository extends BaseRepository {
         `;
       }
 
-      const limitCondition = options?.searchQuery
-        ? this.sql`LIMIT 10`
-        : this.sql``;
+      const limitCondition = options?.searchQuery ? this.sql`LIMIT 10` : this.sql``;
 
       const result = await this.sql<Member[]>`
       SELECT
@@ -50,8 +48,12 @@ export class ProfileRepository extends BaseRepository {
       JOIN user_roles r ON p.id = r.id
       ${
         options?.paidOnly
-          ? this.sql`JOIN public.memberships m ON m.profile_id = p.id`
-          : this.sql`LEFT JOIN public.memberships m ON m.profile_id = p.id`
+          ? this.sql`JOIN membership.memberships m
+              ON m.profile_id = p.id
+             AND m.term_id = (SELECT id FROM public.terms WHERE is_active = true LIMIT 1)`
+          : this.sql`LEFT JOIN membership.memberships m
+              ON m.profile_id = p.id
+             AND m.term_id = (SELECT id FROM public.terms WHERE is_active = true LIMIT 1)`
       }
       LEFT JOIN profiles pv ON pv.id = m.verifier_id
       ${searchCondition}
@@ -152,7 +154,7 @@ export class ProfileRepository extends BaseRepository {
   async updateMemberById(
     profileId: string,
     data: Record<string, string | boolean | null>,
-    columns: string[],
+    columns: string[]
   ): Promise<boolean> {
     try {
       const result = await this.sql`
@@ -187,7 +189,7 @@ export class ProfileRepository extends BaseRepository {
   async updateRoleById(
     profileId: string,
     role: UserRole,
-    subteamId: number | null,
+    subteamId: number | null
   ): Promise<boolean> {
     try {
       const result = await this.sql`

@@ -42,11 +42,7 @@ function HamburgerIcon() {
   );
 }
 
-export function MobileMenu({
-  navLinks,
-  user,
-  onOpenWrapped,
-}: Readonly<MobileMenuProps>) {
+export function MobileMenu({ navLinks, user, onOpenWrapped }: Readonly<MobileMenuProps>) {
   const router = useRouter();
   const { mutate } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -73,10 +69,7 @@ export function MobileMenu({
       <SheetTrigger>
         <HamburgerIcon />
       </SheetTrigger>
-      <SheetContent
-        side="right"
-        className="w-full sm:max-w-sm p-0 [&>button]:hidden"
-      >
+      <SheetContent side="right" className="w-full sm:max-w-sm p-0 [&>button]:hidden">
         <div className="flex flex-col h-full">
           <SheetHeader className="text-left border-b bg-muted/30 px-6 py-4 relative">
             <SheetTitle className="flex items-center gap-3">
@@ -211,17 +204,9 @@ export function MobileMenu({
                     <Link
                       href={link.href}
                       target={link.target}
-                      rel={
-                        link.target === "_blank"
-                          ? "noopener noreferrer"
-                          : undefined
-                      }
+                      rel={link.target === "_blank" ? "noopener noreferrer" : undefined}
                     >
-                      {link.pulse ? (
-                        <PulseLabel>{link.label}</PulseLabel>
-                      ) : (
-                        link.label
-                      )}
+                      {link.pulse ? <PulseLabel>{link.label}</PulseLabel> : link.label}
                     </Link>
                   );
 
@@ -269,13 +254,9 @@ export function MobileMenu({
                       </Badge>
                     </div>
 
-                    <p className="text-sm text-muted-foreground mb-1">
-                      {user?.email}
-                    </p>
+                    <p className="text-sm text-muted-foreground mb-1">{user?.email}</p>
 
-                    <p className="text-sm text-muted-foreground">
-                      WatIAM: {user.wat_iam}
-                    </p>
+                    <p className="text-sm text-muted-foreground">WatIAM: {user.wat_iam}</p>
                   </div>
 
                   <nav className="space-y-1">
@@ -286,6 +267,15 @@ export function MobileMenu({
                         asChild
                       >
                         <Link href="/passport">My Passport</Link>
+                      </Button>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-base py-2 px-4 h-auto font-medium hover:bg-accent/50 transition-colors rounded-lg"
+                        asChild
+                      >
+                        <Link href="/membership">Membership</Link>
                       </Button>
                     </SheetClose>
                     <Separator className="my-1" />

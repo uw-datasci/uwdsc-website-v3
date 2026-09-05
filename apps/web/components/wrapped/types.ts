@@ -263,8 +263,8 @@ export interface AwardEntry {
 /**
  * Podium slide: three full-height colored columns of different heights,
  * each with a hand-drawn doodle above it and a title plus percentile line
- * at the top of the column, 
- * 
+ * at the top of the column,
+ *
  * Data injection points:
  * - `awards`: exactly 3 entries. `awards[0]` sits in the tallest center
  *   column, `awards[1]` in the left column, `awards[2]` in the right column.

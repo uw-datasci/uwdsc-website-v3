@@ -7,7 +7,7 @@ export async function withAnon(
   request: NextRequest,
   response: NextResponse,
   isComplete: boolean,
-  userId: string | undefined,
+  userId: string | undefined
 ) {
   // 1. User is not authenticated
   if (!userId) return NextResponse.redirect(new URL("/login", request.url));

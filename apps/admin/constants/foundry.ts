@@ -37,8 +37,7 @@ export const POSTGRES_PROVIDER_OPTIONS = [
   },
 ] as const;
 
-export type PostgresProviderValue =
-  (typeof POSTGRES_PROVIDER_OPTIONS)[number]["value"];
+export type PostgresProviderValue = (typeof POSTGRES_PROVIDER_OPTIONS)[number]["value"];
 
 export const MONGO_CLIENT_OPTIONS = [
   {

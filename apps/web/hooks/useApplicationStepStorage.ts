@@ -9,10 +9,7 @@ export function useApplicationStepStorage({
   termId,
   currentStep,
 }: UseApplicationStepStorageOptions) {
-  const getStepStorageKey = useCallback(
-    (id: string) => `application:current-step:${id}`,
-    [],
-  );
+  const getStepStorageKey = useCallback((id: string) => `application:current-step:${id}`, []);
 
   const readStoredStep = useCallback(
     (id: string): number | null => {
@@ -26,7 +23,7 @@ export function useApplicationStepStorage({
         return null;
       }
     },
-    [getStepStorageKey],
+    [getStepStorageKey]
   );
 
   const clearStoredStep = useCallback(
@@ -37,7 +34,7 @@ export function useApplicationStepStorage({
         // no-op
       }
     },
-    [getStepStorageKey],
+    [getStepStorageKey]
   );
 
   useEffect(() => {
@@ -49,10 +46,7 @@ export function useApplicationStepStorage({
     if (currentStep < 1 || currentStep > 4) return;
 
     try {
-      window.localStorage.setItem(
-        getStepStorageKey(termId),
-        String(currentStep),
-      );
+      window.localStorage.setItem(getStepStorageKey(termId), String(currentStep));
     } catch {
       // no-op
     }

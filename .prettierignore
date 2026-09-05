@@ -1,0 +1,13 @@
+node_modules
+packages/ui
+packages/eslint-config
+packages/typescript-config
+.next
+out
+dist
+build
+.turbo
+.pnpm-store
+pnpm-lock.yaml
+coverage
+.vercel

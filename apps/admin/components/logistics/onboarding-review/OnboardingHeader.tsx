@@ -49,8 +49,7 @@ const ONBOARDING_CSV_HEADERS = [
 ] as const;
 
 function getCsvValue(row: OnboardingAdminRow, key: string): unknown {
-  if (key === "name")
-    return [row.first_name, row.last_name].filter(Boolean).join(" ");
+  if (key === "name") return [row.first_name, row.last_name].filter(Boolean).join(" ");
   if (key === "position")
     return row.submission_role_name || row.exec_position_name || row.user_role;
   if (key === "submitted") return row.submission ? "yes" : "no";
@@ -96,24 +95,18 @@ export function OnboardingHeader({
   const positionOptions = useMemo(() => {
     const unique = new Set<string>();
     rows.forEach((row) => {
-      const label =
-        row.submission_role_name || row.exec_position_name || row.user_role;
+      const label = row.submission_role_name || row.exec_position_name || row.user_role;
       if (label) unique.add(label);
     });
     return [{ value: "all", label: "All Positions" }].concat(
-      [...unique]
-        .sort((a, b) => a.localeCompare(b))
-        .map((l) => ({ value: l, label: l })),
+      [...unique].sort((a, b) => a.localeCompare(b)).map((l) => ({ value: l, label: l }))
     );
   }, [rows]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return rows.filter((row) => {
-      const name = [row.first_name, row.last_name]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
+      const name = [row.first_name, row.last_name].filter(Boolean).join(" ").toLowerCase();
       const email = (row.email ?? "").toLowerCase();
       const position = (
         (row.submission_role_name || row.exec_position_name || row.user_role) ??
@@ -121,18 +114,13 @@ export function OnboardingHeader({
       ).toLowerCase();
       const hasSubmission = !!row.submission;
 
-      if (q && !name.includes(q) && !email.includes(q) && !position.includes(q))
-        return false;
+      if (q && !name.includes(q) && !email.includes(q) && !position.includes(q)) return false;
       if (statusFilter === "submitted" && !hasSubmission) return false;
       if (statusFilter === "missing" && hasSubmission) return false;
       if (roleFilter !== "all" && row.user_role !== roleFilter) return false;
-      if (
-        termTypeFilter !== "all" &&
-        row.submission?.term_type !== termTypeFilter
-      )
+      if (termTypeFilter !== "all" && row.submission?.term_type !== termTypeFilter)
         return false;
-      if (positionFilter !== "all" && position !== positionFilter.toLowerCase())
-        return false;
+      if (positionFilter !== "all" && position !== positionFilter.toLowerCase()) return false;
       return true;
     });
   }, [rows, search, statusFilter, roleFilter, termTypeFilter, positionFilter]);
@@ -147,7 +135,7 @@ export function OnboardingHeader({
     exportToCsv(
       filtered,
       { headers: [...ONBOARDING_CSV_HEADERS], getValue: getCsvValue },
-      `onboarding-${new Date().toISOString().split("T")[0]}`,
+      `onboarding-${new Date().toISOString().split("T")[0]}`
     );
   }, [filtered]);
 
@@ -183,9 +171,7 @@ export function OnboardingHeader({
             </Badge>
             <Badge className="gap-1 px-2 py-1 bg-emerald-500/15 text-emerald-600 border border-emerald-500/30 dark:text-emerald-300 dark:bg-emerald-500/15 dark:border-emerald-500/30">
               <span className="text-muted-foreground">Submitted</span>
-              <span className="font-semibold tabular-nums">
-                {submittedCount}
-              </span>
+              <span className="font-semibold tabular-nums">{submittedCount}</span>
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground">

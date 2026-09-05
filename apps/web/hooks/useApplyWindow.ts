@@ -35,7 +35,7 @@ export function useApplyWindow() {
       refreshInterval: 5 * 60 * 1000,
       dedupingInterval: 60000,
       shouldRetryOnError: false,
-    },
+    }
   );
 
   return {

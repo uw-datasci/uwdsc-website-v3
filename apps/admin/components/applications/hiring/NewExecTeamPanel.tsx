@@ -34,8 +34,8 @@ export function NewExecTeamPanel({ team, loading }: NewExecTeamPanelProps) {
     return (
       <div className="flex h-48 items-center justify-center px-4 sm:px-6">
         <p className="text-center text-sm text-muted-foreground">
-          No accepted offers yet. Update applicant statuses to &quot;Accepted
-          Offer&quot; to build the new exec team.
+          No accepted offers yet. Update applicant statuses to &quot;Accepted Offer&quot; to
+          build the new exec team.
         </p>
       </div>
     );
@@ -47,29 +47,17 @@ export function NewExecTeamPanel({ team, loading }: NewExecTeamPanelProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className={`min-w-[240px] text-left ${headCell}`}>
-                Name
-              </TableHead>
-              <TableHead className={`min-w-[180px] text-left ${headCell}`}>
-                Position
-              </TableHead>
-              <TableHead className={`min-w-[140px] text-left ${headCell}`}>
-                Subteam
-              </TableHead>
-              <TableHead className={`w-[120px] text-left ${headCell}`}>
-                Role
-              </TableHead>
+              <TableHead className={`min-w-[240px] text-left ${headCell}`}>Name</TableHead>
+              <TableHead className={`min-w-[180px] text-left ${headCell}`}>Position</TableHead>
+              <TableHead className={`min-w-[140px] text-left ${headCell}`}>Subteam</TableHead>
+              <TableHead className={`w-[120px] text-left ${headCell}`}>Role</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {team.map((member) => (
               <TableRow key={`${member.profile_id}-${member.position_name}`}>
-                <TableCell className={`font-medium ${bodyCell}`}>
-                  {member.full_name}
-                </TableCell>
-                <TableCell className={bodyCell}>
-                  {member.position_name}
-                </TableCell>
+                <TableCell className={`font-medium ${bodyCell}`}>{member.full_name}</TableCell>
+                <TableCell className={bodyCell}>{member.position_name}</TableCell>
                 <TableCell className={`text-muted-foreground ${bodyCell}`}>
                   {member.subteam_name ?? "N/A"}
                 </TableCell>

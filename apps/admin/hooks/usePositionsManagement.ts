@@ -3,11 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { ManagablePosition } from "@uwdsc/common/types";
-import {
-  closePosition,
-  getManagablePositions,
-  openPosition,
-} from "@/lib/api/positions";
+import { closePosition, getManagablePositions, openPosition } from "@/lib/api/positions";
 
 export type PositionsLoadState =
   | { status: "loading" }
@@ -28,8 +24,7 @@ export function usePositionsManagement() {
       setLoadState({ status: "ready", positions });
     } catch (err: unknown) {
       const status = (err as { status?: number }).status;
-      const message =
-        err instanceof Error ? err.message : "Failed to load positions";
+      const message = err instanceof Error ? err.message : "Failed to load positions";
       if (status === 401) {
         setLoadState({
           status: "forbidden",
@@ -53,12 +48,12 @@ export function usePositionsManagement() {
         return {
           status: "ready",
           positions: state.positions.map((p) =>
-            p.exec_position_id === execPositionId ? { ...p, ...patch } : p,
+            p.exec_position_id === execPositionId ? { ...p, ...patch } : p
           ),
         };
       });
     },
-    [],
+    []
   );
 
   const togglePosition = useCallback(
@@ -68,9 +63,7 @@ export function usePositionsManagement() {
 
       try {
         if (nextAvailable) {
-          const { availableId } = await openPosition(
-            position.exec_position_id,
-          );
+          const { availableId } = await openPosition(position.exec_position_id);
           patchPosition(position.exec_position_id, {
             available_id: availableId,
           });
@@ -83,8 +76,7 @@ export function usePositionsManagement() {
           toast.success(`${position.name} is now closed for applications`);
         }
       } catch (err: unknown) {
-        const message =
-          err instanceof Error ? err.message : "Something went wrong";
+        const message = err instanceof Error ? err.message : "Something went wrong";
         toast.error(message);
         // Revert the optimistic flip since the request failed.
         patchPosition(position.exec_position_id, {
@@ -99,7 +91,7 @@ export function usePositionsManagement() {
         });
       }
     },
-    [patchPosition],
+    [patchPosition]
   );
 
   return { loadState, load, pendingIds, togglePosition };

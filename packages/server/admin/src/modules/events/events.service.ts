@@ -46,8 +46,8 @@ class EventService {
     data: UpdateEventData
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      // `resources` is jsonb and can't flow through the dynamic sql(data, ...columns) helper
-      // (see EventRepository.updateEventById), so it's carved out and applied separately.
+      // `resources` is jsonb, so it's carved out of the plain column filter and handed to the
+      // repository separately, which wraps it in sql.json() (see EventRepository.updateEventById).
       const { resources, ...rest } = data;
       const { filteredData, columns } = filterPartialUpdate(rest, UPDATE_EVENT_COLUMNS);
 

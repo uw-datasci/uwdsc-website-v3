@@ -37,9 +37,7 @@ export function PassportScanHandler() {
       token,
     })
       .then((result) => setSpin({ status: "done", result }))
-      .catch((error: Error) =>
-        setSpin({ status: "error", message: error.message }),
-      )
+      .catch((error: Error) => setSpin({ status: "error", message: error.message }))
       .finally(() => router.replace("/passport", { scroll: false }));
   }, [membershipId, eventId, token, router]);
 
@@ -64,9 +62,7 @@ function ScanResult({ result }: { readonly result: ScanOutcome }) {
     case "won":
       return <span>You unlocked a new stamp!</span>;
     case "lost":
-      return (
-        <span>No stamp this time - scanning more people boosts your luck.</span>
-      );
+      return <span>No stamp this time - scanning more people boosts your luck.</span>;
     case "already_scanned":
       return <span>You already scanned this person at this event.</span>;
     case "already_has_stamp":

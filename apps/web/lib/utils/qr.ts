@@ -17,7 +17,7 @@ export async function generateCheckInToken(userId: string): Promise<string> {
     keyMaterial,
     { name: "HMAC", hash: "SHA-256" },
     false,
-    ["sign"],
+    ["sign"]
   );
   const timeStep = getCurrentTimeStep();
   const message = encoder.encode(String(timeStep));

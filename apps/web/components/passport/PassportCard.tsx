@@ -25,8 +25,7 @@ interface PassportCardProps {
 }
 
 const CARD_BG = {
-  background:
-    "linear-gradient(160deg, oklch(0.17 0.07 292) 0%, oklch(0.13 0.04 285) 100%)",
+  background: "linear-gradient(160deg, oklch(0.17 0.07 292) 0%, oklch(0.13 0.04 285) 100%)",
 };
 
 const W = 260;
@@ -43,9 +42,7 @@ function buildMrz(displayName: string, term?: string): [string, string] {
     .padEnd(4, "<")
     .toUpperCase();
   const line1 = `P<UWDSC${surname}<<${given}`.slice(0, 44).padEnd(44, "<");
-  const line2 = `MEMBER01<UWDSC${termStr}<<<<<<<<<<<<<<<<<<<<<<`
-    .slice(0, 44)
-    .padEnd(44, "<");
+  const line2 = `MEMBER01<UWDSC${termStr}<<<<<<<<<<<<<<<<<<<<<<`.slice(0, 44).padEnd(44, "<");
   return [line1, line2];
 }
 
@@ -115,18 +112,28 @@ function BioPage({
         <div
           className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 cursor-pointer"
           style={CARD_BG}
-          onClick={(e) => { e.stopPropagation(); setQrExpanded(false); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setQrExpanded(false);
+          }}
         >
           <PassportQRCode userId={userId} membershipId={membershipId} size={180} />
-          <p className="text-white/30 font-mono text-[7px] tracking-widest uppercase">Tap to close</p>
+          <p className="text-white/30 font-mono text-[7px] tracking-widest uppercase">
+            Tap to close
+          </p>
         </div>
       )}
 
       <div className="relative z-10 flex items-center justify-between px-3 pt-3 pb-2">
-        <span className="text-white font-mono font-bold text-[9px] tracking-[0.16em]">UWDSC</span>
+        <span className="text-white font-mono font-bold text-[9px] tracking-[0.16em]">
+          UWDSC
+        </span>
         <button
           className="p-0.5 rounded-sm hover:bg-white/10 transition-colors cursor-pointer"
-          onClick={(e) => { e.stopPropagation(); setQrExpanded(true); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setQrExpanded(true);
+          }}
           aria-label="Show QR code"
         >
           <PassportQRCode userId={userId} membershipId={membershipId} size={24} />
@@ -142,41 +149,65 @@ function BioPage({
         </div>
         <div className="flex-1 min-w-0 space-y-1.5">
           <div>
-            <p className="text-white/25 font-mono text-[5.5px] tracking-[0.2em] uppercase mb-0.5">Surname</p>
+            <p className="text-white/25 font-mono text-[5.5px] tracking-[0.2em] uppercase mb-0.5">
+              Surname
+            </p>
             <p className="text-white font-mono text-[9px] tracking-wider truncate">{surname}</p>
           </div>
           <div>
-            <p className="text-white/25 font-mono text-[5.5px] tracking-[0.2em] uppercase mb-0.5">Given Names</p>
-            <p className="text-white font-mono text-[9px] tracking-wider truncate">{givenNames}</p>
+            <p className="text-white/25 font-mono text-[5.5px] tracking-[0.2em] uppercase mb-0.5">
+              Given Names
+            </p>
+            <p className="text-white font-mono text-[9px] tracking-wider truncate">
+              {givenNames}
+            </p>
           </div>
           {facultyLabel && (
             <div>
-              <p className="text-white/25 font-mono text-[5.5px] tracking-[0.2em] uppercase mb-0.5">Faculty</p>
-              <p className="text-white font-mono text-[9px] tracking-wider">{facultyLabel.toUpperCase()}</p>
+              <p className="text-white/25 font-mono text-[5.5px] tracking-[0.2em] uppercase mb-0.5">
+                Faculty
+              </p>
+              <p className="text-white font-mono text-[9px] tracking-wider">
+                {facultyLabel.toUpperCase()}
+              </p>
             </div>
           )}
           {term && (
             <div>
-              <p className="text-white/25 font-mono text-[5.5px] tracking-[0.2em] uppercase mb-0.5">Term</p>
-              <p className="text-white font-mono text-[9px] tracking-wider">{term.toUpperCase()}</p>
+              <p className="text-white/25 font-mono text-[5.5px] tracking-[0.2em] uppercase mb-0.5">
+                Term
+              </p>
+              <p className="text-white font-mono text-[9px] tracking-wider">
+                {term.toUpperCase()}
+              </p>
             </div>
           )}
           {execPositionLabel && (
             <div>
-              <p className="text-white/25 font-mono text-[5.5px] tracking-[0.2em] uppercase mb-0.5">Position</p>
-              <p className="text-primary/80 font-mono text-[9px] tracking-wider truncate">{execPositionLabel.toUpperCase()}</p>
+              <p className="text-white/25 font-mono text-[5.5px] tracking-[0.2em] uppercase mb-0.5">
+                Position
+              </p>
+              <p className="text-primary/80 font-mono text-[9px] tracking-wider truncate">
+                {execPositionLabel.toUpperCase()}
+              </p>
             </div>
           )}
         </div>
       </div>
       {email && (
-        <p className="relative z-10 px-3 pt-1.5 text-white/20 font-mono text-[6px] truncate">{email}</p>
+        <p className="relative z-10 px-3 pt-1.5 text-white/20 font-mono text-[6px] truncate">
+          {email}
+        </p>
       )}
       <div className="relative z-10 mt-auto">
         <div className="mx-3 h-px bg-white/10 mb-1.5 mt-2" />
         <div className="px-2.5 pb-2.5 space-y-0.5">
-          <p className="text-white/15 font-mono text-[5px] tracking-[0.03em] truncate">{mrzLine1}</p>
-          <p className="text-white/15 font-mono text-[5px] tracking-[0.03em] truncate">{mrzLine2}</p>
+          <p className="text-white/15 font-mono text-[5px] tracking-[0.03em] truncate">
+            {mrzLine1}
+          </p>
+          <p className="text-white/15 font-mono text-[5px] tracking-[0.03em] truncate">
+            {mrzLine2}
+          </p>
         </div>
       </div>
     </div>
@@ -200,7 +231,9 @@ function StampsPage() {
       />
       <div className="absolute -bottom-8 -left-8 size-28 rounded-full bg-primary/15 blur-2xl pointer-events-none" />
       <div className="relative z-10 flex items-center justify-between px-3 pt-3 pb-2">
-        <span className="text-white/30 font-mono text-[6px] tracking-[0.2em] uppercase">Stamps</span>
+        <span className="text-white/30 font-mono text-[6px] tracking-[0.2em] uppercase">
+          Stamps
+        </span>
         <span className="text-white/15 font-mono text-[6px]">0</span>
       </div>
       <div className="mx-3 h-px bg-white/10" />
@@ -243,8 +276,12 @@ function Cover({ shine }: { shine: MotionValue<string> }) {
         <Image src="/logos/dsc.svg" alt="UWDSC" width={52} height={52} />
         <div className="text-center space-y-1">
           <p className="text-white font-mono font-bold text-[11px] tracking-[0.18em]">UWDSC</p>
-          <p className="text-white/50 font-mono text-[8px] tracking-[0.22em] uppercase">UWaterloo Data Science</p>
-          <p className="text-white/30 font-mono text-[7px] tracking-[0.28em] uppercase">Club Member</p>
+          <p className="text-white/50 font-mono text-[8px] tracking-[0.22em] uppercase">
+            UWaterloo Data Science
+          </p>
+          <p className="text-white/30 font-mono text-[7px] tracking-[0.28em] uppercase">
+            Club Member
+          </p>
         </div>
       </div>
       <motion.div
@@ -272,16 +309,8 @@ export function PassportCard(props: PassportCardProps) {
   const coverSpring = useSpring(coverAngle, { stiffness: 90, damping: 20 });
 
   // Desktop: two-page spread. Mobile: single portrait card.
-  const cardWidth = useTransform(
-    coverSpring,
-    [-180, 0],
-    isMobile ? [W, W] : [W * 2, W]
-  );
-  const cardShift = useTransform(
-    coverSpring,
-    [-180, 0],
-    isMobile ? [0, 0] : [0, W / 2]
-  );
+  const cardWidth = useTransform(coverSpring, [-180, 0], isMobile ? [W, W] : [W * 2, W]);
+  const cardShift = useTransform(coverSpring, [-180, 0], isMobile ? [0, 0] : [0, W / 2]);
 
   const rightPageOpacity = useTransform(coverSpring, [-180, -90, 0], [1, 0, 0]);
 
@@ -334,8 +363,7 @@ export function PassportCard(props: PassportCardProps) {
           onClick={handleClick}
           onMouseMove={(e) => {
             if (!ref.current) return;
-            const { left, top, width, height } =
-              ref.current.getBoundingClientRect();
+            const { left, top, width, height } = ref.current.getBoundingClientRect();
             mouseX.set((e.clientX - left) / width - 0.5);
             mouseY.set((e.clientY - top) / height - 0.5);
           }}
@@ -362,10 +390,7 @@ export function PassportCard(props: PassportCardProps) {
                 <div className="absolute inset-y-0 left-0" style={{ width: W }}>
                   <StampsPage />
                 </div>
-                <div
-                  className="absolute inset-y-0 bg-white/15"
-                  style={{ left: W, width: 1 }}
-                />
+                <div className="absolute inset-y-0 bg-white/15" style={{ left: W, width: 1 }} />
               </>
             )}
 
@@ -384,10 +409,7 @@ export function PassportCard(props: PassportCardProps) {
             {/* Cover — the flip. originX:0 hinges it at the spine.
                 No overflow parent means the near edge visibly arcs toward
                 the viewer as it rotates, giving the physical flip feel. */}
-            <div
-              className="absolute inset-y-0 left-0 rounded-2xl"
-              style={{ width: W }}
-            >
+            <div className="absolute inset-y-0 left-0 rounded-2xl" style={{ width: W }}>
               <motion.div
                 className="absolute inset-0 rounded-2xl"
                 style={{

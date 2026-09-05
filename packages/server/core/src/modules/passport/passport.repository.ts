@@ -3,9 +3,7 @@ import type { ScannedMembership, ScanEvent } from "../../types/passport";
 
 export class PassportRepository extends BaseRepository {
   /** Get a membership by id if it belongs to the active term. */
-  async getActiveMembershipById(
-    membershipId: string,
-  ): Promise<ScannedMembership | null> {
+  async getActiveMembershipById(membershipId: string): Promise<ScannedMembership | null> {
     try {
       const result = await this.sql<ScannedMembership[]>`
         SELECT id, profile_id
@@ -91,7 +89,7 @@ export class PassportRepository extends BaseRepository {
   async recordScan(
     scannerProfileId: string,
     scannedProfileId: string,
-    eventId: string,
+    eventId: string
   ): Promise<boolean> {
     try {
       const result = await this.sql<{ id: string }[]>`

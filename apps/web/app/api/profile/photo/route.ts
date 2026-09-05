@@ -1,77 +1,57 @@
-import { ApiResponse } from "@uwdsc/common/utils";
+import { RaftResponse } from "@uw-datasci/raft";
+import { withRaftRoute } from "@uwdsc/core/http";
 import { tryGetCurrentUser } from "@/lib/api/utils";
 import { profileService } from "@uwdsc/core";
 import { createProfilePhotoService } from "@/lib/services";
-import { NextRequest } from "next/server";
 
-export async function GET(): Promise<Response> {
-  try {
-    const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (!user) return isUnauthorized;
+export const GET = withRaftRoute(async () => {
+  const { user, isUnauthorized } = await tryGetCurrentUser();
+  if (!user) return isUnauthorized;
 
-    const profile = await profileService.getProfileByUserId(user.id);
-    const key = profile?.profile_photo_key ?? null;
+  const profile = await profileService.getProfileByUserId(user.id);
+  const key = profile?.profile_photo_key ?? null;
 
-    let url: string | null = null;
-    if (key) {
-      const profilePhotoService = await createProfilePhotoService();
-      url = await profilePhotoService.getSignedUrlForKey(key);
-    }
-
-    return ApiResponse.ok({ hasPhoto: Boolean(key), key, url });
-  } catch (error) {
-    console.error("Error fetching profile photo status:", error);
-    return ApiResponse.serverError(error, "Failed to fetch profile photo status");
-  }
-}
-
-export async function POST(request: NextRequest): Promise<Response> {
-  try {
-    const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (!user) return isUnauthorized;
-
-    const formData = await request.formData();
-    const file = formData.get("file") as File | null;
-
-    if (!file || !(file instanceof File)) {
-      return ApiResponse.badRequest("No file provided");
-    }
-
+  let url: string | null = null;
+  if (key) {
     const profilePhotoService = await createProfilePhotoService();
-    const result = await profilePhotoService.uploadProfilePhoto({ file, userId: user.id });
-
-    if (!result.success) {
-      return ApiResponse.badRequest(result.error, "Upload failed");
-    }
-
-    const updateResult = await profileService.updateProfilePhotoKey(user.id, result.key);
-    if (!updateResult.success) {
-      return ApiResponse.badRequest(updateResult.error, "Upload failed");
-    }
-
-    return ApiResponse.ok({ message: "Upload successful", key: result.key });
-  } catch (error) {
-    console.error("Error uploading profile photo:", error);
-    return ApiResponse.serverError(error, "Failed to upload profile photo");
+    url = await profilePhotoService.getSignedUrlForKey(key);
   }
-}
 
-export async function DELETE(): Promise<Response> {
-  try {
-    const { user, isUnauthorized } = await tryGetCurrentUser();
-    if (!user) return isUnauthorized;
+  return RaftResponse.ok({ hasPhoto: Boolean(key), key, url });
+});
 
-    const profilePhotoService = await createProfilePhotoService();
-    await profilePhotoService.deleteProfilePhoto(user.id);
+export const POST = withRaftRoute(async (request) => {
+  const { user, isUnauthorized } = await tryGetCurrentUser();
+  if (!user) return isUnauthorized;
 
-    const updateResult = await profileService.updateProfilePhotoKey(user.id, null);
-    if (!updateResult.success) {
-      return ApiResponse.badRequest(updateResult.error, "Delete failed");
-    }
+  const formData = await request.formData();
+  const file = formData.get("file");
 
-    return ApiResponse.ok({ message: "Delete successful" });
-  } catch (error) {
-    console.error("Error deleting profile photo:", error);
-    return ApiResponse.serverError(error, "Failed to delete profile photo");
+  if (!file || !(file instanceof File)) {
+    return RaftResponse.badRequest("No file provided");
   }
-}
+
+  const profilePhotoService = await createProfilePhotoService();
+  const result = await profilePhotoService.uploadProfilePhoto({ file, userId: user.id });
+  if (!result.success) return RaftResponse.badRequest(result.error, "Upload failed");
+
+  const updateResult = await profileService.updateProfilePhotoKey(user.id, result.key);
+  if (!updateResult.success)
+    return RaftResponse.badRequest(updateResult.error, "Upload failed");
+
+  return RaftResponse.ok({ message: "Upload successful", key: result.key });
+});
+
+export const DELETE = withRaftRoute(async () => {
+  const { user, isUnauthorized } = await tryGetCurrentUser();
+  if (!user) return isUnauthorized;
+
+  const profilePhotoService = await createProfilePhotoService();
+  await profilePhotoService.deleteProfilePhoto(user.id);
+
+  const updateResult = await profileService.updateProfilePhotoKey(user.id, null);
+  if (!updateResult.success)
+    return RaftResponse.badRequest(updateResult.error, "Delete failed");
+
+  return RaftResponse.ok({ message: "Delete successful" });
+});

@@ -9,7 +9,7 @@ export function useProfilePhotoUrl(profilePhotoKey: string | null | undefined) {
     async () => {
       const status = await getProfilePhotoStatus();
       return status.url;
-    },
+    }
   );
 
   return data ?? null;

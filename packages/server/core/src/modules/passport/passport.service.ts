@@ -23,26 +23,21 @@ class PassportService {
   /** Validate a scanned QR, record the scan and roll for the event stamp. */
   async scanQrCode(
     scannerProfileId: string,
-    params: { membershipId: string; eventId: string; token: string },
+    params: { membershipId: string; eventId: string; token: string }
   ): Promise<ScanOutcome> {
     try {
       return await this.processScan(scannerProfileId, params);
     } catch (error) {
       if (error instanceof ApiError) throw error;
-      throw new ApiError(
-        `Failed to process scan: ${(error as Error).message}`,
-        500,
-      );
+      throw new ApiError(`Failed to process scan: ${(error as Error).message}`, 500);
     }
   }
 
   private async processScan(
     scannerProfileId: string,
-    params: { membershipId: string; eventId: string; token: string },
+    params: { membershipId: string; eventId: string; token: string }
   ): Promise<ScanOutcome> {
-    const membership = await this.repository.getActiveMembershipById(
-      params.membershipId,
-    );
+    const membership = await this.repository.getActiveMembershipById(params.membershipId);
     if (!membership) {
       throw new ApiError("Invalid or inactive membership", 400);
     }
@@ -61,13 +56,12 @@ class PassportService {
     }
 
     // base probability counts scans made BEFORE this one
-    const priorScans =
-      await this.repository.countScansByScanner(scannerProfileId);
+    const priorScans = await this.repository.countScansByScanner(scannerProfileId);
 
     const isNewScan = await this.repository.recordScan(
       scannerProfileId,
       scannedProfileId,
-      params.eventId,
+      params.eventId
     );
     if (!isNewScan) return { outcome: "already_scanned" };
 
@@ -76,8 +70,7 @@ class PassportService {
     }
 
     const scannedRole = await this.repository.getUserRole(scannedProfileId);
-    const probability =
-      priorScans * BASE_RATE_PER_SCAN + (ROLE_DROP_RATE[scannedRole] ?? 0);
+    const probability = priorScans * BASE_RATE_PER_SCAN + (ROLE_DROP_RATE[scannedRole] ?? 0);
 
     if (Math.random() < probability) {
       await this.repository.awardStamp(scannerProfileId, event.stamp_id);
@@ -93,8 +86,7 @@ class PassportService {
   private isTokenValid(userId: string, token: string): boolean {
     const step = Math.floor(Date.now() / (TIME_STEP_SECONDS * 1000));
     return [step, step - 1].some(
-      (s) =>
-        createHmac("sha256", userId).update(String(s)).digest("hex") === token,
+      (s) => createHmac("sha256", userId).update(String(s)).digest("hex") === token
     );
   }
 }

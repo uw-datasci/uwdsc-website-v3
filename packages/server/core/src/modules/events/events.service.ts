@@ -115,7 +115,7 @@ class EventService {
    */
   async getAttendanceForUser(
     eventId: string,
-    profileId: string,
+    profileId: string
   ): Promise<{ checkedIn: boolean; attendanceId: string | null }> {
     try {
       const attendanceId = await this.repository.getAttendanceForUser(eventId, profileId);

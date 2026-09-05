@@ -84,7 +84,7 @@ class ProfileService {
    */
   async updateProfilePhotoKey(
     userId: string,
-    key: string | null,
+    key: string | null
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const result = await this.repository.updateProfilePhotoKey(userId, key);
@@ -92,10 +92,7 @@ class ProfileService {
 
       return { success: true };
     } catch (error) {
-      throw new ApiError(
-        `Failed to update profile photo: ${(error as Error).message}`,
-        500,
-      );
+      throw new ApiError(`Failed to update profile photo: ${(error as Error).message}`, 500);
     }
   }
 }

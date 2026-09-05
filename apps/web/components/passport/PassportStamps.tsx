@@ -34,7 +34,7 @@ export function PassportStamps({ stamps }: Readonly<PassportStampsProps>) {
 
   const pageStamps = stamps.slice(
     currentPage * STAMPS_PER_PAGE,
-    currentPage * STAMPS_PER_PAGE + STAMPS_PER_PAGE,
+    currentPage * STAMPS_PER_PAGE + STAMPS_PER_PAGE
   );
   const placeholderCount = STAMPS_PER_PAGE - pageStamps.length;
 
@@ -42,7 +42,9 @@ export function PassportStamps({ stamps }: Readonly<PassportStampsProps>) {
     <Card className="flex h-full flex-col gap-0 overflow-hidden rounded-2xl border border-white/15 bg-[#121212] py-0 text-white shadow-2xl">
       <div className="flex items-end justify-between gap-3 border-b border-white/10 px-4 pb-3 pt-4">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">my stamps</p>
+          <p className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">
+            my stamps
+          </p>
           <p className="mt-1 text-xs text-zinc-400">
             {pageCount > 1
               ? "Flip through your stamp book pages."

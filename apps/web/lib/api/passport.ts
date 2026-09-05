@@ -5,9 +5,7 @@
 import type { PassportScanRequest, ScanOutcome } from "@uwdsc/common/types";
 import { createApiError } from "./errors";
 
-export async function scanPassportQr(
-  params: PassportScanRequest,
-): Promise<ScanOutcome> {
+export async function scanPassportQr(params: PassportScanRequest): Promise<ScanOutcome> {
   const response = await fetch("/api/passport/scan", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

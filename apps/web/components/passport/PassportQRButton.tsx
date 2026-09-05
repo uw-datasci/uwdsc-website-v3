@@ -121,7 +121,7 @@ export function PassportQRButton({ userId, membershipId, className }: PassportQR
               )}
             </AnimatePresence>
           </>,
-          document.body,
+          document.body
         )}
     </>
   );

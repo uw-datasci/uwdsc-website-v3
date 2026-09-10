@@ -9,8 +9,8 @@ import { ContactForm } from "@/components/contact/ContactForm";
 const CONTACT_BUTTONS = [
   {
     id: "email",
-    label: "contact@uwdatascience.ca",
-    href: "mailto:contact@uwdatascience.ca",
+    label: "support@mail.uwdatascience.ca",
+    href: "mailto:support@mail.uwdatascience.ca",
     icon: <Mail className="w-5 text-white" />,
   },
   {

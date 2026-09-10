@@ -6,6 +6,7 @@ import {
   ClipboardCheck,
   Code2,
   FileText,
+  LifeBuoy,
   Package,
   Library,
   Mail,
@@ -58,6 +59,7 @@ export const getAdminNavigation = (
       subItems: applicationSubItems,
     },
     { name: "Events", href: "/events", icon: Calendar },
+    { name: "Support", href: "/support", icon: LifeBuoy },
     ...(isAdmin(role) ? [{ name: "Campaigns", href: "/campaigns", icon: Mail }] : []),
     {
       name: "Logistics",

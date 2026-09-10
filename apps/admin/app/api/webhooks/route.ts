@@ -3,7 +3,8 @@ import { ApiError } from "@uwdsc/common/types";
 import { RaftClient, RaftResponse } from "@uw-datasci/raft";
 import { withRaftRoute } from "@uwdsc/core/http";
 import { discordService, membershipService, webhookService } from "@uwdsc/admin";
-import { applicationService } from "@uwdsc/core";
+import { applicationService, contactService } from "@uwdsc/core";
+import { parseFromHeader } from "@uwdsc/common/utils";
 import { Webhook } from "svix";
 import { WebhookEventPayload } from "resend";
 
@@ -90,7 +91,19 @@ export const POST = withRaftRoute(async (request) => {
         break;
       }
       case "support": {
-        await discordService.processSupportEmail(contents.email, evt.data.from);
+        const { name, email } = parseFromHeader(evt.data.from);
+        await Promise.all([
+          discordService.processSupportEmail(contents.email, evt.data.from),
+          contactService.submit({
+            name,
+            email,
+            subject: contents.email.subject ?? "(no subject)",
+            message:
+              contents.email.text ?? (contents.email.html ? "(html-only)" : "(no body)"),
+            source: "email",
+            resend_email_id: contents.email.id,
+          }),
+        ]);
         break;
       }
       default: {

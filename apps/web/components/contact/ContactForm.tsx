@@ -14,10 +14,12 @@ import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 export function ContactForm() {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  const isAnonymous = !isAuthLoading && !user;
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactSchema),
@@ -88,8 +90,9 @@ export function ContactForm() {
           name="name"
           render={renderTextField({
             label: "Name",
+            required: true,
             placeholder: "Your name",
-            inputProps: { disabled: true, readOnly: true },
+            inputProps: { disabled: !isAnonymous, readOnly: !isAnonymous },
           })}
         />
         <FormField
@@ -97,8 +100,13 @@ export function ContactForm() {
           name="email"
           render={renderTextField({
             label: "Email",
+            required: true,
             placeholder: "Your email",
-            inputProps: { disabled: true, readOnly: true },
+            inputProps: {
+              disabled: !isAnonymous,
+              readOnly: !isAnonymous,
+              type: "email",
+            },
           })}
         />
         <FormField

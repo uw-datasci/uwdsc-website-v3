@@ -9,7 +9,7 @@ export const POST = withRaftRoute(async (request) => {
   if (!email || !password) return RaftResponse.badRequest("Email and password are required");
 
   const authService = await createAuthService();
-  const emailRedirectTo = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback?next=/complete-profile`;
+  const emailRedirectTo = `${process.env.NEXT_PUBLIC_APP_URL}/confirm-email`;
   const result = await authService.register({
     email,
     password,

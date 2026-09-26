@@ -4,13 +4,13 @@ import { createAuthService } from "@/lib/services";
 
 /**
  * Auth callback handles two flows:
- * - PKCE (initial signup): Supabase redirects with ?code=... → exchangeCodeForSession(code)
- * - Implicit (resend verification): auth.resend() does not use PKCE; Supabase may redirect
- *   with ?token_hash=...&type=... → verifyOtp({ token_hash, type })
+ * - PKCE: Supabase redirects with ?code=... → exchangeCodeForSession(code)
+ * - Implicit: Supabase may redirect with ?token_hash=...&type=... → verifyOtp({ token_hash, type })
  *
- * Password recovery is intentionally NOT handled here - recovery links go directly
- * to a client-side buffer page so enterprise email scanners can't consume the
- * single-use token before the user opens the email.
+ * Signup confirmation and password recovery links normally skip this route - they go
+ * to client-side buffer pages (/confirm-email, /reset-password-confirm) so enterprise
+ * email scanners can't consume the single-use token before the user opens the email.
+ * /confirm-email still forwards legacy ?code= links here.
  */
 export const GET = withRaftRoute(async (request) => {
   const requestUrl = new URL(request.url);

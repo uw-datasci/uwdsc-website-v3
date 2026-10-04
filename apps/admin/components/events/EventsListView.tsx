@@ -17,6 +17,8 @@ import type { EventWithAttendanceCount, Term } from "@uwdsc/common/types";
 import { formatDateTime, getEventTerm } from "@/lib/utils/events";
 import { DeleteEventDialog } from "@/components/events";
 import { EventCategoryBadge } from "./EventCategoryBadge";
+import { EventDraftBadge } from "./EventDraftBadge";
+import { PublishEventButton } from "./PublishEventButton";
 
 interface EventsListViewProps {
   readonly events: EventWithAttendanceCount[];
@@ -48,9 +50,13 @@ function EventCard({
         <div className="flex items-start justify-between gap-2">
           <div className="flex flex-col gap-1.5">
             <h3 className="font-semibold leading-tight">{event.name}</h3>
-            <EventCategoryBadge category={event.category} />
+            <div className="flex flex-wrap gap-1.5">
+              <EventCategoryBadge category={event.category} />
+              {!event.is_published && <EventDraftBadge />}
+            </div>
           </div>
-          <div className="flex shrink-0 gap-1">
+          <div className="flex shrink-0 items-center gap-1">
+            <PublishEventButton event={event} onSuccess={onRefresh} />
             <Button
               variant="ghost"
               size="icon"
@@ -146,7 +152,10 @@ export function EventsListView({
                   <TableRow key={event.id}>
                     <TableCell className="font-medium">{event.name}</TableCell>
                     <TableCell>
-                      <EventCategoryBadge category={event.category} />
+                      <div className="flex flex-wrap gap-1.5">
+                        <EventCategoryBadge category={event.category} />
+                        {!event.is_published && <EventDraftBadge />}
+                      </div>
                     </TableCell>
                     <TableCell>{formatDateTime(event.start_time)}</TableCell>
                     <TableCell>{formatDateTime(event.end_time)}</TableCell>
@@ -155,7 +164,8 @@ export function EventsListView({
                       {formatAttendance(event, terms)}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
+                      <div className="flex items-center justify-end gap-2">
+                        <PublishEventButton event={event} onSuccess={onRefresh} />
                         <Button
                           variant="ghost"
                           size="icon"

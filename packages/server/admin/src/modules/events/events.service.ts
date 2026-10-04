@@ -10,6 +10,7 @@ const UPDATE_EVENT_COLUMNS = [
   "start_time",
   "end_time",
   "category",
+  "is_published",
 ] as const;
 
 class EventService {
@@ -55,7 +56,7 @@ class EventService {
 
       const result = await this.repository.updateEventById(
         eventId,
-        filteredData as Record<string, string | null>,
+        filteredData,
         columns,
         resources
       );

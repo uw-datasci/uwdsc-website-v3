@@ -23,7 +23,8 @@ export class EventRepository extends BaseRepository {
     try {
       const result = await this.sql<Event[]>`
         INSERT INTO events.events (
-          name, description, location, image_url, start_time, end_time, category, resources
+          name, description, location, image_url, start_time, end_time, category, resources,
+          is_published
         )
         VALUES (
           ${data.name},
@@ -33,7 +34,8 @@ export class EventRepository extends BaseRepository {
           ${data.start_time},
           ${data.end_time},
           ${data.category},
-          ${this.sql.json(toJsonValue(data.resources ?? []))}
+          ${this.sql.json(toJsonValue(data.resources ?? []))},
+          ${data.is_published ?? true}
         )
         RETURNING *
       `;
@@ -56,12 +58,14 @@ export class EventRepository extends BaseRepository {
    */
   async updateEventById(
     eventId: string,
-    data: Record<string, string | null>,
+    data: Record<string, string | boolean | null>,
     columns: string[],
     resources?: EventResource[]
   ): Promise<boolean> {
     try {
-      const values: Record<string, string | null | ReturnType<Sql["json"]>> = { ...data };
+      const values: Record<string, string | boolean | null | ReturnType<Sql["json"]>> = {
+        ...data,
+      };
       const updateColumns = [...columns];
 
       if (resources !== undefined) {

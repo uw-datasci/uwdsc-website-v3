@@ -15,3 +15,9 @@ export type GetEventsByTimeRangeOptions = {
   limit?: number;
   asOf?: Date;
 };
+
+/**
+ * Read options for event queries shared by web and admin. Unpublished (draft) events are
+ * hidden by default so public callers can't leak them; admin callers opt in.
+ */
+export type EventVisibilityOptions = { includeUnpublished?: boolean };

@@ -5,16 +5,16 @@ import {
   EventWithAttendanceCount,
   WrappedEvent,
 } from "@uwdsc/common/types";
-import type { EventTimeFilter } from "../../types/events";
+import type { EventTimeFilter, EventVisibilityOptions } from "../../types/events";
 
 export class EventRepository extends BaseRepository {
   /**
-   * Total number of events (all rows).
+   * Total number of published events.
    */
   async getEventCount(): Promise<number> {
     try {
       const result = await this.sql<{ count: number }[]>`
-        SELECT COUNT(*)::int AS count FROM events.events
+        SELECT COUNT(*)::int AS count FROM events.events WHERE is_published
       `;
       return result[0]?.count ?? 0;
     } catch (error: unknown) {
@@ -24,9 +24,12 @@ export class EventRepository extends BaseRepository {
   }
 
   /**
-   * Get all events ordered by start_time descending
+   * Get all events ordered by start_time descending.
+   * Published only unless `includeUnpublished` (admin callers).
    */
-  async getAllEvents(): Promise<Event[]> {
+  async getAllEvents({ includeUnpublished = false }: EventVisibilityOptions = {}): Promise<
+    Event[]
+  > {
     try {
       const result = await this.sql<Event[]>`
         SELECT
@@ -40,8 +43,10 @@ export class EventRepository extends BaseRepository {
           buffered_start_time,
           buffered_end_time,
           category,
-          resources
+          resources,
+          is_published
         FROM events.events
+        WHERE (${includeUnpublished} OR is_published)
         ORDER BY start_time DESC
       `;
 
@@ -54,8 +59,11 @@ export class EventRepository extends BaseRepository {
 
   /**
    * Get all events with an attendance count per event, ordered by start_time descending.
+   * Published only unless `includeUnpublished` (admin callers).
    */
-  async getAllEventsWithAttendanceCount(): Promise<EventWithAttendanceCount[]> {
+  async getAllEventsWithAttendanceCount({
+    includeUnpublished = false,
+  }: EventVisibilityOptions = {}): Promise<EventWithAttendanceCount[]> {
     try {
       const result = await this.sql<EventWithAttendanceCount[]>`
         SELECT
@@ -70,8 +78,10 @@ export class EventRepository extends BaseRepository {
           e.buffered_end_time,
           e.category,
           e.resources,
+          e.is_published,
           (SELECT COUNT(*)::int FROM events.attendance a WHERE a.event_id = e.id) AS attendance_count
         FROM events.events e
+        WHERE (${includeUnpublished} OR e.is_published)
         ORDER BY e.start_time DESC
       `;
       return result;
@@ -84,6 +94,7 @@ export class EventRepository extends BaseRepository {
   /**
    * Get all events with their attendance count and whether the given user
    * attended each one, ordered from oldest to newest. Single scan for DSC Wrapped.
+   * Published events only.
    */
   async getWrappedEventStats(profileId: string): Promise<WrappedEvent[]> {
     try {
@@ -100,10 +111,12 @@ export class EventRepository extends BaseRepository {
           e.buffered_end_time,
           e.category,
           e.resources,
+          e.is_published,
           COUNT(a.profile_id)::int AS attendance_count,
           COALESCE(BOOL_OR(a.profile_id = ${profileId}), false) AS attended_by_user
         FROM events.events e
         LEFT JOIN events.attendance a ON a.event_id = e.id
+        WHERE e.is_published
         GROUP BY e.id
         ORDER BY e.start_time ASC
       `;
@@ -117,8 +130,12 @@ export class EventRepository extends BaseRepository {
   /**
    * Get a single event by ID
    * @param eventId - The event UUID
+   * @param options - Unpublished events are treated as not found unless `includeUnpublished`
    */
-  async getEventById(eventId: string): Promise<Event | null> {
+  async getEventById(
+    eventId: string,
+    { includeUnpublished = false }: EventVisibilityOptions = {}
+  ): Promise<Event | null> {
     try {
       const result = await this.sql<Event[]>`
         SELECT
@@ -132,9 +149,10 @@ export class EventRepository extends BaseRepository {
           buffered_start_time,
           buffered_end_time,
           category,
-          resources
+          resources,
+          is_published
         FROM events.events
-        WHERE id = ${eventId}
+        WHERE id = ${eventId} AND (${includeUnpublished} OR is_published)
         LIMIT 1
       `;
 
@@ -146,15 +164,16 @@ export class EventRepository extends BaseRepository {
   }
 
   /**
-   * Get events matching a generic time filter (in_window, after_start, etc.).
+   * Get published events matching a generic time filter (in_window, after_start, etc.).
    */
   async getEvents(filter: EventTimeFilter): Promise<Event[]> {
     const ref = filter.asOf ?? new Date();
 
     const condition =
       filter.kind === "in_window"
-        ? this.sql`WHERE ${ref} BETWEEN buffered_start_time AND buffered_end_time`
-        : this.sql`WHERE start_time > ${ref}`;
+        ? this
+            .sql`WHERE is_published AND ${ref} BETWEEN buffered_start_time AND buffered_end_time`
+        : this.sql`WHERE is_published AND start_time > ${ref}`;
 
     const orderAndLimit =
       filter.kind === "after_start"
@@ -174,7 +193,8 @@ export class EventRepository extends BaseRepository {
           buffered_start_time,
           buffered_end_time,
           category,
-          resources
+          resources,
+          is_published
         FROM events.events
         ${condition}
         ${orderAndLimit}
@@ -187,7 +207,7 @@ export class EventRepository extends BaseRepository {
   }
 
   /**
-   * Get all events of a given category, newest start_time first. Used by the
+   * Get all published events of a given category, newest start_time first. Used by the
    * public /workshops page (and any future per-category listing) — backed by
    * idx_events_category.
    */
@@ -205,9 +225,10 @@ export class EventRepository extends BaseRepository {
           buffered_start_time,
           buffered_end_time,
           category,
-          resources
+          resources,
+          is_published
         FROM events.events
-        WHERE category = ${category}
+        WHERE category = ${category} AND is_published
         ORDER BY start_time DESC
       `;
       return result;

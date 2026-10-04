@@ -241,22 +241,6 @@ export function downloadICS(event: Event): void {
   URL.revokeObjectURL(url);
 }
 
-interface EndAfterStartError {
-  start_time?: string;
-  end_time?: string;
-}
-
-/** Returns true when end_time is not before start_time. */
-export function isEndAfterStart({ start_time, end_time }: EndAfterStartError) {
-  if (!start_time || !end_time) return true;
-  return new Date(end_time) >= new Date(start_time);
-}
-
-export const endAfterStartError: { message: string; path: PropertyKey[] } = {
-  message: "End date & time must be after start date & time",
-  path: ["end_time"],
-};
-
 // ─── Term helpers ────────────────────────────────────────────────────────────
 
 function toMs(iso: string | null | undefined): number | null {

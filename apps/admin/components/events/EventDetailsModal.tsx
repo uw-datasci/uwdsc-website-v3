@@ -15,6 +15,8 @@ import { formatEventDescription } from "@uwdsc/common/utils";
 import { formatDateTime } from "@/lib/utils/events";
 import { DeleteEventDialog } from "./DeleteEventModal";
 import { EventCategoryBadge } from "./EventCategoryBadge";
+import { EventDraftBadge } from "./EventDraftBadge";
+import { PublishEventButton } from "./PublishEventButton";
 
 interface EventDetailsDialogProps {
   readonly event: Event | null;
@@ -22,6 +24,7 @@ interface EventDetailsDialogProps {
   readonly onOpenChange: (open: boolean) => void;
   readonly onEdit: (event: Event) => void;
   readonly onDelete?: () => void;
+  readonly onPublish?: () => void;
 }
 
 export function EventDetailsDialog({
@@ -30,6 +33,7 @@ export function EventDetailsDialog({
   onOpenChange,
   onEdit,
   onDelete,
+  onPublish,
 }: Readonly<EventDetailsDialogProps>) {
   if (!event) return null;
 
@@ -45,6 +49,7 @@ export function EventDetailsDialog({
           <DialogTitle className="flex items-center gap-2">
             {event.name}
             <EventCategoryBadge category={event.category} />
+            {!event.is_published && <EventDraftBadge />}
           </DialogTitle>
           <DialogDescription>Event schedule, location, and description.</DialogDescription>
         </DialogHeader>
@@ -95,7 +100,14 @@ export function EventDetailsDialog({
           </div>
         )}
 
-        <DialogFooter>
+        <DialogFooter className="sm:items-center">
+          <PublishEventButton
+            event={event}
+            onSuccess={() => {
+              onOpenChange(false);
+              onPublish?.();
+            }}
+          />
           <Button variant="ghost" size="icon" aria-label="Edit event" onClick={handleEdit}>
             <Pencil className="size-4" />
           </Button>

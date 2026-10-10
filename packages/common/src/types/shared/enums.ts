@@ -31,3 +31,5 @@ export type SubmissionStatus = "pending" | "approved" | "rejected";
 export type SubmissionSource = "web_form" | "email";
 
 export type ReviewDecision = "approved" | "rejected";
+
+export type ContactSource = "contact_form" | "email";

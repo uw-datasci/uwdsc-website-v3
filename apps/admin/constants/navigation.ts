@@ -6,6 +6,7 @@ import {
   ClipboardCheck,
   Code2,
   FileText,
+  LifeBuoy,
   Package,
   Library,
   Mail,
@@ -27,29 +28,16 @@ export const getAdminNavigation = (
   const onboardingOpen = logisticsWindows?.onboardingOpen ?? false;
   const returningExecOpen = logisticsWindows?.returningExecOpen ?? false;
   const applicationSubItems = [
-    {
-      name: "Questions",
-      href: "/applications/questions",
-      icon: CircleHelp,
-    },
+    { name: "External Apps", href: "/applications", icon: FileText },
+    { name: "Questions", href: "/applications/questions", icon: CircleHelp },
     ...(isPres(role)
       ? [
           { name: "Hiring", href: "/applications/hiring", icon: UserCheck },
-          {
-            name: "Settings",
-            href: "/applications/settings",
-            icon: Settings,
-          },
+          { name: "Settings", href: "/applications/settings", icon: Settings },
         ]
       : []),
     ...(isAdmin(role)
-      ? [
-          {
-            name: "Returning Execs",
-            href: "/applications/returning-execs",
-            icon: UserCheck,
-          },
-        ]
+      ? [{ name: "Returning Execs", href: "/applications/returning-execs", icon: UserCheck }]
       : []),
   ];
 
@@ -60,7 +48,6 @@ export const getAdminNavigation = (
       icon: Users,
       subItems: [
         { name: "All members", href: "/members", icon: Users },
-        // Open to every exec: the online review queue is not admin-only.
         { name: "Submissions", href: "/members/submissions", icon: ReceiptText },
       ],
     },
@@ -71,6 +58,7 @@ export const getAdminNavigation = (
       subItems: applicationSubItems,
     },
     { name: "Events", href: "/events", icon: Calendar },
+    { name: "Support", href: "/support", icon: LifeBuoy },
     ...(isAdmin(role) ? [{ name: "Campaigns", href: "/campaigns", icon: Mail }] : []),
     {
       name: "Logistics",
@@ -78,13 +66,7 @@ export const getAdminNavigation = (
       icon: Package,
       subItems: [
         ...(onboardingOpen
-          ? [
-              {
-                name: "Onboarding",
-                href: "/logistics/onboarding",
-                icon: FileText,
-              },
-            ]
+          ? [{ name: "Onboarding", href: "/logistics/onboarding", icon: FileText }]
           : []),
         ...(isPres(role)
           ? [
@@ -96,13 +78,7 @@ export const getAdminNavigation = (
             ]
           : []),
         ...(returningExecOpen
-          ? [
-              {
-                name: "Returning execs",
-                href: "/logistics/returning",
-                icon: UserCheck,
-              },
-            ]
+          ? [{ name: "Returning execs", href: "/logistics/returning", icon: UserCheck }]
           : []),
       ],
     },

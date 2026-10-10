@@ -15,7 +15,7 @@ concurrency:
 
 env:
   NODE_VERSION: 24
-  PNPM_VERSION: 11.3.0
+  PNPM_VERSION: 12.8.1
   INFISICAL_PROJECT_SLUG: uwdsc-54e-y
 
 jobs:

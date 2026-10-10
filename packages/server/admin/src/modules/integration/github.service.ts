@@ -136,7 +136,8 @@ class GitHubService {
    */
   async launchFoundryProject(payload: FoundryLaunchPayload): Promise<void> {
     const repoPath = `/repos/${this.org}/${this.foundryRepo}`;
-    const subdomainHost = `${payload.subdomain}.${this.foundryDomain}`;
+    const subdomainLabel = payload.subdomain?.trim() ?? "";
+    const subdomainHost = subdomainLabel ? `${subdomainLabel}.${this.foundryDomain}` : "";
 
     if (foundryWorkflowId) {
       const workflowUrl = `${this.baseUrl}${repoPath}/actions/workflows/${foundryWorkflowId}/dispatches`;

@@ -123,6 +123,29 @@ export async function verifyPasswordRecovery(token_hash: string): Promise<{
 }
 
 /**
+ * Exchange a signup confirmation email `token_hash` for a session (sets auth cookies).
+ *
+ * @param token_hash - From the confirmation link query string
+ * @throws Error if verification fails
+ */
+export async function verifyEmail(token_hash: string): Promise<{
+  success: boolean;
+  message: string;
+}> {
+  const response = await fetch("/api/auth/verify-email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token_hash }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) throw createApiError(data, response.status);
+
+  return data;
+}
+
+/**
  * Set a new password for the currently authenticated (recovery) session
  *
  * @param password - The new password

@@ -13,13 +13,16 @@ export const POST = withRaftRoute(async (request) => {
     return RaftResponse.badRequest("Message must be at least 10 characters");
   }
 
-  await contactService.submit({
+  const data = {
     name: name.trim(),
     email: email.trim(),
     subject: subject.trim(),
     message: message.trim(),
-    source: "contact_form",
-  });
+    source: "contact_form" as const,
+  };
+
+  await contactService.submit(data);
+  await contactService.notifyDiscord(data);
 
   return RaftResponse.ok({ success: true });
 });

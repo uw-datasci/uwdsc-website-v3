@@ -9,7 +9,7 @@ export const POST = withRaftRoute(async (request) => {
   if (!email) return RaftResponse.badRequest("Email is required");
 
   const authService = await createAuthService();
-  const emailRedirectTo = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback?next=/complete-profile`;
+  const emailRedirectTo = `${process.env.NEXT_PUBLIC_APP_URL}/confirm-email`;
   const result = await authService.resendVerificationEmail(email, emailRedirectTo);
 
   if (!result.success) {

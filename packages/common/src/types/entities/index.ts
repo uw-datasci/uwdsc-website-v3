@@ -1,4 +1,5 @@
 export * from "./application";
+export * from "./contact";
 export * from "./question";
 export * from "./event";
 export * from "./file";

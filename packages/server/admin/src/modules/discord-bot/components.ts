@@ -143,12 +143,12 @@ export function buildPreviewCard(draft: DiscordEventDraft): DiscordMessagePayloa
         fields: [
           { name: "Location", value: orNotFound(draft.location) },
           {
-            name: "Start (Toronto)",
+            name: "Start (EST/EDT)",
             value: orNotFound(formatTorontoTime(draft.start_time)),
             inline: true,
           },
           {
-            name: "End (Toronto)",
+            name: "End (EST/EDT)",
             value: orNotFound(formatTorontoTime(draft.end_time)),
             inline: true,
           },
@@ -180,12 +180,12 @@ export function buildCreatedCard(event: Event, userId: string): DiscordMessagePa
         fields: [
           { name: "Location", value: orNotFound(event.location) },
           {
-            name: "Start (Toronto)",
+            name: "Start (EST/EDT)",
             value: orNotFound(formatTorontoTime(event.start_time)),
             inline: true,
           },
           {
-            name: "End (Toronto)",
+            name: "End (EST/EDT)",
             value: orNotFound(formatTorontoTime(event.end_time)),
             inline: true,
           },
@@ -265,8 +265,8 @@ export function buildValidationError(
 export const MODAL_FIELDS = {
   name: { label: "Event name", max: 255, style: TextInputStyle.Short },
   location: { label: "Location", max: 255, style: TextInputStyle.Short },
-  start: { label: "Start (YYYY-MM-DD HH:mm, Toronto)", max: 32, style: TextInputStyle.Short },
-  end: { label: "End (YYYY-MM-DD HH:mm, Toronto)", max: 32, style: TextInputStyle.Short },
+  start: { label: "Start (YYYY-MM-DD HH:mm, EST/EDT)", max: 32, style: TextInputStyle.Short },
+  end: { label: "End (YYYY-MM-DD HH:mm, EST/EDT)", max: 32, style: TextInputStyle.Short },
   description: {
     label: "Description (member-facing)",
     max: 4000,

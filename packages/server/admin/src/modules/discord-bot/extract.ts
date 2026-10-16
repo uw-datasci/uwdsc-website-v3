@@ -26,7 +26,14 @@ const CATEGORIES: ReadonlySet<string> = new Set<EventCategory>([
 ]);
 
 export class ExtractionError extends Error {
-  constructor(message: string) {
+  /**
+   * @param message - Short, user-safe text shown on the Discord card
+   * @param detail - Provider error details for Raft only (never shown in Discord)
+   */
+  constructor(
+    message: string,
+    readonly detail?: string
+  ) {
     super(message);
     this.name = "ExtractionError";
   }
@@ -197,7 +204,8 @@ async function callModel(userPrompt: string): Promise<unknown> {
     }
     if (error instanceof Anthropic.APIError) {
       throw new ExtractionError(
-        `The AI model returned an error (${error.status ?? "network"}).`
+        `The AI model returned an error (${error.status ?? "network"}).`,
+        `${error.type ?? "unknown_error"}: ${error.message} (request_id: ${error.requestID ?? "none"})`
       );
     }
     throw error;

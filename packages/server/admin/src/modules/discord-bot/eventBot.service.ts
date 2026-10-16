@@ -76,7 +76,7 @@ function parseTorontoTime(raw: string, label: string): { iso: string } | { error
   }
   if (dt.toFormat(MODAL_TIME_FORMAT) !== trimmed) {
     return {
-      error: `${label} time "${trimmed}" doesn't exist in Toronto (daylight saving time change). Pick a different time.`,
+      error: `${label} time "${trimmed}" doesn't exist (clocks skip that hour when EST switches to EDT). Pick a different time.`,
     };
   }
   return { iso: dt.toUTC().toISO() ?? "" };
@@ -395,7 +395,12 @@ class EventBotService {
       console.error(`[EventBot] ${step} failed:`, error);
       await RaftClient.getInstance().reportError(
         error instanceof Error ? error : new Error(String(error)),
-        { route: "discord:event-bot", step, ...context },
+        {
+          route: "discord:event-bot",
+          step,
+          ...context,
+          ...(error instanceof ExtractionError && error.detail ? { detail: error.detail } : {}),
+        },
         error instanceof ExtractionError ? "warning" : "error"
       );
       if (!onFailure) return;

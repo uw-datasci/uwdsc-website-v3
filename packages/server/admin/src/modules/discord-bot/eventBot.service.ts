@@ -401,7 +401,7 @@ class EventBotService {
           ...context,
           ...(error instanceof ExtractionError && error.detail ? { detail: error.detail } : {}),
         },
-        error instanceof ExtractionError ? "warning" : "error"
+        error instanceof ExtractionError ? error.severity : "error"
       );
       if (!onFailure) return;
       try {

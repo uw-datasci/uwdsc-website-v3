@@ -25,17 +25,30 @@ const CATEGORIES: ReadonlySet<string> = new Set<EventCategory>([
   "academic",
 ]);
 
+/**
+ * Provider statuses that mean our setup is wrong (bad request, auth, billing, permission,
+ * unknown model) rather than a transient provider problem: they need a human to fix them.
+ */
+const CONFIG_ERROR_STATUSES: ReadonlySet<number> = new Set([400, 401, 402, 403, 404]);
+
 export class ExtractionError extends Error {
+  readonly detail?: string;
+  /** Raft severity: "error" for setup problems someone must fix, "warning" for transient ones. */
+  readonly severity: "warning" | "error";
+
   /**
    * @param message - Short, user-safe text shown on the Discord card
-   * @param detail - Provider error details for Raft only (never shown in Discord)
+   * @param options.detail - Provider error details for Raft only (never shown in Discord)
+   * @param options.severity - Defaults to "warning"
    */
   constructor(
     message: string,
-    readonly detail?: string
+    options: { detail?: string; severity?: "warning" | "error" } = {}
   ) {
     super(message);
     this.name = "ExtractionError";
+    this.detail = options.detail;
+    this.severity = options.severity ?? "warning";
   }
 }
 
@@ -169,7 +182,7 @@ let client: Anthropic | null = null;
 
 function getClient(): Anthropic {
   if (!process.env.ANTHROPIC_API_KEY) {
-    throw new ExtractionError("ANTHROPIC_API_KEY is not configured.");
+    throw new ExtractionError("ANTHROPIC_API_KEY is not configured.", { severity: "error" });
   }
   client ??= new Anthropic({ timeout: LLM_TIMEOUT_MS, maxRetries: 0 });
   return client;
@@ -205,7 +218,13 @@ async function callModel(userPrompt: string): Promise<unknown> {
     if (error instanceof Anthropic.APIError) {
       throw new ExtractionError(
         `The AI model returned an error (${error.status ?? "network"}).`,
-        `${error.type ?? "unknown_error"}: ${error.message} (request_id: ${error.requestID ?? "none"})`
+        {
+          detail: `${error.type ?? "unknown_error"}: ${error.message} (request_id: ${error.requestID ?? "none"})`,
+          severity:
+            error.status !== undefined && CONFIG_ERROR_STATUSES.has(error.status)
+              ? "error"
+              : "warning",
+        }
       );
     }
     throw error;

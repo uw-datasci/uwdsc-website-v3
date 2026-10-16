@@ -14,14 +14,14 @@ It's an HTTP-interactions bot (no gateway connection or always-on process). Disc
 
 ## Environment variables (Infisical → admin)
 
-| Variable                 | Where to find it                                                      |
-| ------------------------ | --------------------------------------------------------------------- |
-| `DISCORD_APPLICATION_ID` | Developer Portal → your app → General Information → Application ID    |
-| `DISCORD_PUBLIC_KEY`     | General Information → Public Key                                      |
-| `DISCORD_BOT_TOKEN`      | Bot → Reset Token                                                     |
-| `DISCORD_GUILD_ID`       | Discord (Developer Mode on) → right-click the server → Copy Server ID |
-| `DISCORD_EXEC_ROLE_ID`   | Server Settings → Roles → right-click the exec role → Copy Role ID    |
-| `ANTHROPIC_API_KEY`      | [Claude Console](https://platform.claude.com) → API Keys              |
+| Variable                 | Where to find it                                                           |
+| ------------------------ | -------------------------------------------------------------------------- |
+| `DISCORD_APPLICATION_ID` | Developer Portal → your app → General Information → Application ID         |
+| `DISCORD_PUBLIC_KEY`     | General Information → Public Key                                           |
+| `DISCORD_BOT_TOKEN`      | Bot → Reset Token                                                          |
+| `DISCORD_GUILD_ID`       | Discord (Developer Mode on) → right-click the server → Copy Server ID      |
+| `DISCORD_EXEC_ROLE_ID`   | Server Settings → Roles → Copy Role ID. Comma-separated for multiple roles |
+| `ANTHROPIC_API_KEY`      | [Claude Console](https://platform.claude.com) → API Keys                   |
 
 > Extraction uses `claude-opus-5-5` at `low` effort, one request per `/event-create`, with a 40s timeout. If a safety classifier declines, the request automatically falls back to Anthropic's recommended model (`fallbacks: "default"`).
 
@@ -42,12 +42,14 @@ It's an HTTP-interactions bot (no gateway connection or always-on process). Disc
    - Bot permissions: **View Channel** and **Read Message History**. That's all it needs: interaction responses don't require Send Messages, and it only edits its own messages.
    - Private threads: the bot can only read them if it's added to the thread (mention it there) or has Manage Threads.
 5. **Register the command**: run `pnpm pull-secrets`, then `pnpm discord:register`. The command is registered for the guild only, and re-running is safe.
-6. **Allow execs to see the command**: it's registered with `default_member_permissions: "0"`, so only server admins see it at first. Go to Server Settings → Integrations → the bot → `/event-create` and allow the exec role. The route also checks `DISCORD_EXEC_ROLE_ID` itself, so this setting only controls visibility.
+6. **Allow execs to see the command**: it's registered with `default_member_permissions: "0"`, so only server admins see it at first. Go to Server Settings → Integrations → the bot → `/event-create` and allow each exec role. The route also checks `DISCORD_EXEC_ROLE_ID` itself, so this setting only controls visibility.
+7. **Cap API spend**: in the Claude Console, create a dedicated workspace for the bot with a monthly spend limit, and use an API key from that workspace as `ANTHROPIC_API_KEY`. This is the hard budget ceiling; once it's hit, extraction fails with an error card until the next month.
 
 ## Behaviour notes
 
 - The card, the created state, and the cancelled state are **public** in the thread. Everything else (errors, "only @user can edit", expiry) is ephemeral. Only the person who ran the command can use the controls.
-- Drafts expire **1 hour** after `/event-create`.
+- Drafts expire **1 hour** after the preview card appears.
+- Each run is a paid LLM call, so `/event-create` is rate limited: **5 runs per exec per hour** and **1 run per thread per minute** (counted from `events.discord_event_drafts`, including failed runs). Tune the constants at the top of `eventBot.service.ts`.
 - Times are entered and shown as `YYYY-MM-DD HH:mm` in **America/Toronto**. Times that don't exist because of the spring-forward DST change are rejected.
 - Validation uses the same `createEventSchema` as the admin form (`@uwdsc/common/schemas`).
 - Failures in the background step (reading the thread, the LLM call) are reported to Raft (`route: "discord:event-bot"`) and appear in Optics. The card is edited to show the failure.

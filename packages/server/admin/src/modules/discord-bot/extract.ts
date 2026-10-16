@@ -233,6 +233,7 @@ async function callModel(userPrompt: string): Promise<unknown> {
   if (response.stop_reason === "refusal") {
     throw new ExtractionError("The AI model declined to process this thread.");
   }
+
   if (response.stop_reason === "max_tokens") {
     throw new ExtractionError("The AI model's response was cut off.");
   }

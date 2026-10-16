@@ -2,10 +2,15 @@ import { BaseRepository } from "@uwdsc/db/base.repository";
 import type { EventCategory } from "@uwdsc/common/types";
 import type { DiscordEventDraft, DraftSubmission, ExtractedEvent } from "../../types/discord";
 
-export interface CreateDraftData extends ExtractedEvent {
+export interface StartRunData {
   initiator_discord_id: string;
   guild_id: string;
   channel_id: string;
+}
+
+export interface RecentRunCounts {
+  by_initiator: number;
+  by_channel: number;
 }
 
 /**
@@ -14,28 +19,61 @@ export interface CreateDraftData extends ExtractedEvent {
  * finished draft.
  */
 export class EventDraftRepository extends BaseRepository {
-  async create(data: CreateDraftData): Promise<DiscordEventDraft> {
+  /**
+   * Insert the run's row up front, before the LLM call, so the rate limit counts every run
+   * (including in-flight and failed ones). The extracted fields are filled in by `setExtracted`.
+   */
+  async startRun(data: StartRunData): Promise<DiscordEventDraft> {
     const result = await this.sql<DiscordEventDraft[]>`
-      INSERT INTO events.discord_event_drafts (
-        initiator_discord_id, guild_id, channel_id,
-        name, location, description, start_time, end_time, category
-      )
-      VALUES (
-        ${data.initiator_discord_id},
-        ${data.guild_id},
-        ${data.channel_id},
-        ${data.name},
-        ${data.location},
-        ${data.description},
-        ${data.start_time},
-        ${data.end_time},
-        ${data.category}
-      )
+      INSERT INTO events.discord_event_drafts (initiator_discord_id, guild_id, channel_id)
+      VALUES (${data.initiator_discord_id}, ${data.guild_id}, ${data.channel_id})
       RETURNING *
     `;
     const draft = result[0];
     if (!draft) throw new Error("Failed to insert discord event draft");
     return draft;
+  }
+
+  /** Store the LLM's extraction and restart the expiry clock from when the card appears. */
+  async setExtracted(id: string, data: ExtractedEvent): Promise<DiscordEventDraft> {
+    const result = await this.sql<DiscordEventDraft[]>`
+      UPDATE events.discord_event_drafts
+      SET name = ${data.name},
+          location = ${data.location},
+          description = ${data.description},
+          start_time = ${data.start_time},
+          end_time = ${data.end_time},
+          category = ${data.category},
+          expires_at = now() + INTERVAL '1 hour'
+      WHERE id = ${id}
+      RETURNING *
+    `;
+    const draft = result[0];
+    if (!draft) throw new Error(`Discord event draft ${id} not found`);
+    return draft;
+  }
+
+  /** Runs started by this exec in the last `initiatorWindowS`, and in this thread in the last `channelWindowS`. */
+  async countRecentRuns(
+    initiatorId: string,
+    channelId: string,
+    initiatorWindowS: number,
+    channelWindowS: number
+  ): Promise<RecentRunCounts> {
+    const result = await this.sql<RecentRunCounts[]>`
+      SELECT
+        count(*) FILTER (
+          WHERE initiator_discord_id = ${initiatorId}
+            AND created_at > now() - make_interval(secs => ${initiatorWindowS})
+        )::int AS by_initiator,
+        count(*) FILTER (
+          WHERE channel_id = ${channelId}
+            AND created_at > now() - make_interval(secs => ${channelWindowS})
+        )::int AS by_channel
+      FROM events.discord_event_drafts
+      WHERE initiator_discord_id = ${initiatorId} OR channel_id = ${channelId}
+    `;
+    return result[0] ?? { by_initiator: 0, by_channel: 0 };
   }
 
   async getById(id: string): Promise<DiscordEventDraft | null> {

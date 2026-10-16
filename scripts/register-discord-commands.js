@@ -48,7 +48,7 @@ const commands = [
     type: 1, // CHAT_INPUT
     // "0" = hidden from everyone except server admins until a role is allowed under
     // Server Settings → Integrations → <bot>. The interactions route also checks
-    // DISCORD_EXEC_ROLE_ID, so this is UX, not the security boundary.
+    // DISCORD_EXEC_ROLE_ID (a comma-separated list of roles), so this is UX, not the security boundary.
     default_member_permissions: "0",
     contexts: [0], // GUILD only
   },

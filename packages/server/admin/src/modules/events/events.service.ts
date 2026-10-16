@@ -29,9 +29,7 @@ class EventService {
     try {
       const event = await this.repository.createEvent(data);
 
-      if (!event) {
-        return { success: false, error: "Failed to create event" };
-      }
+      if (!event) return { success: false, error: "Failed to create event" };
 
       return { success: true, event };
     } catch (error) {

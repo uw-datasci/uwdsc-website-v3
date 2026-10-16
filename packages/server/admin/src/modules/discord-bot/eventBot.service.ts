@@ -41,6 +41,16 @@ import {
 } from "../../types/discord";
 
 const COMMAND_NAME = "event-create";
+
+/**
+ * Each run is one paid LLM call, so cap how often it can be triggered: per exec (bounds a
+ * spamming or compromised account) and per thread (bounds double-runs on the same thread).
+ * The hard spend ceiling is the Claude Console workspace limit on ANTHROPIC_API_KEY.
+ */
+const RUNS_PER_EXEC = 5;
+const EXEC_WINDOW_S = 60 * 60;
+const THREAD_COOLDOWN_S = 60;
+
 const CATEGORIES: ReadonlySet<string> = new Set<EventCategory>([
   "workshop",
   "social",
@@ -102,6 +112,15 @@ function describeFailure(error: unknown): string {
   return "Something went wrong while reading the thread. The error has been logged for the dev team.";
 }
 
+/** DISCORD_EXEC_ROLE_ID is a comma-separated list of role IDs; any one of them grants access. */
+function hasExecRole(memberRoles: string[]): boolean {
+  const execRoleIds = requireEnv("DISCORD_EXEC_ROLE_ID")
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean);
+  return execRoleIds.some((id) => memberRoles.includes(id));
+}
+
 class EventBotService {
   private readonly drafts: EventDraftRepository;
 
@@ -145,14 +164,15 @@ class EventBotService {
 
   // ─── /event-create ─────────────────────────────────────────────────────────
 
-  private handleCommand(interaction: DiscordInteraction): InteractionHandlerResult {
+  private async handleCommand(
+    interaction: DiscordInteraction
+  ): Promise<InteractionHandlerResult> {
     if (interaction.data?.name !== COMMAND_NAME) {
       return { response: ephemeral("Unknown command.") };
     }
 
     const userId = interaction.member?.user?.id;
-    const roles = interaction.member?.roles ?? [];
-    if (!userId || !roles.includes(requireEnv("DISCORD_EXEC_ROLE_ID"))) {
+    if (!userId || !hasExecRole(interaction.member?.roles ?? [])) {
       return { response: ephemeral("Only execs can create events from Discord.") };
     }
 
@@ -165,20 +185,48 @@ class EventBotService {
       };
     }
 
+    const counts = await this.drafts.countRecentRuns(
+      userId,
+      channel.id,
+      EXEC_WINDOW_S,
+      THREAD_COOLDOWN_S
+    );
+    if (counts.by_channel > 0) {
+      return {
+        response: ephemeral(
+          `\`/${COMMAND_NAME}\` was just run in this thread. Wait a minute before running it again.`
+        ),
+      };
+    }
+    if (counts.by_initiator >= RUNS_PER_EXEC) {
+      return {
+        response: ephemeral(
+          `You've run \`/${COMMAND_NAME}\` ${RUNS_PER_EXEC} times in the last hour. Try again later.`
+        ),
+      };
+    }
+
+    const run = await this.drafts.startRun({
+      initiator_discord_id: userId,
+      guild_id: interaction.guild_id ?? "",
+      channel_id: channel.id,
+    });
+
     return {
       // Public "Bot is thinking..." placeholder; edited into the preview card in the background.
       response: { type: InteractionResponseType.DeferredChannelMessageWithSource },
       background: () =>
         this.runInBackground(
           "extract",
-          { guildId: interaction.guild_id, channelId: channel.id },
+          { guildId: interaction.guild_id, channelId: channel.id, draftId: run.id },
           () =>
-            this.extractAndPostCard(interaction, userId, channel.id, channel.parent_id ?? null),
+            this.extractAndPostCard(interaction, run.id, channel.id, channel.parent_id ?? null),
           async (error) => {
             await editOriginalResponse(
               interaction.token,
               buildFailureCard(describeFailure(error))
             );
+            await this.drafts.cancel(run.id);
           }
         ),
     };
@@ -186,7 +234,7 @@ class EventBotService {
 
   private async extractAndPostCard(
     interaction: DiscordInteraction,
-    userId: string,
+    draftId: string,
     threadId: string,
     parentId: string | null
   ): Promise<void> {
@@ -202,12 +250,7 @@ class EventBotService {
       excludeAuthorId: interaction.application_id,
     });
 
-    const draft = await this.drafts.create({
-      ...extracted,
-      initiator_discord_id: userId,
-      guild_id: interaction.guild_id ?? "",
-      channel_id: threadId,
-    });
+    const draft = await this.drafts.setExtracted(draftId, extracted);
 
     const card = await editOriginalResponse(interaction.token, buildPreviewCard(draft));
     await this.drafts.setCardMessage(draft.id, card.channel_id, card.id);

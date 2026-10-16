@@ -230,6 +230,7 @@ export default function EventsPage() {
         onOpenChange={setDetailsOpen}
         onEdit={handleEdit}
         onDelete={fetchData}
+        onPublish={fetchData}
       />
 
       <EventForm

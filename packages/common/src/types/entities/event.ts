@@ -23,6 +23,8 @@ export interface Event {
   buffered_end_time: string;
   category: EventCategory;
   resources: EventResource[];
+  /** false = draft (e.g. from the Discord bot): admin-only until published. */
+  is_published: boolean;
 }
 
 export interface EventWithAttendanceCount extends Event {
@@ -43,6 +45,8 @@ export interface CreateEventData {
   end_time: string;
   category: EventCategory;
   resources?: EventResource[];
+  /** Defaults to true (published) when omitted. */
+  is_published?: boolean;
 }
 
 export type UpdateEventData = Partial<CreateEventData>;

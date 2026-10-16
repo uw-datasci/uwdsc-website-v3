@@ -7,10 +7,12 @@
     "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
     "@react-email/components": "^1.0.10",
     "@react-email/markdown": "^0.0.18",
     "@react-email/render": "^2.0.4",
     "@supabase/supabase-js": "^2.94.0",
+    "@uw-datasci/raft": "^1.0.1",
     "@uwdsc/common": "workspace:*",
     "@uwdsc/core": "workspace:*",
     "@uwdsc/db": "workspace:*",

@@ -2,7 +2,7 @@ import { RaftResponse } from "@uw-datasci/raft";
 import { eventService as adminEventService } from "@uwdsc/admin";
 import { eventService as coreEventService } from "@uwdsc/core";
 import { withAuth } from "@/guards/withAuth";
-import { updateEventSchema } from "@/lib/schemas/event";
+import { updateEventSchema } from "@uwdsc/common/schemas";
 import type { WithAuthContext } from "@/guards/withAuth";
 
 interface Params extends WithAuthContext {
@@ -16,7 +16,7 @@ interface Params extends WithAuthContext {
  */
 export const GET = withAuth<Params>(async (_request, { params }) => {
   const { id } = await params;
-  const event = await coreEventService.getEventById(id);
+  const event = await coreEventService.getEventById(id, { includeUnpublished: true });
   if (!event) return RaftResponse.notFound("Event not found");
 
   return RaftResponse.ok(event);

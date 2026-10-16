@@ -2,7 +2,7 @@ import { RaftResponse } from "@uw-datasci/raft";
 import { eventService as adminEventService } from "@uwdsc/admin";
 import { eventService as coreEventService } from "@uwdsc/core";
 import { withAuth } from "@/guards/withAuth";
-import { createEventSchema } from "@/lib/schemas/event";
+import { createEventSchema } from "@uwdsc/common/schemas";
 
 /**
  * GET /api/events
@@ -17,8 +17,8 @@ export const GET = withAuth(async (request) => {
   const events = activeOnly
     ? await coreEventService.getEventsByTimeRange({ range: "active" })
     : withAttendance
-      ? await coreEventService.getAllEventsWithAttendanceCount()
-      : await coreEventService.getAllEvents();
+      ? await coreEventService.getAllEventsWithAttendanceCount({ includeUnpublished: true })
+      : await coreEventService.getAllEvents({ includeUnpublished: true });
   return RaftResponse.ok(events);
 });
 

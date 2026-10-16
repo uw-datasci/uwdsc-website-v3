@@ -28,7 +28,7 @@ import {
   createEventSchema,
   type CreateEventFormValues,
   type UpdateEventFormValues,
-} from "@/lib/schemas/event";
+} from "@uwdsc/common/schemas";
 import { createEvent, updateEvent } from "@/lib/api/events";
 import {
   EVENT_TIMEZONE_LABEL,

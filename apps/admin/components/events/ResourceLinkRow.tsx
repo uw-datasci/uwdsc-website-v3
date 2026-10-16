@@ -5,7 +5,7 @@ import type { Control } from "react-hook-form";
 import { CircleCheck, CircleHelp, CircleX, Trash2 } from "lucide-react";
 import { Button, FormControl, FormField, FormItem, FormMessage, Input, cn } from "@uwdsc/ui";
 import { checkResourceLink, type LinkCheckResult } from "@/lib/api/events";
-import type { CreateEventFormValues } from "@/lib/schemas/event";
+import type { CreateEventFormValues } from "@uwdsc/common/schemas";
 
 const CHECK_DEBOUNCE_MS = 500;
 

@@ -1,5 +1,25 @@
 import { z } from "zod";
-import { isEndAfterStart, endAfterStartError } from "@/lib/utils/events";
+
+/**
+ * Event schemas, shared by the admin event form/routes and the Discord event bot
+ * (`@uwdsc/admin` discord-bot module) so both validate events with exactly the same rules.
+ */
+
+interface EndAfterStartError {
+  start_time?: string;
+  end_time?: string;
+}
+
+/** Returns true when end_time is not before start_time. */
+export function isEndAfterStart({ start_time, end_time }: EndAfterStartError) {
+  if (!start_time || !end_time) return true;
+  return new Date(end_time) >= new Date(start_time);
+}
+
+export const endAfterStartError: { message: string; path: PropertyKey[] } = {
+  message: "End date & time must be after start date & time",
+  path: ["end_time"],
+};
 
 /**
  * A single "source + link" resource attached to a workshop (slides, a notebook, a recap page).
@@ -23,6 +43,8 @@ const eventFields = {
   end_time: z.iso.datetime({ error: "Invalid end time" }),
   category: z.enum(["workshop", "social", "academic"], { error: "Event type is required" }),
   resources: z.array(eventResourceSchema).max(12, "At most 12 resources"),
+  // Omitted by the admin form (the column defaults to true); false for Discord bot drafts.
+  is_published: z.boolean().optional(),
 };
 
 const resourcesOnlyForWorkshops = (v: { category?: string; resources?: unknown[] }) =>

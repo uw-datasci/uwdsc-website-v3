@@ -5,7 +5,7 @@
  * Components should use these functions instead of making direct fetch calls.
  */
 
-import type { CreateEventFormValues, UpdateEventFormValues } from "@/lib/schemas/event";
+import type { CreateEventFormValues, UpdateEventFormValues } from "@uwdsc/common/schemas";
 import { createApiError } from "./error";
 import { Event, EventWithAttendanceCount } from "@uwdsc/common/types";
 

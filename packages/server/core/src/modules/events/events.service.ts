@@ -1,5 +1,9 @@
 import { EventRepository } from "./events.repository";
-import type { EventTimeFilter, GetEventsByTimeRangeOptions } from "../../types/events";
+import type {
+  EventTimeFilter,
+  EventVisibilityOptions,
+  GetEventsByTimeRangeOptions,
+} from "../../types/events";
 import {
   ApiError,
   Event,
@@ -23,7 +27,7 @@ class EventService {
   }
 
   /**
-   * Total number of events in the database.
+   * Total number of published events in the database.
    */
   async getEventCount(): Promise<number> {
     try {
@@ -34,22 +38,25 @@ class EventService {
   }
 
   /**
-   * Get all events
+   * Get all events (published only unless `includeUnpublished`).
    */
-  async getAllEvents(): Promise<Event[]> {
+  async getAllEvents(options?: EventVisibilityOptions): Promise<Event[]> {
     try {
-      return await this.repository.getAllEvents();
+      return await this.repository.getAllEvents(options);
     } catch (error) {
       throw new ApiError(`Failed to get all events: ${(error as Error).message}`, 500);
     }
   }
 
   /**
-   * Get all events with an attendance count per event.
+   * Get all events with an attendance count per event (published only unless
+   * `includeUnpublished`).
    */
-  async getAllEventsWithAttendanceCount(): Promise<EventWithAttendanceCount[]> {
+  async getAllEventsWithAttendanceCount(
+    options?: EventVisibilityOptions
+  ): Promise<EventWithAttendanceCount[]> {
     try {
-      return await this.repository.getAllEventsWithAttendanceCount();
+      return await this.repository.getAllEventsWithAttendanceCount(options);
     } catch (error) {
       throw new ApiError(
         `Failed to get events with attendance: ${(error as Error).message}`,
@@ -70,11 +77,11 @@ class EventService {
   }
 
   /**
-   * Get a single event by ID
+   * Get a single event by ID (unpublished events resolve to null unless `includeUnpublished`).
    */
-  async getEventById(eventId: string): Promise<Event | null> {
+  async getEventById(eventId: string, options?: EventVisibilityOptions): Promise<Event | null> {
     try {
-      return await this.repository.getEventById(eventId);
+      return await this.repository.getEventById(eventId, options);
     } catch (error) {
       throw new ApiError(`Failed to get event: ${(error as Error).message}`, 500);
     }

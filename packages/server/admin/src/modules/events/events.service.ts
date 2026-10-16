@@ -10,6 +10,7 @@ const UPDATE_EVENT_COLUMNS = [
   "start_time",
   "end_time",
   "category",
+  "is_published",
 ] as const;
 
 class EventService {
@@ -28,9 +29,7 @@ class EventService {
     try {
       const event = await this.repository.createEvent(data);
 
-      if (!event) {
-        return { success: false, error: "Failed to create event" };
-      }
+      if (!event) return { success: false, error: "Failed to create event" };
 
       return { success: true, event };
     } catch (error) {
@@ -55,7 +54,7 @@ class EventService {
 
       const result = await this.repository.updateEventById(
         eventId,
-        filteredData as Record<string, string | null>,
+        filteredData,
         columns,
         resources
       );

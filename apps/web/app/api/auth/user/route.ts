@@ -33,5 +33,6 @@ export const GET = withRaftRoute(async () => {
     term: profile?.term ?? null,
     is_math_soc_member: profile?.is_math_soc_member ?? false,
     exec_position_name: profile?.exec_position_name ?? null,
+    profile_photo_key: profile?.profile_photo_key ?? null,
   });
 });

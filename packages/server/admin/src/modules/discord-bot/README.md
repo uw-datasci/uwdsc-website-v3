@@ -23,7 +23,7 @@ It's an HTTP-interactions bot (no gateway connection or always-on process). Disc
 | `DISCORD_EXEC_ROLE_ID`   | Server Settings → Roles → Copy Role ID. Comma-separated for multiple roles |
 | `ANTHROPIC_API_KEY`      | [Claude Console](https://platform.claude.com) → API Keys                   |
 
-> Extraction uses `claude-opus-5-5` at `low` effort, one request per `/event-create`, with a 40s timeout. If a safety classifier declines, the request automatically falls back to Anthropic's recommended model (`fallbacks: "default"`).
+> Extraction uses `claude-opus-5-5` at `medium` effort, one request per `/event-create`, with a 40s timeout. If a safety classifier declines, the request automatically falls back to Anthropic's recommended model (`fallbacks: "default"`).
 
 ## One-time setup
 

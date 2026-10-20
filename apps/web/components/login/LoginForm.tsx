@@ -68,7 +68,7 @@ export function LoginForm() {
             control={form.control}
             name="email"
             render={renderTextField({
-              placeholder: "Email (ex. slchow@uwaterloo.ca)",
+              placeholder: "Email (ex. a52patel@uwaterloo.ca)",
               className:
                 "!h-auto !text-base border-gray-100/80 !bg-black px-4.5 py-3.5 placeholder:text-gray-100/80 rounded-lg xl:px-6 xl:py-4.5",
               inputProps: { type: "email" },

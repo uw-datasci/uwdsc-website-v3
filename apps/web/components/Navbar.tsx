@@ -25,8 +25,7 @@ import {
   LayoutDashboard,
 } from "lucide-react";
 import { useState } from "react";
-
-const hideNavbarPaths = new Set(["/login", "/register", "/complete-profile"]);
+import { AUTH_PAGE_PATHS } from "@/constants/routes";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -34,7 +33,7 @@ export function Navbar() {
   const { open: applyOpen } = useApplyWindow();
   const [wrappedOpen, setWrappedOpen] = useState(false);
 
-  const hideNavbar = hideNavbarPaths.has(pathname);
+  const hideNavbar = AUTH_PAGE_PATHS.has(pathname);
 
   const navLinks: NavLinkItem[] = [
     { href: "/", label: "Home" },

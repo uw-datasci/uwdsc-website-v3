@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function AuthCodeErrorPage() {
   return (
-    <div className="p-8 max-w-md mx-auto text-center">
+    <div className="mx-auto flex min-h-dvh max-w-md flex-col justify-center p-8 text-center">
       <h1 className="text-2xl font-bold mb-4">Authentication Error</h1>
       <p className="text-gray-600 mb-6">
         There was an error verifying your email. Please try again.
@@ -19,6 +19,9 @@ export default function AuthCodeErrorPage() {
           className="block w-full px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
         >
           Register New Account
+        </Link>
+        <Link href="/" className="block text-sm text-gray-400 hover:text-white">
+          Back to home
         </Link>
       </div>
     </div>

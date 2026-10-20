@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Typing } from "@/components/login/Typing";
+import { AuthHeader } from "@/components/login/AuthHeader";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { getProfile } from "@/lib/api/profile";
@@ -48,16 +48,9 @@ export default function CompleteProfilePage() {
   }
 
   return (
-    <div className="bg-black flex min-h-dvh w-full flex-col items-center overflow-x-hidden px-4 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1.5rem,env(safe-area-inset-top))] sm:px-6 sm:py-8 md:px-8 lg:px-12">
-      <div className="mb-6 w-full max-w-6xl shrink-0 text-center sm:mb-8 md:text-left">
-        <Typing
-          text="UW Data Science Club"
-          speed={75}
-          caretSize="text-2xl font-semibold sm:text-3xl md:text-[42px]"
-          className="text-xl font-bold text-white sm:text-2xl md:text-3xl"
-        />
-      </div>
-      <div className="relative flex min-h-0 w-full max-w-6xl flex-1 flex-col sm:min-h-[min(55vh,420px)] md:min-h-[min(70vh,560px)]">
+    <div className="bg-black flex min-h-dvh w-full flex-col items-center overflow-x-clip px-4 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1.5rem,env(safe-area-inset-top))] sm:px-6 sm:py-8 md:px-8 lg:px-12">
+      <AuthHeader showHomeLink={false} className="mb-6 max-w-6xl shrink-0 sm:mb-8" />
+      <div className="flex w-full max-w-6xl flex-1 flex-col justify-center">
         <AnimatePresence mode="wait">
           {isProfileComplete ? (
             <motion.div
@@ -65,7 +58,7 @@ export default function CompleteProfilePage() {
               initial={{ x: "100%", opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
-              className="absolute inset-0 flex w-full flex-col items-center justify-start overflow-y-auto overscroll-y-contain sm:justify-center"
+              className="flex w-full flex-col items-center justify-center"
             >
               <CompleteProfileSuccessView />
             </motion.div>
@@ -75,9 +68,9 @@ export default function CompleteProfilePage() {
               initial={{ x: 0, opacity: 1 }}
               exit={{ x: "-100%", opacity: 0 }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
-              className="absolute inset-0 flex w-full items-start justify-center overflow-y-auto overscroll-y-contain md:items-center"
+              className="flex w-full items-center justify-center"
             >
-              <div className="mx-auto flex w-full min-w-0 max-w-6xl flex-col gap-6 md:h-full md:flex-row md:gap-8 md:items-center lg:gap-12">
+              <div className="mx-auto flex w-full min-w-0 max-w-6xl flex-col gap-6 md:flex-row md:gap-8 md:items-center lg:gap-12">
                 <div className="flex min-w-0 flex-1 flex-col justify-center gap-5 md:gap-8">
                   <div className="relative mx-auto h-20 w-20 shrink-0 md:mx-0 md:h-40 md:w-40">
                     <Image

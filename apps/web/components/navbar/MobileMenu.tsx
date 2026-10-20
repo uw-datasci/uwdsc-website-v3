@@ -50,6 +50,7 @@ export function MobileMenu({ navLinks, user, onOpenWrapped }: Readonly<MobileMen
   const faculty = `${user?.faculty?.charAt(0).toUpperCase()}${user?.faculty?.slice(1)}`;
 
   const handleSignOut = async () => {
+    setIsMobileMenuOpen(false);
     try {
       await signOut();
       await mutate();
@@ -69,7 +70,14 @@ export function MobileMenu({ navLinks, user, onOpenWrapped }: Readonly<MobileMen
       <SheetTrigger>
         <HamburgerIcon />
       </SheetTrigger>
-      <SheetContent side="right" className="w-full sm:max-w-sm p-0 [&>button]:hidden">
+      <SheetContent
+        side="right"
+        className="w-full sm:max-w-sm p-0 [&>button]:hidden"
+        // Close the menu whenever any link inside it is tapped
+        onClick={(e) => {
+          if ((e.target as HTMLElement).closest("a")) setIsMobileMenuOpen(false);
+        }}
+      >
         <div className="flex flex-col h-full">
           <SheetHeader className="text-left border-b bg-muted/30 px-6 py-4 relative">
             <SheetTitle className="flex items-center gap-3">

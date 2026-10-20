@@ -1,8 +1,16 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { FooterSocialLinks } from "./footer/FooterSocialLinks";
+import { AUTH_PAGE_PATHS } from "@/constants/routes";
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  if (AUTH_PAGE_PATHS.has(pathname)) return null;
+
   return (
     <>
       <hr className="border-b border-[#454545]" />

@@ -40,16 +40,16 @@ export function VerifyEmailView({ email, loginHref = "/login" }: VerifyEmailView
         <div className="absolute inset-0 bg-purple-500/20 blur-3xl rounded-full animate-pulse" />
         <Mail className="w-24 h-24 text-purple-500 animate-bounce" strokeWidth={1.5} />
       </div>
-      <h1 className="gradient-text bg-linear-to-b from-white to-[#ffffff20] text-7xl md:text-8xl font-medium pb-2">
+      <h1 className="gradient-text bg-linear-to-b from-white to-[#ffffff20] text-5xl sm:text-7xl md:text-8xl font-medium pb-2">
         Verify Email
       </h1>
-      <p className="text-xl mt-8 text-gray-300 max-w-2xl">
+      <p className="text-base sm:text-xl mt-6 sm:mt-8 text-gray-300 max-w-2xl">
         We&apos;ve sent a verification link to your email address.
         <br />
         Please check your inbox and click the link to verify your account.
       </p>
-      <div className="mt-12 flex flex-col gap-4 items-center">
-        <div className="flex flex-row gap-5">
+      <div className="mt-8 sm:mt-12 flex w-full flex-col gap-4 items-center">
+        <div className="flex w-full flex-col gap-4 sm:w-auto sm:flex-row sm:gap-5">
           <Button
             asChild
             size="lg"
@@ -60,7 +60,7 @@ export function VerifyEmailView({ email, loginHref = "/login" }: VerifyEmailView
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
           </Button>
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-stretch sm:items-center">
             <Button
               onClick={handleResend}
               variant="outline"

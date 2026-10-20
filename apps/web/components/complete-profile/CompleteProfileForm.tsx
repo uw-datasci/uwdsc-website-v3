@@ -100,7 +100,7 @@ export function CompleteProfileForm({ prefill, onSuccess }: CompleteProfileFormP
           control={form.control}
           name="wat_iam"
           render={renderTextField({
-            placeholder: "WatIAM (ex. slchow)",
+            placeholder: "WatIAM (ex. a52patel)",
             className:
               "!h-auto !text-base border-gray-100/80 !bg-black px-4.5 py-3.5 placeholder:text-gray-100/80 rounded-lg xl:px-6 xl:py-4.5",
           })}

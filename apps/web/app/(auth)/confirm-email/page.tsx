@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { WEB_COMPLETE_PROFILE_PATH } from "@uwdsc/common/constants";
 import { Button } from "@uwdsc/ui";
 import { Loader2 } from "lucide-react";
-import { Typing } from "@/components/login/Typing";
+import { AuthHeader } from "@/components/login/AuthHeader";
 import Image from "next/image";
 
 function ConfirmEmailContent() {
@@ -54,15 +54,8 @@ function ConfirmEmailContent() {
   if (!token_hash && code) return <ConfirmEmailFallback />;
 
   return (
-    <div className="bg-black w-full min-h-screen flex flex-col items-center justify-center px-12 py-8">
-      <div className="w-full mb-8">
-        <Typing
-          text="UW Data Science Club"
-          speed={75}
-          caretSize="text-[42px] font-semibold"
-          className="text-3xl font-bold text-white"
-        />
-      </div>
+    <div className="bg-black w-full min-h-dvh flex flex-col items-center justify-center px-4 py-6 sm:px-8 sm:py-8 md:px-12">
+      <AuthHeader className="mb-6 sm:mb-8" />
       <div className="flex-1 flex flex-col items-center justify-center w-full">
         <div className="flex flex-col md:flex-row gap-8 lg:gap-12 w-full h-full max-w-6xl mx-auto">
           <div className="flex flex-col flex-1 gap-8 justify-center">
@@ -76,11 +69,14 @@ function ConfirmEmailContent() {
               />
             </div>
             <div>
-              <h2 className="text-7xl font-bold text-center md:text-start my-10">
+              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-center md:text-start my-4 sm:my-6 md:my-10">
                 Confirm your email
               </h2>
-              <div className="flex flex-col gap-8 leading-loose text-xl text-center md:text-start">
-                <p>Click the button below to verify your email and finish setting up your account.</p>
+              <div className="flex flex-col gap-8 text-base leading-relaxed sm:text-lg md:text-xl md:leading-loose text-center md:text-start">
+                <p>
+                  Click the button below to verify your email and finish setting up your
+                  account.
+                </p>
               </div>
             </div>
           </div>
@@ -116,7 +112,7 @@ function ConfirmEmailContent() {
 
 function ConfirmEmailFallback() {
   return (
-    <div className="bg-black w-full min-h-screen flex flex-col items-center justify-center px-12 py-8">
+    <div className="bg-black w-full min-h-dvh flex flex-col items-center justify-center px-4 py-6 sm:px-8 sm:py-8 md:px-12">
       <Loader2
         className="h-10 w-10 animate-spin text-white"
         strokeWidth={2}

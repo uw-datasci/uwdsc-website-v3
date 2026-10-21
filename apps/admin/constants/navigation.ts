@@ -10,6 +10,7 @@ import {
   Library,
   Mail,
   ReceiptText,
+  UserPlus,
   Users,
 } from "lucide-react";
 import { isAdmin, isPres } from "@uwdsc/common/constants";
@@ -33,6 +34,7 @@ export const getAdminNavigation = (
         { name: "Submissions", href: "/members/submissions", icon: ReceiptText },
       ],
     },
+    ...(isAdmin(role) ? [{ name: "Recruiting", href: "/recruiting", icon: UserPlus }] : []),
     { name: "Events", href: "/events", icon: Calendar },
     { name: "Support", href: "/support", icon: LifeBuoy },
     ...(isAdmin(role) ? [{ name: "Campaigns", href: "/campaigns", icon: Mail }] : []),

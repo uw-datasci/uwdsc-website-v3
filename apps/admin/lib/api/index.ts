@@ -8,6 +8,7 @@ export * from "./emails";
 export * from "./events";
 export * from "./foundry";
 export * from "./raft";
+export * from "./recruiting";
 export * from "./profile";
 export * from "./terms";
 export * from "./subteams";

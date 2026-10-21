@@ -13,7 +13,6 @@ export * from "./foundry";
 export * from "./raft";
 export * from "./profile";
 export * from "./hiring";
-export * from "./returningExecs";
 export * from "./terms";
 export * from "./subteams";
 export * from "./membershipSubmissions";

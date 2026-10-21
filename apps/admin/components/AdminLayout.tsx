@@ -32,10 +32,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const router = useRouter();
   const { user, isLoading, mutate } = useAuth();
   const [positionName, setPositionName] = useState<string | null>(null);
-  const [logisticsWindows, setLogisticsWindows] = useState({
-    onboardingOpen: false,
-    returningExecOpen: false,
-  });
+  const [logisticsWindows, setLogisticsWindows] = useState({ onboardingOpen: false });
 
   useEffect(() => {
     const loadPosition = async () => {
@@ -60,18 +57,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         if (cancelled) return;
         setLogisticsWindows({
           onboardingOpen: isDateWindowOpen(term?.start_date, term?.onboarding_due_date),
-          returningExecOpen: isDateWindowOpen(
-            term?.returning_exec_release_date,
-            term?.returning_exec_deadline
-          ),
         });
       } catch {
-        if (!cancelled) {
-          setLogisticsWindows({
-            onboardingOpen: false,
-            returningExecOpen: false,
-          });
-        }
+        if (!cancelled) setLogisticsWindows({ onboardingOpen: false });
       }
     })();
     return () => {

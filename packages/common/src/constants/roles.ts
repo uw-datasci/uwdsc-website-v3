@@ -2,8 +2,7 @@ import type { UserRole } from "../types/shared/enums";
 
 /**
  * Roles that are allowed to access the admin app (and see the Admin nav link on the public site).
- * `alum` is intentionally excluded — alums get a narrow, single-page exception (the returning-exec
- * form) handled separately, not full admin-app access.
+ * `alum` is intentionally excluded — alums have no admin-app access.
  */
 export const ADMIN_ROLES = new Set<string>(["admin", "exec", "pres"]);
 
@@ -78,9 +77,8 @@ export function readRoleClaims(appMetadata?: Record<string, unknown> | null): Ro
 }
 
 /**
- * Role for former execs. Behaves like `member` everywhere except they may access the
- * returning-exec form (`RETURNING_EXEC_PATH`) in the admin app to indicate whether they
- * want to return for a future term.
+ * Role for former execs. Behaves like `member` everywhere; alums who want to come back
+ * apply through the public application form.
  */
 export const ALUM_ROLE = "alum";
 
@@ -99,8 +97,3 @@ export const ROLES_WITHOUT_SUBTEAM = new Set<string>(["member", ALUM_ROLE]);
 export function roleRequiresSubteam(role?: string | null): boolean {
   return Boolean(role) && !ROLES_WITHOUT_SUBTEAM.has(role as string);
 }
-
-/**
- * The one admin-app route an `alum` user is permitted to visit.
- */
-export const RETURNING_EXEC_PATH = "/logistics/returning";

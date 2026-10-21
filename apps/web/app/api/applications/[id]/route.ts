@@ -19,7 +19,7 @@ export const PATCH = withRaftRoute(
     if (!id) return RaftResponse.badRequest("Application ID is required");
 
     const body = await request.json();
-    const application = await applicationService.updateApplication(id, user.id, body);
+    const application = await applicationService.updateApplication(id, user.id, term.id, body);
 
     if (!application) return RaftResponse.notFound("Application failed to update");
 

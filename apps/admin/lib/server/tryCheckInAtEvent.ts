@@ -36,8 +36,8 @@ export async function tryCheckInAtEvent(
 
     // No row inserted: either already checked in (treat as success) or a
     // transient conflict. Confirm via attendance lookup.
-    const alreadyIn = await coreEventService.getAttendanceForUser(eventId, profileId);
-    return alreadyIn
+    const { checkedIn } = await coreEventService.getAttendanceForUser(eventId, profileId);
+    return checkedIn
       ? { checked_in: true }
       : { checked_in: false, check_in_error: "Could not check" };
   } catch (error) {

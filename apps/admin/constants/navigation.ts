@@ -27,7 +27,6 @@ export const getAdminNavigation = (
 ) => {
   const onboardingOpen = logisticsWindows?.onboardingOpen ?? false;
   const returningExecOpen = logisticsWindows?.returningExecOpen ?? false;
-
   const applicationSubItems = [
     { name: "External Apps", href: "/applications", icon: FileText },
     { name: "Questions", href: "/applications/questions", icon: CircleHelp },

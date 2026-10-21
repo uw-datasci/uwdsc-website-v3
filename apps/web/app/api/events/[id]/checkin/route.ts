@@ -9,8 +9,8 @@ export const GET = withRaftRoute(async (_request, { params }: RouteContext<{ id:
   const { user, isUnauthorized } = await tryGetCurrentUser();
   if (!user) return isUnauthorized;
 
-  const checkedIn = await eventService.getAttendanceForUser(id, user.id);
-  return RaftResponse.ok({ checkedIn });
+  const { checkedIn, attendanceId } = await eventService.getAttendanceForUser(id, user.id);
+  return RaftResponse.ok({ checkedIn, attendanceId });
 });
 
 export const POST = withRaftRoute(

@@ -6,7 +6,7 @@ import type {
   OnboardingData,
   OnboardingAdminRow,
 } from "@uwdsc/common/types";
-import type { OnboardingAdminRowDb } from "../../types/hiring";
+import type { OnboardingAdminRowDb } from "../../types/onboarding";
 
 const TEAM_DEFAULT_HEADSHOT_URL = "team.png";
 

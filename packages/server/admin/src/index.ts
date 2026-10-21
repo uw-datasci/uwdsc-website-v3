@@ -12,4 +12,5 @@ export * from "./modules/membership/membership.service";
 export * from "./modules/membership/submission.service";
 export * from "./modules/integration/webhook.service";
 export * from "./modules/raft/raft.service";
+export * from "./modules/recruiting/recruiting.service";
 export type { DiscordInteraction } from "./types/discord";

@@ -1,6 +1,6 @@
-import { type ApplicationReviewStatus, type QuestionScope } from "@uwdsc/common/types";
+import { type ApplicationReviewStatus } from "@uwdsc/common/types";
 import { RaftResponse } from "@uw-datasci/raft";
-import { hiringService, returningExecService } from "@uwdsc/admin";
+import { hiringService } from "@uwdsc/admin";
 import { withPresAccess } from "@/guards/withPresAccess";
 
 interface ParamsContext {
@@ -10,11 +10,10 @@ interface ParamsContext {
 /**
  * PATCH /api/applications/hiring/selections/[id]
  * Update a single position selection's review status (president-only statuses).
- * Dispatches to the correct service based on whether the selection belongs to
- * a regular application or a returning-exec submission.
+ * Returning-exec submissions are no longer editable (the returning-exec flow was removed).
  */
 export const PATCH = withPresAccess<ParamsContext>(
-  async (request, { params }, _user, scope: QuestionScope) => {
+  async (request, { params }) => {
     const { id } = await params;
     const body = (await request.json()) as {
       status?: ApplicationReviewStatus;
@@ -26,10 +25,10 @@ export const PATCH = withPresAccess<ParamsContext>(
     }
 
     if (body.source === "returning_exec") {
-      await returningExecService.updateSelectionReviewStatus(scope, id, body.status);
-    } else {
-      await hiringService.updateSelectionStatus(id, body.status);
+      return RaftResponse.badRequest("Returning-exec submissions can no longer be updated");
     }
+
+    await hiringService.updateSelectionStatus(id, body.status);
 
     return RaftResponse.ok({ success: true });
   }

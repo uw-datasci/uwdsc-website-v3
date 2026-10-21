@@ -111,7 +111,8 @@ export class ApplicationRepository extends BaseRepository {
         github_url,
         portfolio_url,
         status,
-        submitted_at
+        submitted_at,
+        applicant_role
       FROM hiring.applications
       WHERE profile_id = ${profileId} AND term_id = ${termId}
       LIMIT 1
@@ -167,16 +168,24 @@ export class ApplicationRepository extends BaseRepository {
         github_url,
         portfolio_url,
         status,
-        submitted_at
+        submitted_at,
+        applicant_role
     `;
     const app = result[0];
     if (!app) throw new Error("Failed to create application");
     return app;
   }
 
+  /**
+   * Update the user's draft for the given term. Scoped to `termId` so a leftover
+   * draft from an earlier term can't be edited or submitted into a new cycle.
+   * On submit, `applicant_role` snapshots the applicant's current `user_roles.role`
+   * (read from the DB, not the JWT) for the Returning badge.
+   */
   async updateApplication(
     id: string,
     userId: string,
+    termId: string,
     data: UpdateApplicationData
   ): Promise<Application | null> {
     const result = await this.sql<Application[]>`
@@ -191,11 +200,16 @@ export class ApplicationRepository extends BaseRepository {
         linkedin_url = COALESCE(${data.linkedin_url ?? null}, linkedin_url),
         github_url = COALESCE(${data.github_url ?? null}, github_url),
         portfolio_url = COALESCE(${data.portfolio_url ?? null}, portfolio_url)
-        ${data.submit ? this.sql`, status = 'submitted', submitted_at = NOW()` : this.sql``}
-      WHERE id = ${id} AND profile_id = ${userId} AND status = 'draft'
+        ${
+          data.submit
+            ? this.sql`, status = 'submitted', submitted_at = NOW(),
+                applicant_role = (SELECT role FROM public.user_roles WHERE id = ${userId})`
+            : this.sql``
+        }
+      WHERE id = ${id} AND profile_id = ${userId} AND term_id = ${termId} AND status = 'draft'
       RETURNING id, profile_id, term_id, full_name, major, year_of_study,
                 personal_email, location, club_experience, linkedin_url,
-                github_url, portfolio_url, status, submitted_at
+                github_url, portfolio_url, status, submitted_at, applicant_role
     `;
     return result[0] ?? null;
   }

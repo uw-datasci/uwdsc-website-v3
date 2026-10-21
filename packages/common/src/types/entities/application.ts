@@ -2,6 +2,7 @@ import type {
   ApplicationInputType,
   ApplicationReviewStatus,
   ApplicationStatus,
+  UserRole,
 } from "../shared/enums";
 
 // ==========================================
@@ -36,6 +37,8 @@ export interface Application {
   portfolio_url: string | null;
   status: ApplicationStatus;
   submitted_at: string;
+  /** The applicant's user_roles.role at submit (set server-side); null before submit. */
+  applicant_role: UserRole | null;
 }
 
 /** Mirrors application_position_selections table. priority is 1-3. */

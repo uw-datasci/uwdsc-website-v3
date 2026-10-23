@@ -5,9 +5,18 @@ import {
   GeneralQuestion,
   PositionWithQuestions,
   ProfileAutofill,
+  QuestionRow,
   Term,
 } from "@uwdsc/common/types";
+import { isDateWindowOpen } from "@uwdsc/common/utils";
 import { ApplicationRepository } from "./application.repository";
+
+/** The active term and whether /apply is open: dates in range and the term's cycle locked. */
+export interface ApplyWindow {
+  term: Term | null;
+  cycleId: string | null;
+  open: boolean;
+}
 
 class ApplicationService {
   private readonly repository: ApplicationRepository;
@@ -32,15 +41,27 @@ class ApplicationService {
     }
   }
 
-  async getPositionsWithQuestions(): Promise<{
+  async getApplyWindow(): Promise<ApplyWindow> {
+    const term = await this.getActiveTerm();
+    if (!term) return { term: null, cycleId: null, open: false };
+
+    try {
+      const cycleId = await this.repository.getLockedCycleId(term.id);
+      const open =
+        cycleId !== null &&
+        isDateWindowOpen(term.application_release_date, term.application_hard_deadline);
+      return { term, cycleId, open };
+    } catch (error) {
+      throw new ApiError(`Failed to get application window: ${(error as Error).message}`, 500);
+    }
+  }
+
+  async getPositionsWithQuestions(cycleId: string): Promise<{
     generalQuestions: GeneralQuestion[];
     positions: PositionWithQuestions[];
   }> {
     try {
-      const [positionRows, questionRows] = await Promise.all([
-        this.repository.getAvailablePositions(),
-        this.repository.getQuestionsForPositions(),
-      ]);
+      const { positionRows, questionRows } = await this.loadCycleForm(cycleId);
 
       const generalQuestions = questionRows
         .filter((q) => q.position_id === null)
@@ -56,7 +77,7 @@ class ApplicationService {
 
       const positions: PositionWithQuestions[] = positionRows.map((pos) => {
         const questions = questionRows
-          .filter((q) => q.position_id === pos.id)
+          .filter((q) => q.position_id !== null && q.position_id === pos.position_id)
           .map((q) => ({
             ...q,
             sort_order: q.sort_order,
@@ -137,14 +158,21 @@ class ApplicationService {
     applicationId: string,
     userId: string,
     termId: string,
+    cycleId: string,
     data: ApplicationUpdatePayload
   ): Promise<ApplicationWithDetails | null> {
     try {
-      const { position_selections, answers, ...applicationData } = data;
+      const { position_selections, answers: submittedAnswers, ...applicationData } = data;
+      const { positionRows, questionRows } = await this.loadCycleForm(cycleId);
 
-      if (answers && answers.length > 0) {
-        await this.validateAnswerLengths(answers);
+      if (position_selections && position_selections.length > 0) {
+        this.validateSelections(position_selections, positionRows);
       }
+
+      // Answers to questions no longer on the form (archived, or a closed position) are dropped.
+      const answers = submittedAnswers
+        ? this.validateAnswers(submittedAnswers, questionRows)
+        : undefined;
 
       const app = await this.repository.updateApplication(
         applicationId,
@@ -168,20 +196,43 @@ class ApplicationService {
     }
   }
 
-  private async validateAnswerLengths(
-    answers: NonNullable<ApplicationUpdatePayload["answers"]>
-  ): Promise<void> {
-    const questionRows = await this.repository.getQuestionsForPositions();
-    const questionMaxLengthById = new Map(
-      questionRows.map((row) => [row.id, row.max_length] as const)
+  private async loadCycleForm(cycleId: string) {
+    const positionRows = await this.repository.getAvailablePositions(cycleId);
+    const questionRows = await this.repository.getQuestionsForPositions(
+      positionRows.map((p) => Number(p.position_id))
+    );
+    return { positionRows, questionRows };
+  }
+
+  private validateSelections(
+    selections: NonNullable<ApplicationUpdatePayload["position_selections"]>,
+    positionRows: { id: string }[]
+  ): void {
+    const openIds = new Set(positionRows.map((p) => String(p.id)));
+    for (const selection of selections) {
+      if (selection.position_id && !openIds.has(String(selection.position_id))) {
+        throw new ApiError("One of the selected positions is no longer open", 400);
+      }
+    }
+  }
+
+  private validateAnswers(
+    answers: NonNullable<ApplicationUpdatePayload["answers"]>,
+    questionRows: QuestionRow[]
+  ): NonNullable<ApplicationUpdatePayload["answers"]> {
+    const maxLengthById = new Map(
+      questionRows.map((row) => [String(row.id), row.max_length] as const)
     );
 
-    for (const answer of answers) {
-      const maxLength = questionMaxLengthById.get(answer.question_id);
+    return answers.filter((answer) => {
+      const key = String(answer.question_id);
+      if (!maxLengthById.has(key)) return false;
+      const maxLength = maxLengthById.get(key);
       if (typeof maxLength === "number" && answer.answer_text.length > maxLength) {
         throw new ApiError(`Answer exceeds max length (${maxLength} characters)`, 400);
       }
-    }
+      return true;
+    });
   }
 }
 

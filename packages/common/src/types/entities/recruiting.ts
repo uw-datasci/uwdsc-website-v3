@@ -26,6 +26,16 @@ export interface HiringCycle {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  leadership_draft: unknown;
+}
+
+/** Mirrors hiring.application_positions_available. cycle_id is null for pre-cycle rows. */
+export interface CyclePosition {
+  id: number;
+  cycle_id: string | null;
+  position_id: number;
+  is_open: boolean;
+  openings: number;
 }
 
 /** Mirrors hiring.cycle_leadership. Co-VPs are two rows with the same position_id. */
@@ -39,6 +49,8 @@ export interface CycleLeadership {
   kind: LeadershipKind;
   confirmed_by: string | null;
   confirmed_at: string;
+  prior_role: UserRole | null;
+  prior_subteam_id: number | null;
 }
 
 /** Mirrors hiring.cycle_events. */

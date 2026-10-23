@@ -1,5 +1,5 @@
 import type { LeadershipDraft } from "../../schemas/recruiting";
-import type { LeadershipKind, UserRole } from "../shared/enums";
+import type { ApplicationInputType, LeadershipKind, UserRole } from "../shared/enums";
 
 // ==========================================
 //  Leadership roster
@@ -92,4 +92,56 @@ export interface LeadershipView {
   people: Record<string, LeadershipPerson>;
   baseline: RosterBaseline[];
   unplaced: string[];
+}
+
+// ==========================================
+//  Setup screen payload
+// ==========================================
+
+export interface SetupSchedule {
+  termId: string;
+  termCode: string;
+  releaseDate: string | null;
+  softDeadline: string | null;
+  hardDeadline: string | null;
+  targetTermId: string;
+  targetTermCode: string;
+  offerResponseHours: number;
+}
+
+export interface SetupPosition {
+  id: number;
+  positionId: number;
+  name: string;
+  isVp: boolean;
+  subteamId: number | null;
+  subteamName: string | null;
+  isOpen: boolean;
+  openings: number;
+  applicants: number;
+  owner: string;
+  canEditQuestions: boolean;
+}
+
+export interface SetupQuestion {
+  id: number;
+  positionId: number | null;
+  questionText: string;
+  type: ApplicationInputType;
+  maxLength: number | null;
+  placeholder: string | null;
+  helpText: string | null;
+  sortOrder: number;
+  archivedAt: string | null;
+  answers: number;
+}
+
+export interface SetupView {
+  schedule: SetupSchedule;
+  targetTerms: { id: string; code: string }[];
+  positions: SetupPosition[];
+  addablePositions: { id: number; name: string; subteamName: string | null }[];
+  questions: SetupQuestion[];
+  canEditSchedule: boolean;
+  canEditGeneralQuestions: boolean;
 }

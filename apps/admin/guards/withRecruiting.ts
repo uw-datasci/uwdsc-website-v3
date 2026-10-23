@@ -40,3 +40,9 @@ export function withRecruiting<C extends WithAuthContext = WithAuthContext>(
     return handler(request, context, user, recruiting);
   });
 }
+
+/** Leadership routes: presidents, once a cycle exists and until it's finalized. */
+export const requireLeadership: WithRecruitingOptions = {
+  require: (caps) =>
+    caps.cycle && caps.can.editLeadership ? null : "Only presidents can edit leadership",
+};

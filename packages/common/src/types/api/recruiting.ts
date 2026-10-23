@@ -1,5 +1,5 @@
 import type { LeadershipDraft } from "../../schemas/recruiting";
-import type { LeadershipKind, UserRole } from "../shared/enums";
+import type { ApplicationInputType, LeadershipKind, UserRole } from "../shared/enums";
 
 // ==========================================
 //  Leadership roster
@@ -97,4 +97,59 @@ export interface LeadershipView {
   baseline: RosterBaseline[];
   /** Current leaders the roster can't place (no VP position on their subteam). */
   unplaced: string[];
+}
+
+// ==========================================
+//  Setup screen payload
+// ==========================================
+
+export interface SetupSchedule {
+  termId: string;
+  termCode: string;
+  releaseDate: string | null;
+  softDeadline: string | null;
+  hardDeadline: string | null;
+  targetTermId: string;
+  targetTermCode: string;
+  offerResponseHours: number;
+}
+
+export interface SetupPosition {
+  /** application_positions_available id */
+  id: number;
+  positionId: number;
+  name: string;
+  isVp: boolean;
+  subteamId: number | null;
+  subteamName: string | null;
+  isOpen: boolean;
+  openings: number;
+  applicants: number;
+  /** "VP, Events" style owner label for the question bank. */
+  owner: string;
+  canEditQuestions: boolean;
+}
+
+export interface SetupQuestion {
+  id: number;
+  positionId: number | null;
+  questionText: string;
+  type: ApplicationInputType;
+  maxLength: number | null;
+  placeholder: string | null;
+  helpText: string | null;
+  sortOrder: number;
+  archivedAt: string | null;
+  answers: number;
+}
+
+export interface SetupView {
+  schedule: SetupSchedule;
+  targetTerms: { id: string; code: string }[];
+  positions: SetupPosition[];
+  /** Exec positions that aren't in the cycle yet (can be added). */
+  addablePositions: { id: number; name: string; subteamName: string | null }[];
+  questions: SetupQuestion[];
+  canEditSchedule: boolean;
+  canEditGeneralQuestions: boolean;
 }

@@ -53,3 +53,9 @@ export const requireLeadership: WithRecruitingOptions = {
   require: (caps) =>
     caps.cycle && caps.can.editLeadership ? null : "Only presidents can edit leadership",
 };
+
+/** Setup routes: presidents and VPs once leadership is locked. */
+export const requireSetup: WithRecruitingOptions = {
+  require: (caps) =>
+    caps.tabs.setup.enabled ? null : (caps.tabs.setup.reason ?? "Setup is locked"),
+};

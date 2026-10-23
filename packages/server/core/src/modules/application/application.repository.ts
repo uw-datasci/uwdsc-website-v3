@@ -59,7 +59,18 @@ export class ApplicationRepository extends BaseRepository {
     return result;
   }
 
-  async getAvailablePositions(): Promise<ApplicationPositionRow[]> {
+  /** The term's hiring cycle, only once its leadership roster is locked. */
+  async getLockedCycleId(termId: string): Promise<string | null> {
+    const result = await this.sql<{ id: string }[]>`
+      SELECT id
+      FROM hiring.cycles
+      WHERE term_id = ${termId} AND roster_locked_at IS NOT NULL
+      LIMIT 1
+    `;
+    return result[0]?.id ?? null;
+  }
+
+  async getAvailablePositions(cycleId: string): Promise<ApplicationPositionRow[]> {
     const result = await this.sql<ApplicationPositionRow[]>`
       SELECT
         apa.id,
@@ -67,13 +78,14 @@ export class ApplicationRepository extends BaseRepository {
         ep.name
       FROM hiring.application_positions_available apa
       JOIN org.exec_positions ep ON apa.position_id = ep.id
-      WHERE apa.is_open = true
+      WHERE apa.cycle_id = ${cycleId} AND apa.is_open = true
       ORDER BY ep.name
     `;
     return result;
   }
 
-  async getQuestionsForPositions(): Promise<QuestionRow[]> {
+  /** General questions plus those for the given exec positions; archived ones are excluded. */
+  async getQuestionsForPositions(execPositionIds: number[]): Promise<QuestionRow[]> {
     const result = await this.sql<QuestionRow[]>`
       SELECT
         q.id,
@@ -87,6 +99,8 @@ export class ApplicationRepository extends BaseRepository {
         pq.sort_order
       FROM hiring.questions q
       JOIN hiring.position_questions pq ON q.id = pq.question_id
+      WHERE q.archived_at IS NULL
+        AND (pq.position_id IS NULL OR pq.position_id = ANY(${this.sql.array(execPositionIds)}::int[]))
       ORDER BY pq.sort_order ASC, q.created_at ASC
     `;
     return result;
@@ -138,7 +152,8 @@ export class ApplicationRepository extends BaseRepository {
         id,
         application_id,
         question_id,
-        answer_text
+        answer_text,
+        question_text
       FROM hiring.answers
       WHERE application_id = ${app.id}
     `;
@@ -241,8 +256,10 @@ export class ApplicationRepository extends BaseRepository {
     for (const ans of answers) {
       if (!ans.question_id || ans.answer_text == null) continue;
       await this.sql`
-        INSERT INTO hiring.answers (application_id, question_id, answer_text)
-        VALUES (${applicationId}, ${ans.question_id}, ${ans.answer_text})
+        INSERT INTO hiring.answers (application_id, question_id, answer_text, question_text)
+        SELECT ${applicationId}, q.id, ${ans.answer_text}, q.question_text
+        FROM hiring.questions q
+        WHERE q.id = ${ans.question_id}
       `;
     }
   }

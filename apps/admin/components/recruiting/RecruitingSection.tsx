@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { Lock } from "lucide-react";
 import { RECRUITING_TABS, type RecruitingTab } from "@uwdsc/common/recruiting";
 import { useRecruiting } from "@/contexts/RecruitingContext";
@@ -8,15 +9,17 @@ import { LockedState } from "./LockedState";
 interface RecruitingSectionProps {
   readonly tab: RecruitingTab;
   /** GitHub issue that builds this screen (shown until it lands). */
-  readonly issue: number;
+  readonly issue?: number;
+  /** The screen itself, rendered when the viewer can use the tab. */
+  readonly children?: ReactNode;
 }
 
 /**
  * Renders a Recruiting tab's content with the right gate: the locked state before
- * leadership is locked, a "no access" note for tabs the viewer can't use, and a
- * placeholder until the screen itself is built.
+ * leadership is locked, a "no access" note for tabs the viewer can't use, then the
+ * screen (or a placeholder until it's built).
  */
-export function RecruitingSection({ tab, issue }: RecruitingSectionProps) {
+export function RecruitingSection({ tab, issue, children }: RecruitingSectionProps) {
   const { capabilities } = useRecruiting();
   if (!capabilities) return null;
 
@@ -35,10 +38,12 @@ export function RecruitingSection({ tab, issue }: RecruitingSectionProps) {
     );
   }
 
+  if (children) return children;
+
   return (
     <div className="rounded-lg border border-dashed p-10 text-center">
       <p className="font-medium">{label} is coming soon</p>
-      <p className="mt-1 text-sm text-muted-foreground">Tracked in #{issue}.</p>
+      {issue && <p className="mt-1 text-sm text-muted-foreground">Tracked in #{issue}.</p>}
     </div>
   );
 }

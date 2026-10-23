@@ -140,8 +140,8 @@ instead of disappearing into a serverless function's logs.
   - `ApiError` with a 5xx `statusCode` is mapped **and** quarantined.
 - **`apps/admin`** doesn't call `withRaftRoute` directly in route files - it's folded into
   the guards in `apps/admin/guards` (`withAuth`, `withAdmin`, `withPresAccess`). Wrap a
-  handler with one of those for auth + Raft together; `withAdmin` accepts `{ scope: true }`
-  for handlers that need VP/subteam scoping.
+  handler with one of those for auth + Raft together (`withAdmin` requires VP or president,
+  `withPresAccess` requires president).
 - **`apps/web`** has no route guard, so routes wrap directly:
   `export const GET = withRaftRoute(async (request, context) => { ... });`
 - Build every response with **`RaftResponse`** - `ok`, `badRequest`, `unauthorized`,

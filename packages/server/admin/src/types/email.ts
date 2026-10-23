@@ -9,14 +9,6 @@ export interface ExecWelcomeEmailProps {
   discordLink: string;
 }
 
-export interface HiringDecisionEmailProps {
-  type: "offer" | "rejection";
-  applicantName: string;
-  positionName: string;
-  offerTermLabel?: string;
-  offerAcceptByDateLabel?: string;
-}
-
 export type MembershipReceiptNoticeKind = "welcome" | "failure" | "already_verified";
 
 export interface MembershipReceiptProps {

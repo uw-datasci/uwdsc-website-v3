@@ -6,8 +6,6 @@ import {
   CampaignEmail,
   ExecWelcomeEmail,
   getExecWelcomeSubject,
-  HiringDecisionEmail,
-  getHiringDecisionSubject,
   MembershipReceipt,
   getMembershipReceiptSubject,
 } from "./templates";
@@ -278,35 +276,6 @@ class EmailService {
       );
     }
     return result;
-  }
-
-  /**
-   * Hiring: send an offer or rejection email to an applicant for a specific role.
-   */
-  async sendHiringDecisionEmail(
-    recipientEmail: string,
-    options: {
-      type: "offer" | "rejection";
-      applicantName: string;
-      positionName: string;
-      offerTermLabel?: string;
-      offerAcceptByDateLabel?: string;
-    }
-  ): Promise<void> {
-    const { type, applicantName, positionName, offerTermLabel, offerAcceptByDateLabel } =
-      options;
-    const subject = getHiringDecisionSubject(type);
-    const html = await render(
-      createElement(HiringDecisionEmail, {
-        type,
-        applicantName,
-        positionName,
-        offerTermLabel,
-        offerAcceptByDateLabel,
-      })
-    );
-
-    await this.sendTransactionalEmail({ to: [recipientEmail], subject, html });
   }
 
   /**

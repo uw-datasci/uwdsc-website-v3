@@ -18,6 +18,9 @@ export interface Question {
   placeholder: string | null;
   help_text: string | null;
   created_at: string;
+  updated_at: string;
+  /** Archived questions stay linked to past answers but are hidden from new applications. */
+  archived_at: string | null;
 }
 
 /** Mirrors applications table */
@@ -56,6 +59,8 @@ export interface Answer {
   application_id: string;
   question_id: string;
   answer_text: string;
+  /** The question text when the answer was saved. */
+  question_text: string | null;
 }
 
 // ==========================================
@@ -63,7 +68,7 @@ export interface Answer {
 // ==========================================
 
 /** Question with sort_order from position_questions bridge */
-export interface QuestionWithSortOrder extends Question {
+export interface QuestionWithSortOrder extends Omit<Question, "updated_at" | "archived_at"> {
   sort_order: number;
   position_id: string | null;
 }

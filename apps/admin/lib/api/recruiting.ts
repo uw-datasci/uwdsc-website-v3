@@ -5,8 +5,16 @@
  */
 
 import type { RecruitingCapabilities, RecruitingCycleSummary } from "@uwdsc/common/recruiting";
-import type { HiringPick, LeadershipDraft } from "@uwdsc/common/schemas";
-import type { LeadershipPerson, LeadershipView } from "@uwdsc/common/types";
+import type {
+  CreateQuestionInput,
+  HiringPick,
+  LeadershipDraft,
+  ReorderQuestionsInput,
+  ScheduleInput,
+  UpdatePositionInput,
+  UpdateQuestionInput,
+} from "@uwdsc/common/schemas";
+import type { LeadershipPerson, LeadershipView, SetupView } from "@uwdsc/common/types";
 import { createApiError } from "./error";
 import { parseJsonResponse } from "./parse-response";
 
@@ -91,4 +99,36 @@ export async function searchLeadershipPeople(query: string): Promise<LeadershipP
   const data = await parseJsonResponse<{ people: LeadershipPerson[] }>(response);
   if (!response.ok) throw createApiError(data, response.status);
   return data.people;
+}
+
+/** Schedule, cycle positions and the question bank (after the lock). */
+export async function getSetup(): Promise<SetupView> {
+  const response = await fetch("/api/recruiting/setup");
+  const data = await parseJsonResponse<SetupView>(response);
+  if (!response.ok) throw createApiError(data, response.status);
+  return data;
+}
+
+export function updateSchedule(input: ScheduleInput): Promise<void> {
+  return sendJson("/api/recruiting/setup/schedule", "PUT", input);
+}
+
+export function addCyclePosition(positionId: number): Promise<void> {
+  return sendJson("/api/recruiting/setup/positions", "POST", { positionId });
+}
+
+export function updateCyclePosition(id: number, patch: UpdatePositionInput): Promise<void> {
+  return sendJson(`/api/recruiting/setup/positions/${id}`, "PATCH", patch);
+}
+
+export function createQuestion(input: CreateQuestionInput): Promise<void> {
+  return sendJson("/api/recruiting/setup/questions", "POST", input);
+}
+
+export function updateQuestion(id: number, input: UpdateQuestionInput): Promise<void> {
+  return sendJson(`/api/recruiting/setup/questions/${id}`, "PATCH", input);
+}
+
+export function reorderQuestions(input: ReorderQuestionsInput): Promise<void> {
+  return sendJson("/api/recruiting/setup/questions/order", "PUT", input);
 }

@@ -19,3 +19,19 @@ export const ROLE_CHANGE_GROUPS: { key: RoleChangeGroup; title: string; icon: Lu
   { key: "alum", title: "Becomes alum", icon: GraduationCap },
   { key: "restored", title: "Back to their previous role", icon: RotateCcw },
 ];
+
+// ---------------------------------------------------------------------------
+// Setup
+// ---------------------------------------------------------------------------
+
+export type ScheduleDateField = "releaseDate" | "softDeadline" | "hardDeadline";
+
+export const SCHEDULE_DATE_FIELDS: { key: ScheduleDateField; label: string; help: string }[] = [
+  { key: "releaseDate", label: "Applications open", help: "When /apply opens." },
+  { key: "softDeadline", label: "Deadline", help: "The deadline applicants see." },
+  {
+    key: "hardDeadline",
+    label: "Final cutoff",
+    help: "Submissions close. At least 15 minutes after the deadline.",
+  },
+];

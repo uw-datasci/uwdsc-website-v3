@@ -14,4 +14,5 @@ export * from "./modules/integration/webhook.service";
 export * from "./modules/raft/raft.service";
 export * from "./modules/recruiting/recruiting.service";
 export * from "./modules/recruiting/leadership.service";
+export * from "./modules/recruiting/setup.service";
 export type { DiscordInteraction } from "./types/discord";

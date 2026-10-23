@@ -33,3 +33,22 @@ export type SubmissionSource = "web_form" | "email";
 export type ReviewDecision = "approved" | "rejected";
 
 export type ContactSource = "contact_form" | "email";
+
+// Recruiting (hiring.* enums)
+
+export type CyclePhase = "leadership" | "setup" | "open" | "review" | "offers" | "finalized";
+
+export type LeadershipKind = "continuing" | "appointed" | "public_hire";
+
+export type CycleEventType =
+  | "cycle_started"
+  | "leadership_locked"
+  | "leadership_edited"
+  | "phase_changed"
+  | "finalized";
+
+export type NoteKind = "general" | "interview";
+
+export type OfferResponse = "accepted" | "declined";
+
+export type OfferResponseVia = "link" | "manual" | "expiry";

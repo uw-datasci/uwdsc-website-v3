@@ -31,3 +31,8 @@ export const sql = postgres(databaseUrl, {
 
 // Export type for use in repositories
 export type Sql = typeof sql;
+
+type SqlTypes = Sql extends postgres.Sql<infer T> ? T : never;
+
+/** The `sql` handle inside `sql.begin(async (tx) => …)`. */
+export type TransactionSql = postgres.TransactionSql<SqlTypes>;

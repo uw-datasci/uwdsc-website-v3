@@ -3,6 +3,7 @@ import type {
   ApplicationInputType,
   ApplicationReviewStatus,
   LeadershipKind,
+  NoteKind,
   UserRole,
 } from "../shared/enums";
 
@@ -246,3 +247,35 @@ export interface CandidateView {
   pastRoles: CandidatePastRole[];
   sections: CandidateSection[];
 }
+
+// ==========================================
+//  Notes + activity
+// ==========================================
+
+export interface NoteView {
+  id: string;
+  authorName: string;
+  /** "President", "VP, Events": the author's role when they wrote it. */
+  authorRoleLabel: string;
+  kind: NoteKind;
+  body: string;
+  createdAt: string;
+  /** Set when the note was edited after posting. */
+  editedAt: string | null;
+  canEdit: boolean;
+  canDelete: boolean;
+}
+
+export type ActivityItem =
+  | {
+      type: "move";
+      id: string;
+      actorName: string | null;
+      positionName: string;
+      from: ApplicationReviewStatus | null;
+      to: ApplicationReviewStatus;
+      undo: boolean;
+      at: string;
+    }
+  | { type: "note"; id: string; actorName: string | null; kind: NoteKind; at: string }
+  | { type: "applied"; id: string; positionNames: string[]; at: string };

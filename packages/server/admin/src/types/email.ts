@@ -27,3 +27,26 @@ export type SendMarketingSegmentBroadcastParams = {
   onEmptyRecipients: "throw" | "skip";
   emptyRecipientsMessage?: string;
 };
+
+export interface OfferEmailProps {
+  firstName: string;
+  positionName: string;
+  subteamName: string | null;
+  termLabel: string;
+  deadline: string;
+  personalLine?: string;
+  signedBy: string;
+}
+
+export interface RejectionEmailProps {
+  firstName: string;
+  termLabel: string;
+  signedBy: string;
+}
+
+export interface RecruitingEmail {
+  to: string;
+  replyTo: string[];
+  subject: string;
+  html: string;
+}

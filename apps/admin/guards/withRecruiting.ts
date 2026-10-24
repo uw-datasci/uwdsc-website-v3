@@ -58,3 +58,8 @@ export const requireBoard: WithRecruitingOptions = {
   require: (caps) =>
     caps.tabs.board.enabled ? null : (caps.tabs.board.reason ?? "The board is locked"),
 };
+
+/** Offer and rejection routes: presidents while the cycle is active. */
+export const requireOffers: WithRecruitingOptions = {
+  require: (caps) => (caps.can.sendOffers ? null : "Only presidents can send offers"),
+};

@@ -39,3 +39,6 @@ export const questionFormSchema = z.object({
 });
 
 export type QuestionFormValues = z.infer<typeof questionFormSchema>;
+
+/** Route ids for cards, applications and notes. */
+export const recruitingIdSchema = z.uuid();

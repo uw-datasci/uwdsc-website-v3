@@ -59,3 +59,9 @@ export const requireSetup: WithRecruitingOptions = {
   require: (caps) =>
     caps.tabs.setup.enabled ? null : (caps.tabs.setup.reason ?? "Setup is locked"),
 };
+
+/** Board, candidate and note routes: presidents and VPs once leadership is locked. */
+export const requireBoard: WithRecruitingOptions = {
+  require: (caps) =>
+    caps.tabs.board.enabled ? null : (caps.tabs.board.reason ?? "The board is locked"),
+};

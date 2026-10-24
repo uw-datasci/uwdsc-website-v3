@@ -15,3 +15,15 @@ export interface SlotEditor {
   addPresident: () => void;
   addVp: (positionId: number) => void;
 }
+
+export type BoardSource = "all" | "new" | "returning";
+
+export interface BoardFilters {
+  /** VPs: only their own subteam's positions. */
+  mine: boolean;
+  positionId: number | null;
+  subteamId: number | null;
+  source: BoardSource;
+  hasNotes: boolean;
+  search: string;
+}

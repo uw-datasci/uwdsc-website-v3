@@ -1,5 +1,10 @@
 import type { LeadershipDraft } from "../../schemas/recruiting";
-import type { ApplicationInputType, LeadershipKind, UserRole } from "../shared/enums";
+import type {
+  ApplicationInputType,
+  ApplicationReviewStatus,
+  LeadershipKind,
+  UserRole,
+} from "../shared/enums";
 
 // ==========================================
 //  Leadership roster
@@ -152,4 +157,47 @@ export interface SetupView {
   questions: SetupQuestion[];
   canEditSchedule: boolean;
   canEditGeneralQuestions: boolean;
+}
+
+// ==========================================
+//  Board
+// ==========================================
+
+/** One card: a candidate × one of the positions they applied for. */
+export interface BoardCard {
+  /** application_position_selections id */
+  id: string;
+  applicationId: string;
+  profileId: string;
+  name: string;
+  email: string | null;
+  program: string | null;
+  year: string | null;
+  /** 1 = first choice. */
+  priority: number;
+  status: ApplicationReviewStatus;
+  /** org.exec_positions id */
+  positionId: number;
+  positionName: string;
+  subteamId: number | null;
+  subteamName: string | null;
+  isVp: boolean;
+  noteCount: number;
+  /** Applied as an exec or alum. */
+  returning: boolean;
+  canMove: boolean;
+}
+
+export interface BoardPosition {
+  id: number;
+  name: string;
+  subteamId: number | null;
+  subteamName: string | null;
+  isVp: boolean;
+}
+
+export interface BoardView {
+  cards: BoardCard[];
+  positions: BoardPosition[];
+  subteams: { id: number; name: string }[];
 }

@@ -9,12 +9,18 @@ import type {
   CreateQuestionInput,
   HiringPick,
   LeadershipDraft,
+  MoveCardInput,
   ReorderQuestionsInput,
   ScheduleInput,
   UpdatePositionInput,
   UpdateQuestionInput,
 } from "@uwdsc/common/schemas";
-import type { LeadershipPerson, LeadershipView, SetupView } from "@uwdsc/common/types";
+import type {
+  BoardView,
+  LeadershipPerson,
+  LeadershipView,
+  SetupView,
+} from "@uwdsc/common/types";
 import { createApiError } from "./error";
 import { parseJsonResponse } from "./parse-response";
 
@@ -131,4 +137,17 @@ export function updateQuestion(id: number, input: UpdateQuestionInput): Promise<
 
 export function reorderQuestions(input: ReorderQuestionsInput): Promise<void> {
   return sendJson("/api/recruiting/setup/questions/order", "PUT", input);
+}
+
+/** Every card in the cycle plus the positions and subteams to filter by. */
+export async function getBoard(): Promise<BoardView> {
+  const response = await fetch("/api/recruiting/board");
+  const data = await parseJsonResponse<BoardView>(response);
+  if (!response.ok) throw createApiError(data, response.status);
+  return data;
+}
+
+/** Move a card. Fails with 409 if it changed since `input.from` was read. */
+export function moveCard(selectionId: string, input: MoveCardInput): Promise<void> {
+  return sendJson(`/api/recruiting/selections/${selectionId}`, "PATCH", input);
 }

@@ -4,3 +4,4 @@ export * from "./leadership";
 export * from "./setup";
 export * from "./board";
 export * from "./offers";
+export * from "./finalize";

@@ -52,3 +52,10 @@ export interface RecruitingEmail {
   subject: string;
   html: string;
 }
+
+export interface OfferClosedEmailProps {
+  firstName: string;
+  positionName: string;
+  termLabel: string;
+  signedBy: string;
+}

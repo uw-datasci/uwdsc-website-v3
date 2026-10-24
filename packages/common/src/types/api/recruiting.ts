@@ -1,3 +1,4 @@
+import type { FinalizePlan } from "../../recruiting/finalize";
 import type { LeadershipDraft } from "../../schemas/recruiting";
 import type {
   ApplicationInputType,
@@ -369,4 +370,21 @@ export interface RejectionBatchPreview {
   } | null;
   /** Sample email (addressed to the first recipient). */
   email: EmailPreview | null;
+}
+
+// ==========================================
+//  Finalize
+// ==========================================
+
+export interface FinalizeView extends FinalizePlan {
+  /** "Winter 2027" */
+  targetTermLabel: string;
+  finalizedAt: string | null;
+}
+
+export interface FinalizeResult {
+  execs: number;
+  alumni: number;
+  closedOffers: number;
+  welcomeSent: boolean;
 }

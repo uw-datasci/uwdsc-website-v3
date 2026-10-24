@@ -38,6 +38,10 @@ class BoardService {
         subteamName: row.subteam_name,
         isVp: row.is_vp,
         noteCount: row.note_count,
+        offerExpiresAt: row.offer_expires_at,
+        offerExpired:
+          row.offer_expires_at !== null &&
+          new Date(row.offer_expires_at).getTime() < Date.now(),
         returning: row.applicant_role === "exec" || row.applicant_role === "alum",
         canMove: canMoveCard(caps, { subteamId: row.subteam_id, isVp: row.is_vp }),
       }));

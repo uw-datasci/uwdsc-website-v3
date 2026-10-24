@@ -135,3 +135,31 @@ export const noteSchema = z.object({
   kind: z.enum(NOTE_KINDS),
 });
 export type NoteInput = z.infer<typeof noteSchema>;
+
+// ==========================================
+//  Offers + rejections
+// ==========================================
+
+export const sendOfferSchema = z.object({
+  selectionId: z.uuid(),
+  personalLine: z.string().trim().max(300, "Keep it under 300 characters").optional(),
+});
+export type SendOfferInput = z.infer<typeof sendOfferSchema>;
+
+/** Record the candidate's reply (or correct it). */
+export const offerResponseSchema = z.object({
+  response: z.enum(["accepted", "declined"]),
+});
+export type OfferResponseInput = z.infer<typeof offerResponseSchema>;
+
+export const rejectionSchema = z.object({ applicationId: z.uuid() });
+export type RejectionInput = z.infer<typeof rejectionSchema>;
+
+export const rejectionBatchSchema = z.object({
+  include: z.object({
+    notWanted: z.boolean(),
+    inReview: z.boolean(),
+    interviewing: z.boolean(),
+  }),
+});
+export type RejectionBatchInput = z.infer<typeof rejectionBatchSchema>;

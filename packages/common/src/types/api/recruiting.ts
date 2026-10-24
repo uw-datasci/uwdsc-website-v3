@@ -173,6 +173,8 @@ export interface BoardCard {
   subteamName: string | null;
   isVp: boolean;
   noteCount: number;
+  offerExpiresAt: string | null;
+  offerExpired: boolean;
   returning: boolean;
   canMove: boolean;
 }
@@ -264,3 +266,85 @@ export type ActivityItem =
     }
   | { type: "note"; id: string; actorName: string | null; kind: NoteKind; at: string }
   | { type: "applied"; id: string; positionNames: string[]; at: string };
+
+// ==========================================
+//  Offers
+// ==========================================
+
+/** A card on the Offers page, with its live offer (if any). */
+export interface OfferRow {
+  selectionId: string;
+  applicationId: string;
+  name: string;
+  email: string | null;
+  program: string | null;
+  priority: number;
+  status: ApplicationReviewStatus;
+  positionId: number;
+  positionName: string;
+  subteamName: string | null;
+  isVp: boolean;
+  returning: boolean;
+  wantedBy: string | null;
+  wantedAt: string | null;
+  sentAt: string | null;
+  expiresAt: string | null;
+  respondedAt: string | null;
+}
+
+export interface ReadyRow extends OfferRow {
+  blocker: string | null;
+}
+
+export interface OfferSeat {
+  positionId: number;
+  positionName: string;
+  openings: number;
+  left: number;
+  heldBy: string[];
+}
+
+export interface ReadyGroup {
+  subteamName: string;
+  seats: OfferSeat[];
+  rows: ReadyRow[];
+}
+
+export interface OffersView {
+  ready: ReadyGroup[];
+  conflicts: {
+    applicationId: string;
+    name: string;
+    program: string | null;
+    rows: ReadyRow[];
+  }[];
+  sent: OfferRow[];
+  expired: OfferRow[];
+  responded: OfferRow[];
+  offerResponseHours: number;
+}
+
+export interface EmailPreview {
+  to: string;
+  replyTo: string[];
+  subject: string;
+  html: string;
+}
+
+export interface RejectionBatchPreview {
+  recipients: {
+    applicationId: string;
+    name: string;
+    email: string | null;
+    group: "notWanted" | "inReview" | "interviewing";
+    positionNames: string[];
+  }[];
+  counts: Record<"notWanted" | "inReview" | "interviewing", number>;
+  skipped: number;
+  skippedExample: {
+    name: string;
+    status: ApplicationReviewStatus;
+    positionName: string;
+  } | null;
+  email: EmailPreview | null;
+}

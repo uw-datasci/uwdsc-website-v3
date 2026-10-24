@@ -18,6 +18,7 @@ export interface BoardCardRow {
   subteam_id: number | null;
   subteam_name: string | null;
   note_count: number;
+  offer_expires_at: string | null;
 }
 
 export interface BoardPositionRow {
@@ -55,7 +56,8 @@ export class BoardRepository extends BaseRepository {
         ep.is_vp,
         ep.subteam_id,
         st.name AS subteam_name,
-        COALESCE(n.note_count, 0)::int AS note_count
+        COALESCE(n.note_count, 0)::int AS note_count,
+        o.expires_at AS offer_expires_at
       FROM hiring.application_position_selections s
       JOIN hiring.applications a ON a.id = s.application_id
       JOIN hiring.application_positions_available apa ON apa.id = s.position_id
@@ -68,6 +70,11 @@ export class BoardRepository extends BaseRepository {
         WHERE cycle_id = ${cycleId} AND deleted_at IS NULL
         GROUP BY candidate_profile_id
       ) n ON n.candidate_profile_id = a.profile_id
+      LEFT JOIN hiring.offers o
+        ON o.selection_id = s.id
+        AND o.withdrawn_at IS NULL
+        AND o.response IS NULL
+        AND s.status = 'Offer Sent'
       WHERE apa.cycle_id = ${cycleId}
         AND a.term_id = ${termId}
         AND a.status <> 'draft'

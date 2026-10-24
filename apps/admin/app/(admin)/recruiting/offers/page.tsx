@@ -1,5 +1,10 @@
 import { RecruitingSection } from "@/components/recruiting";
+import { OffersPage } from "@/components/recruiting/offers";
 
 export default function RecruitingOffersPage() {
-  return <RecruitingSection tab="offers" issue={165} />;
+  return (
+    <RecruitingSection tab="offers">
+      <OffersPage />
+    </RecruitingSection>
+  );
 }

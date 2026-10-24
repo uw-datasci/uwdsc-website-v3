@@ -4,3 +4,4 @@ export * from "./filterPartialUpdate";
 export * from "./profile";
 export * from "./safeRedirect";
 export * from "./terms";
+export * from "./recruiting";

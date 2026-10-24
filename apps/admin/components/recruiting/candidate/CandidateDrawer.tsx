@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import { toast } from "sonner";
 import { ChevronDown, ChevronUp, ExternalLink, FileText, X } from "lucide-react";
 import { STATUS_LABELS, type SelectionStatus } from "@uwdsc/common/recruiting";
@@ -19,10 +19,13 @@ import {
   TabsList,
   TabsTrigger,
 } from "@uwdsc/ui";
+import { BOARD_KEY } from "@/hooks/useBoard";
 import { getCandidate, getCandidateResumeUrl } from "@/lib/api";
 import { externalUrl, programLine } from "@/lib/utils/recruiting";
 import { PersonAvatar } from "../leadership/PersonAvatar";
+import { ACTIVITY_KEY, ActivityTab } from "./ActivityTab";
 import { ApplicationTab } from "./ApplicationTab";
+import { NotesTab } from "./NotesTab";
 import { PositionsStrip } from "./PositionsStrip";
 
 interface CandidateDrawerProps {
@@ -32,7 +35,7 @@ interface CandidateDrawerProps {
   readonly conflict: boolean;
   readonly onNavigate: (card: BoardCard) => void;
   readonly onClose: () => void;
-  readonly onMove: (card: BoardCard, to: SelectionStatus) => void;
+  readonly onMove: (card: BoardCard, to: SelectionStatus) => Promise<void>;
 }
 
 export function CandidateDrawer({
@@ -50,6 +53,19 @@ export function CandidateDrawer({
     ([, applicationId]: [string, string]) => getCandidate(applicationId),
     { shouldRetryOnError: false }
   );
+
+  const { mutate } = useSWRConfig();
+  const refreshActivity = () => {
+    if (card) void mutate([ACTIVITY_KEY, card.applicationId]);
+  };
+  const moveCard = async (target: BoardCard, to: SelectionStatus) => {
+    await onMove(target, to);
+    refreshActivity();
+  };
+  const onNotesChanged = () => {
+    void mutate(BOARD_KEY);
+    refreshActivity();
+  };
 
   const index = card ? column.findIndex((other) => other.id === card.id) : -1;
   const prev = index > 0 ? column[index - 1] : undefined;
@@ -178,28 +194,41 @@ export function CandidateDrawer({
               </div>
             </header>
 
-            <PositionsStrip cards={siblings} appliedOn={appliedOn} onMove={onMove} />
+            <PositionsStrip cards={siblings} appliedOn={appliedOn} onMove={moveCard} />
 
             <Tabs value={tab} onValueChange={setTab} className="min-h-0 flex-1 gap-0">
               <TabsList variant="line" className="w-full justify-start border-b px-5">
                 <TabsTrigger value="application">Application</TabsTrigger>
+                <TabsTrigger value="notes">
+                  Notes
+                  {card.noteCount > 0 && (
+                    <span className="rounded-full bg-muted px-1.5 text-[11px] leading-4 tabular-nums">
+                      {card.noteCount}
+                    </span>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="activity">Activity</TabsTrigger>
               </TabsList>
               <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
-                {isLoading && (
-                  <div className="flex justify-center py-16">
-                    <Spinner className="size-6" />
-                  </div>
-                )}
-                {error && (
-                  <p className="text-sm text-destructive">
-                    Couldn&apos;t load the application: {error.message}
-                  </p>
-                )}
-                {data && (
-                  <TabsContent value="application">
-                    <ApplicationTab candidate={data} />
-                  </TabsContent>
-                )}
+                <TabsContent value="application">
+                  {isLoading && (
+                    <div className="flex justify-center py-16">
+                      <Spinner className="size-6" />
+                    </div>
+                  )}
+                  {error && (
+                    <p className="text-sm text-destructive">
+                      Couldn&apos;t load the application: {error.message}
+                    </p>
+                  )}
+                  {data && <ApplicationTab candidate={data} />}
+                </TabsContent>
+                <TabsContent value="notes">
+                  <NotesTab applicationId={card.applicationId} onChanged={onNotesChanged} />
+                </TabsContent>
+                <TabsContent value="activity">
+                  <ActivityTab applicationId={card.applicationId} />
+                </TabsContent>
               </div>
             </Tabs>
           </>

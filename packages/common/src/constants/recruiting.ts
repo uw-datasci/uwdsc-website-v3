@@ -1,4 +1,4 @@
-import type { ApplicationInputType } from "../types/shared/enums";
+import type { ApplicationInputType, NoteKind } from "../types/shared/enums";
 
 /**
  * Leadership roster: what happens to each seat next term. A seat ("slot") is a president
@@ -39,3 +39,8 @@ export const QUESTION_TYPE_LABELS: Record<ApplicationInputType, string> = {
   text: "Short answer",
   textarea: "Long answer",
 };
+
+/** Candidate note kinds; interview notes get a tag on the Notes tab. */
+export const NOTE_KINDS = ["general", "interview"] as const satisfies readonly NoteKind[];
+
+export const MAX_NOTE_LENGTH = 5000;

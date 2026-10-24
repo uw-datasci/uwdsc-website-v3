@@ -79,3 +79,16 @@ export function cardsByApplication(cards: readonly BoardCard[]): Map<string, Boa
 export function externalUrl(url: string): string {
   return /^https?:\/\//i.test(url) ? url : `https://${url}`;
 }
+
+/** "Today, 10:02 AM" or "Oct 9, 3:40 PM". */
+export function formatActivityTime(iso: string, now = new Date()): string {
+  const date = new Date(iso);
+  const time = date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  if (date.toDateString() === now.toDateString()) return `Today, ${time}`;
+  const day = date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    ...(date.getFullYear() === now.getFullYear() ? {} : { year: "numeric" }),
+  });
+  return `${day}, ${time}`;
+}

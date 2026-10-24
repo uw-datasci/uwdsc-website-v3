@@ -104,7 +104,7 @@ export class ProfileRepository extends BaseRepository {
             SELECT string_agg(ep.name, ' · ' ORDER BY et.id)
             FROM org.exec_team et
             JOIN org.exec_positions ep ON et.position_id = ep.id
-            WHERE et.profile_id = p.id
+            WHERE et.profile_id = p.id AND et.term_id = org.team_term_id()
           ) AS exec_position_name
         FROM profiles p
         JOIN auth.users au ON p.id = au.id

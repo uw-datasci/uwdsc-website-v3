@@ -12,11 +12,14 @@ import {
   getOfferSubject,
   RejectionEmail,
   getRejectionSubject,
+  OfferClosedEmail,
+  getOfferClosedSubject,
 } from "./templates";
 import { appendUnsubscribeFooter } from "../../utils/marketingEmail";
 import type {
   MarketingSegmentBroadcastResult,
   MembershipReceiptNoticeKind,
+  OfferClosedEmailProps,
   OfferEmailProps,
   RecruitingEmail,
   RejectionEmailProps,
@@ -301,6 +304,15 @@ class EmailService {
     return {
       subject: getRejectionSubject(props.termLabel),
       html: await render(createElement(RejectionEmail, props)),
+    };
+  }
+
+  async renderOfferClosedEmail(
+    props: OfferClosedEmailProps
+  ): Promise<{ subject: string; html: string }> {
+    return {
+      subject: getOfferClosedSubject(props.positionName, props.termLabel),
+      html: await render(createElement(OfferClosedEmail, props)),
     };
   }
 

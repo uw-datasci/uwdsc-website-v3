@@ -7,6 +7,7 @@
 import type { RecruitingCapabilities, RecruitingCycleSummary } from "@uwdsc/common/recruiting";
 import type {
   CreateQuestionInput,
+  FinalizeRequest,
   HiringPick,
   LeadershipDraft,
   MoveCardInput,
@@ -24,6 +25,8 @@ import type {
   BoardView,
   CandidateView,
   EmailPreview,
+  FinalizeResult,
+  FinalizeView,
   LeadershipPerson,
   LeadershipView,
   NoteView,
@@ -242,4 +245,17 @@ export function previewRejectionBatch(
 
 export function sendRejectionBatch(input: RejectionBatchInput): Promise<{ sent: number }> {
   return sendJson("/api/recruiting/rejections/batch", "POST", input);
+}
+
+export const FINALIZE_KEY = "/api/recruiting/finalize";
+
+export async function getFinalize(): Promise<FinalizeView> {
+  const response = await fetch(FINALIZE_KEY);
+  const data = await parseJsonResponse<FinalizeView>(response);
+  if (!response.ok) throw createApiError(data, response.status);
+  return data;
+}
+
+export function finalizeCycle(input: FinalizeRequest): Promise<FinalizeResult> {
+  return sendJson(FINALIZE_KEY, "POST", input);
 }

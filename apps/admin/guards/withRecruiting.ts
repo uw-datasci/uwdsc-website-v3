@@ -63,3 +63,9 @@ export const requireBoard: WithRecruitingOptions = {
 export const requireOffers: WithRecruitingOptions = {
   require: (caps) => (caps.can.sendOffers ? null : "Only presidents can send offers"),
 };
+
+/** Finalize routes: presidents once leadership is locked (also after finalizing, to read). */
+export const requireFinalize: WithRecruitingOptions = {
+  require: (caps) =>
+    caps.tabs.finalize.enabled ? null : (caps.tabs.finalize.reason ?? "Presidents only"),
+};

@@ -163,3 +163,14 @@ export const rejectionBatchSchema = z.object({
   }),
 });
 export type RejectionBatchInput = z.infer<typeof rejectionBatchSchema>;
+
+// ==========================================
+//  Finalize
+// ==========================================
+
+export const finalizeSchema = z.object({
+  when2MeetLink: z
+    .url("Paste the When2Meet link")
+    .refine((url) => url.startsWith("https://"), "Use an https:// link"),
+});
+export type FinalizeRequest = z.infer<typeof finalizeSchema>;

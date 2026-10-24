@@ -6,6 +6,7 @@ import {
   SLOT_DECISIONS,
   SLOT_KINDS,
 } from "../constants/recruiting";
+import { SELECTION_STATUSES } from "../recruiting/status";
 
 /**
  * Recruiting schemas, shared by the admin routes/forms and the `@uwdsc/admin` services
@@ -106,3 +107,15 @@ export const reorderQuestionsSchema = z.object({
   questionIds: z.array(z.number().int().positive()).min(1).max(200),
 });
 export type ReorderQuestionsInput = z.infer<typeof reorderQuestionsSchema>;
+
+// ==========================================
+//  Board
+// ==========================================
+
+/** Move a card. `from` is the status the client saw, so stale moves are rejected. */
+export const moveCardSchema = z.object({
+  from: z.enum(SELECTION_STATUSES),
+  to: z.enum(SELECTION_STATUSES),
+  undo: z.boolean().optional(),
+});
+export type MoveCardInput = z.infer<typeof moveCardSchema>;

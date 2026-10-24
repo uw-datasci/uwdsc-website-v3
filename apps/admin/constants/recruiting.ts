@@ -1,6 +1,8 @@
 import { Crown, GraduationCap, RotateCcw, UserCheck, type LucideIcon } from "lucide-react";
 import { SLOT_DECISION_LABELS, type SlotDecision } from "@uwdsc/common/constants";
+import type { SelectionStatus } from "@uwdsc/common/recruiting";
 import type { RoleChangeGroup } from "@uwdsc/common/types";
+import type { BoardSource } from "@/types/recruiting";
 
 // ---------------------------------------------------------------------------
 // Leadership
@@ -34,4 +36,56 @@ export const SCHEDULE_DATE_FIELDS: { key: ScheduleDateField; label: string; help
     label: "Final cutoff",
     help: "Submissions close. At least 15 minutes after the deadline.",
   },
+];
+
+// ---------------------------------------------------------------------------
+// Board
+// ---------------------------------------------------------------------------
+
+/** Chip (`badge`) and dot colors per status. */
+export const STATUS_TONES: Record<SelectionStatus, { badge: string; dot: string }> = {
+  "In Review": {
+    badge: "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200",
+    dot: "bg-zinc-400",
+  },
+  Interviewing: {
+    badge: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-200",
+    dot: "bg-blue-500",
+  },
+  Wanted: {
+    badge: "bg-primary/10 text-primary dark:bg-primary/25 dark:text-violet-200",
+    dot: "bg-primary",
+  },
+  "Not Wanted": {
+    badge: "bg-zinc-200/70 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300",
+    dot: "bg-zinc-600 dark:bg-zinc-500",
+  },
+  "Offer Sent": {
+    badge: "bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-200",
+    dot: "bg-amber-500",
+  },
+  "Accepted Offer": {
+    badge: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-200",
+    dot: "bg-emerald-500",
+  },
+  "Declined Offer": {
+    badge: "bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-200",
+    dot: "bg-rose-500",
+  },
+  "Rejection Sent": {
+    badge: "bg-zinc-200/70 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300",
+    dot: "bg-zinc-800 dark:bg-zinc-200",
+  },
+};
+
+/** Why an offer-stage column can't be dragged into, by viewer. */
+export const OFFER_COLUMN_LOCKS: Record<"pres" | "vp", string> = {
+  pres: "Moved by sending offers and rejections, or by the candidate's response",
+  vp: "Only presidents move candidates in offer stages",
+};
+
+export const SOURCE_FILTERS: { value: BoardSource; label: string }[] = [
+  { value: "all", label: "All sources" },
+  { value: "new", label: "New" },
+  { value: "returning", label: "Returning" },
 ];

@@ -15,4 +15,5 @@ export * from "./modules/raft/raft.service";
 export * from "./modules/recruiting/recruiting.service";
 export * from "./modules/recruiting/leadership.service";
 export * from "./modules/recruiting/setup.service";
+export * from "./modules/recruiting/board.service";
 export type { DiscordInteraction } from "./types/discord";

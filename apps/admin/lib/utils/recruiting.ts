@@ -74,3 +74,8 @@ export function cardsByApplication(cards: readonly BoardCard[]): Map<string, Boa
   for (const group of groups.values()) group.sort((a, b) => a.priority - b.priority);
   return groups;
 }
+
+/** Applicants often paste links without a scheme ("github.com/me"). */
+export function externalUrl(url: string): string {
+  return /^https?:\/\//i.test(url) ? url : `https://${url}`;
+}

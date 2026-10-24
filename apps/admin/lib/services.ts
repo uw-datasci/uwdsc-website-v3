@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { cookies } from "next/headers";
 import { createSupabaseServerClient } from "@uwdsc/db";
-import { AuthService, MembershipProofService } from "@uwdsc/core";
+import { AuthService, MembershipProofService, ResumeService } from "@uwdsc/core";
 import { HeadshotService } from "@uwdsc/admin";
 
 /**
@@ -26,6 +26,14 @@ async function createSupabaseClient() {
 export async function createAuthService() {
   const supabase = await createSupabaseClient();
   return new AuthService(supabase);
+}
+
+/**
+ * Create ResumeService with server-side Supabase client
+ */
+export async function createResumeService() {
+  const supabase = await createSupabaseClient();
+  return new ResumeService(supabase);
 }
 
 /**

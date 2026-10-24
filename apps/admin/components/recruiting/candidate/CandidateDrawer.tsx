@@ -19,12 +19,14 @@ import {
   TabsList,
   TabsTrigger,
 } from "@uwdsc/ui";
+import { useRecruiting } from "@/contexts/RecruitingContext";
 import { BOARD_KEY } from "@/hooks/useBoard";
 import { getCandidate, getCandidateResumeUrl } from "@/lib/api";
 import { externalUrl, programLine } from "@/lib/utils/recruiting";
 import { PersonAvatar } from "../leadership/PersonAvatar";
 import { ACTIVITY_KEY, ActivityTab } from "./ActivityTab";
 import { ApplicationTab } from "./ApplicationTab";
+import { DecisionFooter } from "./DecisionFooter";
 import { NotesTab } from "./NotesTab";
 import { PositionsStrip } from "./PositionsStrip";
 
@@ -51,6 +53,7 @@ export function CandidateDrawer({
   onMove,
 }: CandidateDrawerProps) {
   const [tab, setTab] = useState("application");
+  const { capabilities } = useRecruiting();
   const { data, error, isLoading } = useSWR<CandidateView, Error>(
     card ? ["/api/recruiting/candidates", card.applicationId] : null,
     ([, applicationId]: [string, string]) => getCandidate(applicationId),
@@ -234,6 +237,8 @@ export function CandidateDrawer({
                 </TabsContent>
               </div>
             </Tabs>
+
+            {capabilities?.can.sendOffers && <DecisionFooter cards={siblings} />}
           </>
         )}
       </SheetContent>

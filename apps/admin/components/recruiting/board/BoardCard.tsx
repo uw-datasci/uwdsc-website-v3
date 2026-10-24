@@ -7,7 +7,7 @@ import { STATUS_LABELS } from "@uwdsc/common/recruiting";
 import type { BoardCard as BoardCardData } from "@uwdsc/common/types";
 import { cn } from "@uwdsc/ui";
 import { STATUS_TONES } from "@/constants/recruiting";
-import { ordinal, programLine } from "@/lib/utils/recruiting";
+import { formatActivityTime, ordinal, programLine } from "@/lib/utils/recruiting";
 
 interface BoardCardProps {
   readonly card: BoardCardData;
@@ -142,7 +142,21 @@ export function BoardCardBody({
           </div>
         )}
 
-        {(card.returning || conflict) && (
+        {card.offerExpiresAt && (
+          <div
+            className={cn(
+              "rounded px-1.5 py-0.5 text-[11px] leading-4",
+              card.offerExpired
+                ? "bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-200"
+                : STATUS_TONES["Offer Sent"].badge
+            )}
+          >
+            {card.offerExpired ? "No reply by" : "Due"}{" "}
+            {formatActivityTime(card.offerExpiresAt)}
+          </div>
+        )}
+
+        {(card.returning || conflict || card.offerExpired) && (
           <div className="flex flex-wrap gap-1">
             {card.returning && (
               <span className="rounded px-1.5 py-px text-[11px] leading-4 font-medium text-foreground ring-1 ring-border ring-inset">
@@ -155,6 +169,11 @@ export function BoardCardBody({
                 className="rounded bg-amber-100 px-1.5 py-px text-[11px] leading-4 font-medium text-amber-800 dark:bg-amber-950 dark:text-amber-200"
               >
                 Conflict
+              </span>
+            )}
+            {card.offerExpired && (
+              <span className="rounded bg-rose-100 px-1.5 py-px text-[11px] leading-4 font-medium text-rose-800 dark:bg-rose-950 dark:text-rose-200">
+                Expired offer
               </span>
             )}
           </div>

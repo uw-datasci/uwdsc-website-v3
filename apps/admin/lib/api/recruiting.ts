@@ -11,8 +11,11 @@ import type {
   LeadershipDraft,
   MoveCardInput,
   NoteInput,
+  OfferResponseInput,
+  RejectionBatchInput,
   ReorderQuestionsInput,
   ScheduleInput,
+  SendOfferInput,
   UpdatePositionInput,
   UpdateQuestionInput,
 } from "@uwdsc/common/schemas";
@@ -20,9 +23,12 @@ import type {
   ActivityItem,
   BoardView,
   CandidateView,
+  EmailPreview,
   LeadershipPerson,
   LeadershipView,
   NoteView,
+  OffersView,
+  RejectionBatchPreview,
   SetupView,
 } from "@uwdsc/common/types";
 import { createApiError } from "./error";
@@ -197,4 +203,43 @@ export async function getCandidateActivity(applicationId: string): Promise<Activ
   const data = await parseJsonResponse<{ activity: ActivityItem[] }>(response);
   if (!response.ok) throw createApiError(data, response.status);
   return data.activity;
+}
+
+export const OFFERS_KEY = "/api/recruiting/offers";
+
+export async function getOffers(): Promise<OffersView> {
+  const response = await fetch(OFFERS_KEY);
+  const data = await parseJsonResponse<OffersView>(response);
+  if (!response.ok) throw createApiError(data, response.status);
+  return data;
+}
+
+export function previewOffer(input: SendOfferInput): Promise<EmailPreview> {
+  return sendJson("/api/recruiting/offers/preview", "POST", input);
+}
+
+export function sendOffer(input: SendOfferInput): Promise<void> {
+  return sendJson(OFFERS_KEY, "POST", input);
+}
+
+export function respondToOffer(selectionId: string, input: OfferResponseInput): Promise<void> {
+  return sendJson(`/api/recruiting/offers/${selectionId}`, "PATCH", input);
+}
+
+export function previewRejection(applicationId: string): Promise<EmailPreview> {
+  return sendJson("/api/recruiting/rejections/preview", "POST", { applicationId });
+}
+
+export function sendRejection(applicationId: string): Promise<void> {
+  return sendJson("/api/recruiting/rejections", "POST", { applicationId });
+}
+
+export function previewRejectionBatch(
+  input: RejectionBatchInput
+): Promise<RejectionBatchPreview> {
+  return sendJson("/api/recruiting/rejections/batch/preview", "POST", input);
+}
+
+export function sendRejectionBatch(input: RejectionBatchInput): Promise<{ sent: number }> {
+  return sendJson("/api/recruiting/rejections/batch", "POST", input);
 }

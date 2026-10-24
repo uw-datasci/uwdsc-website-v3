@@ -92,3 +92,20 @@ export function formatActivityTime(iso: string, now = new Date()): string {
   });
   return `${day}, ${time}`;
 }
+
+/** "5h left" / "40m left" until an offer's deadline, and how much of the window is left. */
+export function offerTimeLeft(
+  expiresAt: string,
+  windowHours: number,
+  now: number
+): { label: string; fraction: number; urgent: boolean } {
+  const ms = new Date(expiresAt).getTime() - now;
+  const hours = ms / 3_600_000;
+  const label =
+    hours >= 1 ? `${Math.floor(hours)}h left` : `${Math.max(1, Math.round(ms / 60_000))}m left`;
+  return {
+    label,
+    fraction: Math.min(1, Math.max(0, hours / windowHours)),
+    urgent: hours < 12,
+  };
+}

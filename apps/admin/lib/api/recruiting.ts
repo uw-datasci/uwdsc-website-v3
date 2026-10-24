@@ -10,16 +10,19 @@ import type {
   HiringPick,
   LeadershipDraft,
   MoveCardInput,
+  NoteInput,
   ReorderQuestionsInput,
   ScheduleInput,
   UpdatePositionInput,
   UpdateQuestionInput,
 } from "@uwdsc/common/schemas";
 import type {
+  ActivityItem,
   BoardView,
   CandidateView,
   LeadershipPerson,
   LeadershipView,
+  NoteView,
   SetupView,
 } from "@uwdsc/common/types";
 import { createApiError } from "./error";
@@ -167,4 +170,31 @@ export async function getCandidateResumeUrl(applicationId: string): Promise<stri
   const data = await parseJsonResponse<{ url: string | null }>(response);
   if (!response.ok) throw createApiError(data, response.status);
   return data.url;
+}
+
+export async function getCandidateNotes(applicationId: string): Promise<NoteView[]> {
+  const response = await fetch(`/api/recruiting/candidates/${applicationId}/notes`);
+  const data = await parseJsonResponse<{ notes: NoteView[] }>(response);
+  if (!response.ok) throw createApiError(data, response.status);
+  return data.notes;
+}
+
+export function addCandidateNote(applicationId: string, input: NoteInput): Promise<void> {
+  return sendJson(`/api/recruiting/candidates/${applicationId}/notes`, "POST", input);
+}
+
+export function updateCandidateNote(noteId: string, input: NoteInput): Promise<void> {
+  return sendJson(`/api/recruiting/notes/${noteId}`, "PATCH", input);
+}
+
+export function deleteCandidateNote(noteId: string): Promise<void> {
+  return sendJson(`/api/recruiting/notes/${noteId}`, "DELETE", undefined);
+}
+
+/** Status moves, notes and the application, newest first. */
+export async function getCandidateActivity(applicationId: string): Promise<ActivityItem[]> {
+  const response = await fetch(`/api/recruiting/candidates/${applicationId}/activity`);
+  const data = await parseJsonResponse<{ activity: ActivityItem[] }>(response);
+  if (!response.ok) throw createApiError(data, response.status);
+  return data.activity;
 }

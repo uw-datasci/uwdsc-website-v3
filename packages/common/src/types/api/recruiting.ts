@@ -184,6 +184,10 @@ export interface BoardCard {
   subteamName: string | null;
   isVp: boolean;
   noteCount: number;
+  /** Deadline of the open offer (Offer Sent cards). */
+  offerExpiresAt: string | null;
+  /** The open offer's deadline has passed with no reply. */
+  offerExpired: boolean;
   /** Applied as an exec or alum. */
   returning: boolean;
   canMove: boolean;
@@ -279,3 +283,90 @@ export type ActivityItem =
     }
   | { type: "note"; id: string; actorName: string | null; kind: NoteKind; at: string }
   | { type: "applied"; id: string; positionNames: string[]; at: string };
+
+// ==========================================
+//  Offers
+// ==========================================
+
+/** A card on the Offers page, with its live offer (if any). */
+export interface OfferRow {
+  selectionId: string;
+  applicationId: string;
+  name: string;
+  email: string | null;
+  program: string | null;
+  priority: number;
+  status: ApplicationReviewStatus;
+  positionId: number;
+  positionName: string;
+  subteamName: string | null;
+  isVp: boolean;
+  returning: boolean;
+  /** Who moved them to Wanted, and when. */
+  wantedBy: string | null;
+  wantedAt: string | null;
+  sentAt: string | null;
+  expiresAt: string | null;
+  respondedAt: string | null;
+}
+
+export interface ReadyRow extends OfferRow {
+  /** Why Send offer is disabled, or null. */
+  blocker: string | null;
+}
+
+export interface OfferSeat {
+  positionId: number;
+  positionName: string;
+  openings: number;
+  left: number;
+  heldBy: string[];
+}
+
+export interface ReadyGroup {
+  subteamName: string;
+  seats: OfferSeat[];
+  rows: ReadyRow[];
+}
+
+export interface OffersView {
+  ready: ReadyGroup[];
+  /** Candidates Wanted by two or more subteams. */
+  conflicts: {
+    applicationId: string;
+    name: string;
+    program: string | null;
+    rows: ReadyRow[];
+  }[];
+  sent: OfferRow[];
+  /** Offer Sent past its deadline with no reply. */
+  expired: OfferRow[];
+  responded: OfferRow[];
+  offerResponseHours: number;
+}
+
+export interface EmailPreview {
+  to: string;
+  replyTo: string[];
+  subject: string;
+  html: string;
+}
+
+export interface RejectionBatchPreview {
+  recipients: {
+    applicationId: string;
+    name: string;
+    email: string | null;
+    group: "notWanted" | "inReview" | "interviewing";
+    positionNames: string[];
+  }[];
+  counts: Record<"notWanted" | "inReview" | "interviewing", number>;
+  skipped: number;
+  skippedExample: {
+    name: string;
+    status: ApplicationReviewStatus;
+    positionName: string;
+  } | null;
+  /** Sample email (addressed to the first recipient). */
+  email: EmailPreview | null;
+}

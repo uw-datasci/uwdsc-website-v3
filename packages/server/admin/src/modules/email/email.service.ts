@@ -8,13 +8,23 @@ import {
   getExecWelcomeSubject,
   MembershipReceipt,
   getMembershipReceiptSubject,
+  OfferEmail,
+  getOfferSubject,
+  RejectionEmail,
+  getRejectionSubject,
 } from "./templates";
 import { appendUnsubscribeFooter } from "../../utils/marketingEmail";
 import type {
   MarketingSegmentBroadcastResult,
   MembershipReceiptNoticeKind,
+  OfferEmailProps,
+  RecruitingEmail,
+  RejectionEmailProps,
   SendMarketingSegmentBroadcastParams,
 } from "../../types/email";
+
+/** Resend's limit per batch request. */
+export const EMAIL_BATCH_LIMIT = 100;
 
 class EmailService {
   private readonly resend: Resend;
@@ -276,6 +286,57 @@ class EmailService {
       );
     }
     return result;
+  }
+
+  async renderOfferEmail(props: OfferEmailProps): Promise<{ subject: string; html: string }> {
+    return {
+      subject: getOfferSubject(props.positionName, props.termLabel),
+      html: await render(createElement(OfferEmail, props)),
+    };
+  }
+
+  async renderRejectionEmail(
+    props: RejectionEmailProps
+  ): Promise<{ subject: string; html: string }> {
+    return {
+      subject: getRejectionSubject(props.termLabel),
+      html: await render(createElement(RejectionEmail, props)),
+    };
+  }
+
+  /** One recruiting email (offers). Replies go to the presidents. Returns the Resend id. */
+  async sendRecruitingEmail(email: RecruitingEmail): Promise<string | null> {
+    const { data, error } = await this.resend.emails.send({
+      from: this.from,
+      to: [email.to],
+      replyTo: email.replyTo.length > 0 ? email.replyTo : undefined,
+      subject: email.subject,
+      html: email.html,
+    });
+    if (error) {
+      throw new ApiError(this.resendErrorMessage(error) ?? "Failed to send the email", 500);
+    }
+    return data?.id ?? null;
+  }
+
+  /** Up to {@link EMAIL_BATCH_LIMIT} recruiting emails in one request (rejections). */
+  async sendRecruitingBatch(emails: readonly RecruitingEmail[]): Promise<void> {
+    if (emails.length === 0) return;
+    if (emails.length > EMAIL_BATCH_LIMIT) {
+      throw new ApiError(`Send at most ${EMAIL_BATCH_LIMIT} emails per batch`, 500);
+    }
+    const { error } = await this.resend.batch.send(
+      emails.map((email) => ({
+        from: this.from,
+        to: [email.to],
+        replyTo: email.replyTo.length > 0 ? email.replyTo : undefined,
+        subject: email.subject,
+        html: email.html,
+      }))
+    );
+    if (error) {
+      throw new ApiError(this.resendErrorMessage(error) ?? "Failed to send the emails", 500);
+    }
   }
 
   /**

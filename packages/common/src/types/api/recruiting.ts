@@ -201,3 +201,48 @@ export interface BoardView {
   positions: BoardPosition[];
   subteams: { id: number; name: string }[];
 }
+
+// ==========================================
+//  Candidate drawer
+// ==========================================
+
+export interface CandidateAnswer {
+  questionId: number;
+  /** The question as the candidate saw it. */
+  question: string;
+  answer: string;
+}
+
+/** General, one per position the candidate applied for (by priority), then "Other". */
+export interface CandidateSection {
+  key: string;
+  title: string;
+  subtitle: string | null;
+  answers: CandidateAnswer[];
+}
+
+/** A row from org.exec_team. */
+export interface CandidatePastRole {
+  termCode: string;
+  positionName: string;
+  subteamName: string | null;
+}
+
+/** The full application, loaded when a card is opened. Statuses come from the board. */
+export interface CandidateView {
+  applicationId: string;
+  profileId: string;
+  name: string;
+  email: string | null;
+  personalEmail: string | null;
+  program: string | null;
+  year: string | null;
+  location: string | null;
+  linkedinUrl: string | null;
+  githubUrl: string | null;
+  portfolioUrl: string | null;
+  returning: boolean;
+  submittedAt: string;
+  pastRoles: CandidatePastRole[];
+  sections: CandidateSection[];
+}

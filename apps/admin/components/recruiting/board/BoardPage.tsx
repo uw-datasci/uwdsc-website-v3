@@ -28,6 +28,7 @@ import type { BoardFilters as Filters } from "@/types/recruiting";
 import { BoardCardBody } from "./BoardCard";
 import { BoardColumn, type DropState } from "./BoardColumn";
 import { BoardFilters } from "./BoardFilters";
+import { CandidateDrawer } from "../candidate";
 
 /** Recruiting → Board: one card per candidate × position, columns by status. */
 export function BoardPage() {
@@ -50,6 +51,7 @@ export function BoardPage() {
     () => new Set(isVp ? DECISION_STATUSES : [])
   );
   const [dragging, setDragging] = useState<BoardCardData | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
@@ -78,6 +80,9 @@ export function BoardPage() {
   const visible = board.cards.filter((card) => matchesFilters(card, filters, viewerSubteamId));
   const candidates = new Set(visible.map((card) => card.applicationId)).size;
   const countText = `${visible.length} card${visible.length === 1 ? "" : "s"} · ${candidates} candidate${candidates === 1 ? "" : "s"}`;
+
+  const openCard = board.cards.find((card) => card.id === openId) ?? null;
+  const openColumn = openCard ? visible.filter((card) => card.status === openCard.status) : [];
 
   const targets = new Set<SelectionStatus>(dragging ? dragTargets(dragging.status) : []);
   const dropState = (status: SelectionStatus): DropState => {
@@ -151,6 +156,8 @@ export function BoardPage() {
                 othersFor={othersFor}
                 conflictFor={conflictFor}
                 showSubteam={!filters.mine}
+                selectedId={openId}
+                onOpen={(card) => setOpenId(card.id)}
               />
             </Fragment>
           ))}
@@ -168,6 +175,16 @@ export function BoardPage() {
           )}
         </DragOverlay>
       </DndContext>
+
+      <CandidateDrawer
+        card={openCard}
+        siblings={openCard ? siblings(openCard) : []}
+        column={openColumn}
+        conflict={openCard ? conflictFor(openCard) : false}
+        onNavigate={(card) => setOpenId(card.id)}
+        onClose={() => setOpenId(null)}
+        onMove={(card, to) => void move(card, to)}
+      />
     </div>
   );
 }

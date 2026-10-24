@@ -52,8 +52,7 @@ export class OnboardingRepository extends BaseRepository {
     const result = await this.sql<{ position_id: number }[]>`
       SELECT position_id
       FROM org.exec_team
-      WHERE profile_id = ${profile_id}
-      ORDER BY updated_at DESC, created_at DESC
+      WHERE profile_id = ${profile_id} AND term_id = org.team_term_id()
       LIMIT 1
     `;
 
@@ -110,8 +109,7 @@ export class OnboardingRepository extends BaseRepository {
       LEFT JOIN LATERAL (
         SELECT position_id
         FROM org.exec_team
-        WHERE profile_id = p.id
-        ORDER BY updated_at DESC, created_at DESC
+        WHERE profile_id = p.id AND term_id = org.team_term_id()
         LIMIT 1
       ) et ON true
       LEFT JOIN org.exec_positions ep_current ON ep_current.id = et.position_id
@@ -221,7 +219,7 @@ export class OnboardingRepository extends BaseRepository {
         photo_url = COALESCE(NULLIF(${resolvedHeadshotUrl}::text, ''), photo_url),
         instagram = ${instagram},
         updated_at = NOW()
-      WHERE profile_id = ${profile_id}::uuid
+      WHERE profile_id = ${profile_id}::uuid AND term_id = org.team_term_id()
     `;
     return result[0] ?? null;
   }

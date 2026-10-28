@@ -311,7 +311,7 @@ class EmailService {
     props: OfferClosedEmailProps
   ): Promise<{ subject: string; html: string }> {
     return {
-      subject: getOfferClosedSubject(props.positionName, props.termLabel),
+      subject: getOfferClosedSubject(props.positionName, props.termLabel, props.reason),
       html: await render(createElement(OfferClosedEmail, props)),
     };
   }

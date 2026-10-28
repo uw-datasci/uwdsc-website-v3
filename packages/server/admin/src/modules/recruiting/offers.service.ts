@@ -15,7 +15,9 @@ import { createOfferToken, offerResponseService, offerUrl, type CardMove } from 
 import type {
   OfferResponseInput,
   RejectionBatchInput,
+  ResendOfferInput,
   SendOfferInput,
+  WithdrawOfferInput,
 } from "@uwdsc/common/schemas";
 import type {
   EmailPreview,
@@ -77,6 +79,10 @@ function toOfferRow(row: OfferCardRow): OfferRow {
     sentAt: row.sent_at,
     expiresAt: row.expires_at,
     respondedAt: row.responded_at,
+    respondedVia: row.responded_via,
+    responseNote: row.response_note,
+    personalLine: row.personal_line,
+    withdrawn: row.withdrawn_at !== null && row.responded_at === null,
   };
 }
 
@@ -199,6 +205,82 @@ class OffersService {
       personalLine,
       send: () => emailService.sendRecruitingEmail(email),
     });
+  }
+
+  async previewResend(
+    caps: Capabilities,
+    selectionId: string,
+    input: ResendOfferInput
+  ): Promise<EmailPreview> {
+    const ctx = await this.load(caps);
+    const row = this.resendable(ctx, selectionId);
+    const expiresAt = new Date(Date.now() + ctx.cycle.offerResponseHours * HOUR_MS);
+    const email = await this.offerEmail(
+      ctx,
+      row,
+      input.personalLine,
+      expiresAt,
+      offerUrl(PREVIEW_TOKEN)
+    );
+    return this.toPreview(email);
+  }
+
+  /** Send a new link with a fresh deadline; the old link stops working. */
+  async resendOffer(
+    caps: Capabilities,
+    actorId: string,
+    selectionId: string,
+    input: ResendOfferInput
+  ): Promise<void> {
+    const ctx = await this.load(caps);
+    const row = this.resendable(ctx, selectionId);
+    const sentAt = new Date();
+    const expiresAt = new Date(sentAt.getTime() + ctx.cycle.offerResponseHours * HOUR_MS);
+    const personalLine = input.personalLine?.trim() || null;
+    const { token, hash } = createOfferToken();
+    const email = await this.offerEmail(ctx, row, personalLine, expiresAt, offerUrl(token));
+
+    await this.repository.resendOffer({
+      selectionId,
+      actorId,
+      sentAt,
+      expiresAt,
+      tokenHash: hash,
+      personalLine,
+      send: () => emailService.sendRecruitingEmail(email),
+    });
+  }
+
+  async previewWithdraw(caps: Capabilities, selectionId: string): Promise<EmailPreview> {
+    const ctx = await this.load(caps);
+    const row = this.withdrawable(ctx, selectionId, caps);
+    return this.toPreview(await this.withdrawnEmail(ctx, row));
+  }
+
+  /** Close the offer and move the card to Declined Offer, optionally telling them. */
+  async withdrawOffer(
+    caps: Capabilities,
+    actorId: string,
+    selectionId: string,
+    input: WithdrawOfferInput
+  ): Promise<void> {
+    const ctx = await this.load(caps);
+    const row = this.withdrawable(ctx, selectionId, caps);
+    if (input.notify && !row.email) {
+      throw new ApiError("This candidate has no email on file", 400);
+    }
+    const email = input.notify ? await this.withdrawnEmail(ctx, row) : null;
+
+    await this.repository.withdrawOffer(
+      {
+        selectionId,
+        from: row.status,
+        to: "Declined Offer",
+        actorId,
+        reason: "withdrawn",
+      },
+      email ? () => emailService.sendRecruitingEmail(email) : null
+    );
   }
 
   /** Mark accepted / declined by hand, or correct a recorded reply. */
@@ -350,6 +432,24 @@ class OffersService {
     return row;
   }
 
+  private resendable(ctx: Context, selectionId: string): OfferCardRow {
+    const row = this.findRow(ctx, selectionId);
+    if (row.status !== "Offer Sent") {
+      throw new ApiError("Only open offers can be re-sent", 409);
+    }
+    if (!row.email) throw new ApiError("This candidate has no email on file", 400);
+    return row;
+  }
+
+  private withdrawable(ctx: Context, selectionId: string, caps: Capabilities): OfferCardRow {
+    const row = this.findRow(ctx, selectionId);
+    assertMove(row.status, "Declined Offer", {
+      role: caps.viewer.role,
+      action: "withdraw_offer",
+    });
+    return row;
+  }
+
   private rejectable(
     ctx: Context,
     applicationId: string
@@ -391,6 +491,17 @@ class OffersService {
       personalLine: personalLine?.trim() || undefined,
       signedBy: ctx.signedBy,
       respondUrl,
+    });
+    return { to: row.email ?? "", replyTo: ctx.replyTo, subject, html };
+  }
+
+  private async withdrawnEmail(ctx: Context, row: OfferCardRow): Promise<RecruitingEmail> {
+    const { subject, html } = await emailService.renderOfferClosedEmail({
+      firstName: firstName(row.full_name),
+      positionName: row.position_name,
+      termLabel: ctx.termLabel,
+      signedBy: ctx.signedBy,
+      reason: "withdrawn",
     });
     return { to: row.email ?? "", replyTo: ctx.replyTo, subject, html };
   }

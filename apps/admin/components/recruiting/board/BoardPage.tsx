@@ -183,7 +183,7 @@ export function BoardPage() {
         conflict={openCard ? conflictFor(openCard) : false}
         onNavigate={(card) => setOpenId(card.id)}
         onClose={() => setOpenId(null)}
-        onMove={(card, to) => void move(card, to)}
+        onMove={move}
       />
     </div>
   );

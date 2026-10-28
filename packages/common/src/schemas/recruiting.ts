@@ -1,7 +1,9 @@
 import { z } from "zod";
 import {
+  MAX_NOTE_LENGTH,
   MAX_OFFER_RESPONSE_HOURS,
   MAX_POSITION_OPENINGS,
+  NOTE_KINDS,
   QUESTION_TYPES,
   SLOT_DECISIONS,
   SLOT_KINDS,
@@ -119,3 +121,17 @@ export const moveCardSchema = z.object({
   undo: z.boolean().optional(),
 });
 export type MoveCardInput = z.infer<typeof moveCardSchema>;
+
+// ==========================================
+//  Notes
+// ==========================================
+
+export const noteSchema = z.object({
+  body: z
+    .string()
+    .trim()
+    .min(1, "Write a note")
+    .max(MAX_NOTE_LENGTH, `Keep it under ${MAX_NOTE_LENGTH} characters`),
+  kind: z.enum(NOTE_KINDS),
+});
+export type NoteInput = z.infer<typeof noteSchema>;

@@ -15,10 +15,12 @@ import type {
   OfferResponseInput,
   RejectionBatchInput,
   ReorderQuestionsInput,
+  ResendOfferInput,
   ScheduleInput,
   SendOfferInput,
   UpdatePositionInput,
   UpdateQuestionInput,
+  WithdrawOfferInput,
 } from "@uwdsc/common/schemas";
 import type {
   ActivityItem,
@@ -227,6 +229,25 @@ export function sendOffer(input: SendOfferInput): Promise<void> {
 
 export function respondToOffer(selectionId: string, input: OfferResponseInput): Promise<void> {
   return sendJson(`/api/recruiting/offers/${selectionId}`, "PATCH", input);
+}
+
+export function previewResendOffer(
+  selectionId: string,
+  input: ResendOfferInput
+): Promise<EmailPreview> {
+  return sendJson(`/api/recruiting/offers/${selectionId}/resend/preview`, "POST", input);
+}
+
+export function resendOffer(selectionId: string, input: ResendOfferInput): Promise<void> {
+  return sendJson(`/api/recruiting/offers/${selectionId}/resend`, "POST", input);
+}
+
+export function previewWithdrawOffer(selectionId: string): Promise<EmailPreview> {
+  return sendJson(`/api/recruiting/offers/${selectionId}/withdraw/preview`, "POST", {});
+}
+
+export function withdrawOffer(selectionId: string, input: WithdrawOfferInput): Promise<void> {
+  return sendJson(`/api/recruiting/offers/${selectionId}/withdraw`, "POST", input);
 }
 
 export function previewRejection(applicationId: string): Promise<EmailPreview> {

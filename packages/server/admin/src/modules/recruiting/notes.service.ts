@@ -92,6 +92,7 @@ class NotesService {
         from: row.from_status,
         to: row.to_status,
         undo: row.reason === "undo",
+        reason: row.reason === "undo" ? null : row.reason,
         at: row.created_at,
       })),
       ...notes.map((row): ActivityItem => ({

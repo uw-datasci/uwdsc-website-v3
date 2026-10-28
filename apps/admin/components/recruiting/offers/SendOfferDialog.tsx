@@ -20,16 +20,18 @@ import {
 } from "@uwdsc/ui";
 import { useRecruiting } from "@/contexts/RecruitingContext";
 import { useRefreshDecisions } from "@/hooks/useOfferActions";
-import { previewOffer, sendOffer } from "@/lib/api";
+import { previewOffer, previewResendOffer, resendOffer, sendOffer } from "@/lib/api";
 import { EmailPreviewFrame } from "./EmailPreviewFrame";
 
-/** The card being offered. */
+/** The card being offered, or re-sent a new link. */
 export interface OfferTarget {
   selectionId: string;
   name: string;
   email: string | null;
   positionName: string;
   subteamName: string | null;
+  mode: "send" | "resend";
+  personalLine: string | null;
 }
 
 interface SendOfferDialogProps {
@@ -51,25 +53,30 @@ function SendOfferBody({ target, onClose }: { target: OfferTarget; onClose: () =
   const { capabilities } = useRecruiting();
   const refresh = useRefreshDecisions();
   const hours = capabilities?.cycle?.offerResponseHours ?? 48;
-  const [draft, setDraft] = useState("");
-  const [personalLine, setPersonalLine] = useState("");
+  const resend = target.mode === "resend";
+  const [draft, setDraft] = useState(target.personalLine ?? "");
+  const [personalLine, setPersonalLine] = useState(target.personalLine ?? "");
   const [sending, setSending] = useState(false);
 
   const { data, error, isLoading } = useSWR<EmailPreview, Error>(
-    ["offer-preview", target.selectionId, personalLine],
+    ["offer-preview", target.mode, target.selectionId, personalLine],
     () =>
-      previewOffer({
-        selectionId: target.selectionId,
-        personalLine: personalLine || undefined,
-      }),
+      resend
+        ? previewResendOffer(target.selectionId, { personalLine: personalLine || undefined })
+        : previewOffer({
+            selectionId: target.selectionId,
+            personalLine: personalLine || undefined,
+          }),
     { revalidateOnFocus: false, shouldRetryOnError: false, keepPreviousData: true }
   );
 
   const send = async () => {
     setSending(true);
     try {
-      await sendOffer({ selectionId: target.selectionId, personalLine: draft || undefined });
-      toast.success(`Offer sent to ${target.name}`);
+      const line = draft.trim() || undefined;
+      if (resend) await resendOffer(target.selectionId, { personalLine: line });
+      else await sendOffer({ selectionId: target.selectionId, personalLine: line });
+      toast.success(`${resend ? "New offer link" : "Offer"} sent to ${target.name}`);
       await refresh();
       onClose();
     } catch (err) {
@@ -86,9 +93,13 @@ function SendOfferBody({ target, onClose }: { target: OfferTarget; onClose: () =
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Send offer to {target.name}</DialogTitle>
+        <DialogTitle>
+          {resend ? "Resend offer to" : "Send offer to"} {target.name}
+        </DialogTitle>
         <DialogDescription>
-          Check the email below. The {hours}-hour clock starts when you send.
+          {resend
+            ? `This sends a new link with a fresh ${hours}-hour deadline. The old link stops working.`
+            : `Check the email below. The ${hours}-hour clock starts when you send.`}
         </DialogDescription>
       </DialogHeader>
 
@@ -136,7 +147,9 @@ function SendOfferBody({ target, onClose }: { target: OfferTarget; onClose: () =
 
       <DialogFooter className="items-center gap-2 border-t pt-4 sm:justify-between">
         <span className="text-xs text-muted-foreground">
-          {target.name} moves to Offer Sent. Their VP sees the status but can&apos;t change it.
+          {resend
+            ? `${target.name} stays at Offer Sent.`
+            : `${target.name} moves to Offer Sent. Their VP sees the status but can't change it.`}
         </span>
         <div className="flex gap-2">
           <Button variant="outline" disabled={sending} onClick={onClose}>
@@ -144,7 +157,7 @@ function SendOfferBody({ target, onClose }: { target: OfferTarget; onClose: () =
           </Button>
           <Button disabled={sending || !data || !target.email} onClick={() => void send()}>
             {sending ? <Spinner className="size-4" /> : <Send aria-hidden />}
-            Send offer
+            {resend ? "Resend offer" : "Send offer"}
           </Button>
         </div>
       </DialogFooter>

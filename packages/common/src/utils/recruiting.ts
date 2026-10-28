@@ -17,6 +17,16 @@ export function formatOfferDeadline(date: Date | string): string {
   return `${day} at ${time} ET`;
 }
 
+/** "Oct 12" in Eastern time. */
+export function formatShortDate(date: Date | string): string {
+  const value = typeof date === "string" ? new Date(date) : date;
+  return value.toLocaleDateString("en-US", {
+    timeZone: EASTERN,
+    month: "short",
+    day: "numeric",
+  });
+}
+
 /** First word of a full name, for email greetings. */
 export function firstName(fullName: string): string {
   return fullName.trim().split(/\s+/)[0] ?? fullName;

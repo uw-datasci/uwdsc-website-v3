@@ -116,7 +116,12 @@ export function OffersPage() {
         </Button>
       </div>
 
-      <section id="ready" aria-labelledby="ready-h" className="flex flex-col gap-3">
+      <section
+        id="ready"
+        aria-labelledby="ready-h"
+        data-tour="offers-ready"
+        className="flex flex-col gap-3"
+      >
         <SectionHeader id="ready-h" title="Ready to offer">
           {readyRows.length} Wanted · {canGo} can go now
           {readyRows.length - canGo > 0 ? `, ${readyRows.length - canGo} waiting` : ""}
@@ -216,7 +221,7 @@ export function OffersPage() {
             Waiting on a reply · {data.offerResponseHours}h each
           </SectionHeader>
           {data.sent.length === 0 ? (
-            <EmptyState>No offers out right now.</EmptyState>
+            <EmptyState>No offers out. Send one from Ready to offer above.</EmptyState>
           ) : (
             <ul className="overflow-hidden rounded-lg border">
               {data.sent.map((row) => {
@@ -314,7 +319,7 @@ export function OffersPage() {
               {accepted} accepted, {data.responded.length - accepted} declined
             </SectionHeader>
             {data.responded.length === 0 ? (
-              <EmptyState>No replies yet.</EmptyState>
+              <EmptyState>No replies yet. Answers by email link show up here.</EmptyState>
             ) : (
               <ul className="overflow-hidden rounded-lg border">
                 {data.responded.map((row) => {

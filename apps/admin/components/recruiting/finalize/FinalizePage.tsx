@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import type { PlanPerson, PreviewMember } from "@uwdsc/common/recruiting";
 import type { FinalizeView } from "@uwdsc/common/types";
-import { Button, cn, Spinner } from "@uwdsc/ui";
+import { Button, cn, Spinner, Tooltip, TooltipContent, TooltipTrigger } from "@uwdsc/ui";
 import { FINALIZE_KEY, getFinalize } from "@/lib/api";
 import { PersonAvatar } from "../leadership/PersonAvatar";
 import { FinalizeDialog } from "./FinalizeDialog";
@@ -176,10 +176,24 @@ export function FinalizePage() {
             the team page.
           </div>
         </div>
-        <Button disabled={data.blockers.length > 0} onClick={() => setOpen(true)}>
-          <CircleCheckBig aria-hidden />
-          Finalize team
-        </Button>
+        {data.blockers.length > 0 ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span tabIndex={0} className="inline-flex">
+                <Button disabled>
+                  <CircleCheckBig aria-hidden />
+                  Finalize team
+                </Button>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{data.blockers[0]}</TooltipContent>
+          </Tooltip>
+        ) : (
+          <Button onClick={() => setOpen(true)}>
+            <CircleCheckBig aria-hidden />
+            Finalize team
+          </Button>
+        )}
       </div>
 
       <FinalizeDialog view={data} open={open} onOpenChange={setOpen} />

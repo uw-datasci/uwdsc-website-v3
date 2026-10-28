@@ -72,12 +72,12 @@ export function ScheduleCard({ view, onSaved }: ScheduleCardProps) {
     : [{ id: schedule.targetTermId, code: schedule.targetTermCode }, ...view.targetTerms];
 
   return (
-    <Card className="gap-0 py-0">
+    <Card className="gap-0 py-0" data-tour="schedule">
       <div className="border-b px-5 py-4">
         <h3 className="text-[15px] font-semibold">Schedule</h3>
         <p className="text-sm text-muted-foreground">
           Applications are collected in {formatTermCode(schedule.termCode)}. Times are{" "}
-          {EVENT_TIMEZONE_LABEL}.
+          {EVENT_TIMEZONE_LABEL}.{canEditSchedule ? "" : " Presidents set the dates."}
         </p>
       </div>
 

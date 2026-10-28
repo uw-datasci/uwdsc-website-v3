@@ -2,12 +2,17 @@
 
 import type { KeyboardEvent, ReactNode } from "react";
 import { useDraggable } from "@dnd-kit/core";
-import { GripVertical, MessageSquare } from "lucide-react";
+import { GripVertical, Lock, MessageSquare } from "lucide-react";
 import { STATUS_LABELS } from "@uwdsc/common/recruiting";
 import type { BoardCard as BoardCardData } from "@uwdsc/common/types";
-import { cn } from "@uwdsc/ui";
+import { cn, Tooltip, TooltipContent, TooltipTrigger } from "@uwdsc/ui";
 import { STATUS_TONES } from "@/constants/recruiting";
-import { formatActivityTime, ordinal, programLine } from "@/lib/utils/recruiting";
+import {
+  formatActivityTime,
+  ordinal,
+  programLine,
+  readOnlyReason,
+} from "@/lib/utils/recruiting";
 
 interface BoardCardProps {
   readonly card: BoardCardData;
@@ -43,7 +48,15 @@ export function BoardCard(props: BoardCardProps) {
               <GripVertical className="size-3.5" aria-hidden />
             </button>
           ) : (
-            <span aria-hidden className="w-3 flex-none" />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="-ml-1 flex h-6 w-4 flex-none items-center justify-center text-muted-foreground/60">
+                  <Lock className="size-3" aria-hidden />
+                  <span className="sr-only">{readOnlyReason(props.card)}</span>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>{readOnlyReason(props.card)}</TooltipContent>
+            </Tooltip>
           )
         }
       />

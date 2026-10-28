@@ -1,7 +1,7 @@
 "use client";
 
 import { MAX_POSITION_OPENINGS } from "@uwdsc/common/constants";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { Minus, Plus } from "lucide-react";
 import type { UpdatePositionInput } from "@uwdsc/common/schemas";
@@ -16,6 +16,9 @@ import {
   SelectTrigger,
   SelectValue,
   Switch,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
   cn,
 } from "@uwdsc/ui";
 import { addCyclePosition, updateCyclePosition } from "@/lib/api";
@@ -82,7 +85,7 @@ export function PositionsCard({ view, onSaved }: PositionsCardProps) {
 
       {view.positions.length === 0 && (
         <p className="px-5 py-6 text-sm text-muted-foreground">
-          No positions in this cycle yet.
+          No positions in this cycle yet. Presidents pick hiring positions in Leadership.
         </p>
       )}
 
@@ -95,12 +98,14 @@ export function PositionsCard({ view, onSaved }: PositionsCardProps) {
                 const busy = busyId === position.id;
                 return (
                   <li key={position.id} className="flex min-h-10 items-center gap-2.5">
-                    <Switch
-                      checked={position.isOpen}
-                      disabled={!editable || position.isVp || busy}
-                      aria-label={`${position.name} open`}
-                      onCheckedChange={(isOpen) => patch(position, { isOpen })}
-                    />
+                    <LockedReason reason={switchLock(editable, position.isVp)}>
+                      <Switch
+                        checked={position.isOpen}
+                        disabled={!editable || position.isVp || busy}
+                        aria-label={`${position.name} open`}
+                        onCheckedChange={(isOpen) => patch(position, { isOpen })}
+                      />
+                    </LockedReason>
                     <div className="min-w-0 flex-1">
                       <div
                         className={cn(
@@ -175,5 +180,32 @@ export function PositionsCard({ view, onSaved }: PositionsCardProps) {
         </div>
       )}
     </Card>
+  );
+}
+
+function switchLock(editable: boolean, isVp: boolean): string | null {
+  if (!editable) return "Presidents open and close positions.";
+  if (isVp) return "VP seats are opened from Leadership.";
+  return null;
+}
+
+/** Tooltip on a disabled control explaining why. */
+function LockedReason({
+  reason,
+  children,
+}: {
+  readonly reason: string | null;
+  readonly children: ReactNode;
+}) {
+  if (!reason) return children;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span tabIndex={0} className="inline-flex rounded-full">
+          {children}
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>{reason}</TooltipContent>
+    </Tooltip>
   );
 }

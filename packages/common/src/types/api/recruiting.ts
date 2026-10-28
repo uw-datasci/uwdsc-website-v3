@@ -386,3 +386,79 @@ export interface PublicOfferView {
   signedBy: string;
   acceptedElsewhere: string | null;
 }
+
+// ==========================================
+//  Overview
+// ==========================================
+
+export type OverviewStepState = "done" | "current" | "partial" | "next";
+
+export interface OverviewStep {
+  key: string;
+  label: string;
+  sub: string;
+  state: OverviewStepState;
+}
+
+export interface OverviewCount {
+  key: string;
+  label: string;
+  value: number;
+  sub: string;
+  status: ApplicationReviewStatus | null;
+}
+
+export type AttentionTone = "want" | "warn" | "error" | "offer" | "review" | "info";
+
+export type AttentionIcon =
+  "send" | "warn" | "expired" | "clock" | "inbox" | "note" | "question";
+
+export interface AttentionItem {
+  id: string;
+  tone: AttentionTone;
+  icon: AttentionIcon;
+  title: string;
+  desc: string;
+  action: string;
+  href: string;
+}
+
+export interface ChecklistItem {
+  id: string;
+  label: string;
+  done: boolean;
+  href: string;
+}
+
+export interface RoleSeat {
+  positionId: number;
+  name: string;
+  openings: number;
+  accepted: number;
+  offers: number;
+}
+
+export interface RoleGroup {
+  subteamName: string;
+  seats: RoleSeat[];
+}
+
+export interface OverviewRoles {
+  title: string;
+  filled: number;
+  total: number;
+  groups: RoleGroup[];
+  others: string | null;
+}
+
+/** Recruiting → Overview, computed from the cycle's current state. */
+export interface OverviewView {
+  stepNumber: number;
+  stepLabel: string;
+  summary: string;
+  steps: OverviewStep[];
+  counts: OverviewCount[];
+  attention: AttentionItem[];
+  checklist: ChecklistItem[];
+  roles: OverviewRoles;
+}

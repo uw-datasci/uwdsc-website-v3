@@ -19,18 +19,13 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@uwdsc/ui";
+import { readOnlyReason } from "@/lib/utils/recruiting";
 import { StatusBadge, StatusDot } from "../board/StatusBadge";
 
 interface PositionsStripProps {
   readonly cards: readonly BoardCard[];
   readonly appliedOn: string | null;
   readonly onMove: (card: BoardCard, to: SelectionStatus) => void;
-}
-
-function readOnlyReason(card: BoardCard): string {
-  if (!isReviewStatus(card.status)) return "Set by offers and the candidate's response.";
-  if (card.isVp) return "View only. Presidents review applicants for VP roles.";
-  return `View only. VP, ${card.subteamName ?? "this subteam"} and presidents can change this.`;
 }
 
 export function PositionsStrip({ cards, appliedOn, onMove }: PositionsStripProps) {

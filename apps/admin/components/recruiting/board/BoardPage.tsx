@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useState, type ReactNode } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -19,7 +19,7 @@ import {
   type SelectionStatus,
 } from "@uwdsc/common/recruiting";
 import type { BoardCard as BoardCardData } from "@uwdsc/common/types";
-import { Spinner } from "@uwdsc/ui";
+import { Button, Spinner } from "@uwdsc/ui";
 import { OFFER_COLUMN_LOCKS } from "@/constants/recruiting";
 import { useRecruiting } from "@/contexts/RecruitingContext";
 import { useBoard } from "@/hooks/useBoard";
@@ -118,6 +118,36 @@ export function BoardPage() {
         countText={countText}
       />
 
+      {board.cards.length === 0 && (
+        <EmptyNotice
+          title="No applications yet"
+          body="Cards show up here as people apply, one for each position they pick."
+        />
+      )}
+      {board.cards.length > 0 && visible.length === 0 && (
+        <EmptyNotice
+          title="No cards match these filters"
+          body="Try a wider search or clear the filters."
+        >
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              setFilters({
+                mine: false,
+                positionId: null,
+                subteamId: null,
+                source: "all",
+                hasNotes: false,
+                search: "",
+              })
+            }
+          >
+            Clear filters
+          </Button>
+        </EmptyNotice>
+      )}
+
       <DndContext
         sensors={sensors}
         onDragStart={onDragStart}
@@ -127,6 +157,7 @@ export function BoardPage() {
         <div
           role="region"
           aria-label="Candidate board"
+          data-tour="columns"
           className="flex gap-3 overflow-x-auto pb-3"
         >
           {SELECTION_STATUSES.map((status) => (
@@ -185,6 +216,26 @@ export function BoardPage() {
         onClose={() => setOpenId(null)}
         onMove={move}
       />
+    </div>
+  );
+}
+
+function EmptyNotice({
+  title,
+  body,
+  children,
+}: {
+  readonly title: string;
+  readonly body: string;
+  readonly children?: ReactNode;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-dashed px-4 py-3">
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium">{title}</p>
+        <p className="text-xs text-muted-foreground">{body}</p>
+      </div>
+      {children}
     </div>
   );
 }

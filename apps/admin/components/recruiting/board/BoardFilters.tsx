@@ -40,7 +40,7 @@ export function BoardFilters({
   return (
     <div className="flex flex-wrap items-center gap-2">
       {canFilterMine && (
-        <div className="flex items-center gap-2 pr-1">
+        <div className="flex items-center gap-2 pr-1" data-tour="my-positions">
           <Switch
             id="board-mine"
             checked={filters.mine}

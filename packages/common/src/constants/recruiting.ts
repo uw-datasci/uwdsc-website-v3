@@ -46,3 +46,7 @@ export const NOTE_KINDS = ["general", "interview"] as const satisfies readonly N
 export const MAX_NOTE_LENGTH = 5000;
 
 export const MAX_RESPONSE_NOTE_LENGTH = 500;
+
+export const RECRUITING_TOURS = ["pres-v1", "vp-v1"] as const;
+
+export type RecruitingTour = (typeof RECRUITING_TOURS)[number];

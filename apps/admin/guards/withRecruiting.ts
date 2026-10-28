@@ -41,6 +41,12 @@ export function withRecruiting<C extends WithAuthContext = WithAuthContext>(
   });
 }
 
+/** Overview: anyone with recruiting access once leadership is locked. */
+export const requireOverview: WithRecruitingOptions = {
+  require: (caps) =>
+    caps.tabs.overview.enabled ? null : (caps.tabs.overview.reason ?? "Recruiting is locked"),
+};
+
 /** Leadership routes: presidents, once a cycle exists and until it's finalized. */
 export const requireLeadership: WithRecruitingOptions = {
   require: (caps) =>

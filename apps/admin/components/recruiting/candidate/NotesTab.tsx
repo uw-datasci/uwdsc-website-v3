@@ -107,7 +107,9 @@ export function NotesTab({ applicationId, onChanged }: NotesTabProps) {
         <p className="text-sm text-destructive">Couldn&apos;t load notes: {error.message}</p>
       )}
       {data?.length === 0 && (
-        <p className="py-6 text-center text-sm text-muted-foreground">No notes yet.</p>
+        <p className="py-6 text-center text-sm text-muted-foreground">
+          No notes yet. Add the first one above.
+        </p>
       )}
 
       {data && data.length > 0 && (

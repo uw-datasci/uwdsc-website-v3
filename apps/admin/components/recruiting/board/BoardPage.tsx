@@ -14,6 +14,7 @@ import {
   DECISION_STATUSES,
   dragTargets,
   isReviewStatus,
+  REVIEW_STATUSES,
   SELECTION_STATUSES,
   wantedSubteams,
   type SelectionStatus,
@@ -28,6 +29,7 @@ import type { BoardFilters as Filters } from "@/types/recruiting";
 import { BoardCardBody } from "./BoardCard";
 import { BoardColumn, type DropState } from "./BoardColumn";
 import { BoardFilters } from "./BoardFilters";
+import { BoardList } from "./BoardList";
 import { CandidateDrawer } from "../candidate";
 
 /** Recruiting → Board: one card per candidate × position, columns by status. */
@@ -52,6 +54,7 @@ export function BoardPage() {
   );
   const [dragging, setDragging] = useState<BoardCardData | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
+  const [listStatus, setListStatus] = useState<SelectionStatus | null>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
@@ -80,6 +83,11 @@ export function BoardPage() {
   const visible = board.cards.filter((card) => matchesFilters(card, filters, viewerSubteamId));
   const candidates = new Set(visible.map((card) => card.applicationId)).size;
   const countText = `${visible.length} card${visible.length === 1 ? "" : "s"} · ${candidates} candidate${candidates === 1 ? "" : "s"}`;
+
+  const shownStatus =
+    listStatus ??
+    REVIEW_STATUSES.find((status) => visible.some((card) => card.status === status)) ??
+    "In Review";
 
   const openCard = board.cards.find((card) => card.id === openId) ?? null;
   const openColumn = openCard ? visible.filter((card) => card.status === openCard.status) : [];
@@ -148,64 +156,80 @@ export function BoardPage() {
         </EmptyNotice>
       )}
 
-      <DndContext
-        sensors={sensors}
-        onDragStart={onDragStart}
-        onDragEnd={onDragEnd}
-        onDragCancel={() => setDragging(null)}
-      >
-        <div
-          role="region"
-          aria-label="Candidate board"
-          data-tour="columns"
-          className="flex gap-3 overflow-x-auto pb-3"
-        >
-          {SELECTION_STATUSES.map((status) => (
-            <Fragment key={status}>
-              {status === DECISION_STATUSES[0] && (
-                <div
-                  role="separator"
-                  aria-orientation="vertical"
-                  aria-label="Offer stages"
-                  className="flex flex-none flex-col items-center gap-2 pt-2"
-                >
-                  <span className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase [writing-mode:vertical-rl]">
-                    Offers
-                  </span>
-                  <span className="w-px flex-1 bg-border" />
-                </div>
-              )}
-              <BoardColumn
-                status={status}
-                cards={visible.filter((card) => card.status === status)}
-                collapsed={collapsed.has(status)}
-                onToggle={() => toggle(status)}
-                lockReason={
-                  isReviewStatus(status) ? null : OFFER_COLUMN_LOCKS[isVp ? "vp" : "pres"]
-                }
-                dropState={dropState(status)}
-                othersFor={othersFor}
-                conflictFor={conflictFor}
-                showSubteam={!filters.mine}
-                selectedId={openId}
-                onOpen={(card) => setOpenId(card.id)}
-              />
-            </Fragment>
-          ))}
-        </div>
+      <div className="md:hidden">
+        <BoardList
+          cards={visible}
+          status={shownStatus}
+          onStatusChange={setListStatus}
+          othersFor={othersFor}
+          conflictFor={conflictFor}
+          showSubteam={!filters.mine}
+          selectedId={openId}
+          onOpen={(card) => setOpenId(card.id)}
+          onMove={move}
+        />
+      </div>
 
-        <DragOverlay dropAnimation={null}>
-          {dragging && (
-            <BoardCardBody
-              card={dragging}
-              others={othersFor(dragging)}
-              conflict={conflictFor(dragging)}
-              showSubteam={!filters.mine}
-              overlay
-            />
-          )}
-        </DragOverlay>
-      </DndContext>
+      <div className="hidden md:block">
+        <DndContext
+          sensors={sensors}
+          onDragStart={onDragStart}
+          onDragEnd={onDragEnd}
+          onDragCancel={() => setDragging(null)}
+        >
+          <div
+            role="region"
+            aria-label="Candidate board"
+            data-tour="columns"
+            className="flex gap-3 overflow-x-auto pb-3"
+          >
+            {SELECTION_STATUSES.map((status) => (
+              <Fragment key={status}>
+                {status === DECISION_STATUSES[0] && (
+                  <div
+                    role="separator"
+                    aria-orientation="vertical"
+                    aria-label="Offer stages"
+                    className="flex flex-none flex-col items-center gap-2 pt-2"
+                  >
+                    <span className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase [writing-mode:vertical-rl]">
+                      Offers
+                    </span>
+                    <span className="w-px flex-1 bg-border" />
+                  </div>
+                )}
+                <BoardColumn
+                  status={status}
+                  cards={visible.filter((card) => card.status === status)}
+                  collapsed={collapsed.has(status)}
+                  onToggle={() => toggle(status)}
+                  lockReason={
+                    isReviewStatus(status) ? null : OFFER_COLUMN_LOCKS[isVp ? "vp" : "pres"]
+                  }
+                  dropState={dropState(status)}
+                  othersFor={othersFor}
+                  conflictFor={conflictFor}
+                  showSubteam={!filters.mine}
+                  selectedId={openId}
+                  onOpen={(card) => setOpenId(card.id)}
+                />
+              </Fragment>
+            ))}
+          </div>
+
+          <DragOverlay dropAnimation={null}>
+            {dragging && (
+              <BoardCardBody
+                card={dragging}
+                others={othersFor(dragging)}
+                conflict={conflictFor(dragging)}
+                showSubteam={!filters.mine}
+                overlay
+              />
+            )}
+          </DragOverlay>
+        </DndContext>
+      </div>
 
       <CandidateDrawer
         card={openCard}

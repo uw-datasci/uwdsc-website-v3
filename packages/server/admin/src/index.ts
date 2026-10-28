@@ -16,4 +16,6 @@ export * from "./modules/recruiting/recruiting.service";
 export * from "./modules/recruiting/leadership.service";
 export * from "./modules/recruiting/setup.service";
 export * from "./modules/recruiting/board.service";
+export * from "./modules/recruiting/candidate.service";
+export * from "./modules/recruiting/notes.service";
 export type { DiscordInteraction } from "./types/discord";

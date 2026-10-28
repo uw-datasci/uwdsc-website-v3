@@ -10,15 +10,19 @@ import type {
   HiringPick,
   LeadershipDraft,
   MoveCardInput,
+  NoteInput,
   ReorderQuestionsInput,
   ScheduleInput,
   UpdatePositionInput,
   UpdateQuestionInput,
 } from "@uwdsc/common/schemas";
 import type {
+  ActivityItem,
   BoardView,
+  CandidateView,
   LeadershipPerson,
   LeadershipView,
+  NoteView,
   SetupView,
 } from "@uwdsc/common/types";
 import { createApiError } from "./error";
@@ -150,4 +154,47 @@ export async function getBoard(): Promise<BoardView> {
 /** Move a card. Fails with 409 if it changed since `input.from` was read. */
 export function moveCard(selectionId: string, input: MoveCardInput): Promise<void> {
   return sendJson(`/api/recruiting/selections/${selectionId}`, "PATCH", input);
+}
+
+/** The full application behind a card. */
+export async function getCandidate(applicationId: string): Promise<CandidateView> {
+  const response = await fetch(`/api/recruiting/candidates/${applicationId}`);
+  const data = await parseJsonResponse<CandidateView>(response);
+  if (!response.ok) throw createApiError(data, response.status);
+  return data;
+}
+
+/** A signed resume URL, made on demand. Null if the candidate has no resume. */
+export async function getCandidateResumeUrl(applicationId: string): Promise<string | null> {
+  const response = await fetch(`/api/recruiting/candidates/${applicationId}/resume`);
+  const data = await parseJsonResponse<{ url: string | null }>(response);
+  if (!response.ok) throw createApiError(data, response.status);
+  return data.url;
+}
+
+export async function getCandidateNotes(applicationId: string): Promise<NoteView[]> {
+  const response = await fetch(`/api/recruiting/candidates/${applicationId}/notes`);
+  const data = await parseJsonResponse<{ notes: NoteView[] }>(response);
+  if (!response.ok) throw createApiError(data, response.status);
+  return data.notes;
+}
+
+export function addCandidateNote(applicationId: string, input: NoteInput): Promise<void> {
+  return sendJson(`/api/recruiting/candidates/${applicationId}/notes`, "POST", input);
+}
+
+export function updateCandidateNote(noteId: string, input: NoteInput): Promise<void> {
+  return sendJson(`/api/recruiting/notes/${noteId}`, "PATCH", input);
+}
+
+export function deleteCandidateNote(noteId: string): Promise<void> {
+  return sendJson(`/api/recruiting/notes/${noteId}`, "DELETE", undefined);
+}
+
+/** Status moves, notes and the application, newest first. */
+export async function getCandidateActivity(applicationId: string): Promise<ActivityItem[]> {
+  const response = await fetch(`/api/recruiting/candidates/${applicationId}/activity`);
+  const data = await parseJsonResponse<{ activity: ActivityItem[] }>(response);
+  if (!response.ok) throw createApiError(data, response.status);
+  return data.activity;
 }

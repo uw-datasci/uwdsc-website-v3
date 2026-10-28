@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   transpilePackages: ["@uwdsc/ui"],
+  experimental: { turbopackFileSystemCacheForBuild: true },
 };
 
 export default nextConfig;

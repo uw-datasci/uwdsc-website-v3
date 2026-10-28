@@ -42,7 +42,7 @@ interface SendOfferDialogProps {
 export function SendOfferDialog({ target, onClose }: SendOfferDialogProps) {
   return (
     <Dialog open={target !== null} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="max-h-[calc(100svh-2rem)] overflow-y-auto sm:max-w-2xl">
         {target && <SendOfferBody key={target.selectionId} target={target} onClose={onClose} />}
       </DialogContent>
     </Dialog>

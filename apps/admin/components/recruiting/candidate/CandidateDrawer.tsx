@@ -116,7 +116,7 @@ export function CandidateDrawer({
       <SheetContent
         side="right"
         showCloseButton={false}
-        className="w-full gap-0 p-0 sm:max-w-xl"
+        className="h-svh w-full gap-0 p-0 sm:max-w-xl"
       >
         {card && (
           <>
@@ -125,7 +125,7 @@ export function CandidateDrawer({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="size-7"
+                  className="size-9 sm:size-7"
                   aria-label="Previous candidate"
                   disabled={!prev}
                   onClick={() => prev && onNavigate(prev)}
@@ -135,7 +135,7 @@ export function CandidateDrawer({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="size-7"
+                  className="size-9 sm:size-7"
                   aria-label="Next candidate"
                   disabled={!next}
                   onClick={() => next && onNavigate(next)}
@@ -151,7 +151,7 @@ export function CandidateDrawer({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="ml-auto size-7"
+                    className="ml-auto size-9 sm:size-7"
                     aria-label="Close"
                   >
                     <X className="size-4" aria-hidden />

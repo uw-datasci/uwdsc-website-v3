@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
-import { Button, cn } from "@uwdsc/ui";
+import { Button, cn, useIsMobile } from "@uwdsc/ui";
 import type { TourStep } from "./tours";
 
 interface TourOverlayProps {
@@ -26,8 +26,10 @@ const CARD_WIDTH = 340;
 const GAP = 12;
 const PAD = 6;
 
+/** The first matching element that's actually laid out (the mobile and desktop views share anchors). */
 function findTarget(target: string): HTMLElement | null {
-  return document.querySelector<HTMLElement>(`[data-tour="${target}"]`);
+  const matches = document.querySelectorAll<HTMLElement>(`[data-tour="${target}"]`);
+  return [...matches].find((element) => element.getClientRects().length > 0) ?? null;
 }
 
 /** Watches the step's `[data-tour]` element and reports its box (null if it never shows up). */
@@ -83,6 +85,7 @@ function cardPosition(box: Box | null): CSSProperties {
 /** Spotlight over the step's target plus the step card. */
 export function TourOverlay({ steps, index, onBack, onNext, onClose }: TourOverlayProps) {
   const step = steps[index];
+  const isMobile = useIsMobile();
   const box = useTargetBox(step?.target ?? "");
   const titleId = useId();
   const nextRef = useRef<HTMLButtonElement>(null);
@@ -144,7 +147,9 @@ export function TourOverlay({ steps, index, onBack, onNext, onClose }: TourOverl
         <h3 id={titleId} className="text-[15px] font-semibold">
           {step.title}
         </h3>
-        <p className="text-[13px] leading-relaxed text-muted-foreground">{step.body}</p>
+        <p className="text-[13px] leading-relaxed text-muted-foreground">
+          {isMobile && step.mobileBody ? step.mobileBody : step.body}
+        </p>
         <div className="mt-2 flex items-center gap-2">
           <div aria-hidden className="flex gap-1">
             {steps.map((item, i) => (

@@ -1,5 +1,3 @@
-export * from "./modules/application/application.service";
-export * from "./modules/application/returningExec.service";
 export * from "./modules/contact/contact.service";
 export * from "./modules/discord-bot/eventBot.service";
 export * from "./modules/email/email.service";
@@ -7,9 +5,8 @@ export * from "./modules/events/events.service";
 export * from "./modules/integration/discord.service";
 export * from "./modules/integration/github.service";
 export * from "./modules/integration/linkCheck.service";
-export * from "./modules/hiring/headshot.service";
-export * from "./modules/hiring/hiring.service";
-export * from "./modules/hiring/onboarding.service";
+export * from "./modules/onboarding/headshot.service";
+export * from "./modules/onboarding/onboarding.service";
 export * from "./modules/membership/profile.service";
 export * from "./modules/membership/membership.service";
 export * from "./modules/membership/submission.service";

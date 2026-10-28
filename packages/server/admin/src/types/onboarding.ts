@@ -1,15 +1,5 @@
 import type { UserRole } from "@uwdsc/common/types";
 
-export interface AcceptedOfferRow {
-  profile_id: string;
-  full_name: string;
-  position_name: string;
-  is_vp: boolean;
-  subteam_id: number | null;
-  subteam_name: string | null;
-  email: string | null;
-}
-
 export interface OnboardingAdminRowDb {
   profile_id: string;
   first_name: string | null;

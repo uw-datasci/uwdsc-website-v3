@@ -186,10 +186,10 @@ export function OffersPage() {
               {group.rows.map((row) => (
                 <li
                   key={row.selectionId}
-                  className="grid grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.2fr)_auto] items-center gap-3 border-b px-4 py-2.5 last:border-b-0"
+                  className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 border-b px-4 py-2.5 last:border-b-0 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.2fr)_auto] md:gap-3"
                 >
                   <Person name={row.name} detail={row.program} />
-                  <div className="flex min-w-0 items-center gap-1.5 text-[13px]">
+                  <div className="order-3 col-span-2 flex min-w-0 items-center gap-1.5 pl-[38px] text-[13px] md:order-none md:col-span-1 md:pl-0">
                     <span className="truncate">{row.positionName}</span>
                     <span className="text-[11px] text-muted-foreground">
                       {ordinal(row.priority)}
@@ -200,14 +200,16 @@ export function OffersPage() {
                       </span>
                     )}
                   </div>
-                  <span className="truncate text-xs text-muted-foreground">
+                  <span className="order-4 col-span-2 truncate pl-[38px] text-xs text-muted-foreground md:order-none md:col-span-1 md:pl-0">
                     {row.blocker ??
                       `Wanted by ${row.wantedBy ?? "a VP"}${row.wantedAt ? ` · ${formatActivityTime(row.wantedAt)}` : ""}`}
                   </span>
-                  <OfferButton row={row} onOffer={offer}>
-                    <Send aria-hidden />
-                    Send offer
-                  </OfferButton>
+                  <div className="order-2 md:order-none">
+                    <OfferButton row={row} onOffer={offer}>
+                      <Send aria-hidden />
+                      Send offer
+                    </OfferButton>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -235,7 +237,7 @@ export function OffersPage() {
                       name={row.name}
                       detail={`${row.positionName}${row.sentAt ? ` · sent ${formatActivityTime(row.sentAt)}` : ""}`}
                     />
-                    <div className="flex w-36 flex-none flex-col gap-1">
+                    <div className="flex w-28 flex-none flex-col gap-1 sm:w-36">
                       <div className="flex items-baseline justify-between gap-2 text-xs">
                         <span
                           className={cn(

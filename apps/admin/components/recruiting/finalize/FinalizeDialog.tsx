@@ -98,7 +98,7 @@ export function FinalizeDialog({ view, open, onOpenChange }: FinalizeDialogProps
 
   return (
     <Dialog open={open} onOpenChange={(next) => !submitting && onOpenChange(next)}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="max-h-[calc(100svh-2rem)] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Finalize the {view.targetTermLabel} team?</DialogTitle>
           <DialogDescription>

@@ -6,6 +6,7 @@ export interface TourStep {
   target: string;
   title: string;
   body: string;
+  mobileBody?: string;
 }
 
 const VP_STEPS: TourStep[] = [
@@ -43,6 +44,8 @@ const VP_STEPS: TourStep[] = [
     target: "columns",
     title: "Move candidates by dragging",
     body: "Drag a card from In Review to Interviewing, then to Wanted or Not Wanted. Columns you can't drop into dim, and Undo shows for 6 seconds. Click a card to read the application and leave notes.",
+    mobileBody:
+      "Pick a status above to see its cards. Tap a card to read it and leave notes, and use the button beside it to move it. Undo shows for 6 seconds.",
   },
   {
     id: "help",
@@ -88,6 +91,8 @@ const PRES_STEPS: TourStep[] = [
     target: "columns",
     title: "You can move any card",
     body: "VPs move their own subteam's candidates. You can move anyone, including applicants for public VP seats.",
+    mobileBody:
+      "VPs move their own subteam's candidates. You can move anyone, including applicants for public VP seats, with the button beside each card.",
   },
   {
     id: "offers",

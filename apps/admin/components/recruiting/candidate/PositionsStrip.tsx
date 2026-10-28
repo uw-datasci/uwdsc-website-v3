@@ -47,7 +47,7 @@ export function PositionsStrip({ cards, appliedOn, onMove }: PositionsStripProps
         {cards.map((card) => {
           const editable = card.canMove && isReviewStatus(card.status);
           return (
-            <li key={card.id} className="flex items-center gap-2.5">
+            <li key={card.id} className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5">
               <span className="w-6 flex-none text-xs text-muted-foreground tabular-nums">
                 #{card.priority}
               </span>
@@ -64,7 +64,7 @@ export function PositionsStrip({ cards, appliedOn, onMove }: PositionsStripProps
                 >
                   <SelectTrigger
                     size="sm"
-                    className="w-40"
+                    className="w-36 sm:w-40"
                     aria-label={`Status for ${card.positionName}: ${STATUS_LABELS[card.status]}`}
                   >
                     <SelectValue />
@@ -81,12 +81,17 @@ export function PositionsStrip({ cards, appliedOn, onMove }: PositionsStripProps
               ) : (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <span tabIndex={0} className="flex w-40 justify-end">
+                    <span tabIndex={0} className="flex w-36 justify-end sm:w-40">
                       <StatusBadge status={card.status} />
                     </span>
                   </TooltipTrigger>
                   <TooltipContent>{readOnlyReason(card)}</TooltipContent>
                 </Tooltip>
+              )}
+              {!editable && (
+                <p className="w-full pl-8.5 text-xs text-muted-foreground md:hidden">
+                  {readOnlyReason(card)}
+                </p>
               )}
             </li>
           );

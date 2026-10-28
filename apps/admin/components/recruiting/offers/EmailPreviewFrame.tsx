@@ -20,7 +20,7 @@ export function EmailPreviewFrame({
           <span className="truncate text-xs text-muted-foreground">Subject: {subject}</span>
         )}
       </div>
-      <div className="relative h-80 overflow-hidden rounded-lg border bg-muted/40">
+      <div className="relative h-64 overflow-hidden sm:h-80 rounded-lg border bg-muted/40">
         {html && (
           <iframe
             title="Email preview"

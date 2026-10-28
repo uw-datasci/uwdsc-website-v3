@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CircleHelp, Lock } from "lucide-react";
@@ -61,6 +61,14 @@ function ShellBody({ children }: { readonly children: ReactNode }) {
   const pathname = usePathname();
   const { capabilities, isLoading, error } = useRecruiting();
   const cycle = capabilities?.cycle ?? null;
+  const activeTab = activeTabFor(pathname);
+  const tabsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    tabsRef.current
+      ?.querySelector(`[data-tour="tab-${activeTab}"]`)
+      ?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [activeTab]);
 
   return (
     <div className="flex flex-1 flex-col gap-6">
@@ -75,38 +83,43 @@ function ShellBody({ children }: { readonly children: ReactNode }) {
       </div>
 
       {capabilities && (
-        <Tabs value={activeTabFor(pathname)}>
-          <TabsList variant="line" aria-label="Recruiting sections">
-            {RECRUITING_TABS.map(({ key, label, href }) => {
-              const access = capabilities.tabs[key];
-              if (!access.visible) return null;
+        <div
+          ref={tabsRef}
+          className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:px-0"
+        >
+          <Tabs value={activeTab}>
+            <TabsList variant="line" aria-label="Recruiting sections">
+              {RECRUITING_TABS.map(({ key, label, href }) => {
+                const access = capabilities.tabs[key];
+                if (!access.visible) return null;
 
-              if (access.enabled) {
-                return (
-                  <TabsTrigger key={key} value={key} asChild>
-                    <Link href={href} data-tour={`tab-${key}`}>
-                      {label}
-                    </Link>
-                  </TabsTrigger>
-                );
-              }
-
-              return (
-                <Tooltip key={key}>
-                  <TooltipTrigger asChild>
-                    <span tabIndex={0} className="inline-flex">
-                      <TabsTrigger value={key} disabled>
-                        <Lock className="size-3.5" aria-hidden />
+                if (access.enabled) {
+                  return (
+                    <TabsTrigger key={key} value={key} asChild>
+                      <Link href={href} data-tour={`tab-${key}`}>
                         {label}
-                      </TabsTrigger>
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent>{access.reason}</TooltipContent>
-                </Tooltip>
-              );
-            })}
-          </TabsList>
-        </Tabs>
+                      </Link>
+                    </TabsTrigger>
+                  );
+                }
+
+                return (
+                  <Tooltip key={key}>
+                    <TooltipTrigger asChild>
+                      <span tabIndex={0} className="inline-flex">
+                        <TabsTrigger value={key} disabled>
+                          <Lock className="size-3.5" aria-hidden />
+                          {label}
+                        </TabsTrigger>
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>{access.reason}</TooltipContent>
+                  </Tooltip>
+                );
+              })}
+            </TabsList>
+          </Tabs>
+        </div>
       )}
 
       {isLoading && (

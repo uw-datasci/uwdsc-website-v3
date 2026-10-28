@@ -34,7 +34,7 @@ export function RejectionDialog({
 }) {
   return (
     <Dialog open={target !== null} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="max-h-[calc(100svh-2rem)] overflow-y-auto sm:max-w-2xl">
         {target && (
           <RejectionBody key={target.applicationId} target={target} onClose={onClose} />
         )}

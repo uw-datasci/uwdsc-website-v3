@@ -75,7 +75,7 @@ export function QuestionDialog({
 
   return (
     <Dialog open={open} onOpenChange={(next) => !isSubmitting && onOpenChange(next)}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="max-h-[calc(100svh-2rem)] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{question ? "Edit question" : "Add question"}</DialogTitle>
           <DialogDescription>

@@ -365,3 +365,19 @@ export interface FinalizeResult {
   closedOffers: number;
   welcomeSent: boolean;
 }
+
+export type PublicOfferState = "open" | "accepted" | "declined" | "expired" | "closed";
+
+/** What the public offer page shows for one token. */
+export interface PublicOfferView {
+  state: PublicOfferState;
+  firstName: string;
+  positionName: string;
+  subteamName: string | null;
+  termLabel: string;
+  expiresAt: string;
+  respondedAt: string | null;
+  personalLine: string | null;
+  signedBy: string;
+  acceptedElsewhere: string | null;
+}

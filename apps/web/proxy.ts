@@ -32,6 +32,9 @@ export async function proxy(request: NextRequest) {
     // 3. complete profile route
     case pathname === WEB_COMPLETE_PROFILE_PATH:
       return await withAnon(request, response, isComplete, user?.id);
+    // 4. Offer links work signed out and with an incomplete profile
+    case pathname.startsWith("/offer/"):
+      return response;
     case user && !isComplete:
       return completeProfileResponse;
   }

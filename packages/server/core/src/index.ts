@@ -11,6 +11,7 @@ export * from "./modules/file/membershipProof.service";
 export * from "./modules/team/team.service";
 export * from "./modules/offers/offerResponse.service";
 export * from "./modules/offers/offerToken";
+export * from "./modules/rateLimit/rateLimit.service";
 export {
   applyCardMove,
   type CardMove,

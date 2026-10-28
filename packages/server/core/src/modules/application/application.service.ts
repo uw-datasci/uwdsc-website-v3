@@ -8,6 +8,7 @@ import {
   QuestionRow,
   Term,
 } from "@uwdsc/common/types";
+import { MAX_POSITION_CHOICES } from "@uwdsc/common/constants";
 import { isDateWindowOpen } from "@uwdsc/common/utils";
 import { ApplicationRepository } from "./application.repository";
 
@@ -209,10 +210,22 @@ class ApplicationService {
     positionRows: { id: string }[]
   ): void {
     const openIds = new Set(positionRows.map((p) => String(p.id)));
+    const priorities = new Set<number>();
     for (const selection of selections) {
       if (selection.position_id && !openIds.has(String(selection.position_id))) {
         throw new ApiError("One of the selected positions is no longer open", 400);
       }
+      const { priority } = selection;
+      if (!Number.isInteger(priority) || priority < 1 || priority > MAX_POSITION_CHOICES) {
+        throw new ApiError(
+          `Each position needs a choice number from 1 to ${MAX_POSITION_CHOICES}`,
+          400
+        );
+      }
+      if (priorities.has(priority)) {
+        throw new ApiError("Two positions have the same choice number", 400);
+      }
+      priorities.add(priority);
     }
   }
 

@@ -131,7 +131,7 @@ export class AuthRepository extends BaseRepository {
           SET password_reset_count = password_reset_count + 1,
               updated_at = now()
           WHERE profile_id = ${userId}
-            AND term_id = (SELECT id FROM public.terms WHERE is_active = true LIMIT 1)
+            AND term_id = public.active_term_id()
         `;
       } catch (incrementError) {
         console.error("Failed to increment password reset counters:", incrementError);

@@ -38,7 +38,7 @@ export interface Application {
   github_url: string | null;
   portfolio_url: string | null;
   status: ApplicationStatus;
-  submitted_at: string;
+  submitted_at: string | null;
   applicant_role: UserRole | null;
 }
 

@@ -45,9 +45,7 @@ export class RecruitingRepository extends BaseRepository {
     const rows = await this.sql<ActiveTermRow[]>`
       SELECT id, code, start_date
       FROM public.terms
-      WHERE is_active = true
-      ORDER BY created_at DESC
-      LIMIT 1
+      WHERE id = public.active_term_id()
     `;
     return rows[0] ?? null;
   }
@@ -68,7 +66,7 @@ export class RecruitingRepository extends BaseRepository {
       FROM hiring.cycles c
       JOIN public.terms t ON t.id = c.term_id
       JOIN public.terms tt ON tt.id = c.target_term_id
-      WHERE t.is_active = true
+      WHERE t.id = public.active_term_id()
       LIMIT 1
     `;
     const row = rows[0];

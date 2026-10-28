@@ -130,20 +130,16 @@ export class OnboardingRepository extends BaseRepository {
       SELECT
         id,
         code,
-        is_active,
+        COALESCE(id = public.active_term_id(), false) AS is_active,
         application_release_date,
         application_soft_deadline,
         application_hard_deadline,
         start_date,
         end_date,
         onboarding_due_date,
-        returning_exec_release_date,
-        returning_exec_deadline,
         created_at
       FROM public.terms
-      WHERE is_active = true
-      ORDER BY created_at DESC
-      LIMIT 1
+      WHERE id = public.active_term_id()
     `;
     return result[0] ?? null;
   }

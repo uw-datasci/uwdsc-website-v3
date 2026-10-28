@@ -68,7 +68,8 @@ export type TransitionAction =
   | "correction"
   | "offer_expiry"
   | "sibling_accepted"
-  | "offer_closed";
+  | "offer_closed"
+  | "withdraw_offer";
 
 export interface RecruitingActor {
   role: RecruitingActorRole;
@@ -153,6 +154,11 @@ const ACTION_RULES: Record<TransitionAction, ActionRule> = {
     roles: ["pres", "system"],
     moves: [["Offer Sent", "Declined Offer"]],
     roleReason: "Only presidents can close offers.",
+  },
+  withdraw_offer: {
+    roles: ["pres"],
+    moves: [["Offer Sent", "Declined Offer"]],
+    roleReason: "Only presidents can withdraw offers.",
   },
 };
 

@@ -11,10 +11,13 @@ import {
   type RecruitingCycleSummary,
   type SelectionStatus,
 } from "@uwdsc/common/recruiting";
+import { createOfferToken, offerResponseService, offerUrl, type CardMove } from "@uwdsc/core";
 import type {
   OfferResponseInput,
   RejectionBatchInput,
+  ResendOfferInput,
   SendOfferInput,
+  WithdrawOfferInput,
 } from "@uwdsc/common/schemas";
 import type {
   EmailPreview,
@@ -28,12 +31,7 @@ import { ApiError } from "@uwdsc/common/types";
 import { firstName, formatOfferDeadline, formatTermCode, joinNames } from "@uwdsc/common/utils";
 import { EMAIL_BATCH_LIMIT, emailService } from "../email/email.service";
 import type { RecruitingEmail } from "../../types/email";
-import {
-  OffersRepository,
-  type CardMove,
-  type OfferCardRow,
-  type VpHire,
-} from "./offers.repository";
+import { OffersRepository, type OfferCardRow } from "./offers.repository";
 
 type Capabilities = Pick<RecruitingCapabilities, "can" | "viewer" | "cycle">;
 
@@ -48,6 +46,8 @@ interface Context {
 }
 
 const HOUR_MS = 60 * 60 * 1000;
+/** Previews link to a placeholder; real tokens are only made on send. */
+const PREVIEW_TOKEN = "preview";
 
 function toDecision(row: OfferCardRow): DecisionCard {
   return {
@@ -79,6 +79,10 @@ function toOfferRow(row: OfferCardRow): OfferRow {
     sentAt: row.sent_at,
     expiresAt: row.expires_at,
     respondedAt: row.responded_at,
+    respondedVia: row.responded_via,
+    responseNote: row.response_note,
+    personalLine: row.personal_line,
+    withdrawn: row.withdrawn_at !== null && row.responded_at === null,
   };
 }
 
@@ -173,7 +177,14 @@ class OffersService {
     const ctx = await this.load(caps);
     const row = this.offerable(ctx, input.selectionId, caps);
     const expiresAt = new Date(Date.now() + ctx.cycle.offerResponseHours * HOUR_MS);
-    return this.toPreview(await this.offerEmail(ctx, row, input.personalLine, expiresAt));
+    const email = await this.offerEmail(
+      ctx,
+      row,
+      input.personalLine,
+      expiresAt,
+      offerUrl(PREVIEW_TOKEN)
+    );
+    return this.toPreview(email);
   }
 
   async sendOffer(caps: Capabilities, actorId: string, input: SendOfferInput): Promise<void> {
@@ -181,15 +192,95 @@ class OffersService {
     const row = this.offerable(ctx, input.selectionId, caps);
     const sentAt = new Date();
     const expiresAt = new Date(sentAt.getTime() + ctx.cycle.offerResponseHours * HOUR_MS);
-    const email = await this.offerEmail(ctx, row, input.personalLine, expiresAt);
+    const personalLine = input.personalLine?.trim() || null;
+    const { token, hash } = createOfferToken();
+    const email = await this.offerEmail(ctx, row, personalLine, expiresAt, offerUrl(token));
 
     await this.repository.sendOffer({
       selectionId: row.selection_id,
       actorId,
       sentAt,
       expiresAt,
+      tokenHash: hash,
+      personalLine,
       send: () => emailService.sendRecruitingEmail(email),
     });
+  }
+
+  async previewResend(
+    caps: Capabilities,
+    selectionId: string,
+    input: ResendOfferInput
+  ): Promise<EmailPreview> {
+    const ctx = await this.load(caps);
+    const row = this.resendable(ctx, selectionId);
+    const expiresAt = new Date(Date.now() + ctx.cycle.offerResponseHours * HOUR_MS);
+    const email = await this.offerEmail(
+      ctx,
+      row,
+      input.personalLine,
+      expiresAt,
+      offerUrl(PREVIEW_TOKEN)
+    );
+    return this.toPreview(email);
+  }
+
+  /** Send a new link with a fresh deadline; the old link stops working. */
+  async resendOffer(
+    caps: Capabilities,
+    actorId: string,
+    selectionId: string,
+    input: ResendOfferInput
+  ): Promise<void> {
+    const ctx = await this.load(caps);
+    const row = this.resendable(ctx, selectionId);
+    const sentAt = new Date();
+    const expiresAt = new Date(sentAt.getTime() + ctx.cycle.offerResponseHours * HOUR_MS);
+    const personalLine = input.personalLine?.trim() || null;
+    const { token, hash } = createOfferToken();
+    const email = await this.offerEmail(ctx, row, personalLine, expiresAt, offerUrl(token));
+
+    await this.repository.resendOffer({
+      selectionId,
+      actorId,
+      sentAt,
+      expiresAt,
+      tokenHash: hash,
+      personalLine,
+      send: () => emailService.sendRecruitingEmail(email),
+    });
+  }
+
+  async previewWithdraw(caps: Capabilities, selectionId: string): Promise<EmailPreview> {
+    const ctx = await this.load(caps);
+    const row = this.withdrawable(ctx, selectionId, caps);
+    return this.toPreview(await this.withdrawnEmail(ctx, row));
+  }
+
+  /** Close the offer and move the card to Declined Offer, optionally telling them. */
+  async withdrawOffer(
+    caps: Capabilities,
+    actorId: string,
+    selectionId: string,
+    input: WithdrawOfferInput
+  ): Promise<void> {
+    const ctx = await this.load(caps);
+    const row = this.withdrawable(ctx, selectionId, caps);
+    if (input.notify && !row.email) {
+      throw new ApiError("This candidate has no email on file", 400);
+    }
+    const email = input.notify ? await this.withdrawnEmail(ctx, row) : null;
+
+    await this.repository.withdrawOffer(
+      {
+        selectionId,
+        from: row.status,
+        to: "Declined Offer",
+        actorId,
+        reason: "withdrawn",
+      },
+      email ? () => emailService.sendRecruitingEmail(email) : null
+    );
   }
 
   /** Mark accepted / declined by hand, or correct a recorded reply. */
@@ -199,63 +290,15 @@ class OffersService {
     selectionId: string,
     input: OfferResponseInput
   ): Promise<void> {
-    const ctx = await this.load(caps);
-    const row = this.findRow(ctx, selectionId);
-    const accepted = input.response === "accepted";
-    const to: SelectionStatus = accepted ? "Accepted Offer" : "Declined Offer";
-    const action = row.status === "Offer Sent" ? "manual_response" : "correction";
-    assertMove(row.status, to, { role: caps.viewer.role, action });
-
-    const siblings = ctx.rows.filter(
-      (other) =>
-        other.application_id === row.application_id && other.selection_id !== row.selection_id
-    );
-    const siblingMoves: CardMove[] = [];
-
-    if (accepted) {
-      if (siblings.some((other) => other.status === "Accepted Offer")) {
-        throw new ApiError("They've already accepted another offer", 409);
-      }
-      for (const other of siblings.filter((card) => card.status === "Offer Sent")) {
-        assertMove(other.status, "Declined Offer", {
-          role: "system",
-          action: "sibling_accepted",
-        });
-        siblingMoves.push({
-          selectionId: other.selection_id,
-          from: other.status,
-          to: "Declined Offer",
-          actorId: null,
-          reason: "accepted another offer",
-        });
-      }
-    }
-
-    let vpHire: VpHire | null = null;
-    if (accepted && row.is_vp) {
-      if (row.subteam_id === null) throw new ApiError("This VP seat has no subteam", 400);
-      if (await this.repository.isOnRoster(ctx.cycle.id, row.profile_id)) {
-        throw new ApiError("They're already on next term's leadership", 409);
-      }
-      vpHire = {
-        cycleId: ctx.cycle.id,
-        profileId: row.profile_id,
-        positionId: row.position_id,
-        subteamId: row.subteam_id,
-        actorId,
-      };
-    }
-    const vpUndo =
-      !accepted && row.is_vp && row.status === "Accepted Offer"
-        ? { cycleId: ctx.cycle.id, profileId: row.profile_id, positionId: row.position_id }
-        : null;
-
-    await this.repository.recordResponse({
-      move: { selectionId, from: row.status, to, actorId, reason: null },
+    const cycle = caps.cycle;
+    if (!cycle) throw new ApiError("There's no hiring cycle yet", 404);
+    await offerResponseService.apply({
+      selectionId,
       response: input.response,
-      siblings: siblingMoves,
-      vpHire,
-      vpUndo,
+      via: "manual",
+      actorId,
+      actorRole: caps.viewer.role,
+      cycleId: cycle.id,
     });
   }
 
@@ -389,6 +432,24 @@ class OffersService {
     return row;
   }
 
+  private resendable(ctx: Context, selectionId: string): OfferCardRow {
+    const row = this.findRow(ctx, selectionId);
+    if (row.status !== "Offer Sent") {
+      throw new ApiError("Only open offers can be re-sent", 409);
+    }
+    if (!row.email) throw new ApiError("This candidate has no email on file", 400);
+    return row;
+  }
+
+  private withdrawable(ctx: Context, selectionId: string, caps: Capabilities): OfferCardRow {
+    const row = this.findRow(ctx, selectionId);
+    assertMove(row.status, "Declined Offer", {
+      role: caps.viewer.role,
+      action: "withdraw_offer",
+    });
+    return row;
+  }
+
   private rejectable(
     ctx: Context,
     applicationId: string
@@ -417,8 +478,9 @@ class OffersService {
   private async offerEmail(
     ctx: Context,
     row: OfferCardRow,
-    personalLine: string | undefined,
-    expiresAt: Date
+    personalLine: string | null | undefined,
+    expiresAt: Date,
+    respondUrl: string
   ): Promise<RecruitingEmail> {
     const { subject, html } = await emailService.renderOfferEmail({
       firstName: firstName(row.full_name),
@@ -428,6 +490,18 @@ class OffersService {
       deadline: formatOfferDeadline(expiresAt),
       personalLine: personalLine?.trim() || undefined,
       signedBy: ctx.signedBy,
+      respondUrl,
+    });
+    return { to: row.email ?? "", replyTo: ctx.replyTo, subject, html };
+  }
+
+  private async withdrawnEmail(ctx: Context, row: OfferCardRow): Promise<RecruitingEmail> {
+    const { subject, html } = await emailService.renderOfferClosedEmail({
+      firstName: firstName(row.full_name),
+      positionName: row.position_name,
+      termLabel: ctx.termLabel,
+      signedBy: ctx.signedBy,
+      reason: "withdrawn",
     });
     return { to: row.email ?? "", replyTo: ctx.replyTo, subject, html };
   }

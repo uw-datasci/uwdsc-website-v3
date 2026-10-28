@@ -50,6 +50,8 @@ export function DecisionFooter({ cards }: { readonly cards: readonly BoardCard[]
     email: card.email,
     positionName: card.positionName,
     subteamName: card.subteamName,
+    mode: "send",
+    personalLine: null,
   });
 
   return (

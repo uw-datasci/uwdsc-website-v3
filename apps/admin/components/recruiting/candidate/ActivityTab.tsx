@@ -14,22 +14,34 @@ function listNames(names: readonly string[]): string {
   return `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`;
 }
 
+function moveVerb(item: Extract<ActivityItem, { type: "move" }>): string {
+  if (item.undo) return "undid a move on";
+  if (item.from === item.to) return "re-sent the offer for";
+  return "moved";
+}
+
 function ActivityRow({ item }: { readonly item: ActivityItem }) {
   if (item.type === "move") {
+    const resent = item.from === item.to;
     return (
       <>
         <StatusDot status={item.to} className="mt-1.5" />
         <div className="flex flex-col gap-1">
           <p className="text-[13px]">
-            <span className="font-medium">{item.actorName ?? "Someone"}</span>{" "}
-            {item.undo ? "undid a move on" : "moved"} {item.positionName}
+            <span className="font-medium">{item.actorName ?? "Someone"}</span> {moveVerb(item)}{" "}
+            {item.positionName}
           </p>
-          <div className="flex items-center gap-1.5">
-            {item.from && <StatusBadge status={item.from} />}
-            {item.from && <span className="text-xs text-muted-foreground">→</span>}
-            <StatusBadge status={item.to} />
-          </div>
-          <p className="text-xs text-muted-foreground">{formatActivityTime(item.at)}</p>
+          {!resent && (
+            <div className="flex items-center gap-1.5">
+              {item.from && <StatusBadge status={item.from} />}
+              {item.from && <span className="text-xs text-muted-foreground">→</span>}
+              <StatusBadge status={item.to} />
+            </div>
+          )}
+          <p className="text-xs text-muted-foreground">
+            {formatActivityTime(item.at)}
+            {item.reason && !resent ? ` · ${item.reason}` : ""}
+          </p>
         </div>
       </>
     );

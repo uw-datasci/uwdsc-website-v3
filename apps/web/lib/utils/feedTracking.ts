@@ -1,18 +1,6 @@
 import { createHash } from "node:crypto";
 import { eventService } from "@uwdsc/core";
-
-/**
- * Extract the client IP from request headers.
- * Prefers x-forwarded-for (first value behind a proxy), falls back to x-real-ip.
- */
-function getClientIp(request: Request): string | null {
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) {
-    const first = forwarded.split(",")[0]?.trim();
-    if (first) return first;
-  }
-  return request.headers.get("x-real-ip");
-}
+import { getClientIp } from "./request";
 
 /**
  * Hash an IP address with a secret salt so we never store raw IPs (PII).
@@ -32,7 +20,7 @@ function hashIp(ip: string): string | null {
  */
 export async function recordFeedSubscriber(request: Request): Promise<void> {
   try {
-    const ip = getClientIp(request);
+    const ip = getClientIp(request.headers);
     if (!ip) return;
 
     const ipHash = hashIp(ip);

@@ -263,6 +263,7 @@ export type ActivityItem =
       from: ApplicationReviewStatus | null;
       to: ApplicationReviewStatus;
       undo: boolean;
+      reason: string | null;
       at: string;
     }
   | { type: "note"; id: string; actorName: string | null; kind: NoteKind; at: string }
@@ -291,6 +292,10 @@ export interface OfferRow {
   sentAt: string | null;
   expiresAt: string | null;
   respondedAt: string | null;
+  respondedVia: "link" | "manual" | "expiry" | null;
+  responseNote: string | null;
+  personalLine: string | null;
+  withdrawn: boolean;
 }
 
 export interface ReadyRow extends OfferRow {
@@ -364,4 +369,20 @@ export interface FinalizeResult {
   alumni: number;
   closedOffers: number;
   welcomeSent: boolean;
+}
+
+export type PublicOfferState = "open" | "accepted" | "declined" | "expired" | "closed";
+
+/** What the public offer page shows for one token. */
+export interface PublicOfferView {
+  state: PublicOfferState;
+  firstName: string;
+  positionName: string;
+  subteamName: string | null;
+  termLabel: string;
+  expiresAt: string;
+  respondedAt: string | null;
+  personalLine: string | null;
+  signedBy: string;
+  acceptedElsewhere: string | null;
 }

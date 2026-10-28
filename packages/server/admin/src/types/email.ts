@@ -36,6 +36,7 @@ export interface OfferEmailProps {
   deadline: string;
   personalLine?: string;
   signedBy: string;
+  respondUrl: string;
 }
 
 export interface RejectionEmailProps {
@@ -51,9 +52,12 @@ export interface RecruitingEmail {
   html: string;
 }
 
+export type OfferClosedReason = "finalized" | "withdrawn";
+
 export interface OfferClosedEmailProps {
   firstName: string;
   positionName: string;
   termLabel: string;
   signedBy: string;
+  reason: OfferClosedReason;
 }

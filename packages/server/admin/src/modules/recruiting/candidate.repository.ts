@@ -61,7 +61,7 @@ export class CandidateRepository extends BaseRepository {
         a.github_url,
         a.portfolio_url,
         a.applicant_role,
-        a.submitted_at
+        COALESCE(a.submitted_at, a.created_at) AS submitted_at
       FROM hiring.applications a
       LEFT JOIN auth.users au ON au.id = a.profile_id
       WHERE a.id = ${applicationId}

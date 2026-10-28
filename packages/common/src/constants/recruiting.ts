@@ -27,6 +27,8 @@ export const SLOT_DECISION_LABELS: Record<SlotDecision, string> = {
 /** Most people one cycle position can hire. */
 export const MAX_POSITION_OPENINGS = 50;
 
+export const MAX_POSITION_CHOICES = 3;
+
 /** Longest offer response window (2 weeks). */
 export const MAX_OFFER_RESPONSE_HOURS = 336;
 

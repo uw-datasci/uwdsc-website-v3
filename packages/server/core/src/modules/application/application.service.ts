@@ -136,6 +136,7 @@ class ApplicationService {
   async updateApplication(
     applicationId: string,
     userId: string,
+    termId: string,
     data: ApplicationUpdatePayload
   ): Promise<ApplicationWithDetails | null> {
     try {
@@ -148,6 +149,7 @@ class ApplicationService {
       const app = await this.repository.updateApplication(
         applicationId,
         userId,
+        termId,
         applicationData
       );
       if (!app) return null;
@@ -161,6 +163,7 @@ class ApplicationService {
 
       return this.repository.getApplicationByUserAndTerm(userId, app.term_id);
     } catch (error) {
+      if (error instanceof ApiError) throw error;
       throw new ApiError(`Failed to update application: ${(error as Error).message}`, 500);
     }
   }

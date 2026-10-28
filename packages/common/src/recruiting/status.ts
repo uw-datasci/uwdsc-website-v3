@@ -67,7 +67,8 @@ export type TransitionAction =
   | "manual_response"
   | "correction"
   | "offer_expiry"
-  | "sibling_accepted";
+  | "sibling_accepted"
+  | "offer_closed";
 
 export interface RecruitingActor {
   role: RecruitingActorRole;
@@ -148,9 +149,18 @@ const ACTION_RULES: Record<TransitionAction, ActionRule> = {
     moves: [["Offer Sent", "Declined Offer"]],
     roleReason: "Other offers are declined automatically when one is accepted.",
   },
+  offer_closed: {
+    roles: ["pres", "system"],
+    moves: [["Offer Sent", "Declined Offer"]],
+    roleReason: "Only presidents can close offers.",
+  },
 };
 
-function moveReason(from: SelectionStatus, to: SelectionStatus, action: TransitionAction): string {
+function moveReason(
+  from: SelectionStatus,
+  to: SelectionStatus,
+  action: TransitionAction
+): string {
   if (from === to) return `Already ${STATUS_LABELS[to]}.`;
   if (!isReviewStatus(from) && isReviewStatus(to)) {
     return `Candidates at ${STATUS_LABELS[from]} can't go back to review.`;

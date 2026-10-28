@@ -153,6 +153,14 @@ export const offerResponseSchema = z.object({
 });
 export type OfferResponseInput = z.infer<typeof offerResponseSchema>;
 
+export const resendOfferSchema = z.object({
+  personalLine: z.string().trim().max(300, "Keep it under 300 characters").optional(),
+});
+export type ResendOfferInput = z.infer<typeof resendOfferSchema>;
+
+export const withdrawOfferSchema = z.object({ notify: z.boolean() });
+export type WithdrawOfferInput = z.infer<typeof withdrawOfferSchema>;
+
 /** A candidate's answer from the offer link. */
 export const offerLinkResponseSchema = z.object({
   response: z.enum(["accepted", "declined"]),

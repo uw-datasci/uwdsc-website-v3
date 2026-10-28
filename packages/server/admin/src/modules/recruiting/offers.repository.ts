@@ -22,6 +22,10 @@ export interface OfferCardRow {
   sent_at: string | null;
   expires_at: string | null;
   responded_at: string | null;
+  responded_via: "link" | "manual" | "expiry" | null;
+  response_note: string | null;
+  personal_line: string | null;
+  withdrawn_at: string | null;
   wanted_by: string | null;
   wanted_at: string | null;
 }
@@ -32,7 +36,7 @@ export interface PresidentRow {
 }
 
 export class OffersRepository extends BaseRepository {
-  /** Every submitted card in the cycle, with its live offer and who marked it Wanted. */
+  /** Every submitted card in the cycle, with its latest offer and who marked it Wanted. */
   async getCards(cycleId: string, termId: string): Promise<OfferCardRow[]> {
     return this.sql<OfferCardRow[]>`
       SELECT
@@ -55,6 +59,10 @@ export class OffersRepository extends BaseRepository {
         o.sent_at,
         o.expires_at,
         o.responded_at,
+        o.responded_via,
+        o.response_note,
+        o.personal_line,
+        o.withdrawn_at,
         w.wanted_by,
         w.created_at AS wanted_at
       FROM hiring.application_position_selections s
@@ -64,10 +72,12 @@ export class OffersRepository extends BaseRepository {
       LEFT JOIN org.subteams st ON st.id = ep.subteam_id
       LEFT JOIN auth.users au ON au.id = a.profile_id
       LEFT JOIN LATERAL (
-        SELECT o.sent_at, o.expires_at, o.responded_at
+        SELECT
+          o.sent_at, o.expires_at, o.responded_at, o.responded_via, o.response_note,
+          o.personal_line, o.withdrawn_at
         FROM hiring.offers o
-        WHERE o.selection_id = s.id AND o.withdrawn_at IS NULL
-        ORDER BY o.sent_at DESC
+        WHERE o.selection_id = s.id
+        ORDER BY o.withdrawn_at IS NULL DESC, o.sent_at DESC
         LIMIT 1
       ) o ON true
       LEFT JOIN LATERAL (
@@ -135,6 +145,65 @@ export class OffersRepository extends BaseRepository {
       if (!offer) throw new ApiError("Couldn't create the offer", 500);
       const emailId = await input.send();
       await sql`UPDATE hiring.offers SET email_id = ${emailId} WHERE id = ${offer.id}`;
+    });
+  }
+
+  /**
+   * Replace the open offer with a new one (new link, new deadline) and send it before
+   * committing. The card stays at Offer Sent.
+   */
+  async resendOffer(input: {
+    selectionId: string;
+    actorId: string;
+    sentAt: Date;
+    expiresAt: Date;
+    tokenHash: string;
+    personalLine: string | null;
+    send: () => Promise<string | null>;
+  }): Promise<void> {
+    await this.sql.begin(async (sql) => {
+      const card = await sql`
+        SELECT id FROM hiring.application_position_selections
+        WHERE id = ${input.selectionId} AND status = 'Offer Sent'
+        FOR UPDATE
+      `;
+      const closed = await sql`
+        UPDATE hiring.offers
+        SET withdrawn_at = now()
+        WHERE selection_id = ${input.selectionId} AND withdrawn_at IS NULL AND response IS NULL
+        RETURNING id
+      `;
+      if (card.length === 0 || closed.length === 0) {
+        throw new ApiError("This offer changed since you loaded it", 409);
+      }
+      const [offer] = await sql<{ id: string }[]>`
+        INSERT INTO hiring.offers
+          (selection_id, sent_at, expires_at, sent_by, token_hash, personal_line)
+        VALUES
+          (${input.selectionId}, ${input.sentAt}, ${input.expiresAt}, ${input.actorId},
+           ${input.tokenHash}, ${input.personalLine})
+        RETURNING id
+      `;
+      if (!offer) throw new ApiError("Couldn't create the offer", 500);
+      await sql`
+        INSERT INTO hiring.selection_events (selection_id, actor_id, from_status, to_status, reason)
+        VALUES (${input.selectionId}, ${input.actorId}, 'Offer Sent', 'Offer Sent', 'offer re-sent')
+      `;
+      const emailId = await input.send();
+      await sql`UPDATE hiring.offers SET email_id = ${emailId} WHERE id = ${offer.id}`;
+    });
+  }
+
+  /** Close the open offer and decline the card. `send` (optional email) runs before commit. */
+  async withdrawOffer(move: CardMove, send: (() => Promise<unknown>) | null): Promise<void> {
+    await this.sql.begin(async (sql) => {
+      await applyCardMove(sql, move);
+      await sql`
+        UPDATE hiring.offers
+        SET withdrawn_at = now()
+        WHERE selection_id = ${move.selectionId} AND withdrawn_at IS NULL
+      `;
+      if (send) await send();
     });
   }
 

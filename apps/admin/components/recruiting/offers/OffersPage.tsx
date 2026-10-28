@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import useSWR from "swr";
-import { Check, MailX, MoreHorizontal, Send, X } from "lucide-react";
+import { Check, MailX, MoreHorizontal, RotateCw, Send, Undo2, X } from "lucide-react";
 import type { OfferRow, OffersView, ReadyRow } from "@uwdsc/common/types";
 import {
   Button,
@@ -10,6 +10,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
   Spinner,
   Tooltip,
@@ -22,6 +23,7 @@ import { formatActivityTime, offerTimeLeft, ordinal } from "@/lib/utils/recruiti
 import { PersonAvatar } from "../leadership/PersonAvatar";
 import { RejectBatchDialog } from "./RejectBatchDialog";
 import { SendOfferDialog, type OfferTarget } from "./SendOfferDialog";
+import { WithdrawOfferDialog, type WithdrawTarget } from "./WithdrawOfferDialog";
 
 /** Recruiting → Offers: who's ready, who's been sent one, who responded. */
 export function OffersPage() {
@@ -32,6 +34,7 @@ export function OffersPage() {
   const respond = useOfferResponse();
   const [now] = useState(() => Date.now());
   const [offerTarget, setOfferTarget] = useState<OfferTarget | null>(null);
+  const [withdrawTarget, setWithdrawTarget] = useState<WithdrawTarget | null>(null);
   const [batchOpen, setBatchOpen] = useState(false);
 
   if (isLoading) {
@@ -55,14 +58,28 @@ export function OffersPage() {
   ];
   const canGo = readyRows.filter((row) => !row.blocker).length;
   const accepted = data.responded.filter((row) => row.status === "Accepted Offer").length;
-  const offer = (row: OfferRow) =>
+  const offerTo = (row: OfferRow, mode: OfferTarget["mode"]) =>
     setOfferTarget({
       selectionId: row.selectionId,
       name: row.name,
       email: row.email,
       positionName: row.positionName,
       subteamName: row.subteamName,
+      mode,
+      personalLine: mode === "resend" ? row.personalLine : null,
     });
+  const offer = (row: OfferRow) => offerTo(row, "send");
+  const actions: OfferActions = {
+    respond,
+    resend: (row) => offerTo(row, "resend"),
+    withdraw: (row) =>
+      setWithdrawTarget({
+        selectionId: row.selectionId,
+        name: row.name,
+        email: row.email,
+        positionName: row.positionName,
+      }),
+  };
 
   const nav = [
     { href: "#ready", label: "Ready to offer", count: readyRows.length },
@@ -248,7 +265,7 @@ export function OffersPage() {
                         />
                       </div>
                     </div>
-                    <ResponseMenu row={row} onRespond={respond} />
+                    <ResponseMenu row={row} actions={actions} />
                   </li>
                 );
               })}
@@ -274,13 +291,9 @@ export function OffersPage() {
                       name={row.name}
                       detail={`${row.positionName}${row.expiresAt ? ` · expired ${formatActivityTime(row.expiresAt)}` : ""}`}
                     />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => void respond(row, "accepted")}
-                    >
-                      <Check aria-hidden />
-                      Mark accepted
+                    <Button size="sm" onClick={() => actions.resend(row)}>
+                      <RotateCw aria-hidden />
+                      Resend for {data.offerResponseHours}h
                     </Button>
                     <Button
                       variant="outline"
@@ -289,6 +302,7 @@ export function OffersPage() {
                     >
                       Release seat
                     </Button>
+                    <ResponseMenu row={row} actions={actions} expired />
                   </li>
                 ))}
               </ul>
@@ -304,32 +318,26 @@ export function OffersPage() {
             ) : (
               <ul className="overflow-hidden rounded-lg border">
                 {data.responded.map((row) => {
-                  const isAccepted = row.status === "Accepted Offer";
+                  const detail = [
+                    row.positionName,
+                    row.respondedAt && formatActivityTime(row.respondedAt),
+                    row.respondedVia === "link" && "via link",
+                    row.responseNote,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ");
                   return (
                     <li
                       key={row.selectionId}
                       className="flex items-center gap-3 border-b px-4 py-2.5 last:border-b-0"
                     >
-                      <Person
-                        name={row.name}
-                        detail={`${row.positionName}${row.respondedAt ? ` · ${formatActivityTime(row.respondedAt)}` : ""}`}
-                      />
-                      <span
-                        className={cn(
-                          "inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium",
-                          isAccepted
-                            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-200"
-                            : "bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-200"
-                        )}
-                      >
-                        {isAccepted ? (
-                          <Check className="size-3" aria-hidden />
-                        ) : (
-                          <X className="size-3" aria-hidden />
-                        )}
-                        {isAccepted ? "Accepted" : "Declined"}
-                      </span>
-                      <ResponseMenu row={row} onRespond={respond} />
+                      <Person name={row.name} detail={detail} />
+                      <ResponseBadge row={row} />
+                      {row.withdrawn ? (
+                        <span aria-hidden className="size-7" />
+                      ) : (
+                        <ResponseMenu row={row} actions={actions} />
+                      )}
                     </li>
                   );
                 })}
@@ -340,6 +348,7 @@ export function OffersPage() {
       </div>
 
       <SendOfferDialog target={offerTarget} onClose={() => setOfferTarget(null)} />
+      <WithdrawOfferDialog target={withdrawTarget} onClose={() => setWithdrawTarget(null)} />
       <RejectBatchDialog open={batchOpen} onOpenChange={setBatchOpen} />
     </div>
   );
@@ -416,12 +425,48 @@ function OfferButton({
   );
 }
 
+interface OfferActions {
+  respond: (row: OfferRow, response: "accepted" | "declined") => Promise<void>;
+  resend: (row: OfferRow) => void;
+  withdraw: (row: OfferRow) => void;
+}
+
+function ResponseBadge({ row }: { readonly row: OfferRow }) {
+  const isAccepted = row.status === "Accepted Offer";
+  let tone = "bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-200";
+  if (isAccepted)
+    tone = "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-200";
+  else if (row.withdrawn) tone = "bg-muted text-muted-foreground";
+
+  let label = "Declined";
+  if (isAccepted) label = "Accepted";
+  else if (row.withdrawn) label = "Withdrawn";
+
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium",
+        tone
+      )}
+    >
+      {isAccepted ? (
+        <Check className="size-3" aria-hidden />
+      ) : (
+        <X className="size-3" aria-hidden />
+      )}
+      {label}
+    </span>
+  );
+}
+
 function ResponseMenu({
   row,
-  onRespond,
+  actions,
+  expired,
 }: {
   readonly row: OfferRow;
-  readonly onRespond: (row: OfferRow, response: "accepted" | "declined") => Promise<void>;
+  readonly actions: OfferActions;
+  readonly expired?: boolean;
 }) {
   const sent = row.status === "Offer Sent";
   return (
@@ -438,16 +483,31 @@ function ResponseMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {row.status !== "Accepted Offer" && (
-          <DropdownMenuItem onSelect={() => void onRespond(row, "accepted")}>
+          <DropdownMenuItem onSelect={() => void actions.respond(row, "accepted")}>
             <Check aria-hidden />
             {sent ? "Mark accepted" : "Change to accepted"}
           </DropdownMenuItem>
         )}
-        {row.status !== "Declined Offer" && (
-          <DropdownMenuItem onSelect={() => void onRespond(row, "declined")}>
+        {row.status !== "Declined Offer" && !expired && (
+          <DropdownMenuItem onSelect={() => void actions.respond(row, "declined")}>
             <X aria-hidden />
             {sent ? "Mark declined" : "Change to declined"}
           </DropdownMenuItem>
+        )}
+        {sent && (
+          <>
+            <DropdownMenuSeparator />
+            {!expired && (
+              <DropdownMenuItem onSelect={() => actions.resend(row)}>
+                <RotateCw aria-hidden />
+                Resend with new deadline
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem variant="destructive" onSelect={() => actions.withdraw(row)}>
+              <Undo2 aria-hidden />
+              Withdraw offer
+            </DropdownMenuItem>
+          </>
         )}
       </DropdownMenuContent>
     </DropdownMenu>

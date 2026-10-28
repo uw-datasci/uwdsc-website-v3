@@ -166,6 +166,7 @@ class FinalizeService {
             positionName: offer.positionName,
             termLabel,
             signedBy,
+            reason: "finalized",
           });
           return { to: offer.email ?? "", replyTo, subject, html };
         })

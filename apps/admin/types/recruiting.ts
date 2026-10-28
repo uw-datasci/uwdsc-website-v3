@@ -13,3 +13,14 @@ export interface SlotEditor {
   addPresident: () => void;
   addVp: (positionId: number) => void;
 }
+
+export type BoardSource = "all" | "new" | "returning";
+
+export interface BoardFilters {
+  mine: boolean;
+  positionId: number | null;
+  subteamId: number | null;
+  source: BoardSource;
+  hasNotes: boolean;
+  search: string;
+}

@@ -36,6 +36,7 @@ export interface OfferEmailProps {
   deadline: string;
   personalLine?: string;
   signedBy: string;
+  respondUrl: string;
 }
 
 export interface RejectionEmailProps {

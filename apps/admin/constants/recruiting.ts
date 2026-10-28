@@ -84,6 +84,18 @@ export const OFFER_COLUMN_LOCKS: Record<"pres" | "vp", string> = {
   vp: "Only presidents move candidates in offer stages",
 };
 
+export const COLUMN_EMPTY: Record<SelectionStatus, string> = {
+  "In Review": "New applications land here.",
+  Interviewing: "Drag candidates here once you've set up an interview.",
+  Wanted: "Drag candidates here once you've decided you want them.",
+  "Not Wanted":
+    "Candidates you pass on land here. No one is emailed until presidents send rejections.",
+  "Offer Sent": "Presidents send offers from the Offers tab.",
+  "Accepted Offer": "Accepted offers land here.",
+  "Declined Offer": "Declined and withdrawn offers land here.",
+  "Rejection Sent": "Candidates who were sent a rejection land here.",
+};
+
 export const SOURCE_FILTERS: { value: BoardSource; label: string }[] = [
   { value: "all", label: "All sources" },
   { value: "new", label: "New" },

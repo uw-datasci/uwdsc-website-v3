@@ -86,7 +86,7 @@ export function QuestionsCard({ view, onSaved }: QuestionsCardProps) {
   const archivedCount = view.questions.filter((q) => q.archivedAt).length;
 
   return (
-    <Card className="gap-0 py-0">
+    <Card className="gap-0 py-0" data-tour="questions">
       <div className="flex flex-wrap items-center gap-3 border-b px-5 py-4">
         <div className="flex-1">
           <h3 className="text-[15px] font-semibold">Questions</h3>

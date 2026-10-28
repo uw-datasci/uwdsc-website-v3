@@ -6,6 +6,7 @@ import {
   MAX_RESPONSE_NOTE_LENGTH,
   NOTE_KINDS,
   QUESTION_TYPES,
+  RECRUITING_TOURS,
   SLOT_DECISIONS,
   SLOT_KINDS,
 } from "../constants/recruiting";
@@ -194,3 +195,6 @@ export const finalizeSchema = z.object({
     .refine((url) => url.startsWith("https://"), "Use an https:// link"),
 });
 export type FinalizeRequest = z.infer<typeof finalizeSchema>;
+
+export const tourSchema = z.object({ tour: z.enum(RECRUITING_TOURS) });
+export type TourInput = z.infer<typeof tourSchema>;

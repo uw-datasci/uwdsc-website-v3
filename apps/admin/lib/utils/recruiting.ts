@@ -1,3 +1,4 @@
+import { isReviewStatus } from "@uwdsc/common/recruiting";
 import type { BoardCard, LeadershipPerson, RoleState } from "@uwdsc/common/types";
 import type { BoardFilters } from "@/types/recruiting";
 
@@ -35,6 +36,15 @@ export function personNow(
 }
 
 /** Choice rank label: 1 → "1st". Applicants pick at most three. */
+/** Why a card's status can't be changed by this viewer. */
+export function readOnlyReason(
+  card: Pick<BoardCard, "status" | "isVp" | "subteamName">
+): string {
+  if (!isReviewStatus(card.status)) return "Set by offers and the candidate's response.";
+  if (card.isVp) return "View only. Presidents review applicants for VP roles.";
+  return `View only. VP, ${card.subteamName ?? "this subteam"} and presidents can change this.`;
+}
+
 export function ordinal(n: number): string {
   return ["1st", "2nd", "3rd"][n - 1] ?? `${n}th`;
 }

@@ -18,6 +18,7 @@ import type {
   ResendOfferInput,
   ScheduleInput,
   SendOfferInput,
+  TourInput,
   UpdatePositionInput,
   UpdateQuestionInput,
   WithdrawOfferInput,
@@ -33,6 +34,7 @@ import type {
   LeadershipView,
   NoteView,
   OffersView,
+  OverviewView,
   RejectionBatchPreview,
   SetupView,
 } from "@uwdsc/common/types";
@@ -266,6 +268,29 @@ export function previewRejectionBatch(
 
 export function sendRejectionBatch(input: RejectionBatchInput): Promise<{ sent: number }> {
   return sendJson("/api/recruiting/rejections/batch", "POST", input);
+}
+
+export const OVERVIEW_KEY = "/api/recruiting/overview";
+
+export async function getOverview(): Promise<OverviewView> {
+  const response = await fetch(OVERVIEW_KEY);
+  const data = await parseJsonResponse<OverviewView>(response);
+  if (!response.ok) throw createApiError(data, response.status);
+  return data;
+}
+
+export const TOUR_KEY = "/api/recruiting/tour";
+
+/** Tours the viewer has finished or skipped. */
+export async function getCompletedTours(): Promise<string[]> {
+  const response = await fetch(TOUR_KEY);
+  const data = await parseJsonResponse<{ completed: string[] }>(response);
+  if (!response.ok) throw createApiError(data, response.status);
+  return data.completed;
+}
+
+export function completeTour(input: TourInput): Promise<void> {
+  return sendJson(TOUR_KEY, "POST", input);
 }
 
 export const FINALIZE_KEY = "/api/recruiting/finalize";

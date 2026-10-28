@@ -5,6 +5,7 @@ import { ChevronsLeftRight, ChevronsRightLeft, Lock } from "lucide-react";
 import { isReviewStatus, STATUS_LABELS, type SelectionStatus } from "@uwdsc/common/recruiting";
 import type { BoardCard as BoardCardData } from "@uwdsc/common/types";
 import { Button, cn, Tooltip, TooltipContent, TooltipTrigger } from "@uwdsc/ui";
+import { COLUMN_EMPTY } from "@/constants/recruiting";
 import { BoardCard } from "./BoardCard";
 import { StatusDot } from "./StatusBadge";
 
@@ -128,7 +129,9 @@ export function BoardColumn({
           />
         ))}
         {cards.length === 0 && (
-          <p className="px-2 py-6 text-center text-xs text-muted-foreground">No one here</p>
+          <p className="px-2 py-6 text-center text-xs text-muted-foreground">
+            {COLUMN_EMPTY[status]}
+          </p>
         )}
       </div>
     </section>

@@ -20,7 +20,7 @@ import { NavUser } from "./nav/NavUser";
 import { NavMain } from "./nav/NavMain";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { getAllExecPositions, getActiveTerm } from "@/lib/api/onboarding";
+import { getActiveTerm } from "@/lib/api/onboarding";
 import { getAdminNavigation } from "@/constants/navigation";
 import { isDateWindowOpen } from "@uwdsc/common/utils";
 
@@ -30,24 +30,8 @@ interface AdminLayoutProps {
 
 export function AdminLayout({ children }: AdminLayoutProps) {
   const router = useRouter();
-  const { user, isLoading, mutate } = useAuth();
-  const [positionName, setPositionName] = useState<string | null>(null);
+  const { user, mutate } = useAuth();
   const [logisticsWindows, setLogisticsWindows] = useState({ onboardingOpen: false });
-
-  useEffect(() => {
-    const loadPosition = async () => {
-      if (!user?.position_id || isLoading) return;
-      try {
-        const positions = await getAllExecPositions();
-        const pos = positions.find((p) => p.id === user.position_id);
-        setPositionName(pos?.name ?? null);
-      } catch {
-        setPositionName(null);
-      }
-    };
-
-    loadPosition();
-  }, [user?.position_id, isLoading]);
 
   useEffect(() => {
     let cancelled = false;
@@ -67,7 +51,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     };
   }, []);
 
-  const navigationList = getAdminNavigation(positionName, user?.role, logisticsWindows);
+  const navigationList = getAdminNavigation(user?.role, logisticsWindows);
 
   const handleSignOut = async () => {
     try {

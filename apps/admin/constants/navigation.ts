@@ -16,7 +16,6 @@ import {
 import { isAdmin, isPres } from "@uwdsc/common/constants";
 
 export const getAdminNavigation = (
-  _position: string | null,
   role?: string | null,
   logisticsWindows?: {
     onboardingOpen: boolean;

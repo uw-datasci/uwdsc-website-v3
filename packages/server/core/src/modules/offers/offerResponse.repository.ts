@@ -2,6 +2,7 @@ import { BaseRepository } from "@uwdsc/db/base.repository";
 import type { TransactionSql } from "@uwdsc/db/connection";
 import { restoreRoleAfterRemoval } from "@uwdsc/common/recruiting";
 import { ApiError, type ApplicationReviewStatus, type UserRole } from "@uwdsc/common/types";
+import type { OfferLinkRow } from "./offerLink";
 
 export type OfferResponse = "accepted" | "declined";
 export type OfferResponseVia = "link" | "manual";
@@ -85,6 +86,58 @@ export class OfferResponseRepository extends BaseRepository {
       WHERE cycle_id = ${cycleId} AND profile_id = ${profileId}
     `;
     return rows.length > 0;
+  }
+
+  async getByTokenHash(tokenHash: string): Promise<OfferLinkRow | null> {
+    const [row] = await this.sql<OfferLinkRow[]>`
+      SELECT
+        o.id AS offer_id,
+        o.selection_id,
+        a.profile_id,
+        apa.cycle_id,
+        s.status,
+        a.full_name,
+        ep.name AS position_name,
+        st.name AS subteam_name,
+        t.code AS target_term_code,
+        o.expires_at,
+        o.responded_at,
+        o.response,
+        o.withdrawn_at,
+        o.personal_line,
+        (
+          SELECT ep2.name
+          FROM hiring.application_position_selections s2
+          JOIN hiring.application_positions_available apa2 ON apa2.id = s2.position_id
+          JOIN org.exec_positions ep2 ON ep2.id = apa2.position_id
+          WHERE s2.application_id = s.application_id
+            AND s2.id <> s.id
+            AND s2.status = 'Accepted Offer'
+          LIMIT 1
+        ) AS accepted_elsewhere
+      FROM hiring.offers o
+      JOIN hiring.application_position_selections s ON s.id = o.selection_id
+      JOIN hiring.applications a ON a.id = s.application_id
+      JOIN hiring.application_positions_available apa ON apa.id = s.position_id
+      JOIN org.exec_positions ep ON ep.id = apa.position_id
+      LEFT JOIN org.subteams st ON st.id = ep.subteam_id
+      JOIN hiring.cycles c ON c.id = apa.cycle_id
+      JOIN public.terms t ON t.id = c.target_term_id
+      WHERE o.token_hash = ${tokenHash}
+    `;
+    return row ?? null;
+  }
+
+  /** Next term's presidents, who sign the offer. */
+  async getPresidentNames(cycleId: string): Promise<string[]> {
+    const rows = await this.sql<{ name: string | null }[]>`
+      SELECT NULLIF(btrim(concat_ws(' ', p.first_name, p.last_name)), '') AS name
+      FROM hiring.cycle_leadership cl
+      JOIN public.profiles p ON p.id = cl.profile_id
+      WHERE cl.cycle_id = ${cycleId} AND cl.role = 'pres'
+      ORDER BY cl.confirmed_at, p.first_name
+    `;
+    return rows.map((row) => row.name).filter((name): name is string => !!name);
   }
 
   /**

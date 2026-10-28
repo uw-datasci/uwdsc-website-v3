@@ -3,6 +3,7 @@ import {
   MAX_NOTE_LENGTH,
   MAX_OFFER_RESPONSE_HOURS,
   MAX_POSITION_OPENINGS,
+  MAX_RESPONSE_NOTE_LENGTH,
   NOTE_KINDS,
   QUESTION_TYPES,
   SLOT_DECISIONS,
@@ -151,6 +152,17 @@ export const offerResponseSchema = z.object({
   response: z.enum(["accepted", "declined"]),
 });
 export type OfferResponseInput = z.infer<typeof offerResponseSchema>;
+
+/** A candidate's answer from the offer link. */
+export const offerLinkResponseSchema = z.object({
+  response: z.enum(["accepted", "declined"]),
+  note: z
+    .string()
+    .trim()
+    .max(MAX_RESPONSE_NOTE_LENGTH, `Keep it under ${MAX_RESPONSE_NOTE_LENGTH} characters`)
+    .optional(),
+});
+export type OfferLinkResponseInput = z.infer<typeof offerLinkResponseSchema>;
 
 export const rejectionSchema = z.object({ applicationId: z.uuid() });
 export type RejectionInput = z.infer<typeof rejectionSchema>;

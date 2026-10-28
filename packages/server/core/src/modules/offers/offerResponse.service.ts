@@ -4,7 +4,10 @@ import {
   type RecruitingActorRole,
   type SelectionStatus,
 } from "@uwdsc/common/recruiting";
-import { ApiError } from "@uwdsc/common/types";
+import type { OfferLinkResponseInput } from "@uwdsc/common/schemas";
+import { ApiError, type PublicOfferView } from "@uwdsc/common/types";
+import { firstName, formatTermCode, joinNames } from "@uwdsc/common/utils";
+import { offerLinkState, type OfferLinkRow } from "./offerLink";
 import {
   OfferResponseRepository,
   type CardMove,
@@ -12,6 +15,14 @@ import {
   type OfferResponseVia,
   type VpHire,
 } from "./offerResponse.repository";
+import { hashOfferToken } from "./offerToken";
+
+const CLOSED_REASONS: Record<Exclude<PublicOfferView["state"], "open">, string> = {
+  accepted: "You've already accepted this offer",
+  declined: "You've already answered this offer",
+  expired: "This offer has expired",
+  closed: "This offer is no longer open",
+};
 
 export interface ApplyResponseInput {
   selectionId: string;
@@ -104,6 +115,52 @@ class OfferResponseService {
       vpHire,
       vpUndo,
     });
+  }
+
+  /** The public offer page for a link, or null if the token doesn't match an offer. */
+  async getByToken(token: string): Promise<PublicOfferView | null> {
+    const row = await this.repository.getByTokenHash(hashOfferToken(token));
+    return row ? this.toView(row) : null;
+  }
+
+  /** The candidate accepts or declines from the link. */
+  async respondByToken(token: string, input: OfferLinkResponseInput): Promise<PublicOfferView> {
+    const hash = hashOfferToken(token);
+    const row = await this.repository.getByTokenHash(hash);
+    if (!row) throw new ApiError("This link isn't valid", 404);
+
+    const state = offerLinkState(row);
+    if (state !== "open") throw new ApiError(CLOSED_REASONS[state], 410);
+
+    await this.apply({
+      selectionId: row.selection_id,
+      response: input.response,
+      via: "link",
+      actorId: row.profile_id,
+      actorRole: "candidate",
+      note: input.response === "declined" ? input.note : null,
+      cycleId: row.cycle_id,
+    });
+
+    const updated = await this.repository.getByTokenHash(hash);
+    if (!updated) throw new ApiError("This link isn't valid", 404);
+    return this.toView(updated);
+  }
+
+  private async toView(row: OfferLinkRow): Promise<PublicOfferView> {
+    const presidents = await this.repository.getPresidentNames(row.cycle_id);
+    return {
+      state: offerLinkState(row),
+      firstName: firstName(row.full_name),
+      positionName: row.position_name,
+      subteamName: row.subteam_name,
+      termLabel: formatTermCode(row.target_term_code),
+      expiresAt: new Date(row.expires_at).toISOString(),
+      respondedAt: row.responded_at ? new Date(row.responded_at).toISOString() : null,
+      personalLine: row.personal_line,
+      signedBy: joinNames(presidents) || "The DSC presidents",
+      acceptedElsewhere: row.accepted_elsewhere,
+    };
   }
 }
 

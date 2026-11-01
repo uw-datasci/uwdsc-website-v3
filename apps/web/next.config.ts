@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactCompiler: true,
   transpilePackages: ["@uwdsc/ui"],
+  experimental: { turbopackFileSystemCacheForBuild: true },
   images: {
     remotePatterns: [
       {

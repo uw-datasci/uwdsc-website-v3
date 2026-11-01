@@ -1,7 +1,6 @@
 import { AuthRepository } from "./auth.repository";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
-import { ApiError, type QuestionScope, LoginData, RegisterData } from "@uwdsc/common/types";
-import { isAdmin, isPres, type RoleClaims } from "@uwdsc/common/constants";
+import { ApiError, LoginData, RegisterData } from "@uwdsc/common/types";
 
 const DUPLICATE_EMAIL_MESSAGE =
   "An account with this email already exists. Please sign in instead.";
@@ -291,45 +290,5 @@ export class AuthService {
     } catch (error) {
       throw new ApiError(`Failed to reset password: ${(error as Error).message}`, 500);
     }
-  }
-
-  /**
-   * Resolve VP / Presidents scope for application-question CRUD and role-preference review.
-   *
-   * Scope comes entirely from the caller's role claims (`user_roles.role` +
-   * `user_roles.subteam_id`, mirrored into Supabase `app_metadata` by the `on_role_upsert`
-   * trigger) — `org.exec_team` is display data and is deliberately not consulted here.
-   *
-   * Presidents are unscoped: every consumer short-circuits on `scope.isPresident` before
-   * consulting the arrays, so returning empty arrays for them is correct and avoids two
-   * pointless queries. A VP whose subteam is somehow null gets an empty scope rather than
-   * a wide one.
-   */
-  async getScopeForUser(claims: RoleClaims): Promise<QuestionScope> {
-    const scopeIsPresident = isPres(claims.role);
-    const isVp = isAdmin(claims.role) && !scopeIsPresident;
-
-    if (!isVp || claims.subteamId === null) {
-      return {
-        isPresident: scopeIsPresident,
-        vpSubteamNames: [],
-        vpSubteamIds: [],
-        vpPositionIds: [],
-        vpExecPositionIds: [],
-      };
-    }
-
-    const [vpPositionIds, vpExecPositionIds] = await Promise.all([
-      this.repository.getApplicationPositionIdsForSubteam(claims.subteamId),
-      this.repository.getExecPositionIdsForSubteam(claims.subteamId),
-    ]);
-
-    return {
-      isPresident: false,
-      vpSubteamNames: claims.subteamName ? [claims.subteamName] : [],
-      vpSubteamIds: [claims.subteamId],
-      vpPositionIds,
-      vpExecPositionIds,
-    };
   }
 }

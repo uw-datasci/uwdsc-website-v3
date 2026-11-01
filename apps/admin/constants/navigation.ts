@@ -2,7 +2,6 @@ import {
   Activity,
   Anvil,
   Calendar,
-  CircleHelp,
   ClipboardCheck,
   Code2,
   FileText,
@@ -11,36 +10,18 @@ import {
   Library,
   Mail,
   ReceiptText,
-  Settings,
-  UserCheck,
+  UserPlus,
   Users,
 } from "lucide-react";
 import { isAdmin, isPres } from "@uwdsc/common/constants";
 
 export const getAdminNavigation = (
-  _position: string | null,
   role?: string | null,
   logisticsWindows?: {
     onboardingOpen: boolean;
-    returningExecOpen: boolean;
   }
 ) => {
   const onboardingOpen = logisticsWindows?.onboardingOpen ?? false;
-  const returningExecOpen = logisticsWindows?.returningExecOpen ?? false;
-
-  const applicationSubItems = [
-    { name: "External Apps", href: "/applications", icon: FileText },
-    { name: "Questions", href: "/applications/questions", icon: CircleHelp },
-    ...(isPres(role)
-      ? [
-          { name: "Hiring", href: "/applications/hiring", icon: UserCheck },
-          { name: "Settings", href: "/applications/settings", icon: Settings },
-        ]
-      : []),
-    ...(isAdmin(role)
-      ? [{ name: "Returning Execs", href: "/applications/returning-execs", icon: UserCheck }]
-      : []),
-  ];
 
   return [
     {
@@ -52,12 +33,7 @@ export const getAdminNavigation = (
         { name: "Submissions", href: "/members/submissions", icon: ReceiptText },
       ],
     },
-    {
-      name: "Applications",
-      href: "/applications",
-      icon: FileText,
-      subItems: applicationSubItems,
-    },
+    ...(isAdmin(role) ? [{ name: "Recruiting", href: "/recruiting", icon: UserPlus }] : []),
     { name: "Events", href: "/events", icon: Calendar },
     { name: "Support", href: "/support", icon: LifeBuoy },
     ...(isAdmin(role) ? [{ name: "Campaigns", href: "/campaigns", icon: Mail }] : []),
@@ -77,9 +53,6 @@ export const getAdminNavigation = (
                 icon: ClipboardCheck,
               },
             ]
-          : []),
-        ...(returningExecOpen
-          ? [{ name: "Returning execs", href: "/logistics/returning", icon: UserCheck }]
           : []),
       ],
     },

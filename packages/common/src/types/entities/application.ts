@@ -2,17 +2,12 @@ import type {
   ApplicationInputType,
   ApplicationReviewStatus,
   ApplicationStatus,
+  UserRole,
 } from "../shared/enums";
 
 // ==========================================
 //  Row-level types (1:1 with DB tables)
 // ==========================================
-
-/** Mirrors application_positions_available table */
-export interface ApplicationPositionAvailable {
-  id: string;
-  position_id: string;
-}
 
 /** Mirrors questions table */
 export interface Question {
@@ -23,14 +18,8 @@ export interface Question {
   placeholder: string | null;
   help_text: string | null;
   created_at: string;
-}
-
-/** Mirrors position_questions bridge table. position_id is null for general questions. */
-export interface PositionQuestion {
-  id: string;
-  position_id: string | null;
-  question_id: string;
-  sort_order: number;
+  updated_at: string;
+  archived_at: string | null;
 }
 
 /** Mirrors applications table */
@@ -49,7 +38,8 @@ export interface Application {
   github_url: string | null;
   portfolio_url: string | null;
   status: ApplicationStatus;
-  submitted_at: string;
+  submitted_at: string | null;
+  applicant_role: UserRole | null;
 }
 
 /** Mirrors application_position_selections table. priority is 1-3. */
@@ -67,6 +57,7 @@ export interface Answer {
   application_id: string;
   question_id: string;
   answer_text: string;
+  question_text: string | null;
 }
 
 // ==========================================
@@ -74,7 +65,7 @@ export interface Answer {
 // ==========================================
 
 /** Question with sort_order from position_questions bridge */
-export interface QuestionWithSortOrder extends Question {
+export interface QuestionWithSortOrder extends Omit<Question, "updated_at" | "archived_at"> {
   sort_order: number;
   position_id: string | null;
 }
@@ -91,49 +82,4 @@ export interface PositionWithQuestions {
 export interface ApplicationWithDetails extends Application {
   position_selections: ApplicationPositionSelection[];
   answers: Answer[];
-}
-
-/** Position selection with position name (for admin review) */
-export interface PositionSelectionWithName extends ApplicationPositionSelection {
-  position_name: string;
-}
-
-/** Answer with question text (for admin review) */
-export interface AnswerWithQuestion extends Answer {
-  question_text: string;
-  /** Position names this question is scoped to; empty for general questions. */
-  position_names: string[];
-}
-
-/** Full application data for admin list/detail view */
-export interface ApplicationListItem extends Application {
-  position_selections: PositionSelectionWithName[];
-  answers: AnswerWithQuestion[];
-}
-
-/**
- * Every exec position (excluding Presidents) joined against
- * application_positions_available, for the President-only positions
- * management dashboard. `available_id` is null when the position is
- * not currently open for applications.
- */
-export interface ManagablePosition {
-  exec_position_id: number;
-  name: string;
-  is_vp: boolean;
-  subteam_name: string | null;
-  available_id: number | null;
-  is_available: boolean;
-}
-
-/**
- * Payload for updating the active term's application schedule from
- * `/applications/settings`. The soft deadline is display-only (countdown,
- * due-date pill); the hard deadline gates the apply page and every
- * application API.
- */
-export interface TermScheduleInput {
-  application_release_date: string;
-  application_soft_deadline: string;
-  application_hard_deadline: string;
 }

@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { AuthRepository } from "./auth.repository";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { ApiError, LoginData, RegisterData } from "@uwdsc/common/types";
@@ -148,7 +149,7 @@ export class AuthService {
    */
   async resendVerificationEmail(email: string, emailRedirectTo: string) {
     try {
-      const placeholderPassword = `Tmp${Math.random().toString(36).slice(2)}A1!`;
+      const placeholderPassword = `Tmp${randomBytes(24).toString("base64url")}A1!`;
       const { data, error } = await this.repository.signUp({
         email,
         password: placeholderPassword,

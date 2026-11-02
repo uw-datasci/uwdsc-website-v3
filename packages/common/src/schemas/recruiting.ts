@@ -1,0 +1,200 @@
+import { z } from "zod";
+import {
+  MAX_NOTE_LENGTH,
+  MAX_OFFER_RESPONSE_HOURS,
+  MAX_POSITION_OPENINGS,
+  MAX_RESPONSE_NOTE_LENGTH,
+  NOTE_KINDS,
+  QUESTION_TYPES,
+  RECRUITING_TOURS,
+  SLOT_DECISIONS,
+  SLOT_KINDS,
+} from "../constants/recruiting";
+import { SELECTION_STATUSES } from "../recruiting/status";
+
+/**
+ * Recruiting schemas, shared by the admin routes/forms and the `@uwdsc/admin` services
+ * (which also parse the stored leadership draft with them).
+ */
+
+// ==========================================
+//  Leadership
+// ==========================================
+
+export const leadershipSlotSchema = z.object({
+  id: z.string().min(1).max(64),
+  kind: z.enum(SLOT_KINDS),
+  positionId: z.number().int().positive(),
+  outgoingProfileId: z.uuid().nullable(),
+  decision: z.enum(SLOT_DECISIONS),
+  successorProfileId: z.uuid().nullable(),
+});
+export type LeadershipSlot = z.infer<typeof leadershipSlotSchema>;
+
+export const leadershipDraftSchema = z.object({
+  slots: z.array(leadershipSlotSchema).max(200),
+});
+export type LeadershipDraft = z.infer<typeof leadershipDraftSchema>;
+
+/** A non-VP position picked for hiring, with how many people it needs. */
+export const hiringPickSchema = z.object({
+  positionId: z.number().int().positive(),
+  openings: z.number().int().min(1).max(MAX_POSITION_OPENINGS),
+});
+export type HiringPick = z.infer<typeof hiringPickSchema>;
+
+// ==========================================
+//  Setup
+// ==========================================
+
+export const scheduleSchema = z
+  .object({
+    releaseDate: z.iso.datetime({ offset: true, message: "Pick a release date" }),
+    softDeadline: z.iso.datetime({ offset: true, message: "Pick a deadline" }),
+    hardDeadline: z.iso.datetime({ offset: true, message: "Pick a final cutoff" }),
+    targetTermId: z.uuid("Pick the term you're hiring for"),
+    offerResponseHours: z
+      .number()
+      .int("Use whole hours")
+      .min(1, "At least 1 hour")
+      .max(MAX_OFFER_RESPONSE_HOURS, "At most 2 weeks"),
+  })
+  .refine((v) => new Date(v.releaseDate) < new Date(v.softDeadline), {
+    message: "The deadline must be after the release date",
+    path: ["softDeadline"],
+  })
+  .refine((v) => new Date(v.softDeadline) <= new Date(v.hardDeadline), {
+    message: "The final cutoff can't be before the deadline",
+    path: ["hardDeadline"],
+  });
+export type ScheduleInput = z.infer<typeof scheduleSchema>;
+
+export const addPositionSchema = z.object({
+  positionId: z.number().int().positive(),
+});
+
+export const updatePositionSchema = z
+  .object({
+    isOpen: z.boolean().optional(),
+    openings: z.number().int().min(1).max(MAX_POSITION_OPENINGS).optional(),
+  })
+  .refine((v) => v.isOpen !== undefined || v.openings !== undefined, "Nothing to update");
+export type UpdatePositionInput = z.infer<typeof updatePositionSchema>;
+
+export const questionFieldsSchema = z.object({
+  questionText: z
+    .string()
+    .trim()
+    .min(1, "Write the question")
+    .max(500, "Keep it under 500 characters"),
+  type: z.enum(QUESTION_TYPES),
+  maxLength: z.number().int().min(1).max(5000).nullable(),
+  placeholder: z.string().trim().max(200).nullable(),
+  helpText: z.string().trim().max(500).nullable(),
+});
+export type QuestionFields = z.infer<typeof questionFieldsSchema>;
+
+/** positionId null = a General question. */
+export const createQuestionSchema = questionFieldsSchema.extend({
+  positionId: z.number().int().positive().nullable(),
+});
+export type CreateQuestionInput = z.infer<typeof createQuestionSchema>;
+
+export const updateQuestionSchema = z.union([
+  questionFieldsSchema,
+  z.object({ archived: z.boolean() }),
+]);
+export type UpdateQuestionInput = z.infer<typeof updateQuestionSchema>;
+
+export const reorderQuestionsSchema = z.object({
+  positionId: z.number().int().positive().nullable(),
+  questionIds: z.array(z.number().int().positive()).min(1).max(200),
+});
+export type ReorderQuestionsInput = z.infer<typeof reorderQuestionsSchema>;
+
+// ==========================================
+//  Board
+// ==========================================
+
+/** Move a card. `from` is the status the client saw, so stale moves are rejected. */
+export const moveCardSchema = z.object({
+  from: z.enum(SELECTION_STATUSES),
+  to: z.enum(SELECTION_STATUSES),
+  undo: z.boolean().optional(),
+});
+export type MoveCardInput = z.infer<typeof moveCardSchema>;
+
+// ==========================================
+//  Notes
+// ==========================================
+
+export const noteSchema = z.object({
+  body: z
+    .string()
+    .trim()
+    .min(1, "Write a note")
+    .max(MAX_NOTE_LENGTH, `Keep it under ${MAX_NOTE_LENGTH} characters`),
+  kind: z.enum(NOTE_KINDS),
+});
+export type NoteInput = z.infer<typeof noteSchema>;
+
+// ==========================================
+//  Offers + rejections
+// ==========================================
+
+export const sendOfferSchema = z.object({
+  selectionId: z.uuid(),
+  personalLine: z.string().trim().max(300, "Keep it under 300 characters").optional(),
+});
+export type SendOfferInput = z.infer<typeof sendOfferSchema>;
+
+/** Record the candidate's reply (or correct it). */
+export const offerResponseSchema = z.object({
+  response: z.enum(["accepted", "declined"]),
+});
+export type OfferResponseInput = z.infer<typeof offerResponseSchema>;
+
+export const resendOfferSchema = z.object({
+  personalLine: z.string().trim().max(300, "Keep it under 300 characters").optional(),
+});
+export type ResendOfferInput = z.infer<typeof resendOfferSchema>;
+
+export const withdrawOfferSchema = z.object({ notify: z.boolean() });
+export type WithdrawOfferInput = z.infer<typeof withdrawOfferSchema>;
+
+/** A candidate's answer from the offer link. */
+export const offerLinkResponseSchema = z.object({
+  response: z.enum(["accepted", "declined"]),
+  note: z
+    .string()
+    .trim()
+    .max(MAX_RESPONSE_NOTE_LENGTH, `Keep it under ${MAX_RESPONSE_NOTE_LENGTH} characters`)
+    .optional(),
+});
+export type OfferLinkResponseInput = z.infer<typeof offerLinkResponseSchema>;
+
+export const rejectionSchema = z.object({ applicationId: z.uuid() });
+export type RejectionInput = z.infer<typeof rejectionSchema>;
+
+export const rejectionBatchSchema = z.object({
+  include: z.object({
+    notWanted: z.boolean(),
+    inReview: z.boolean(),
+    interviewing: z.boolean(),
+  }),
+});
+export type RejectionBatchInput = z.infer<typeof rejectionBatchSchema>;
+
+// ==========================================
+//  Finalize
+// ==========================================
+
+export const finalizeSchema = z.object({
+  when2MeetLink: z
+    .url("Paste the When2Meet link")
+    .refine((url) => url.startsWith("https://"), "Use an https:// link"),
+});
+export type FinalizeRequest = z.infer<typeof finalizeSchema>;
+
+export const tourSchema = z.object({ tour: z.enum(RECRUITING_TOURS) });
+export type TourInput = z.infer<typeof tourSchema>;

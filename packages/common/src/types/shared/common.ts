@@ -23,7 +23,5 @@ export interface Term {
   start_date: string | null;
   end_date: string;
   onboarding_due_date: string | null;
-  returning_exec_release_date: string | null;
-  returning_exec_deadline: string | null;
   created_at: string;
 }

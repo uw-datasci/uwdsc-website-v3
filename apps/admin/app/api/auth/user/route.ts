@@ -6,29 +6,25 @@ import { readRoleClaims } from "@uwdsc/common/constants";
 
 /**
  * GET /api/auth/user
- * Get the currently authenticated user (admin/exec, plus alum for the returning-exec form's
- * `useAuth()`-driven name/email prefill).
+ * Get the currently authenticated admin/exec user.
  */
-export const GET = withAuth(
-  async (_request, _context, user) => {
-    const { role, subteamId, subteamName } = readRoleClaims(user.app_metadata);
-    const [profile, positionId] = await Promise.all([
-      profileService.getProfileByUserId(user.id),
-      onboardingService.getExecPosId(user.id),
-    ]);
+export const GET = withAuth(async (_request, _context, user) => {
+  const { role, subteamId, subteamName } = readRoleClaims(user.app_metadata);
+  const [profile, positionId] = await Promise.all([
+    profileService.getProfileByUserId(user.id),
+    onboardingService.getExecPosId(user.id),
+  ]);
 
-    return RaftResponse.ok({
-      id: user.id,
-      email: user.email,
-      role,
-      first_name: profile?.first_name,
-      last_name: profile?.last_name,
-      wat_iam: profile?.wat_iam,
-      faculty: profile?.faculty,
-      position_id: positionId,
-      subteam_id: subteamId,
-      subteam_name: subteamName,
-    });
-  },
-  { allowAlum: true }
-);
+  return RaftResponse.ok({
+    id: user.id,
+    email: user.email,
+    role,
+    first_name: profile?.first_name,
+    last_name: profile?.last_name,
+    wat_iam: profile?.wat_iam,
+    faculty: profile?.faculty,
+    position_id: positionId,
+    subteam_id: subteamId,
+    subteam_name: subteamName,
+  });
+});

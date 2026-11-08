@@ -1,9 +1,8 @@
 import { z } from "zod";
 
 /**
- * Event schemas, shared by the admin event form/routes and the internal drafts API that
- * nexus-bot's `/event-create` calls (`/api/internal/events/drafts`), so both validate events
- * with exactly the same rules.
+ * Event schemas, shared by the admin event form/routes and the Discord event bot
+ * (`@uwdsc/admin` discord-bot module) so both validate events with exactly the same rules.
  */
 
 interface EndAfterStartError {
@@ -44,7 +43,7 @@ const eventFields = {
   end_time: z.iso.datetime({ error: "Invalid end time" }),
   category: z.enum(["workshop", "social", "academic"], { error: "Event type is required" }),
   resources: z.array(eventResourceSchema).max(12, "At most 12 resources"),
-  // Omitted by the admin form (the column defaults to true); false for nexus-bot drafts.
+  // Omitted by the admin form (the column defaults to true); false for Discord bot drafts.
   is_published: z.boolean().optional(),
 };
 

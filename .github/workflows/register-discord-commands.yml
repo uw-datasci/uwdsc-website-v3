@@ -1,0 +1,55 @@
+name: Register Discord Commands
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: 24
+  PNPM_VERSION: 12.8.1
+  INFISICAL_PROJECT_SLUG: uwdsc-54e-y
+
+jobs:
+  register:
+    name: Register /event-create
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          registry-url: https://npm.pkg.github.com
+          scope: "@uw-datasci"
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull Secrets from Infisical
+        uses: infisical/secrets-action@v1.0.16
+        with:
+          env-slug: prod
+          client-id: ${{ secrets.INFISICAL_CLIENT_ID }}
+          client-secret: ${{ secrets.INFISICAL_CLIENT_SECRET }}
+          project-slug: ${{ env.INFISICAL_PROJECT_SLUG }}
+          secret-path: /website/admin
+
+      - name: Register commands
+        run: pnpm discord:register

@@ -26,7 +26,12 @@
         "SUPPORT_DISCORD_WEBHOOK_URL",
         "RAFT_APP_NAME",
         "RAFT_DATABASE_URL",
-        "NEXUS_BOT_INTERNAL_TOKEN"
+        "DISCORD_APPLICATION_ID",
+        "DISCORD_PUBLIC_KEY",
+        "DISCORD_BOT_TOKEN",
+        "DISCORD_GUILD_ID",
+        "DISCORD_EXEC_ROLE_ID",
+        "ANTHROPIC_API_KEY"
       ]
     },
     "lint": { "dependsOn": ["^lint"] },

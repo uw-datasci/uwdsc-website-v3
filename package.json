@@ -12,6 +12,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "ui:add": "node scripts/ui-add.js",
     "pull-secrets": "node scripts/pull-secrets.js",
+    "discord:register": "node scripts/register-discord-commands.js",
     "migrate": "node scripts/migrate.js up",
     "migrate:down": "node scripts/migrate.js down",
     "migrate:reset": "node scripts/migrate.js reset",

@@ -1,5 +1,4 @@
 export * from "./modules/contact/contact.service";
-export * from "./modules/discord-bot/eventBot.service";
 export * from "./modules/email/email.service";
 export * from "./modules/events/events.service";
 export * from "./modules/integration/discord.service";

@@ -122,6 +122,16 @@ export class ProfileRepository extends BaseRepository {
   }
 
   /**
+   * The profile's website role (`user_roles.role`), or null if the profile doesn't exist.
+   */
+  async getUserRole(profileId: string): Promise<string | null> {
+    const result = await this.sql<{ role: string }[]>`
+      SELECT r.role FROM user_roles r WHERE r.id = ${profileId} LIMIT 1
+    `;
+    return result[0]?.role ?? null;
+  }
+
+  /**
    * Get the profile by profile ID
    */
   async getProfileById(profileId: string): Promise<Profile | null> {

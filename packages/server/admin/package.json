@@ -8,7 +8,6 @@
     "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.131.0",
     "@react-email/components": "^1.0.10",
     "@react-email/markdown": "^0.0.18",
     "@react-email/render": "^2.0.4",

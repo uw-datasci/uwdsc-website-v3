@@ -57,6 +57,17 @@ class ProfileService {
   }
 
   /**
+   * The profile's website role (member, exec, admin, pres, alum), or null if there's no profile.
+   */
+  async getUserRole(profileId: string): Promise<string | null> {
+    try {
+      return await this.repository.getUserRole(profileId);
+    } catch (error) {
+      throw new ApiError(`Failed to get user role: ${(error as Error).message}`, 500);
+    }
+  }
+
+  /**
    * Get the profile by profile ID
    */
   async getProfileById(profileId: string): Promise<Profile | null> {

@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, Info, Plus, Trash2 } from "lucide-react";
+import { AlertCircle, Info, Lock, Plus, Trash2 } from "lucide-react";
 import { SLOT_DECISION_LABELS, type SlotDecision } from "@uwdsc/common/constants";
 import { slotDecisionOptions, slotNextHolder } from "@uwdsc/common/recruiting";
 import type { LeadershipSlot } from "@uwdsc/common/schemas";
@@ -152,6 +152,16 @@ function SlotRow({
   }));
   const positionName = subteam.vpPositions.find((p) => p.id === slot.positionId)?.name ?? "VP";
 
+  if (slot.decision === "hired") {
+    return (
+      <HiredSlotRow
+        outgoingName={outgoing?.name ?? null}
+        hireName={successor?.name ?? "A public applicant"}
+        positionName={positionName}
+      />
+    );
+  }
+
   return (
     <div className="border-b p-3 last:border-b-0">
       <div className="flex items-center gap-2.5">
@@ -229,6 +239,41 @@ function SlotRow({
           {positionName} is added to hiring positions. Presidents review those candidates.
         </p>
       )}
+    </div>
+  );
+}
+
+/** A public VP seat a candidate accepted. Locked here; it only changes through Offers. */
+function HiredSlotRow({
+  outgoingName,
+  hireName,
+  positionName,
+}: {
+  readonly outgoingName: string | null;
+  readonly hireName: string;
+  readonly positionName: string;
+}) {
+  return (
+    <div className="border-b p-3 last:border-b-0">
+      <div className="flex items-center gap-2.5">
+        <PersonAvatar name={hireName} className="size-7.5 text-[11px]" />
+        <div className="min-w-0 flex-1">
+          <div className="text-[13px] font-semibold">{hireName}</div>
+          <div className="text-xs text-muted-foreground">
+            {outgoingName ? `Replaces ${outgoingName} · ` : ""}
+            {SLOT_DECISION_LABELS.hired}
+          </div>
+        </div>
+        <Badge variant="secondary" className="gap-1">
+          <Lock className="size-3" aria-hidden />
+          Locked
+        </Badge>
+      </div>
+      <p className="mt-2.5 flex items-start gap-1.5 rounded-md bg-muted px-2.5 py-1.5 text-xs text-muted-foreground">
+        <Info className="mt-0.5 size-3.5 flex-none" aria-hidden />
+        {hireName} accepted the {positionName} offer. To change this seat, correct their
+        response in Offers.
+      </p>
     </div>
   );
 }

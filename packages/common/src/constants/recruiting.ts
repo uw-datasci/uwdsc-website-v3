@@ -3,11 +3,15 @@ import type { ApplicationInputType, NoteKind } from "../types/shared/enums";
 /**
  * Leadership roster: what happens to each seat next term. A seat ("slot") is a president
  * seat or one VP seat on an `is_vp` exec position; co-VPs are two slots on one position.
+ *
+ * `hired` is never picked by hand: it's what an `open` seat becomes when a public
+ * applicant accepts the offer for it. The seat is then locked to that person.
  */
 export const SLOT_DECISIONS = [
   "continuing",
   "successor",
   "open",
+  "hired",
   "leaving",
   "undecided",
 ] as const;
@@ -20,6 +24,7 @@ export const SLOT_DECISION_LABELS: Record<SlotDecision, string> = {
   continuing: "Continuing",
   successor: "Successor chosen",
   open: "Open to public",
+  hired: "Hired from public",
   leaving: "Leaving",
   undecided: "Undecided",
 };

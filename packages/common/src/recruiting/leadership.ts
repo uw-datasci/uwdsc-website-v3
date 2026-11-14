@@ -21,8 +21,13 @@ import type {
 /**
  * Decisions a slot can be set to in the UI. `undecided` is always allowed (it blocks the
  * lock). A new seat (no current holder) must name someone, or for a VP seat, open it.
+ * A `hired` seat (public applicant accepted) is locked and has no other options.
  */
-export function slotDecisionOptions(slot: Pick<LeadershipSlot, "kind" | "outgoingProfileId">) {
+export function slotDecisionOptions(
+  slot: Pick<LeadershipSlot, "kind" | "outgoingProfileId"> &
+    Partial<Pick<LeadershipSlot, "decision">>
+) {
+  if (slot.decision === "hired") return ["hired"] as SlotDecision[];
   const options: SlotDecision[] =
     slot.kind === "pres"
       ? slot.outgoingProfileId
@@ -37,8 +42,16 @@ export function slotDecisionOptions(slot: Pick<LeadershipSlot, "kind" | "outgoin
 /** The person a slot puts in the seat next term, or null if it leaves the seat empty. */
 export function slotNextHolder(slot: LeadershipSlot): string | null {
   if (slot.decision === "continuing") return slot.outgoingProfileId;
-  if (slot.decision === "successor") return slot.successorProfileId;
+  if (slot.decision === "successor" || slot.decision === "hired")
+    return slot.successorProfileId;
   return null;
+}
+
+/** The roster kind a filled slot writes to `cycle_leadership`. */
+function slotKind(slot: LeadershipSlot): LeadershipKind {
+  if (slot.decision === "continuing") return "continuing";
+  if (slot.decision === "hired") return "public_hire";
+  return "appointed";
 }
 
 function vpPositionSubteam(structure: LeadershipStructure, positionId: number): number | null {
@@ -57,7 +70,7 @@ export function buildRoster(
   for (const slot of draft.slots) {
     const profileId = slotNextHolder(slot);
     if (!profileId) continue;
-    const kind: LeadershipKind = slot.decision === "continuing" ? "continuing" : "appointed";
+    const kind = slotKind(slot);
 
     if (slot.kind === "pres") {
       roster.push({
@@ -110,6 +123,9 @@ export function checkLockReadiness(
           : "Pick someone for each new seat"
       );
     }
+    if (slot.decision === "hired" && (slot.kind !== "vp" || !slot.successorProfileId)) {
+      blockers.push(`${nameOf(slot.outgoingProfileId)} has a status that doesn't fit the seat`);
+    }
     if (slot.kind === "vp" && vpPositionSubteam(structure, slot.positionId) === null) {
       blockers.push(`${nameOf(slot.outgoingProfileId)} isn't on a VP position`);
     }
@@ -155,6 +171,85 @@ export function openVpPositionIds(draft: LeadershipDraft): number[] {
     .filter((slot) => slot.kind === "vp" && slot.decision === "open")
     .map((slot) => slot.positionId);
   return [...new Set(ids)];
+}
+
+/**
+ * Public VP seats per position: how many are still open and how many a public applicant
+ * already filled. The cycle position stays open while any seat is open, and its openings
+ * count both (a filled seat still counts toward the seats on the Offers page).
+ */
+export function publicVpSeats(
+  draft: LeadershipDraft
+): Map<number, { open: number; hired: number }> {
+  const seats = new Map<number, { open: number; hired: number }>();
+  for (const slot of draft.slots) {
+    if (slot.kind !== "vp" || (slot.decision !== "open" && slot.decision !== "hired")) continue;
+    const seat = seats.get(slot.positionId) ?? { open: 0, hired: 0 };
+    if (slot.decision === "open") seat.open += 1;
+    else seat.hired += 1;
+    seats.set(slot.positionId, seat);
+  }
+  return seats;
+}
+
+/**
+ * A public applicant accepted the VP offer on `positionId`: lock the first open seat on
+ * that position to them. Null when no seat on the position is open anymore.
+ */
+export function fillPublicSeat(
+  draft: LeadershipDraft,
+  positionId: number,
+  profileId: string
+): LeadershipDraft | null {
+  const index = draft.slots.findIndex(
+    (slot) => slot.kind === "vp" && slot.positionId === positionId && slot.decision === "open"
+  );
+  if (index === -1) return null;
+  return {
+    slots: draft.slots.map((slot, i) =>
+      i === index ? { ...slot, decision: "hired", successorProfileId: profileId } : slot
+    ),
+  };
+}
+
+/** Undo {@link fillPublicSeat} (the accepted offer was corrected to Declined). */
+export function reopenPublicSeat(
+  draft: LeadershipDraft,
+  positionId: number,
+  profileId: string
+): LeadershipDraft | null {
+  const index = draft.slots.findIndex(
+    (slot) =>
+      slot.decision === "hired" &&
+      slot.positionId === positionId &&
+      slot.successorProfileId === profileId
+  );
+  if (index === -1) return null;
+  return {
+    slots: draft.slots.map((slot, i) =>
+      i === index ? { ...slot, decision: "open", successorProfileId: null } : slot
+    ),
+  };
+}
+
+/**
+ * Hired seats can only change through the offer (accept / correct to Declined), never
+ * from Leadership. Returns why `next` isn't allowed, or null if every hired seat in
+ * `stored` is unchanged and `next` adds none.
+ */
+export function hiredSeatChange(stored: LeadershipDraft, next: LeadershipDraft): string | null {
+  const key = (slot: LeadershipSlot) =>
+    `${slot.id}|${slot.kind}|${slot.positionId}|${slot.outgoingProfileId}|${slot.successorProfileId}`;
+  const storedHired = new Set(
+    stored.slots.filter((slot) => slot.decision === "hired").map(key)
+  );
+  const nextHired = next.slots.filter((slot) => slot.decision === "hired").map(key);
+
+  const changed =
+    nextHired.length !== storedHired.size || nextHired.some((k) => !storedHired.has(k));
+  return changed
+    ? "Seats filled from public applicants only change through Offers. Reload the page."
+    : null;
 }
 
 function sameRole(a: RoleState, b: RoleState): boolean {

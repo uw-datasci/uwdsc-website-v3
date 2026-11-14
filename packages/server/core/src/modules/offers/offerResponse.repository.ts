@@ -1,6 +1,12 @@
 import { BaseRepository } from "@uwdsc/db/base.repository";
 import type { TransactionSql } from "@uwdsc/db/connection";
-import { restoreRoleAfterRemoval } from "@uwdsc/common/recruiting";
+import {
+  fillPublicSeat,
+  publicVpSeats,
+  reopenPublicSeat,
+  restoreRoleAfterRemoval,
+} from "@uwdsc/common/recruiting";
+import { leadershipDraftSchema, type LeadershipDraft } from "@uwdsc/common/schemas";
 import { ApiError, type ApplicationReviewStatus, type UserRole } from "@uwdsc/common/types";
 import type { OfferLinkRow } from "./offerLink";
 
@@ -29,6 +35,8 @@ export interface VpUndo {
   cycleId: string;
   profileId: string;
   positionId: number;
+  subteamId: number | null;
+  actorId: string;
 }
 
 export interface ResponseCardRow {
@@ -188,7 +196,17 @@ export class OfferResponseRepository extends BaseRepository {
     `;
   }
 
+  /**
+   * Accepting a public VP seat: lock the seat to the hire in the leadership draft (so a
+   * later Leadership edit keeps them), add them to the roster, grant admin, and close the
+   * position once none of its seats are open.
+   */
   private async grantVp(sql: TransactionSql, hire: VpHire): Promise<void> {
+    const draft = await this.lockDraft(sql, hire.cycleId);
+    const filled = draft && fillPublicSeat(draft, hire.positionId, hire.profileId);
+    if (!filled) throw new ApiError("This VP seat is no longer open to the public", 409);
+    await this.saveDraft(sql, hire.cycleId, hire.positionId, filled);
+
     const [current] = await sql<{ role: UserRole; subteam_id: number | null }[]>`
       SELECT role, subteam_id FROM public.user_roles WHERE id = ${hire.profileId}
     `;
@@ -205,9 +223,21 @@ export class OfferResponseRepository extends BaseRepository {
       SET role = 'admin', subteam_id = ${hire.subteamId}
       WHERE id = ${hire.profileId}
     `;
+    await this.logLeadershipEdit(sql, hire.cycleId, hire.actorId, {
+      profileId: hire.profileId,
+      from: { role: current?.role ?? null, subteamId: current?.subteam_id ?? null },
+      to: { role: "admin", subteamId: hire.subteamId },
+      positionId: hire.positionId,
+      kind: "public_hire",
+    });
   }
 
+  /** The accepted public VP offer was corrected to Declined: reopen the seat, restore the role. */
   private async undoVp(sql: TransactionSql, undo: VpUndo): Promise<void> {
+    const draft = await this.lockDraft(sql, undo.cycleId);
+    const reopened = draft && reopenPublicSeat(draft, undo.positionId, undo.profileId);
+    if (reopened) await this.saveDraft(sql, undo.cycleId, undo.positionId, reopened);
+
     const [row] = await sql<{ prior_role: UserRole | null; prior_subteam_id: number | null }[]>`
       DELETE FROM hiring.cycle_leadership
       WHERE cycle_id = ${undo.cycleId}
@@ -222,6 +252,87 @@ export class OfferResponseRepository extends BaseRepository {
       UPDATE public.user_roles
       SET role = ${restored.role}, subteam_id = ${restored.subteamId}
       WHERE id = ${undo.profileId}
+    `;
+    await this.logLeadershipEdit(sql, undo.cycleId, undo.actorId, {
+      profileId: undo.profileId,
+      from: { role: "admin", subteamId: undo.subteamId },
+      to: restored,
+      positionId: undo.positionId,
+      kind: null,
+    });
+  }
+
+  /** The cycle's leadership draft, row-locked so Leadership saves and hires serialize. */
+  private async lockDraft(
+    sql: TransactionSql,
+    cycleId: string
+  ): Promise<LeadershipDraft | null> {
+    const [cycle] = await sql<{ leadership_draft: unknown }[]>`
+      SELECT leadership_draft FROM hiring.cycles WHERE id = ${cycleId} FOR UPDATE
+    `;
+    const parsed = leadershipDraftSchema.safeParse(cycle?.leadership_draft);
+    return parsed.success ? parsed.data : null;
+  }
+
+  /** Store the draft and open the VP position only while one of its seats is still open. */
+  private async saveDraft(
+    sql: TransactionSql,
+    cycleId: string,
+    positionId: number,
+    draft: LeadershipDraft
+  ): Promise<void> {
+    await sql`
+      UPDATE hiring.cycles SET leadership_draft = ${sql.json(draft)} WHERE id = ${cycleId}
+    `;
+    const stillOpen = (publicVpSeats(draft).get(positionId)?.open ?? 0) > 0;
+    await sql`
+      UPDATE hiring.application_positions_available
+      SET is_open = ${stillOpen}
+      WHERE cycle_id = ${cycleId} AND position_id = ${positionId}
+    `;
+  }
+
+  private async logLeadershipEdit(
+    sql: TransactionSql,
+    cycleId: string,
+    actorId: string | null,
+    change: {
+      profileId: string;
+      from: { role: UserRole | null; subteamId: number | null };
+      to: { role: UserRole; subteamId: number | null };
+      positionId: number;
+      kind: "public_hire" | null;
+    }
+  ): Promise<void> {
+    await sql`
+      INSERT INTO hiring.cycle_events (cycle_id, actor_id, type, payload)
+      VALUES (
+        ${cycleId},
+        ${actorId},
+        'leadership_edited',
+        ${sql.json({
+          source: change.kind ? "offer_accepted" : "offer_corrected",
+          changes: [
+            {
+              profile_id: change.profileId,
+              from_role: change.from.role,
+              from_subteam_id: change.from.subteamId,
+              to_role: change.to.role,
+              to_subteam_id: change.to.subteamId,
+            },
+          ],
+          roster: change.kind
+            ? [
+                {
+                  profile_id: change.profileId,
+                  role: "admin",
+                  position_id: change.positionId,
+                  kind: change.kind,
+                },
+              ]
+            : [],
+        })}
+      )
     `;
   }
 }

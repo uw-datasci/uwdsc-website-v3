@@ -1,6 +1,11 @@
 import { BaseRepository } from "@uwdsc/db/base.repository";
 import type { TransactionSql } from "@uwdsc/db/connection";
-import type { HiringPick, LeadershipDraft } from "@uwdsc/common/schemas";
+import { hiredSeatChange } from "@uwdsc/common/recruiting";
+import {
+  leadershipDraftSchema,
+  type HiringPick,
+  type LeadershipDraft,
+} from "@uwdsc/common/schemas";
 import type {
   CyclePositionInfo,
   ExecPositionInfo,
@@ -8,7 +13,7 @@ import type {
   RoleChange,
   RosterEntry,
 } from "@uwdsc/common/types";
-import type { CycleEventType, UserRole } from "@uwdsc/common/types";
+import { ApiError, type CycleEventType, type UserRole } from "@uwdsc/common/types";
 
 export interface CurrentLeaderRow {
   profile_id: string;
@@ -210,6 +215,15 @@ export class LeadershipRepository extends BaseRepository {
     const { cycleId, actorId, draft, roster, changes, lock, positions } = input;
 
     return this.sql.begin(async (sql) => {
+      // Re-check hired seats under the row lock: a public VP offer accepted after the
+      // page loaded must not be overwritten by this save.
+      const [current] = await sql<{ leadership_draft: unknown }[]>`
+        SELECT leadership_draft FROM hiring.cycles WHERE id = ${cycleId} FOR UPDATE
+      `;
+      const stored = leadershipDraftSchema.safeParse(current?.leadership_draft);
+      const conflict = hiredSeatChange(stored.success ? stored.data : { slots: [] }, draft);
+      if (conflict) throw new ApiError(conflict, 409);
+
       const [cycle] = lock
         ? await sql<{ id: string }[]>`
             UPDATE hiring.cycles

@@ -3,7 +3,8 @@ import {
   buildRoster,
   checkLockReadiness,
   computeRoleChanges,
-  openVpPositionIds,
+  hiredSeatChange,
+  publicVpSeats,
   restoreRoleAfterRemoval,
   type RecruitingCycleSummary,
 } from "@uwdsc/common/recruiting";
@@ -77,6 +78,7 @@ class LeadershipService {
     }
     const ctx = await this.load(cycle);
     this.assertSlotsMatchLeaders(draft, ctx);
+    this.assertHiredSeats(draft, ctx);
     this.assertPositions(draft, hiring, ctx);
 
     const saved = await this.repository.saveDraft(
@@ -98,6 +100,7 @@ class LeadershipService {
     if (cycle.rosterLockedAt) throw new ApiError("Leadership is already locked", 409);
     const ctx = await this.load(cycle);
     this.assertSlotsMatchLeaders(draft, ctx);
+    this.assertHiredSeats(draft, ctx);
     this.assertPositions(draft, hiring, ctx);
     await this.assertReady(draft, ctx);
 
@@ -138,6 +141,7 @@ class LeadershipService {
         400
       );
     }
+    this.assertHiredSeats(draft, ctx);
     this.assertPositions(draft, [], ctx);
     await this.assertReady(draft, ctx);
 
@@ -318,6 +322,12 @@ class LeadershipService {
       throw new ApiError(readiness.blockers[0] ?? "Roster isn't ready", 400);
   }
 
+  /** Seats filled by a public hire are locked: only the offer (accept / correct) changes them. */
+  private assertHiredSeats(draft: LeadershipDraft, ctx: Context): void {
+    const conflict = hiredSeatChange(ctx.draft, draft);
+    if (conflict) throw new ApiError(conflict, 409);
+  }
+
   /** Before the lock, the draft must cover exactly the people who hold a seat now. */
   private assertSlotsMatchLeaders(draft: LeadershipDraft, ctx: Context): void {
     const expected = new Set(ctx.draft.slots.map((s) => s.outgoingProfileId).filter(Boolean));
@@ -371,16 +381,12 @@ class LeadershipService {
     const vpIds = ctx.structure.subteams.flatMap((s) => s.vpPositions.map((p) => p.id));
     const execIds = ctx.positions.filter((p) => !p.isVp).map((p) => p.id);
 
-    const openSeats = new Map<number, number>();
-    for (const slot of draft.slots) {
-      if (slot.kind === "vp" && slot.decision === "open") {
-        openSeats.set(slot.positionId, (openSeats.get(slot.positionId) ?? 0) + 1);
-      }
-    }
-    const vpPicks: HiringPick[] = openVpPositionIds(draft).map((positionId) => ({
-      positionId,
-      openings: openSeats.get(positionId) ?? 1,
-    }));
+    // A VP position stays open while any of its public seats is open. Its openings count
+    // hired seats too, so a filled seat still shows as filled on the Offers page. Once every
+    // seat is hired the position drops out of `desired` and is closed (it has applicants).
+    const vpPicks: HiringPick[] = [...publicVpSeats(draft)]
+      .filter(([, seats]) => seats.open > 0)
+      .map(([positionId, seats]) => ({ positionId, openings: seats.open + seats.hired }));
 
     return scope === "all"
       ? { managedIds: [...vpIds, ...execIds], desired: [...hiring, ...vpPicks] }

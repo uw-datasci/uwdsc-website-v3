@@ -63,9 +63,10 @@ export function PersonPicker({
           size="sm"
           disabled={disabled}
           aria-label={label}
-          className="h-8 w-full min-w-0 justify-between rounded-md font-normal"
+          // `shrink` overrides Button's shrink-0 so the trigger fits beside a label.
+          className="h-8 w-full min-w-0 shrink justify-between rounded-md font-normal"
         >
-          <span className="truncate">
+          <span className="min-w-0 truncate">
             {value ? (
               <>
                 <span className="font-medium">{value.name}</span>

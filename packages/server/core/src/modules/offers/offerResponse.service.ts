@@ -97,7 +97,13 @@ class OfferResponseService {
     }
     const vpUndo =
       !accepted && row.is_vp && row.status === "Accepted Offer"
-        ? { cycleId: row.cycle_id, profileId: row.profile_id, positionId: row.position_id }
+        ? {
+            cycleId: row.cycle_id,
+            profileId: row.profile_id,
+            positionId: row.position_id,
+            subteamId: row.subteam_id,
+            actorId: input.actorId,
+          }
         : null;
 
     await this.repository.recordResponse({

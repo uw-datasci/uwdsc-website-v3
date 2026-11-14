@@ -11,7 +11,7 @@ export class MembershipRepository extends BaseRepository {
         SELECT id, profile_id
         FROM membership.memberships
         WHERE profile_id = ${profileId}
-          AND term_id = (SELECT id FROM public.terms WHERE is_active = true LIMIT 1)
+          AND term_id = public.active_term_id()
         LIMIT 1
       `;
       return result[0] ?? null;

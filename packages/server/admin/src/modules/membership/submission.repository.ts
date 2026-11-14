@@ -25,7 +25,7 @@ export class SubmissionReviewRepository extends BaseRepository {
   async listSubmissions(options: ListSubmissionsOptions = {}): Promise<SubmissionRow[]> {
     const termCondition = options.termId
       ? this.sql`s.term_id = ${options.termId}`
-      : this.sql`s.term_id = (SELECT id FROM public.terms WHERE is_active = true LIMIT 1)`;
+      : this.sql`s.term_id = public.active_term_id()`;
 
     const statusCondition = options.status
       ? this.sql`AND s.status = ${options.status}::membership.submission_status_enum`

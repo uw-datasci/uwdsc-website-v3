@@ -131,7 +131,7 @@ export class AuthRepository extends BaseRepository {
           SET password_reset_count = password_reset_count + 1,
               updated_at = now()
           WHERE profile_id = ${userId}
-            AND term_id = (SELECT id FROM public.terms WHERE is_active = true LIMIT 1)
+            AND term_id = public.active_term_id()
         `;
       } catch (incrementError) {
         console.error("Failed to increment password reset counters:", incrementError);
@@ -139,37 +139,5 @@ export class AuthRepository extends BaseRepository {
     }
 
     return { data, error };
-  }
-
-  /**
-   * `application_positions_available.id` for every role (open OR closed) in the given
-   * subteam. Deliberately not filtered on `apa.is_open`: a VP must keep review access
-   * and question-edit rights for a role after a President closes it mid-cycle, so
-   * submitted applicants aren't orphaned from their reviewer.
-   */
-  async getApplicationPositionIdsForSubteam(subteamId: number): Promise<number[]> {
-    const rows = await this.sql<{ position_id: number }[]>`
-      SELECT DISTINCT apa.id AS position_id
-      FROM hiring.application_positions_available apa
-      JOIN org.exec_positions ep ON apa.position_id = ep.id
-      WHERE ep.subteam_id = ${subteamId}
-    `;
-    return rows.map((row) => row.position_id);
-  }
-
-  /**
-   * `org.exec_positions.id` for every role in the given subteam. Unlike
-   * `getApplicationPositionIdsForSubteam`, this is NOT joined through
-   * `hiring.application_positions_available` — a VP must be able to review
-   * returning-exec role preferences even for roles that aren't open on the
-   * external application.
-   */
-  async getExecPositionIdsForSubteam(subteamId: number): Promise<number[]> {
-    const rows = await this.sql<{ position_id: number }[]>`
-      SELECT ep.id AS position_id
-      FROM org.exec_positions ep
-      WHERE ep.subteam_id = ${subteamId}
-    `;
-    return rows.map((row) => row.position_id);
   }
 }

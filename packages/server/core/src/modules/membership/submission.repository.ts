@@ -16,8 +16,7 @@ export class MembershipSubmissionRepository extends BaseRepository {
     const result = await this.sql<ActiveTermRef[]>`
       SELECT id, code
       FROM public.terms
-      WHERE is_active = true
-      LIMIT 1
+      WHERE id = public.active_term_id()
     `;
     return result[0] ?? null;
   }
@@ -29,7 +28,7 @@ export class MembershipSubmissionRepository extends BaseRepository {
         SELECT 1
         FROM membership.memberships
         WHERE profile_id = ${profileId}
-          AND term_id = (SELECT id FROM public.terms WHERE is_active = true LIMIT 1)
+          AND term_id = public.active_term_id()
       ) AS exists
     `;
     return result[0]?.exists ?? false;

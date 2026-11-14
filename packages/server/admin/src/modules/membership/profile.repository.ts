@@ -50,10 +50,10 @@ export class ProfileRepository extends BaseRepository {
         options?.paidOnly
           ? this.sql`JOIN membership.memberships m
               ON m.profile_id = p.id
-             AND m.term_id = (SELECT id FROM public.terms WHERE is_active = true LIMIT 1)`
+             AND m.term_id = public.active_term_id()`
           : this.sql`LEFT JOIN membership.memberships m
               ON m.profile_id = p.id
-             AND m.term_id = (SELECT id FROM public.terms WHERE is_active = true LIMIT 1)`
+             AND m.term_id = public.active_term_id()`
       }
       LEFT JOIN profiles pv ON pv.id = m.verifier_id
       ${searchCondition}

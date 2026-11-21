@@ -20,20 +20,32 @@ class SetupService {
   async getSetup(caps: Capabilities): Promise<SetupView> {
     const cycle = this.requireCycle(caps);
     try {
-      const [schedule, cyclePositions, execPositions, vpSubteams, activeTerm] =
-        await Promise.all([
-          this.repository.getSchedule(cycle.id),
-          this.repository.getCyclePositions(cycle.id),
-          this.repository.getExecPositions(),
-          this.repository.getVpSubteams(cycle.id),
-          this.recruiting.getActiveTerm(),
-        ]);
+      const [
+        schedule,
+        cyclePositions,
+        execPositions,
+        vpSubteams,
+        activeTerm,
+        activeSubteams,
+        retiring,
+      ] = await Promise.all([
+        this.repository.getSchedule(cycle.id),
+        this.repository.getCyclePositions(cycle.id),
+        this.repository.getExecPositions(),
+        this.repository.getVpSubteams(cycle.id),
+        this.recruiting.getActiveTerm(),
+        this.repository.getActiveSubteams(),
+        this.recruiting.getRetiredSubteams(cycle.id),
+      ]);
       if (!schedule) throw new ApiError("Hiring cycle not found", 404);
 
       const targetTerms = activeTerm
         ? await this.recruiting.getTermsStartingAfter(activeTerm.start_date)
         : [];
       const subteamsWithVp = new Set(vpSubteams.map((row) => row.subteam_id));
+      const retired = new Set(retiring.map((subteam) => subteam.id));
+      const isRetired = (subteamId: number | null) =>
+        subteamId !== null && retired.has(subteamId);
 
       const positions: SetupPosition[] = cyclePositions.map((row) => ({
         id: row.id,
@@ -53,11 +65,15 @@ class SetupService {
           subteamId: row.subteam_id,
           isVp: row.is_vp,
         }),
+        retired: isRetired(row.subteam_id),
       }));
 
       const inCycle = new Set(cyclePositions.map((row) => row.position_id));
       const addablePositions = execPositions
-        .filter((p) => !p.is_vp && p.subteam_id !== null && !inCycle.has(p.id))
+        .filter(
+          (p) =>
+            !p.is_vp && p.subteam_id !== null && !inCycle.has(p.id) && !isRetired(p.subteam_id)
+        )
         .map((p) => ({ id: p.id, name: p.name, subteamName: p.subteam_name }));
 
       const questions = await this.repository.getQuestions(
@@ -69,9 +85,11 @@ class SetupService {
         targetTerms: targetTerms.map((term) => ({ id: term.id, code: term.code })),
         positions,
         addablePositions,
+        subteams: activeSubteams.filter((subteam) => !retired.has(subteam.id)),
         questions,
         canEditSchedule: caps.can.editSchedule,
         canEditGeneralQuestions: canEditQuestionsFor(caps, null),
+        canEditStructure: caps.can.editStructure,
       };
     } catch (error) {
       if (error instanceof ApiError) throw error;
@@ -103,6 +121,7 @@ class SetupService {
     if (position.is_vp) {
       throw new ApiError("VP seats are opened from Leadership", 400);
     }
+    await this.assertNotRetiring(cycle.id, position.subteam_id, position.subteam_name);
     await this.repository.addPosition(cycle.id, positionId);
   }
 
@@ -118,6 +137,9 @@ class SetupService {
     if (!row) throw new ApiError("Position not found in this cycle", 404);
     if (row.is_vp && patch.isOpen !== undefined) {
       throw new ApiError("Open or close VP seats from Leadership", 400);
+    }
+    if (patch.isOpen) {
+      await this.assertNotRetiring(cycle.id, row.subteam_id, row.subteam_name);
     }
     await this.repository.updatePosition(id, patch);
   }
@@ -160,6 +182,18 @@ class SetupService {
   }
 
   // ---------------------------------------------------------------------------
+
+  private async assertNotRetiring(
+    cycleId: string,
+    subteamId: number | null,
+    subteamName: string | null
+  ): Promise<void> {
+    if (subteamId === null) return;
+    const retiring = await this.recruiting.getRetiredSubteams(cycleId);
+    if (retiring.some((subteam) => subteam.id === subteamId)) {
+      throw new ApiError(`${subteamName ?? "That subteam"} won't continue next term`, 400);
+    }
+  }
 
   private requireCycle(caps: Capabilities) {
     if (!caps.cycle || caps.locked) throw new ApiError("Lock leadership first", 409);

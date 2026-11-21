@@ -78,7 +78,10 @@ export class SetupRepository extends BaseRepository {
     };
   }
 
-  /** Dates live on the cycle's term (what /apply reads); the rest on the cycle. */
+  /**
+   * Dates live on the cycle's term (what /apply reads); the rest on the cycle. The final
+   * cutoff is always the deadline plus the 15-minute grace period.
+   */
   async updateSchedule(cycleId: string, termId: string, input: ScheduleInput): Promise<void> {
     await this.sql.begin(async (sql) => {
       await sql`
@@ -86,7 +89,7 @@ export class SetupRepository extends BaseRepository {
         SET
           application_release_date = ${input.releaseDate},
           application_soft_deadline = ${input.softDeadline},
-          application_hard_deadline = ${input.hardDeadline}
+          application_hard_deadline = ${input.softDeadline}::timestamptz + interval '15 minutes'
         WHERE id = ${termId}
       `;
       await sql`
@@ -102,7 +105,18 @@ export class SetupRepository extends BaseRepository {
       SELECT ep.id, ep.name, ep.is_vp, ep.subteam_id, s.name AS subteam_name
       FROM org.exec_positions ep
       LEFT JOIN org.subteams s ON s.id = ep.subteam_id
+      WHERE s.retired_at IS NULL
       ORDER BY ep.subteam_id NULLS LAST, ep.name
+    `;
+  }
+
+  /** Subteams new positions can go on: active, and not Presidents. */
+  async getActiveSubteams(): Promise<{ id: number; name: string }[]> {
+    return this.sql<{ id: number; name: string }[]>`
+      SELECT id, name
+      FROM org.subteams
+      WHERE retired_at IS NULL AND name <> 'Presidents'
+      ORDER BY name
     `;
   }
 

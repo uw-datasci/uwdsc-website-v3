@@ -128,6 +128,7 @@ export interface SetupPosition {
   applicants: number;
   owner: string;
   canEditQuestions: boolean;
+  retired: boolean;
 }
 
 export interface SetupQuestion {
@@ -148,9 +149,11 @@ export interface SetupView {
   targetTerms: { id: string; code: string }[];
   positions: SetupPosition[];
   addablePositions: { id: number; name: string; subteamName: string | null }[];
+  subteams: { id: number; name: string }[];
   questions: SetupQuestion[];
   canEditSchedule: boolean;
   canEditGeneralQuestions: boolean;
+  canEditStructure: boolean;
 }
 
 // ==========================================

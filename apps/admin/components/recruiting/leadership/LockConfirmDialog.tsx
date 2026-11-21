@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Lock, TriangleAlert } from "lucide-react";
+import { Archive, ArrowRight, Lock, TriangleAlert } from "lucide-react";
 import type { LeadershipPerson, RoleChange, RoleChangeSet } from "@uwdsc/common/types";
 import {
   Button,
@@ -25,6 +25,7 @@ interface LockConfirmDialogProps {
   readonly people: Record<string, LeadershipPerson>;
   readonly subteamNames: ReadonlyMap<number, string>;
   readonly hiringSummary: string;
+  readonly notContinuing: string[];
   readonly viewerId: string | null;
   readonly isSubmitting: boolean;
   readonly onConfirm: () => void;
@@ -39,6 +40,7 @@ export function LockConfirmDialog({
   people,
   subteamNames,
   hiringSummary,
+  notContinuing,
   viewerId,
   isSubmitting,
   onConfirm,
@@ -105,6 +107,23 @@ export function LockConfirmDialog({
               </section>
             );
           })}
+          {notContinuing.length > 0 && (
+            <section className="overflow-hidden rounded-lg border">
+              <div className="flex items-center gap-2 border-b bg-muted/40 px-3 py-2">
+                <Archive className="size-3.5" aria-hidden />
+                <h3 className="text-[13px] font-semibold">Not continuing in {targetLabel}</h3>
+                <span className="text-xs text-muted-foreground">{notContinuing.length}</span>
+              </div>
+              <p className="px-3 py-2 text-[13px] leading-[19px]">
+                <span className="font-medium">{notContinuing.join(", ")}</span>
+                <span className="text-muted-foreground">
+                  {" "}
+                  stay as they are this term. Finalize retires them; execs there become alum
+                  unless they&apos;re hired onto another subteam.
+                </span>
+              </p>
+            </section>
+          )}
           <p className="text-xs leading-[18px] text-muted-foreground">
             {unchanged ? `No change: ${unchanged}. ` : ""}
             Hiring: {hiringSummary}.

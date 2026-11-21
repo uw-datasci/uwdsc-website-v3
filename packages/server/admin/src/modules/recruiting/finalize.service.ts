@@ -12,6 +12,7 @@ import { EMAIL_BATCH_LIMIT, emailService } from "../email/email.service";
 import type { RecruitingEmail } from "../../types/email";
 import { FinalizeRepository, type DecidedRow } from "./finalize.repository";
 import { OffersRepository } from "./offers.repository";
+import { RecruitingRepository } from "./recruiting.repository";
 
 type Capabilities = Pick<RecruitingCapabilities, "can" | "viewer" | "cycle">;
 
@@ -33,6 +34,7 @@ function toDecided(row: DecidedRow) {
 class FinalizeService {
   private readonly repository = new FinalizeRepository();
   private readonly offers = new OffersRepository();
+  private readonly recruiting = new RecruitingRepository();
 
   async getFinalize(caps: Capabilities): Promise<FinalizeView> {
     const cycle = this.requireCycle(caps);
@@ -96,13 +98,15 @@ class FinalizeService {
     cycle: RecruitingCycleSummary
   ): Promise<{ plan: FinalizePlan; emails: string[] }> {
     try {
-      const [currentTeam, roster, decided, execHolders, seatsTotal] = await Promise.all([
-        this.repository.getCurrentTeam(),
-        this.repository.getRoster(cycle.id),
-        this.repository.getDecided(cycle.id, cycle.termId),
-        this.repository.getExecHolders(),
-        this.repository.getSeatsTotal(cycle.id),
-      ]);
+      const [currentTeam, roster, decided, execHolders, seatsTotal, retiredSubteams] =
+        await Promise.all([
+          this.repository.getCurrentTeam(),
+          this.repository.getRoster(cycle.id),
+          this.repository.getDecided(cycle.id, cycle.termId),
+          this.repository.getExecHolders(),
+          this.repository.getSeatsTotal(cycle.id),
+          this.recruiting.getRetiredSubteams(cycle.id),
+        ]);
 
       // Accepted public VP seats are already on the roster (granted when accepted).
       const accepted = decided.filter((row) => row.status === "Accepted Offer" && !row.is_vp);
@@ -129,6 +133,7 @@ class FinalizeService {
         pending: decided.filter((row) => row.status === "Offer Sent").map(toDecided),
         execHolders: execHolders.map((row) => ({ profileId: row.profile_id, name: row.name })),
         seatsTotal,
+        retiredSubteams,
       });
 
       const emails = [

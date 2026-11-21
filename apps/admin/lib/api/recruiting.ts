@@ -6,7 +6,9 @@
 
 import type { RecruitingCapabilities, RecruitingCycleSummary } from "@uwdsc/common/recruiting";
 import type {
+  CreatePositionInput,
   CreateQuestionInput,
+  CreateSubteamInput,
   FinalizeRequest,
   HiringPick,
   LeadershipDraft,
@@ -102,6 +104,20 @@ export function saveLeadershipDraft(
   hiring: HiringPick[]
 ): Promise<LeadershipView> {
   return sendJson("/api/recruiting/leadership/draft", "PUT", { draft, hiring });
+}
+
+/** Create a subteam with its VP position (or restore a retired one with that name). */
+export function createSubteam(
+  input: CreateSubteamInput
+): Promise<{ subteamId: number; restored: boolean }> {
+  return sendJson("/api/recruiting/structure/subteams", "POST", input);
+}
+
+/** Create an exec or VP position on a subteam. */
+export function createPosition(
+  input: Omit<CreatePositionInput, "openInCycle"> & { openInCycle?: boolean }
+): Promise<{ positionId: number }> {
+  return sendJson("/api/recruiting/structure/positions", "POST", input);
 }
 
 /** Lock next term's leadership; role changes apply immediately. */

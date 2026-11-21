@@ -34,9 +34,14 @@ export interface RecruitingCycleSummary {
   offerResponseHours: number;
 }
 
-export type RecruitingTab = "overview" | "leadership" | "setup" | "board" | "offers" | "finalize";
+export type RecruitingTab =
+  "overview" | "leadership" | "setup" | "board" | "offers" | "finalize";
 
-export const RECRUITING_TABS: ReadonlyArray<{ key: RecruitingTab; label: string; href: string }> = [
+export const RECRUITING_TABS: ReadonlyArray<{
+  key: RecruitingTab;
+  label: string;
+  href: string;
+}> = [
   { key: "overview", label: "Overview", href: "/recruiting" },
   { key: "leadership", label: "Leadership", href: "/recruiting/leadership" },
   { key: "setup", label: "Setup", href: "/recruiting/setup" },
@@ -67,6 +72,7 @@ export interface RecruitingCapabilities {
     moveStatuses: RecruitingScope;
     sendOffers: boolean;
     finalize: boolean;
+    editStructure: boolean;
   };
 }
 
@@ -112,6 +118,7 @@ export function computeCapabilities(
         moveStatuses: active ? "all" : false,
         sendOffers: active,
         finalize: active,
+        editStructure: !!cycle && !finalized,
       },
     };
   }
@@ -141,6 +148,7 @@ export function computeCapabilities(
       moveStatuses: ownScope,
       sendOffers: false,
       finalize: false,
+      editStructure: false,
     },
   };
 }

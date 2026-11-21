@@ -5,13 +5,21 @@ import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { toast } from "sonner";
 import { AlertCircle, CheckCircle2, Lock } from "lucide-react";
-import { buildRoster, checkLockReadiness, computeRoleChanges } from "@uwdsc/common/recruiting";
+import {
+  buildRoster,
+  checkLockReadiness,
+  computeRoleChanges,
+  restoreSubteam,
+  retireBlocker,
+  retireSubteam,
+} from "@uwdsc/common/recruiting";
 import type { HiringPick, LeadershipDraft, LeadershipSlot } from "@uwdsc/common/schemas";
 import type { LeadershipPerson, LeadershipView, RoleState } from "@uwdsc/common/types";
 import { formatTermCode } from "@uwdsc/common/utils";
 import { Button, Spinner } from "@uwdsc/ui";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRecruiting } from "@/contexts/RecruitingContext";
+import { useAutosave, type AutosaveStatus } from "@/hooks/useAutosave";
 import {
   getLeadership,
   lockLeadership,
@@ -52,6 +60,14 @@ export function LeadershipPage() {
     <LeadershipEditor
       key={version}
       view={data}
+      onDraftSaved={async (next) => {
+        // Keep the cache current without remounting the editor mid-edit.
+        await mutate(next, { revalidate: false });
+      }}
+      onStructureChanged={async () => {
+        // New subteams/positions arrive in the view; local edits are kept (no remount).
+        await mutate();
+      }}
       onSaved={async (next) => {
         if (next) await mutate(next, { revalidate: false });
         else await mutate();
@@ -67,14 +83,24 @@ function newSlotId() {
 
 interface LeadershipEditorProps {
   readonly view: LeadershipView;
+  readonly onDraftSaved: (next: LeadershipView) => Promise<void>;
+  readonly onStructureChanged: () => Promise<void>;
   readonly onSaved: (next: LeadershipView | null) => Promise<void>;
 }
 
-function LeadershipEditor({ view, onSaved }: LeadershipEditorProps) {
+function LeadershipEditor({
+  view,
+  onDraftSaved,
+  onStructureChanged,
+  onSaved,
+}: LeadershipEditorProps) {
   const router = useRouter();
   const { user } = useAuth();
   const { capabilities, refresh } = useRecruiting();
   const [slots, setSlots] = useState<LeadershipSlot[]>(view.draft.slots);
+  const [retiredSubteamIds, setRetiredSubteamIds] = useState<number[]>(
+    view.draft.retiredSubteamIds
+  );
   const [hiring, setHiring] = useState<HiringPick[]>(() =>
     view.hiring
       .filter((row) => row.isOpen)
@@ -89,7 +115,11 @@ function LeadershipEditor({ view, onSaved }: LeadershipEditorProps) {
   const targetLabel = capabilities?.cycle
     ? formatTermCode(capabilities.cycle.targetTermCode)
     : "next term";
-  const draft: LeadershipDraft = useMemo(() => ({ slots }), [slots]);
+  const draft: LeadershipDraft = useMemo(
+    () => ({ slots, retiredSubteamIds }),
+    [slots, retiredSubteamIds]
+  );
+  const retired = useMemo(() => new Set(retiredSubteamIds), [retiredSubteamIds]);
 
   const subteamNames = useMemo(() => {
     const names = new Map<number, string>();
@@ -181,6 +211,26 @@ function LeadershipEditor({ view, onSaved }: LeadershipEditorProps) {
           successorProfileId: null,
         },
       ]),
+    retired,
+    canEditStructure: capabilities?.can.editStructure ?? false,
+    retireBlocker: (subteamId) => retireBlocker(draft, view.structure, subteamId, names),
+    setRetired: (subteamId, on) => {
+      const next = on
+        ? retireSubteam(draft, view.structure, subteamId)
+        : restoreSubteam(draft, view.structure, subteamId);
+      setSlots(next.slots);
+      setRetiredSubteamIds(next.retiredSubteamIds);
+      if (on) {
+        setHiring((current) =>
+          current.filter(
+            (pick) =>
+              view.positions.find((p) => p.id === pick.positionId)?.subteamId !== subteamId
+          )
+        );
+      }
+      setDirty(true);
+    },
+    structureChanged: onStructureChanged,
   };
 
   const afterRoleChange = async () => {
@@ -188,17 +238,17 @@ function LeadershipEditor({ view, onSaved }: LeadershipEditorProps) {
     router.refresh();
   };
 
-  const saveDraft = async () => {
-    setIsSaving(true);
-    try {
-      const next = await saveLeadershipDraft(draft, hiring);
-      toast.success("Draft saved");
-      await onSaved(next);
-    } catch (err) {
-      toast.error((err as Error).message || "Couldn't save the draft");
-      setIsSaving(false);
-    }
-  };
+  // Before the lock, every change saves itself. After it, changes apply roles, so they
+  // wait for "Apply changes" and its confirm dialog.
+  const pendingDraft = useMemo(() => ({ draft, hiring }), [draft, hiring]);
+  const autosave = useAutosave(
+    pendingDraft,
+    async (value) => {
+      const next = await saveLeadershipDraft(value.draft, value.hiring);
+      await onDraftSaved(next);
+    },
+    { enabled: !view.locked && !isSaving }
+  );
 
   const confirm = async () => {
     setIsSaving(true);
@@ -231,9 +281,16 @@ function LeadershipEditor({ view, onSaved }: LeadershipEditorProps) {
           <p className="mt-1 max-w-2xl text-sm leading-[22px] text-muted-foreground">
             {view.locked
               ? `Leadership for ${targetLabel} is locked. Changes here apply roles immediately.`
-              : `Decide what happens to each president and VP seat for ${targetLabel}, then pick which exec positions are hiring. Recruiting unlocks for every VP when you lock this.`}
+              : `Decide what happens to each president and VP seat for ${targetLabel}, then pick which exec positions are hiring. Changes save automatically. Recruiting unlocks for every VP when you lock this.`}
           </p>
         </div>
+        {!view.locked && (
+          <AutosaveIndicator
+            status={autosave.status}
+            error={autosave.error}
+            onRetry={autosave.retry}
+          />
+        )}
         <div className="flex-[0_0_240px]">
           <div className="mb-1.5 flex justify-between text-xs">
             <span className="font-semibold">
@@ -268,13 +325,23 @@ function LeadershipEditor({ view, onSaved }: LeadershipEditorProps) {
       <VicePresidentsCard structure={view.structure} slots={slots} editor={editor} />
       <HiringPositionsCard
         positions={view.positions}
+        presidentsSubteamId={view.structure.presidentsSubteamId}
+        retired={retired}
         hiring={hiring}
         openVpSeats={openVpSeats}
         readOnly={view.locked}
         disabled={isSaving}
+        canAddPositions={!view.locked && editor.canEditStructure}
         onChange={(next) => {
           setHiring(next);
           setDirty(true);
+        }}
+        onPositionCreated={async ({ positionId, isVp }) => {
+          await onStructureChanged();
+          if (!isVp) {
+            setHiring((current) => [...current, { positionId, openings: 1 }]);
+            setDirty(true);
+          }
         }}
       />
 
@@ -302,11 +369,6 @@ function LeadershipEditor({ view, onSaved }: LeadershipEditorProps) {
               : readiness.blockers.slice(0, 2).join(". ")}
           </div>
         </div>
-        {!view.locked && (
-          <Button variant="outline" disabled={isSaving || !dirty} onClick={saveDraft}>
-            Save draft
-          </Button>
-        )}
         <Button
           disabled={
             isSaving ||
@@ -331,10 +393,66 @@ function LeadershipEditor({ view, onSaved }: LeadershipEditorProps) {
         people={people}
         subteamNames={subteamNames}
         hiringSummary={hiringSummary}
+        notContinuing={view.structure.subteams
+          .filter((subteam) => retired.has(subteam.id))
+          .map((subteam) => subteam.name)}
         viewerId={user?.id ?? null}
         isSubmitting={isSaving}
         onConfirm={confirm}
       />
+    </div>
+  );
+}
+
+/** Save state, shown left of the progress bar. Nothing until the first change. */
+function AutosaveIndicator({
+  status,
+  error,
+  onRetry,
+}: {
+  readonly status: AutosaveStatus;
+  readonly error: string | null;
+  readonly onRetry: () => void;
+}) {
+  if (status === "idle") return null;
+
+  if (status === "error") {
+    return (
+      <div
+        role="alert"
+        className="flex flex-none items-center gap-2 text-[13px] text-destructive"
+      >
+        <AlertCircle className="size-4 flex-none" aria-hidden />
+        <span className="max-w-64 truncate" title={error ?? undefined}>
+          Couldn&apos;t save{error ? `: ${error}` : ""}
+        </span>
+        <Button variant="outline" size="sm" onClick={onRetry}>
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      aria-live="polite"
+      className="flex flex-none items-center gap-1.5 text-[13px] whitespace-nowrap text-muted-foreground"
+    >
+      {status === "saved" && (
+        <>
+          <CheckCircle2 className="size-4 text-emerald-600" aria-hidden />
+          <span className="font-medium text-emerald-700 dark:text-emerald-400">
+            Draft saved
+          </span>
+        </>
+      )}
+      {status === "saving" && (
+        <>
+          <Spinner className="size-3.5" />
+          Saving…
+        </>
+      )}
+      {status === "pending" && "Unsaved changes"}
     </div>
   );
 }

@@ -33,13 +33,14 @@ export class TeamRepository extends BaseRepository {
   }
 
   /**
-   * Every subteam, for pickers and filters (e.g. assigning a member's subteam).
+   * Every active subteam, for pickers and filters (e.g. assigning a member's subteam).
    * Ordered by id so the seeded ordering (Presidents first) is preserved.
    */
   async getSubteams(): Promise<SubteamOption[]> {
     return this.sql<SubteamOption[]>`
       SELECT id, name
       FROM org.subteams
+      WHERE retired_at IS NULL
       ORDER BY id ASC
     `;
   }

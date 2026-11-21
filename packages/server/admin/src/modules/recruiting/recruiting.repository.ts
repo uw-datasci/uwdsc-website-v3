@@ -73,6 +73,20 @@ export class RecruitingRepository extends BaseRepository {
     return row ? toSummary(row) : null;
   }
 
+  /** Subteams the cycle's leadership draft marks Not continuing next term. */
+  async getRetiredSubteams(cycleId: string): Promise<{ id: number; name: string }[]> {
+    return this.sql<{ id: number; name: string }[]>`
+      SELECT st.id, st.name
+      FROM hiring.cycles c
+      CROSS JOIN LATERAL jsonb_array_elements_text(
+        COALESCE(c.leadership_draft->'retiredSubteamIds', '[]'::jsonb)
+      ) AS retired(id)
+      JOIN org.subteams st ON st.id = retired.id::int
+      WHERE c.id = ${cycleId}
+      ORDER BY st.name
+    `;
+  }
+
   /** Terms that start after the given term, soonest first: the possible target terms. */
   async getTermsStartingAfter(startDate: string): Promise<StartableTermRow[]> {
     return this.sql<StartableTermRow[]>`

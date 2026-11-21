@@ -70,6 +70,12 @@ export const requireOffers: WithRecruitingOptions = {
   require: (caps) => (caps.can.sendOffers ? null : "Only presidents can send offers"),
 };
 
+/** Subteam / position creation: presidents while a cycle exists and isn't finalized. */
+export const requireStructure: WithRecruitingOptions = {
+  require: (caps) =>
+    caps.can.editStructure ? null : "Only presidents can add subteams and positions",
+};
+
 /** Finalize routes: presidents once leadership is locked (also after finalizing, to read). */
 export const requireFinalize: WithRecruitingOptions = {
   require: (caps) =>

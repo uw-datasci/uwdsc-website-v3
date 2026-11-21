@@ -43,6 +43,7 @@ export interface FinalizeInput {
   pending: readonly DecidedCard[];
   execHolders: readonly { profileId: string; name: string }[];
   seatsTotal: number;
+  retiredSubteams: readonly { id: number; name: string }[];
 }
 
 export interface PlanPerson {
@@ -65,6 +66,7 @@ export interface FinalizePlan {
   roleUpdates: { profileId: string; role: "exec" | "alum"; subteamId: number | null }[];
   teamRows: { profileId: string; positionId: number; subteamId: number }[];
   preview: { presidents: PreviewMember[]; vps: PreviewMember[]; execs: PreviewMember[] };
+  notContinuing: { id: number; name: string }[];
   pending: {
     selectionId: string;
     name: string;
@@ -141,9 +143,16 @@ export function buildFinalizePlan(input: FinalizeInput): FinalizePlan {
   for (const member of input.roster) {
     add(member.profileId, member.name, labels.get(member.profileId) ?? "VP");
   }
+  const retired = new Map(input.retiredSubteams.map((subteam) => [subteam.id, subteam.name]));
   for (const card of input.accepted) {
     if (card.subteamId === null) {
       blockers.push(`${card.positionName} has no subteam. Set one before finalizing.`);
+    }
+    const retiredName = card.subteamId === null ? undefined : retired.get(card.subteamId);
+    if (retiredName) {
+      blockers.push(
+        `${card.name} accepted ${card.positionName}, but ${retiredName} won't continue next term. Correct the offer or restore ${retiredName} in Leadership.`
+      );
     }
     add(card.profileId, card.name, execLabel(card));
   }
@@ -272,6 +281,7 @@ export function buildFinalizePlan(input: FinalizeInput): FinalizePlan {
     roleUpdates,
     teamRows,
     preview,
+    notContinuing: [...input.retiredSubteams],
     pending: input.pending.map((card) => ({
       selectionId: card.selectionId,
       name: card.name,

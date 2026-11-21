@@ -21,13 +21,16 @@ import type {
 /**
  * Decisions a slot can be set to in the UI. `undecided` is always allowed (it blocks the
  * lock). A new seat (no current holder) must name someone, or for a VP seat, open it.
- * A `hired` seat (public applicant accepted) is locked and has no other options.
+ * A `hired` seat (public applicant accepted) is locked and has no other options. A VP seat
+ * on a subteam that won't continue next term can only be Leaving.
  */
 export function slotDecisionOptions(
   slot: Pick<LeadershipSlot, "kind" | "outgoingProfileId"> &
-    Partial<Pick<LeadershipSlot, "decision">>
+    Partial<Pick<LeadershipSlot, "decision">>,
+  { retired = false }: { retired?: boolean } = {}
 ) {
   if (slot.decision === "hired") return ["hired"] as SlotDecision[];
+  if (retired && slot.kind === "vp") return ["leaving"] as SlotDecision[];
   const options: SlotDecision[] =
     slot.kind === "pres"
       ? slot.outgoingProfileId
@@ -59,6 +62,83 @@ function vpPositionSubteam(structure: LeadershipStructure, positionId: number): 
     if (subteam.vpPositions.some((p) => p.id === positionId)) return subteam.id;
   }
   return null;
+}
+
+/** Whether a VP slot sits on a subteam the draft marks Not continuing. */
+export function isRetiredSlot(
+  draft: LeadershipDraft,
+  structure: LeadershipStructure,
+  slot: Pick<LeadershipSlot, "kind" | "positionId">
+): boolean {
+  if (slot.kind !== "vp") return false;
+  const subteamId = vpPositionSubteam(structure, slot.positionId);
+  return subteamId !== null && draft.retiredSubteamIds.includes(subteamId);
+}
+
+function subteamVpPositionIds(structure: LeadershipStructure, subteamId: number): Set<number> {
+  const subteam = structure.subteams.find((s) => s.id === subteamId);
+  return new Set(subteam?.vpPositions.map((p) => p.id) ?? []);
+}
+
+/**
+ * Why a subteam can't be marked Not continuing, or null if it can. A seat filled by an
+ * accepted public VP offer has to be corrected in Offers first.
+ */
+export function retireBlocker(
+  draft: LeadershipDraft,
+  structure: LeadershipStructure,
+  subteamId: number,
+  names: Record<string, string> = {}
+): string | null {
+  const positionIds = subteamVpPositionIds(structure, subteamId);
+  const hired = draft.slots.find(
+    (slot) =>
+      slot.kind === "vp" && slot.decision === "hired" && positionIds.has(slot.positionId)
+  );
+  if (!hired) return null;
+  const name = (hired.successorProfileId && names[hired.successorProfileId]) || "Someone";
+  return `${name} accepted a VP offer here. Correct it in Offers first.`;
+}
+
+/**
+ * Mark a subteam Not continuing next term: its current VPs become Leaving, seats nobody
+ * holds now are dropped. Nothing changes in the current term until Finalize.
+ */
+export function retireSubteam(
+  draft: LeadershipDraft,
+  structure: LeadershipStructure,
+  subteamId: number
+): LeadershipDraft {
+  const positionIds = subteamVpPositionIds(structure, subteamId);
+  const onSubteam = (slot: LeadershipSlot) =>
+    slot.kind === "vp" && positionIds.has(slot.positionId);
+  return {
+    ...draft,
+    slots: draft.slots
+      .filter((slot) => !onSubteam(slot) || slot.outgoingProfileId !== null)
+      .map((slot) =>
+        onSubteam(slot) ? { ...slot, decision: "leaving", successorProfileId: null } : slot
+      ),
+    retiredSubteamIds: [...new Set([...draft.retiredSubteamIds, subteamId])],
+  };
+}
+
+/** Undo {@link retireSubteam}: the subteam continues and its VPs need a decision again. */
+export function restoreSubteam(
+  draft: LeadershipDraft,
+  structure: LeadershipStructure,
+  subteamId: number
+): LeadershipDraft {
+  const positionIds = subteamVpPositionIds(structure, subteamId);
+  return {
+    ...draft,
+    slots: draft.slots.map((slot) =>
+      slot.kind === "vp" && positionIds.has(slot.positionId) && slot.decision === "leaving"
+        ? { ...slot, decision: "undecided" }
+        : slot
+    ),
+    retiredSubteamIds: draft.retiredSubteamIds.filter((id) => id !== subteamId),
+  };
 }
 
 /** Next term's roster: one entry per filled slot. Invalid slots are skipped (see checkLockReadiness). */
@@ -110,10 +190,22 @@ export function checkLockReadiness(
   const blockers: string[] = [];
   const nameOf = (id: string | null) => (id ? (names[id] ?? "Someone") : "A new seat");
 
+  const retired = new Set(draft.retiredSubteamIds);
+  const subteamName = (id: number | null) =>
+    structure.subteams.find((s) => s.id === id)?.name ?? "This subteam";
+
   for (const slot of draft.slots) {
-    if (slot.decision === "undecided") {
+    const slotRetired = isRetiredSlot(draft, structure, slot);
+    if (slotRetired && slot.decision !== "leaving") {
+      const subteam = subteamName(vpPositionSubteam(structure, slot.positionId));
+      blockers.push(
+        slot.decision === "hired"
+          ? `${subteam} has a seat filled from Offers, so it can't be Not continuing`
+          : `Pick Leaving for ${nameOf(slot.outgoingProfileId)}: ${subteam} won't continue next term`
+      );
+    } else if (slot.decision === "undecided") {
       blockers.push(`${nameOf(slot.outgoingProfileId)} is Undecided`);
-    } else if (!slotDecisionOptions(slot).includes(slot.decision)) {
+    } else if (!slotDecisionOptions(slot, { retired: slotRetired }).includes(slot.decision)) {
       blockers.push(`${nameOf(slot.outgoingProfileId)} has a status that doesn't fit the seat`);
     }
     if (slot.decision === "successor" && !slot.successorProfileId) {
@@ -146,6 +238,7 @@ export function checkLockReadiness(
   }
 
   for (const subteam of structure.subteams) {
+    if (retired.has(subteam.id)) continue;
     const positionIds = new Set(subteam.vpPositions.map((p) => p.id));
     const covered = draft.slots.some(
       (slot) =>
@@ -206,6 +299,7 @@ export function fillPublicSeat(
   );
   if (index === -1) return null;
   return {
+    ...draft,
     slots: draft.slots.map((slot, i) =>
       i === index ? { ...slot, decision: "hired", successorProfileId: profileId } : slot
     ),
@@ -226,6 +320,7 @@ export function reopenPublicSeat(
   );
   if (index === -1) return null;
   return {
+    ...draft,
     slots: draft.slots.map((slot, i) =>
       i === index ? { ...slot, decision: "open", successorProfileId: null } : slot
     ),

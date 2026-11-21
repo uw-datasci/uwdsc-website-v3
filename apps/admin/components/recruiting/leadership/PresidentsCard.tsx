@@ -8,7 +8,7 @@ import { PRESIDENT_DECISION_OPTIONS } from "@/constants/recruiting";
 import { PersonAvatar } from "./PersonAvatar";
 import { personNow } from "@/lib/utils/recruiting";
 import { PersonPicker } from "./PersonPicker";
-import { SegmentedControl } from "./SegmentedControl";
+import { SeatDecision } from "./SeatDecision";
 import type { SlotEditor } from "@/types/recruiting";
 
 function nextTag(slot: LeadershipSlot): { label: string; className: string } {
@@ -38,8 +38,8 @@ export function PresidentsCard({ slots, editor, targetLabel }: PresidentsCardPro
 
   return (
     <Card className="gap-0 py-0">
-      <div className="flex items-center gap-3 border-b px-5 py-4">
-        <div className="flex-1">
+      <div className="flex flex-wrap items-center gap-3 border-b px-4 py-4 sm:px-5">
+        <div className="min-w-0 flex-1">
           <h3 className="text-[15px] font-semibold">Presidents</h3>
           <p className="text-sm text-muted-foreground">Who leads {targetLabel}.</p>
         </div>
@@ -60,7 +60,7 @@ export function PresidentsCard({ slots, editor, targetLabel }: PresidentsCardPro
           return (
             <li
               key={slot.id}
-              className="flex flex-wrap items-center gap-3.5 border-b px-5 py-3 last:border-b-0"
+              className="flex flex-wrap items-center gap-x-3.5 gap-y-2.5 border-b px-4 py-3 last:border-b-0 sm:px-5"
             >
               <PersonAvatar name={name} className="size-9 text-xs" />
               <div className="min-w-0 flex-[1_1_200px]">
@@ -86,9 +86,9 @@ export function PresidentsCard({ slots, editor, targetLabel }: PresidentsCardPro
                 {tag.label}
               </Badge>
               {outgoing ? (
-                <SegmentedControl
+                <SeatDecision
                   label={`${outgoing.name} next term`}
-                  className="w-full sm:w-64"
+                  segmentedClassName="w-64"
                   value={slot.decision}
                   options={PRESIDENT_DECISION_OPTIONS}
                   disabled={disabled}

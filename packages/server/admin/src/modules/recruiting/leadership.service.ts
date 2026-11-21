@@ -198,7 +198,9 @@ class LeadershipService {
       };
 
       const parsed = leadershipDraftSchema.safeParse(rawDraft);
-      const stored: LeadershipDraft = parsed.success ? parsed.data : { slots: [] };
+      const stored: LeadershipDraft = parsed.success
+        ? parsed.data
+        : { slots: [], retiredSubteamIds: [] };
       const locked = cycle.rosterLockedAt !== null;
       const { draft, unplaced } = locked
         ? { draft: stored, unplaced: [] }
@@ -255,12 +257,14 @@ class LeadershipService {
         kind: "vp",
         positionId,
         outgoingProfileId: leader.profile_id,
-        decision: "undecided",
+        decision: stored.retiredSubteamIds.includes(subteam?.id ?? -1)
+          ? "leaving"
+          : "undecided",
         successorProfileId: null,
       });
     }
 
-    return { draft: { slots }, unplaced };
+    return { draft: { ...stored, slots }, unplaced };
   }
 
   private baseline(cycle: RecruitingCycleSummary, ctx: Context): RosterBaseline[] {
@@ -357,10 +361,24 @@ class LeadershipService {
           : vpIds.has(slot.positionId);
       if (!valid) throw new ApiError("A seat is on the wrong position", 400);
     }
+    const subteamIds = new Set(ctx.structure.subteams.map((s) => s.id));
+    if (draft.retiredSubteamIds.some((id) => !subteamIds.has(id))) {
+      throw new ApiError("Only subteams with a VP seat can be marked Not continuing", 400);
+    }
+    const retired = new Set(draft.retiredSubteamIds);
+    const positionsById = new Map(ctx.positions.map((p) => [p.id, p]));
+
     const seen = new Set<number>();
     for (const pick of hiring) {
       if (!execIds.has(pick.positionId)) {
         throw new ApiError("Only exec positions can be picked for hiring", 400);
+      }
+      const position = positionsById.get(pick.positionId);
+      if (position?.subteamId != null && retired.has(position.subteamId)) {
+        throw new ApiError(
+          `${position.subteamName ?? "That subteam"} won't continue next term, so it can't hire`,
+          400
+        );
       }
       if (seen.has(pick.positionId)) throw new ApiError("A position is picked twice", 400);
       seen.add(pick.positionId);
@@ -388,9 +406,16 @@ class LeadershipService {
       .filter(([, seats]) => seats.open > 0)
       .map(([positionId, seats]) => ({ positionId, openings: seats.open + seats.hired }));
 
+    // After the lock Setup owns exec positions, except on a subteam marked Not continuing:
+    // those close here (applicants and cards stay).
+    const retired = new Set(draft.retiredSubteamIds);
+    const retiredExecIds = ctx.positions
+      .filter((p) => !p.isVp && p.subteamId !== null && retired.has(p.subteamId))
+      .map((p) => p.id);
+
     return scope === "all"
       ? { managedIds: [...vpIds, ...execIds], desired: [...hiring, ...vpPicks] }
-      : { managedIds: vpIds, desired: vpPicks };
+      : { managedIds: [...vpIds, ...retiredExecIds], desired: vpPicks };
   }
 }
 

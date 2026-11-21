@@ -22,6 +22,10 @@ import {
   cn,
 } from "@uwdsc/ui";
 import { addCyclePosition, updateCyclePosition } from "@/lib/api";
+import {
+  CreatePositionDialog,
+  type CreatePositionTarget,
+} from "@/components/recruiting/structure/CreatePositionDialog";
 
 interface PositionsCardProps {
   readonly view: SetupView;
@@ -32,6 +36,8 @@ export function PositionsCard({ view, onSaved }: PositionsCardProps) {
   const editable = view.canEditSchedule;
   const [busyId, setBusyId] = useState<number | null>(null);
   const [toAdd, setToAdd] = useState("");
+  const [creating, setCreating] = useState<CreatePositionTarget | null>(null);
+  const canCreate = editable && view.canEditStructure && view.subteams.length > 0;
 
   const groups = new Map<string, SetupPosition[]>();
   for (const position of view.positions) {
@@ -98,10 +104,15 @@ export function PositionsCard({ view, onSaved }: PositionsCardProps) {
                 const busy = busyId === position.id;
                 return (
                   <li key={position.id} className="flex min-h-10 items-center gap-2.5">
-                    <LockedReason reason={switchLock(editable, position.isVp)}>
+                    <LockedReason reason={switchLock(editable, position)}>
                       <Switch
                         checked={position.isOpen}
-                        disabled={!editable || position.isVp || busy}
+                        disabled={
+                          !editable ||
+                          position.isVp ||
+                          busy ||
+                          (position.retired && !position.isOpen)
+                        }
                         aria-label={`${position.name} open`}
                         onCheckedChange={(isOpen) => patch(position, { isOpen })}
                       />
@@ -117,6 +128,11 @@ export function PositionsCard({ view, onSaved }: PositionsCardProps) {
                         {position.isVp && (
                           <Badge variant="secondary" className="px-1.5 py-0 text-[10px]">
                             VP seat
+                          </Badge>
+                        )}
+                        {position.retired && (
+                          <Badge variant="outline" className="px-1.5 py-0 text-[10px]">
+                            Not continuing
                           </Badge>
                         )}
                       </div>
@@ -158,34 +174,73 @@ export function PositionsCard({ view, onSaved }: PositionsCardProps) {
         ))}
       </div>
 
-      {editable && view.addablePositions.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 px-5 py-3">
-          <Select value={toAdd} onValueChange={setToAdd}>
-            <SelectTrigger size="sm" className="w-64" aria-label="Position to add">
-              <SelectValue placeholder="Add a position" />
-            </SelectTrigger>
-            <SelectContent>
-              {view.addablePositions.map((position) => (
-                <SelectItem key={position.id} value={String(position.id)}>
-                  {position.name}
-                  {position.subteamName ? ` · ${position.subteamName}` : ""}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button size="sm" variant="outline" disabled={!toAdd || busyId === -1} onClick={add}>
-            <Plus aria-hidden />
-            Add
-          </Button>
+      {editable && (view.addablePositions.length > 0 || canCreate) && (
+        <div className="flex flex-wrap items-center gap-2 px-4 py-3 sm:px-5">
+          {view.addablePositions.length > 0 && (
+            <>
+              <Select value={toAdd} onValueChange={setToAdd}>
+                <SelectTrigger
+                  size="sm"
+                  className="w-full sm:w-64"
+                  aria-label="Position to add"
+                >
+                  <SelectValue placeholder="Add a position" />
+                </SelectTrigger>
+                <SelectContent>
+                  {view.addablePositions.map((position) => (
+                    <SelectItem key={position.id} value={String(position.id)}>
+                      {position.name}
+                      {position.subteamName ? ` · ${position.subteamName}` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={!toAdd || busyId === -1}
+                onClick={add}
+              >
+                <Plus aria-hidden />
+                Add
+              </Button>
+            </>
+          )}
+          {canCreate && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-muted-foreground sm:ml-auto"
+              onClick={() =>
+                setCreating({
+                  subteams: view.subteams,
+                  subteamId: null,
+                  allowVp: false,
+                  openInCycle: true,
+                })
+              }
+            >
+              <Plus aria-hidden />
+              Create a position
+            </Button>
+          )}
         </div>
       )}
+      <CreatePositionDialog
+        target={creating}
+        onClose={() => setCreating(null)}
+        onCreated={onSaved}
+      />
     </Card>
   );
 }
 
-function switchLock(editable: boolean, isVp: boolean): string | null {
+function switchLock(editable: boolean, position: SetupPosition): string | null {
   if (!editable) return "Presidents open and close positions.";
-  if (isVp) return "VP seats are opened from Leadership.";
+  if (position.isVp) return "VP seats are opened from Leadership.";
+  if (position.retired && !position.isOpen) {
+    return `${position.subteamName ?? "This subteam"} won't continue next term.`;
+  }
   return null;
 }
 

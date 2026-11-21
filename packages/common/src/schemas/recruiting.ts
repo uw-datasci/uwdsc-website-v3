@@ -33,6 +33,7 @@ export type LeadershipSlot = z.infer<typeof leadershipSlotSchema>;
 
 export const leadershipDraftSchema = z.object({
   slots: z.array(leadershipSlotSchema).max(200),
+  retiredSubteamIds: z.array(z.number().int().positive()).max(50).default([]),
 });
 export type LeadershipDraft = z.infer<typeof leadershipDraftSchema>;
 
@@ -51,7 +52,6 @@ export const scheduleSchema = z
   .object({
     releaseDate: z.iso.datetime({ offset: true, message: "Pick a release date" }),
     softDeadline: z.iso.datetime({ offset: true, message: "Pick a deadline" }),
-    hardDeadline: z.iso.datetime({ offset: true, message: "Pick a final cutoff" }),
     targetTermId: z.uuid("Pick the term you're hiring for"),
     offerResponseHours: z
       .number()
@@ -62,12 +62,33 @@ export const scheduleSchema = z
   .refine((v) => new Date(v.releaseDate) < new Date(v.softDeadline), {
     message: "The deadline must be after the release date",
     path: ["softDeadline"],
-  })
-  .refine((v) => new Date(v.softDeadline) <= new Date(v.hardDeadline), {
-    message: "The final cutoff can't be before the deadline",
-    path: ["hardDeadline"],
   });
 export type ScheduleInput = z.infer<typeof scheduleSchema>;
+
+// ==========================================
+//  Subteams & positions
+// ==========================================
+
+const structureName = (what: string) =>
+  z
+    .string()
+    .trim()
+    .min(2, `${what} needs at least 2 characters`)
+    .max(60, `Keep the ${what.toLowerCase()} under 60 characters`);
+
+export const createSubteamSchema = z.object({
+  name: structureName("Subteam name"),
+  vpPositionName: structureName("VP position name"),
+});
+export type CreateSubteamInput = z.infer<typeof createSubteamSchema>;
+
+export const createPositionSchema = z.object({
+  subteamId: z.number().int().positive(),
+  name: structureName("Position name"),
+  isVp: z.boolean(),
+  openInCycle: z.boolean().default(false),
+});
+export type CreatePositionInput = z.infer<typeof createPositionSchema>;
 
 export const addPositionSchema = z.object({
   positionId: z.number().int().positive(),

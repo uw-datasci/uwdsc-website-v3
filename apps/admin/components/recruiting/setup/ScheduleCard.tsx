@@ -38,7 +38,6 @@ export function ScheduleCard({ view, onSaved }: ScheduleCardProps) {
   const [values, setValues] = useState({
     releaseDate: schedule.releaseDate ?? "",
     softDeadline: schedule.softDeadline ?? "",
-    hardDeadline: schedule.hardDeadline ?? "",
     targetTermId: schedule.targetTermId,
     offerResponseHours: String(schedule.offerResponseHours),
   });
@@ -81,7 +80,7 @@ export function ScheduleCard({ view, onSaved }: ScheduleCardProps) {
         </p>
       </div>
 
-      <div className="grid gap-5 p-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-5 p-5 sm:grid-cols-2">
         {SCHEDULE_DATE_FIELDS.map(({ key, label, help }) => (
           <div key={key} className="flex flex-col gap-1.5">
             <Label>{label}</Label>

@@ -11,6 +11,7 @@ import {
   RotateCcw,
   TriangleAlert,
   UserPlus,
+  Archive,
 } from "lucide-react";
 import type { PlanPerson, PreviewMember } from "@uwdsc/common/recruiting";
 import type { FinalizeView } from "@uwdsc/common/types";
@@ -88,6 +89,27 @@ export function FinalizePage() {
         >
           {data.pending.map((offer) => `${offer.name} (${offer.positionName})`).join(", ")}. If
           you finalize now, those offers close and the seats stay empty.
+        </Banner>
+      )}
+
+      {data.notContinuing.length > 0 && (
+        <Banner
+          tone="warn"
+          icon={Archive}
+          title={`Not continuing in ${data.targetTermLabel}: ${data.notContinuing
+            .map((subteam) => subteam.name)
+            .join(", ")}`}
+          action={
+            !data.finalizedAt && (
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/recruiting/leadership">Change in Leadership</Link>
+              </Button>
+            )
+          }
+        >
+          {data.finalizedAt
+            ? "Retired at Finalize. They stay in past terms' teams."
+            : "Finalizing retires them. They stay on this term's team page and in past terms; execs there become alum unless they were hired onto another subteam."}
         </Banner>
       )}
 

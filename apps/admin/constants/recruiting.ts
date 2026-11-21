@@ -26,15 +26,14 @@ export const ROLE_CHANGE_GROUPS: { key: RoleChangeGroup; title: string; icon: Lu
 // Setup
 // ---------------------------------------------------------------------------
 
-export type ScheduleDateField = "releaseDate" | "softDeadline" | "hardDeadline";
+export type ScheduleDateField = "releaseDate" | "softDeadline";
 
 export const SCHEDULE_DATE_FIELDS: { key: ScheduleDateField; label: string; help: string }[] = [
   { key: "releaseDate", label: "Applications open", help: "When /apply opens." },
-  { key: "softDeadline", label: "Deadline", help: "The deadline applicants see." },
   {
-    key: "hardDeadline",
-    label: "Final cutoff",
-    help: "Submissions close. At least 15 minutes after the deadline.",
+    key: "softDeadline",
+    label: "Deadline",
+    help: "The deadline applicants see. Submissions close 15 minutes later.",
   },
 ];
 

@@ -74,6 +74,7 @@ export class LeadershipRepository extends BaseRepository {
       SELECT ep.id, ep.name, ep.is_vp, ep.subteam_id, s.name AS subteam_name
       FROM org.exec_positions ep
       LEFT JOIN org.subteams s ON s.id = ep.subteam_id
+      WHERE s.retired_at IS NULL
       ORDER BY ep.subteam_id NULLS LAST, ep.is_vp DESC, ep.name
     `;
     return rows.map((row) => ({
@@ -221,7 +222,10 @@ export class LeadershipRepository extends BaseRepository {
         SELECT leadership_draft FROM hiring.cycles WHERE id = ${cycleId} FOR UPDATE
       `;
       const stored = leadershipDraftSchema.safeParse(current?.leadership_draft);
-      const conflict = hiredSeatChange(stored.success ? stored.data : { slots: [] }, draft);
+      const conflict = hiredSeatChange(
+        stored.success ? stored.data : { slots: [], retiredSubteamIds: [] },
+        draft
+      );
       if (conflict) throw new ApiError(conflict, 409);
 
       const [cycle] = lock

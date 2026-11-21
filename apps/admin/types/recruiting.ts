@@ -12,6 +12,11 @@ export interface SlotEditor {
   pick: (slotId: string, person: LeadershipPerson) => void;
   addPresident: () => void;
   addVp: (positionId: number) => void;
+  readonly retired: ReadonlySet<number>;
+  readonly canEditStructure: boolean;
+  retireBlocker: (subteamId: number) => string | null;
+  setRetired: (subteamId: number, retired: boolean) => void;
+  structureChanged: () => Promise<void>;
 }
 
 export type BoardSource = "all" | "new" | "returning";

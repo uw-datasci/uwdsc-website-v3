@@ -197,9 +197,21 @@ export class FinalizeRepository extends BaseRepository {
         `;
       }
 
+      // Subteams marked Not continuing stop existing from the target term on. The row stays,
+      // since roles, rosters and past exec_team rows still point at it.
+      const retiredIds = plan.notContinuing.map((subteam) => subteam.id);
+      if (retiredIds.length > 0) {
+        await sql`
+          UPDATE org.subteams
+          SET retired_at = now(), retired_in_cycle_id = ${cycleId}
+          WHERE id = ANY(${sql.array(retiredIds)}::int[]) AND retired_at IS NULL
+        `;
+      }
+
       await sql`
         INSERT INTO hiring.cycle_events (cycle_id, actor_id, type, payload)
         VALUES (${cycleId}, ${actorId}, 'finalized', ${sql.json({
+          retiredSubteams: retiredIds,
           team: plan.teamRows.length,
           execs: plan.roleUpdates.filter((u) => u.role === "exec").length,
           alumni: plan.roleUpdates.filter((u) => u.role === "alum").length,

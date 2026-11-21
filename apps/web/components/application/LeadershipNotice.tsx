@@ -30,7 +30,7 @@ export function LeadershipNotice({ seat }: { readonly seat: LeadershipSeat }) {
         </div>
         <h1 className="mb-4 text-3xl font-bold text-white">What are you doing here? 👀</h1>
         <p className="mb-2 text-lg text-grey1">
-          You&apos;re literally {seat.positionName ?? fallback}. You don&apos;t fill out the form, you read it.
+          You&apos;re literally {seat.positionName ?? fallback}... You don&apos;t fill out the form, you read it.
         </p>
         <p className="mb-6 text-lg text-grey1">{nextStep}</p>
         <div className="flex flex-col justify-center gap-3 sm:flex-row">

@@ -15,7 +15,7 @@ export function LeadershipNotice({ seat }: { readonly seat: LeadershipSeat }) {
   const nextStep =
     seat.role === "pres"
       ? "Go run the club. The applicants are waiting."
-      : "Go back to Recruiting and review your applicants.";
+      : "Go back to Recruiting and find your team.";
 
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4">

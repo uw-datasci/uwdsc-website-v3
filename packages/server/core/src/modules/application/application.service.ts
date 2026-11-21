@@ -3,6 +3,7 @@ import {
   ApplicationUpdatePayload,
   ApplicationWithDetails,
   GeneralQuestion,
+  LeadershipSeat,
   PositionWithQuestions,
   ProfileAutofill,
   QuestionRow,
@@ -54,6 +55,25 @@ class ApplicationService {
       return { term, cycleId, open };
     } catch (error) {
       throw new ApiError(`Failed to get application window: ${(error as Error).message}`, 500);
+    }
+  }
+
+  async getLeadershipSeat(userId: string, cycleId: string): Promise<LeadershipSeat | null> {
+    try {
+      return await this.repository.getLeadershipSeat(userId, cycleId);
+    } catch (error) {
+      throw new ApiError(`Failed to check leadership: ${(error as Error).message}`, 500);
+    }
+  }
+
+  /** Presidents and VPs are already on next term's team, so they can't start or submit one. */
+  async assertCanApply(userId: string, cycleId: string): Promise<void> {
+    const seat = await this.getLeadershipSeat(userId, cycleId);
+    if (seat) {
+      throw new ApiError(
+        "You're on next term's leadership, so there's no application to fill out.",
+        403
+      );
     }
   }
 

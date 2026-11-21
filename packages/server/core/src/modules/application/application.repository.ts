@@ -6,6 +6,7 @@ import type {
   ApplicationPositionSelection,
   ApplicationWithDetails,
   CreateApplicationData,
+  LeadershipSeat,
   PositionSelectionInput,
   ProfileAutofill,
   QuestionRow,
@@ -62,6 +63,32 @@ export class ApplicationRepository extends BaseRepository {
       LIMIT 1
     `;
     return result[0]?.id ?? null;
+  }
+
+  /**
+   * The user's seat if they're a president or VP. /apply only opens after the lock, when
+   * roles already reflect next term's leadership; the seat name comes from the roster.
+   */
+  async getLeadershipSeat(userId: string, cycleId: string): Promise<LeadershipSeat | null> {
+    const result = await this.sql<
+      { role: LeadershipSeat["role"]; position_name: string | null; target_term_code: string }[]
+    >`
+      SELECT ur.role, ep.name AS position_name, tt.code AS target_term_code
+      FROM public.user_roles ur
+      JOIN hiring.cycles c ON c.id = ${cycleId}
+      JOIN public.terms tt ON tt.id = c.target_term_id
+      LEFT JOIN hiring.cycle_leadership cl ON cl.cycle_id = c.id AND cl.profile_id = ur.id
+      LEFT JOIN org.exec_positions ep ON ep.id = cl.position_id
+      WHERE ur.id = ${userId} AND ur.role IN ('pres', 'admin')
+      LIMIT 1
+    `;
+    const row = result[0];
+    if (!row) return null;
+    return {
+      role: row.role,
+      positionName: row.position_name,
+      targetTermCode: row.target_term_code,
+    };
   }
 
   async getAvailablePositions(cycleId: string): Promise<ApplicationPositionRow[]> {

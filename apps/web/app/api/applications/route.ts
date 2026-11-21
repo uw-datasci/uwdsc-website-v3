@@ -26,9 +26,9 @@ export const POST = withRaftRoute(async (request) => {
   const { user, isUnauthorized } = await tryGetCurrentUser();
   if (!user) return isUnauthorized;
 
-  const { term: activeTerm, open } = await applicationService.getApplyWindow();
+  const { term: activeTerm, cycleId, open } = await applicationService.getApplyWindow();
   if (!activeTerm) return RaftResponse.notFound("No active application period");
-  if (!open) return RaftResponse.forbidden("The application period is closed.");
+  if (!open || !cycleId) return RaftResponse.forbidden("The application period is closed.");
 
   const body = await request.json();
   const { termId } = body;
@@ -36,6 +36,7 @@ export const POST = withRaftRoute(async (request) => {
   if (termId !== activeTerm.id)
     return RaftResponse.badRequest("termId does not match active term");
 
+  await applicationService.assertCanApply(user.id, cycleId);
   const application = await applicationService.createApplication(user.id, termId);
   return RaftResponse.ok(application);
 });

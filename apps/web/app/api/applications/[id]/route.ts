@@ -15,6 +15,8 @@ export const PATCH = withRaftRoute(
     const { id } = await params;
     if (!id) return RaftResponse.badRequest("Application ID is required");
 
+    await applicationService.assertCanApply(user.id, cycleId);
+
     const body = await request.json();
     const application = await applicationService.updateApplication(
       id,

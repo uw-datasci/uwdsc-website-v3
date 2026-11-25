@@ -7,7 +7,7 @@ interface OfferShellProps {
 
 /** Narrow, phone-first column below the site navbar. */
 export function OfferShell({ children }: OfferShellProps) {
-  return <main className="mx-auto w-full max-w-md px-5 pt-28 pb-20 lg:pt-32">{children}</main>;
+  return <main className="mx-auto w-full max-w-md px-5 pt-36 pb-20 lg:pt-44">{children}</main>;
 }
 
 interface OfferMessageProps {

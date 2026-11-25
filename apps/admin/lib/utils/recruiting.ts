@@ -1,6 +1,6 @@
 import { isReviewStatus } from "@uwdsc/common/recruiting";
 import type { BoardCard, LeadershipPerson, RoleState } from "@uwdsc/common/types";
-import type { BoardFilters } from "@/types/recruiting";
+import type { BoardFilters, BoardGroup } from "@/types/recruiting";
 
 export function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -83,6 +83,19 @@ export function cardsByApplication(cards: readonly BoardCard[]): Map<string, Boa
   }
   for (const group of groups.values()) group.sort((a, b) => a.priority - b.priority);
   return groups;
+}
+
+/** A candidate's cards with the same status merged into one group, in board order. */
+export function groupCards(cards: readonly BoardCard[]): BoardGroup[] {
+  const groups = new Map<string, BoardGroup>();
+  for (const card of cards) {
+    const id = `${card.applicationId}:${card.status}`;
+    const group = groups.get(id);
+    if (group) group.cards.push(card);
+    else groups.set(id, { id, status: card.status, cards: [card] });
+  }
+  for (const group of groups.values()) group.cards.sort((a, b) => a.priority - b.priority);
+  return [...groups.values()];
 }
 
 /** Applicants often paste links without a scheme ("github.com/me"). */

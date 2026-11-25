@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { offerResponseService } from "@uwdsc/core";
 import { OfferMessage } from "@/components/offer/OfferMessage";
 import { OfferResponse, type OfferStep } from "@/components/offer/OfferResponse";
+import { createAuthService } from "@/lib/services";
 import { allowOfferRequest } from "@/lib/utils/offer";
 
 export const dynamic = "force-dynamic";
@@ -37,8 +39,14 @@ export default async function OfferPage({ params, searchParams }: OfferPageProps
     );
   }
 
-  const view = await offerResponseService.getByToken(token);
-  if (!view) {
+  const { user } = await (await createAuthService()).getCurrentUser();
+  if (!user) {
+    const query = typeof r === "string" ? `?r=${encodeURIComponent(r)}` : "";
+    redirect(`/login?redirect=${encodeURIComponent(`/offer/${token}${query}`)}`);
+  }
+
+  const lookup = await offerResponseService.getByToken(token, user.id);
+  if (lookup.status === "invalid") {
     return (
       <OfferMessage
         title="This link isn't valid"
@@ -46,6 +54,15 @@ export default async function OfferPage({ params, searchParams }: OfferPageProps
       />
     );
   }
+  if (lookup.status === "wrong_account") {
+    return (
+      <OfferMessage
+        title="This offer is for a different account"
+        body={`You're signed in as ${user.email ?? "another account"}. Log out, then open the link again and sign in with the account you applied with. Can't get in? Reply to your offer email and we will record your answer.`}
+      />
+    );
+  }
+  const { view } = lookup;
 
   const hoursLeft = Math.max(
     0,

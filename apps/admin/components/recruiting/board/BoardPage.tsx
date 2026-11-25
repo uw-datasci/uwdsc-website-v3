@@ -24,18 +24,21 @@ import { Button, Spinner } from "@uwdsc/ui";
 import { OFFER_COLUMN_LOCKS } from "@/constants/recruiting";
 import { useRecruiting } from "@/contexts/RecruitingContext";
 import { useBoard } from "@/hooks/useBoard";
-import { cardsByApplication, matchesFilters } from "@/lib/utils/recruiting";
-import type { BoardFilters as Filters } from "@/types/recruiting";
+import { cardsByApplication, groupCards, matchesFilters } from "@/lib/utils/recruiting";
+import type { BoardFilters as Filters, BoardGroup } from "@/types/recruiting";
 import { BoardCardBody } from "./BoardCard";
 import { BoardColumn, type DropState } from "./BoardColumn";
 import { BoardFilters } from "./BoardFilters";
 import { BoardList } from "./BoardList";
 import { CandidateDrawer } from "../candidate";
 
-/** Recruiting → Board: one card per candidate × position, columns by status. */
+/**
+ * Recruiting → Board: columns by status, one card per candidate per column. A candidate's
+ * positions at the same status share a card and move together; the drawer moves one.
+ */
 export function BoardPage() {
   const { capabilities } = useRecruiting();
-  const { board, error, isLoading, move } = useBoard();
+  const { board, error, isLoading, move, moveCards } = useBoard();
   const viewer = capabilities?.viewer;
   const isVp = viewer?.role === "vp";
   const viewerSubteamId = viewer?.subteamId ?? null;
@@ -52,7 +55,7 @@ export function BoardPage() {
   const [collapsed, setCollapsed] = useState<ReadonlySet<SelectionStatus>>(
     () => new Set(isVp ? DECISION_STATUSES : [])
   );
-  const [dragging, setDragging] = useState<BoardCardData | null>(null);
+  const [dragging, setDragging] = useState<BoardGroup | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
   const [listStatus, setListStatus] = useState<SelectionStatus | null>(null);
   const sensors = useSensors(
@@ -76,11 +79,18 @@ export function BoardPage() {
 
   const byApplication = cardsByApplication(board.cards);
   const siblings = (card: BoardCardData) => byApplication.get(card.applicationId) ?? [card];
-  const othersFor = (card: BoardCardData) =>
-    siblings(card).filter((other) => other.id !== card.id);
-  const conflictFor = (card: BoardCardData) => wantedSubteams(siblings(card)).length >= 2;
+  const othersFor = (group: BoardGroup) => {
+    const inGroup = new Set(group.cards.map((card) => card.id));
+    const lead = group.cards[0];
+    return lead ? siblings(lead).filter((other) => !inGroup.has(other.id)) : [];
+  };
+  const conflictFor = (group: BoardGroup) => {
+    const lead = group.cards[0];
+    return lead ? wantedSubteams(siblings(lead)).length >= 2 : false;
+  };
 
   const visible = board.cards.filter((card) => matchesFilters(card, filters, viewerSubteamId));
+  const groups = groupCards(visible);
   const candidates = new Set(visible.map((card) => card.applicationId)).size;
   const countText = `${visible.length} card${visible.length === 1 ? "" : "s"} · ${candidates} candidate${candidates === 1 ? "" : "s"}`;
 
@@ -90,7 +100,14 @@ export function BoardPage() {
     "In Review";
 
   const openCard = board.cards.find((card) => card.id === openId) ?? null;
-  const openColumn = openCard ? visible.filter((card) => card.status === openCard.status) : [];
+  const openColumn = openCard
+    ? groups
+        .filter((group) => group.status === openCard.status)
+        .flatMap((group) => {
+          const shown = group.cards.find((card) => card.id === openCard.id) ?? group.cards[0];
+          return shown ? [shown] : [];
+        })
+    : [];
 
   const targets = new Set<SelectionStatus>(dragging ? dragTargets(dragging.status) : []);
   const dropState = (status: SelectionStatus): DropState => {
@@ -107,13 +124,18 @@ export function BoardPage() {
     });
 
   const onDragStart = ({ active }: DragStartEvent) => {
-    setDragging((active.data.current?.card as BoardCardData | undefined) ?? null);
+    setDragging((active.data.current?.group as BoardGroup | undefined) ?? null);
   };
   const onDragEnd = ({ over }: DragEndEvent) => {
-    const card = dragging;
+    const group = dragging;
     setDragging(null);
     const to = over?.id as SelectionStatus | undefined;
-    if (card && to && targets.has(to)) void move(card, to);
+    if (group && to && targets.has(to)) {
+      void moveCards(
+        group.cards.filter((card) => card.canMove),
+        to
+      );
+    }
   };
 
   return (
@@ -129,7 +151,7 @@ export function BoardPage() {
       {board.cards.length === 0 && (
         <EmptyNotice
           title="No applications yet"
-          body="Cards show up here as people apply, one for each position they pick."
+          body="Cards show up here as people apply."
         />
       )}
       {board.cards.length > 0 && visible.length === 0 && (
@@ -158,7 +180,7 @@ export function BoardPage() {
 
       <div className="md:hidden">
         <BoardList
-          cards={visible}
+          groups={groups}
           status={shownStatus}
           onStatusChange={setListStatus}
           othersFor={othersFor}
@@ -166,7 +188,7 @@ export function BoardPage() {
           showSubteam={!filters.mine}
           selectedId={openId}
           onOpen={(card) => setOpenId(card.id)}
-          onMove={move}
+          onMove={moveCards}
         />
       </div>
 
@@ -200,7 +222,7 @@ export function BoardPage() {
                 )}
                 <BoardColumn
                   status={status}
-                  cards={visible.filter((card) => card.status === status)}
+                  groups={groups.filter((group) => group.status === status)}
                   collapsed={collapsed.has(status)}
                   onToggle={() => toggle(status)}
                   lockReason={
@@ -220,7 +242,7 @@ export function BoardPage() {
           <DragOverlay dropAnimation={null}>
             {dragging && (
               <BoardCardBody
-                card={dragging}
+                group={dragging}
                 others={othersFor(dragging)}
                 conflict={conflictFor(dragging)}
                 showSubteam={!filters.mine}
@@ -235,7 +257,7 @@ export function BoardPage() {
         card={openCard}
         siblings={openCard ? siblings(openCard) : []}
         column={openColumn}
-        conflict={openCard ? conflictFor(openCard) : false}
+        conflict={openCard ? wantedSubteams(siblings(openCard)).length >= 2 : false}
         onNavigate={(card) => setOpenId(card.id)}
         onClose={() => setOpenId(null)}
         onMove={move}

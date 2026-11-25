@@ -13,25 +13,26 @@ import type { BoardCard as BoardCardData } from "@uwdsc/common/types";
 import { cn } from "@uwdsc/ui";
 import { COLUMN_EMPTY } from "@/constants/recruiting";
 import { readOnlyReason } from "@/lib/utils/recruiting";
+import type { BoardGroup } from "@/types/recruiting";
 import { BoardCardBody } from "./BoardCard";
 import { StatusDot } from "./StatusBadge";
 import { StatusMenu } from "./StatusMenu";
 
 interface BoardListProps {
-  readonly cards: readonly BoardCardData[];
+  readonly groups: readonly BoardGroup[];
   readonly status: SelectionStatus;
   readonly onStatusChange: (status: SelectionStatus) => void;
-  readonly othersFor: (card: BoardCardData) => BoardCardData[];
-  readonly conflictFor: (card: BoardCardData) => boolean;
+  readonly othersFor: (group: BoardGroup) => BoardCardData[];
+  readonly conflictFor: (group: BoardGroup) => boolean;
   readonly showSubteam: boolean;
   readonly selectedId: string | null;
   readonly onOpen: (card: BoardCardData) => void;
-  readonly onMove: (card: BoardCardData, to: SelectionStatus) => Promise<void>;
+  readonly onMove: (cards: readonly BoardCardData[], to: SelectionStatus) => Promise<void>;
 }
 
 /** The board on phones: one status at a time, moved with a menu instead of dragging. */
 export function BoardList({
-  cards,
+  groups,
   status,
   onStatusChange,
   othersFor,
@@ -41,7 +42,7 @@ export function BoardList({
   onOpen,
   onMove,
 }: BoardListProps) {
-  const shown = cards.filter((card) => card.status === status);
+  const shown = groups.filter((group) => group.status === status);
 
   return (
     <div className="flex flex-col gap-3">
@@ -51,7 +52,7 @@ export function BoardList({
         className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none]"
       >
         {SELECTION_STATUSES.map((option) => {
-          const count = cards.filter((card) => card.status === option).length;
+          const count = groups.filter((group) => group.status === option).length;
           const active = option === status;
           return (
             <Fragment key={option}>
@@ -93,27 +94,29 @@ export function BoardList({
             {COLUMN_EMPTY[status]}
           </li>
         )}
-        {shown.map((card) => {
-          const locked = isReviewStatus(card.status) && !card.canMove;
+        {shown.map((group) => {
+          const lead = group.cards[0];
+          const locked =
+            isReviewStatus(group.status) && !group.cards.some((card) => card.canMove);
           return (
-            <li key={card.id} className="flex flex-col gap-1">
+            <li key={group.id} className="flex flex-col gap-1">
               <div className="flex items-start gap-2">
                 <div className="min-w-0 flex-1">
                   <BoardCardBody
-                    card={card}
-                    others={othersFor(card)}
-                    conflict={conflictFor(card)}
+                    group={group}
+                    others={othersFor(group)}
+                    conflict={conflictFor(group)}
                     showSubteam={showSubteam}
-                    selected={card.id === selectedId}
+                    selected={group.cards.some((card) => card.id === selectedId)}
                     onOpen={onOpen}
                   />
                 </div>
-                <StatusMenu card={card} onMove={onMove} />
+                <StatusMenu group={group} onMove={onMove} />
               </div>
-              {locked && (
+              {locked && lead && (
                 <p className="flex items-center gap-1.5 px-1 text-xs text-muted-foreground">
                   <Lock className="size-3 flex-none" aria-hidden />
-                  {readOnlyReason(card)}
+                  {readOnlyReason(lead)}
                 </p>
               )}
             </li>

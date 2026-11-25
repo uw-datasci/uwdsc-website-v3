@@ -50,10 +50,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <div className="min-h-screen bg-slate-50 dark:bg-background">
+        <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-background">
           <AppProviders>
             <Navbar />
-            {children}
+            <div className="flex-1">{children}</div>
             <Footer />
           </AppProviders>
         </div>

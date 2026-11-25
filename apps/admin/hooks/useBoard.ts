@@ -17,45 +17,63 @@ export function useBoard() {
     shouldRetryOnError: false,
   });
 
-  const setStatus = (id: string, status: SelectionStatus) =>
+  const setStatus = (ids: ReadonlySet<string>, status: SelectionStatus) =>
     mutate(
       (current) =>
         current && {
           ...current,
-          cards: current.cards.map((card) => (card.id === id ? { ...card, status } : card)),
+          cards: current.cards.map((card) => (ids.has(card.id) ? { ...card, status } : card)),
         },
       { revalidate: false }
     );
 
-  const move = async (card: BoardCard, to: SelectionStatus, undo = false): Promise<void> => {
-    if (card.status === to) return;
-    const from = card.status;
-    await setStatus(card.id, to);
+  /** Move several of one candidate's cards (all at the same status) together. */
+  const moveCards = async (
+    cards: readonly BoardCard[],
+    to: SelectionStatus,
+    undo = false
+  ): Promise<void> => {
+    const moving = cards.filter((card) => card.status !== to);
+    const first = moving[0];
+    if (!first) return;
+    const from = first.status;
+    await setStatus(new Set(moving.map((card) => card.id)), to);
 
-    try {
-      await moveCard(card.id, { from, to, undo });
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Couldn't move the card");
+    const results = await Promise.allSettled(
+      moving.map((card) => moveCard(card.id, { from: card.status, to, undo }))
+    );
+    const failed = results.find((result) => result.status === "rejected");
+    if (failed) {
+      const reason = (failed as PromiseRejectedResult).reason;
+      toast.error(reason instanceof Error ? reason.message : "Couldn't move the card");
       await mutate();
       return;
     }
 
     if (undo) return;
-    toast(`${card.name} moved to ${STATUS_LABELS[to]}`, {
-      description: `${card.positionName} · was ${STATUS_LABELS[from]}`,
+    toast(`${first.name} moved to ${STATUS_LABELS[to]}`, {
+      description: `${moving.map((card) => card.positionName).join(", ")} · was ${STATUS_LABELS[from]}`,
       duration: UNDO_MS,
       action: {
         label: "Undo",
-        onClick: () => void move({ ...card, status: to }, from, true),
+        onClick: () =>
+          void moveCards(
+            moving.map((card) => ({ ...card, status: to })),
+            from,
+            true
+          ),
       },
     });
   };
+
+  const move = (card: BoardCard, to: SelectionStatus): Promise<void> => moveCards([card], to);
 
   return {
     board: data ?? null,
     error: error ?? null,
     isLoading,
     move,
+    moveCards,
     refresh: async () => {
       await mutate();
     },

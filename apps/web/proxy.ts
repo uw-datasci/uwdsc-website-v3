@@ -32,9 +32,15 @@ export async function proxy(request: NextRequest) {
     // 3. complete profile route
     case pathname === WEB_COMPLETE_PROFILE_PATH:
       return await withAnon(request, response, isComplete, user?.id);
-    // 4. Offer links work signed out and with an incomplete profile
+    // 4. Offer links need the applicant signed in (any profile state, so a deadline isn't missed)
     case pathname.startsWith("/offer/"):
-      return response;
+      if (user) return response;
+      return NextResponse.redirect(
+        new URL(
+          `/login?redirect=${encodeURIComponent(pathname + request.nextUrl.search)}`,
+          request.url
+        )
+      );
     case user && !isComplete:
       return completeProfileResponse;
   }

@@ -382,6 +382,8 @@ export interface PublicOfferView {
   firstName: string;
   positionName: string;
   subteamName: string | null;
+  isVp: boolean;
+  vpNames: string[];
   termLabel: string;
   expiresAt: string;
   respondedAt: string | null;

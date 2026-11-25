@@ -13,9 +13,10 @@ import {
   programLine,
   readOnlyReason,
 } from "@/lib/utils/recruiting";
+import type { BoardGroup } from "@/types/recruiting";
 
 interface BoardCardProps {
-  readonly card: BoardCardData;
+  readonly group: BoardGroup;
   readonly others: readonly BoardCardData[];
   readonly conflict: boolean;
   readonly showSubteam: boolean;
@@ -23,13 +24,18 @@ interface BoardCardProps {
   readonly onOpen?: (card: BoardCardData) => void;
 }
 
-/** `movable`: the viewer can move the card and it's still in a review column. */
-export function BoardCard({ movable, ...props }: BoardCardProps & { readonly movable: boolean }) {
+/** `movable`: the viewer can move at least one of the cards and they're in a review column. */
+export function BoardCard({
+  movable,
+  ...props
+}: BoardCardProps & { readonly movable: boolean }) {
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, isDragging } = useDraggable({
-    id: props.card.id,
-    data: { card: props.card },
+    id: props.group.id,
+    data: { group: props.group },
     disabled: !movable,
   });
+  const lead = props.group.cards[0];
+  if (!lead) return null;
 
   return (
     <div ref={setNodeRef} className={cn(isDragging && "opacity-40")}>
@@ -40,7 +46,7 @@ export function BoardCard({ movable, ...props }: BoardCardProps & { readonly mov
             <button
               ref={setActivatorNodeRef}
               type="button"
-              aria-label={`Drag ${props.card.name}`}
+              aria-label={`Drag ${lead.name}`}
               className="-ml-1 flex h-6 w-4 flex-none cursor-grab touch-none items-center justify-center rounded text-muted-foreground hover:text-foreground active:cursor-grabbing"
               onClick={(event) => event.stopPropagation()}
               {...listeners}
@@ -53,10 +59,10 @@ export function BoardCard({ movable, ...props }: BoardCardProps & { readonly mov
               <TooltipTrigger asChild>
                 <span className="-ml-1 flex h-6 w-4 flex-none items-center justify-center text-muted-foreground/60">
                   <Lock className="size-3" aria-hidden />
-                  <span className="sr-only">{readOnlyReason(props.card)}</span>
+                  <span className="sr-only">{readOnlyReason(lead)}</span>
                 </span>
               </TooltipTrigger>
-              <TooltipContent>{readOnlyReason(props.card)}</TooltipContent>
+              <TooltipContent>{readOnlyReason(lead)}</TooltipContent>
             </Tooltip>
           )
         }
@@ -65,9 +71,9 @@ export function BoardCard({ movable, ...props }: BoardCardProps & { readonly mov
   );
 }
 
-/** The card's content, also rendered in the drag overlay. */
+/** The card's content, also rendered in the drag overlay. One row per position in the group. */
 export function BoardCardBody({
-  card,
+  group,
   others,
   conflict,
   showSubteam,
@@ -76,22 +82,26 @@ export function BoardCardBody({
   handle,
   overlay,
 }: BoardCardProps & { readonly handle?: ReactNode; readonly overlay?: boolean }) {
-  const program = programLine(card);
-  const open = onOpen ? () => onOpen(card) : undefined;
+  const lead = group.cards[0];
+  if (!lead) return null;
+  const program = programLine(lead);
+  const open = onOpen ? () => onOpen(lead) : undefined;
   const openOnKey = (event: KeyboardEvent) => {
     if (open && (event.key === "Enter" || event.key === " ")) {
       event.preventDefault();
       open();
     }
   };
-  const position =
+  const positionLabel = (card: BoardCardData) =>
     showSubteam && card.subteamName
       ? `${card.subteamName} · ${card.positionName}`
       : card.positionName;
+  const offers = group.cards.filter((card) => card.offerExpiresAt);
+  const expired = group.cards.some((card) => card.offerExpired);
 
   return (
     <article
-      aria-label={`${card.name}, ${card.positionName}`}
+      aria-label={`${lead.name}, ${group.cards.map((card) => card.positionName).join(", ")}`}
       className={cn(
         "flex gap-1.5 rounded-lg border bg-card p-2.5 shadow-xs transition-colors",
         onOpen && "cursor-pointer hover:border-foreground/20",
@@ -105,38 +115,40 @@ export function BoardCardBody({
     >
       {handle}
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-        <div className="flex items-start gap-2">
-          <div className="min-w-0 flex-1">
-            <div className="truncate text-[13px] leading-5 font-medium">{card.name}</div>
-            {program && (
-              <div className="truncate text-xs leading-4 text-muted-foreground">{program}</div>
-            )}
-          </div>
-          <span
-            title={`${ordinal(card.priority)} choice`}
-            className={cn(
-              "flex-none rounded px-1.5 py-0.5 text-[11px] leading-4 font-medium",
-              card.priority === 1
-                ? "bg-primary/10 text-primary dark:bg-primary/25 dark:text-violet-200"
-                : "text-muted-foreground ring-1 ring-border ring-inset"
-            )}
-          >
-            {ordinal(card.priority)}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="min-w-0 flex-1 truncate">{position}</span>
-          {card.noteCount > 0 && (
-            <span
-              className="flex flex-none items-center gap-1"
-              title={`${card.noteCount} note${card.noteCount === 1 ? "" : "s"}`}
-            >
-              <MessageSquare className="size-3" aria-hidden />
-              {card.noteCount}
-            </span>
+        <div className="min-w-0">
+          <div className="truncate text-[13px] leading-5 font-medium">{lead.name}</div>
+          {program && (
+            <div className="truncate text-xs leading-4 text-muted-foreground">{program}</div>
           )}
         </div>
+
+        <ul className="flex flex-col gap-1">
+          {group.cards.map((card) => (
+            <li key={card.id} className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span
+                title={`${ordinal(card.priority)} choice`}
+                className={cn(
+                  "flex-none rounded px-1.5 py-0.5 text-[11px] leading-4 font-medium",
+                  card.priority === 1
+                    ? "bg-primary/10 text-primary dark:bg-primary/25 dark:text-violet-200"
+                    : "text-muted-foreground ring-1 ring-border ring-inset"
+                )}
+              >
+                {ordinal(card.priority)}
+              </span>
+              <span className="min-w-0 flex-1 truncate">{positionLabel(card)}</span>
+              {card.noteCount > 0 && (
+                <span
+                  className="flex flex-none items-center gap-1"
+                  title={`${card.noteCount} note${card.noteCount === 1 ? "" : "s"}`}
+                >
+                  <MessageSquare className="size-3" aria-hidden />
+                  {card.noteCount}
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
 
         {others.length > 0 && (
           <div className="flex flex-wrap gap-1">
@@ -154,8 +166,9 @@ export function BoardCardBody({
           </div>
         )}
 
-        {card.offerExpiresAt && (
+        {offers.map((card) => (
           <div
+            key={card.id}
             className={cn(
               "rounded px-1.5 py-0.5 text-[11px] leading-4",
               card.offerExpired
@@ -163,14 +176,15 @@ export function BoardCardBody({
                 : STATUS_TONES["Offer Sent"].badge
             )}
           >
+            {offers.length > 1 && `${card.positionName}: `}
             {card.offerExpired ? "No reply by" : "Due"}{" "}
-            {formatActivityTime(card.offerExpiresAt)}
+            {formatActivityTime(card.offerExpiresAt ?? "")}
           </div>
-        )}
+        ))}
 
-        {(card.returning || conflict || card.offerExpired) && (
+        {(lead.returning || conflict || expired) && (
           <div className="flex flex-wrap gap-1">
-            {card.returning && (
+            {lead.returning && (
               <span className="rounded px-1.5 py-px text-[11px] leading-4 font-medium text-foreground ring-1 ring-border ring-inset">
                 Returning
               </span>
@@ -183,7 +197,7 @@ export function BoardCardBody({
                 Conflict
               </span>
             )}
-            {card.offerExpired && (
+            {expired && (
               <span className="rounded bg-rose-100 px-1.5 py-px text-[11px] leading-4 font-medium text-rose-800 dark:bg-rose-950 dark:text-rose-200">
                 Expired offer
               </span>

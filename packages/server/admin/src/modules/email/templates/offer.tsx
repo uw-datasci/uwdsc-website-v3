@@ -18,10 +18,6 @@ const button = {
   textDecoration: "none",
 };
 
-function withResponse(url: string, response: "accept" | "decline"): string {
-  return `${url}${url.includes("?") ? "&" : "?"}r=${response}`;
-}
-
 export function OfferEmail({
   firstName,
   positionName,
@@ -59,26 +55,15 @@ export function OfferEmail({
         </Row>
       </Section>
       <Text style={{ ...recruitingText, marginTop: "16px" }}>
-        Please respond by <strong>{deadline}</strong>.
+        Please respond by <strong>{deadline}</strong>. You&apos;ll sign in with the account
+        you applied with.
       </Text>
       <Section style={{ margin: "4px 0 8px" }}>
         <Button
-          href={withResponse(respondUrl, "accept")}
+          href={respondUrl}
           style={{ ...button, backgroundColor: "#7c3aed", color: "#ffffff" }}
         >
-          Accept offer
-        </Button>
-        <Button
-          href={withResponse(respondUrl, "decline")}
-          style={{
-            ...button,
-            marginLeft: "8px",
-            backgroundColor: "#ffffff",
-            color: "#27272a",
-            border: "1px solid #d4d4d8",
-          }}
-        >
-          Decline
+          View your offer
         </Button>
       </Section>
       <Text style={recruitingMuted}>

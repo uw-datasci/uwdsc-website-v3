@@ -17,6 +17,14 @@ import {
 } from "./offerResponse.repository";
 import { hashOfferToken } from "./offerToken";
 
+/** What an offer link shows the signed-in viewer. */
+export type OfferLookup =
+  | { status: "found"; view: PublicOfferView }
+  | { status: "wrong_account" }
+  | { status: "invalid" };
+
+const WRONG_ACCOUNT = "This offer was sent to a different account.";
+
 const CLOSED_REASONS: Record<Exclude<PublicOfferView["state"], "open">, string> = {
   accepted: "You've already accepted this offer",
   declined: "You've already answered this offer",
@@ -123,17 +131,27 @@ class OfferResponseService {
     });
   }
 
-  /** The public offer page for a link, or null if the token doesn't match an offer. */
-  async getByToken(token: string): Promise<PublicOfferView | null> {
+  /**
+   * The offer page for a link. Only the applicant it was sent to sees it: anyone else
+   * signed in gets `wrong_account` without the offer's details.
+   */
+  async getByToken(token: string, userId: string): Promise<OfferLookup> {
     const row = await this.repository.getByTokenHash(hashOfferToken(token));
-    return row ? this.toView(row) : null;
+    if (!row) return { status: "invalid" };
+    if (row.profile_id !== userId) return { status: "wrong_account" };
+    return { status: "found", view: await this.toView(row) };
   }
 
-  /** The candidate accepts or declines from the link. */
-  async respondByToken(token: string, input: OfferLinkResponseInput): Promise<PublicOfferView> {
+  /** The candidate, signed in as the applicant, accepts or declines from the link. */
+  async respondByToken(
+    token: string,
+    userId: string,
+    input: OfferLinkResponseInput
+  ): Promise<PublicOfferView> {
     const hash = hashOfferToken(token);
     const row = await this.repository.getByTokenHash(hash);
     if (!row) throw new ApiError("This link isn't valid", 404);
+    if (row.profile_id !== userId) throw new ApiError(WRONG_ACCOUNT, 403);
 
     const state = offerLinkState(row);
     if (state !== "open") throw new ApiError(CLOSED_REASONS[state], 410);
@@ -154,12 +172,19 @@ class OfferResponseService {
   }
 
   private async toView(row: OfferLinkRow): Promise<PublicOfferView> {
-    const presidents = await this.repository.getPresidentNames(row.cycle_id);
+    const [presidents, vpNames] = await Promise.all([
+      this.repository.getPresidentNames(row.cycle_id),
+      row.subteam_id === null
+        ? Promise.resolve([])
+        : this.repository.getSubteamVpNames(row.cycle_id, row.subteam_id, row.profile_id),
+    ]);
     return {
       state: offerLinkState(row),
       firstName: firstName(row.full_name),
       positionName: row.position_name,
       subteamName: row.subteam_name,
+      isVp: row.is_vp,
+      vpNames,
       termLabel: formatTermCode(row.target_term_code),
       expiresAt: new Date(row.expires_at).toISOString(),
       respondedAt: row.responded_at ? new Date(row.responded_at).toISOString() : null,

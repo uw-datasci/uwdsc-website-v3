@@ -106,7 +106,9 @@ export class OfferResponseRepository extends BaseRepository {
         s.status,
         a.full_name,
         ep.name AS position_name,
+        ep.subteam_id,
         st.name AS subteam_name,
+        ep.is_vp,
         t.code AS target_term_code,
         o.expires_at,
         o.responded_at,
@@ -143,6 +145,25 @@ export class OfferResponseRepository extends BaseRepository {
       FROM hiring.cycle_leadership cl
       JOIN public.profiles p ON p.id = cl.profile_id
       WHERE cl.cycle_id = ${cycleId} AND cl.role = 'pres'
+      ORDER BY cl.confirmed_at, p.first_name
+    `;
+    return rows.map((row) => row.name).filter((name): name is string => !!name);
+  }
+
+  /** Next term's VPs of a subteam (the offer's own candidate left out). */
+  async getSubteamVpNames(
+    cycleId: string,
+    subteamId: number,
+    excludeProfileId: string
+  ): Promise<string[]> {
+    const rows = await this.sql<{ name: string | null }[]>`
+      SELECT NULLIF(btrim(concat_ws(' ', p.first_name, p.last_name)), '') AS name
+      FROM hiring.cycle_leadership cl
+      JOIN public.profiles p ON p.id = cl.profile_id
+      WHERE cl.cycle_id = ${cycleId}
+        AND cl.role = 'admin'
+        AND cl.subteam_id = ${subteamId}
+        AND cl.profile_id <> ${excludeProfileId}
       ORDER BY cl.confirmed_at, p.first_name
     `;
     return rows.map((row) => row.name).filter((name): name is string => !!name);

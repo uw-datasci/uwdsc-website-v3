@@ -8,7 +8,9 @@ export interface OfferLinkRow {
   status: ApplicationReviewStatus;
   full_name: string;
   position_name: string;
+  subteam_id: number | null;
   subteam_name: string | null;
+  is_vp: boolean;
   target_term_code: string;
   expires_at: string;
   responded_at: string | null;

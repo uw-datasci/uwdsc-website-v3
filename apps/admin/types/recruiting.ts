@@ -1,5 +1,6 @@
+import type { SelectionStatus } from "@uwdsc/common/recruiting";
 import type { LeadershipSlot } from "@uwdsc/common/schemas";
-import type { LeadershipPerson } from "@uwdsc/common/types";
+import type { BoardCard, LeadershipPerson } from "@uwdsc/common/types";
 
 /** Callbacks and lookups the roster cards share. */
 export interface SlotEditor {
@@ -20,6 +21,13 @@ export interface SlotEditor {
 }
 
 export type BoardSource = "all" | "new" | "returning";
+
+/** One candidate's cards that share a status, shown as a single card on the board. */
+export interface BoardGroup {
+  id: string;
+  status: SelectionStatus;
+  cards: BoardCard[];
+}
 
 export interface BoardFilters {
   mine: boolean;

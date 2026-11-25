@@ -6,6 +6,7 @@ import { isReviewStatus, STATUS_LABELS, type SelectionStatus } from "@uwdsc/comm
 import type { BoardCard as BoardCardData } from "@uwdsc/common/types";
 import { Button, cn, Tooltip, TooltipContent, TooltipTrigger } from "@uwdsc/ui";
 import { COLUMN_EMPTY } from "@/constants/recruiting";
+import type { BoardGroup } from "@/types/recruiting";
 import { BoardCard } from "./BoardCard";
 import { StatusDot } from "./StatusBadge";
 
@@ -14,13 +15,13 @@ export type DropState = "idle" | "target" | "over" | "dim";
 
 interface BoardColumnProps {
   readonly status: SelectionStatus;
-  readonly cards: readonly BoardCardData[];
+  readonly groups: readonly BoardGroup[];
   readonly collapsed: boolean;
   readonly onToggle: () => void;
   readonly lockReason: string | null;
   readonly dropState: DropState;
-  readonly othersFor: (card: BoardCardData) => readonly BoardCardData[];
-  readonly conflictFor: (card: BoardCardData) => boolean;
+  readonly othersFor: (group: BoardGroup) => readonly BoardCardData[];
+  readonly conflictFor: (group: BoardGroup) => boolean;
   readonly showSubteam: boolean;
   readonly selectedId?: string | null;
   readonly onOpen?: (card: BoardCardData) => void;
@@ -28,7 +29,7 @@ interface BoardColumnProps {
 
 export function BoardColumn({
   status,
-  cards,
+  groups,
   collapsed,
   onToggle,
   lockReason,
@@ -61,7 +62,7 @@ export function BoardColumn({
     return (
       <section
         ref={setNodeRef}
-        aria-label={`${label}, ${cards.length} cards, collapsed`}
+        aria-label={`${label}, ${groups.length} candidates, collapsed`}
         className={cn(
           "flex w-10 flex-none flex-col items-center gap-2 rounded-lg bg-muted/50 py-2 transition-opacity",
           state === "dim" && "opacity-40"
@@ -77,7 +78,7 @@ export function BoardColumn({
           <ChevronsLeftRight className="size-3.5" aria-hidden />
         </Button>
         <StatusDot status={status} />
-        <span className="text-xs text-muted-foreground tabular-nums">{cards.length}</span>
+        <span className="text-xs text-muted-foreground tabular-nums">{groups.length}</span>
         <h2 className="text-xs font-semibold [writing-mode:vertical-rl]">{label}</h2>
         {lock}
       </section>
@@ -87,7 +88,7 @@ export function BoardColumn({
   return (
     <section
       ref={setNodeRef}
-      aria-label={`${label}, ${cards.length} cards`}
+      aria-label={`${label}, ${groups.length} candidates`}
       className={cn(
         "flex max-h-[calc(100svh-15rem)] min-h-64 w-72 flex-none flex-col rounded-lg bg-muted/50 transition-[opacity,background-color]",
         state === "dim" && "opacity-40",
@@ -100,7 +101,7 @@ export function BoardColumn({
       <header className="flex items-center gap-2 px-3 pt-2.5 pb-2">
         <StatusDot status={status} />
         <h2 className="text-[13px] font-semibold">{label}</h2>
-        <span className="text-xs text-muted-foreground tabular-nums">{cards.length}</span>
+        <span className="text-xs text-muted-foreground tabular-nums">{groups.length}</span>
         {lock}
         {state === "over" && (
           <span className="text-xs font-medium text-primary">Release to move here</span>
@@ -117,19 +118,19 @@ export function BoardColumn({
       </header>
 
       <div className="flex flex-1 flex-col gap-2 overflow-y-auto px-2 pb-2">
-        {cards.map((card) => (
+        {groups.map((group) => (
           <BoardCard
-            key={card.id}
-            card={card}
-            others={othersFor(card)}
-            conflict={conflictFor(card)}
+            key={group.id}
+            group={group}
+            others={othersFor(group)}
+            conflict={conflictFor(group)}
             showSubteam={showSubteam}
-            selected={card.id === selectedId}
+            selected={group.cards.some((card) => card.id === selectedId)}
             onOpen={onOpen}
-            movable={card.canMove && isReviewStatus(status)}
+            movable={isReviewStatus(status) && group.cards.some((card) => card.canMove)}
           />
         ))}
-        {cards.length === 0 && (
+        {groups.length === 0 && (
           <p className="px-2 py-6 text-center text-xs text-muted-foreground">
             {COLUMN_EMPTY[status]}
           </p>

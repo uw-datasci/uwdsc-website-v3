@@ -155,7 +155,7 @@ export function FinalizeDialog({ view, open, onOpenChange }: FinalizeDialogProps
             onCheckedChange={(value) => setChecked(value === true)}
           />
           <Label htmlFor="finalize-checked" className="text-[13px] font-normal">
-            I checked the team page preview
+            I&apos;ve reviewed the new team and understand this can&apos;t be undone
           </Label>
         </div>
 

@@ -2,13 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createSupabaseMiddlewareClient } from "@uwdsc/db";
 import { isProfileCompleteForMiddleware } from "@uwdsc/db/supabase/profile";
-import {
-  ADMIN_ROLES,
-  ALUM_ROLE,
-  RETURNING_EXEC_PATH,
-  WEB_COMPLETE_PROFILE_PATH,
-  readRoleClaims,
-} from "@uwdsc/common/constants";
+import { ADMIN_ROLES, WEB_COMPLETE_PROFILE_PATH, readRoleClaims } from "@uwdsc/common/constants";
 import { safeRedirect } from "@uwdsc/common/utils";
 
 const LOGIN_ROUTE = "/login";
@@ -34,9 +28,7 @@ function webCompleteProfileAbsoluteUrl(): string {
  * Proxy to protect all admin routes.
  * - Not signed in: only /login and /api are allowed; other paths redirect to /login.
  * - Signed in (admin/exec/pres): all paths allowed except /login (redirect to /members).
- * - Signed in (alum): only /logistics/returning (the returning-exec form) and /unauthorized are
- *   allowed; everything else — including /login — redirects toward the returning-exec form or
- *   /unauthorized. Alums otherwise have no admin-app access.
+ * - Signed in (any other role, including alum): everything redirects to /unauthorized.
  * - Signed-in admins with an incomplete web profile: redirect to the web app complete-profile page.
  */
 export async function proxy(request: NextRequest) {
@@ -52,23 +44,17 @@ export async function proxy(request: NextRequest) {
 
   const { role } = readRoleClaims(user?.app_metadata);
   const isAdmin = ADMIN_ROLES.has(role ?? "");
-  const isAlum = role === ALUM_ROLE;
   const isLoginRoute = pathname == LOGIN_ROUTE;
   const isUnauthorizedRoute = pathname == UNAUTHORIZED_ROUTE;
-  const isReturningExecRoute = pathname === RETURNING_EXEC_PATH;
-  const alumAllowedRoute = isUnauthorizedRoute || isReturningExecRoute;
 
   switch (true) {
     case !user && !isLoginRoute:
       return NextResponse.redirect(loginUrlWithRedirect(request));
     case user && isLoginRoute: {
-      const fallback = isAlum ? RETURNING_EXEC_PATH : "/members";
-      const target = safeRedirect(request.nextUrl.searchParams.get("redirect"), fallback);
+      const target = safeRedirect(request.nextUrl.searchParams.get("redirect"), "/members");
       return NextResponse.redirect(new URL(target, request.url));
     }
-    case user && isAlum && !alumAllowedRoute:
-      return NextResponse.redirect(new URL("/unauthorized", request.url));
-    case user && !isAdmin && !isAlum && !isUnauthorizedRoute:
+    case user && !isAdmin && !isUnauthorizedRoute:
       return NextResponse.redirect(new URL("/unauthorized", request.url));
     case user && isAdmin && isUnauthorizedRoute:
       return NextResponse.redirect(new URL("/members", request.url));

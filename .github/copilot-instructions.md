@@ -171,8 +171,9 @@ instead of disappearing into a serverless function's logs.
     from observability just because it was thrown as an `ApiError`.
 - **`apps/admin`** doesn't call `withRaftRoute` directly in route files — it's folded into the
   guards in `apps/admin/guards` (`withAuth`, `withAdmin`, `withPresAccess`). Wrap a handler
-  with one of those for auth + Raft together; `withAdmin` accepts `{ scope: true }` for
-  handlers that need VP/subteam scoping.
+  with one of those for auth + Raft together (`withAdmin` requires VP or president,
+  `withPresAccess` requires president). Recruiting routes use `withRecruiting`, which passes
+  the viewer's capabilities from `@uwdsc/common/recruiting` so routes check `recruiting.can.*`.
 - **`apps/web`** has no route guard, so routes wrap directly:
   ```typescript
   export const GET = withRaftRoute(async (request, context) => { ... });

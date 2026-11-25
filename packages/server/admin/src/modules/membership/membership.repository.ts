@@ -15,7 +15,7 @@ export class MembershipRepository extends BaseRepository {
         FROM profiles p
         LEFT JOIN membership.memberships m
           ON p.id = m.profile_id
-         AND m.term_id = (SELECT id FROM public.terms WHERE is_active = true LIMIT 1)
+         AND m.term_id = public.active_term_id()
       `;
 
       return (
@@ -44,7 +44,7 @@ export class MembershipRepository extends BaseRepository {
           WHERE pr.id = ${profileId}
           LIMIT 1
         ),
-        (SELECT id FROM public.terms WHERE is_active = true LIMIT 1)
+        public.active_term_id()
       ) AS term_id
     `;
     return result[0]?.term_id ?? null;
@@ -60,7 +60,7 @@ export class MembershipRepository extends BaseRepository {
       SELECT term_id, payment_method::text AS payment_method
       FROM membership.memberships
       WHERE profile_id = ${profileId}
-        AND term_id = (SELECT id FROM public.terms WHERE is_active = true LIMIT 1)
+        AND term_id = public.active_term_id()
       LIMIT 1
     `;
     return result[0] ?? null;
@@ -97,7 +97,7 @@ export class MembershipRepository extends BaseRepository {
               WHERE pr.id = ${profileId}
               LIMIT 1
             ),
-            (SELECT id FROM public.terms WHERE is_active = true LIMIT 1)
+            public.active_term_id()
           ),
           ${data.verifier},
           ${verifiedAtSql},

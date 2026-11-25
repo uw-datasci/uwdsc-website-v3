@@ -12,6 +12,13 @@ export interface ProfileAutofill {
   term: string | null;
 }
 
+/** A president or VP on next term's leadership: they don't apply. */
+export interface LeadershipSeat {
+  role: "pres" | "admin";
+  positionName: string | null;
+  targetTermCode: string;
+}
+
 /** Payload for updating an application (API layer) */
 export interface ApplicationUpdatePayload {
   full_name?: string;

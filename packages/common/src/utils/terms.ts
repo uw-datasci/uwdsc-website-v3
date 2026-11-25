@@ -15,13 +15,6 @@ export const NEXT_TERM_SHIFT: Record<TermSeason, TermShift> = {
   W: (y) => ({ season: "S", yearSuffix: y + 1 }),
 };
 
-/** Two seasons ahead (skip next term): Sxx → W(xx+1), Wxx → Fxx, Fxx → S(xx+1). */
-export const DEFERRED_RETURN_TERM_SHIFT: Record<TermSeason, TermShift> = {
-  S: (y) => ({ season: "W", yearSuffix: y + 1 }),
-  W: (y) => ({ season: "F", yearSuffix: y }),
-  F: (y) => ({ season: "S", yearSuffix: y + 1 }),
-};
-
 /** Inclusive date window check (start through end). */
 export function isDateWindowOpen(
   startIso: string | null | undefined,

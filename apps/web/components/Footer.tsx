@@ -12,7 +12,7 @@ export default function Footer() {
   if (AUTH_PAGE_PATHS.has(pathname)) return null;
 
   return (
-    <>
+    <div>
       <hr className="border-b border-[#454545]" />
       <footer className="mx-container my-8 flex flex-col justify-between gap-8 sm:flex-row sm:items-center">
         <div className="flex flex-col items-center sm:items-start">
@@ -34,6 +34,6 @@ export default function Footer() {
         </div>
         <FooterSocialLinks />
       </footer>
-    </>
+    </div>
   );
 }

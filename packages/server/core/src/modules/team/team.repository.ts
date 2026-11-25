@@ -4,7 +4,7 @@ import type { ExecTeamRow } from "../../types/team";
 
 export class TeamRepository extends BaseRepository {
   /**
-   * Get all exec team members with profile, position, and subteam details.
+   * The current team (`org.team_term_id()`) with profile, position, and subteam details.
    * Used for the public team page.
    */
   async getExecTeam(): Promise<ExecTeamRow[]> {
@@ -26,19 +26,21 @@ export class TeamRepository extends BaseRepository {
       JOIN profiles p ON et.profile_id = p.id
       JOIN org.exec_positions ep ON et.position_id = ep.id
       JOIN org.subteams s ON et.subteam_id = s.id
+      WHERE et.term_id = org.team_term_id()
       ORDER BY s.id ASC, et.id ASC
     `;
     return result;
   }
 
   /**
-   * Every subteam, for pickers and filters (e.g. assigning a member's subteam).
+   * Every active subteam, for pickers and filters (e.g. assigning a member's subteam).
    * Ordered by id so the seeded ordering (Presidents first) is preserved.
    */
   async getSubteams(): Promise<SubteamOption[]> {
     return this.sql<SubteamOption[]>`
       SELECT id, name
       FROM org.subteams
+      WHERE retired_at IS NULL
       ORDER BY id ASC
     `;
   }

@@ -5,6 +5,7 @@ import {
   createApplication,
   getActiveTerm,
   getApplication,
+  getLeadershipSeat,
   getPositionsWithQuestions,
   getProfileAutofill,
   updateApplication,
@@ -30,6 +31,7 @@ import { useForm } from "react-hook-form";
 
 import { AvailablePositions } from "@/components/application/banners/AvailablePositions";
 import { DueDateTag } from "@/components/application/DueDateTag";
+import { LeadershipNotice } from "@/components/application/LeadershipNotice";
 import {
   General,
   Intro,
@@ -39,7 +41,12 @@ import {
   Submitted,
 } from "@/components/application/steps";
 import { STEP_NAMES } from "@/constants/application";
-import type { GeneralQuestion, PositionWithQuestions, Term } from "@uwdsc/common/types";
+import type {
+  GeneralQuestion,
+  LeadershipSeat,
+  PositionWithQuestions,
+  Term,
+} from "@uwdsc/common/types";
 import {
   formatTermCode,
   isDateWindowOpen,
@@ -75,6 +82,7 @@ export default function ApplyPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [leadershipSeat, setLeadershipSeat] = useState<LeadershipSeat | null>(null);
 
   const { setProgressValue } = useApplicationProgress();
 
@@ -95,6 +103,12 @@ export default function ApplyPage() {
       try {
         const term = await getActiveTerm();
         setCurrentTerm(term);
+
+        const seat = await getLeadershipSeat();
+        if (seat) {
+          setLeadershipSeat(seat);
+          return;
+        }
 
         const [positionsData, autofill] = await Promise.all([
           getPositionsWithQuestions(),
@@ -339,6 +353,8 @@ export default function ApplyPage() {
       </div>
     );
   }
+
+  if (leadershipSeat) return <LeadershipNotice seat={leadershipSeat} />;
 
   if (currentStep === 5) return <Submitted />;
 

@@ -6,6 +6,7 @@ import type {
   ApplicationPositionSelection,
   ApplicationWithDetails,
   CreateApplicationData,
+  LeadershipSeat,
   PositionSelectionInput,
   ProfileAutofill,
   QuestionRow,
@@ -20,20 +21,16 @@ export class ApplicationRepository extends BaseRepository {
       SELECT
         id,
         code,
-        is_active,
+        COALESCE(id = public.active_term_id(), false) AS is_active,
         application_release_date,
         application_soft_deadline,
         application_hard_deadline,
         start_date,
         end_date,
         onboarding_due_date,
-        returning_exec_release_date,
-        returning_exec_deadline,
         created_at
       FROM public.terms
-      WHERE is_active = true
-      ORDER BY created_at DESC
-      LIMIT 1
+      WHERE id = public.active_term_id()
     `;
     return result[0] ?? null;
   }
@@ -43,15 +40,13 @@ export class ApplicationRepository extends BaseRepository {
       SELECT
         id,
         code,
-        is_active,
+        COALESCE(id = public.active_term_id(), false) AS is_active,
         application_release_date,
         application_soft_deadline,
         application_hard_deadline,
         start_date,
         end_date,
         onboarding_due_date,
-        returning_exec_release_date,
-        returning_exec_deadline,
         created_at
       FROM public.terms
       ORDER BY start_date DESC NULLS LAST
@@ -59,7 +54,44 @@ export class ApplicationRepository extends BaseRepository {
     return result;
   }
 
-  async getAvailablePositions(): Promise<ApplicationPositionRow[]> {
+  /** The term's hiring cycle, only once its leadership roster is locked. */
+  async getLockedCycleId(termId: string): Promise<string | null> {
+    const result = await this.sql<{ id: string }[]>`
+      SELECT id
+      FROM hiring.cycles
+      WHERE term_id = ${termId} AND roster_locked_at IS NOT NULL
+      LIMIT 1
+    `;
+    return result[0]?.id ?? null;
+  }
+
+  /**
+   * The user's seat if they're a president or VP. /apply only opens after the lock, when
+   * roles already reflect next term's leadership; the seat name comes from the roster.
+   */
+  async getLeadershipSeat(userId: string, cycleId: string): Promise<LeadershipSeat | null> {
+    const result = await this.sql<
+      { role: LeadershipSeat["role"]; position_name: string | null; target_term_code: string }[]
+    >`
+      SELECT ur.role, ep.name AS position_name, tt.code AS target_term_code
+      FROM public.user_roles ur
+      JOIN hiring.cycles c ON c.id = ${cycleId}
+      JOIN public.terms tt ON tt.id = c.target_term_id
+      LEFT JOIN hiring.cycle_leadership cl ON cl.cycle_id = c.id AND cl.profile_id = ur.id
+      LEFT JOIN org.exec_positions ep ON ep.id = cl.position_id
+      WHERE ur.id = ${userId} AND ur.role IN ('pres', 'admin')
+      LIMIT 1
+    `;
+    const row = result[0];
+    if (!row) return null;
+    return {
+      role: row.role,
+      positionName: row.position_name,
+      targetTermCode: row.target_term_code,
+    };
+  }
+
+  async getAvailablePositions(cycleId: string): Promise<ApplicationPositionRow[]> {
     const result = await this.sql<ApplicationPositionRow[]>`
       SELECT
         apa.id,
@@ -67,13 +99,14 @@ export class ApplicationRepository extends BaseRepository {
         ep.name
       FROM hiring.application_positions_available apa
       JOIN org.exec_positions ep ON apa.position_id = ep.id
-      WHERE apa.is_open = true
+      WHERE apa.cycle_id = ${cycleId} AND apa.is_open = true
       ORDER BY ep.name
     `;
     return result;
   }
 
-  async getQuestionsForPositions(): Promise<QuestionRow[]> {
+  /** General questions plus those for the given exec positions; archived ones are excluded. */
+  async getQuestionsForPositions(execPositionIds: number[]): Promise<QuestionRow[]> {
     const result = await this.sql<QuestionRow[]>`
       SELECT
         q.id,
@@ -87,6 +120,8 @@ export class ApplicationRepository extends BaseRepository {
         pq.sort_order
       FROM hiring.questions q
       JOIN hiring.position_questions pq ON q.id = pq.question_id
+      WHERE q.archived_at IS NULL
+        AND (pq.position_id IS NULL OR pq.position_id = ANY(${this.sql.array(execPositionIds)}::int[]))
       ORDER BY pq.sort_order ASC, q.created_at ASC
     `;
     return result;
@@ -111,7 +146,8 @@ export class ApplicationRepository extends BaseRepository {
         github_url,
         portfolio_url,
         status,
-        submitted_at
+        submitted_at,
+        applicant_role
       FROM hiring.applications
       WHERE profile_id = ${profileId} AND term_id = ${termId}
       LIMIT 1
@@ -137,7 +173,8 @@ export class ApplicationRepository extends BaseRepository {
         id,
         application_id,
         question_id,
-        answer_text
+        answer_text,
+        question_text
       FROM hiring.answers
       WHERE application_id = ${app.id}
     `;
@@ -167,16 +204,24 @@ export class ApplicationRepository extends BaseRepository {
         github_url,
         portfolio_url,
         status,
-        submitted_at
+        submitted_at,
+        applicant_role
     `;
     const app = result[0];
     if (!app) throw new Error("Failed to create application");
     return app;
   }
 
+  /**
+   * Update the user's draft for the given term. Scoped to `termId` so a leftover
+   * draft from an earlier term can't be edited or submitted into a new cycle.
+   * On submit, `applicant_role` snapshots the applicant's current `user_roles.role`
+   * (read from the DB, not the JWT) for the Returning badge.
+   */
   async updateApplication(
     id: string,
     userId: string,
+    termId: string,
     data: UpdateApplicationData
   ): Promise<Application | null> {
     const result = await this.sql<Application[]>`
@@ -191,11 +236,16 @@ export class ApplicationRepository extends BaseRepository {
         linkedin_url = COALESCE(${data.linkedin_url ?? null}, linkedin_url),
         github_url = COALESCE(${data.github_url ?? null}, github_url),
         portfolio_url = COALESCE(${data.portfolio_url ?? null}, portfolio_url)
-        ${data.submit ? this.sql`, status = 'submitted', submitted_at = NOW()` : this.sql``}
-      WHERE id = ${id} AND profile_id = ${userId} AND status = 'draft'
+        ${
+          data.submit
+            ? this.sql`, status = 'submitted', submitted_at = NOW(),
+                applicant_role = (SELECT role FROM public.user_roles WHERE id = ${userId})`
+            : this.sql``
+        }
+      WHERE id = ${id} AND profile_id = ${userId} AND term_id = ${termId} AND status = 'draft'
       RETURNING id, profile_id, term_id, full_name, major, year_of_study,
                 personal_email, location, club_experience, linkedin_url,
-                github_url, portfolio_url, status, submitted_at
+                github_url, portfolio_url, status, submitted_at, applicant_role
     `;
     return result[0] ?? null;
   }
@@ -227,8 +277,10 @@ export class ApplicationRepository extends BaseRepository {
     for (const ans of answers) {
       if (!ans.question_id || ans.answer_text == null) continue;
       await this.sql`
-        INSERT INTO hiring.answers (application_id, question_id, answer_text)
-        VALUES (${applicationId}, ${ans.question_id}, ${ans.answer_text})
+        INSERT INTO hiring.answers (application_id, question_id, answer_text, question_text)
+        SELECT ${applicationId}, q.id, ${ans.answer_text}, q.question_text
+        FROM hiring.questions q
+        WHERE q.id = ${ans.question_id}
       `;
     }
   }

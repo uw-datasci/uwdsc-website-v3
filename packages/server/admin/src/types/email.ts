@@ -9,14 +9,6 @@ export interface ExecWelcomeEmailProps {
   discordLink: string;
 }
 
-export interface HiringDecisionEmailProps {
-  type: "offer" | "rejection";
-  applicantName: string;
-  positionName: string;
-  offerTermLabel?: string;
-  offerAcceptByDateLabel?: string;
-}
-
 export type MembershipReceiptNoticeKind = "welcome" | "failure" | "already_verified";
 
 export interface MembershipReceiptProps {
@@ -35,3 +27,37 @@ export type SendMarketingSegmentBroadcastParams = {
   onEmptyRecipients: "throw" | "skip";
   emptyRecipientsMessage?: string;
 };
+
+export interface OfferEmailProps {
+  firstName: string;
+  positionName: string;
+  subteamName: string | null;
+  termLabel: string;
+  deadline: string;
+  personalLine?: string;
+  signedBy: string;
+  respondUrl: string;
+}
+
+export interface RejectionEmailProps {
+  firstName: string;
+  termLabel: string;
+  signedBy: string;
+}
+
+export interface RecruitingEmail {
+  to: string;
+  replyTo: string[];
+  subject: string;
+  html: string;
+}
+
+export type OfferClosedReason = "finalized" | "withdrawn";
+
+export interface OfferClosedEmailProps {
+  firstName: string;
+  positionName: string;
+  termLabel: string;
+  signedBy: string;
+  reason: OfferClosedReason;
+}

@@ -2,6 +2,7 @@
 import { cookies } from "next/headers";
 import { createSupabaseServerClient } from "@uwdsc/db";
 import { AuthService, MembershipProofService, ResumeService } from "@uwdsc/core";
+import { createSupabaseServiceRoleClient } from "@uwdsc/db/supabase";
 import { HeadshotService } from "@uwdsc/admin";
 
 /**
@@ -29,11 +30,12 @@ export async function createAuthService() {
 }
 
 /**
- * Create ResumeService with server-side Supabase client
+ * Create ResumeService with the service-role client. Storage only lets a resume's owner
+ * (or the `admin` role) read it, so the caller must check access first, as the
+ * recruiting routes do.
  */
 export async function createResumeService() {
-  const supabase = await createSupabaseClient();
-  return new ResumeService(supabase);
+  return new ResumeService(createSupabaseServiceRoleClient());
 }
 
 /**

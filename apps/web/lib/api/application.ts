@@ -8,6 +8,7 @@
 import type {
   ApplicationUpdatePayload,
   ApplicationWithDetails,
+  LeadershipSeat,
   ProfileAutofill,
   Term,
 } from "@uwdsc/common/types";
@@ -29,6 +30,14 @@ export async function getActiveTerm(): Promise<Term> {
   const data = await response.json();
   if (!response.ok) throw createApiError(data, response.status);
   return data;
+}
+
+/** The viewer's seat on next term's leadership; presidents and VPs don't apply. */
+export async function getLeadershipSeat(): Promise<LeadershipSeat | null> {
+  const response = await fetch("/api/applications/leadership");
+  const data = await response.json();
+  if (!response.ok) throw createApiError(data, response.status);
+  return (data as { seat: LeadershipSeat | null }).seat;
 }
 
 export async function getPositionsWithQuestions(): Promise<PositionsWithQuestionsResponse> {
